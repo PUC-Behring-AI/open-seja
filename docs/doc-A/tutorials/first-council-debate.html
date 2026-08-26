@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="tutorial">
+  <meta name="doc-volume" content="Tutorials">
+  <meta name="doc-chapter" content="Your First Council Debate">
+  <meta name="doc-phase" content="stable">
+  <meta name="doc-status" content="published">
+
+  <title>Your First Council Debate -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element (WCAG 2.4.1) -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Volume navigation bar -->
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="../how-to/index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Tutorials</a></li>
+      <li>Your First Council Debate</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content area -->
+  <main id="main-content" class="chapter-content vol-tutorials">
+    <article>
+      <!-- Diataxis type badge -->
+      <p class="vol-accent"><strong>tutorial</strong></p>
+
+      <h1>Your First Council Debate</h1>
+
+      <p>
+        When a design decision has real trade-offs and no obvious right answer,
+        a single perspective is not enough. SEJA's council debate convenes
+        multiple named expert archetypes -- a Security Advocate, a DX
+        Pragmatist, a UX Champion, an Architecture Purist, and a Product
+        Strategist -- and runs them through structured argumentation. This
+        tutorial walks you through running your first debate.
+      </p>
+
+      <!-- Prerequisites -->
+      <section id="prerequisites">
+        <h2>Prerequisites</h2>
+
+        <ul>
+          <li>A working SEJA project (complete <a href="first-project.html">Chapter 1</a> first)</li>
+          <li>The to-do app project (<code>my-todo-app</code>) open in your terminal</li>
+        </ul>
+      </section>
+
+      <!-- The question -->
+      <section id="the-design-question">
+        <h2>The Design Question</h2>
+
+        <p>
+          Your to-do app has been growing. A user requests shared task lists --
+          the ability for multiple people to collaborate on the same set of
+          tasks. This is a high-stakes question: it changes the data model,
+          introduces authentication, raises privacy concerns, and could
+          fundamentally alter the product's identity as a <em>personal</em>
+          task manager.
+        </p>
+
+        <p>
+          This is exactly the kind of decision that benefits from a council
+          debate: there are genuine trade-offs, reasonable people would disagree,
+          and the stakes are high enough that you want to hear all sides before
+          committing.
+        </p>
+      </section>
+
+      <!-- Running the debate -->
+      <section id="running-the-debate">
+        <h2>Running the Debate</h2>
+
+        <p>
+          Invoke a deep research session with the council debate:
+        </p>
+
+        <pre><code><span class="token-command">/research</span> --deep Should the to-do app support shared task lists?</code></pre>
+
+        <p>
+          The <code>--deep</code> flag activates the council debate mode instead
+          of the standard research mode. SEJA convenes the five fixed archetypes
+          and runs the structured debate protocol.
+        </p>
+
+        <h3>Expected output: Round 1 -- Position Statements</h3>
+
+        <p>
+          Each expert states their position in 2-3 sentences, arguing from their
+          genuine priority:
+        </p>
+
+        <dl>
+          <dt>Security Advocate</dt>
+          <dd>
+            Shared lists require authentication, authorization, and access
+            control. Today the app stores data locally in SQLite with no user
+            identity. Adding sharing means adding a trust boundary that does
+            not exist yet, and every shared-data feature becomes a potential
+            data-leak surface. The risk is disproportionate to the feature's
+            value for a personal task manager.
+          </dd>
+
+          <dt>DX Pragmatist</dt>
+          <dd>
+            Sharing would require migrating from SQLite to a networked
+            database, adding an API layer, and building a sync mechanism. That
+            is a 10x increase in implementation complexity for a feature that
+            might not be the product's core value proposition. Ship the single-
+            user experience well first; sharing can come later if demand proves
+            real.
+          </dd>
+
+          <dt>UX Champion</dt>
+          <dd>
+            Users who asked for shared lists have a real need -- families and
+            small teams do share tasks. But the current app's strength is its
+            simplicity. Adding sharing risks making the common case (solo use)
+            worse to accommodate the uncommon case (collaboration). The UX
+            question is whether sharing can be additive without degrading the
+            solo experience.
+          </dd>
+
+          <dt>Architecture Purist</dt>
+          <dd>
+            If sharing is on the roadmap, the data model should be designed
+            for it now, even if the feature is not built yet. Retrofitting
+            multi-tenancy into a single-user SQLite schema creates technical
+            debt. The architecture-clean path is to add a user-scoped data
+            model now and build sharing when you are ready.
+          </dd>
+
+          <dt>Product Strategist</dt>
+          <dd>
+            The feature request validates market interest, but the to-do app
+            market is saturated with collaboration tools. Competing on sharing
+            means competing with Todoist, Notion, and Trello. The strategic
+            question is whether the product's identity is "personal and fast"
+            or "collaborative and full-featured." Trying to be both risks being
+            neither.
+          </dd>
+        </dl>
+
+        <h3>Expected output: Round 2 -- Cross-Examination</h3>
+
+        <p>
+          Each expert responds to the others' positions, surfacing genuine
+          tensions:
+        </p>
+
+        <dl>
+          <dt>Security Advocate responds</dt>
+          <dd>
+            The Architecture Purist suggests designing for multi-tenancy now.
+            That is premature from a security standpoint -- you are adding
+            attack surface for a feature that may never ship. Design the
+            security model when you commit to the feature, not before.
+          </dd>
+
+          <dt>DX Pragmatist responds</dt>
+          <dd>
+            The UX Champion raises a fair point about the solo experience
+            degrading. That aligns with the implementation concern: every
+            sharing feature adds conditional logic to every existing feature.
+            The codebase complexity does not grow linearly; it grows
+            combinatorially.
+          </dd>
+
+          <dt>UX Champion responds</dt>
+          <dd>
+            The Product Strategist's framing is sharp: "personal and fast"
+            versus "collaborative and full-featured." If the product's identity
+            is "personal and fast," then sharing is a distraction. If it is
+            "collaborative," then the entire UX needs rethinking. You cannot
+            bolt collaboration onto a personal tool.
+          </dd>
+
+          <dt>Architecture Purist responds</dt>
+          <dd>
+            The Security Advocate says designing for multi-tenancy early is
+            premature. Fair point about attack surface. But the alternative is
+            a painful migration later. A middle path exists: add a user ID
+            column now (no auth, just a local constant), so the schema is
+            ready without adding runtime complexity.
+          </dd>
+
+          <dt>Product Strategist responds</dt>
+          <dd>
+            The DX Pragmatist's "ship the single-user experience well first"
+            is the right sequencing. The market signal is noted but not
+            validated. Run a lightweight experiment (export/import of task
+            lists as files) before committing to real-time sharing. It tests
+            demand with minimal investment.
+          </dd>
+        </dl>
+
+        <h3>Expected output: Synthesis</h3>
+
+        <p>
+          The debate concludes with a synthesis that honestly reports where the
+          experts agree, where they disagree, and a recommended path forward:
+        </p>
+
+        <dl>
+          <dt>Consensus</dt>
+          <dd>
+            All five agree that real-time sharing is premature for the current
+            stage. The product's identity as a personal task manager should be
+            the priority. The solo experience should be excellent before
+            collaboration is considered.
+          </dd>
+
+          <dt>Unresolved tensions</dt>
+          <dd>
+            <strong>Architecture vs. Security</strong>: Should the data model
+            be pre-designed for multi-tenancy (Architecture Purist) or kept
+            minimal until the feature is committed (Security Advocate)? The
+            core tension is future-proofing versus attack-surface minimization.
+            <br>
+            <strong>UX vs. Product Strategy</strong>: Is export/import a valid
+            proxy for testing sharing demand (Product Strategist), or does it
+            test the wrong thing because file sharing is not the same as
+            real-time collaboration (UX Champion)?
+          </dd>
+
+          <dt>Recommended path</dt>
+          <dd>
+            Do not build sharing now. Instead: (1) Ship the single-user
+            experience with excellent priority and tagging support. (2) Add a
+            task-list export/import feature as a lightweight collaboration
+            proxy. (3) Monitor whether users adopt export/import for sharing
+            or request real-time collaboration. (4) If demand validates, design
+            the multi-tenancy architecture and security model as a dedicated
+            phase.
+          </dd>
+        </dl>
+
+        <aside class="callout-tip">
+          <h3>What just happened?</h3>
+          <p>
+            You just ran a <strong>council debate</strong> -- a structured
+            multi-perspective argumentation protocol. Unlike a standard research
+            query where one voice gives you a recommendation, the council debate
+            forces five (or more) expert archetypes to argue from their genuine
+            priorities, challenge each other's assumptions, and surface tensions
+            that a single perspective would miss.
+          </p>
+          <p>
+            This connects to a key concept in SEJA's epistemic design:
+            <strong>abductive reasoning and plural readings</strong>. SEJA does
+            not assume there is one right answer. Instead, it generates multiple
+            plausible interpretations (the expert positions) and evaluates them
+            through structured debate. The synthesis does not paper over
+            disagreement -- it names the unresolved tensions so you can make an
+            informed decision.
+          </p>
+          <p>
+            The debate transcript is saved as a research log under
+            <code>_output/research-logs/</code>. You can reference it in future
+            planning sessions. For the theoretical foundation behind abductive
+            reasoning in SEJA, see
+            <a href="../explanation/semiotic-engineering.html">
+            The Semiotic Engineering Foundation</a>.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Understanding the council -->
+      <section id="understanding-the-council">
+        <h2>Understanding the Council</h2>
+
+        <p>
+          The council debate has a fixed structure designed to maximize the
+          quality of disagreement:
+        </p>
+
+        <h3>The five fixed archetypes</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Archetype</th>
+                <th>Priority</th>
+                <th>Challenges</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Security Advocate</td>
+                <td>Safety, data protection, worst-case scenarios</td>
+                <td>Features that add attack surface</td>
+              </tr>
+              <tr>
+                <td>DX Pragmatist</td>
+                <td>Developer productivity, simplicity, shipping speed</td>
+                <td>Over-engineering and premature abstraction</td>
+              </tr>
+              <tr>
+                <td>UX Champion</td>
+                <td>User experience, accessibility, discoverability</td>
+                <td>Technical decisions that degrade the user's experience</td>
+              </tr>
+              <tr>
+                <td>Architecture Purist</td>
+                <td>Clean boundaries, long-term maintainability</td>
+                <td>Short-term expedients that create technical debt</td>
+              </tr>
+              <tr>
+                <td>Product Strategist</td>
+                <td>Business value, time-to-market, user adoption</td>
+                <td>Features that do not serve the product's identity</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Brief-specific experts</h3>
+
+        <p>
+          Beyond the five fixed archetypes, you can add up to two
+          domain-specific experts. For example, if your question involved data
+          pipelines, you could include a Data Engineer. If it involved
+          deployment strategy, you could include a DevOps/Platform Engineer.
+          The caller selects these when invoking the debate.
+        </p>
+
+        <h3>The two-round structure</h3>
+
+        <p>
+          Round 1 (position statements) ensures every perspective is heard
+          without interruption. Round 2 (cross-examination) forces each expert
+          to engage with the others' arguments directly. This structure prevents
+          the common failure mode of multi-perspective analysis: polite
+          agreement that hides real disagreement.
+        </p>
+      </section>
+
+      <!-- When to use a council debate -->
+      <section id="when-to-use-a-council-debate">
+        <h2>When to Use a Council Debate</h2>
+
+        <p>
+          Not every question needs a council debate. Use it when:
+        </p>
+
+        <ul>
+          <li>The decision has genuine trade-offs with no obvious right answer</li>
+          <li>Multiple stakeholder perspectives would disagree on the approach</li>
+          <li>The stakes are high enough that a wrong decision is expensive to reverse</li>
+          <li>You suspect you are anchored on one perspective and want to stress-test it</li>
+        </ul>
+
+        <p>
+          For simpler questions (What library should I use for date parsing?
+          Should I use camelCase or snake_case?), standard
+          <code>/research</code> is faster and sufficient.
+        </p>
+      </section>
+
+      <!-- Summary -->
+      <section id="summary">
+        <h2>Summary</h2>
+
+        <p>In this tutorial, you:</p>
+
+        <ol>
+          <li>Posed a high-stakes design question to a council debate</li>
+          <li>Read position statements from five expert archetypes</li>
+          <li>Followed the cross-examination where experts challenged each other</li>
+          <li>Reviewed a synthesis that named consensus, unresolved tensions, and a recommended path</li>
+        </ol>
+
+        <p>
+          The council debate is SEJA's tool for high-stakes design decisions
+          where single-perspective analysis feels too thin. It surfaces
+          disagreement, names trade-offs, and gives you a recommended path
+          that acknowledges what it costs. The next tutorial introduces a
+          different kind of governance: detecting and resolving drift between
+          what you designed and what the code actually does.
+        </p>
+      </section>
+
+    </article>
+
+    <!-- Sequential chapter navigation -->
+    <nav aria-label="chapter navigation">
+      <a href="first-metacommunication.html">Previous: Writing Your First Metacommunication Message</a>
+      <a href="drift-detection.html">Next: Drift Detection and Alignment</a>
+    </nav>
+
+    <!-- Cross-volume related chapters -->
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../explanation/reflective-practice.html#abduction-the-reasoning-mode">Reflective Practice in SEJA</a> -- the abductive reasoning and plural-reading stance the council debate embodies</li>
+        <li><a href="../how-to/skills/research.html">How to Research a Question</a> -- the goal-first guide to research modes, including when to escalate to a council debate</li>
+        <li><a href="../explanation/dual-thesis.html#epistemics-without-governance">The Governable and Epistemic Thesis</a> -- how surfacing disagreement serves the epistemic axis</li>
+      </ul>
+    </nav>
+  </main>
+
+  <!-- Sidebar table of contents -->
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#prerequisites">Prerequisites</a></li>
+      <li><a href="#the-design-question">The Design Question</a></li>
+      <li><a href="#running-the-debate">Running the Debate</a></li>
+      <li><a href="#understanding-the-council">Understanding the Council</a></li>
+      <li><a href="#when-to-use-a-council-debate">When to Use a Council Debate</a></li>
+      <li><a href="#summary">Summary</a></li>
+    </ul>
+  </aside>
+
+  <!-- Footer -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T12:00:00Z</p>
+  </footer>
+
+</body>
+</html>

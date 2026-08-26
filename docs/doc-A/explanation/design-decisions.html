@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-volume" content="Explanation">
+  <meta name="doc-chapter" content="Design Decisions and Trade-offs">
+  <meta name="doc-phase" content="stable">
+  <meta name="doc-status" content="published">
+
+  <title>Design Decisions and Trade-offs -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element (WCAG 2.4.1) -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Volume navigation bar -->
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="../how-to/index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Explanation</a></li>
+      <li>Design Decisions and Trade-offs</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content area -->
+  <main id="main-content" class="chapter-content vol-explanation">
+    <article>
+      <!-- Diataxis type badge -->
+      <p class="vol-accent"><strong>explanation</strong></p>
+
+      <h1>Design Decisions and Trade-offs</h1>
+
+      <p>
+        The preceding chapters explained the theory behind SEJA and the reading
+        model behind its structure. This final chapter is more concrete: it walks
+        through six specific structural choices the harness makes, and for each
+        one states the decision, the alternatives that were considered, the
+        trade-off that was accepted, and what would change if the decision were
+        reversed. The point is not to defend every choice as obviously correct.
+        Each of these was a genuine fork with real costs on both sides, and naming
+        the road not taken is what makes the chosen road legible. A design
+        rationale that only lists benefits is advertising; a design rationale that
+        names its trade-offs is an argument.
+      </p>
+
+      <section id="why-multiple-marker-types">
+        <h2>Why More Than One Marker Type</h2>
+
+        <p>
+          <strong>The decision.</strong> SEJA's write path for human-authored
+          design files -- the <code>apply_marker.py</code> script -- supports several
+          distinct marker types rather than a single generic status field. Four of
+          them track the lifecycle state of design items (STATUS, which moves an
+          item through <code>proposed</code> to <code>implemented</code> to
+          <code>established</code> to <code>superseded</code>; ESTABLISHED, the
+          human-promotion stamp; INCORPORATED, the stamp that records when a
+          research or advisory finding has been absorbed into design intent; and
+          CHANGELOG_APPEND, the append-only audit channel), and the write path
+          carries additional marker types for related record-keeping such as
+          appending decision entries. Each type has a fixed
+          shape and a fixed place, both machine-enforced.
+        </p>
+
+        <p>
+          <strong>The alternative considered.</strong> The obvious simpler design is
+          a single status field -- one marker that records "where is this item" with
+          a value, and nothing else. Fewer concepts, less to learn, one code path.
+        </p>
+
+        <p>
+          <strong>The trade-off accepted.</strong> A single field conflates events
+          that carry different meaning and different authority. Recording that an
+          item was <em>implemented</em> is a statement about code; recording that a
+          human <em>promoted</em> it to established is a statement about human
+          judgment; appending a changelog entry is an append-only audit act that must
+          never overwrite history. Collapsing these into one field would either lose
+          the distinctions or smuggle them back in as unenforced conventions on top
+          of the field's value. SEJA accepts more marker types -- more vocabulary to
+          learn -- in exchange for each marker meaning exactly one thing and being
+          enforceable on its own terms. This is the sign-system argument of Chapter 1
+          made concrete: a small, conventionalized vocabulary where each sign has a
+          distinct, fixed meaning is more legible than one overloaded sign.
+        </p>
+
+        <p>
+          <strong>What would change if reversed.</strong> Collapsing to a single
+          marker type would simplify the write path and the mental model, but it
+          would move the burden of distinguishing lifecycle events, human
+          promotions, and audit appends into human discipline and prose convention --
+          exactly the place SEJA is trying to lift it out of. The append-only
+          guarantee on the audit channel, in particular, could no longer be enforced
+          structurally.
+        </p>
+      </section>
+
+      <section id="why-path-scoped-rules">
+        <h2>Why Path-Scoped Rules Instead of Global Ones</h2>
+
+        <p>
+          <strong>The decision.</strong> SEJA's rule files are each scoped to a path
+          pattern and auto-loaded only when the agent works on files matching that
+          scope, rather than being held in a single always-loaded global rulebook.
+        </p>
+
+        <p>
+          <strong>The alternative considered.</strong> A single global rulebook,
+          always present in context, containing every convention the project holds.
+          Conceptually simpler: one place to look, no question about whether a rule
+          is active.
+        </p>
+
+        <p>
+          <strong>The trade-off accepted.</strong> As Chapter 5 explained, the
+          agent's context window is finite and its attention within that window is
+          itself scarce. A global rulebook grows without bound as conventions
+          accumulate, and every rule it holds competes for attention with every other
+          rule regardless of relevance to the task at hand. Path-scoping keeps each
+          rule's cost local to the files it governs, so the guidance the agent sees is
+          guidance it can act on now. The accepted cost is that a rule fires only when
+          its scope is touched: a convention that genuinely applies everywhere cannot
+          be expressed as a narrowly-scoped rule and must live in the always-loaded
+          references instead.
+        </p>
+
+        <p>
+          <strong>What would change if reversed.</strong> A global rulebook would
+          guarantee that no rule is ever missed for lack of a scope match, at the cost
+          of flooding every task's context with mostly-irrelevant guidance and
+          degrading the agent's attention to the rules that do matter. The reversal
+          trades a reliability gain (rules never silently inactive) for an attention
+          loss (relevant rules diluted by irrelevant ones).
+        </p>
+      </section>
+
+      <section id="why-as-intended-as-coded-split">
+        <h2>Why the As-Intended / As-Coded Split</h2>
+
+        <p>
+          <strong>The decision.</strong> SEJA keeps design intent and implementation
+          state in two separate artifacts: a human-authored
+          <code>product-design-as-intended.md</code> that expresses what the designer
+          wants, and an agent-maintained <code>product-design-as-coded.md</code> that
+          records what the system actually does. They sit side by side, and drift
+          detection watches the gap between them.
+        </p>
+
+        <p>
+          <strong>The alternative considered.</strong> A single design file that is
+          kept continuously up to date -- intent and reality merged, always
+          reconciled, one source of truth.
+        </p>
+
+        <p>
+          <strong>The trade-off accepted.</strong> A single reconciled file cannot
+          represent divergence, and divergence is exactly the signal SEJA most wants
+          to surface. If intent and reality are forced into one document, then every
+          time the code diverges from the intent, someone must immediately either
+          change the code back or rewrite the intent -- there is no place to hold the
+          honest state "these have drifted and we have not yet decided which is
+          right." The two-file split makes drift a first-class, observable condition
+          rather than an error to be instantly resolved. It also cleanly separates
+          authorship: the intent file is the designer's voice (human-authored), the
+          as-coded file is the machine's record (agent-maintained), and neither
+          overwrites the other. The accepted cost is redundancy -- two files that
+          describe overlapping territory -- and the ongoing work of drift detection to
+          relate them.
+        </p>
+
+        <p>
+          <strong>What would change if reversed.</strong> Merging to one file would
+          remove the redundancy and the drift-detection machinery, but it would also
+          remove the ability to represent intent-versus-reality divergence at all. The
+          epistemic signal that as-coded has slipped away from as-intended -- the
+          thing Chapter 4 identified as the primary defense against drift -- would have
+          nowhere to live.
+        </p>
+      </section>
+
+      <section id="why-pre-post-skill-hooks">
+        <h2>Why Pre-Skill and Post-Skill Hooks Instead of Ad-Hoc Checks</h2>
+
+        <p>
+          <strong>The decision.</strong> Every user-facing skill is bracketed by two
+          lifecycle hooks -- a pre-skill hook that loads context and logs the
+          invocation, and a post-skill hook that records completion, captures Q&amp;A,
+          and commits -- implemented as two monolithic pipelines rather than as a
+          scatter of per-skill checks.
+        </p>
+
+        <p>
+          <strong>The alternative considered.</strong> Two alternatives, really.
+          First, no standard bracketing at all -- each skill does its own setup and
+          teardown as it sees fit. Second, decomposing the hooks into many small
+          independently-configured micro-hooks rather than two readable pipelines.
+        </p>
+
+        <p>
+          <strong>The trade-off accepted.</strong> Against the no-bracketing
+          alternative: consistency is the whole value proposition. If context loading
+          and completion logging are left to each skill's discretion, they will be
+          done differently or forgotten, and the governance guarantees SEJA depends on
+          become unreliable. Bracketing every skill with the same hooks is what makes
+          "the constitution is always loaded" and "every invocation is logged" true
+          rather than aspirational. Against the micro-hook alternative: the pipelines
+          are intentionally monolithic so that the full lifecycle is readable in one
+          place. Decomposing into micro-hooks would add file count and configuration
+          surface without solving an actual problem, and a per-skill opt-out mechanism
+          already handles the cases where a stage does not apply. The accepted cost is
+          pipeline overhead on every skill invocation -- ceremony that, on a small
+          task, can exceed the value it returns.
+        </p>
+
+        <p>
+          <strong>What would change if reversed.</strong> Dropping the standard hooks
+          would make simple tasks faster and lighter, at the cost of the consistency
+          guarantees that make the governance model trustworthy. Decomposing them into
+          micro-hooks would allow finer per-stage configuration and independent
+          versioning, at the cost of the single-file readability that lets a
+          contributor understand the whole lifecycle at a glance.
+        </p>
+      </section>
+
+      <section id="why-human-markers-classification">
+        <h2>Why Human (Markers) Classification Instead of Direct Agent Writes</h2>
+
+        <p>
+          <strong>The decision.</strong> Design-intent files carry a "Human
+          (markers)" classification: the prose is authored and edited only by humans,
+          and the agent may write only fixed-format lifecycle markers into them,
+          through the enforced write path, and only after explicit confirmation in the
+          same turn. The agent never writes prose into design intent.
+        </p>
+
+        <p>
+          <strong>The alternative considered.</strong> Letting the agent edit design
+          intent directly -- updating the prose to reflect new decisions as it goes,
+          the way it edits code. Faster, fewer confirmation steps, less friction.
+        </p>
+
+        <p>
+          <strong>The trade-off accepted.</strong> This is the designer's-deputy
+          argument from Chapter 1 in its most load-bearing form. If the agent can
+          freely rewrite design intent, then the metacommunication message stops being
+          the designer's voice and becomes a document the model quietly co-authors --
+          and the accountability the first-person template exists to carry dissolves.
+          Restricting the agent to markers, after confirmation, keeps authorship of
+          intent unambiguously human while still letting the agent record lifecycle
+          movement. The accepted cost is friction: recording that intent has moved
+          requires a marker write and a confirmation rather than a silent edit, and
+          the agent cannot simply "fix up" the intent file when it notices something.
+        </p>
+
+        <p>
+          <strong>What would change if reversed.</strong> Allowing direct agent writes
+          would remove the friction and let intent stay effortlessly current, but it
+          would erase the authorship boundary that the entire governance model rests
+          on. There would no longer be a structural guarantee that the design intent
+          is the human's message rather than the agent's -- and once that guarantee is
+          gone, "the design intent is authoritative" loses its meaning, because the
+          agent could author the very intent it is supposedly accountable to.
+        </p>
+      </section>
+
+      <section id="why-council-debate">
+        <h2>Why Council Debate Instead of Single-Perspective Analysis</h2>
+
+        <p>
+          <strong>The decision.</strong> For high-stakes or genuinely contested
+          questions, SEJA's deep research mode convenes a council of several named
+          expert perspectives that state positions, cross-examine each other, and
+          drive toward a synthesis -- rather than producing a single authoritative
+          analysis.
+        </p>
+
+        <p>
+          <strong>The alternative considered.</strong> A single-perspective analysis:
+          the agent reasons through the question once and returns its best answer.
+          Faster, cheaper in tokens, and easier to act on because there is one
+          conclusion.
+        </p>
+
+        <p>
+          <strong>The trade-off accepted.</strong> This is the abduction argument from
+          Chapter 3 operationalized. A single analysis presents one reading as if it
+          were the only plausible one, which is exactly the posture abductive
+          reasoning warns against -- an abductive conclusion is provisional and holds
+          only until a better reading arrives. The council makes the plurality of
+          readings part of the deliverable: by assembling perspectives that genuinely
+          disagree and surfacing the disagreement, the synthesis carries its
+          counter-readings on its face, so the designer sees not just a recommendation
+          but the tension it resolved. The accepted cost is expense and effort -- a
+          council runs longer, consumes more context, and hands back something the
+          designer has to weigh rather than simply adopt.
+        </p>
+
+        <p>
+          <strong>What would change if reversed.</strong> Single-perspective analysis
+          would be faster and its output easier to act on, at the cost of hiding the
+          plurality of plausible readings behind a confident single answer. The risk
+          the council is designed to counter -- mistaking one reading for the only one
+          -- would return, and the deliverable would look more certain than the
+          reasoning behind it warrants.
+        </p>
+      </section>
+
+      <section id="the-common-thread">
+        <h2>The Common Thread</h2>
+
+        <p>
+          Read together, these six decisions share a shape. In every case, SEJA
+          accepts more friction, more structure, or more expense in exchange for a
+          guarantee it considers load-bearing: distinct meaning per marker, relevant
+          guidance per task, observable drift, consistent governance, human authorship
+          of intent, and visible plurality in hard calls. And in every case the
+          reversal is genuinely tempting -- it buys simplicity, speed, or lower cost.
+          That is what makes these trade-offs rather than free wins. The decisions
+          are defensible not because the alternatives are foolish but because, given
+          SEJA's commitment to being governable and epistemic at once, the accepted
+          costs buy exactly the properties that commitment requires. A reader who
+          weighs the trade-offs differently -- who values speed over the guarantee on
+          a given axis -- would be making a coherent choice, just a different design
+          than SEJA. Naming the fork is what lets you see that clearly.
+        </p>
+      </section>
+
+      <section id="what-this-means-for-seja-users">
+        <h2>What This Means for SEJA Users</h2>
+
+        <p>
+          When a SEJA mechanism feels heavier than it needs to be -- a confirmation
+          you would rather skip, a second file to keep in view, a council that takes
+          its time -- this chapter is the answer to "why can't it just do the simple
+          thing." It usually can, and the simple thing is the reversal named above;
+          what you would give up is the guarantee the friction was buying. Knowing
+          which guarantee is at stake lets you judge, for your own project and your own
+          task, whether the trade is worth it. That judgment is yours to make: SEJA is
+          a proposer, and you are the decider. This chapter closes the Explanation
+          volume, which set out to explain not how to use the harness but why it is
+          shaped the way it is -- from the semiotic theory of its foundations to the
+          concrete forks of its structure.
+        </p>
+      </section>
+
+    </article>
+
+    <!-- Sequential chapter navigation -->
+    <nav aria-label="chapter navigation">
+      <a href="agent-as-reader.html">Previous: How the Agent Reads SEJA</a>
+    </nav>
+
+    <!-- See also: cross-volume related chapters -->
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="dual-thesis.html">The Governable and Epistemic Thesis</a> -- the commitment these trade-offs serve</li>
+        <li><a href="../reference/skills-reference.html">Skills Reference</a> -- the mechanisms these decisions produced</li>
+      </ul>
+    </nav>
+  </main>
+
+  <!-- Sidebar table of contents -->
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#why-multiple-marker-types">Why More Than One Marker Type</a></li>
+      <li><a href="#why-path-scoped-rules">Why Path-Scoped Rules</a></li>
+      <li><a href="#why-as-intended-as-coded-split">Why the As-Intended / As-Coded Split</a></li>
+      <li><a href="#why-pre-post-skill-hooks">Why Pre-Skill and Post-Skill Hooks</a></li>
+      <li><a href="#why-human-markers-classification">Why Human (Markers) Classification</a></li>
+      <li><a href="#why-council-debate">Why Council Debate</a></li>
+      <li><a href="#the-common-thread">The Common Thread</a></li>
+      <li><a href="#what-this-means-for-seja-users">What This Means for SEJA Users</a></li>
+    </ul>
+  </aside>
+
+  <!-- Footer -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T22:55:00Z</p>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How-to guide for the /implement skill: execute a previously approved plan across auto, manual, and roadmap modes to add a feature, fix a bug, or refactor.">
+  <title>/implement — SEJA Documentation</title>
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>/implement</h1>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Skills</a></li>
+        <li aria-current="page">/implement</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge core-skills">skills</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="what-it-does">
+          <h2 id="what-it-does">What it does</h2>
+          <p><code>/implement</code> runs a previously approved plan step by step. It creates a rollback branch before starting and ends with a Quality Gate &mdash; validation, code review, tests, and smoke tests if configured.</p>
+          <p>Three execution modes suit different situations: <strong>auto</strong> (the default) dispatches each step to a fresh subagent with isolated context and follows a TDD red-green cycle for steps that carry explicit <code>Tests:</code> fields, with a generator-critic loop for critical code-review findings; <strong>manual</strong> (<code>--manual</code>) runs steps sequentially in your current context with per-step confirmation; and <strong>roadmap</strong> (<code>--roadmap</code>) executes all plans in a roadmap wave by wave, pausing for review between waves. Advanced flags include <code>--dry-run</code> (preview without writing files), <code>--skip-checks</code> (skip the Quality Gate), <code>--skip-docs</code> (suppress the documentation prompt), and <code>--checkpoint</code> (control roadmap pause granularity).</p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="when-to-run">
+          <h2 id="when-to-run">When to run it</h2>
+          <p>Run <code>/implement</code> once you have reviewed a plan created by <code>/plan</code> and are ready to have the agent carry it out. Use auto mode for most plans, especially those with more than six steps; use <code>--manual</code> for small plans or when you want per-step confirmation; and use <code>--roadmap</code> to execute all plans in a roadmap wave by wave without triggering each one manually.</p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="how-it-fits">
+          <h2 id="how-it-fits">How it fits the lifecycle</h2>
+          <p>On the canonical path &mdash; <code>/research</code> &rarr; <code>/design</code> | <code>/plan</code> &rarr; <code>/implement</code> &rarr; <code>/critique</code> &rarr; <code>/document</code> | <code>/communicate</code> &rarr; <code>/reflect</code> &mdash; <code>/implement</code> is the build step. It takes the reviewed plan from <code>/plan</code> and turns it into working code.</p>
+          <p>Its end-of-run Quality Gate runs validation, review, and tests automatically unless <code>--skip-checks</code> was used, so <code>/critique</code> largely happens inline; documentation generation for qualifying plans runs automatically via post-skill unless <code>--skip-docs</code> was passed. After implementation, move on to <code>/pending</code> to review pending actions or <code>/reflect</code> to surface patterns across recent work.</p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="../operations/plan-and-execute.html">Plan and execute</a> &mdash; the operational flow from plan through implementation.</li>
+            <li><a href="../concepts/lifecycle-pipeline.html">Lifecycle pipeline</a> &mdash; where /implement sits on the canonical path.</li>
+            <li><a href="plan.html">/plan</a> &mdash; create and review the plan first.</li>
+            <li><a href="critique.html">/critique</a> &mdash; standalone quality checks beyond the inline Quality Gate.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Skills</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

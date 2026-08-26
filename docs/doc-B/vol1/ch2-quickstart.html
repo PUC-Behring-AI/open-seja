@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="tutorial">
+  <meta name="doc-volume" content="1">
+  <meta name="doc-chapter" content="2">
+  <meta name="doc-phase" content="1">
+  <meta name="doc-status" content="draft">
+
+  <title>Quickstart -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 1: Onboarding and Orientation</a></li>
+      <li>Quickstart</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>Quickstart</h1>
+
+      <p>
+        The fastest path from zero to a working SEJA project. This chapter
+        walks you through clone, setup, and your first lifecycle cycle with
+        concrete commands and expected outputs. By the end you will have a
+        configured project with a plan and its implementation.
+      </p>
+
+      <!-- Section 1: Prerequisites -->
+      <section data-diataxis="reference" id="prerequisites">
+        <h2>Prerequisites</h2>
+
+        <p>Before you begin, make sure you have:</p>
+
+        <ul>
+          <li>
+            <strong>Git</strong> -- any recent version. You will need it to
+            clone the SEJA repository and to manage your project history.
+          </li>
+          <li>
+            <strong>Claude Code CLI</strong> -- the official Anthropic CLI
+            for Claude, installed and authenticated. SEJA runs as a governance
+            layer on top of Claude Code, so the CLI must be available in your
+            terminal.
+          </li>
+          <li>
+            <strong>Python 3.10+</strong> -- SEJA uses Python scripts for
+            state detection, index generation, validation checks, and other
+            harness utilities. Python must be on your <code>PATH</code>.
+          </li>
+        </ul>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> You do not need any particular application
+            stack to follow this tutorial. SEJA governs how the AI agent
+            works, not what you build with it. The setup questionnaire will
+            ask about your stack and adapt accordingly.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 2: Clone and Setup -->
+      <section data-diataxis="tutorial" id="clone-and-setup">
+        <h2>Clone and Setup</h2>
+
+        <p>
+          There are two ways to start a SEJA project: clone the public
+          repository and finalise in place, or copy the harness into an
+          existing project directory. We will cover the clone-and-finalise
+          path first, then note the alternative.
+        </p>
+
+        <h3>Option A: Clone and Finalise In Place</h3>
+
+        <p>
+          Clone the SEJA repository directly into your project folder, then
+          tell the harness to finalise setup around the files already present:
+        </p>
+
+        <pre><code><span class="token-comment"># Clone SEJA into a new directory</span>
+<span class="token-command">git clone https://github.com/simonedjb/seja my-project</span>
+<span class="token-command">cd my-project</span>
+
+<span class="token-comment"># Install the pre-commit hook (fast preflight checks on every commit)</span>
+<span class="token-command">bash .githooks/install.sh</span></code></pre>
+
+        <p>
+          Now open Claude Code in the project directory and run the setup
+          skill:
+        </p>
+
+        <pre><code><span class="token-command">/seja-setup --here</span></code></pre>
+
+        <p>
+          The <code>--here</code> flag tells the harness that the SEJA files
+          are already in the current directory (from the clone) and it should
+          finalise setup without copying anything. The harness will:
+        </p>
+
+        <ol>
+          <li>
+            Detect the project state (it sees a fresh SEJA download and
+            routes accordingly).
+          </li>
+          <li>
+            Pin the version tag to <code>.seja-version</code> for future
+            upgrades.
+          </li>
+          <li>
+            Create the output directory (<code>_output/</code>) with
+            subdirectories for plans, advisory logs, QA logs, and check logs.
+          </li>
+          <li>
+            Run the Section 1 scaffolding questionnaire -- a short sequence
+            of questions about your project name, description, backend
+            framework, frontend framework, database, and test tooling. Your
+            answers populate <code>product-design/conventions.md</code>.
+          </li>
+          <li>
+            Scaffold <code>CLAUDE.md</code>, stack-flavored rule files in
+            <code>.claude/rules/</code>, and smoke-test infrastructure
+            (when a backend is present) -- all derived from your questionnaire
+            answers.
+          </li>
+          <li>
+            Offer git-history handling (re-initialise fresh, keep and add
+            a project remote, or leave as-is) and cleanup of harness-dev
+            artefacts you do not need.
+          </li>
+          <li>
+            Create an initial commit.
+          </li>
+        </ol>
+
+        <p>
+          When setup completes, you will see a summary like:
+        </p>
+
+        <pre><code><span class="token-string">Your SEJA setup has been finalised in `/path/to/my-project`.
+Stack scaffolded (flask + react).</span>
+
+<span class="token-string">Next steps:</span>
+<span class="token-string">1. Run /design to define entities, permissions, metacommunication,
+   personas, and standards.</span>
+<span class="token-string">2. Once /design completes, you are ready to run /research, /plan,
+   /implement, and the other SEJA skills.</span>
+<span class="token-string">3. .seja-version is pinned to 0.9.1 -- /seja-setup --upgrade will
+   use this as the baseline next time you want to refresh harness
+   files.</span></code></pre>
+
+        <h3>Option B: Copy Harness Into an Existing Project</h3>
+
+        <p>
+          If you already have a project directory with source code and a git
+          history you want to keep, use the install mode instead:
+        </p>
+
+        <pre><code><span class="token-comment"># From any directory, point SEJA at your existing project</span>
+<span class="token-command">/seja-setup /path/to/my-existing-project</span></code></pre>
+
+        <p>
+          This copies the harness files into the target directory without
+          touching your existing source code. The same scaffolding
+          questionnaire runs, and you end up with the same result: a project
+          directory containing both your code and the SEJA harness, ready for
+          <code>/design</code>.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> If your existing project already has a
+            <code>.claude/</code> directory (from a prior SEJA install), the
+            setup skill detects this and offers options: overwrite harness
+            only, overwrite everything, create a companion workspace, or
+            abort.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 3: First Lifecycle Cycle -->
+      <section data-diataxis="tutorial" id="first-lifecycle-cycle">
+        <h2>First Lifecycle Cycle</h2>
+
+        <p>
+          With setup complete, you are ready to run through a minimal
+          lifecycle cycle: design your project, plan a small feature, and
+          implement it. Each step uses a SEJA skill -- a slash command that
+          the harness intercepts and governs.
+        </p>
+
+        <h3>Step 1: Design</h3>
+
+        <p>
+          The <code>/design</code> skill defines your project's design
+          intent: domain entities, permissions, metacommunication message,
+          personas, standards, and the project constitution. Since
+          <code>/seja-setup</code> already populated
+          <code>product-design/conventions.md</code> with your stack answers,
+          <code>/design</code> detects the partial-design state and skips
+          the stack questions. It picks up from the metacommunication message
+          and walks you through the remaining design sections.
+        </p>
+
+        <pre><code><span class="token-command">/design</span></code></pre>
+
+        <p>
+          You will be asked about:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Metacommunication message</strong> -- a short statement
+            of your design intent, written in first/second person ("I, the
+            designer, am telling you, the user...").
+          </li>
+          <li>
+            <strong>Domain entities</strong> -- the core concepts your
+            application manages (e.g., Task, Category, User).
+          </li>
+          <li>
+            <strong>Permissions and access control</strong> -- who can do
+            what.
+          </li>
+          <li>
+            <strong>Design standards</strong> -- UX patterns, backend
+            conventions, frontend conventions, and testing standards.
+          </li>
+          <li>
+            <strong>Constitution</strong> -- immutable project principles
+            (e.g., "accessibility first," "every change must have a test").
+          </li>
+        </ul>
+
+        <p>
+          When <code>/design</code> finishes, you will have several new
+          files under <code>product-design/</code>:
+        </p>
+
+        <pre><code><span class="token-comment"># Expected files after /design</span>
+product-design/
+  conventions.md              <span class="token-comment"># stack and directory layout (from setup)</span>
+  product-design-as-intended.md  <span class="token-comment"># domain model, entities, metacomm</span>
+  standards.md                <span class="token-comment"># backend, frontend, testing, i18n standards</span>
+  design-standards.md         <span class="token-comment"># UX and visual design standards</span>
+  ux-research-results.md      <span class="token-comment"># personas, scenarios, discovered journeys</span>
+  constitution.md             <span class="token-comment"># immutable project principles</span></code></pre>
+
+        <p>
+          These files are the designer's voice -- the reference material that
+          the harness loads into every subsequent skill invocation via the
+          pre-skill hook. From this point on, the AI agent works accountable
+          to your stated intent.
+        </p>
+
+        <h3>Step 2: Plan a Small Feature</h3>
+
+        <p>
+          Now plan something concrete. Give <code>/plan</code> a brief
+          describing a small feature:
+        </p>
+
+        <pre><code><span class="token-command">/plan add a health-check endpoint that returns the app version</span></code></pre>
+
+        <p>
+          The <code>/plan</code> skill verifies that
+          <code>product-design/conventions.md</code> exists (its design
+          guard), then:
+        </p>
+
+        <ol>
+          <li>Reserves a 6-digit plan ID (e.g., <code>000042</code>).</li>
+          <li>
+            Investigates the codebase to understand the current state.
+          </li>
+          <li>
+            Writes a step-by-step plan file at
+            <code>_output/plans/plan-000042-health-check-endpoint.md</code>.
+          </li>
+          <li>
+            Runs a complexity-gated review (light, standard, or deep)
+            against engineering and design perspectives.
+          </li>
+        </ol>
+
+        <p>
+          Expected output:
+        </p>
+
+        <pre><code><span class="token-string">Plan 000042 saved to _output/plans/plan-000042-health-check-endpoint.md</span>
+<span class="token-string">Review: 3 steps, estimated complexity: low</span>
+<span class="token-string">Ready to implement with: /implement 000042</span></code></pre>
+
+        <h3>Step 3: Implement the Plan</h3>
+
+        <p>
+          Execute the plan by passing its ID to <code>/implement</code>:
+        </p>
+
+        <pre><code><span class="token-command">/implement 000042</span></code></pre>
+
+        <p>
+          By default, <code>/implement</code> runs in auto mode: it creates
+          a rollback branch, spawns subagents for each plan step, and tracks
+          progress in
+          <code>_output/plans/plan-000042-progress.md</code>.
+          Each step reads the plan file, executes it, and marks it done.
+          After all steps complete, the skill runs a quality gate
+          (validation checks and code review) unless you pass
+          <code>--skip-checks</code>.
+        </p>
+
+        <p>
+          When implementation finishes, you will see a summary of what was
+          created or modified, and the plan file's to-do list will show all
+          steps checked off.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> If you prefer to execute each step yourself
+            rather than delegating to subagents, pass the
+            <code>--manual</code> flag:
+            <code>/implement 000042 --manual</code>.
+          </p>
+        </aside>
+
+        <p>
+          You now have a working SEJA project with a design foundation, one
+          completed plan, and its implementation. The harness tracked every
+          step: the brief log in <code>_output/briefs.md</code> records each
+          skill invocation, and the plan file documents the full execution
+          history.
+        </p>
+      </section>
+
+      <!-- Section 4: What Just Happened -->
+      <section data-diataxis="explanation" id="what-just-happened">
+        <h2>What Just Happened</h2>
+
+        <p>
+          The three commands you just ran -- <code>/seja-setup</code>,
+          <code>/design</code>, and <code>/plan</code> followed by
+          <code>/implement</code> -- traced the opening segment of the
+          SEJA canonical lifecycle path:
+        </p>
+
+        <pre><code>/research > /design > /plan > /implement > /critique > /document > /reflect</code></pre>
+
+        <p>
+          Here is how each step maps to the lifecycle:
+        </p>
+
+        <dl>
+          <dt><code>/seja-setup</code> -- Harness Installation</dt>
+          <dd>
+            Not a lifecycle skill per se, but the prerequisite for
+            everything else. It scaffolds the project topology: directory
+            layout, <code>CLAUDE.md</code>, stack-flavored rules, and the
+            output directory. After setup, the harness is operational.
+          </dd>
+
+          <dt><code>/design</code> -- Design Intent</dt>
+          <dd>
+            Defines <em>what</em> the project is and <em>why</em> it exists.
+            Populates the <code>product-design/</code> directory with the
+            designer's domain model, metacommunication message, standards,
+            and constitution. Every subsequent skill invocation loads these
+            files via the pre-skill hook, ensuring the AI agent stays aligned
+            with your intent.
+          </dd>
+
+          <dt><code>/plan</code> -- Planning</dt>
+          <dd>
+            Defines <em>how</em> to build a feature and <em>why</em> those
+            implementation choices are appropriate. Produces a numbered plan
+            file under <code>_output/plans/</code> with step-by-step
+            instructions, a review log, and a to-do checklist for execution.
+          </dd>
+
+          <dt><code>/implement</code> -- Execution</dt>
+          <dd>
+            Carries out the plan. In auto mode, subagents handle each step
+            in isolated context windows. A quality gate runs afterward to
+            validate the result against engineering and design perspectives.
+          </dd>
+        </dl>
+
+        <h3>The Skills You Did Not Use Yet</h3>
+
+        <p>
+          The lifecycle continues beyond implementation. The remaining skills
+          complete the feedback loop:
+        </p>
+
+        <dl>
+          <dt><code>/research</code> (or <code>/explain</code>)</dt>
+          <dd>
+            Investigate questions about the codebase, architecture, or design
+            decisions. Typically the starting point from iteration 2 onward,
+            before you decide whether to branch into <code>/design</code>
+            (when intent needs to change) or <code>/plan</code> (when it
+            does not).
+          </dd>
+
+          <dt><code>/critique</code></dt>
+          <dd>
+            Run validation checks, code review, smoke tests, preflight
+            analysis, or harness health diagnostics. The quality-assurance
+            counterpart to implementation.
+          </dd>
+
+          <dt><code>/document</code></dt>
+          <dd>
+            Generate or update project documentation -- READMEs, API
+            references, contextual help, changelogs -- based on what changed
+            in the most recent plan.
+          </dd>
+
+          <dt><code>/communicate</code></dt>
+          <dd>
+            Generate tailored communication material for a specific audience:
+            evaluators, clients, end-users, or academics.
+          </dd>
+
+          <dt><code>/reflect</code></dt>
+          <dd>
+            On-demand reflection anchored on a specific plan or artifact.
+            Records your observations about either the product (what was
+            built) or your practice (how you worked).
+          </dd>
+        </dl>
+
+        <p>
+          For deeper coverage of each skill -- arguments, modes, and worked
+          examples -- see
+          <a href="../vol3/ch2-skills-in-depth.html">Skills In Depth</a>
+          in Vol. 3.
+        </p>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="ch1-what-is-seja.html">Previous: What SEJA Is (and Is Not)</a>
+    <a href="ch3-reading-map.html">Next: Reading Map</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

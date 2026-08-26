@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-volume" content="5">
+  <meta name="doc-chapter" content="3">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+
+  <title>The Extended Metacommunication Template -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 5: Foundations and Philosophy</a></li>
+      <li>The Extended Metacommunication Template</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>The Extended Metacommunication Template</h1>
+
+      <p>
+        Semiotic engineering holds that software is a one-shot message from
+        designers to users, and that this message can be paraphrased in a
+        single sentence: <em>"Here is my understanding of who you are, what I
+        have learned you want or need to do, in which preferred ways, and why.
+        This is the system that I have therefore designed for you, and this is
+        the way you can or should use it in order to fulfil a range of purposes
+        that fall within this vision."</em> That template &mdash; the
+        <strong>metacommunication message</strong> &mdash; was formulated by de
+        Souza (2005) for interactive systems in which the designer's deputy is
+        the interface itself. Barbosa, de Souza, and colleagues (2021) extended
+        it to a harder setting: systems that raise fairness, accountability, and
+        transparency concerns, where the message must be answered not once but
+        across a whole development lifecycle, and where the "designer" who
+        authors it is rarely a single person. The result is the
+        <strong>Extended Metacommunication Template (EMT)</strong>. This chapter
+        develops the EMT, shows how SEJA's <code>/design</code> questionnaire
+        operationalizes it into a versioned artifact, and is honest about the
+        one thing a static template cannot hold: the <em>temporal</em> record of
+        what a designer learned, and unlearned, over time.
+      </p>
+
+      <!-- Section 1: From the message to the template -->
+      <section data-diataxis="explanation" id="from-message-to-template">
+        <h2>From the One-Shot Message to a Lifecycle Template</h2>
+
+        <p>
+          De Souza's original metacommunication message is a single utterance
+          spoken through the completed artifact. It answers, in effect,
+          "who did I design this for, and how do I intend it to be used?" It is
+          expressed in the first and second person &mdash; "I" the designer,
+          "you" the user &mdash; because the whole point of semiotic engineering
+          is that an interface is a designer speaking, by proxy, to a person.
+          The message is powerful precisely because it is compact: it forces the
+          designer to commit to a vision that the artifact will then either
+          uphold or betray.
+        </p>
+
+        <p>
+          Barbosa et al. (2021) observed that for systems with significant
+          ethical stakes, this single sentence is too coarse. A recommender that
+          allocates opportunities, a triage tool that ranks people, an
+          AI-assisted decision aid &mdash; each carries commitments that the
+          one-shot message flattens. Their extension keeps the first-person
+          voice but <strong>unfolds the single message across the phases of a
+          development lifecycle</strong>, and at each phase attaches explicit
+          <strong>ethical</strong> questions alongside the descriptive ones. The
+          designer is asked not only "what did I design for you?" but "what
+          ethical questions can be raised by what I have learned?" and "what have
+          I built into the system to prevent undesirable uses and
+          consequences?" The template thus becomes a <em>reflective
+          instrument</em>: a structured place to record, per phase, what is
+          known, what is not yet known, and what the designer is accountable
+          for.
+        </p>
+
+        <h3>The Four Lifecycle Stages</h3>
+
+        <p>
+          SEJA reconciles the paper's framing into four ordered lifecycle
+          stages. It is worth being precise here, because a common misreading
+          treats the EMT as "four dimensions" of a single message. In SEJA's
+          operationalization &mdash; verified against the live design template
+          (see the <a href="#operationalization">operationalization</a> section)
+          &mdash; the EMT is <strong>four lifecycle stages, each carrying its
+          own guiding questions</strong>, several of which are explicitly
+          ethical:
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Stage</th>
+              <th>Focus</th>
+              <th>Representative guiding questions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1. Analysis</td>
+              <td>Understanding needs, defining requirements</td>
+              <td>What do I know or don't know about you (and how)? About
+              affected others? About the intended and other anticipated contexts
+              of use? What ethical questions can be raised by what I have
+              learned, and why?</td>
+            </tr>
+            <tr>
+              <td>2. Design</td>
+              <td>What was designed, for whom, and why</td>
+              <td>What have I designed for you? Which of your goals does it
+              support? In what contexts do I intend or accept its use? For what
+              purposes do I <em>not</em> want it used? What ethical principles
+              influenced my decisions, and how is the system aligned with
+              them?</td>
+            </tr>
+            <tr>
+              <td>3. Prototyping, implementation, and formative evaluation</td>
+              <td>How the vision was built and guarded</td>
+              <td>How have I built the system to support my design vision? What
+              have I built in to prevent undesirable uses and consequences? To
+              identify and remedy unanticipated negative effects? What ethical
+              scenarios have I used to evaluate the system?</td>
+            </tr>
+            <tr>
+              <td>4. Continuous, post-deployment evaluation and monitoring</td>
+              <td>What use actually reveals over time</td>
+              <td>How much of my vision is reflected in actual use? What
+              unanticipated uses have been made, by whom, and why? What effects
+              have resulted, and who do they affect? What ethical issues need
+              handling through redesign, policy, or even decommissioning?</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The four stages map onto SEJA's own lifecycle.
+            Analysis aligns with <code>/research</code> and the metacomm intake;
+            Design with <code>/design</code>; Prototyping/implementation with
+            <code>/plan</code> and <code>/implement</code>; and Continuous
+            evaluation with <code>/critique</code> and <code>/reflect</code>.
+            The EMT is not a form to fill once &mdash; it is the shape of the
+            whole development arc, written in the first person.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 2: The articulation process -->
+      <section data-diataxis="explanation" id="articulation-process">
+        <h2>The Articulation Process: Distributed We, Collective We, I</h2>
+
+        <p>
+          The subtlest contribution of Barbosa et al. (2021) is not a new
+          question but a claim about <em>who speaks</em>. De Souza's original
+          "I" is a convenient fiction: even for a modest interface, the
+          designer's voice is really the settled voice of a team &mdash;
+          product, engineering, research, legal. For an ethically loaded system,
+          that fiction strains. The paper describes an <strong>articulation
+          process</strong> by which the many actual authors of a system converge
+          on a single accountable voice. It can be read as a movement through
+          three positions:
+        </p>
+
+        <dl>
+          <dt>The distributed <em>we</em></dt>
+          <dd>
+            The many contributors as they actually are: dispersed across roles,
+            time zones, and disciplines, each holding a partial and sometimes
+            conflicting understanding of who the users are and what the system
+            should do. At this stage there is no single message &mdash; there
+            are many, latent and uncoordinated.
+          </dd>
+
+          <dt>The collective <em>we</em></dt>
+          <dd>
+            The contributors as they deliberately coordinate: negotiating a
+            shared understanding, resolving conflicts, agreeing what the system
+            is for and what it must not do. The EMT's ethical questions are the
+            forcing function here &mdash; "for what purposes do I not want you to
+            use the system?" cannot be answered without the collective actually
+            deciding.
+          </dd>
+
+          <dt>The designer's <em>I</em></dt>
+          <dd>
+            The single first-person voice in which the finished message is
+            spoken. This "I" is a <em>constructed</em> speaker: an accountable
+            position that the collective agrees to stand behind, so that the
+            user is addressed by a coherent designer rather than a committee.
+            The move from <em>we</em> to <em>I</em> is a deliberate assumption of
+            responsibility, not a grammatical convenience.
+          </dd>
+        </dl>
+
+        <p>
+          This articulation matters for SEJA because the harness inserts a new
+          participant into the relay. In an ordinary product, the collective's
+          <em>I</em> speaks through the interface directly to the user. Under
+          SEJA, the designer's <em>I</em> speaks first to <strong>an
+          agent</strong>, which then acts on the design intent to build and
+          govern the system the user eventually meets. The metacommunication is
+          therefore a <strong>designer-to-agent-to-user relay</strong>: the
+          designer authors intent, the agent reads it as its authoritative
+          brief, and the artifacts the agent produces carry that intent onward.
+          The EMT is what makes the first hop of that relay legible &mdash; it is
+          the document the agent reads to know whose "I" it is deputizing for.
+        </p>
+
+        <aside class="callout-warning">
+          <p>
+            <strong>Note:</strong> The "distributed we &rarr; collective we
+            &rarr; I" articulation is a <em>theoretical</em> frame from the
+            paper. It does not appear as an explicit mechanism anywhere in the
+            live harness &mdash; SEJA does not model the roster of contributors
+            or track their convergence. What SEJA encodes is the <em>output</em>
+            of the articulation: a single first-person design-intent artifact.
+            Whether the "I" it records was genuinely articulated by a collective,
+            or asserted by one person, is a discipline the harness cannot verify.
+            See the <a href="#counter-reading">critical counter-reading</a>.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 3: Operationalization -->
+      <section data-diataxis="explanation" id="operationalization">
+        <h2>How <code>/design</code> Operationalizes the EMT</h2>
+
+        <p>
+          SEJA turns the EMT from a conceptual template into a concrete,
+          versioned artifact through the <code>/design</code> skill. The claims
+          in this section are verified against the live skill and template files,
+          not against the public foundations prose (which lags): the design
+          skill definition (<code>.claude/skills/design/SKILL.md</code>), the
+          design questionnaire
+          (<code>.claude/references/template/questionnaire.md</code>), and the
+          design-intent template
+          (<code>.claude/references/template/product-design-as-intended.md</code>).
+        </p>
+
+        <h3>The Intake: Section 0 and the First-Person Rule</h3>
+
+        <p>
+          The entry point to the EMT is the metacommunication message itself.
+          The questionnaire's Section 0 asks the designer for an optional one- to
+          three-sentence message spoken <strong>directly to future users</strong>,
+          under a strict phrasing rule: use "I" (designer) and "you" (user),
+          never the third person. This is the compact de Souza message,
+          preserved intact. The questionnaire treats it as load-bearing: an agent
+          filling in the form extracts the project's description, target user
+          type, and primary use case from this message and offers them as
+          defaults for later questions, so the metacommunication genuinely
+          governs the rest of the design rather than sitting decoratively at the
+          top.
+        </p>
+
+        <h3>The Expansion: Section 12 of the Design-Intent File</h3>
+
+        <p>
+          The compact message is then expanded into the full four-stage EMT in
+          section 12 of <code>product-design-as-intended.md</code>, titled
+          <em>"Extended Metacommunication Template Guiding Questions."</em> In the
+          template, each guiding question is a placeholder token &mdash; for
+          example <code>{{EMT_ANALYSIS_WHAT_I_KNOW_OR_DONT_KNOW_ABOUT_YOU_AND_HOW}}</code>
+          and
+          <code>{{EMT_DESIGN_FOR_WHAT_PURPOSES_DO_I_NOT_WANT_YOU_TO_USE_THE_SYSTEM}}</code>
+          &mdash; that <code>/design</code> replaces with the designer's answers.
+          The four stages appear in order: <em>Analysis</em>, <em>Design</em>,
+          <em>Prototyping, implementation, and formative evaluation</em>, and
+          <em>Continuous, post-deployment evaluation and monitoring</em>. Each
+          stage's ethical questions are first-class placeholders, so the ethical
+          reflection cannot be silently skipped &mdash; the template has a
+          labelled slot waiting for it.
+        </p>
+
+        <h3>The Verification Pass</h3>
+
+        <p>
+          Operationalization is enforced, not merely offered. The design skill's
+          Mode 1 verification pass (step 11) reads the generated
+          <code>product-design-as-intended.md</code> and checks, among other
+          things, that the section 12 EMT guiding questions are
+          <strong>populated from the spec rather than left as placeholders</strong>,
+          and that the metacommunication message matches the generated Global
+          Vision. If gaps are found, the skill fills them and re-runs the check
+          once. This closes the loop between the intake message and the expanded
+          template: a project whose EMT slots were left blank fails the
+          verification and is repaired before the design is considered done.
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>EMT element</th>
+              <th>Where it lives in SEJA</th>
+              <th>How it is written</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Compact metacommunication message</td>
+              <td>Questionnaire Section 0; Global Vision in the design-intent
+              file</td>
+              <td>Designer-authored, first person ("I"/"you")</td>
+            </tr>
+            <tr>
+              <td>Four-stage EMT guiding questions</td>
+              <td>Section 12 of <code>product-design-as-intended.md</code></td>
+              <td>Designer answers substituted for <code>{{EMT_...}}</code>
+              placeholders by <code>/design</code></td>
+            </tr>
+            <tr>
+              <td>Ethical questions per stage</td>
+              <td>Dedicated slots within Section 12</td>
+              <td>First-class placeholders; verification pass checks they are
+              filled</td>
+            </tr>
+            <tr>
+              <td>Epistemic gaps ("what I don't yet know")</td>
+              <td>Analysis-stage answers (e.g. question 1.1)</td>
+              <td>Designer-authored; the template explicitly invites
+              uncertainty</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The Analysis stage's question 1.1 &mdash;
+            "what do I know <em>or don't know</em> about you?" &mdash; is where
+            SEJA's epistemic ambition lives. The template rewards a designer for
+            recording ignorance, not hiding it. A design-intent file that says
+            "I don't yet know my users' contexts of use" is more faithful to the
+            EMT than one that pretends to complete knowledge.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 4: Open question -- the temporal dimension -->
+      <section data-diataxis="explanation" id="open-question-temporal">
+        <h2>Open Question: The Temporal Dimension in a Static Template</h2>
+
+        <p>
+          The EMT's fourth stage &mdash; continuous, post-deployment evaluation
+          &mdash; is explicitly about <em>time</em>. It asks what actual use has
+          revealed, what unanticipated uses have emerged, and what effects have
+          accrued. But the artifact that holds these answers,
+          <code>product-design-as-intended.md</code>, is a single current-state
+          document. It records what the designer believes <em>now</em>. This
+          creates a genuine tension: the template that is supposed to capture
+          learning over time is, structurally, a snapshot.
+        </p>
+
+        <p>
+          Consider a designer who wrote, at the Analysis stage, "I don't yet know
+          my users' contexts of use," and who, six months later, has learned a
+          great deal from field observation. If they simply overwrite the
+          Analysis answer with their new understanding, the record of <em>what
+          they once did not know</em> is lost &mdash; and with it the honest
+          trajectory the EMT was meant to preserve. The very epistemic humility
+          the template rewards is erased by the act of updating it.
+        </p>
+
+        <h3>How SEJA Partially Addresses It</h3>
+
+        <p>
+          SEJA does not solve this cleanly, but it does not ignore it either.
+          Several mechanisms carry temporal information <em>around</em> the
+          static template:
+        </p>
+
+        <ul>
+          <li>
+            <strong>An append-only changelog.</strong> The design-intent file
+            carries a CHANGELOG section written through the marker path
+            (<code>apply_marker.py</code>), so revisions leave a dated trail even
+            when the prose above them is replaced.
+          </li>
+          <li>
+            <strong>Decision records.</strong> Consequential changes of intent
+            are recorded as <code>D-NNN</code> entries with rationale and
+            rejected alternatives, giving each shift of the "I" a durable,
+            attributable history.
+          </li>
+          <li>
+            <strong>Reflection artifacts.</strong> The <code>/reflect</code>
+            skill captures, at chosen moments, what was surprising and what is
+            now known that was not before &mdash; a longitudinal record that
+            lives beside, not inside, the template.
+          </li>
+          <li>
+            <strong>Discovered journeys.</strong> Field observations that
+            contradict the designed vision accumulate in the UX research
+            artifacts as append-only discovered journeys, so the gap between
+            intended and actual use is recorded rather than reconciled away.
+          </li>
+        </ul>
+
+        <p>
+          The honest position is that these are <em>compensations</em>, not a
+          resolution. The EMT's fourth stage asks a longitudinal question of a
+          point-in-time document, and SEJA answers it by scattering the temporal
+          record across a changelog, a decision log, reflection files, and
+          research artifacts. Reconstructing "what did the designer believe, and
+          when?" requires reading all of them together. Whether the EMT should
+          instead be versioned as a sequence of dated snapshots &mdash; a
+          genuine timeline of design intent &mdash; remains an open question for
+          the harness. It is recorded here as a limitation, not a solved
+          problem.
+        </p>
+      </section>
+
+      <!-- Section 5: Critical counter-reading -->
+      <section data-diataxis="explanation" id="counter-reading">
+        <h2>Critical Counter-Reading</h2>
+
+        <p>
+          The EMT is a strong instrument, and it is worth naming precisely where
+          it stops.
+        </p>
+
+        <dl>
+          <dt>The template enforces form, not sincerity</dt>
+          <dd>
+            SEJA's verification pass can confirm that the EMT slots are filled;
+            it cannot confirm that they were filled honestly, or by a genuinely
+            articulated collective. A designer can write a fluent, complete EMT
+            that reflects no real deliberation &mdash; "accountability theatre,"
+            in the harness's own words. The template makes the <em>absence</em>
+            of an answer visible, which is real value, but a present answer is
+            not evidence of the reflection the EMT was meant to provoke.
+          </dd>
+
+          <dt>The articulation process is assumed, not supported</dt>
+          <dd>
+            The "distributed we &rarr; collective we &rarr; I" movement is the
+            theoretical heart of the extension, yet the harness offers no tooling
+            for it &mdash; no roster of contributors, no record of how conflicts
+            were resolved, no trace of who dissented from the collective "I." For
+            a solo designer this is harmless; for a team system with real
+            fairness stakes, it means the single most ethically load-bearing step
+            happens entirely outside the harness's view.
+          </dd>
+
+          <dt>The relay adds a link the template does not model</dt>
+          <dd>
+            The EMT was designed for a designer-to-user message. SEJA's relay
+            inserts the agent between them, but the template has no slot for the
+            <em>agent's</em> reading &mdash; no place to record where the agent
+            may have misread the intent, or where its own inferences filled a
+            gap the designer left open. The metacommunication is treated as if
+            it passed through the agent transparently. In practice the agent is
+            an interpreter, and interpreters distort.
+          </dd>
+
+          <dt>Over-engineering for small projects</dt>
+          <dd>
+            Four lifecycle stages with per-stage ethical questions is a heavy
+            instrument for a weekend tool with no ethical stakes. The EMT was
+            motivated by fairness-, accountability-, and transparency-sensitive
+            systems; applied indiscriminately, it risks turning a proportionate
+            reflection into ceremony. SEJA makes Section 0 optional, but the
+            full section-12 expansion is generated regardless &mdash; a place
+            where the harness may under-serve the designer of something small.
+          </dd>
+        </dl>
+
+        <p>
+          None of this diminishes the EMT's central achievement: it takes an
+          idea &mdash; that a designer owes users an accountable account of what
+          was built and why &mdash; and gives it a shape that a lifecycle can
+          carry. SEJA's contribution is to make that shape a first-class,
+          verified artifact rather than an aspiration. The gap between a filled
+          template and a genuinely reflective one is exactly where the designer's
+          irreducible responsibility lives.
+        </p>
+      </section>
+
+      <!-- Section 6: References -->
+      <section data-diataxis="explanation" id="references">
+        <h2>References</h2>
+        <ul>
+          <li>
+            Barbosa, S. D. J., de Souza, C. S., et al. (2021). "A Semiotic
+            Engineering perspective on &hellip;" <em>ACM FAccT 2021</em>.
+          </li>
+          <li>
+            de Souza, C. S. (2005). <em>The Semiotic Engineering of
+            Human-Computer Interaction</em>. MIT Press.
+          </li>
+        </ul>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Curated cross-volume related-chapter links -->
+  <nav aria-label="see also" class="see-also">
+    <h2>See Also</h2>
+    <ul>
+      <li>
+        <a href="../vol2/ch1-metacommunication-message.html">Vol. 2, Ch. 1: The Metacommunication Message</a>
+        &mdash; the compact message this chapter extends, seen from the
+        practitioner's side.
+      </li>
+      <li>
+        <a href="../vol2/ch5-ux-research-artifacts.html">Vol. 2, Ch. 5: UX Research Artifacts</a>
+        &mdash; where the EMT's epistemic gaps and discovered journeys are
+        recorded over time.
+      </li>
+      <li>
+        <a href="ch1-software-as-designed-communication.html">Vol. 5, Ch. 1: Software as Designed Communication</a>
+        &mdash; the founding premise the metacommunication message expresses.
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="ch2-sign-systems-and-communicability.html">Previous: Sign Systems and Communicability</a>
+    <a href="ch4-reflective-practice.html">Next: Reflective Practice</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

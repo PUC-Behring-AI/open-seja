@@ -1,0 +1,178 @@
+<!--
+  _template.html — Content-authoring chapter template for doc-D
+
+  This file is an AUTHORING INPUT, never served to readers. It is not linked
+  from any page and does not count as a chapter.
+
+  ============================================================================
+  USAGE
+  ============================================================================
+
+  1. Copy this file and rename it to the chapter's filename:
+       cp _template.html <volume-dir>/<chapter-slug>.html
+
+  2. Replace every {{PLACEHOLDER}} with the chapter-specific value.
+
+  3. Run the volume-nav generator so the new chapter joins the sidebar and
+     print view (see GENERATOR STEP below):
+       python _output/generated-scripts/build_doc_volume_nav.py
+
+  You author only the skeleton below (skip-nav, header, breadcrumb,
+  <main id="main-content"><article>...</article></main>, chapter-nav, footer).
+  The generator OWNS the per-volume sidebar, the layout wrapper, the body
+  class, and the nav script — do not hand-author them (see GENERATOR STEP).
+
+  PLACEHOLDERS
+  ────────────────────────────────────────────────────────────────────────────
+  {{TITLE}}          Chapter title. Used in <title>, <h1>, and the last
+                     breadcrumb crumb.
+  {{VOLUME_TITLE}}   Breadcrumb volume name (e.g., "Vol. 2: Design Layer").
+  {{VOLUME_NUM}}     Numeric volume number for <meta name="doc-volume">.
+  {{CHAPTER_NUM}}    Numeric chapter number for <meta name="doc-chapter">.
+  {{PHASE_NUM}}      Numeric phase number for <meta name="doc-phase">.
+  {{DIATAXIS_TYPE}}  Diataxis classification for <meta name="diataxis">.
+                     One of: mixed | explanation | reference | tutorial | how-to
+  {{CONTENT}}        The <article> body — replace the entire <article> element
+                     contents (keep the <article> wrapper). Structure with
+                     <h1> (chapter title), then <section> elements for each
+                     major topic, using data-diataxis attributes on sections
+                     when a section has a specific Diataxis classification:
+                       <section data-diataxis="explanation">
+  {{PREV_CHAPTER}}   Relative path to previous chapter (e.g., what-seja-is.html).
+                     Omit the entire "Previous" link for the first chapter in
+                     a volume.
+  {{PREV_TITLE}}     Display title of the previous chapter.
+  {{NEXT_CHAPTER}}   Relative path to next chapter (e.g., glossary.html).
+                     Omit the entire "Next" link for the last chapter in
+                     a volume.
+  {{NEXT_TITLE}}     Display title of the next chapter.
+
+  CSS DEPTH
+  ────────────────────────────────────────────────────────────────────────────
+  All doc-D chapter pages live at depth 1 (inside a volume directory), so
+  the stylesheet link is:   <link rel="stylesheet" href="../styles.css">
+  The collection's styles.css already @imports Google Fonts, so no per-page
+  font <link> tags are needed.
+
+  PER-PAGE CHOICES
+  ────────────────────────────────────────────────────────────────────────────
+  - Set {{DIATAXIS_TYPE}} per chapter: mixed, explanation, reference,
+    tutorial, or how-to.
+  - Set {{VOLUME_NUM}}, {{CHAPTER_NUM}}, {{PHASE_NUM}} per chapter.
+  - Add data-diataxis="..." attributes on individual <section> elements
+    when a section has a specific Diataxis classification distinct from the
+    page-level type.
+  - Sequential navigation: omit the "Previous" link for the first chapter
+    in a volume; omit the "Next" link for the last chapter.
+
+  GENERATOR STEP  (run after authoring — do NOT hand-author these regions)
+  ────────────────────────────────────────────────────────────────────────────
+  This template is the HUMAN-AUTHORED half of a chapter page: the skeleton
+  below (skip-nav, header, breadcrumb, <main>/<article>, chapter-nav, footer).
+  The sticky per-volume TOC sidebar and the layout scaffolding are GENERATED,
+  never hand-written. After copying, filling placeholders, and adding a
+  volume-index chapter-list entry, run:
+
+       python _output/generated-scripts/build_doc_volume_nav.py
+
+  It idempotently injects FOUR generated regions into the authored page, each
+  delimited by START/END marker comments the generator OWNS. Do NOT hand-edit
+  or hand-author these — re-running the generator replaces their contents, so
+  any manual edits inside them are overwritten:
+
+    1. VOLUME-TOC   <!-- VOLUME-TOC:START --> ... <!-- VOLUME-TOC:END -->
+       The <nav aria-label="volume contents" class="volume-toc"> sidebar,
+       emitted AFTER <main> in source order (CSS renders it visually left).
+    2. DOC-LAYOUT   <!-- DOC-LAYOUT:START --> ... <!-- DOC-LAYOUT:END -->
+       A <div class="doc-layout"> wrapper placed around <main> + the sidebar.
+    3. has-doc-layout body class
+       The generator adds class="has-doc-layout" to the <body> tag (widens
+       the container for the two-column layout). Leave <body> as plain
+       <body> in this template.
+    4. NAV-SCRIPT   <!-- NAV-SCRIPT:START --> ... <!-- NAV-SCRIPT:END -->
+       A <script src="../nav.js" defer></script> injected before </body>
+       (scroll-spy active-section highlighting + mobile TOC toggle).
+
+  The same run also adds/refreshes the volume index's Single-page / print
+  view link (<!-- PRINT-LINK:START/END --> region in <volume-dir>/index.html).
+
+  This template deliberately does NOT pre-embed the marker pairs: the
+  generator locates <main>, <body>, and </body> directly and inserts the
+  markers on first run, and re-runs splice between them. Keeping the authored
+  skeleton clean (no empty marker pairs) avoids any risk of double-injection
+  and keeps the generator idempotent. _template.html is in the generator's
+  EXCLUDED_ROOT_PAGES list, so the generator never mutates this file — a
+  copied-and-renamed chapter is what gets the injected regions, not this
+  template.
+
+  CONTENT-SOURCING RULE
+  ────────────────────────────────────────────────────────────────────────────
+  Source all content from `.claude/` and `product-design/` harness files.
+  Do NOT use `seja-public/docs/` as authoritative — use only for
+  prose-flow inspiration.
+
+  Normative reference: _output/docs/doc-guidelines.md
+  ============================================================================
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata: set values per chapter -->
+  <meta name="diataxis" content="{{DIATAXIS_TYPE}}">
+  <meta name="doc-volume" content="{{VOLUME_NUM}}">
+  <meta name="doc-chapter" content="{{CHAPTER_NUM}}">
+  <meta name="doc-phase" content="{{PHASE_NUM}}">
+  <meta name="doc-status" content="draft">
+
+  <title>{{TITLE}} -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page — all doc-D chapters are depth 1) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">{{VOLUME_TITLE}}</a></li>
+      <li>{{TITLE}}</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>{{TITLE}}</h1>
+
+      {{CONTENT}}
+    </article>
+  </main>
+
+  <!-- Chapter navigation (sequential prev/next) -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="{{PREV_CHAPTER}}">Previous: {{PREV_TITLE}}</a>
+    <a href="{{NEXT_CHAPTER}}">Next: {{NEXT_TITLE}}</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

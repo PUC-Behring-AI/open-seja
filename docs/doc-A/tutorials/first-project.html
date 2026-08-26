@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="tutorial">
+  <meta name="doc-volume" content="Tutorials">
+  <meta name="doc-chapter" content="Your First SEJA Project">
+  <meta name="doc-phase" content="stable">
+  <meta name="doc-status" content="published">
+
+  <title>Your First SEJA Project -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element (WCAG 2.4.1) -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Volume navigation bar -->
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="../how-to/index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Tutorials</a></li>
+      <li>Your First SEJA Project</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content area -->
+  <main id="main-content" class="chapter-content vol-tutorials">
+    <article>
+      <!-- Diataxis type badge -->
+      <p class="vol-accent"><strong>tutorial</strong></p>
+
+      <h1>Your First SEJA Project</h1>
+
+      <p>
+        This tutorial walks you through creating a SEJA project from scratch.
+        By the end, you will have a working project directory with design intent
+        files that the harness reads on every skill invocation. The whole process
+        takes about 15 minutes.
+      </p>
+
+      <!-- Prerequisites -->
+      <section id="prerequisites">
+        <h2>Prerequisites</h2>
+
+        <p>Before you begin, make sure you have:</p>
+
+        <ul>
+          <li>Git installed and configured on your machine</li>
+          <li>Claude Code (the CLI) installed and authenticated</li>
+          <li>A terminal or command prompt open</li>
+          <li>An empty parent directory where you want to create the project</li>
+        </ul>
+      </section>
+
+      <!-- What you will build -->
+      <section id="what-you-will-build">
+        <h2>What You Will Build</h2>
+
+        <p>
+          You will create a to-do app project called <code>my-todo-app</code>.
+          The domain is personal task management. The stack is Python with SQLite.
+          By the time you finish, your project directory will contain the harness
+          files SEJA needs to operate and a set of design-intent files in
+          <code>product-design/</code> that capture your project's identity,
+          standards, and trust boundaries.
+        </p>
+      </section>
+
+      <!-- Step 1: Clone and set up -->
+      <section id="step-1-set-up-the-project">
+        <h2>Step 1: Set Up the Project</h2>
+
+        <p>
+          Open your terminal, navigate to the parent directory where you want
+          your project to live, and run:
+        </p>
+
+        <pre><code><span class="token-command">/seja-setup</span> my-todo-app</code></pre>
+
+        <p>
+          SEJA detects that the target directory does not exist yet and treats this
+          as a greenfield install. It creates the <code>my-todo-app</code> directory,
+          copies all harness files into <code>.claude/</code>, and populates
+          <code>.claude/references/</code> with the reference scaffolding the
+          harness needs.
+        </p>
+
+        <h3>Expected output</h3>
+
+        <p>
+          You will see a series of messages as SEJA copies files. When it finishes,
+          you will be asked a short series of questions about your project's stack.
+          Answer them as follows:
+        </p>
+
+        <ul>
+          <li><strong>Project name</strong>: <code>my-todo-app</code></li>
+          <li><strong>Domain</strong>: <code>personal task management</code></li>
+          <li><strong>Backend framework</strong>: <code>Python (Flask)</code></li>
+          <li><strong>Database</strong>: <code>SQLite</code></li>
+          <li><strong>Frontend framework</strong>: <code>none</code> (CLI app for now)</li>
+        </ul>
+
+        <p>
+          After answering, SEJA generates <code>product-design/conventions.md</code>
+          with your stack definitions and scaffolds <code>CLAUDE.md</code> with
+          stack-specific content. It then tells you to run <code>/design</code> next.
+        </p>
+
+        <aside class="callout-tip">
+          <h3>What just happened?</h3>
+          <p>
+            The <code>/seja-setup</code> command performed the bootstrap sequence:
+            it created the project directory, copied the harness files (skills,
+            rules, references, agent prompts, and helper scripts) into
+            <code>.claude/</code>, and generated <code>conventions.md</code> --
+            the file that tells every skill where things live and what stack
+            you are using. This file is the single source of truth for project
+            configuration. Every skill reads it at startup.
+          </p>
+          <p>
+            The harness uses a state-detection system that recognizes four project
+            states: <em>no-harness</em> (fresh target), <em>fresh-download</em>
+            (SEJA cloned in place), <em>partial-init</em> (conventions exist but
+            design intent absent), and <em>finalised</em> (full project). Your
+            project is now in the <em>partial-init</em> state -- conventions exist,
+            but design intent does not. That is why SEJA tells you to run
+            <code>/design</code> next.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Step 2: Design the project -->
+      <section id="step-2-design-the-project">
+        <h2>Step 2: Design the Project</h2>
+
+        <p>Navigate into your new project and run the design skill:</p>
+
+        <pre><code><span class="token-command">cd</span> my-todo-app
+<span class="token-command">/design</span></code></pre>
+
+        <p>
+          SEJA detects that <code>conventions.md</code> exists but the design
+          intent file does not. It skips the stack questions (already answered in
+          Step 1) and walks you through the remaining design sections.
+        </p>
+
+        <h3>The design questionnaire</h3>
+
+        <p>
+          You will be asked questions across several design sections. For this
+          tutorial, answer them with the to-do app in mind:
+        </p>
+
+        <dl>
+          <dt>Section 0: Metacommunication message</dt>
+          <dd>
+            This is a first-person statement of your design intent. Answer as the
+            designer speaking to the user:
+            <em>"When you open my to-do app, I want you to see your tasks organized
+            by priority, so you always know what to work on next. I have designed
+            the interface to be minimal, because I believe adding a task should
+            take less than 5 seconds."</em>
+          </dd>
+
+          <dt>Section 2: Conceptual design</dt>
+          <dd>
+            Describe the core entities: <strong>Task</strong> (title, description,
+            priority, due date, status), <strong>Tag</strong> (name, color), and
+            the relationship between them (a task can have many tags).
+          </dd>
+
+          <dt>UX Design Standards (Section 3)</dt>
+          <dd>
+            For a CLI app, you can keep this minimal. Describe the command
+            structure: <code>todo add</code>, <code>todo list</code>,
+            <code>todo done</code>.
+          </dd>
+
+          <dt>Graphic/UI Design Standards (Section 4)</dt>
+          <dd>
+            Specify visual choices such as colors, typography, and spacing. For a
+            CLI app, defaults are fine.
+          </dd>
+
+          <dt>Engineering Standards (Sections 6--11)</dt>
+          <dd>
+            Specify your testing framework (pytest), code style (PEP 8 via ruff),
+            and any other conventions you follow. These sections cover project
+            conventions, frontend and backend standards, testing, i18n, and
+            security checklists. For a solo project, accept the recommended
+            defaults.
+          </dd>
+        </dl>
+
+        <h3>Expected output</h3>
+
+        <p>After the questionnaire completes, verify the generated files:</p>
+
+        <pre><code><span class="token-command">ls</span> product-design/</code></pre>
+
+        <p>You should see these files:</p>
+
+        <pre><code>conventions.md
+constitution.md
+product-design-as-intended.md
+standards.md
+design-standards.md
+security-checklists.md
+ux-research-results.md</code></pre>
+
+        <p>
+          For a brownfield (evolving) project, you would also see
+          <code>product-design-as-coded.md</code>, which captures the current
+          implementation state.
+        </p>
+
+        <aside class="callout-tip">
+          <h3>What just happened?</h3>
+          <p>
+            The <code>/design</code> skill generated your project's design-intent
+            artifacts. These files form the foundation that every other skill
+            reads:
+          </p>
+          <ul>
+            <li>
+              <code>conventions.md</code> -- your project directory layout and the
+              harness variables the agents read at the start of every skill. Already
+              populated in Step 1; <code>/design</code> may have amended it.
+            </li>
+            <li>
+              <code>constitution.md</code> -- immutable principles for your project.
+              Once you approve it, agents treat it as read-only. It is the trust
+              boundary between you and the agent.
+            </li>
+            <li>
+              <code>product-design-as-intended.md</code> -- your working design
+              intent. This is the file you edit as your project evolves. Every
+              planning session reads it first to understand what you want to build.
+            </li>
+            <li>
+              <code>standards.md</code> -- your engineering standards for backend,
+              frontend, testing, and internationalization, so the agents know what
+              "good" means in your codebase.
+            </li>
+            <li>
+              <code>design-standards.md</code> -- your UX patterns and graphic/visual
+              design standards (interaction patterns, accessibility, colors,
+              typography, spacing).
+            </li>
+            <li>
+              <code>security-checklists.md</code> -- security checklists and
+              validation constants that agents enforce during implementation and
+              review.
+            </li>
+            <li>
+              <code>ux-research-results.md</code> -- personas, problem scenarios,
+              and discovered user journeys. Pre-populated from your questionnaire
+              answers and updated as you learn more about your users.
+            </li>
+          </ul>
+          <p>
+            Your project is now in the <em>finalised</em> state. The harness is
+            fully configured and ready for the development lifecycle. For a deeper
+            understanding of the metacommunication message you wrote, see
+            <a href="../explanation/semiotic-engineering.html#software-as-designed-communication">
+            The Semiotic Engineering Foundation</a>.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Step 3: Verify the project -->
+      <section id="step-3-verify-the-project">
+        <h2>Step 3: Verify the Project</h2>
+
+        <p>
+          Run a quick harness health check to confirm everything is in order:
+        </p>
+
+        <pre><code><span class="token-command">/critique</span> health</code></pre>
+
+        <p>
+          The health check runs 9 built-in diagnostics across the skill system,
+          briefs, plans, references, conventions, constitution, spec compliance,
+          and the pending ledger. On a fresh project, you should see all checks
+          pass.
+        </p>
+
+        <h3>Expected output</h3>
+
+        <p>
+          A summary table showing each check with a PASS status. If any check
+          fails, read the diagnostic message -- it tells you exactly what is
+          missing and how to fix it.
+        </p>
+
+        <aside class="callout-tip">
+          <h3>What just happened?</h3>
+          <p>
+            The <code>/critique health</code> command ran the harness's
+            self-diagnosis suite. This is the same suite that maintainers run
+            before releases. By running it now, you have verified that your
+            project's harness is correctly installed and all required files are
+            present and well-formed. You can run this check at any time to
+            confirm the harness is healthy.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Summary -->
+      <section id="summary">
+        <h2>Summary</h2>
+
+        <p>In this tutorial, you:</p>
+
+        <ol>
+          <li>Created a new SEJA project with <code>/seja-setup</code></li>
+          <li>Defined your project's design intent with <code>/design</code></li>
+          <li>Verified the harness health with <code>/critique health</code></li>
+        </ol>
+
+        <p>Your project directory now looks like this:</p>
+
+        <pre><code>my-todo-app/
+  .claude/
+    skills/          <span class="token-comment"># 17 skill definitions</span>
+    agents/          <span class="token-comment"># 16 subagent prompts</span>
+    rules/           <span class="token-comment"># 7 path-scoped rule files</span>
+    references/      <span class="token-comment"># General, template, and project references</span>
+  product-design/
+    conventions.md   <span class="token-comment"># Project configuration (stack, paths, variables)</span>
+    constitution.md  <span class="token-comment"># Immutable principles (trust boundary)</span>
+    product-design-as-intended.md  <span class="token-comment"># Working design intent</span>
+    standards.md     <span class="token-comment"># Engineering standards</span>
+    design-standards.md     <span class="token-comment"># UX and visual design standards</span>
+    security-checklists.md  <span class="token-comment"># Security checklists and validation</span>
+    ux-research-results.md  <span class="token-comment"># Personas and user journeys</span>
+  _output/           <span class="token-comment"># Plans, briefs, logs (created as you work)</span>
+  CLAUDE.md          <span class="token-comment"># Agent entry point (reads this first)</span></code></pre>
+
+        <p>
+          You are ready to build your first feature. Continue to the next
+          tutorial to walk through the complete development lifecycle.
+        </p>
+      </section>
+
+    </article>
+
+    <!-- Sequential chapter navigation -->
+    <nav aria-label="chapter navigation">
+      <a href="lifecycle-in-one-feature.html">Next: The Lifecycle in One Feature</a>
+    </nav>
+
+    <!-- Cross-volume related chapters -->
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../how-to/installation.html">Installation and Setup</a> -- the goal-first guide to the install variants behind <code>/seja-setup</code></li>
+        <li><a href="../reference/configuration-reference.html">Configuration Reference</a> -- the full specification of the <code>conventions.md</code> fields you populated</li>
+        <li><a href="../explanation/semiotic-engineering.html#software-as-designed-communication">The Semiotic Engineering Foundation</a> -- why SEJA treats software as designed communication and your project intent as a message</li>
+      </ul>
+    </nav>
+  </main>
+
+  <!-- Sidebar table of contents -->
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#prerequisites">Prerequisites</a></li>
+      <li><a href="#what-you-will-build">What You Will Build</a></li>
+      <li><a href="#step-1-set-up-the-project">Step 1: Set Up the Project</a></li>
+      <li><a href="#step-2-design-the-project">Step 2: Design the Project</a></li>
+      <li><a href="#step-3-verify-the-project">Step 3: Verify the Project</a></li>
+      <li><a href="#summary">Summary</a></li>
+    </ul>
+  </aside>
+
+  <!-- Footer -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T12:00:00Z</p>
+  </footer>
+
+</body>
+</html>

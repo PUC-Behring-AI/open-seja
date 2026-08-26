@@ -1,0 +1,142 @@
+<!--
+  SEJA doc-A Chapter Template
+  ===========================
+  This template is the canonical HTML structure for chapter pages in
+  the doc-A documentation collection. It is NOT served to readers --
+  volume plans copy and fill it to create actual chapter pages.
+
+  Usage conventions:
+
+  1. Copy this file and rename it to match the chapter slug
+     (e.g., quickstart.html, lifecycle.html).
+
+  2. Replace ALL mustache-style placeholders with actual content.
+     The 12 placeholders are:
+       {{TITLE}}              -- Chapter title (appears in <title>, <h1>, breadcrumb)
+       {{VOLUME}}             -- Volume name (e.g., "Tutorials", "How-To Guides")
+       {{DIATAXIS_TYPE}}      -- Diataxis quadrant: tutorial | how-to | reference | explanation
+       {{BREADCRUMB}}         -- Breadcrumb HTML (pre-built for most pages; adjust if needed)
+       {{CONTENT}}            -- Main chapter body HTML
+       {{TOC}}                -- Sidebar table-of-contents list items
+       {{CROSS_REFS}}         -- Cross-reference links in the footer section
+       {{VOLUME_COLOR_CLASS}} -- Volume color class on <main> container:
+                                 vol-tutorials | vol-howto | vol-reference | vol-explanation
+       {{PREV_CHAPTER}}       -- Relative link to previous chapter (omit element for first chapter)
+       {{NEXT_CHAPTER}}       -- Relative link to next chapter (omit element for last chapter)
+       {{GENERATION_TIMESTAMP}} -- ISO 8601 timestamp of page generation
+       {{PHASE}}              -- Doc phase: draft | review | stable | archived
+
+  3. CSS depth for <link> tag:
+     - Depth-1 pages (e.g., tutorials/quickstart.html) use ../styles.css
+     - Depth-2 pages (e.g., how-to/skills/plan.html) use ../../styles.css
+
+  4. Apply the appropriate volume color class to the <main> element:
+     - Tutorials:   vol-tutorials  (success/green accent)
+     - How-To:      vol-howto      (clay accent)
+     - Reference:   vol-reference  (ochre accent)
+     - Explanation:  vol-explanation (sage accent)
+
+  5. Set prev/next for sequential navigation within the volume:
+     - The first chapter in a volume omits the "Previous" link.
+     - The last chapter in a volume omits the "Next" link.
+     - For volumes where reading order does not matter (e.g., reference),
+       sequential navigation is optional.
+
+  Normative reference: _output/docs/doc-guidelines.md
+  CSS pattern: Pattern 2 -- Co-located CSS File (Section G)
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Classification metadata: set values per chapter -->
+  <meta name="diataxis" content="{{DIATAXIS_TYPE}}">
+  <meta name="doc-volume" content="{{VOLUME}}">
+  <meta name="doc-chapter" content="{{TITLE}}">
+  <meta name="doc-phase" content="{{PHASE}}">
+  <meta name="doc-status" content="stub">
+
+  <title>{{TITLE}} -- SEJA Documentation</title>
+
+  <!-- SEJA design system fonts: loaded via @import in styles.css.
+       No <link> tags needed here; the CSS file handles font fetching. -->
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element (WCAG 2.4.1) -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Volume navigation bar -->
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="../how-to/index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <!-- Breadcrumb navigation
+       Default structure: Home > {{VOLUME}} > {{TITLE}}
+       Replace {{BREADCRUMB}} with <li> elements for the trail.
+       The current page (last item) is plain text, not a link. -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      {{BREADCRUMB}}
+    </ol>
+  </nav>
+
+  <!-- Primary content area -->
+  <main id="main-content" class="chapter-content {{VOLUME_COLOR_CLASS}}">
+    <article>
+      <!-- Diataxis type badge -->
+      <p class="vol-accent"><strong>{{DIATAXIS_TYPE}}</strong></p>
+
+      <h1>{{TITLE}}</h1>
+
+      {{CONTENT}}
+    </article>
+
+    <!-- Sequential chapter navigation (prev/next within volume) -->
+    <nav aria-label="chapter navigation">
+      <a href="{{PREV_CHAPTER}}">Previous</a>
+      <a href="{{NEXT_CHAPTER}}">Next</a>
+    </nav>
+  </main>
+
+  <!-- Sidebar table of contents -->
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      {{TOC}}
+    </ul>
+  </aside>
+
+  <!-- Footer -->
+  <footer>
+    <!-- Cross-references to related chapters -->
+    <section>
+      <h2>Related</h2>
+      {{CROSS_REFS}}
+    </section>
+
+    <!-- Collection-level navigation -->
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: {{GENERATION_TIMESTAMP}}</p>
+  </footer>
+
+</body>
+</html>

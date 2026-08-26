@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="A critical counter-reading of SEJA: where its theory is thin, what it does not know about its own readers, the accountability it cannot enforce, and what has never been evaluated outside a single-designer context.">
+  <title>Open Questions &mdash; SEJA Documentation</title>
+  <!-- CSS depth: 2 (tracks/scholar sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Open Questions</h1>
+      <p>A critical counter-reading: where the theory is thin, what the harness cannot enforce, and what has not yet been evaluated.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#tracks">Tracks</a></li>
+        <li><a href="index.html">Scholar</a></li>
+        <li aria-current="page">Open Questions</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-explanation">explanation</span>
+          <span class="badge track-scholar">Scholar</span>
+        </p>
+
+        <section data-diataxis="explanation" aria-labelledby="what-this-page-is">
+          <h2 id="what-this-page-is">What this page is</h2>
+          <p>
+            Everything below is drawn from SEJA's own record of its uncertainty
+            &mdash; the unresolved tensions logged when the documentation
+            architecture was chosen, the "what I don't know" questions in the
+            extended metacommunication template, and the ethical scenarios and
+            post-deployment questions in the as-coded metacommunication section.
+            Nothing here is a new claim about the harness. It is a synthesis of
+            claims the harness already makes about itself.
+          </p>
+          <p>
+            That provenance is the point. A system whose stated quality principle is
+            that it must <em>surface what is not yet known, not only what has been
+            decided</em> owes its readers a page where those unknowns are collected
+            rather than distributed across artifacts only its author reads. This is
+            that page, and its existence is a test the harness can fail: if the
+            uncertainties recorded elsewhere have grown and this page has not, the
+            epistemic posture has become decorative.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="the-accountability-limit">
+          <h2 id="the-accountability-limit">The accountability limit</h2>
+          <p>
+            The sharpest open question is one the harness answers plainly and
+            unflatteringly. SEJA's governance model makes the designer's intent
+            explicit and traceable, which supports accountability when AI-assisted
+            software causes harm. But <strong>SEJA cannot enforce that the designer's
+            intent is itself ethical</strong>. It can only enforce that the
+            implementation matches the intent. A designer who writes an unethical
+            metacommunication message gets a system that faithfully executes it.
+          </p>
+          <p>
+            The harness evaluated itself against three ethical scenarios, and the
+            third is the one with no mechanism behind it. A designer who treats
+            confirmation gates as rubber-stamps &mdash; approving proposed content
+            without reading it &mdash; defeats the model entirely, and the recorded
+            answer is that SEJA has no recourse: the designer's epistemic
+            responsibility is not enforceable by tooling. SEJA can make the
+            responsibility visible; it cannot make it felt.
+          </p>
+          <p>
+            This bounds every claim the rest of the documentation makes. Governance
+            here means <em>traceability of authorship</em>, not <em>guarantee of
+            judgment</em>. Read against a literature that sometimes treats process
+            compliance as a proxy for design quality, SEJA is unusually explicit
+            that the two come apart &mdash; but being explicit about a gap is not the
+            same as closing it.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="false-completeness">
+          <h2 id="false-completeness">The false-completeness risk</h2>
+          <p>
+            The second recorded ethical question turns the epistemic posture against
+            itself. A harness that surfaces gaps and unknowns may produce exactly the
+            confidence it was built to prevent: <em>"I have addressed all the gaps
+            SEJA found, so I must be done."</em> The record is blunt about why that
+            inference does not hold &mdash; gap detection is heuristic and bounded by
+            what is visible in the artifacts, and there will always be gaps SEJA
+            cannot detect.
+          </p>
+          <p>
+            The evaluation scenario for this is concrete: the harness reports full
+            coverage of designed features while missing a connection between a problem
+            scenario and a feature's metacommunication intention. The question the
+            scenario asks is not whether the miss is possible &mdash; it is whether the
+            heuristic label on the report makes its own confidence legible to a reader
+            who wants reassurance. That is a communicability question, and it is open.
+          </p>
+          <p>
+            For a scholar the interesting move here is structural. Confidence labeling
+            is SEJA's attempt to make a tool's epistemic limits part of its
+            metacommunication rather than a footnote to it. Whether a label changes
+            what a motivated reader concludes is an empirical question no one has
+            answered for this system.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="unknown-readers">
+          <h2 id="unknown-readers">What the harness does not know about its readers</h2>
+          <p>
+            The metacommunication template requires the designer to state what they do
+            <em>not</em> know about the people they are designing for, and SEJA's own
+            answers are substantial. It does not know how much formal semiotic
+            engineering training its user has, whether they work alone or in a team,
+            what domain their project addresses, how long they have used the harness,
+            or &mdash; most pointedly &mdash; whether they have hit its limits in ways
+            they have not reported.
+          </p>
+          <p>
+            The gap widens for affected others. The full range of organizational
+            contexts is unknown; so is the extent to which team members who are not
+            themselves harness practitioners are affected by decisions made under its
+            governance; so is the space of misuse scenarios in which the governance
+            model is exploited or circumvented rather than followed.
+          </p>
+          <p>
+            Three misuses are anticipated and named: producing design artifacts that
+            look authoritative but were authored without designer confirmation; using
+            the governance vocabulary to create an appearance of design rigour without
+            the substance; and bypassing the commit-time gate to suppress leak
+            detection. Anticipating a misuse is not preventing it, and two of the three
+            are behavioural rather than technical.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="over-and-under-engineering">
+          <h2 id="over-and-under-engineering">Where the harness may over- or under-engineer</h2>
+          <p>
+            Two watch areas are recorded as open, and they pull in opposite
+            directions.
+          </p>
+          <p>
+            <strong>Over-engineering.</strong> The anticipated negative effect of the
+            design is increased ceremony for simple tasks &mdash; the full lifecycle
+            overhead applied to a one-line change. The corresponding ethical watch area
+            names the same thing more sharply: the risk of over-engineering design
+            artefacts for small projects where the ceremony exceeds the value. Neither
+            has been resolved by evidence; both are held as things to watch.
+          </p>
+          <p>
+            <strong>Accountability theatre.</strong> The other watch area is the risk
+            of using the governance vocabulary to perform accountability without
+            practising it. This is the misuse scenario restated as a systemic property
+            rather than an individual failing, and it is the point at which SEJA's
+            heaviest mechanisms &mdash; audit trails, decision records, confirmation
+            gates &mdash; become indistinguishable from their own imitation.
+          </p>
+          <p>
+            A reader deciding whether the harness over- or under-engineers reflection
+            should notice that the record does not claim to know. It names both
+            failure modes, provides mechanisms aimed at each, and leaves the calibration
+            question open.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="not-yet-evaluated">
+          <h2 id="not-yet-evaluated">What has not been evaluated</h2>
+          <p>
+            The post-deployment section of the metacommunication record is, by its own
+            account, largely unpopulated &mdash; and that is the most consequential
+            uncertainty on this page.
+          </p>
+          <dl>
+            <dt>Vision versus actual use</dt>
+            <dd>
+              Unevaluated in a multi-user context. The harness has been used primarily
+              by a single designer &mdash; its own author &mdash; who has deep knowledge
+              of its design intent. Every claim about how the harness communicates its
+              intent to a user rests on a sample that includes the person who wrote the
+              intent.
+            </dd>
+            <dt>Unanticipated uses</dt>
+            <dd>
+              To be populated from field observation. One near-anticipated use is
+              recorded: the harness as a pedagogical instrument in a semiotic
+              engineering course.
+            </dd>
+            <dt>Effects in use</dt>
+            <dd>
+              One anticipated positive effect (reduced drift from design intent) and
+              one anticipated negative effect (ceremony overhead) are named.
+              Unanticipated effects are recorded as unknown.
+            </dd>
+            <dt>Issues warranting redesign</dt>
+            <dd>
+              To be evaluated as the harness matures, with the two watch areas above as
+              the standing agenda.
+            </dd>
+          </dl>
+          <p>
+            For a scholar this is the load-bearing caveat. The harness is a designed
+            artifact with an articulated theory and an unusually complete record of its
+            own intent &mdash; and almost no evidence about its reception. Read it as a
+            design proposition, not a validated result.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="documentation-tensions">
+          <h2 id="documentation-tensions">Tensions in the documentation itself</h2>
+          <p>
+            The collection you are reading was chosen over two alternatives, and the
+            research that chose it logged four tensions as unresolved rather than
+            settled. Three of them are visible from this page.
+          </p>
+          <dl>
+            <dt>No single organizing axis satisfies everyone</dt>
+            <dd>
+              Documentation type, system layer, and reader path each serve some
+              audiences at the cost of others. Routing by reader path &mdash; the choice
+              made here &mdash; is a bet, not a solution.
+            </dd>
+            <dt>Theory prominence cuts both ways</dt>
+            <dd>
+              The semiotic-engineering grounding is the harness's intellectual
+              differentiator and simultaneously an adoption barrier. This track exists
+              because the tension was resolved by <em>separating</em> the audiences
+              rather than by deciding how much theory a general reader should meet.
+            </dd>
+            <dt>Comprehensiveness costs sustainability</dt>
+            <dd>
+              More documentation means more surface that can go stale. This is the
+              cost accepted when the collection grew, and it falls hardest on pages
+              describing internals that change.
+            </dd>
+            <dt>Routing risks duplication</dt>
+            <dd>
+              Audience-routing serves readers best but invites content to be restated
+              per track; single-sourcing prevents that but demands aggressive
+              cross-referencing. The discipline that tracks recommend an order and
+              never restate content is the answer to this tension &mdash; and it is a
+              discipline, which means it can lapse.
+            </dd>
+          </dl>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="../../core/concepts/as-intended-as-coded.html">As-Intended and As-Coded</a> &mdash; the pattern that records intent and implementation separately, and where these uncertainties are logged.</li>
+            <li><a href="../../core/concepts/sign-system.html">The Sign System</a> &mdash; the epistemic posture these questions test.</li>
+            <li><a href="../../core/skills/reflect.html">/reflect</a> &mdash; the mechanism by which the unevaluated questions above are meant to become answered ones.</li>
+            <li><a href="index.html">Scholar Track</a> &mdash; back to the track gate.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Scholar Track</a>
+        <a href="../../core/concepts/index.html">Concepts</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (tracks/scholar sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

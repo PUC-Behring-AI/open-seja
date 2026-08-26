@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-volume" content="Explanation">
+  <meta name="doc-chapter" content="How the Agent Reads SEJA">
+  <meta name="doc-phase" content="stable">
+  <meta name="doc-status" content="published">
+
+  <title>How the Agent Reads SEJA -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element (WCAG 2.4.1) -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Volume navigation bar -->
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="../how-to/index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Explanation</a></li>
+      <li>How the Agent Reads SEJA</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content area -->
+  <main id="main-content" class="chapter-content vol-explanation">
+    <article>
+      <!-- Diataxis type badge -->
+      <p class="vol-accent"><strong>explanation</strong></p>
+
+      <h1>How the Agent Reads SEJA</h1>
+
+      <p>
+        Every previous chapter has treated SEJA as a message from a designer to a
+        human user. This chapter is about SEJA's other reader: the AI agent that
+        executes it. SEJA is unusual among design methodologies in that its
+        primary run-time consumer is not a person but a language model. The
+        harness is a corpus of instructions -- skill definitions, reference files,
+        rules, a constitution -- that the agent reads into a bounded context window
+        and acts on. Understanding how the agent reads that corpus is not a
+        curiosity; it explains why the harness is structured the way it is, and it
+        tells you, when you author documentation for the agent, what will actually
+        land. This is the meta-documentation: SEJA describing how SEJA is read.
+      </p>
+
+      <section id="how-claude-processes-a-skill">
+        <h2>How the Agent Processes a Skill Definition</h2>
+
+        <p>
+          A SEJA skill is a Markdown file -- <code>SKILL.md</code> -- with a YAML
+          frontmatter block and an instructional body. When you invoke a skill, the
+          agent reads that file and follows its instructions as a procedure. There
+          is no interpreter compiling the skill; the language model reads the prose
+          and does what it says. This has a consequence that shapes everything about
+          how skills are written: <strong>the instructions must be legible to a
+          reader that follows text closely but has no execution guarantees.</strong>
+          A skill body is imperative prose ("Read and inject the constitution,"
+          "Without asking for authorization, insert a new entry") because the agent
+          is being asked to <em>perform</em> the steps, not to parse a formal
+          grammar.
+        </p>
+
+        <p>
+          Because the agent is a probabilistic reader rather than a deterministic
+          machine, the harness leans on a few structural habits to keep behavior
+          reliable. Critical instructions are stated plainly and early. Verbatim
+          invocation phrasings (like <code>Run /pre-skill ...</code>) are kept
+          intact so that static tooling and the agent alike can detect them.
+          Frontmatter carries the machine-relevant configuration -- version,
+          category, context budget, references -- separately from the narrative body,
+          so that the parts a tool needs to read are cleanly separable from the
+          parts the agent needs to follow. The design assumption throughout is that
+          the agent reads carefully but not infallibly, and that structure is what
+          makes careful reading dependable.
+        </p>
+      </section>
+
+      <section id="context-window-budgets">
+        <h2>Context-Window Budgets: Light, Standard, Heavy</h2>
+
+        <p>
+          The agent's context window is finite, and every reference file loaded
+          into it competes for the same space with the actual task. SEJA manages
+          this scarcity explicitly. Each skill declares a
+          <code>context_budget</code> in its frontmatter -- one of three tiers -- and
+          the pre-skill hook's budget-eval stage reads that value to decide how
+          much to load before the skill runs. The three tiers are a direct response
+          to the reality that not every skill needs the same context, and that
+          loading everything for every skill would exhaust the window on ceremony.
+        </p>
+
+        <dl>
+          <dt><code>light</code></dt>
+          <dd>
+            The minimal tier. Pre-skill records the invocation and does essentially
+            nothing else: it skips all briefs and all reference-file loading, and it
+            skips the ref-load and constitution stages entirely. This tier is for
+            skills that need almost no project context to do their job -- the ones
+            that manage the harness itself or produce information without deep
+            analysis. Loading design intent for them would be pure overhead.
+          </dd>
+
+          <dt><code>standard</code> (the default)</dt>
+          <dd>
+            The working tier for most skills. Instead of the full briefs log, it
+            loads a compact briefs <em>index</em> -- one-line summaries -- which gives
+            the agent awareness of recent history without spending the window on
+            full entries. It then runs orphan detection, loads the mandatory
+            references and the skill's own references, and loads the constitution.
+            This is the balance point: enough context to reason well, not so much
+            that the task is crowded out.
+          </dd>
+
+          <dt><code>heavy</code></dt>
+          <dd>
+            The context-intensive tier for skills that genuinely need deep history
+            -- planning, implementing, critiquing. It loads the full briefs log, but
+            with <strong>recency windowing</strong>: the newest entries in full and a
+            one-line summary standing in for the older ones, so that even "load
+            everything" respects the window's limits. It also loads the plan index
+            and runs an additional compaction check. The heavy tier is the harness
+            admitting that some work is irreducibly context-hungry and budgeting for
+            it deliberately rather than pretending otherwise.
+          </dd>
+        </dl>
+
+        <p>
+          The tiers are a governance-and-epistemics mechanism in miniature. They
+          govern -- a skill cannot silently balloon its context footprint, because
+          the tier is declared and the loader enforces it -- and they are epistemic,
+          because recency windowing is an admission that the window is finite and a
+          strategy for spending it on what is most likely to matter.
+        </p>
+      </section>
+
+      <section id="eager-vs-lazy-loading">
+        <h2>Eager vs. Lazy: Demand-Pull Reference Loading</h2>
+
+        <p>
+          Within the ref-load stage, SEJA supports two loading disciplines, chosen
+          per skill by whether the skill declares an <code>eager_references</code>
+          field in its frontmatter. The distinction is a direct response to the
+          same scarcity the budget tiers address, applied at the granularity of
+          individual reference files.
+        </p>
+
+        <p>
+          In <strong>eager-only mode</strong> (no <code>eager_references</code>
+          field), the loader reads and injects every file the skill lists in
+          <code>references</code>. This is the simple discipline: everything the
+          skill might need is loaded up front, present in the window from the first
+          step. It is the right choice when a skill's references are all likely to
+          be used and small enough to afford.
+        </p>
+
+        <p>
+          In <strong>demand-pull mode</strong> (the <code>eager_references</code>
+          field is present), the loader splits the references in two. The
+          <em>eager tier</em> -- the files named in <code>eager_references</code> --
+          is loaded up front alongside the mandatory references. The <em>lazy tier</em>
+          -- everything in <code>references</code> that is not eager -- is not loaded;
+          instead the loader emits an "Available references" block, a compact list
+          of the lazy files each annotated with a trigger hint ("reviewing security
+          concerns," and the like). The agent pulls a lazy reference into context
+          only when the work at hand calls for it. This is lazy loading in the
+          familiar computing sense, applied to context-window management: pay the
+          loading cost only when the reference is actually needed. It matters
+          because a skill may declare many references that are each relevant only to
+          a fraction of its invocations; loading all of them eagerly would waste the
+          window on files the current task will never touch.
+        </p>
+      </section>
+
+      <section id="agent-attention-patterns">
+        <h2>Agent Attention Patterns: What the Agent Prioritizes and May Miss</h2>
+
+        <p>
+          Loading a file into the context window is necessary but not sufficient
+          for the agent to act on it. Attention is itself a scarce resource: a large
+          window can hold more than the agent reliably attends to in any single
+          step. SEJA's structure reflects a working theory of what the agent
+          prioritizes and where it is at risk of missing content.
+        </p>
+
+        <p>
+          The agent attends most reliably to instructions that are present, recent,
+          and unambiguous. It is at greater risk of under-weighting content that is
+          far from the current step, buried in the middle of a long file, or phrased
+          as background rather than instruction. This is why SEJA treats certain
+          reference files as <strong>pinned anchors</strong>: files that must never
+          be summarized or dropped, and must be re-injected verbatim after any
+          context compaction. The pinned set is small and deliberate -- the
+          constitution (dropping it would let the agent bypass governance rules),
+          the permissions reference (dropping it would remove authorization
+          boundaries), the constraints reference (dropping it would remove quality
+          and safety guardrails), the active skill's own instructions, the active
+          plan if one is being executed, and the session scratchpad. The reasoning
+          behind the pinned set is precisely an attention-and-persistence argument:
+          these are the files whose absence would silently corrupt the agent's
+          behavior, so they are protected against the compaction that would
+          otherwise quietly evict them.
+        </p>
+
+        <p>
+          Notably, the sibling facet files -- the designer-facing quick guides and
+          the maintainer-only rationale files that live next to a pinned
+          <code>SKILL.md</code> -- are <em>not</em> pinned, and this is intentional.
+          They are off the agent's executional hot path: the quick guide is loaded
+          only when a designer explicitly asks for help, and the rationale file is
+          never loaded at run time at all. Keeping them unpinned is a deliberate
+          attention economy: the agent's window is reserved for what it needs to act,
+          and narrative meant for humans does not compete for that space during
+          execution.
+        </p>
+      </section>
+
+      <section id="path-scoped-rules">
+        <h2>Path-Scoped Rules and Auto-Loading</h2>
+
+        <p>
+          SEJA carries a set of rule files, each scoped to a path pattern. When the
+          agent works on a file that matches a rule's scope, that rule is
+          auto-loaded into context. The mechanism is a targeted form of the same
+          attention economy: rather than loading every rule for every task -- which
+          would flood the window with guidance irrelevant to the file at hand -- the
+          harness loads a rule exactly when the agent touches the files that rule
+          governs. A rule about the structure of the harness loads when the agent
+          edits harness files; a rule about a particular subsystem loads when the
+          agent works inside it.
+        </p>
+
+        <p>
+          Path-scoping is worth pausing on as a design idea, because the alternative
+          -- a single global rulebook always in context -- would be simpler to reason
+          about and worse in practice. A global rulebook grows without bound as the
+          project accumulates conventions, and every convention it holds competes for
+          attention with every other, whether or not it is relevant to the current
+          task. Path-scoping keeps each rule's cost local to the files it applies to,
+          so that the guidance the agent sees is guidance it can use right now. The
+          trade-off, examined more fully in the next chapter, is that a rule only
+          fires when its scope is touched -- so a convention that should apply
+          everywhere cannot be expressed as a narrowly-scoped rule.
+        </p>
+      </section>
+
+      <section id="implications-for-authoring">
+        <h2>Implications for Authoring Documentation for the Agent</h2>
+
+        <p>
+          The practical payoff of understanding the agent's reading model is that it
+          changes how you write for the agent. A few implications follow directly
+          from the mechanisms above.
+        </p>
+
+        <p>
+          <strong>Write for a bounded window.</strong> Every line of agent-facing
+          instruction you add competes with the task for context. The harness's own
+          constraints reference states the rule plainly: when writing or revising
+          agent-facing instructions, be as concise as possible. Concision here is not
+          a stylistic preference; it is context-budget hygiene. This is also why
+          agent-facing prose is compressed while human-facing prose is not -- the two
+          are read by different readers with different scarcities.
+        </p>
+
+        <p>
+          <strong>Put the load-bearing instruction where attention is highest.</strong>
+          State critical directives plainly and early, not buried mid-file behind
+          background. If a step must not be skipped, say so as an instruction, not as
+          a note. The agent attends most reliably to the present, recent, and
+          unambiguous, so structure the document to put what matters most in exactly
+          those positions.
+        </p>
+
+        <p>
+          <strong>Separate what a tool parses from what the agent follows.</strong>
+          Machine-relevant configuration belongs in frontmatter; procedure belongs in
+          the body. Mixing them forces both readers to wade through the other's
+          material.
+        </p>
+
+        <p>
+          <strong>Decide eager versus lazy deliberately.</strong> If you author a
+          skill with several references, ask which the skill needs on every
+          invocation (eager) and which only sometimes (lazy). Declaring everything
+          eager is the easy default and the wrong one when references are large and
+          conditionally relevant; the demand-pull discipline exists precisely so that
+          a rarely-needed reference does not tax every invocation.
+        </p>
+      </section>
+
+      <section id="what-we-are-uncertain-about">
+        <h2>What We Are Uncertain About</h2>
+
+        <p>
+          The account above is a working model, not a measured one. We describe what
+          the agent tends to prioritize and where it tends to miss, but "tends to" is
+          doing heavy lifting: attention behavior varies across model versions,
+          context sizes, and prompt shapes, and SEJA's structural choices are hedges
+          against imperfect attention rather than exploits of a precisely known
+          mechanism. The pinned-anchor set is a good example -- it is a conservative
+          bet that certain files must survive compaction, made without a precise
+          model of exactly when compaction would drop them or exactly how much their
+          absence would degrade behavior. If future models attend more uniformly
+          across a large window, some of these structural precautions would become
+          unnecessary overhead; if they attend less reliably, the precautions would
+          need to grow. We treat the reading model as provisional, revisable in the
+          same abductive spirit as the rest of the harness's self-understanding.
+        </p>
+      </section>
+
+      <section id="what-this-means-for-seja-users">
+        <h2>What This Means for SEJA Users</h2>
+
+        <p>
+          You do not have to think about the agent's reading model to use SEJA, but
+          knowing it demystifies several things. It explains why some skills feel
+          instantaneous (light budget, nothing loaded) and others pause to gather
+          context (heavy budget, full history windowed in). It explains why the
+          harness insists on concise agent-facing prose while letting human-facing
+          documentation breathe. And it explains why, when you extend the harness,
+          the structure matters as much as the content: you are authoring for a
+          reader whose attention is finite and whose window is a shared resource. The
+          final chapter turns from how the agent reads the harness to why the harness
+          made the specific structural choices it did -- the design decisions and the
+          trade-offs behind them.
+        </p>
+      </section>
+
+    </article>
+
+    <!-- Sequential chapter navigation -->
+    <nav aria-label="chapter navigation">
+      <a href="dual-thesis.html">Previous: The Governable and Epistemic Thesis</a>
+      <a href="design-decisions.html">Next: Design Decisions and Trade-offs</a>
+    </nav>
+
+    <!-- See also: cross-volume related chapters -->
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../reference/pipeline-reference.html">Pipeline Reference</a> -- the budget-eval and ref-load stages in full</li>
+        <li><a href="../reference/skills-reference.html">Skills Reference</a> -- the context-budget tier of every skill</li>
+      </ul>
+    </nav>
+  </main>
+
+  <!-- Sidebar table of contents -->
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#how-claude-processes-a-skill">How the Agent Processes a Skill</a></li>
+      <li><a href="#context-window-budgets">Context-Window Budgets</a></li>
+      <li><a href="#eager-vs-lazy-loading">Eager vs. Lazy Loading</a></li>
+      <li><a href="#agent-attention-patterns">Agent Attention Patterns</a></li>
+      <li><a href="#path-scoped-rules">Path-Scoped Rules</a></li>
+      <li><a href="#implications-for-authoring">Implications for Authoring</a></li>
+      <li><a href="#what-we-are-uncertain-about">What We Are Uncertain About</a></li>
+      <li><a href="#what-this-means-for-seja-users">What This Means for SEJA Users</a></li>
+    </ul>
+  </aside>
+
+  <!-- Footer -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T22:55:00Z</p>
+  </footer>
+
+</body>
+</html>

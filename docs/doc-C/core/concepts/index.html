@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="Concepts Core landing page: the vocabulary and mental models behind the SEJA harness — the sign system, constitution, enforcement layers, marker system, lifecycle pipeline, review perspectives, the two-spec model, and installation profiles.">
+  <title>Concepts — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/concepts category landing) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Concepts</h1>
+      <p>The vocabulary and mental models &mdash; how the SEJA harness thinks about design, governance, and its own knowledge.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li aria-current="page">Concepts</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge core-concepts">concepts</span>
+          <span class="badge diataxis-explanation">explanation</span>
+        </p>
+
+        <section aria-labelledby="pages">
+          <h2 id="pages">Pages in this category</h2>
+          <p>Eight explanation pages. A sensible first read runs top to bottom, but each page stands on its own.</p>
+          <dl>
+            <dt><a href="sign-system.html">The Sign System</a> <span class="badge diataxis-explanation">explanation</span></dt>
+            <dd>The four file classifications that decide who may write to a file, the traceability markers that stand in for design intent, and the harness's epistemic stance toward its own knowledge.</dd>
+
+            <dt><a href="constitution.html">The Constitution</a> <span class="badge diataxis-explanation">explanation</span></dt>
+            <dd>The highest-authority artifact, loaded before all others, that fixes the harness's trust boundaries and takes precedence over everything else.</dd>
+
+            <dt><a href="enforcement-layers.html">Enforcement Layers</a> <span class="badge diataxis-explanation">explanation</span></dt>
+            <dd>The layered enforcement that keeps governance honest: the immutable constitution, path-scoped constraints, the deferred-action pending ledger, and the commit-time guardrail scripts.</dd>
+
+            <dt><a href="marker-system.html">The Marker System</a> <span class="badge diataxis-explanation">explanation</span></dt>
+            <dd>The operational mechanics of lifecycle markers: what STATUS, ESTABLISHED, and CHANGELOG_APPEND do, how <code>apply_marker.py</code> writes them, and the allowed state transitions.</dd>
+
+            <dt><a href="lifecycle-pipeline.html">The Lifecycle Pipeline</a> <span class="badge diataxis-explanation">explanation</span></dt>
+            <dd>The canonical path through the harness: skill invocation wrapped by the pre-skill and post-skill pipelines, plus a decision matrix for when to reach for each lifecycle skill.</dd>
+
+            <dt><a href="review-perspectives.html">Review Perspectives</a> <span class="badge diataxis-explanation">explanation</span></dt>
+            <dd>How the harness structures review: the engineering and design perspective families, the Essential/Standard/Deep levels, and the depth gating that keeps coverage deterministic.</dd>
+
+            <dt><a href="as-intended-as-coded.html">As-Intended and As-Coded</a> <span class="badge diataxis-explanation">explanation</span></dt>
+            <dd>The two-spec model: design intent versus implementation state, the drift-reconciliation workflow that surfaces the gap, and the promote workflow that closes it.</dd>
+
+            <dt><a href="profile-x-pattern.html">The Installation Profile Matrix</a> <span class="badge diataxis-explanation">explanation</span></dt>
+            <dd>The 2&times;2 of installation profiles: greenfield vs brownfield along one axis, collocated vs companion workspace along the other, and how <code>/seja-setup</code> routes each combination.</dd>
+          </dl>
+        </section>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="../../index.html#core">Core</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/concepts category landing) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

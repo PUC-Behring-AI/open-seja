@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="2">
+  <meta name="doc-chapter" content="2">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+
+  <title>The Constitution -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 2: The Design Layer</a></li>
+      <li>The Constitution</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>The Constitution</h1>
+
+      <p>
+        A SEJA project constitution declares the immutable principles that
+        every skill, agent, and plan must observe. It is the first artifact
+        loaded by pre-skill -- before conventions, standards, or any other
+        reference -- and its rules take precedence over everything else.
+        This chapter explains what a constitution contains, how to write and
+        maintain one, and why immutable principles are essential for
+        governing agent behavior.
+      </p>
+
+      <!-- ================================================== -->
+      <section id="what-a-constitution-contains" data-diataxis="reference">
+        <h2>What a Constitution Contains</h2>
+
+        <p>
+          Every constitution follows the same four-section structure, defined
+          in the template at
+          <code>.claude/references/template/constitution.md</code>.
+          Each section serves a distinct governance purpose:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Section</th>
+              <th>Purpose</th>
+              <th>Typical entries</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Technical Principles</td>
+              <td>Non-negotiable architectural decisions that shape how
+                the system is built.</td>
+              <td>Lifecycle discipline, file classification rules,
+                authoring boundaries, voice and phrasing rules.</td>
+            </tr>
+            <tr>
+              <td>Quality Principles</td>
+              <td>Quality gates that cannot be bypassed -- the standards
+                the project is committed to regardless of schedule
+                pressure.</td>
+              <td>Design-intent authority, epistemic posture
+                requirements, governance-plus-epistemic mandate.</td>
+            </tr>
+            <tr>
+              <td>Security Invariants</td>
+              <td>Security rules that must never be relaxed without
+                explicit sign-off from the project lead.</td>
+              <td>Private-content isolation, hook-bypass controls,
+                credential handling rules.</td>
+            </tr>
+            <tr>
+              <td>Compliance Requirements</td>
+              <td>Regulatory, contractual, or policy obligations the
+                project is bound by.</td>
+              <td>Repository visibility rules, sync-boundary
+                constraints, data-residency requirements.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Every entry in the constitution is a row in a principles table
+          with three columns: a stable identifier (T1, Q2, S1, C1, etc.),
+          the principle itself, and a rationale explaining why the rule
+          exists. The rationale is not optional -- it is what allows the
+          agent (and future maintainers) to judge edge cases rather than
+          blindly following the letter of the rule.
+        </p>
+
+        <h3>Worked Example: SEJA's Own Constitution</h3>
+
+        <p>
+          SEJA uses its own harness, so its constitution at
+          <code>product-design/constitution.md</code> serves as a real-world
+          reference. The following entries illustrate the kind of commitments
+          each section captures:
+        </p>
+
+        <figure>
+          <figcaption>Technical Principles (excerpt)</figcaption>
+          <dl>
+            <dt>T1 -- Lifecycle discipline</dt>
+            <dd>Every user-facing skill starts with pre-skill and ends
+              with post-skill. Skills may opt out of non-critical stages
+              but may never skip pre-skill entirely.</dd>
+            <dt>T2 -- Human (markers) boundary</dt>
+            <dd>Human (markers) files receive prose writes only from
+              human designers. Agents write only lifecycle markers via
+              <code>apply_marker.py</code> after confirmation.</dd>
+            <dt>T4 -- I/you phrasing</dt>
+            <dd>The metacommunication message is always voiced in first
+              person (designer "I" to user "you"). Third-person
+              restatements must never replace the canonical I/you
+              message.</dd>
+          </dl>
+        </figure>
+
+        <figure>
+          <figcaption>Quality Principles (excerpt)</figcaption>
+          <dl>
+            <dt>Q1 -- Design-intent authority</dt>
+            <dd>The metacommunication message and constitution are the
+              highest-authority artifacts; no plan or implementation step
+              may contradict them without an explicit D-NNN decision
+              record.</dd>
+            <dt>Q2 -- Surface the unknown</dt>
+            <dd>SEJA must surface what is not yet known, not only what
+              has been decided. Gaps and epistemic uncertainties must be
+              made visible.</dd>
+          </dl>
+        </figure>
+
+        <figure>
+          <figcaption>Security Invariants (excerpt)</figcaption>
+          <dl>
+            <dt>S1 -- Private-content isolation</dt>
+            <dd>Private content must never reach the public repository
+              without explicit opt-in. The pre-commit hook and publish
+              pipeline both enforce this gate.</dd>
+          </dl>
+        </figure>
+
+        <p>
+          The template also includes a Project Identity preamble (a
+          one-sentence mission statement and primary users), an Enforcement
+          section (describing how principles are loaded and validated), and
+          a Changelog (recording amendments with version numbers and dates).
+        </p>
+      </section>
+
+      <!-- ================================================== -->
+      <p>
+        The reference above describes what goes into a constitution. The
+        following section explains how to create one and keep it current
+        over time.
+      </p>
+
+      <section id="writing-and-maintaining-a-constitution" data-diataxis="how-to">
+        <h2>Writing and Maintaining a Constitution</h2>
+
+        <h3>Starting from the Template</h3>
+
+        <p>
+          When you run <code>/design</code> on a new project (or select
+          the "Constitution" option from the update menu), SEJA copies the
+          template from
+          <code>.claude/references/template/constitution.md</code> into
+          <code>product-design/constitution.md</code>. The template contains
+          placeholder rows with <code>{{…}}</code> tokens and HTML comments
+          showing examples for each section. Replace the placeholders with
+          your project's actual commitments and delete the example comments.
+        </p>
+
+        <h3>Adding Principles over Time</h3>
+
+        <p>
+          New principles often emerge from design decisions. When a D-NNN
+          decision record in <code>product-design-as-intended.md</code>
+          identifies a commitment that should be immutable -- one that
+          should never be overridden by a plan or implementation step
+          without explicit approval -- promote it to a constitution entry.
+          Assign the next available identifier in the appropriate section
+          (e.g., T5, Q4) and write a rationale that explains why this
+          rule exists.
+        </p>
+
+        <h3>The Amendment Protocol</h3>
+
+        <p>
+          Constitutions change rarely, and every change requires:
+        </p>
+
+        <ol>
+          <li>Explicit approval from the project lead (the designer).</li>
+          <li>A new version entry in the constitution's Changelog section,
+            recording the date and what changed.</li>
+        </ol>
+
+        <p>
+          This protocol ensures that constitution changes are deliberate
+          and auditable. An agent cannot amend the constitution
+          unilaterally -- the file is classified as <code>Human</code>,
+          meaning only the designer writes to it.
+        </p>
+
+        <h3>Constitution vs. Conventions vs. Standards</h3>
+
+        <p>
+          Three different artifacts capture project rules at different
+          levels of mutability:
+        </p>
+
+        <dl>
+          <dt>Constitution (<code>product-design/constitution.md</code>)</dt>
+          <dd>Immutable principles. Loaded first by pre-skill. Violations
+            are blocking -- they must be resolved before commit. Change
+            requires explicit designer approval and a changelog
+            entry.</dd>
+
+          <dt>Conventions (<code>product-design/conventions.md</code>)</dt>
+          <dd>Project structure: directory paths, stack choices, key file
+            locations, review configuration. Mutable -- updated when the
+            stack changes or the project reorganizes. Does not carry
+            governance weight.</dd>
+
+          <dt>Standards (<code>product-design/standards.md</code>, <code>product-design/design-standards.md</code>)</dt>
+          <dd>Engineering standards: coding patterns, testing rules, UX
+            patterns, accessibility requirements. Mutable --
+            <code>Human / Agent</code> classification, so both the
+            designer and the agent can update them. Advisory rather than
+            blocking unless a constitution principle elevates a specific
+            standard.</dd>
+        </dl>
+
+        <p>
+          The decision rule: if a commitment should survive any refactoring,
+          any stack change, and any team turnover, it belongs in the
+          constitution. If it describes how the project is structured today,
+          it belongs in conventions. If it describes how code should be
+          written, it belongs in standards.
+        </p>
+      </section>
+
+      <!-- ================================================== -->
+      <p>
+        With the mechanics of writing and maintaining a constitution
+        covered, the next section explains why immutable principles are
+        worth the governance overhead.
+      </p>
+
+      <section id="why-immutable-principles-matter" data-diataxis="explanation">
+        <h2>Why Immutable Principles Matter</h2>
+
+        <p>
+          The constitution is the first artifact loaded during pre-skill's
+          constitution stage. It enters the agent's context before
+          conventions, before skill-specific references, and before the
+          plan being executed. This loading order is deliberate: it means
+          every subsequent decision the agent makes is bounded by the
+          constitution's constraints.
+        </p>
+
+        <p>
+          Without immutable principles, an agent operating under schedule
+          pressure or optimization heuristics can silently drift from the
+          designer's commitments. A plan might skip review steps to save
+          time. An implementation might bypass the Human (markers) boundary
+          because direct writes are faster than routing through
+          <code>apply_marker.py</code>. A critique might overlook a
+          security invariant because it was not salient in the current
+          context.
+        </p>
+
+        <p>
+          The constitution prevents this drift by making certain commitments
+          non-negotiable. When <code>/critique validate</code> runs, it
+          checks the agent's output against the constitution's principles
+          and classifies violations as blocking. The agent cannot merge
+          a change that contradicts a constitution entry without an explicit
+          D-NNN decision record approved by the designer -- and that
+          decision record itself becomes part of the project's audit trail.
+        </p>
+
+        <p>
+          This is the governance half of what SEJA calls the "governable
+          and epistemic" thesis: immutable principles provide the
+          governance floor, while epistemic mechanisms (gap detection, drift
+          surfacing, uncertainty tracking) provide the awareness ceiling.
+          Neither alone is sufficient. For the theoretical foundations of
+          this thesis, see
+          <a href="../foundations/governable-epistemic.html#why-both-axes-are-required">The
+          Governable AND Epistemic Thesis</a>.
+        </p>
+      </section>
+
+      <!-- ================================================== -->
+      <section id="common-mistakes" data-diataxis="how-to">
+        <h2>Common Mistakes</h2>
+        <dl>
+          <dt>Putting mutable conventions in the constitution</dt>
+          <dd>
+            Directory paths, stack choices, and other structural details
+            change as a project evolves. If these are encoded as
+            constitution principles, every reorganization requires a formal
+            amendment. Put structural details in
+            <code>product-design/conventions.md</code> instead, and
+            reserve the constitution for commitments that should survive
+            any refactoring.
+          </dd>
+
+          <dt>Writing principles without rationale</dt>
+          <dd>
+            The rationale column in the principles table is not optional.
+            A principle without a rationale is an unexplained rule that
+            the agent cannot reason about at the edges. When an edge case
+            arises, the agent needs the "why" to determine whether the
+            principle applies or whether the case falls outside its scope.
+            Always explain why the rule exists.
+          </dd>
+
+          <dt>Making the constitution too long</dt>
+          <dd>
+            The constitution is loaded into every agent context window via
+            pre-skill. A bloated constitution consumes token budget that
+            could be used for the actual task. Keep the constitution
+            focused on genuinely immutable commitments -- typically 4 to
+            12 principles total. If a rule is important but not immutable,
+            it belongs in standards, not the constitution.
+          </dd>
+
+          <dt>Confusing the constitution with standards</dt>
+          <dd>
+            Standards (<code>product-design/standards.md</code>) are
+            mutable engineering rules that evolve as the project matures.
+            Constitution principles are immutable commitments that require
+            explicit designer approval to change. A coding convention
+            ("use snake_case for function names") is a standard. A
+            governance commitment ("no plan may bypass the pre-commit
+            hook") is a constitution principle. Putting standards in the
+            constitution makes the constitution noisy and makes standards
+            unnecessarily hard to update.
+          </dd>
+        </dl>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 2: The Design Layer</h2>
+    <ol>
+      <li>
+        <a href="metacommunication.html">The Metacommunication Message</a>
+      </li>
+      <li aria-current="page">
+        <a href="constitution-guide.html">The Constitution</a>
+        <ul>
+          <li><a href="#what-a-constitution-contains">What a Constitution Contains</a></li>
+          <li><a href="#writing-and-maintaining-a-constitution">Writing and Maintaining a Constitution</a></li>
+          <li><a href="#why-immutable-principles-matter">Why Immutable Principles Matter</a></li>
+          <li><a href="#common-mistakes">Common Mistakes</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="design-intent-files.html">Design Intent Files</a>
+      </li>
+      <li>
+        <a href="marker-system.html">The Marker System</a>
+      </li>
+      <li>
+        <a href="ux-research.html">UX Research Artifacts</a>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="metacommunication.html">Previous: The Metacommunication Message</a>
+    <a href="design-intent-files.html">Next: Design Intent Files</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

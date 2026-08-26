@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How to upgrade a SEJA install to a newer release: the --upgrade flag, --version pinning, --dry-run preview, .seja-version baseline tracking, the legacy upgrade path, and the file-preservation guarantee.">
+  <title>Upgrading SEJA — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/operations sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Upgrading SEJA</h1>
+      <p>Refresh harness files to a newer release while preserving every project-specific file.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Operations</a></li>
+        <li aria-current="page">Upgrading SEJA</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge core-operations">operations</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="overview">
+          <h2 id="overview">Overview</h2>
+          <p>
+            Upgrading updates the project-independent parts of the harness — skills,
+            general and template references, scripts, harness metadata — to a newer
+            tagged release, while leaving everything you authored untouched. The
+            upgrade runs from the <strong>target project</strong>, not the source
+            repository, and never re-runs the scaffolding questionnaire.
+          </p>
+          <pre><code>/seja-setup --upgrade</code></pre>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="the-upgrade-flag">
+          <h2 id="the-upgrade-flag">The <code>--upgrade</code> flag</h2>
+          <p>
+            <code>--upgrade</code> short-circuits state dispatch (while still honouring
+            the <code>dev-repo-refuse</code> guard) and routes straight to the upgrade
+            flow. The precondition is that the target is in the
+            <code>finalised</code> state — it has <code>.claude/</code>,
+            <code>product-design/conventions.md</code>, and a
+            <code>.seja-version</code> pin (or the legacy no-pin fallback). In a
+            finalised project, running <code>/seja-setup</code> with no arguments
+            also surfaces <em>Upgrade to latest</em> as a menu option.
+          </p>
+          <p>The upgrade flow, in outline:</p>
+          <ol>
+            <li>Resolve the target version (latest SemVer tag, or <code>--version &lt;tag&gt;</code>). If it already matches <code>.seja-version</code>, it prints "Harness already up to date" and exits.</li>
+            <li>Locate the SEJA source at the resolved tag — a supplied local path, or a shallow clone of the tag.</li>
+            <li>Read <code>product-design/conventions.md</code> for the output directory and other project paths.</li>
+            <li>Run <code>upgrade_harness.py</code> to apply the file classification (below), writing the resolved tag to <code>.seja-version</code> on success.</li>
+            <li>Show diffs for files that need a manual merge, offer follow-up actions, and summarise the change.</li>
+          </ol>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="version-pinning">
+          <h2 id="version-pinning">Pinning a version with <code>--version</code></h2>
+          <p>
+            By default the upgrade targets the latest SemVer tag on the public SEJA
+            remote. To pin to a specific release, pass
+            <code>--version &lt;tag&gt;</code>:
+          </p>
+          <pre><code>/seja-setup --upgrade --version v0.2.0</code></pre>
+          <p>
+            The resolution order mirrors install: <code>--version &lt;tag&gt;</code>
+            wins; else the latest SemVer tag; else a warned <code>HEAD</code>
+            fallback. Pinning lets you step through releases deliberately or hold a
+            project at a known-good version rather than always chasing latest.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="dry-run">
+          <h2 id="dry-run">Previewing with <code>--dry-run</code></h2>
+          <p>
+            To see what an upgrade would change without touching any files, add
+            <code>--dry-run</code>:
+          </p>
+          <pre><code>/seja-setup --upgrade --dry-run</code></pre>
+          <p>
+            Dry-run passes through to <code>upgrade_harness.py --dry-run</code>,
+            which reports the same summary — files auto-updated, files needing a
+            manual merge, new files added, the pin change — but applies nothing.
+            Use it to review the delta before committing to the change.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="baseline-tracking">
+          <h2 id="baseline-tracking"><code>.seja-version</code> baseline tracking</h2>
+          <p>
+            <code>.seja-version</code> is a one-line file recording the release tag
+            the project is currently pinned to. Install writes it first; each
+            upgrade reads it for the "from" half of the change banner
+            (for example <code>v0.1.0 → v0.2.0</code>) and overwrites it with the
+            resolved tag on success. It is the anchor that makes upgrades
+            deterministic and repeatable, and it is classified <em>never
+            overwrite</em> only in the sense that the upgrade script — not a manual
+            edit — owns the write.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="legacy-path">
+          <h2 id="legacy-path">The legacy (no <code>.seja-version</code>) path</h2>
+          <p>
+            Projects created before the A2 release model have no
+            <code>.seja-version</code> pin. They upgrade as
+            <code>unknown → &lt;target-tag&gt;</code> with a banner, and
+            <code>.seja-version</code> is written on this first upgrade. To set a
+            specific baseline explicitly without jumping to latest, pass
+            <code>--version &lt;intended-baseline&gt;</code>.
+          </p>
+          <aside class="callout-tip">
+            <strong>Scaffolding migration.</strong> A pre-scaffolding project whose
+            <code>conventions.md</code> still carries <code>{{VAR}}</code>
+            placeholders keeps those placeholders through the upgrade —
+            <code>product-design/**</code> is never overwritten. Run
+            <code>/design update stack</code> afterwards to fill them and regenerate
+            the downstream <code>CLAUDE.md</code>, rules, and smoke-test
+            infrastructure via the named scaffolding anchors.
+          </aside>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="preservation-guarantee">
+          <h2 id="preservation-guarantee">The preservation guarantee</h2>
+          <p>
+            The upgrade applies a file classification that decides what is safe to
+            overwrite automatically and what is preserved. Your project definitions,
+            settings, output, and <code>CLAUDE.md</code> are <strong>never</strong>
+            overwritten.
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>How the upgrade treats each category of file.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Category</th>
+                  <th scope="col">Overwrite?</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Skills (<code>SKILL.md</code>)</th>
+                  <td>Yes</td>
+                  <td>Auto-update</td>
+                </tr>
+                <tr>
+                  <th scope="row">General references</th>
+                  <td>Yes</td>
+                  <td>Auto-update</td>
+                </tr>
+                <tr>
+                  <th scope="row">Templates</th>
+                  <td>Yes</td>
+                  <td>Auto-update</td>
+                </tr>
+                <tr>
+                  <th scope="row">Harness metadata (CHANGELOG, VERSION, CHEATSHEET)</th>
+                  <td>Yes</td>
+                  <td>Auto-update</td>
+                </tr>
+                <tr>
+                  <th scope="row">Scripts</th>
+                  <td>Yes</td>
+                  <td>Auto-update</td>
+                </tr>
+                <tr>
+                  <th scope="row">Agents</th>
+                  <td>Mostly</td>
+                  <td>Show diff, ask per file (may carry local tweaks)</td>
+                </tr>
+                <tr>
+                  <th scope="row">Rules</th>
+                  <td>No</td>
+                  <td>Show diff, manual merge (project-specific conventions)</td>
+                </tr>
+                <tr>
+                  <th scope="row">Project definitions (<code>product-design/**</code>)</th>
+                  <td>Never</td>
+                  <td>Skip</td>
+                </tr>
+                <tr>
+                  <th scope="row">Settings</th>
+                  <td>Never</td>
+                  <td>Skip</td>
+                </tr>
+                <tr>
+                  <th scope="row">Output directory</th>
+                  <td>Never</td>
+                  <td>Skip</td>
+                </tr>
+                <tr>
+                  <th scope="row"><code>CLAUDE.md</code></th>
+                  <td>Never</td>
+                  <td>Skip</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            After the run, review everything with <code>git diff</code> before
+            committing. The post-upgrade summary lists the pin change, counts of
+            files auto-updated, manually merged, and added, and the reference files
+            it regenerated.
+          </p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="installation.html">Installing SEJA</a> &mdash; the four install modes and where <code>.seja-version</code> is first pinned.</li>
+            <li><a href="release.html">Release</a> &mdash; how the tagged releases you upgrade to are produced.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Operations</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/operations sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

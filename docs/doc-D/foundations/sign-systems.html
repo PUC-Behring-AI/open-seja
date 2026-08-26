@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-volume" content="5">
+  <meta name="doc-chapter" content="2">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+  <meta name="quality" content="publication">
+
+  <title>Sign Systems and Communicability -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 5: Foundations and Philosophy</a></li>
+      <li>Sign Systems and Communicability</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>Sign Systems and Communicability</h1>
+
+      <p>
+        Semiotic engineering analyzes software interfaces through a tripartite
+        classification of signs: static, dynamic, and metalinguistic. This
+        taxonomy, introduced by de Souza (2005, Ch. 4), provides the
+        analytical vocabulary for evaluating <em>communicability</em> -- the
+        degree to which a system successfully conveys the designer's
+        metacommunication message. Where the
+        <a href="software-as-communication.html">preceding chapter</a>
+        established that software is a designer-to-user communication, this
+        chapter asks: through what kinds of signs does that communication
+        actually occur?
+      </p>
+
+      <p>
+        In a traditional graphical interface, these sign classes map to
+        familiar categories: labels and icons (static), system responses and
+        state transitions (dynamic), help text and tooltips (metalinguistic).
+        In an agent harness like SEJA, the "interface" is not a visual
+        display but a collection of files, conventions, and lifecycle
+        behaviors that the AI agent reads and enacts. The sign classes still
+        apply, but the examples shift: the harness's directory structure is a
+        static sign; the lifecycle pipeline is a dynamic sign; the
+        <code>/help</code> skill is a metalinguistic sign. This chapter
+        develops each class with SEJA-specific examples and then subjects
+        the taxonomy itself to critical examination.
+      </p>
+
+      <section id="static-signs" data-diataxis="explanation">
+        <h2>Static Signs</h2>
+
+        <p>
+          Static signs are those whose meaning is encoded at design time and
+          remains available to the user independently of any interaction
+          sequence. In a graphical interface, static signs include labels,
+          icons, menu structures, and layout -- everything the user can
+          perceive before taking any action. De Souza characterizes them as
+          the "state-zero" of the interface: the designer's message as it
+          exists before the user arrives (de Souza, 2005, pp. 100-103).
+        </p>
+
+        <p>
+          Static signs encode what Eco (1976) calls the <em>signification
+          system</em>: the code of conventionalized expression-content pairs
+          that make meaning possible. They are the rules of the game, not
+          the game in play. A menu label means what it means regardless of
+          whether anyone clicks it; a file path communicates its purpose
+          regardless of whether any agent reads it.
+        </p>
+
+        <h3>SEJA's Static Signs</h3>
+
+        <p>
+          In the SEJA harness, static signs are the structural and naming
+          conventions that communicate the designer's organizational intent
+          before any skill is invoked:
+        </p>
+
+        <dl>
+          <dt>SKILL.md frontmatter fields</dt>
+          <dd>
+            The YAML frontmatter of every skill file -- <code>name</code>,
+            <code>description</code>, <code>metadata.context_budget</code>,
+            <code>metadata.references</code> -- communicates the skill's
+            identity, purpose, and resource requirements. These fields exist
+            and signify regardless of whether the skill is ever invoked.
+            The <code>designer_description</code> field on agent prompts
+            serves the same function: a first-person statement of what the
+            artifact is for, present before any interaction occurs.
+          </dd>
+
+          <dt><code>data-diataxis</code> attributes</dt>
+          <dd>
+            The Diataxis classification tags on documentation sections
+            (tutorial, how-to, reference, explanation) are static signs that
+            communicate the <em>kind</em> of content a section contains.
+            They tell both human readers and automated tooling what reading
+            mode is appropriate for each section, independent of the
+            section's actual content.
+          </dd>
+
+          <dt>File naming conventions</dt>
+          <dd>
+            The naming pattern <code>plan-NNNNNN-slug.md</code> communicates
+            that a file is a plan, what its sequence number is, and what it
+            concerns -- all before the file is opened. Similarly,
+            <code>research-NNNNNN-slug.md</code>,
+            <code>reflection-NNNNNN-slug.md</code>, and the
+            <code>SKILL.md</code> / <code>SKILL-quickguide.md</code> sibling
+            pattern encode artifact type and relationship through naming alone.
+          </dd>
+
+          <dt>Directory structure</dt>
+          <dd>
+            The harness directory tree -- <code>.claude/skills/</code>,
+            <code>.claude/agents/</code>, <code>.claude/references/</code>,
+            <code>.claude/rules/</code>, <code>product-design/</code> -- is
+            itself a static sign system. It communicates the harness's
+            conceptual architecture: skills are capabilities, agents are
+            delegates, references are shared knowledge, rules are contextual
+            constraints, and product-design holds the designer's intent.
+            A practitioner who has never used SEJA can infer its structure
+            from its directory layout alone.
+          </dd>
+        </dl>
+
+        <p>
+          The defining characteristic of static signs is that they are
+          available for interpretation before any interaction begins. They
+          establish the <em>signification potential</em> of the system --
+          the space of meanings that dynamic and metalinguistic signs will
+          subsequently activate (de Souza, 2005, p. 102).
+        </p>
+      </section>
+
+      <section id="dynamic-signs" data-diataxis="explanation">
+        <h2>Dynamic Signs</h2>
+
+        <p>
+          Dynamic signs are those whose meaning emerges through interaction
+          sequences -- state transitions, system responses, feedback loops,
+          and behavioral patterns that unfold over time. Where static signs
+          encode the designer's message at rest, dynamic signs encode the
+          message in motion: the designer communicates not only through what
+          the system <em>is</em> but through what it <em>does</em> in
+          response to user action (de Souza, 2005, pp. 103-108).
+        </p>
+
+        <p>
+          Dynamic signs are inherently temporal. A single system response
+          may be interpretable in isolation, but its full meaning depends on
+          the sequence in which it occurs. The same error message means
+          something different when it appears on a first attempt versus a
+          fifth. The same skill output carries different communicative weight
+          when it follows a plan versus when it follows a research inquiry.
+        </p>
+
+        <h3>SEJA's Dynamic Signs</h3>
+
+        <dl>
+          <dt>The lifecycle path</dt>
+          <dd>
+            The canonical progression -- research, plan, implement, critique,
+            document, communicate, reflect -- is a dynamic sign system. Each
+            transition communicates a design commitment: that research
+            precedes planning (understand before you build), that critique
+            precedes documentation (validate before you communicate), that
+            reflection follows implementation (learn from what you did). The
+            lifecycle is not merely a workflow; it is the designer's message
+            about the <em>order</em> in which design activities should occur
+            and why that order matters.
+          </dd>
+
+          <dt>The pre-skill / post-skill pipeline</dt>
+          <dd>
+            Every user-facing skill invocation triggers a pre-skill pipeline
+            (brief-log, budget-eval, pending-check, ref-load, constitution)
+            and concludes with a post-skill pipeline (DONE marking, commit,
+            decision flush). This bracketing behavior is a dynamic sign: it
+            communicates that every skill execution is a governed act --
+            logged, contextualized, and finalized. The agent does not simply
+            run a skill; it <em>performs a governed invocation</em>, and the
+            pre/post brackets make that governance visible.
+          </dd>
+
+          <dt>The conversation trace</dt>
+          <dd>
+            As a session progresses, the conversation trace accumulates
+            entries -- each exchange logged with an emitter, a message
+            summary, and a preceding-event link. This accumulation is itself
+            a dynamic sign: it communicates that SEJA values provenance and
+            traceability. The growing trace is the system saying, over and
+            over, "I am keeping a record of what we discussed and why."
+          </dd>
+
+          <dt>STATUS marker transitions</dt>
+          <dd>
+            The lifecycle markers on design-intent items --
+            <code>proposed</code>, <code>implemented</code>,
+            <code>established</code>, <code>superseded</code> -- form a
+            dynamic sign system whose meaning depends on the transition
+            sequence. A marker moving from <code>proposed</code> to
+            <code>implemented</code> communicates something different from a
+            marker moving from <code>established</code> to
+            <code>superseded</code>. The transition itself carries meaning
+            that the individual states do not.
+          </dd>
+        </dl>
+
+        <p>
+          Dynamic signs are where the designer's metacommunication message
+          becomes <em>performative</em>: not merely a statement of intent
+          but an enactment of it. When the pre-skill pipeline loads the
+          constitution before every skill invocation, it does not merely
+          <em>say</em> that the constitution is authoritative -- it
+          <em>demonstrates</em> that authority through behavior
+          (de Souza, 2005, p. 106).
+        </p>
+      </section>
+
+      <section id="metalinguistic-signs" data-diataxis="explanation">
+        <h2>Metalinguistic Signs</h2>
+
+        <p>
+          Metalinguistic signs are signs that explain other signs. They
+          constitute the system's self-referential capacity -- its ability
+          to communicate about its own signification system. In traditional
+          interfaces, metalinguistic signs include help text, tooltips,
+          error messages that explain what went wrong, and tutorials that
+          teach the user how to interpret the interface. De Souza identifies
+          metalinguistic signs as the layer where the designer most
+          explicitly "speaks" to the user about the system's own design
+          (de Souza, 2005, pp. 108-113).
+        </p>
+
+        <p>
+          Metalinguistic signs occupy a privileged position in the sign
+          taxonomy. They are the signs through which the designer can most
+          directly address communicability failures: when a user
+          misinterprets a static or dynamic sign, a metalinguistic sign is
+          the corrective mechanism. They are also the most explicitly
+          authored signs -- where static signs may emerge from structural
+          decisions and dynamic signs from interaction logic, metalinguistic
+          signs are almost always deliberately written to explain.
+        </p>
+
+        <h3>SEJA's Metalinguistic Signs</h3>
+
+        <dl>
+          <dt><code>/help</code> output and SKILL-quickguide.md files</dt>
+          <dd>
+            The <code>/help</code> skill and its per-skill
+            <code>SKILL-quickguide.md</code> siblings are SEJA's most direct
+            metalinguistic facilities. They explain what each skill does,
+            when to use it, and what to expect -- signs about signs. The
+            quickguide's designer-friendly descriptions and usage scenarios
+            translate the technical <code>SKILL.md</code> instructions
+            (themselves a mix of static and metalinguistic signs) into
+            narrative form accessible to the practitioner.
+          </dd>
+
+          <dt>The <code>/explain</code> skill</dt>
+          <dd>
+            SEJA's primary metalinguistic facility. The <code>/explain</code>
+            skill generates explanatory reports about the system's own
+            behavior, code, data model, architecture, and spec drift. It is
+            a sign that produces signs about signs: when a practitioner
+            invokes <code>/explain architecture</code>, the output is a
+            metalinguistic artifact that interprets the system's own
+            structural signs. See
+            <a href="../execution-layer/skills-in-depth.html#explain">
+            Skills In Depth</a> for the operational details of this skill.
+          </dd>
+
+          <dt>The Reading Map and this documentation collection</dt>
+          <dd>
+            The Reading Map that accompanies this documentation collection
+            is a metalinguistic sign par excellence: it explains how to
+            read the collection itself -- which volumes to start with,
+            which reading paths serve which audiences. This very chapter,
+            which analyzes the sign system of SEJA using the vocabulary of
+            semiotic engineering, is metalinguistic: it explains the
+            signification system that the harness embodies.
+          </dd>
+
+          <dt>The constitution</dt>
+          <dd>
+            The constitution (<code>product-design/constitution.md</code>)
+            occupies an interesting position. It is a metalinguistic sign
+            insofar as it explains the rules that govern all other signs in
+            the harness -- it tells the agent how to interpret and prioritize
+            everything else. But it is also a static sign: its content is
+            fixed at design time and does not change during interaction.
+            This dual classification is not a defect in the taxonomy but a
+            genuine feature of the artifact, as the Critical Counter-Reading
+            below discusses.
+          </dd>
+        </dl>
+
+        <p>
+          The density of metalinguistic signs in a system is itself a
+          communicative choice. SEJA is unusually rich in metalinguistic
+          apparatus -- quickguides, help output, explanation skills, this
+          documentation collection -- because the harness designer
+          recognizes that an AI agent reading harness files faces acute
+          interpretive challenges. The agent cannot ask a colleague what
+          a convention means; it must find the answer in the metalinguistic
+          signs the harness provides (de Souza, 2005, p. 111).
+        </p>
+      </section>
+
+      <section id="critical-counter-reading" data-diataxis="explanation">
+        <h2>Critical Counter-Reading</h2>
+
+        <p>
+          The tripartite taxonomy of static, dynamic, and metalinguistic
+          signs provides a productive analytical framework, but it is
+          neither exhaustive nor unproblematic. Several difficulties emerge
+          when applying it to SEJA's artifact system.
+        </p>
+
+        <h3>Classification Boundary Problems</h3>
+
+        <p>
+          Some SEJA artifacts resist clean classification into a single
+          sign class. The constitution, as noted above, functions
+          simultaneously as a static sign (its content is fixed) and a
+          metalinguistic sign (it explains the rules governing other signs).
+          The <code>SKILL.md</code> files exhibit a similar duality: their
+          frontmatter is a static sign (present before invocation), but
+          their instructional body functions metalinguistically (explaining
+          how the skill should behave). The <code>CLAUDE.md</code> file at
+          the project root is perhaps the most ambiguous: it is a static
+          sign (always loaded), a metalinguistic sign (it explains project
+          structure), and arguably participates in dynamic signification
+          (the agent's behavior changes based on which sections it
+          attends to).
+        </p>
+
+        <p>
+          De Souza acknowledges that signs may participate in multiple
+          classes depending on the analytical perspective adopted
+          (2005, p. 113). But this acknowledgment weakens the taxonomy's
+          discriminative power. If the same artifact can be classified
+          differently depending on the analyst's framing, the classification
+          becomes an interpretive choice rather than an empirical finding.
+        </p>
+
+        <h3>The Granularity Problem</h3>
+
+        <p>
+          The boundary between static and dynamic signs depends on the
+          granularity of analysis. At the level of a single session, the
+          constitution is a static sign -- it does not change. At the level
+          of a project's lifetime, the constitution is a dynamic sign --
+          it can be amended through decision records, and each amendment
+          changes the signification system. Similarly, the lifecycle path
+          is a dynamic sign within a session (the sequence unfolds through
+          interaction) but a static sign at the level of harness design
+          (the path is fixed by the designer). The taxonomy does not
+          specify which granularity is correct; the analyst must choose,
+          and different choices yield different analyses.
+        </p>
+
+        <h3>Signification versus Communication</h3>
+
+        <p>
+          Eco's (1976) distinction between <em>signification</em> and
+          <em>communication</em> introduces a deeper challenge. A
+          signification system is a set of rules that <em>make</em>
+          meaning possible -- the code that correlates expressions with
+          contents. Communication is the <em>use</em> of that system to
+          produce actual sign tokens in concrete situations. Eco argues
+          that the study of signification systems is logically prior to
+          and independent of the study of communication acts
+          (Eco, 1976, pp. 8-14).
+        </p>
+
+        <p>
+          Applied to SEJA, this distinction reveals a gap in the
+          three-class taxonomy. SEJA's reference files -- the constitution,
+          conventions, shared definitions, design-intent documents -- are
+          part of the signification system: they define the rules by which
+          the harness produces meaning. But they only <em>communicate</em>
+          when they are loaded into the agent's context window. A reference
+          file sitting on disk is a signification resource; the same file
+          loaded by pre-skill's ref-load stage is a communication act. The
+          tripartite taxonomy does not cleanly capture this distinction
+          between potential meaning (signification) and actual meaning
+          (communication). It classifies signs by their temporal behavior
+          (static vs. dynamic) and their referential target (object-level
+          vs. metalinguistic), but not by whether they are currently
+          participating in a communicative act.
+        </p>
+
+        <p>
+          This is not merely an academic point. The difference between
+          a reference file that is loaded (communicating) and one that is
+          available but not loaded (signifying but not communicating) has
+          practical consequences in SEJA. Lazy-loaded references exist in
+          the signification system -- the agent knows they are available --
+          but they do not communicate until the pre-skill pipeline brings
+          them into the context window. The three-class taxonomy treats
+          both as static signs, obscuring a distinction that matters for
+          understanding how the agent actually interprets the harness.
+        </p>
+
+        <h3>The Limits of Taxonomic Analysis</h3>
+
+        <p>
+          Finally, there is a methodological concern. Taxonomic analysis
+          encourages the analyst to assign every artifact a class, which
+          can create an illusion of exhaustiveness. Not every meaningful
+          aspect of an interface falls neatly into one of three categories.
+          The <em>absence</em> of a sign -- a gap in the reference files,
+          a missing quickguide, an unlogged decision -- can be as
+          communicatively significant as the presence of one. SEJA's gap
+          detection facilities (constitution principle Q2: "surface what is
+          not yet known") implicitly acknowledge that what the system
+          does <em>not</em> say is part of its communicative reality.
+          The tripartite taxonomy has no category for significant absences.
+        </p>
+      </section>
+
+      <section id="references" data-diataxis="reference">
+        <h2>References</h2>
+
+        <ul>
+          <li>
+            de Souza, C.S. (2005).
+            <cite>The Semiotic Engineering of Human-Computer Interaction</cite>.
+            Cambridge, MA: MIT Press.
+          </li>
+          <li>
+            Eco, U. (1976).
+            <cite>A Theory of Semiotics</cite>.
+            Bloomington: Indiana University Press.
+          </li>
+        </ul>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 5: Foundations and Philosophy</h2>
+    <ol>
+      <li>
+        <a href="software-as-communication.html">Software as Designed Communication</a>
+      </li>
+      <li aria-current="page">
+        <a href="sign-systems.html">Sign Systems and Communicability</a>
+        <ul>
+          <li><a href="#static-signs">Static Signs</a></li>
+          <li><a href="#dynamic-signs">Dynamic Signs</a></li>
+          <li><a href="#metalinguistic-signs">Metalinguistic Signs</a></li>
+          <li><a href="#critical-counter-reading">Critical Counter-Reading</a></li>
+          <li><a href="#references">References</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="extended-metacommunication.html">The Extended Metacommunication Template</a>
+      </li>
+      <li>
+        <a href="reflective-practice.html">Reflective Practice</a>
+      </li>
+      <li>
+        <a href="abduction-plural-readings.html">Abduction and Plural Readings</a>
+      </li>
+      <li>
+        <a href="governable-epistemic.html">The Governable and Epistemic Thesis</a>
+      </li>
+      <li>
+        <a href="agent-reads-harness.html">How the Agent Reads the Harness</a>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="software-as-communication.html">Previous: Software as Designed Communication</a>
+    <a href="extended-metacommunication.html">Next: The Extended Metacommunication Template</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-volume" content="Explanation">
+  <meta name="doc-chapter" content="Volume Index">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>Explanation -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element (WCAG 2.4.1) -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Volume navigation bar -->
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="../how-to/index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="index.html">Explanation</a>
+  </nav>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li>Explanation</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content area -->
+  <main id="main-content" class="chapter-content vol-explanation">
+    <article>
+      <!-- Diataxis type badge -->
+      <p class="vol-accent"><strong>explanation</strong></p>
+
+      <h1>Vol. 4: Explanation -- "Understand SEJA"</h1>
+
+      <p>
+        Understanding-oriented reading for people who want to know <em>why</em>
+        SEJA is shaped the way it is -- not how to use it, but what ideas it
+        embodies and what commitments those ideas carry. Where the tutorials
+        teach, the how-to guides solve, and the reference specifies, this volume
+        explains: it traces each harness mechanism back to its theoretical
+        foundation and makes the design reasoning visible so you can judge the
+        harness critically, extend it thoughtfully, and contribute to its
+        continued development. These chapters are narrative essays. Read them
+        when you have time to think, not when you are mid-task.
+      </p>
+
+      <!-- Chapter listing -->
+      <section id="chapters">
+        <h2>Chapters</h2>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Chapter</th>
+                <th>Read it to understand</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td><a href="semiotic-engineering.html">The Semiotic Engineering Foundation</a></td>
+                <td>Why SEJA treats software as designed communication, what the "designer's deputy" is, and how de Souza's metacommunication template became the spine of the design-intent files.</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td><a href="emt.html">The Extended Metacommunication Template</a></td>
+                <td>How Barbosa et al.'s lifecycle-spanning template -- and its ethical questions -- became the <code>/design</code> questionnaire and the <code>§12</code> "what don't I know" framework.</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td><a href="reflective-practice.html">Reflective Practice in SEJA</a></td>
+                <td>How Sch&ouml;n's three registers of reflection map onto decision-point rationale, post-skill QA logging, and the <code>/reflect</code> skill -- with the counter-readings that complicate the picture.</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td><a href="dual-thesis.html">The Governable AND Epistemic Thesis</a></td>
+                <td>Why governance without epistemic support turns brittle, why epistemic support without governance drifts, and how SEJA is built to hold both axes at once.</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td><a href="agent-as-reader.html">How the Agent Reads SEJA</a></td>
+                <td>What actually happens when Claude processes a <code>SKILL.md</code> -- context-budget tiers, eager vs. lazy reference loading, path-scoped rules -- and what that means for writing documentation the agent can use.</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td><a href="design-decisions.html">Design Decisions and Trade-offs</a></td>
+                <td>The public-safe rationale behind key choices -- multiple marker types, path-scoped rules, the as-intended/as-coded split, the pre/post-skill hooks -- with alternatives weighed and reversibility noted.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- How to use this volume -->
+      <section id="how-to-use-this-volume">
+        <h2>How to Read This Volume</h2>
+
+        <p>
+          The chapters build on one another and reward being read in order:
+          Chapters 1&ndash;3 establish the three theoretical roots (semiotic
+          engineering, the extended metacommunication template, reflective
+          practice); Chapter 4 synthesises them into the unifying thesis;
+          Chapters 5&ndash;6 turn the theory back onto the harness itself -- how
+          the agent reads it, and why its structure is what it is. That said,
+          each chapter is self-contained: if one question brought you here, start
+          with the chapter that names it and follow the cross-references outward.
+        </p>
+
+        <ul>
+          <li><strong>New to semiotic engineering?</strong> Begin with <a href="semiotic-engineering.html">Ch. 1</a>, then <a href="emt.html">Ch. 2</a>.</li>
+          <li><strong>Curious why SEJA reflects so much?</strong> Read <a href="reflective-practice.html">Ch. 3</a>.</li>
+          <li><strong>Want the one-paragraph reason SEJA exists?</strong> Read <a href="dual-thesis.html">Ch. 4</a>.</li>
+          <li><strong>Writing docs or skills for the agent to read?</strong> Read <a href="agent-as-reader.html">Ch. 5</a>.</li>
+          <li><strong>Evaluating a specific design choice?</strong> Jump to <a href="design-decisions.html">Ch. 6</a>.</li>
+        </ul>
+      </section>
+
+      <!-- Cross-references to other volumes -->
+      <section id="cross-references">
+        <h2>Cross-References to Other Volumes</h2>
+
+        <ul>
+          <li><a href="../tutorials/index.html">Vol. 1: Tutorials</a> -- learning-oriented walkthroughs; the concepts explained here are what those walkthroughs put into practice.</li>
+          <li><a href="../how-to/index.html">Vol. 2: How-To Guides</a> -- goal-first procedures; this volume explains why those procedures are shaped as they are.</li>
+          <li><a href="../reference/index.html">Vol. 3: Reference</a> -- exhaustive specification of every mechanism these essays interpret. See the <a href="../reference/pipeline-reference.html">Pipeline Reference</a> for the pre/post-skill machinery discussed in Ch. 5.</li>
+        </ul>
+      </section>
+
+    </article>
+
+    <!-- Volume navigation (prev/next volume) -->
+    <nav aria-label="volume navigation">
+      <a href="../reference/index.html">Previous: Vol. 3 -- Reference</a>
+    </nav>
+  </main>
+
+  <!-- Sidebar table of contents -->
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#chapters">Chapters</a></li>
+      <li><a href="#how-to-use-this-volume">How to Read This Volume</a></li>
+      <li><a href="#cross-references">Cross-References</a></li>
+    </ul>
+  </aside>
+
+  <!-- Footer -->
+  <footer>
+    <section>
+      <h2>Related</h2>
+      <ul>
+        <li><a href="../tutorials/index.html">Vol. 1: Tutorials</a> -- learning-oriented walkthroughs for new users</li>
+        <li><a href="../how-to/index.html">Vol. 2: How-To Guides</a> -- goal-first procedures for people with a task in hand</li>
+        <li><a href="../reference/index.html">Vol. 3: Reference</a> -- exhaustive specification for contributors and architects</li>
+      </ul>
+    </section>
+
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T22:55:00Z</p>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="4">
+  <meta name="doc-chapter" content="2">
+  <meta name="doc-phase" content="3">
+  <meta name="doc-status" content="draft">
+
+  <title>Enforcement Architecture -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 4: The Output and Governance Layer</a></li>
+      <li>Enforcement Architecture</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>Enforcement Architecture</h1>
+
+      <p>
+        Governance in SEJA is not a matter of good intentions -- it is
+        enforced. This chapter documents the machinery that makes the
+        lifecycle mandatory rather than merely recommended: the multi-layer
+        defense-in-depth model, the file-maintainer classification that
+        controls who may write what, the leak-prevention gate that guards the
+        private/public boundary, and the structural split between what stays
+        private and what syncs to the public <code>seja</code> repository. It
+        closes with an <a href="#anti-patterns">Anti-patterns</a> catalog of
+        the mistakes that this architecture exists to prevent. For the
+        theoretical grounding of why enforcement is framed as making the
+        harness <em>governable</em> and <em>epistemic</em>, see
+        <a href="../vol5/ch6-governable-and-epistemic.html">Vol. 5 Ch. 6</a>.
+      </p>
+
+      <!-- Section 1: Multi-Layer Enforcement -->
+      <section data-diataxis="explanation" id="multi-layer-enforcement">
+        <h2>Multi-Layer Enforcement</h2>
+
+        <p>
+          SEJA enforces its governance through <strong>defense in
+          depth</strong>: no single mechanism is trusted to catch every
+          violation. Instead, three layers sit in series, each catching a
+          different class of failure that the previous layer let through.
+          Because the agent's compliance rests partly on
+          instruction-following -- a soft, probabilistic behavior -- the
+          harder, code-level gates below it exist precisely to compensate
+          when instruction-following slips.
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Layer</th>
+              <th>Mechanism</th>
+              <th>Posture</th>
+              <th>Catches</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Post-skill advisory checks</td>
+              <td>Advisory (warns, may prompt)</td>
+              <td>Scope and marker violations at the moment they are staged, before the commit is attempted</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Pre-commit hook</td>
+              <td>Blocking (rejects commit)</td>
+              <td>Anything the advisory layer surfaced but the operator overrode, plus private-content leaks</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Continuous integration</td>
+              <td>Blocking (rejects merge)</td>
+              <td>Full-coverage checks too slow for the fast local gate; violations from clones without the hook installed</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Layer 1: Post-Skill Advisory Checks</h3>
+
+        <p>
+          During the post-skill pipeline, several steps run validation
+          scripts against the staged changes and report their findings
+          <em>before</em> the commit is made. Step 6 runs
+          <code>verify_commit_scope.py</code> to flag files staged outside
+          the expected paths for the skill type. Step 6b runs
+          <code>run_preflight_fast.py</code>, a battery of fast checks. Step
+          6c runs <code>check_human_markers_only.py --staged</code> to
+          detect unauthorized prose mutations in Human (markers) files. These
+          checks are <strong>advisory</strong>: a non-zero result displays the
+          failures and, for the marker verifier, prompts an abort/proceed
+          decision, but the operator can still choose to continue. The value
+          of this layer is early feedback -- the violation is named at the
+          moment it is introduced, when the fix is cheapest.
+        </p>
+
+        <h3>Layer 2: The Pre-Commit Hook (Blocking Gate)</h3>
+
+        <p>
+          The pre-commit hook in <code>.githooks/pre-commit</code> (installed
+          once per clone via <code>bash .githooks/install.sh</code>) runs
+          automatically on every <code>git commit</code>. Unlike the advisory
+          layer, it is a <strong>hard gate</strong>: it runs the fast
+          preflight checks and the pre-sync leak gate
+          (<code>check_no_private_leaks.py --staged</code>), and if any check
+          fails the commit is rejected outright. This is the layer that
+          catches what the advisory layer merely warned about -- if an
+          operator overrode a step 6c prompt, or if the agent skipped
+          post-skill entirely, the hook still stands between the working tree
+          and the repository.
+        </p>
+
+        <aside class="callout-warning">
+          <p>
+            <strong>Warning:</strong> The hook only protects clones where it
+            has been installed. <code>bash .githooks/install.sh</code> is a
+            per-clone step -- a fresh clone has no active hook until it is run.
+            This is why Layer 3 (CI) exists: it enforces the same checks on
+            the server side, where no local installation is required.
+          </p>
+        </aside>
+
+        <h3>Layer 3: Continuous Integration (Full Coverage)</h3>
+
+        <p>
+          CI runs the complete validation suite via
+          <code>run_all_checks.py</code>, the CI-independent orchestrator that
+          discovers and runs every check script with unified exit codes and
+          JUnit XML output. This is the backstop for two gaps the earlier
+          layers leave open: checks too slow to belong in the fast local
+          preflight, and commits that arrived from a clone without the
+          pre-commit hook installed. Because CI runs regardless of local
+          configuration, it is the layer of last resort -- a violation that
+          slipped past both the advisory checks and an uninstalled hook is
+          still caught before it can be merged.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The three layers are intentionally
+            redundant, not wasteful. Each catches what the previous missed:
+            advisory checks catch it early but can be overridden; the hook
+            blocks it locally but only where installed; CI blocks it
+            centrally regardless of local state. Removing any one layer opens
+            a path that the others were relied upon to close.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 2: File-Maintainer Classification -->
+      <section data-diataxis="explanation" id="file-maintainer-classification">
+        <h2>File-Maintainer Classification</h2>
+
+        <p>
+          Enforcement needs to know not just <em>what</em> may change but
+          <em>who</em> may change it. SEJA answers this with a
+          <strong>file-maintainer classification</strong>: a scheme that
+          assigns each governed file a maintainer type, recorded in the
+          "Maintained by" column of the Key Files table in
+          <code>product-design/conventions.md</code> and summarized in
+          <code>.claude/references/general/harness-governance.md</code>. Three
+          of the four values matter most for enforcement.
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Value</th>
+              <th>Meaning</th>
+              <th>Agent write rule</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Human</strong></td>
+              <td>Authored and updated exclusively by humans.</td>
+              <td>The agent must not write. It may read and propose changes via <code>AskUserQuestion</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Human (markers)</strong></td>
+              <td>Human-authored prose; the agent may write fixed-format structured markers only.</td>
+              <td>The agent writes only via <code>apply_marker.py</code>, after explicit confirmation. Never prose.</td>
+            </tr>
+            <tr>
+              <td><strong>Agent</strong></td>
+              <td>Auto-maintained by agents and skills (e.g., via post-skill).</td>
+              <td>The agent reads and writes freely. Humans typically do not edit directly.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>The "Human (markers)" Boundary</h3>
+
+        <p>
+          The middle classification is the subtle one. Files such as
+          <code>product-design/product-design-as-intended.md</code> and
+          <code>product-design/ux-research-results.md</code> hold design
+          intent and research findings whose <em>prose is the designer's
+          own</em> -- their precise wording carries intentional nuance that
+          paraphrasing would distort. But these same files also carry
+          machine-parseable lifecycle markers (STATUS flags, ESTABLISHED
+          stamps, CHANGELOG append lines) that the agent legitimately needs to
+          update as work progresses.
+        </p>
+
+        <p>
+          The rule that resolves this tension is strict: on a Human (markers)
+          file, the agent may write <strong>only</strong> the fixed-format
+          markers, and only through <code>apply_marker.py</code> -- never the
+          prose. The script is the sole sanctioned write path; it supports the
+          STATUS, ESTABLISHED, INCORPORATED, CHANGELOG_APPEND,
+          DECISION_APPEND, and REQ_TRACED_BY marker types and nothing else. Any prose mutation
+          the agent introduces is a violation, caught by
+          <code>check_human_markers_only.py</code> at post-skill step 6c
+          and, if it reaches the commit, by the pre-commit hook.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> When you need to flip a STATUS marker,
+            record an ESTABLISHED stamp, or append a changelog line to a Human
+            (markers) file, reach for <code>apply_marker.py</code> rather than
+            editing the file directly. Editing by hand is exactly the pattern
+            the marker verifier is designed to reject.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 3: Leak Prevention -->
+      <section data-diataxis="how-to" id="leak-prevention">
+        <h2>Leak Prevention</h2>
+
+        <p>
+          The most consequential thing the pre-commit hook does is prevent
+          private content from leaking into a commit that could later be
+          synced to the public repository. The gate is
+          <code>check_no_private_leaks.py</code>, run in
+          <code>--staged</code> mode by the hook and again by
+          <code>/publish</code> before the public sync. This section shows how
+          to run it and what it blocks.
+        </p>
+
+        <h3>Running the Leak Gate</h3>
+
+        <p>
+          The pre-commit hook runs the staged-mode scan automatically, so in
+          normal work you never invoke it by hand -- a failing commit is your
+          signal. To run the same scan manually against your staged changes
+          (for example, to check before you attempt a commit):
+        </p>
+
+        <pre><code><span class="token-comment"># Scan the currently staged changes for private leaks</span>
+<span class="token-command">python</span> .claude/skills/scripts/priv/check_no_private_leaks.py --staged
+
+<span class="token-comment"># Scan an explicit list of files instead of the staged set</span>
+<span class="token-command">python</span> .claude/skills/scripts/priv/check_no_private_leaks.py --files path/to/file.md</code></pre>
+
+        <p>
+          Exit code <code>0</code> means the staged content is clean and the
+          commit may proceed. A non-zero exit lists the offending files and
+          patterns; the pre-commit hook translates that into a rejected
+          commit.
+        </p>
+
+        <h3>What It Blocks</h3>
+
+        <p>
+          The gate blocks staged content that belongs only in the private
+          workspace from reaching a commit destined for -- or synced into --
+          the public tree. In practice this means:
+        </p>
+
+        <ul>
+          <li>References to private-only artifacts and workspace paths that
+          have no public counterpart.</li>
+          <li>Content that would appear in public-facing prose but originates
+          in the private half of the repository.</li>
+          <li>Private-only fragments that escaped their conditional markers
+          and would otherwise survive the public sync.</li>
+        </ul>
+
+        <p>
+          Because the same script runs both at commit time
+          (<code>--staged</code>) and again during <code>/publish</code>, a
+          leak has to defeat the check twice to reach the public repository --
+          another instance of the defense-in-depth pattern.
+        </p>
+      </section>
+
+      <!-- Section 4: The Priv/Public Boundary -->
+      <section data-diataxis="explanation" id="priv-public-boundary">
+        <h2>The Priv/Public Boundary</h2>
+
+        <p>
+          <code>seja-priv</code> is both a <strong>codebase</strong> (it
+          authors the harness) and a <strong>workspace</strong> (it hosts the
+          harness's own design artifacts). The leak gate above only makes
+          sense against this structural split: some content is meant to
+          propagate to the public <code>seja</code> repository, and some is
+          meant to stay private. Knowing which half you are editing is the
+          contributor's core responsibility, because edits to the codebase
+          half reach downstream consumers while edits to the workspace half do
+          not.
+        </p>
+
+        <h3>What Syncs to Public</h3>
+
+        <p>
+          The codebase half propagates outward. It comprises the harness
+          source under <code>.claude/</code> -- skills, rules, agents,
+          scripts, and the general and template reference directories -- which
+          consumers receive via <code>/seja-setup</code> and its
+          <code>--upgrade</code> mode. Alongside it, a set of public-facing
+          prose files (the changelog, README, license, and public docs) are
+          authored directly in the public tree and copied during release.
+          Publication is orchestrated by <code>/publish</code>, which
+          generates the public <code>.claude/</code> ephemerally into a temp
+          clone via the sync tool rather than from any on-disk mirror.
+        </p>
+
+        <h3>What Stays Private</h3>
+
+        <p>
+          The workspace half stays inside <code>seja-priv</code>. This is
+          SEJA's own iteration history and strategic context:
+        </p>
+
+        <ul>
+          <li>The <code>product-design/</code> design configuration for this
+          project.</li>
+          <li>The <code>_output/</code> workspace -- plans, roadmaps, research
+          logs, reflections, the pending ledger, and the other artifacts a
+          working session produces.</li>
+          <li>Private-only tooling under <code>.claude/skills/scripts/priv/</code>,
+          excluded from sync entirely.</li>
+          <li>Private-only fragments embedded inside otherwise-shared files,
+          guarded by conditional markers that the sync tool strips.</li>
+        </ul>
+
+        <p>
+          The boundary is <em>structural</em>: it is defined by where a file
+          lives and by the markers around a fragment, not by ad-hoc judgment
+          at commit time. When in doubt about which side a change falls on,
+          the reliable test is to check whether the file would appear in the
+          public tree after a dry-run of the sync tool. The two-role split and
+          its rationale are documented in
+          <code>.claude/references/general/harness-governance.md</code> under
+          "Codebase and workspace".
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> Editing the codebase half affects downstream
+            consumers at the next release; editing the workspace half is
+            visible only inside <code>seja-priv</code> and is safe to iterate
+            on freely. The leak gate and the priv/public markers exist so that
+            this distinction is enforced mechanically, not left to memory.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 5: Anti-Patterns -->
+      <section data-diataxis="how-to" id="anti-patterns">
+        <h2>Anti-patterns</h2>
+
+        <p>
+          The enforcement architecture exists to prevent a specific set of
+          recurring mistakes. Each entry below describes the mistake, its
+          consequence, and how to avoid it -- and, where relevant, which
+          enforcement layer catches it if you do not.
+        </p>
+
+        <dl>
+          <dt>Bypassing the lifecycle</dt>
+          <dd>
+            <strong>Mistake:</strong> Skipping the pre-skill or post-skill
+            phases -- for example, doing a skill's work directly without
+            invoking <code>/pre-skill</code> to load context, or interrupting
+            before <code>/post-skill</code> finalizes and commits the output.
+            <br>
+            <strong>Consequence:</strong> References and the constitution are
+            never loaded, so the work proceeds without governance context. On
+            the exit side, artifacts are produced but not committed, indexes go
+            stale, and telemetry is never flushed -- the briefs file may show
+            work as DONE while nothing is persisted.
+            <br>
+            <strong>Avoidance:</strong> Let the lifecycle run end to end.
+            Lifecycle-workflow skills invoke <code>/pre-skill</code> as their
+            first step and <code>/post-skill</code> as their last; do not
+            short-circuit either. If post-skill is interrupted, re-invoke it
+            with the same skill ID so checkpoint recovery resumes from where it
+            stopped.
+          </dd>
+
+          <dt>Hand-editing Human (markers) files directly</dt>
+          <dd>
+            <strong>Mistake:</strong> Writing prose or markers into a Human
+            (markers) file -- such as
+            <code>product-design-as-intended.md</code> or
+            <code>ux-research-results.md</code> -- by editing the file
+            directly instead of going through <code>apply_marker.py</code>.
+            <br>
+            <strong>Consequence:</strong> Post-skill step 6c
+            (<code>check_human_markers_only.py --staged</code>) detects the
+            unauthorized mutation and recommends aborting the commit. If the
+            commit proceeds anyway, the pre-commit hook is the next gate. Prose
+            edits corrupt the designer-voice guarantee these files exist to
+            protect.
+            <br>
+            <strong>Avoidance:</strong> Use <code>apply_marker.py</code> for
+            every write to a Human (markers) file. It is the only sanctioned
+            write path and supports exactly the marker types these files
+            permit (STATUS, ESTABLISHED, INCORPORATED, CHANGELOG_APPEND,
+            DECISION_APPEND, REQ_TRACED_BY). Leave the prose to the human author.
+          </dd>
+
+          <dt>Skipping pre-commit hooks</dt>
+          <dd>
+            <strong>Mistake:</strong> Committing with
+            <code>git commit --no-verify</code> to bypass the pre-commit hook,
+            or working in a clone where <code>bash .githooks/install.sh</code>
+            was never run.
+            <br>
+            <strong>Consequence:</strong> The blocking layer is removed. Fast
+            preflight failures and, critically, the private-leak gate are
+            never evaluated, so a commit containing private content or a
+            preflight regression can reach the branch. It will only be caught
+            later, by CI -- if at all.
+            <br>
+            <strong>Avoidance:</strong> Run
+            <code>bash .githooks/install.sh</code> once per clone and let the
+            hook run on every commit. Do not use <code>--no-verify</code> to
+            work around a failing check; fix the underlying violation instead.
+            Treat a hook failure as information, not an obstacle.
+          </dd>
+
+          <dt>Mixing private content into public documentation</dt>
+          <dd>
+            <strong>Mistake:</strong> Writing private-only details --
+            workspace-only artifact references, or internal strategic
+            context -- into files that sync to the public <code>seja</code>
+            repository, or into public-facing prose authored in the public
+            tree.
+            <br>
+            <strong>Consequence:</strong> The leak reaches the public
+            distribution, exposing content that was meant to stay private. The
+            <code>check_no_private_leaks.py</code> gate exists precisely to
+            block this at commit time and again at <code>/publish</code>, but a
+            leak that is written carelessly still forces an abort and a
+            rewrite.
+            <br>
+            <strong>Avoidance:</strong> Keep private content in the workspace
+            half (<code>_output/</code>, <code>product-design/</code>,
+            <code>scripts/priv/</code>) or, for fragments inside shared files,
+            wrap it in the conditional priv-only markers that the sync tool
+            strips. When unsure, run a dry-run of the sync tool to see whether
+            a file would appear in the public tree.
+          </dd>
+
+          <dt>Running implementations without a plan</dt>
+          <dd>
+            <strong>Mistake:</strong> Invoking <code>/implement</code> (or
+            simply writing code) without a corresponding plan file in
+            <code>_output/plans/</code>.
+            <br>
+            <strong>Consequence:</strong> The implementation has no recorded
+            scope, no step-by-step breakdown, and no <code>Docs:</code> or
+            <code>Deploy:</code> metadata for post-skill to act on. As-coded
+            alignment has no plan to read from, and the documentation auto-run
+            and deferred-artifact generation have nothing to process. Design
+            decisions cannot be traced back to their rationale.
+            <br>
+            <strong>Avoidance:</strong> Always run <code>/plan</code> first;
+            for trivial changes, <code>/plan --light</code> produces a
+            lightweight proposal. The <code>CLAUDE.md</code> rules instruct the
+            agent to check for an existing plan before implementing -- honor
+            that check rather than working around it.
+          </dd>
+        </dl>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> Every anti-pattern here maps to a layer of
+            the enforcement architecture that will catch it. That is the point:
+            the safest way to work is to treat the lifecycle, the marker
+            script, the hook, and the plan requirement as the intended path
+            rather than as obstacles to route around. For the skills that this
+            lifecycle governs, see <a href="../vol3/index.html">Vol. 3</a>.
+          </p>
+        </aside>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="ch1-output-artifacts.html">Previous: Output Artifacts</a>
+    <a href="ch3-scripts-and-automation.html">Next: Scripts and Automation</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="reference">
+  <meta name="doc-status" content="draft">
+
+  <title>Authoring Guide -- SEJA Documentation</title>
+
+    <!-- CSS depth: 0 -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation: Collection > Authoring Guide -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="index.html">Collection</a></li>
+      <li>Authoring Guide</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>Authoring Guide</h1>
+
+      <p>
+        This reference codifies the seven conventions that govern content
+        authoring across the SEJA Documentation Collection. Authors creating
+        or expanding chapter content must follow these conventions to ensure
+        structural consistency, Diataxis compliance, and cross-reference
+        integrity across all five volumes.
+      </p>
+
+      <p>
+        For HTML template structure, CSS specifications, and accessibility
+        requirements, see <code>doc-guidelines.md</code>. This authoring
+        guide addresses content-level conventions that the template does not
+        cover.
+      </p>
+
+      <!-- Convention 1 -->
+      <section id="section-level-diataxis-tagging">
+        <h2>1. Section-Level Diataxis Tagging</h2>
+
+        <p>
+          The standard Diataxis framework classifies each documentation page
+          as exactly one type: tutorial, how-to, reference, or explanation.
+          In this collection, many chapters serve multiple purposes within a
+          single page -- a design-layer chapter might explain the rationale
+          for a mechanism, provide reference tables for its configuration,
+          and include how-to steps for common tasks. Rather than splitting
+          these into separate pages (which would fragment the narrative),
+          apply Diataxis classification at the section level.
+        </p>
+
+        <h3>How to Apply</h3>
+
+        <p>
+          Add a <code>data-diataxis</code> attribute to each
+          <code>&lt;section&gt;</code> element within the chapter:
+        </p>
+
+        <pre><code>&lt;section id="marker-types" data-diataxis="reference"&gt;
+  &lt;h2&gt;Marker Types&lt;/h2&gt;
+  &lt;!-- Reference content: tables, exhaustive lists --&gt;
+&lt;/section&gt;
+
+&lt;section id="when-to-use-markers" data-diataxis="explanation"&gt;
+  &lt;h2&gt;When to Use Markers&lt;/h2&gt;
+  &lt;!-- Explanation content: rationale, trade-offs --&gt;
+&lt;/section&gt;
+
+&lt;section id="applying-a-marker" data-diataxis="how-to"&gt;
+  &lt;h2&gt;Applying a Marker&lt;/h2&gt;
+  &lt;!-- How-to content: task-oriented steps --&gt;
+&lt;/section&gt;</code></pre>
+
+        <h3>Page-Level Meta Tag</h3>
+
+        <p>
+          When a chapter contains sections of more than one Diataxis type,
+          set the page-level <code>&lt;meta name="diataxis"&gt;</code> tag
+          to <code>"mixed"</code>:
+        </p>
+
+        <pre><code>&lt;meta name="diataxis" content="mixed"&gt;</code></pre>
+
+        <p>
+          When all sections share the same type (common in Vol. 5 where every
+          section is explanation), use that type directly instead of
+          <code>"mixed"</code>.
+        </p>
+
+        <h3>Valid Values</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Value</th>
+              <th>Usage</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>tutorial</code></td>
+              <td>Learning-oriented: guided exercises with guaranteed outcomes</td>
+            </tr>
+            <tr>
+              <td><code>how-to</code></td>
+              <td>Task-oriented: steps to accomplish a specific goal</td>
+            </tr>
+            <tr>
+              <td><code>reference</code></td>
+              <td>Information-oriented: exhaustive, factual, dry</td>
+            </tr>
+            <tr>
+              <td><code>explanation</code></td>
+              <td>Understanding-oriented: rationale, context, trade-offs</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Convention 2 -->
+      <section id="mixed-type-chapter-guidelines">
+        <h2>2. Mixed-Type Chapter Guidelines</h2>
+
+        <p>
+          When a chapter contains sections of different Diataxis types, three
+          principles govern the content organization:
+        </p>
+
+        <h3>Topic Locality First</h3>
+
+        <p>
+          Group content by topic, not by Diataxis type. A chapter on the
+          marker system should keep all marker-related content together --
+          the explanation of why markers exist, the reference table of
+          marker types, and the how-to for applying markers -- rather than
+          separating all explanations into one section and all references
+          into another.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> A useful test: if a reader is looking for
+            "everything about markers," can they find it in one chapter, or
+            must they jump between the explanation chapter and the reference
+            chapter? Topic locality keeps it in one place.
+          </p>
+        </aside>
+
+        <h3>Diataxis Discipline Per Section</h3>
+
+        <p>
+          Within each section, maintain strict Diataxis discipline. A
+          section tagged <code>data-diataxis="reference"</code> must not
+          include narrative prose explaining rationale; a section tagged
+          <code>data-diataxis="how-to"</code> must not include exhaustive
+          reference tables. If a section naturally mixes types, split it
+          into subsections with distinct tags, or restructure so each
+          section serves exactly one purpose.
+        </p>
+
+        <h3>Transition Sentences Between Types</h3>
+
+        <p>
+          When adjacent sections differ in Diataxis type, include a brief
+          transition sentence at the end of the preceding section or the
+          beginning of the following one. The transition helps readers adjust
+          their reading mode:
+        </p>
+
+        <ul>
+          <li><strong>Reference to explanation:</strong> "The table above lists all marker types. The following section explains when each type is appropriate and the design rationale behind the taxonomy."</li>
+          <li><strong>Explanation to how-to:</strong> "With the rationale established, the following steps show how to apply a marker in practice."</li>
+          <li><strong>How-to to reference:</strong> "For a complete list of parameters and their valid values, see the reference table below."</li>
+        </ul>
+      </section>
+
+      <!-- Convention 3 -->
+      <section id="common-mistakes-convention">
+        <h2>3. "Common Mistakes" Section Convention</h2>
+
+        <p>
+          Certain chapter types require a dedicated "Common Mistakes"
+          section. This section collects errors that practitioners
+          frequently make, framed as problem-solution pairs.
+        </p>
+
+        <h3>Required In</h3>
+
+        <ul>
+          <li><strong>Each skill chapter</strong> (Vol. 3, Ch. 2 "Skills In Depth") -- one "Common Mistakes" subsection per skill within the per-skill template, plus a cross-cutting "Common Mistakes" section for the chapter as a whole.</li>
+          <li><strong>Each design-layer chapter</strong> (Vol. 2, Ch. 1-5) -- one "Common Mistakes" section per chapter covering errors specific to that design-layer component.</li>
+        </ul>
+
+        <h3>Format</h3>
+
+        <p>
+          Each entry in a "Common Mistakes" section follows this structure:
+        </p>
+
+        <pre><code>&lt;section id="common-mistakes" data-diataxis="how-to"&gt;
+  &lt;h2&gt;Common Mistakes&lt;/h2&gt;
+  &lt;dl&gt;
+    &lt;dt&gt;Mistake description (what goes wrong)&lt;/dt&gt;
+    &lt;dd&gt;
+      Why it happens, what the symptom looks like, and how to
+      fix or avoid it. Include a code example if applicable.
+    &lt;/dd&gt;
+  &lt;/dl&gt;
+&lt;/section&gt;</code></pre>
+
+        <p>
+          Use a definition list (<code>&lt;dl&gt;</code>) for
+          problem-solution pairs. The <code>&lt;dt&gt;</code> is the mistake;
+          the <code>&lt;dd&gt;</code> is the explanation and fix. Tag the
+          section as <code>data-diataxis="how-to"</code> because the
+          purpose is task-oriented: help the reader avoid or recover from
+          the mistake.
+        </p>
+      </section>
+
+      <!-- Convention 4 -->
+      <section id="anti-patterns-convention">
+        <h2>4. "Anti-patterns" Section Convention</h2>
+
+        <p>
+          Vol. 4, Ch. 2 ("Enforcement Architecture") uses "Anti-patterns"
+          instead of "Common Mistakes." The distinction is intentional:
+          anti-patterns are structural misuses of the governance system,
+          not simple errors. They represent patterns that appear reasonable
+          but undermine the harness's integrity.
+        </p>
+
+        <h3>Required Anti-Pattern Items</h3>
+
+        <ul>
+          <li><strong>Bypassing the lifecycle</strong> -- executing implementation without a preceding plan, skipping critique before documentation.</li>
+          <li><strong>Hand-editing Human marker files</strong> -- modifying <code>product-design-as-intended.md</code> or <code>product-design-as-coded.md</code> directly instead of using <code>apply_marker.py</code>.</li>
+          <li><strong>Skipping pre-commit hooks</strong> -- using <code>--no-verify</code> to bypass the leak gate and preflight checks.</li>
+          <li><strong>Mixing private content into public docs</strong> -- including <code>seja-priv</code>-only content in files that propagate to <code>seja-public</code>.</li>
+          <li><strong>Circumventing constitution principles</strong> -- overriding immutable constraints defined in <code>constitution.md</code> through skill parameters or prompt engineering.</li>
+        </ul>
+
+        <h3>Format</h3>
+
+        <p>
+          Use the same definition list format as "Common Mistakes" but with
+          stronger framing: each <code>&lt;dt&gt;</code> names the
+          anti-pattern, and the <code>&lt;dd&gt;</code> explains why it is
+          structurally harmful (not merely inconvenient), what symptom
+          surfaces, and what the correct alternative is. Tag the section as
+          <code>data-diataxis="how-to"</code>.
+        </p>
+      </section>
+
+      <!-- Convention 5 -->
+      <section id="publication-quality-guidelines">
+        <h2>5. Publication-Quality Guidelines for Vol. 5</h2>
+
+        <p>
+          Vol. 5 (Foundations and Philosophy) targets publication-quality
+          writing. Every chapter in this volume carries
+          <code>&lt;meta name="quality" content="publication"&gt;</code>,
+          which signals the following standards:
+        </p>
+
+        <h3>Citation Density</h3>
+
+        <p>
+          Every substantive claim must be traceable to a cited source.
+          Primary sources are preferred over secondary summaries. When
+          referencing semiotic engineering concepts, cite de Souza (2005)
+          directly, not a downstream textbook's summary. Use the
+          <code>&lt;cite&gt;</code> element for work titles and provide
+          full bibliographic details in a "Key Citations" section at the
+          end of each chapter.
+        </p>
+
+        <h3>Counter-Readings</h3>
+
+        <p>
+          Every Vol. 5 chapter must include a "Critical Counter-Reading"
+          section as its final substantive section (before "Source Material"
+          and "Key Citations"). This section presents genuine objections
+          to the chapter's argument -- not straw-man dismissals. A good
+          counter-reading:
+        </p>
+
+        <ul>
+          <li>Identifies a specific weakness in the argument, not a general caveat.</li>
+          <li>References an alternative theoretical framework that would reach different conclusions.</li>
+          <li>Acknowledges limitations that the chapter's framing cannot resolve.</li>
+          <li>Avoids the "however, despite these concerns, our approach is still correct" pattern. The counter-reading should leave genuine tension unresolved.</li>
+        </ul>
+
+        <h3>Acknowledged Limitations</h3>
+
+        <p>
+          Publication-quality writing is honest about what it does not
+          cover. Each chapter should state its scope explicitly and
+          acknowledge where the argument is speculative, where evidence
+          is thin, and where the theoretical framework might not apply.
+          Do not present conjectures as established facts.
+        </p>
+
+        <aside class="callout-warning">
+          <p>
+            <strong>Warning:</strong> The publication-quality standard
+            applies only to Vol. 5. Applying it to Vol. 1-4 chapters
+            would slow practical documentation with unnecessary academic
+            apparatus. Vol. 1-4 chapters should be clear and accurate
+            but do not require citation density or counter-readings.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Convention 6 -->
+      <section id="content-phasing">
+        <h2>6. Content Phasing</h2>
+
+        <p>
+          Content development is organized into three phases, prioritized
+          by immediate value to readers. The <code>doc-phase</code> meta
+          tag on each page records its phase assignment.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Phase</th>
+              <th>Volumes</th>
+              <th>Rationale</th>
+              <th><code>doc-phase</code> Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Phase 1</td>
+              <td>Vol. 1 (Onboarding) + Vol. 3 (Execution Layer)</td>
+              <td>Highest immediate value: gets users started and covers the skills and workflows they interact with daily.</td>
+              <td><code>1</code></td>
+            </tr>
+            <tr>
+              <td>Phase 2</td>
+              <td>Vol. 2 (Design Layer) + Vol. 5 (Foundations)</td>
+              <td>Deepens understanding: explains the design artifacts and theoretical foundations that shape how the harness works.</td>
+              <td><code>2</code></td>
+            </tr>
+            <tr>
+              <td>Phase 3</td>
+              <td>Vol. 4 (Governance Layer)</td>
+              <td>Completes the collection: covers output artifacts, enforcement, scripts, maintenance, and release -- topics that matter most to maintainers and contributors.</td>
+              <td><code>3</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Phasing Rules</h3>
+
+        <ul>
+          <li><strong>Stub pages are phase-tagged at creation.</strong> Every stub carries the <code>doc-phase</code> meta tag from the moment it is created, even before content development begins.</li>
+          <li><strong>Phase 1 content is developed first.</strong> When prioritizing content work, always complete Phase 1 chapters before starting Phase 2, and Phase 2 before Phase 3.</li>
+          <li><strong>Cross-phase references are permitted.</strong> A Phase 1 chapter may link to a Phase 2 or Phase 3 stub. The stub's status notice tells the reader that content is planned but not yet available.</li>
+          <li><strong>Phase does not determine reading order.</strong> The <a href="reading-map.html">Reading Map</a> defines recommended reading sequences that cross phase boundaries. A researcher might start with Vol. 5 (Phase 2) even though Vol. 1 (Phase 1) was developed first.</li>
+        </ul>
+      </section>
+
+      <!-- Convention 7 -->
+      <section id="cross-reference-link-format">
+        <h2>7. Cross-Reference Link Format</h2>
+
+        <p>
+          All cross-references within the collection follow the conventions
+          defined in <code>doc-guidelines.md</code> Section C. This section
+          summarizes the key rules for quick reference.
+        </p>
+
+        <h3>Inter-Volume Links</h3>
+
+        <p>
+          Links between chapters in different volumes use relative paths
+          from the chapter file:
+        </p>
+
+        <pre><code>&lt;!-- From onboarding/quickstart.html to execution-layer/lifecycle-pipeline.html --&gt;
+&lt;a href="../execution-layer/lifecycle-pipeline.html"&gt;Lifecycle Pipeline&lt;/a&gt;</code></pre>
+
+        <p>Pattern: <code>../volume-dir/chapter.html</code></p>
+
+        <h3>Intra-Volume Links</h3>
+
+        <p>
+          Links between chapters in the same volume use sibling paths:
+        </p>
+
+        <pre><code>&lt;!-- From design-layer/metacommunication.html to design-layer/constitution-guide.html --&gt;
+&lt;a href="constitution-guide.html"&gt;Constitution Guide&lt;/a&gt;
+
+&lt;!-- Link to a specific section --&gt;
+&lt;a href="marker-system.html#marker-types"&gt;Marker Types&lt;/a&gt;</code></pre>
+
+        <p>Pattern: <code>chapter.html</code> or <code>chapter.html#section-id</code></p>
+
+        <h3>Collection-Root Links</h3>
+
+        <p>
+          Links from chapter pages to collection-root pages (index, reading
+          map, this authoring guide) use the parent directory:
+        </p>
+
+        <pre><code>&lt;!-- From any chapter page to the collection index --&gt;
+&lt;a href="../index.html"&gt;Collection Index&lt;/a&gt;
+
+&lt;!-- From any chapter page to the authoring guide --&gt;
+&lt;a href="../authoring-guide.html"&gt;Authoring Guide&lt;/a&gt;</code></pre>
+
+        <h3>Descriptive Link Text</h3>
+
+        <p>
+          Link text must describe the target. Use the chapter's short title
+          or section heading. Do not use generic phrases:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Correct</th>
+              <th>Incorrect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>&lt;a href="..."&gt;Lifecycle Pipeline&lt;/a&gt;</code></td>
+              <td><code>&lt;a href="..."&gt;click here&lt;/a&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>&lt;a href="..."&gt;Marker Types reference&lt;/a&gt;</code></td>
+              <td><code>&lt;a href="..."&gt;this page&lt;/a&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>&lt;a href="..."&gt;Constitution Guide&lt;/a&gt;</code></td>
+              <td><code>&lt;a href="..."&gt;read more&lt;/a&gt;</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Anchor ID Format</h3>
+
+        <p>
+          Section anchor IDs use kebab-case derived from the heading text:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Heading</th>
+              <th>Anchor ID</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>The Metacommunication Message</td>
+              <td><code>the-metacommunication-message</code></td>
+            </tr>
+            <tr>
+              <td>Common Mistakes</td>
+              <td><code>common-mistakes</code></td>
+            </tr>
+            <tr>
+              <td>Design Decisions and Trade-offs</td>
+              <td><code>design-decisions-and-trade-offs</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>Rules:</p>
+
+        <ul>
+          <li>Lowercase all characters.</li>
+          <li>Replace spaces with hyphens.</li>
+          <li>Remove punctuation (colons, parentheses, quotes).</li>
+          <li>Preserve numbers as-is.</li>
+        </ul>
+
+        <h3>No External References</h3>
+
+        <p>
+          Per the self-containment rule, pages in this collection must not
+          link to files outside the collection's folder tree. If a concept
+          is documented elsewhere (e.g., in <code>seja-public/docs/</code>),
+          summarize or reproduce the relevant content in the appropriate
+          chapter rather than linking out.
+        </p>
+      </section>
+
+      <!-- Convention 8 -->
+      <section id="generated-navigation-and-print-view">
+        <h2>8. Generated Navigation and Print View</h2>
+
+        <p>
+          Each in-volume page carries a sticky per-volume table-of-contents
+          sidebar (<code>&lt;nav class="volume-toc"&gt;</code>), and every
+          volume offers a consolidated single-page "print view" at
+          <code>&lt;volume&gt;/&lt;volume&gt;-print.html</code>. Neither is
+          hand-written. Both are produced by the generator script
+          <code>_output/generated-scripts/build_doc_volume_nav.py</code>, which
+          reads the volume indexes and chapter files and injects the sidebar,
+          the layout wrapper, the navigation script tag, and the print-view
+          link into the pages that need them. Authors write only the chapter
+          skeleton (see <code>doc-guidelines.md</code> Section E, "Two Sidebar
+          Scopes"); the generator owns the rest.
+        </p>
+
+        <h3>How to Run It</h3>
+
+        <p>
+          From the repository root, run the generator with no arguments to
+          regenerate every marked region across the collection:
+        </p>
+
+        <pre><code>python _output/generated-scripts/build_doc_volume_nav.py</code></pre>
+
+        <p>
+          Two flags are available:
+        </p>
+
+        <ul>
+          <li><code>--dry-run</code> lists the pages that would change without writing anything -- use it to preview the effect before committing.</li>
+          <li><code>--root &lt;path&gt;</code> targets a different collection directory (the default is this collection's root).</li>
+        </ul>
+
+        <p>
+          The generator is <strong>idempotent</strong>: it is safe to re-run,
+          and re-running replaces the contents of the marked regions in place
+          rather than duplicating them. Running it twice in a row produces no
+          further changes.
+        </p>
+
+        <h3>When to Re-Run</h3>
+
+        <p>
+          Re-run the generator whenever the volume or chapter structure
+          changes, so the sidebars and print pages stay in sync with the
+          content:
+        </p>
+
+        <ul>
+          <li>After adding, renaming, reordering, or removing a chapter.</li>
+          <li>After changing a chapter's section headings or its <code>&lt;section id&gt;</code> values (the sidebar's nested section links and the print page's anchors are derived from these).</li>
+          <li>After editing a volume <code>index.html</code>'s <code>.chapter-list</code> (the chapter roster and ordering come from there).</li>
+        </ul>
+
+        <h3>Do Not Hand-Edit the Generated Regions</h3>
+
+        <p>
+          The generator delimits everything it owns with HTML-comment markers.
+          Do not edit the content between these markers by hand -- the next
+          generator run overwrites it:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Marker pair</th>
+              <th>Owns</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>&lt;!-- VOLUME-TOC:START --&gt;</code> / <code>END</code></td>
+              <td>The <code>&lt;nav class="volume-toc"&gt;</code> sidebar.</td>
+            </tr>
+            <tr>
+              <td><code>&lt;!-- DOC-LAYOUT:START --&gt;</code> / <code>END</code></td>
+              <td>The <code>&lt;div class="doc-layout"&gt;</code> grid wrapper around <code>&lt;main&gt;</code> and the sidebar.</td>
+            </tr>
+            <tr>
+              <td><code>&lt;!-- NAV-SCRIPT:START --&gt;</code> / <code>END</code></td>
+              <td>The <code>&lt;script src="../nav.js" defer&gt;</code> tag before <code>&lt;/body&gt;</code>.</td>
+            </tr>
+            <tr>
+              <td><code>&lt;!-- PRINT-LINK:START --&gt;</code> / <code>END</code></td>
+              <td>The "Single-page / print view" link in each volume index.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The <code>has-doc-layout</code> class on <code>&lt;body&gt;</code> is
+          likewise added by the generator (it gates the wider two-column
+          layout). Do not add or remove it by hand.
+        </p>
+
+        <h3>Which Pages Get the Sidebar</h3>
+
+        <p>
+          The generator injects the sidebar into the pages that belong to a
+          volume: the <strong>25 chapter pages</strong>, the
+          <strong>5 volume index pages</strong>, and
+          <code>reading-map.html</code> (which is Vol. 1, Ch. 3). Three
+          collection-root pages are excluded and receive no sidebar, no layout
+          wrapper, and no script tag:
+        </p>
+
+        <ul>
+          <li><code>index.html</code> (the collection landing page).</li>
+          <li><code>authoring-guide.html</code> (this page).</li>
+          <li><code>_template.html</code> (the chapter template).</li>
+        </ul>
+
+        <p>
+          Because this authoring guide is on the exclude list, the generator
+          never modifies it -- any edits here are made by hand.
+        </p>
+
+        <h3>The Consolidated Print View</h3>
+
+        <p>
+          The <code>&lt;volume&gt;/&lt;volume&gt;-print.html</code> pages are
+          per-volume, single-page views: each concatenates all of its volume's
+          in-volume chapters into one document (with a single <code>&lt;h1&gt;</code>,
+          demoted chapter headings, and namespaced section ids) for printing or
+          single-page reading. Each volume index links its print page through
+          the generated PRINT-LINK region as
+          <strong>"Single-page / print view"</strong>. The print pages are not
+          sidebar pages -- they <em>are</em> the single-page view.
+        </p>
+
+        <h3>Progressive Enhancement</h3>
+
+        <p>
+          The sidebar works fully <strong>without JavaScript</strong>: every
+          chapter and section entry is a plain <code>&lt;a href&gt;</code> that
+          navigates correctly, and the current chapter and anchored section are
+          marked with a non-color cue (font weight plus a leading marker). The
+          collection's <code>nav.js</code> is a progressive enhancement layered
+          on top: it adds scroll-spy (highlighting the section currently in
+          view) and a mobile toggle for collapsing the sidebar on narrow
+          viewports. With JavaScript disabled, the sidebar still renders and
+          navigates -- nothing depends on the script.
+        </p>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="index.html">Collection Index</a>
+      <a href="reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

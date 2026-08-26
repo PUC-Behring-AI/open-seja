@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="2">
+  <meta name="doc-chapter" content="3">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+
+  <title>Design Intent Files -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 2: The Design Layer</a></li>
+      <li>Design Intent Files</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>Design Intent Files</h1>
+
+      <p>
+        SEJA maintains a pair of parallel design files for every project: one
+        that records what the designer intends the system to be, and one that
+        records what the system actually is. This chapter explains why that
+        split exists, walks through the structure of the primary design-intent
+        file, describes the workflow for promoting items from one lifecycle
+        state to the next, and surfaces the design trade-offs behind the
+        marker system that governs these files.
+      </p>
+
+      <section id="the-as-intended-as-coded-split" data-diataxis="explanation">
+        <h2>The As-Intended / As-Coded Split</h2>
+
+        <p>
+          Every SEJA project maintains two complementary artifacts that
+          together capture the full picture of a system's design:
+        </p>
+
+        <dl>
+          <dt><code>product-design-as-intended.md</code></dt>
+          <dd>
+            The designer's vision -- what the system <em>should</em> be. This
+            file is classified as <code>Human (markers)</code>: its prose is
+            authored exclusively by the human designer. Agents may not write
+            free-form text into it. They may only apply structured lifecycle
+            markers (STATUS, INCORPORATED, DECISION_APPEND, CHANGELOG_APPEND)
+            through <code>apply_marker.py</code>, and only after explicit
+            confirmation from the designer.
+          </dd>
+
+          <dt><code>product-design-as-coded.md</code></dt>
+          <dd>
+            The implementation state -- what the system <em>actually is</em>
+            right now. This file is classified as <code>Agent</code>:
+            it is maintained automatically by post-skill and designated skill
+            steps. The designer does not hand-edit it.
+          </dd>
+        </dl>
+
+        <p>
+          The As-Intended / As-Coded Registry in
+          <code>product-design/conventions.md</code> is the single source of
+          truth for which file pairs exist in a project. It maps each
+          as-intended file and section to its as-coded counterpart:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>As-Intended file</th>
+              <th>Section</th>
+              <th>As-Coded counterpart</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>product-design-as-intended.md</code></td>
+              <td>§0--§17 design intent + Decisions + CHANGELOG</td>
+              <td><code>product-design-as-coded.md</code></td>
+            </tr>
+            <tr>
+              <td><code>product-design-as-intended.md</code></td>
+              <td>§15 designed journeys</td>
+              <td><code>product-design-as-coded.md</code> § Journey Maps</td>
+            </tr>
+            <tr>
+              <td><code>ux-research-results.md</code></td>
+              <td>all (personas, scenarios, journeys, CHANGELOG)</td>
+              <td>--</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          This split enforces Constitution principle T2: design intent is
+          human-authored; implementation state is agent-maintained. The
+          boundary is not merely a convention -- it is validated at commit
+          time by <code>check_human_markers_only.py</code>, which rejects
+          any agent prose writes to <code>Human (markers)</code> files.
+        </p>
+
+        <p>
+          The gap between what the designer intends and what the system
+          currently implements is the subject of the
+          <code>/explain drift</code> command, which compares the two files
+          and surfaces misalignments before they compound into design debt.
+        </p>
+
+        <p>
+          The reference table above covers the structure of the as-intended
+          file in detail. The following section walks through its eighteen
+          numbered sections.
+        </p>
+      </section>
+
+      <section id="structure-of-product-design-as-intended" data-diataxis="reference">
+        <h2>Structure of product-design-as-intended.md</h2>
+
+        <p>
+          The design-intent file is organized into eighteen numbered sections
+          (§0 through §17), followed by a Decisions section and a CHANGELOG.
+          Together they form the project's unified working intent -- the
+          single artifact that records what the designer wants the system to
+          be across every design dimension.
+        </p>
+
+        <h3>Section inventory</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>§</th>
+              <th>Section</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0</td>
+              <td>Planned Changes</td>
+              <td>Upcoming design changes with target version and rationale</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Platform Purpose</td>
+              <td>What the system is and why it exists</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Entity Hierarchy</td>
+              <td>Domain model: entities, relationships, ownership tree</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Domain-Specific Concepts</td>
+              <td>Terminology and concepts unique to the project's domain</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Permission Model</td>
+              <td>System-level roles and resource-level access rules</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Content Authoring and Attribution</td>
+              <td>Authoring model and marker attribution rules</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>Content Import and Export</td>
+              <td>Data portability: import formats, export mechanisms</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>User Community and Localization</td>
+              <td>i18n strategy and community features</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>User Experience Patterns (Domain-Driven)</td>
+              <td>UX patterns derived from domain needs</td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td>Administrative Domain</td>
+              <td>Admin capabilities and operational controls</td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td>Validation Constants (Domain)</td>
+              <td>Field constraints: lengths, ranges, formats</td>
+            </tr>
+            <tr>
+              <td>11</td>
+              <td>Global Metacommunication Vision</td>
+              <td>The designer's I/you message to the user (highest-authority artifact)</td>
+            </tr>
+            <tr>
+              <td>12</td>
+              <td>Extended Metacommunication Template Guiding Questions</td>
+              <td>EMT answers: who the users are, what they need, how the system helps</td>
+            </tr>
+            <tr>
+              <td>13</td>
+              <td>Solution Representations</td>
+              <td>How the system represents its solutions to the user</td>
+            </tr>
+            <tr>
+              <td>14</td>
+              <td>Per-Feature Metacommunication Intentions</td>
+              <td>Feature-level I/you statements for individual capabilities</td>
+            </tr>
+            <tr>
+              <td>15</td>
+              <td>Designed User Journeys</td>
+              <td>JM-TB-NNN designed journey maps linking personas to tasks</td>
+            </tr>
+            <tr>
+              <td>16</td>
+              <td>Conceptual Design Delta</td>
+              <td>Structural changes since the last design iteration</td>
+            </tr>
+            <tr>
+              <td>17</td>
+              <td>Delta Rationale</td>
+              <td>Why each delta was introduced</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Decisions section</h3>
+
+        <p>
+          Below the eighteen numbered sections, a <code>## Decisions</code>
+          section holds DDR-shaped (Design Decision Record) entries under
+          <code>### D-NNN: Title</code> headings. Each entry records:
+        </p>
+
+        <ul>
+          <li><strong>Context</strong> -- the situation that prompted the decision</li>
+          <li><strong>Decision</strong> -- what was decided</li>
+          <li><strong>Consequences</strong> -- downstream effects</li>
+          <li><strong>Rejected Alternatives</strong> -- what was considered and set aside</li>
+        </ul>
+
+        <p>
+          Decision IDs (<code>D-001</code>, <code>D-002</code>, ...) are
+          auto-assigned by <code>apply_marker.py --marker DECISION_APPEND</code>.
+          They use a namespace orthogonal to <code>REQ-TYPE-NNN</code>
+          requirement markers -- the two are never intermixed.
+        </p>
+
+        <h3>CHANGELOG section</h3>
+
+        <p>
+          A <code>## CHANGELOG</code> at the bottom of the file provides a
+          chronological record of marker flips and design-intent changes.
+          Entries are appended via <code>apply_marker.py --marker CHANGELOG_APPEND</code>,
+          never written by hand. The CHANGELOG serves as the audit trail for
+          when and why design-intent items changed lifecycle state.
+        </p>
+
+        <h3>File classification</h3>
+
+        <p>
+          The entire file carries the <code>Human (markers)</code>
+          classification. This means:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Prose</strong> (section content, decision rationale,
+            entity descriptions) is written exclusively by the human
+            designer.
+          </li>
+          <li>
+            <strong>Markers</strong> (STATUS comments, DECISION_APPEND
+            entries, CHANGELOG_APPEND lines) are written by the agent
+            through <code>apply_marker.py</code>, but only after the
+            designer confirms via an explicit prompt.
+          </li>
+          <li>
+            <strong>Enforcement</strong>: <code>check_human_markers_only.py</code>
+            runs during post-skill and rejects any agent prose mutations
+            that bypass the marker pathway.
+          </li>
+        </ul>
+
+        <p>
+          With the file's structure established, the next section explains
+          how design-intent items advance through their lifecycle.
+        </p>
+      </section>
+
+      <section id="the-promote-workflow" data-diataxis="how-to">
+        <h2>The Promote Workflow</h2>
+
+        <p>
+          Design-intent items move through a four-state lifecycle tracked by
+          STATUS markers. The state machine enforces a strict forward
+          progression:
+        </p>
+
+        <pre><code>proposed  →  implemented  →  established  →  superseded</code></pre>
+
+        <p>
+          Regression (moving backward, such as <code>established</code> back
+          to <code>implemented</code>) is rejected by
+          <code>apply_marker.py</code>. Each transition requires a plan ID
+          and date.
+        </p>
+
+        <p>
+          The primary promotion path -- moving items from
+          <code>implemented</code> to <code>established</code> -- uses the
+          <code>/explain drift --promote</code> command and proceeds in two
+          phases:
+        </p>
+
+        <h3>Phase 3a: Decision entry proposal</h3>
+
+        <p>
+          <code>/explain drift --promote</code> scans
+          <code>product-design-as-intended.md</code> for items marked
+          <code>STATUS: implemented</code>. For each one, it generates a
+          DDR-shaped decision entry proposal and writes it to
+          <code>_output/promote-proposals/promote-proposal-plan-&lt;id&gt;.md</code>.
+          The designer reviews the proposal, edits it to their voice, and
+          copies approved entries into the <code>## Decisions</code> section
+          of the design-intent file.
+        </p>
+
+        <h3>Phase 3b: STATUS marker flip</h3>
+
+        <p>
+          Once the decision entry is in place, the designer runs
+          <code>/explain drift --apply-markers plan-&lt;id&gt;</code>. This
+          invokes <code>apply_marker.py</code> to flip the STATUS marker
+          from <code>implemented</code> to <code>established</code>. The
+          script verifies the entry heading exists (using heading-only grep
+          to avoid matching prose) before applying the transition.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The two-phase split exists to preserve the
+            designer's voice. Phase 3a generates a <em>proposal</em> that
+            the designer edits before it enters the permanent record. Phase
+            3b is a mechanical marker flip that happens only after the
+            human-authored entry is confirmed.
+          </p>
+        </aside>
+
+        <p>
+          The rationale behind the marker types and the as-intended/as-coded
+          split is explored in the following section.
+        </p>
+      </section>
+
+      <section id="design-decisions-and-trade-offs" data-diataxis="explanation">
+        <h2>Design Decisions and Trade-offs</h2>
+
+        <h3>Why three marker types</h3>
+
+        <p>
+          SEJA's marker system uses three distinct marker types, each serving
+          a different governance purpose:
+        </p>
+
+        <dl>
+          <dt>STATUS markers</dt>
+          <dd>
+            Track the lifecycle of individual design-intent items through the
+            <code>proposed → implemented → established → superseded</code>
+            state machine. STATUS markers answer: "has this design intention
+            been realized in code, and has that realization been confirmed?"
+          </dd>
+
+          <dt>INCORPORATED markers</dt>
+          <dd>
+            Record when research findings have been absorbed into design
+            intent. An INCORPORATED stamp links a research log to the
+            design-intent section it informed, creating traceability from
+            discovery to design.
+          </dd>
+
+          <dt>DECISION_APPEND / CHANGELOG_APPEND</dt>
+          <dd>
+            Structured append operations that add new entries to the
+            Decisions or CHANGELOG sections. These are not status transitions
+            -- they are content additions that extend the design record
+            without modifying existing prose.
+          </dd>
+        </dl>
+
+        <p>
+          Each type has a specific regex-validated format, preventing
+          free-form mutations from slipping through the marker pathway.
+        </p>
+
+        <h3>Why the as-intended / as-coded split</h3>
+
+        <p>
+          The split enforces Constitution principle T2: design intent is
+          human-authored; implementation state is agent-maintained. Without
+          this boundary, two failure modes emerge:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Agent drift</strong>: if the agent can write design
+            intent, it can silently rewrite the designer's vision to match
+            what it built, eliminating the gap signal that
+            <code>/explain drift</code> relies on.
+          </li>
+          <li>
+            <strong>Stale intent</strong>: if the designer must also
+            maintain the implementation record, the as-coded file falls
+            behind, and drift detection produces false positives that erode
+            trust.
+          </li>
+        </ul>
+
+        <p>
+          The split is not duplication -- each file serves a distinct
+          audience. The as-intended file is the designer's authoritative
+          statement of what should exist. The as-coded file is the agent's
+          honest report of what does exist. The productive tension between
+          them is the engine of SEJA's governance model.
+        </p>
+
+        <h3>Why path-scoped rules</h3>
+
+        <p>
+          Rules in <code>.claude/rules/</code> are auto-loaded by Claude
+          when editing files that match the rule's scope. This means
+          governance constraints are applied contextually: a rule about
+          <code>product-design/</code> files loads when the agent touches
+          those files, but does not clutter the context window when working
+          on unrelated code. Path scoping keeps governance lightweight by
+          loading constraints only when they are relevant. For details on
+          the marker mechanics, see
+          <a href="marker-system.html">The Marker System</a>.
+        </p>
+      </section>
+
+      <section id="common-mistakes" data-diataxis="how-to">
+        <h2>Common Mistakes</h2>
+
+        <dl>
+          <dt>Hand-editing Human (markers) files</dt>
+          <dd>
+            Writing prose directly into
+            <code>product-design-as-intended.md</code> or
+            <code>ux-research-results.md</code> as an agent, instead of
+            using <code>apply_marker.py</code>. The
+            <code>check_human_markers_only.py</code> verifier catches this
+            during post-skill and rejects the mutation. The fix: always use
+            <code>apply_marker.py</code> with the appropriate
+            <code>--marker</code> type (STATUS, INCORPORATED,
+            DECISION_APPEND, or CHANGELOG_APPEND) and wait for designer
+            confirmation via the AskUserQuestion prompt.
+          </dd>
+
+          <dt>Treating as-coded as authoritative over as-intended</dt>
+          <dd>
+            Assuming that because <code>product-design-as-coded.md</code>
+            reflects the current implementation, it represents the "real"
+            design. It does not. The as-intended file is the designer's
+            authoritative vision; the as-coded file is the agent's report of
+            current state. When the two diverge, the as-intended file is
+            correct and the implementation needs to catch up -- not the other
+            way around. Use <code>/explain drift</code> to surface and
+            manage these gaps.
+          </dd>
+
+          <dt>Forgetting the Registry when adding new design files</dt>
+          <dd>
+            Creating a new as-intended or as-coded file without registering
+            it in the As-Intended / As-Coded Registry in
+            <code>product-design/conventions.md</code>. Unregistered files
+            are invisible to <code>/explain drift</code>, post-skill DONE
+            marker proposals, and <code>/design</code> template generation.
+            Always add a row to the Registry when introducing a new
+            design-intent artifact pair.
+          </dd>
+
+          <dt>Confusing STATUS markers with git status</dt>
+          <dd>
+            STATUS markers (<code>&lt;!-- STATUS: implemented | plan-000123 | 2026-07-01 --&gt;</code>)
+            track the <em>design lifecycle</em> of an item -- whether a
+            design intention has been proposed, implemented, established, or
+            superseded. They have no relation to <code>git status</code>,
+            which tracks file modifications in the working tree. A file can
+            have <code>STATUS: implemented</code> markers on all its
+            sections while showing as unmodified in <code>git status</code>,
+            and vice versa.
+          </dd>
+        </dl>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 2: The Design Layer</h2>
+    <ol>
+      <li>
+        <a href="metacommunication.html">The Metacommunication Message</a>
+      </li>
+      <li>
+        <a href="constitution-guide.html">The Constitution</a>
+      </li>
+      <li aria-current="page">
+        <a href="design-intent-files.html">Design Intent Files</a>
+        <ul>
+          <li><a href="#the-as-intended-as-coded-split">The As-Intended / As-Coded Split</a></li>
+          <li><a href="#structure-of-product-design-as-intended">Structure of product-design-as-intended.md</a></li>
+          <li><a href="#the-promote-workflow">The Promote Workflow</a></li>
+          <li><a href="#design-decisions-and-trade-offs">Design Decisions and Trade-offs</a></li>
+          <li><a href="#common-mistakes">Common Mistakes</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="marker-system.html">The Marker System</a>
+      </li>
+      <li>
+        <a href="ux-research.html">UX Research Artifacts</a>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="constitution-guide.html">Previous: The Constitution</a>
+    <a href="marker-system.html">Next: The Marker System</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="reference">
+  <meta name="doc-volume" content="1">
+  <meta name="doc-chapter" content="4">
+  <meta name="doc-phase" content="1">
+  <meta name="doc-status" content="draft">
+
+  <title>Glossary and Shared Definitions -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 1: Onboarding and Orientation</a></li>
+      <li>Glossary and Shared Definitions</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>Glossary and Shared Definitions</h1>
+
+      <p>
+        This chapter collects the terms you will encounter throughout the SEJA
+        documentation, organized into three conceptual domains: core harness
+        concepts, semiotic engineering theory, and operational lifecycle
+        vocabulary. Each entry provides a designer-facing definition and a
+        cross-reference to the chapter that covers the concept in depth.
+      </p>
+
+      <section data-diataxis="reference" id="core-terms">
+        <h2>Core Terms</h2>
+
+        <dl>
+          <dt id="term-as-intended-as-coded">As-Intended / As-Coded</dt>
+          <dd>
+            Two complementary views of a project's design state. The
+            <em>as-intended</em> view (recorded in
+            <code>product-design/product-design-as-intended.md</code>)
+            captures what the designer means the product to be: its purpose,
+            entity model, permission rules, UX patterns, and metacommunication
+            vision. The <em>as-coded</em> view (recorded in
+            <code>product-design/product-design-as-coded.md</code>) captures
+            what the codebase actually implements at any given moment. SEJA
+            treats the gap between these two views as the primary signal for
+            design drift -- when they diverge, something was lost in
+            translation. See
+            <a href="../vol2/ch3-design-intent-files.html">Design Intent Files</a>
+            (Vol. 2) and
+            <a href="../vol4/ch4-maintenance-and-drift.html">Maintenance and Drift</a>
+            (Vol. 4).
+          </dd>
+
+          <dt id="term-brief">Brief</dt>
+          <dd>
+            A short, structured summary of a completed skill invocation,
+            logged automatically by the post-skill pipeline into
+            <code>_output/briefs.md</code>. Briefs serve as the project's
+            institutional memory: they let any future skill invocation
+            understand what has already been done, what decisions were made,
+            and what questions remain open -- without requiring the agent to
+            re-read every plan and advisory. See
+            <a href="../vol3/ch1-lifecycle-pipeline.html">The Lifecycle Pipeline</a>.
+          </dd>
+
+          <dt id="term-constitution">Constitution</dt>
+          <dd>
+            A set of immutable principles that define a project's
+            non-negotiable boundaries -- values, constraints, and quality
+            commitments that no plan, skill, or agent may override. Stored in
+            <code>product-design/constitution.md</code>, the constitution is
+            loaded into every subagent's context to enforce trust boundaries.
+            It is the designer's way of saying: "These things are true about
+            my project regardless of what you are asked to build." See
+            <a href="../vol2/ch2-constitution.html">Constitution Guide</a>
+            (Vol. 2).
+          </dd>
+
+          <dt id="term-design-intent">Design Intent</dt>
+          <dd>
+            The designer's explicit statement of what a product should be and
+            why, captured before any code is written. In SEJA, design intent
+            is recorded in the as-intended file and the metacommunication
+            message, then carried forward through plans and implementation.
+            Every code change is measured against design intent to detect
+            drift. This is the central idea behind SEJA's governance: the
+            designer's vision is not implicit knowledge that fades over time
+            but an explicit artifact that can be compared against reality. See
+            <a href="ch1-what-is-seja.html">What SEJA Is (and Is Not)</a>.
+          </dd>
+
+          <dt id="term-marker">Marker</dt>
+          <dd>
+            An inline HTML comment embedded in design-intent files to track
+            the lifecycle state of individual requirements or decisions.
+            Markers follow a state machine
+            (<code>proposed -> implemented -> established -> superseded</code>)
+            and carry a plan ID and date for traceability. They are the
+            mechanism by which SEJA connects "what was designed" to "what was
+            built" at the granularity of individual items, not just whole
+            files. See
+            <a href="../vol3/ch4-plans-and-implementation.html">Plans and Implementation</a>.
+          </dd>
+
+          <dt id="term-metacommunication-message">Metacommunication Message</dt>
+          <dd>
+            The designer-to-user message that a product conveys through its
+            entire interface. Semiotic engineering summarizes it as: "Here is
+            my understanding of who you are, what I have learned you want or
+            need to do, in which preferred ways, and why. This is the system
+            that I have therefore designed for you, and this is the way you
+            can or should use it in order to fulfill a range of purposes that
+            fall within this vision." In SEJA, this message is written in
+            first-person ("I designed...") to preserve the designer's personal
+            voice and recorded in
+            <code>product-design/product-design-as-intended.md</code>. It is
+            the north star that every implementation decision should serve.
+            See
+            <a href="../vol2/ch1-metacommunication-message.html">Metacommunication</a>
+            (Vol. 2) and
+            <a href="../vol5/ch3-extended-metacommunication-template.html">Extended Metacommunication</a>
+            (Vol. 5).
+          </dd>
+
+          <dt id="term-plan">Plan</dt>
+          <dd>
+            A structured implementation blueprint generated by the
+            <code>/plan</code> skill before any code is written. Each plan
+            receives a unique numeric ID (e.g., <code>plan-000701</code>),
+            contains ordered steps with file targets and trace links to
+            design-intent requirements, and undergoes a multi-perspective
+            review before execution. Plans are the mechanism that prevents the
+            agent from jumping straight to code -- they force a design
+            checkpoint between intent and implementation. See
+            <a href="../vol3/ch4-plans-and-implementation.html">Plans and Implementation</a>.
+          </dd>
+
+          <dt id="term-roadmap">Roadmap</dt>
+          <dd>
+            A higher-level planning artifact that organizes multiple plans
+            into a sequenced development strategy. Generated by
+            <code>/plan --roadmap</code>, a roadmap defines waves (groups of
+            plans that can execute in parallel), dependencies between them,
+            and the overall trajectory from current state to a target state.
+            While a plan answers "how do I build this feature?", a roadmap
+            answers "in what order should I build everything?". See
+            <a href="../vol3/ch4-plans-and-implementation.html">Plans and Implementation</a>.
+          </dd>
+
+          <dt id="term-skill">Skill</dt>
+          <dd>
+            A governed capability within the SEJA harness, invoked via a
+            slash command (e.g., <code>/plan</code>, <code>/implement</code>,
+            <code>/critique</code>). Each skill follows a defined protocol:
+            pre-skill hooks load context and check constraints, the skill body
+            executes its task, and post-skill hooks log the result, update
+            briefs, and propose next steps. Skills are not arbitrary chat
+            commands -- they are lifecycle-aware actions that maintain the
+            project's audit trail. See
+            <a href="../vol3/ch2-skills-in-depth.html">Skills In Depth</a>.
+          </dd>
+
+          <dt id="term-subagent">Subagent</dt>
+          <dd>
+            A specialized agent delegated to by the main agent via Claude's
+            Agent tool. Subagents run in isolated context windows with focused
+            prompts tailored to a specific role (e.g., code reviewer, plan
+            reviewer, document generator). Isolation is deliberate: it
+            prevents a reviewer from being biased by the same context that
+            produced the code, and it lets SEJA parallelize independent work.
+            Subagent prompt files live in <code>.claude/agents/</code>. See
+            <a href="../vol3/ch3-subagent-delegation.html">Subagent Delegation</a>.
+          </dd>
+        </dl>
+      </section>
+
+      <section data-diataxis="reference" id="semiotic-engineering-terms">
+        <h2>Semiotic Engineering Terms</h2>
+
+        <p>
+          SEJA is grounded in semiotic engineering, a theory of
+          human-computer interaction developed by Clarisse Sieckenius de Souza.
+          The terms below are theoretical concepts from that foundation. You
+          do not need to master semiotic engineering to use SEJA effectively,
+          but understanding these terms will help you see why the harness is
+          shaped the way it is.
+        </p>
+
+        <dl>
+          <dt id="term-abduction">Abduction</dt>
+          <dd>
+            A form of reasoning that generates the best available explanation
+            for an observed phenomenon, even when that explanation is not
+            certain. Unlike deduction (which guarantees truth) or induction
+            (which generalizes from patterns), abduction produces plausible
+            hypotheses. In semiotic engineering, users engage in abduction
+            whenever they interpret an interface: they see a button, a layout,
+            an error message, and form a hypothesis about what the designer
+            intended. SEJA's council-debate agent formalizes this process by
+            having multiple expert perspectives generate competing
+            interpretations of a design decision. See
+            <a href="../vol5/ch5-abduction-and-plural-readings.html">Abduction
+            and Plural Readings</a> (Vol. 5).
+          </dd>
+
+          <dt id="term-communicability">Communicability</dt>
+          <dd>
+            The quality of a system's ability to convey its designer's
+            intent to users through the interface. A system with high
+            communicability makes it easy for users to understand what it
+            does, why it was designed that way, and how they should interact
+            with it. A system with low communicability leaves users guessing,
+            confused, or forming incorrect mental models. SEJA's review
+            perspectives and spec-drift detection are mechanisms for
+            evaluating and maintaining communicability across the development
+            lifecycle. See
+            <a href="../vol5/ch2-sign-systems-and-communicability.html">Sign Systems</a>
+            (Vol. 5).
+          </dd>
+
+          <dt id="term-dynamic-sign">Dynamic Sign</dt>
+          <dd>
+            An interface element whose meaning emerges through interaction
+            over time -- its significance is revealed by what happens when a
+            user acts on it. Examples include a button that triggers a state
+            change, a drag-and-drop interaction that reorders items, or a
+            progressive-disclosure pattern that reveals content on click.
+            Dynamic signs cannot be fully understood by looking at a static
+            screenshot; they require experiencing the interaction. Together
+            with static signs and metalinguistic signs, they form the three
+            classes of interface signs in semiotic engineering. See
+            <a href="../vol5/ch2-sign-systems-and-communicability.html">Sign Systems</a>
+            (Vol. 5).
+          </dd>
+
+          <dt id="term-metacommunication">Metacommunication</dt>
+          <dd>
+            Communication about communication. In semiotic engineering,
+            every software interface is an act of metacommunication: the
+            designer is communicating to the user (through the interface)
+            about how the user should communicate with the system. The
+            designer cannot be present at use-time, so the interface must
+            carry the full message on the designer's behalf. This is the
+            theoretical foundation for SEJA's metacommunication message and
+            the first-person phrasing rule -- they make the implicit
+            designer-to-user conversation explicit and auditable. See
+            <a href="../vol2/ch1-metacommunication-message.html">Metacommunication</a>
+            (Vol. 2) and
+            <a href="../vol5/ch1-software-as-designed-communication.html">Software
+            as Communication</a> (Vol. 5).
+          </dd>
+
+          <dt id="term-metalinguistic-sign">Metalinguistic Sign</dt>
+          <dd>
+            An interface element that explains other interface elements --
+            it is a sign about signs. Examples include tooltips, help text,
+            onboarding walkthroughs, error messages, and placeholder text in
+            form fields. Metalinguistic signs are the interface's built-in
+            explanation layer: they tell the user how to interpret the rest of
+            the interface. When metalinguistic signs are unclear or missing,
+            users must rely more heavily on abduction to figure out what the
+            designer intended. See
+            <a href="../vol5/ch2-sign-systems-and-communicability.html">Sign Systems</a>
+            (Vol. 5).
+          </dd>
+
+          <dt id="term-sign">Sign</dt>
+          <dd>
+            Anything that stands for something else to someone. In semiotic
+            engineering, every element of a software interface -- a button
+            label, a color, an animation, a menu structure -- is a sign that
+            carries meaning from the designer to the user. The designer
+            chooses signs to express intent; the user interprets those signs
+            to form an understanding. When the user's interpretation matches
+            the designer's intent, communication succeeds. When it does not,
+            there is a communicability breakdown. See
+            <a href="../vol5/ch2-sign-systems-and-communicability.html">Sign Systems</a>
+            (Vol. 5).
+          </dd>
+
+          <dt id="term-sign-system">Sign System</dt>
+          <dd>
+            The organized collection of signs and the rules governing their
+            combination within a software interface. A sign system is not a
+            random assortment of interface elements but a structured language:
+            it has a vocabulary (the individual signs), a grammar (the rules
+            for combining them), and conventions (the patterns users learn to
+            expect). In SEJA, the project's conventions file
+            (<code>product-design/conventions.md</code>) and design standards
+            collectively define the sign system that the product's interface
+            should express. See
+            <a href="../vol5/ch2-sign-systems-and-communicability.html">Sign Systems</a>
+            (Vol. 5).
+          </dd>
+
+          <dt id="term-static-sign">Static Sign</dt>
+          <dd>
+            An interface element whose meaning can be understood from its
+            appearance alone, without any interaction. Examples include
+            labels, icons, colors, layout structure, and typography choices.
+            A user can look at a static sign in a screenshot and derive its
+            intended meaning. Static signs form the "first impression" layer
+            of an interface's communicability. See
+            <a href="../vol5/ch2-sign-systems-and-communicability.html">Sign Systems</a>
+            (Vol. 5).
+          </dd>
+        </dl>
+      </section>
+
+      <section data-diataxis="reference" id="lifecycle-terms">
+        <h2>Lifecycle Terms</h2>
+
+        <p>
+          These terms describe the operational mechanisms that SEJA uses to
+          govern the agent's behavior across skill invocations and project
+          evolution.
+        </p>
+
+        <dl>
+          <dt id="term-checkpoint">Checkpoint</dt>
+          <dd>
+            A quality gate within the lifecycle that requires explicit
+            verification before proceeding. Checkpoints appear at plan
+            review (where a multi-perspective review must pass before
+            implementation begins), at implementation completion (where a
+            quality gate validates the changes), and at promotion time (where
+            a human confirms that an implemented item matches its design
+            intent). Checkpoints are the points where SEJA slows the agent
+            down deliberately, preventing it from racing ahead without
+            verification. See
+            <a href="../vol3/ch5-quality-and-critique.html">Quality and Critique</a>.
+          </dd>
+
+          <dt id="term-council-debate">Council Debate</dt>
+          <dd>
+            A structured deliberation process in which multiple expert
+            perspectives evaluate a high-stakes design decision. Five fixed
+            archetypes (plus up to two brief-specific experts) stake out
+            positions, cross-examine each other, and surface trade-offs that
+            a single viewpoint would miss. The council-debate agent
+            formalizes the abductive reasoning that semiotic engineering
+            describes: rather than accepting one interpretation, it generates
+            competing hypotheses and lets the designer choose. See
+            <a href="../vol3/ch3-subagent-delegation.html">Subagent
+            Delegation</a> (Vol. 3) and
+            <a href="../vol5/ch5-abduction-and-plural-readings.html">Abduction
+            and Plural Readings</a> (Vol. 5).
+          </dd>
+
+          <dt id="term-drift">Drift</dt>
+          <dd>
+            The divergence between design intent (as-intended) and actual
+            implementation (as-coded). Drift is natural and inevitable --
+            implementation always reveals things the design did not anticipate.
+            What matters is detecting drift and deciding whether to update the
+            intent, fix the code, or accept the deviation. SEJA's
+            <code>/explain drift</code> command compares the as-intended and
+            as-coded files to surface these gaps systematically. Undetected
+            drift is how projects lose coherence over time. See
+            <a href="../vol4/ch4-maintenance-and-drift.html">Maintenance
+            and Drift</a> (Vol. 4).
+          </dd>
+
+          <dt id="term-human-markers-classification">Human (markers) Classification</dt>
+          <dd>
+            A file-maintainer classification indicating that a file is
+            human-authored prose where the agent may only write fixed-format
+            structured markers (STATUS flags, INCORPORATED stamps, CHANGELOG
+            lines) -- never modify prose or free-text content. This
+            classification protects the designer's voice: the agent can
+            record that a section has been implemented, but it cannot
+            rewrite what the designer said. Write access is enforced through
+            <code>apply_marker.py</code> and validated by
+            <code>check_human_markers_only.py</code>. See
+            <a href="../vol2/ch4-marker-system.html">Marker System</a>
+            (Vol. 2) and
+            <a href="../vol4/ch2-enforcement-architecture.html">Enforcement
+            Architecture</a> (Vol. 4).
+          </dd>
+
+          <dt id="term-pending-action">Pending Action</dt>
+          <dd>
+            An outstanding item that requires human attention, tracked in the
+            pending-actions ledger (<code>_output/pending.jsonl</code>). Pending
+            actions are filed automatically by the lifecycle (e.g., when a
+            plan completes, an <code>implement</code> action is filed; when
+            a plan changes at least five files, a <code>verify-as-coded</code>
+            action is filed) and addressed through the <code>/pending</code>
+            skill. They are SEJA's mechanism for ensuring that nothing falls
+            through the cracks between skill invocations. See
+            <a href="../vol3/ch1-lifecycle-pipeline.html">The Lifecycle Pipeline</a>.
+          </dd>
+
+          <dt id="term-post-skill">Post-Skill</dt>
+          <dd>
+            The lifecycle hook that executes after every skill invocation. It
+            logs a brief summarizing what was done, updates the briefs index,
+            proposes marker flips for implemented items, runs periodic
+            housekeeping checks, and suggests the next logical step in the
+            lifecycle. Post-skill is how SEJA maintains institutional memory
+            -- without it, each skill invocation would be an isolated event
+            with no connection to what came before. See
+            <a href="../vol3/ch1-lifecycle-pipeline.html">The Lifecycle Pipeline</a>.
+          </dd>
+
+          <dt id="term-pre-skill">Pre-Skill</dt>
+          <dd>
+            The lifecycle hook that executes before every skill invocation.
+            It runs as a pipeline of composable stages: loading the project
+            constitution, evaluating context budget, checking for pending
+            actions, loading relevant references, and logging the brief.
+            Pre-skill ensures that every skill starts with the right context
+            loaded and the right constraints enforced, regardless of what the
+            agent's context window currently contains. See
+            <a href="../vol3/ch1-lifecycle-pipeline.html">The Lifecycle Pipeline</a>.
+          </dd>
+
+          <dt id="term-reflection-register">Reflection Register</dt>
+          <dd>
+            A structured record of a designer's reflections on completed
+            work, captured by the <code>/reflect</code> skill. Reflections
+            can focus on the product (what was built and whether it matches
+            intent) or on practice (how the work process went and what could
+            improve). The register preserves the designer's own words
+            verbatim, anchored to specific plans or artifacts, creating a
+            qualitative history that complements the quantitative audit trail
+            of briefs and markers. See
+            <a href="../vol5/ch4-reflective-practice.html">Reflective
+            Practice</a> (Vol. 5).
+          </dd>
+        </dl>
+      </section>
+    </article>
+  </main>
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="ch3-reading-map.html">Previous: Reading Map</a>
+    <span></span>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

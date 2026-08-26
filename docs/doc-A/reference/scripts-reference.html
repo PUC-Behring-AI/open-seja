@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="reference">
+  <meta name="doc-volume" content="Reference">
+  <meta name="doc-chapter" content="Scripts Reference">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>Scripts Reference -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="../how-to/index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Reference</a></li>
+      <li>Scripts Reference</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-reference">
+    <article>
+      <p class="vol-accent"><strong>reference</strong></p>
+
+      <h1>Scripts Reference</h1>
+
+      <!-- ============================================================ -->
+      <!-- Overview                                                      -->
+      <!-- ============================================================ -->
+
+      <section id="overview">
+        <h2>Overview</h2>
+        <p>
+          The SEJA harness includes 93 Python scripts distributed across
+          <code>.claude/skills/scripts/</code> (shared utilities) and
+          co-located skill subdirectories (skill-owned scripts that live
+          next to their <code>SKILL.md</code>). Scripts are organized into
+          six functional categories: validation, generation,
+          lifecycle/markers, utility, conversion, and migration/setup.
+        </p>
+        <p>
+          All scripts use Python 3 and follow the conventions in
+          <code>.claude/references/general/coding-standards.md</code> and
+          <code>.claude/references/general/script-header-convention.md</code>.
+          Scripts that serve as CLI entry points declare their interface via
+          <code>argparse</code> and follow a standard exit-code convention:
+          <strong>0</strong> = success/pass, <strong>1</strong> =
+          failures/violations found, <strong>2</strong> = script error.
+        </p>
+
+        <h3>Script Locations</h3>
+        <dl>
+          <dt><code>.claude/skills/scripts/</code></dt>
+          <dd>Shared utility scripts available to all skills and hooks.</dd>
+
+          <dt><code>.claude/skills/scripts/priv/</code></dt>
+          <dd>Private-only scripts that are never synced to the public repository.</dd>
+
+          <dt><code>.claude/skills/&lt;skill-name&gt;/</code></dt>
+          <dd>Skill-owned scripts co-located with their parent skill's <code>SKILL.md</code>.</dd>
+        </dl>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Validation Scripts                                            -->
+      <!-- ============================================================ -->
+
+      <section id="validation-scripts">
+        <h2>Validation Scripts</h2>
+        <p>
+          Scripts that check, verify, or validate harness state, code quality,
+          or configuration consistency. Many are wired into
+          <code>run_preflight_fast.py</code> (pre-commit hook) or
+          <code>run_all_checks.py</code> (CI orchestrator).
+        </p>
+
+        <h3 id="validation-orchestrators">Orchestrators</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Script</th>
+                <th>Purpose</th>
+                <th>CLI Interface</th>
+                <th>Exit Codes</th>
+                <th>Invoked By</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>run_all_checks.py</code></td>
+                <td>CI-independent validation orchestrator. Discovers and runs all <code>check_*.py</code> scripts with unified exit codes and optional JUnit XML output.</td>
+                <td><code>python run_all_checks.py --root . [--junit results.xml] [--filter flask] [--verbose]</code></td>
+                <td>0 = all pass, 1 = failures, 2 = orchestrator error</td>
+                <td>CI pipelines, manual</td>
+              </tr>
+              <tr>
+                <td><code>run_preflight_fast.py</code></td>
+                <td>Fast preflight checks (&lt;10 seconds). Curated subset of fast validation scripts for git hooks and CI.</td>
+                <td><code>python run_preflight_fast.py [--ci] [--verbose]</code></td>
+                <td>0 = all pass, 1 = failures, 2 = script error</td>
+                <td>Pre-commit hook, post-skill step 6b, GitHub Actions</td>
+              </tr>
+              <tr>
+                <td><code>run_all_tests.py</code></td>
+                <td>Run backend (pytest), frontend (vitest), and e2e (Playwright) test suites. Saves ANSI-free transcripts.</td>
+                <td><code>python run_all_tests.py [--backend-only] [--frontend-only] [--e2e-only] [--out-dir DIR]</code></td>
+                <td>0 = all pass, 1 = failures</td>
+                <td>Manual, CI</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="validation-shared">Shared Validation Scripts</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Script</th>
+                <th>Purpose</th>
+                <th>CLI Interface</th>
+                <th>Exit Codes</th>
+                <th>Invoked By</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>check_conventions.py</code></td>
+                <td>Validate that every <code>${VARIABLE_NAME}</code> reference in SKILL.md and reference files is defined in <code>conventions.md</code>.</td>
+                <td><code>[--verbose]</code></td>
+                <td>0 = pass, 1 = errors found</td>
+                <td><code>run_preflight_fast.py</code>, <code>run_all_checks.py</code></td>
+              </tr>
+              <tr>
+                <td><code>check_design_output.py</code></td>
+                <td>Scan design output files for unsubstituted placeholders, phrasing violations, cross-file inconsistencies, and missing fields.</td>
+                <td><code>[--root DIR] [--verbose] [--plugins LIST] [--filter SEVERITY]</code></td>
+                <td>0 = no issues, 1 = issues found, 2 = script error</td>
+                <td><code>run_preflight_fast.py</code>, <code>run_all_checks.py</code></td>
+              </tr>
+              <tr>
+                <td><code>check_harness_drift.py</code></td>
+                <td>Compare a canonical harness source against a target workspace. Report drift and optionally generate or apply remediation plans.</td>
+                <td><code>--source &lt;path&gt; [--target &lt;path&gt;] [--json] [--plan-output &lt;path&gt;]</code> or <code>--apply &lt;plan&gt; --source &lt;path&gt;</code></td>
+                <td>0 = no drift, 1 = drift found, 2 = error</td>
+                <td><code>/critique health --source</code></td>
+              </tr>
+              <tr>
+                <td><code>check_human_markers_only.py</code></td>
+                <td>Verify that diffs to Human (markers) files contain only allowed marker mutations (STATUS, ESTABLISHED, INCORPORATED, CHANGELOG_APPEND, DECISION_APPEND). No prose changes permitted.</td>
+                <td><code>--staged</code> or <code>--range HEAD~1..HEAD</code></td>
+                <td>0 = pass, 1 = violation, 2 = runtime error</td>
+                <td><code>run_preflight_fast.py</code>, post-skill step 6c</td>
+              </tr>
+              <tr>
+                <td><code>check_retired_tokens.py</code></td>
+                <td>Guard against retired tokens (renamed/removed variable names) lingering in live harness files.</td>
+                <td><code>[--verbose]</code></td>
+                <td>0 = no retired token found, 1 = one or more hits</td>
+                <td><code>run_preflight_fast.py</code></td>
+              </tr>
+              <tr>
+                <td><code>check_skill_spec.py</code></td>
+                <td>Validate SKILL.md files against the agentskills.io universal spec (name shape, description length, metadata shape).</td>
+                <td><code>[--verbose]</code></td>
+                <td>0 = pass, 1 = failures found, 2 = script error</td>
+                <td><code>run_preflight_fast.py</code></td>
+              </tr>
+              <tr>
+                <td><code>check_skill_system.py</code></td>
+                <td>Validate <code>.claude</code> skill system integrity: frontmatter, references, dependencies, cycles, and agent linkage.</td>
+                <td><code>[--verbose] [--self-test]</code></td>
+                <td>0 = pass, 1 = failures found, 2 = script error</td>
+                <td><code>run_preflight_fast.py</code>, <code>run_all_checks.py</code></td>
+              </tr>
+              <tr>
+                <td><code>check_telemetry.py</code></td>
+                <td>Validate <code>telemetry.jsonl</code> schema and field constraints (required fields, types, enum values).</td>
+                <td><code>[--verbose]</code></td>
+                <td>0 = all valid, 1 = errors found</td>
+                <td><code>run_all_checks.py</code></td>
+              </tr>
+              <tr>
+                <td><code>check_unused_files.py</code></td>
+                <td>Detect orphaned source files not imported or referenced anywhere.</td>
+                <td><code>[backend|frontend] [--verbose]</code></td>
+                <td>0 = no orphans, 1 = orphans found</td>
+                <td>Manual</td>
+              </tr>
+              <tr>
+                <td><code>check_version_changelog_sync.py</code></td>
+                <td>Verify <code>.claude/skills/VERSION</code> matches the latest <code>## [x.y.z]</code> heading in <code>.claude/CHANGELOG.md</code>.</td>
+                <td>(no arguments)</td>
+                <td>0 = in sync, 1 = mismatch, 2 = script error</td>
+                <td><code>run_preflight_fast.py</code></td>
+              </tr>
+              <tr>
+                <td><code>check_vuln_patterns.py</code></td>
+                <td>Scan files for generated-code vulnerability patterns from the SEJA threat model (shell injection, unsafe deserialization, etc.). <strong>Critical check.</strong></td>
+                <td><code>--path src/</code> or <code>--files app.py routes.js</code> or <code>--diff</code> or <code>--json</code></td>
+                <td>0 = no findings, 1 = findings found, 2 = script error</td>
+                <td><code>run_preflight_fast.py</code></td>
+              </tr>
+              <tr>
+                <td><code>check_worktree_health.py</code></td>
+                <td>Detect orphaned git worktrees from parallel wave execution.</td>
+                <td>(no arguments)</td>
+                <td>0 = clean, 1 = orphaned worktrees found</td>
+                <td><code>/critique health</code></td>
+              </tr>
+              <tr>
+                <td><code>verify_commit_scope.py</code></td>
+                <td>Check staged git files against expected post-skill patterns for a given skill type and artifact. Outputs JSON with <code>expected</code>, <code>staged</code>, <code>unexpected</code>, <code>missing</code>, and <code>pass</code> keys.</td>
+                <td><code>--skill-type &lt;type&gt; --artifact-id &lt;id&gt; [--plan-id &lt;id&gt;] [--always-include &lt;paths&gt;] [--roadmap-id &lt;id&gt;]</code></td>
+                <td>0 = pass (no unexpected), 1 = unexpected files, 2 = script error</td>
+                <td>Post-skill step 6</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="validation-skill-owned">Skill-Owned Validation Scripts</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Script</th>
+                <th>Location</th>
+                <th>Purpose</th>
+                <th>CLI Interface</th>
+                <th>Exit Codes</th>
+                <th>Invoked By</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>check_docs.py</code></td>
+                <td><code>critique/</code></td>
+                <td>Plugin-based documentation consistency checker with 14 scanners: harness-integrity, path-liveness, env-vars, command-refs, terminology, structural-completeness, harness-reference-coverage, lifecycle-fact-uniqueness, docs-frontmatter, internal-reference-leakage, skill-body-length, quickguide-pointer-compliance, mantra-banner-consistency, script-citation-drift.</td>
+                <td><code>[--root DIR] [--verbose] [--plugins LIST] [--filter SEVERITY]</code></td>
+                <td>0 = no issues, 1 = issues found, 2 = script error</td>
+                <td><code>run_preflight_fast.py</code> (select plugins), <code>run_all_checks.py</code></td>
+              </tr>
+              <tr>
+                <td><code>check_git_freshness.py</code></td>
+                <td><code>critique/</code></td>
+                <td>Compare local branches against upstreams for relevant repos. Reports ahead/behind counts. Never pulls.</td>
+                <td><code>[--json] [--repos C:/repo1,C:/repo2]</code></td>
+                <td>0 always (advisory only)</td>
+                <td><code>/critique freshness</code>, periodic trigger</td>
+              </tr>
+              <tr>
+                <td><code>check_spec_conformance.py</code></td>
+                <td><code>critique/</code></td>
+                <td>Validate codebase against structured <code>spec-checks.yaml</code> (file_exists, grep_match, grep_absent, model_field, route_exists).</td>
+                <td><code>[--root /path] [--verbose]</code></td>
+                <td>0 = all pass, 1 = errors found</td>
+                <td><code>/critique validate</code></td>
+              </tr>
+              <tr>
+                <td><code>check_plan_coverage.py</code></td>
+                <td><code>design/</code></td>
+                <td>Plan coverage verification against design-intent requirement IDs (<code>REQ-TYPE-NNN</code>).</td>
+                <td><code>[--root DIR] [--verbose] [--filter SEVERITY] [--mode advisory|blocking]</code></td>
+                <td>0 = full coverage, 1 = gaps found, 2 = script error</td>
+                <td><code>run_preflight_fast.py</code> (blocking mode)</td>
+              </tr>
+              <tr>
+                <td><code>check_secrets.py</code></td>
+                <td><code>design/</code></td>
+                <td>Scan staged or all tracked files for accidentally committed secrets (API keys, passwords, tokens, AWS credentials). <strong>Critical check.</strong></td>
+                <td><code>[--all] [--verbose] [--self-test]</code></td>
+                <td>0 = no secrets, 1 = potential secrets, 2 = script error</td>
+                <td><code>run_preflight_fast.py</code></td>
+              </tr>
+              <tr>
+                <td><code>check_changelog_append_only.py</code></td>
+                <td><code>explain/</code></td>
+                <td>Enforce append-only discipline on designated sections of Human (markers) files.</td>
+                <td><code>--staged</code> or <code>--range HEAD~1..HEAD</code></td>
+                <td>0 = pass, 1 = violation</td>
+                <td><code>run_preflight_fast.py</code></td>
+              </tr>
+              <tr>
+                <td><code>check_section_boundary_writes.py</code></td>
+                <td><code>post-skill/</code></td>
+                <td>Reject contiguous write regions that cross an H2 section boundary in registered as-coded files.</td>
+                <td><code>--staged</code> or <code>--range</code> or <code>--diff-from-file</code></td>
+                <td>0 = pass, 1 = violation</td>
+                <td><code>run_preflight_fast.py</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="validation-project">Project-Specific Check Plugins</h3>
+        <p>
+          Template check scripts for downstream projects. Each declares a
+          <code>CHECK_PLUGIN_MANIFEST</code> with name, scope, stack, and
+          critical flag. Only active when the project's stack matches.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Script</th>
+                <th>Stack</th>
+                <th>Scope</th>
+                <th>Critical</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>check_api_auth_decorators.py</code></td>
+                <td>Flask</td>
+                <td>auth</td>
+                <td>Yes</td>
+                <td>Verify API endpoint auth coverage (<code>@jwt_required</code>, <code>@admin_required</code>).</td>
+              </tr>
+              <tr>
+                <td><code>check_api_contract_sync.py</code></td>
+                <td>Flask + React</td>
+                <td>api</td>
+                <td>Yes</td>
+                <td>Compare backend Marshmallow schemas with frontend TypeScript interfaces.</td>
+              </tr>
+              <tr>
+                <td><code>check_backend_test_coverage.py</code></td>
+                <td>Flask</td>
+                <td>coverage</td>
+                <td>No</td>
+                <td>Analyse backend test coverage with pytest-cov, per-module breakdown.</td>
+              </tr>
+              <tr>
+                <td><code>check_frontend_test_coverage.py</code></td>
+                <td>React</td>
+                <td>coverage</td>
+                <td>No</td>
+                <td>Analyse frontend test coverage with vitest v8 coverage.</td>
+              </tr>
+              <tr>
+                <td><code>check_i18n_keys.py</code></td>
+                <td>Flask + React</td>
+                <td>i18n</td>
+                <td>No</td>
+                <td>Detect undefined/mismatched i18n keys (react-i18next + Flask-Babel).</td>
+              </tr>
+              <tr>
+                <td><code>check_migration_chain.py</code></td>
+                <td>Flask</td>
+                <td>database</td>
+                <td>Yes</td>
+                <td>Validate Alembic migration revision chain (multiple heads, orphans, cycles).</td>
+              </tr>
+              <tr>
+                <td><code>check_po_parity.py</code></td>
+                <td>Flask</td>
+                <td>i18n</td>
+                <td>No</td>
+                <td>Verify Flask-Babel <code>.po</code> catalog parity between locales.</td>
+              </tr>
+              <tr>
+                <td><code>check_route_coverage.py</code></td>
+                <td>Flask + React</td>
+                <td>api</td>
+                <td>No</td>
+                <td>Detect frontend/backend API drift (routes on one side missing on the other).</td>
+              </tr>
+              <tr>
+                <td><code>check_validation_constants_sync.py</code></td>
+                <td>Flask + React</td>
+                <td>validation</td>
+                <td>Yes</td>
+                <td>Detect drift between backend Python and frontend TypeScript validation constants.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Generation Scripts                                            -->
+      <!-- ============================================================ -->
+
+      <section id="generation-scripts">
+        <h2>Generation Scripts</h2>
+        <p>
+          Scripts that produce derived artifacts: indexes, manifests,
+          reference documentation, topology visualizations, and reports.
+        </p>
+
+        <h3 id="generation-shared">Shared and Post-Skill Generators</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Script</th>
+                <th>Purpose</th>
+                <th>CLI Interface</th>
+                <th>Exit Codes</th>
+                <th>Invoked By</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>generate_briefs_index.py</code></td>
+                <td>Generate a lightweight briefs index (one-line summaries per entry, newest first) for fast pre-skill scanning.</td>
+                <td><code>[--verbose]</code></td>
+                <td>0 = success</td>
+                <td>Post-skill step 7a</td>
+              </tr>
+              <tr>
+                <td><code>generate_macro_index.py</code></td>
+                <td>Unified artifact index generator. Scans all <code>.md</code> files in <code>OUTPUT_DIR</code> and generates <code>INDEX.md</code> with a chronological table.</td>
+                <td><code>[--verbose] [--finalize &lt;id&gt; --status DONE]</code></td>
+                <td>0 = success</td>
+                <td>Post-skill step 7b</td>
+              </tr>
+              <tr>
+                <td><code>generate_cheatsheet.py</code></td>
+                <td>Generate <code>.claude/CHEATSHEET.md</code> -- a skill quick reference from SKILL.md frontmatter.</td>
+                <td>(no arguments)</td>
+                <td>0 = success, 1 = no skills found, 2 = script error</td>
+                <td>Manual</td>
+              </tr>
+              <tr>
+                <td><code>generate_essential_perspectives_summary.py</code></td>
+                <td>Extract Essential (P0) questions from all 16 review perspective files into a single summary file.</td>
+                <td><code>[--output PATH]</code></td>
+                <td>0 = success, 1 = partial, 2 = script error</td>
+                <td>Manual</td>
+              </tr>
+              <tr>
+                <td><code>generate_pending_roadmap.py</code></td>
+                <td>Generate a roadmap from pending implement entries with file overlap analysis and wave assignment.</td>
+                <td><code>--roadmap-id &lt;id&gt; [--output-dir /custom/path]</code></td>
+                <td>0 = success</td>
+                <td><code>/implement --pending</code></td>
+              </tr>
+              <tr>
+                <td><code>generate_skill_graph.py</code></td>
+                <td>Parse <code>skill-graph.md</code> tables into <code>skill-graph.json</code> for post-skill hand-off lookup.</td>
+                <td><code>[--check] [--verbose]</code></td>
+                <td>0 = fresh, 1 = stale (with <code>--check</code>)</td>
+                <td>Manual, preflight</td>
+              </tr>
+              <tr>
+                <td><code>generate_skills_manifest.py</code></td>
+                <td>Generate L1 metadata manifest JSON from SKILL.md frontmatter for fast skill scanning.</td>
+                <td><code>[--check] [--verbose]</code></td>
+                <td>0 = fresh, 1 = stale (with <code>--check</code>)</td>
+                <td><code>run_preflight_fast.py</code> (<code>--check</code> mode)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="generation-skill-owned">Skill-Owned Generators</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Script</th>
+                <th>Location</th>
+                <th>Purpose</th>
+                <th>CLI Interface</th>
+                <th>Invoked By</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>generate_decision_digest.py</code></td>
+                <td><code>post-skill/</code></td>
+                <td>Generate machine-readable decision digest JSONL from D-NNN entries and advisory recommendations.</td>
+                <td><code>[--verbose]</code></td>
+                <td>Post-skill step 7d (conditional)</td>
+              </tr>
+              <tr>
+                <td><code>generate_telemetry_report.py</code></td>
+                <td><code>critique/</code></td>
+                <td>Aggregate <code>telemetry.jsonl</code> into a Markdown report (frequency, duration, outcomes, trends).</td>
+                <td>(invoked by skill)</td>
+                <td><code>/critique telemetry</code></td>
+              </tr>
+              <tr>
+                <td><code>generate_reflection_report.py</code></td>
+                <td><code>reflect/</code></td>
+                <td>Orchestrator for <code>/reflect</code> -- runs 5 reflection primitives and composes a non-prescriptive Markdown report.</td>
+                <td>(invoked by skill)</td>
+                <td><code>/reflect</code></td>
+              </tr>
+              <tr>
+                <td><code>generate_skill_map.py</code></td>
+                <td><code>help/</code></td>
+                <td>Generate a Mermaid flowchart from <code>skill-graph.md</code> (optionally SVG via <code>mmdc</code>).</td>
+                <td><code>[--svg]</code></td>
+                <td><code>/help --browse</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="generation-priv">Private-Only Generators</h3>
+        <p>
+          Located in <code>.claude/skills/scripts/priv/</code>. These scripts
+          are never synced to the public repository.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Script</th>
+                <th>Purpose</th>
+                <th>CLI Interface</th>
+                <th>Exit Codes</th>
+                <th>Invoked By</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>generate_call_graph.py</code></td>
+                <td>Extract harness invocation/delegation topology. Emits <code>call-graph.json</code>, Mermaid Markdown, and interactive Cytoscape.js HTML viewer with filter-by-type, three layouts, manual drag, and SVG/PNG export.</td>
+                <td><code>[--verbose] [--fixed-date ISO] [--check]</code></td>
+                <td>0 = success, 1 = validation failure, 2 = script error</td>
+                <td>Manual, preflight (<code>--check</code>)</td>
+              </tr>
+              <tr>
+                <td><code>generate_spo.py</code></td>
+                <td>Generate Structured Product Overview HTML from <code>product-overview.yaml</code> (project mode, default) or <code>call-graph.json</code> (harness mode: <code>--harness</code>). Supports drift overlay, gap-detection badges, compact/full toggle.</td>
+                <td><code>[--project] [--harness] [--check] [--drift] [--output PATH] [--strip-internal]</code></td>
+                <td>0 = success, 1 = stale (<code>--check</code>)</td>
+                <td><code>/document --type spo</code></td>
+              </tr>
+              <tr>
+                <td><code>generate_changelog_data.py</code></td>
+                <td>Extract structured change data from git history for harness changelog generation.</td>
+                <td><code>[--verbose] [--changelog-path PATH]</code></td>
+                <td>0 = success</td>
+                <td><code>/document --type changelog --harness</code></td>
+              </tr>
+              <tr>
+                <td><code>generate_harness_reference.py</code></td>
+                <td>Generate the SEJA harness reference Markdown (categorized table of all artifacts + user-facing surface view).</td>
+                <td><code>--public-docs-root &lt;path&gt; [--output PATH] [--check] [--verbose]</code></td>
+                <td>0 = success, 1 = drift (<code>--check</code>), 2 = error</td>
+                <td>Manual, preflight</td>
+              </tr>
+              <tr>
+                <td><code>generate_skills_reference.py</code></td>
+                <td>Generate public-facing SEJA skills catalog Markdown grouped by category.</td>
+                <td><code>[--output PATH] [--check] [--verbose]</code></td>
+                <td>0 = success, 1 = drift, 2 = error</td>
+                <td>Manual, preflight</td>
+              </tr>
+              <tr>
+                <td><code>generate_perspectives_reference.py</code></td>
+                <td>Generate the review-perspectives catalog Markdown (alphabetized table).</td>
+                <td><code>[--output PATH] [--check] [--verbose]</code></td>
+                <td>0 = success, 1 = drift, 2 = error</td>
+                <td>Manual, preflight</td>
+              </tr>
+              <tr>
+                <td><code>scan_public_docs_for_filenames.py</code></td>
+                <td>Map harness files to public-docs mentions (JSON output for <code>generate_harness_reference.py</code>).</td>
+                <td><code>[--public-docs-root PATH] [--format json|text] [--verbose]</code></td>
+                <td>0 = success, 2 = error</td>
+                <td><code>generate_harness_reference.py</code></td>
+              </tr>
+              <tr>
+                <td><code>check_no_private_leaks.py</code></td>
+                <td>Verify no private content leaks to public (priv-only markers, files, fingerprints).</td>
+                <td><code>[--candidate DIR] [--files PATH...] [--staged]</code></td>
+                <td>0 = clean, 1 = leaks found</td>
+                <td>Pre-commit hook, <code>/publish</code></td>
+              </tr>
+              <tr>
+                <td><code>bump_version.py</code></td>
+                <td>Update all SEJA version files atomically (<code>VERSION</code>, <code>.seja-version</code>, validate <code>CHANGELOG</code>).</td>
+                <td><code>--version &lt;semver&gt; [--dry-run]</code></td>
+                <td>0 = success</td>
+                <td>Manual (release prep)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="generation-reflect">Reflection Primitives</h3>
+        <p>
+          Individual pattern-extraction scripts invoked by
+          <code>generate_reflection_report.py</code>. Located in
+          <code>.claude/skills/reflect/</code>.
+        </p>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Script</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>reflect_sequence_mining.py</code></td>
+                <td>Mine common skill invocation sequences from telemetry data.</td>
+              </tr>
+              <tr>
+                <td><code>reflect_duration_anomalies.py</code></td>
+                <td>Detect unusually long or short skill durations.</td>
+              </tr>
+              <tr>
+                <td><code>reflect_revision_rate.py</code></td>
+                <td>Measure plan revision frequency and patterns.</td>
+              </tr>
+              <tr>
+                <td><code>reflect_stuck_loops.py</code></td>
+                <td>Detect repeated skill invocation loops (implement-critique cycles).</td>
+              </tr>
+              <tr>
+                <td><code>reflect_decision_reversals.py</code></td>
+                <td>Identify reversed or superseded design decisions.</td>
+              </tr>
+              <tr>
+                <td><code>reflect_colors.py</code></td>
+                <td>Shared color palette for reflection visualizations.</td>
+              </tr>
+              <tr>
+                <td><code>reflect_event_matrix.py</code></td>
+                <td>Vega-Lite event matrix visualization for <code>/reflect --deep</code>.</td>
+              </tr>
+              <tr>
+                <td><code>reflect_transition_graph.py</code></td>
+                <td>Cytoscape.js transition graph for <code>/reflect --deep</code>.</td>
+              </tr>
+              <tr>
+                <td><code>reflect_deep_scope.py</code></td>
+                <td>Scope resolution for <code>/reflect --deep</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Lifecycle and Marker Scripts                                  -->
+      <!-- ============================================================ -->
+
+      <section id="lifecycle-scripts">
+        <h2>Lifecycle and Marker Scripts</h2>
+        <p>
+          Scripts that manage the SEJA lifecycle: brief logging, marker
+          application, pending actions, conversation tracing, and
+          cross-reference maintenance.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Script</th>
+                <th>Purpose</th>
+                <th>CLI Interface</th>
+                <th>Exit Codes</th>
+                <th>Invoked By</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>apply_marker.py</code></td>
+                <td>Sole write path for Human (markers) files. Applies lifecycle markers after <code>AskUserQuestion</code> confirmation. Supported marker types: <code>STATUS</code>, <code>ESTABLISHED</code>, <code>INCORPORATED</code>, <code>CHANGELOG_APPEND</code>, <code>DECISION_APPEND</code>.</td>
+                <td><code>--file &lt;path&gt; --id &lt;entry-id&gt; --marker &lt;kind&gt; --value &lt;value&gt; [--plan &lt;plan-id&gt;] [--date YYYY-MM-DD] [--note &lt;text&gt;] [--dry-run]</code></td>
+                <td>0 = success, 1 = validation failure, 2 = runtime error</td>
+                <td><code>/explain drift --apply-markers</code>, post-skill step 2e</td>
+              </tr>
+              <tr>
+                <td><code>mark_brief_done.py</code></td>
+                <td>Mark a <code>STARTED</code> brief entry as <code>DONE</code> in <code>briefs.md</code>.</td>
+                <td><code>--brief-pattern &lt;text&gt; --done-time "YYYY-MM-DD HH:MM UTC" [--plan-id &lt;id&gt;]</code></td>
+                <td>0 = success, 1 = no matching entry</td>
+                <td>Post-skill step 1</td>
+              </tr>
+              <tr>
+                <td><code>brief_state.py</code></td>
+                <td>Persist and retrieve brief text between pre-skill and post-skill. Pre-skill saves the exact brief text to a session-scoped state file; post-skill loads it for <code>mark_brief_done.py</code>, then deletes the state file. Avoids pattern-mismatch failures when context compression drops the original brief text.</td>
+                <td><code>save --session-id &lt;id&gt; --brief "&lt;text&gt;" --skill "&lt;name&gt;" --start-time "&lt;datetime UTC&gt;"</code> | <code>load --session-id &lt;id&gt;</code></td>
+                <td>save: 0 = success. load: 0 = success (prints brief), 1 = no state file</td>
+                <td>Pre-skill (save), Post-skill (load)</td>
+              </tr>
+              <tr>
+                <td><code>update_cross_refs.py</code></td>
+                <td>Cross-reference updater. Links a new artifact's <code>source:</code> field to its parent's <code>spawned:</code> field.</td>
+                <td><code>--artifact &lt;path&gt;</code></td>
+                <td>0 = success</td>
+                <td>Post-skill step 7c</td>
+              </tr>
+              <tr>
+                <td><code>pending.py</code></td>
+                <td>Pending actions ledger CLI. Manages the <code>pending.jsonl</code> file with add, done, snooze, dismiss, list, due, cleanup, periodic-check, and status subcommands.</td>
+                <td><code>&lt;subcommand&gt; [args]</code> -- subcommands: <code>add</code>, <code>done</code>, <code>snooze</code>, <code>dismiss</code>, <code>list</code>, <code>due</code>, <code>cleanup</code>, <code>periodic-check</code>, <code>status</code></td>
+                <td>0 = success, 1 = forbidden transition/validation, 2 = runtime error</td>
+                <td><code>/pending</code>, post-skill steps 2d, 2g</td>
+              </tr>
+              <tr>
+                <td><code>conversation_trace.py</code></td>
+                <td>Append-only conversation trace log with automatic secret masking. Tracks user/agent exchanges across sessions.</td>
+                <td>Subcommands: <code>append --session-id --emitter --message --type [--topic-tags] [--preceding-evt-id] [--confirm]</code>, <code>backfill-skill --evt-id --skill-id</code>, <code>last-evt-id --session-id</code></td>
+                <td>0 = success, 1 = error, 2 = masking confirmation required</td>
+                <td><code>CLAUDE.md</code> (after every non-skill response), pre-skill step 2</td>
+              </tr>
+              <tr>
+                <td><code>build_telemetry.py</code></td>
+                <td>Construct and append a validated telemetry record to <code>telemetry.jsonl</code>. Single write path for telemetry data.</td>
+                <td><code>--skill &lt;name&gt; --id &lt;artifact-id&gt; --outcome &lt;outcome&gt; --timestamp &lt;ISO&gt; --duration-seconds &lt;N&gt; [+ many optional fields]</code></td>
+                <td>0 = success, 1 = validation error</td>
+                <td>Post-skill step 8b</td>
+              </tr>
+              <tr>
+                <td><code>update_roadmap_plan_id.py</code></td>
+                <td>Backfill a plan ID into a roadmap Wave Summary row (replace <code>plan-TBD</code>).</td>
+                <td><code>--roadmap-file &lt;path&gt; --work-item-id &lt;slug&gt; --plan-id plan-NNNNNN</code></td>
+                <td>0 = success, 1 = not found / already replaced</td>
+                <td><code>/plan</code> (roadmap inline)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Utility Scripts                                               -->
+      <!-- ============================================================ -->
+
+      <section id="utility-scripts">
+        <h2>Utility Scripts</h2>
+        <p>
+          General-purpose scripts: configuration readers, conversion tools,
+          setup utilities, and shared libraries.
+        </p>
+
+        <h3 id="utility-libraries">Library Modules</h3>
+        <p>
+          Scripts imported by other scripts rather than invoked via CLI.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Script</th>
+                <th>Purpose</th>
+                <th>Key Exports</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>project_config.py</code></td>
+                <td>Central configuration reader. Parses <code>conventions.md</code> and exposes all project variables to other scripts.</td>
+                <td><code>get()</code>, <code>get_path()</code>, <code>get_list()</code>, <code>get_pending_file()</code>, <code>diff_conventions()</code></td>
+              </tr>
+              <tr>
+                <td><code>human_markers_registry.py</code></td>
+                <td>Registry of Human (markers) files and allowed marker patterns. Imported by <code>apply_marker.py</code> and <code>check_human_markers_only.py</code>.</td>
+                <td><code>HUMAN_MARKERS_FILES</code>, <code>ALLOWED_MARKERS</code></td>
+              </tr>
+              <tr>
+                <td><code>load_quickguide.py</code></td>
+                <td>Shared loader for <code>SKILL-quickguide.md</code> sibling files.</td>
+                <td><code>load_quickguide(skill_dir)</code></td>
+              </tr>
+              <tr>
+                <td><code>design_system.py</code></td>
+                <td>Extract CSS and design tokens from HTML design system files.</td>
+                <td><code>extract_css()</code>, <code>extract_root_vars()</code>, <code>find_design_system()</code></td>
+              </tr>
+              <tr>
+                <td><code>smoke_test_core.py</code></td>
+                <td>Generic framework for registry-driven API smoke testing.</td>
+                <td>Base test runner class, result aggregator</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="utility-cli">CLI Utilities</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Script</th>
+                <th>Purpose</th>
+                <th>CLI Interface</th>
+                <th>Exit Codes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>reserve_id.py</code></td>
+                <td>Atomically reserve sequential 6-digit artifact IDs. Finds the highest ID and appends a <code>RESERVED</code> row to <code>INDEX.md</code>.</td>
+                <td><code>--type &lt;artifact-type&gt; --title '&lt;title&gt;' [--dry-run]</code></td>
+                <td>0 = success</td>
+              </tr>
+              <tr>
+                <td><code>count_loc.py</code></td>
+                <td>Count source files and lines across frontend/backend/harness (physical + code-only lines).</td>
+                <td><code>[--harness] [--json] [--list-files] [--ext .py .js] [path]</code></td>
+                <td>0 = success</td>
+              </tr>
+              <tr>
+                <td><code>md_to_html.py</code></td>
+                <td>Convert Markdown to styled standalone HTML with all CSS inlined. Supports python-markdown and pandoc engines.</td>
+                <td><code>&lt;input.md&gt; [--style PATH] [--output PATH] [--engine name] [--lang code] [--verbose]</code></td>
+                <td>0 = success</td>
+              </tr>
+              <tr>
+                <td><code>html_report.py</code></td>
+                <td>Convert extended Markdown (<code>:::directive</code> blocks) to rich self-contained HTML with profile-based features.</td>
+                <td><code>&lt;input.md&gt; [--style PATH] [--output PATH] [--profile report|onboard|document|communicate] [--title STR] [--toc] [--lang code] [--verbose]</code></td>
+                <td>0 = success</td>
+              </tr>
+              <tr>
+                <td><code>seja_harness_hook.py</code></td>
+                <td><code>UserPromptSubmit</code> hook that injects SEJA lifecycle reminder into every user prompt.</td>
+                <td>(invoked as hook, not CLI)</td>
+                <td>N/A</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="utility-setup">Setup and Upgrade</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Script</th>
+                <th>Purpose</th>
+                <th>CLI Interface</th>
+                <th>Invoked By</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>upgrade_harness.py</code></td>
+                <td>Upgrade a project to a newer SEJA version by replacing harness files, running migrations, and regenerating references.</td>
+                <td><code>--from &lt;source_path&gt; [--target &lt;project_path&gt;] [--dry-run]</code></td>
+                <td><code>/seja-setup --upgrade</code></td>
+              </tr>
+              <tr>
+                <td><code>create_workspace.py</code></td>
+                <td>Create a project workspace from the foundational SEJA harness alongside an existing codebase.</td>
+                <td><code>--from &lt;foundational_harness&gt; --workspace &lt;ws_path&gt; --target &lt;codebase_path&gt; [--dry-run]</code></td>
+                <td><code>/seja-setup --workspace</code></td>
+              </tr>
+              <tr>
+                <td><code>detect_setup_state.py</code></td>
+                <td>Inspect current directory and report SEJA setup state (fresh, partial, finalised, dev repo).</td>
+                <td><code>[--json] [--cwd &lt;path&gt;]</code></td>
+                <td><code>/seja-setup</code></td>
+              </tr>
+              <tr>
+                <td><code>resolve_seja_version.py</code></td>
+                <td>Resolve the public SEJA release tag to pin against (newest SemVer tag from remote).</td>
+                <td><code>[--remote &lt;url&gt;] [--version &lt;tag&gt;]</code></td>
+                <td><code>/seja-setup</code> (install and <code>--upgrade</code>)</td>
+              </tr>
+              <tr>
+                <td><code>summarize_artifacts.py</code></td>
+                <td>Resolve and summarize SEJA artifacts by ID or path for embedding in reflection reports.</td>
+                <td>(invoked by skill)</td>
+                <td><code>/reflect</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Migration Scripts                                             -->
+      <!-- ============================================================ -->
+
+      <section id="migration-scripts">
+        <h2>Migration Scripts</h2>
+        <p>
+          One-shot scripts for data migration between SEJA versions. Most
+          support <code>--dry-run</code> for safe preview. After execution,
+          they are typically no longer needed but remain in the codebase for
+          reference and idempotent re-runs.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Script</th>
+                <th>Purpose</th>
+                <th>Key Flags</th>
+                <th>Idempotent</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>run_migrations.py</code></td>
+                <td>Run pending SEJA harness migrations from <code>.claude/migrations/</code>.</td>
+                <td><code>--target &lt;path&gt;</code>, <code>--dry-run</code></td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td><code>backfill_decision_digest.py</code></td>
+                <td>One-time backfill of <code>decision-digest.jsonl</code> from existing advisory logs.</td>
+                <td><code>--dry-run</code></td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td><code>backfill_open_plans.py</code></td>
+                <td>One-shot backfill of implement pending entries for open plans.</td>
+                <td><code>--dry-run</code>, <code>--bulk-dismiss-older-than N</code>, <code>--reset</code></td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td><code>backfill_qa_dates.py</code></td>
+                <td>One-time addition of dates to existing QA log headers.</td>
+                <td><code>--dry-run</code>, <code>--verbose</code></td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td><code>migrate_to_global_ids.py</code></td>
+                <td>One-time migration from mixed 4/6-digit IDs to globally unique 6-digit IDs. Renames files, updates headers, cross-refs, briefs, telemetry, INDEX.</td>
+                <td><code>--dry-run</code>, <code>--verbose</code></td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td><code>migrate_plan_done_rename.py</code></td>
+                <td>Rename <code>plan-NNNNNN-done-slug.md</code> to <code>plan-NNNNNN-slug.md</code>.</td>
+                <td><code>--dry-run</code></td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td><code>migrate_quickguide.py</code></td>
+                <td>Extract Quick Guide H2 from <code>SKILL.md</code> into <code>SKILL-quickguide.md</code> sibling file.</td>
+                <td><code>--dry-run</code></td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td><code>migrate_references_paths.py</code></td>
+                <td>Replace <code>_references/</code> path strings with new <code>.claude/references/</code> layout paths.</td>
+                <td>(one-off)</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td><code>migrate_qa_logs_to_parent_dirs.py</code></td>
+                <td>Move post-skill QA logs to parent artifact directories.</td>
+                <td><code>--apply</code> to execute</td>
+                <td>Yes</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Exit Code Convention                                          -->
+      <!-- ============================================================ -->
+
+      <section id="exit-code-convention">
+        <h2>Exit Code Convention</h2>
+        <p>
+          All CLI scripts follow a standard three-value exit code convention:
+        </p>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Exit Code</th>
+                <th>Meaning</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>0</code></td>
+                <td>Success / Pass</td>
+                <td>All checks passed or operation completed successfully.</td>
+              </tr>
+              <tr>
+                <td><code>1</code></td>
+                <td>Failures / Violations Found</td>
+                <td>The script ran correctly but found issues. Check output for details.</td>
+              </tr>
+              <tr>
+                <td><code>2</code></td>
+                <td>Script Error</td>
+                <td>The script itself failed (missing dependency, file not found, parse error). Investigate the script, not the checked content.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Exception: <code>conversation_trace.py</code> uses exit code
+          <code>2</code> for "masking confirmation required" (the script
+          detected sensitive content and needs the caller to re-run with
+          <code>--confirm</code>).
+        </p>
+      </section>
+
+      <!-- See also: cross-volume related chapters -->
+      <nav aria-label="see also" class="see-also">
+        <h2>See also</h2>
+        <ul>
+          <li><a href="../how-to/customization.html">Customization and Extension</a> -- how to add project-specific validation and generation scripts</li>
+          <li><a href="../explanation/design-decisions.html">Design Decisions and Trade-offs</a> -- why the harness pushes work into deterministic scripts rather than the agent</li>
+        </ul>
+      </nav>
+
+    </article>
+
+    <!-- Sequential chapter navigation -->
+    <nav aria-label="chapter navigation">
+      <a href="subagent-reference.html">Previous: Subagent Reference</a>
+      <a href="reference-files-catalog.html">Next: Reference Files Catalog</a>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#overview">Overview</a></li>
+      <li>
+        <a href="#validation-scripts">Validation Scripts</a>
+        <ul>
+          <li><a href="#validation-orchestrators">Orchestrators</a></li>
+          <li><a href="#validation-shared">Shared</a></li>
+          <li><a href="#validation-skill-owned">Skill-Owned</a></li>
+          <li><a href="#validation-project">Project Plugins</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="#generation-scripts">Generation Scripts</a>
+        <ul>
+          <li><a href="#generation-shared">Shared Generators</a></li>
+          <li><a href="#generation-skill-owned">Skill-Owned</a></li>
+          <li><a href="#generation-priv">Private-Only</a></li>
+          <li><a href="#generation-reflect">Reflection Primitives</a></li>
+        </ul>
+      </li>
+      <li><a href="#lifecycle-scripts">Lifecycle and Marker Scripts</a></li>
+      <li>
+        <a href="#utility-scripts">Utility Scripts</a>
+        <ul>
+          <li><a href="#utility-libraries">Library Modules</a></li>
+          <li><a href="#utility-cli">CLI Utilities</a></li>
+          <li><a href="#utility-setup">Setup and Upgrade</a></li>
+        </ul>
+      </li>
+      <li><a href="#migration-scripts">Migration Scripts</a></li>
+      <li><a href="#exit-code-convention">Exit Code Convention</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T16:30:00Z</p>
+  </footer>
+
+</body>
+</html>

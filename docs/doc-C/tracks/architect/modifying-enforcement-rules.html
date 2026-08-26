@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How to modify SEJA's enforcement surface: path-scoped rule files, the check-script contract and how the orchestrator discovers them, the pre-commit hook chain, and the constitutional limit on bypassing it.">
+  <title>Modifying Enforcement Rules &mdash; SEJA Documentation</title>
+  <!-- CSS depth: 2 (tracks/architect sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Modifying Enforcement Rules</h1>
+      <p>Path-scoped rules, the check-script contract, the commit-time hook chain, and the one rule about bypassing it.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#tracks">Tracks</a></li>
+        <li><a href="index.html">Architect</a></li>
+        <li aria-current="page">Modifying Enforcement Rules</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge track-architect">Architect</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="two-enforcement-surfaces">
+          <h2 id="two-enforcement-surfaces">Two surfaces, two failure modes</h2>
+          <p>
+            Enforcement in the harness splits into an advisory surface and a blocking
+            one, and extending each is a different job.
+          </p>
+          <p>
+            <strong>Path-scoped rules</strong> are advisory: they load context into the
+            agent when it touches matching files, so the right questions are in front
+            of it before it writes. Their failure mode is silence &mdash; a rule with a
+            scope that never matches simply never fires.
+            <strong>Check scripts</strong> are blocking: they run in the hook chain and
+            in the validation orchestrator, and they stop a commit. Their failure mode
+            is noise &mdash; a check that reports false positives gets bypassed, and a
+            routinely bypassed check enforces nothing.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="path-scoped-rules">
+          <h2 id="path-scoped-rules">Path-scoped rules</h2>
+          <p>
+            A rule is a Markdown file in <code>.claude/rules/</code>. Its frontmatter
+            declares the glob patterns it governs and its designer-facing description:
+          </p>
+          <pre><code>---
+paths:
+  - "backend/**"
+designer_description: "When you touch anything under backend/, I surface ..."
+---</code></pre>
+          <p>
+            The body is deliberately thin. A rule is a <em>router</em>, not a manual:
+            it names the review-perspective files whose P0 questions apply, points at
+            the relevant section of the project's standards, and closes with a
+            <strong>Perspective Alignment</strong> line naming the perspectives that
+            govern it. Content that would be duplicated from a standards file belongs
+            in that file, with the rule pointing to it.
+          </p>
+          <p>
+            When adding a rule, the two decisions that matter are the glob scope
+            &mdash; narrow enough that it fires only when its questions are relevant
+            &mdash; and the perspective alignment, which is what keeps the rule and the
+            review checklist from drifting apart.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="the-check-script-contract">
+          <h2 id="the-check-script-contract">The check-script contract</h2>
+          <p>
+            A check script is a Python file whose name begins with
+            <code>check_</code>. That prefix is the registration mechanism: the
+            orchestrator discovers <code>check_*.py</code> both in
+            <code>.claude/skills/scripts/</code> and in every co-located skill
+            subdirectory, so a check placed next to the skill it serves is picked up
+            with no manifest entry.
+          </p>
+          <p>The contract a check must honour:</p>
+          <dl>
+            <dt>Exit codes</dt>
+            <dd>
+              <code>0</code> for pass, <code>1</code> for a genuine failure, and
+              <code>2</code> reserved for script error &mdash; a check that cannot run is
+              not the same as a check that failed, and collapsing the two makes a
+              broken check indistinguishable from a broken codebase.
+            </dd>
+            <dt>Header block</dt>
+            <dd>
+              A <code>designer:</code> comment in the harness's first-person voice,
+              then a module docstring carrying the one-line purpose,
+              <code>Invocation:</code>, <code>Lifecycle:</code>, the exit-code table,
+              and a runnable usage example.
+            </dd>
+            <dt>Self-containment</dt>
+            <dd>
+              Runnable from the repository root with no arguments beyond an optional
+              <code>--root</code>. Project-specific paths come from the shared
+              project-config module, which parses the conventions file &mdash; never
+              hardcode a directory a downstream project is free to rename.
+            </dd>
+            <dt>Diagnostic output</dt>
+            <dd>
+              Print the file and line for every finding. A check whose failure message
+              does not say <em>where</em> forces the reader to re-derive it.
+            </dd>
+          </dl>
+          <p>
+            Optionally, add an entry to the check plugin registry naming the script,
+            its display name, the stacks it applies to, its scope, and whether it is
+            critical. The registry is what lets the orchestrator filter by stack; a
+            script absent from it is included by default rather than skipped, so
+            registration is about <em>excluding</em> your check from irrelevant stacks,
+            not about making it run.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="the-hook-chain">
+          <h2 id="the-hook-chain">The commit-time hook chain</h2>
+          <p>
+            The pre-commit hook is installed once per clone with
+            <code>bash .githooks/install.sh</code> and runs two gates in sequence,
+            each blocking on failure:
+          </p>
+          <ol>
+            <li>
+              <strong>Fast preflight.</strong> The lightweight validation pass sized
+              for a git hook. A non-zero exit blocks the commit.
+            </li>
+            <li>
+              <strong>The leak gate.</strong> Scans <em>staged</em> shared Markdown for
+              fingerprints and malformed private-only markers that would leak to the
+              public repository on the next sync.
+            </li>
+          </ol>
+          <p>
+            Both gates degrade gracefully: if Python or a gate script is missing the
+            hook prints a notice and exits zero, so an older clone or a partial upgrade
+            cannot wedge every commit. That tolerance is why an installed hook is a
+            per-clone responsibility rather than something the repository can assume.
+          </p>
+          <p>
+            Choose your gate by cost. The fast preflight is the hook-time budget; the
+            full orchestrator &mdash; which runs every discovered check and can emit
+            JUnit XML &mdash; is the CI-time sweep. Putting an expensive check in the
+            hook chain is the most reliable way to teach contributors to bypass it.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="bypassing-the-hook">
+          <h2 id="bypassing-the-hook">Bypassing the hook</h2>
+          <aside class="callout-warning">
+            <p>
+              <strong>No plan or implementation step may circumvent the pre-commit
+              hook without explicit designer approval recorded in a decision entry.</strong>
+              This is a constitutional security invariant, not a convention: hook
+              bypass is the most common accidental path to leaking private content or
+              shipping unvalidated code.
+            </p>
+          </aside>
+          <p>
+            The practical consequence for anyone extending enforcement is that
+            <code>--no-verify</code> is not an escape hatch you may design around. If a
+            check blocks legitimate work, the fix is to correct the check, narrow its
+            scope, or move it out of the hook chain into the CI sweep &mdash; and if the
+            bypass is genuinely warranted, it is recorded as a decision with the
+            designer's approval attached, not taken silently at the command line.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="sourced-from">
+          <h2 id="sourced-from">Sourced from</h2>
+          <p>
+            This page was written from the harness files below. When any of them
+            changes, re-check this page against it &mdash; this list is the freshness
+            work-list for this chapter.
+          </p>
+          <ul>
+            <li><code>.claude/rules/backend.md</code>, <code>.claude/rules/tests.md</code> (rule file shape)</li>
+            <li><code>.claude/rules/harness-structure.md</code></li>
+            <li><code>.claude/skills/scripts/run_all_checks.py</code> (discovery and filtering)</li>
+            <li><code>.claude/skills/scripts/check_plugin_registry.json</code></li>
+            <li><code>.githooks/pre-commit</code>, <code>.githooks/install.sh</code></li>
+            <li><code>product-design/constitution.md</code> (invariant S2)</li>
+          </ul>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="../../core/concepts/enforcement-layers.html">Enforcement Layers</a> &mdash; the four layers this page extends, and why they are layered.</li>
+            <li><a href="../../core/operations/quality-gates.html">Quality Gates</a> &mdash; running the gates rather than changing them.</li>
+            <li><a href="../../core/operations/ci-integration.html">CI Integration</a> &mdash; where the full check sweep runs.</li>
+            <li><a href="index.html">Architect Track</a> &mdash; back to the track gate.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Architect Track</a>
+        <a href="../../core/operations/index.html">Operations</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (tracks/architect sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

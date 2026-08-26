@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-volume" content="5">
+  <meta name="doc-chapter" content="1">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+  <meta name="quality" content="publication">
+
+  <title>Software as Designed Communication -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 5: Foundations and Philosophy</a></li>
+      <li>Software as Designed Communication</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>Software as Designed Communication</h1>
+
+      <p>
+        Semiotic engineering begins with a claim that distinguishes it from
+        every other theory of human-computer interaction: software is not a
+        tool that a user operates, nor a medium through which information
+        flows, but a <em>one-shot communicative act</em> from designer to
+        user, delivered at interaction time by the software itself acting as
+        the designer's deputy (de Souza, 2005, Ch. 1). This chapter develops
+        that claim, traces its consequences for agent harness design, and
+        subjects it to the critical scrutiny it deserves.
+      </p>
+
+      <section id="the-communication-metaphor" data-diataxis="explanation">
+        <h2>The Communication Metaphor</h2>
+
+        <p>
+          Most theories of HCI treat the interface as an instrument. The
+          user has a goal; the system provides affordances; successful
+          interaction means the goal is achieved efficiently. Usability
+          metrics — task completion time, error rate, learnability — flow
+          naturally from this framing. De Souza (2005) proposes a radical
+          alternative: every software artifact is a message. The designer
+          is the sender, the user is the receiver, and the interface is
+          the medium through which the designer says:
+        </p>
+
+        <blockquote>
+          <p>
+            "Here is my understanding of who you are, what I've learned you
+            want or need to do, in which preferred ways, and why. This is the
+            system that I have therefore designed for you, and this is the way
+            you can or should use it in order to fulfill a range of purposes
+            that fall within this vision."
+          </p>
+          <footer>— de Souza (2005, p. 84)</footer>
+        </blockquote>
+
+        <p>
+          This is the <em>metacommunication message</em> — a first-person,
+          designer-to-user statement that is not written down in any single
+          place within a conventional application but is instead distributed
+          across every design decision: every label, every layout choice,
+          every error message, every workflow constraint. The user
+          reconstructs this message — usually tacitly, often incompletely —
+          from the cumulative evidence of interacting with the system.
+        </p>
+
+        <p>
+          The communication metaphor is not a convenience or a pedagogical
+          shorthand. It is a theoretical commitment with structural
+          consequences. If software is a message, then design decisions are
+          communicative acts, and every design choice can be evaluated not
+          only by whether it works (the instrumental criterion) but by
+          whether it <em>communicates what the designer intends</em> (the
+          communicability criterion). A dropdown menu that is functionally
+          correct but semantically misleading — it works, but it says the
+          wrong thing — is a communicability failure even if no user ever
+          reports a bug.
+        </p>
+
+        <p>
+          De Souza draws on Peirce's semiotics to formalize this insight.
+          Signs — the elements of the interface — are not self-interpreting
+          tokens but triadic structures relating a representamen (the
+          perceptible form), an object (what the sign refers to), and an
+          interpretant (the effect the sign produces in the interpreter).
+          The designer selects representamens (icons, labels, interaction
+          patterns) to refer to objects (domain concepts, system states,
+          user intentions) and anticipates interpretants (the user's
+          understanding). When the anticipated interpretant matches the
+          user's actual interpretant, communication succeeds. When it does
+          not, the user experiences a <em>communicability breakdown</em> —
+          a moment of confusion that reveals a gap between the designer's
+          intended message and the message the user actually receives.
+        </p>
+
+        <p>
+          The communication framing also changes how we think about
+          interaction over time. In instrumental theories, a user who has
+          learned the interface has <em>mastered a tool</em>. In semiotic
+          engineering, a user who has learned the interface has
+          <em>understood a message</em> — they have reconstructed the
+          designer's metacommunication and can now anticipate the system's
+          behavior because they understand the communicative logic behind
+          it. This distinction matters: a tool can be used without
+          understanding; a message cannot be received without
+          interpretation.
+        </p>
+      </section>
+
+      <section id="designers-deputy" data-diataxis="explanation">
+        <h2>Designer's Deputy</h2>
+
+        <p>
+          If software is a message, then someone must deliver it. De Souza
+          (2005, Ch. 3) introduces the concept of the <em>designer's
+          deputy</em>: the software system itself, acting as the designer's
+          representative at interaction time. The designer is absent — they
+          cannot sit beside every user and explain their reasoning. Instead,
+          the system must speak on their behalf, conveying the
+          metacommunication message through its structure, responses, and
+          constraints.
+        </p>
+
+        <p>
+          The deputy metaphor carries a specific implication: the system is
+          not autonomous. It does not have its own communicative intentions.
+          It is a <em>proxy</em> — it relays the designer's message, for
+          better or worse. When the deputy communicates well, users
+          understand the designer's vision and can work with the system
+          effectively. When the deputy communicates poorly — through
+          inconsistent terminology, contradictory affordances, or opaque
+          behavior — users receive a garbled version of the designer's
+          intent, and the communicative act fails regardless of whether
+          the system is technically functional.
+        </p>
+
+        <p>
+          The designer's deputy concept acquires new force in the context
+          of AI agent harnesses. In a conventional application, the deputy
+          is the interface: static layouts, dynamic responses, help text.
+          In SEJA, the deputy is the harness itself — the constellation of
+          skills, rules, references, and lifecycle hooks that shape the
+          AI agent's behavior. Claude, operating within SEJA's governance
+          structure, is the designer's deputy in a remarkably literal sense:
+          it reads the designer's metacommunication message from
+          <code>product-design-as-intended.md</code>, loads the designer's
+          immutable principles from <code>product-design/constitution.md</code>,
+          follows the designer's lifecycle constraints through pre-skill and
+          post-skill hooks, and consults the designer's review perspectives
+          when evaluating its own work. The agent does not substitute its
+          own judgment for the designer's intent; it delivers the designer's
+          message through the medium of AI-assisted development.
+        </p>
+
+        <p>
+          This is what the metacommunication message's I/you phrasing
+          encodes. When the designer writes "I have designed this harness
+          to be not only governable... but also epistemic," the first-person
+          voice is not a stylistic choice — it is a structural commitment
+          to the deputy relationship. The designer speaks; the harness
+          delivers; the user receives. The I/you frame makes the
+          communicative act explicit and the authorship traceable. For a
+          fuller treatment of how this message is structured and maintained
+          in practice, see
+          <a href="../design-layer/metacommunication.html#what-is-a-metacommunication-message">The Metacommunication Message</a>
+          in Vol. 2.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The deputy relationship in SEJA is
+            unusually transparent. In most software, the metacommunication
+            message is implicit — distributed across thousands of design
+            decisions, never stated in full. In SEJA, it is explicit:
+            §11 of <code>product-design-as-intended.md</code> contains
+            the designer's canonical metacommunication message in plain
+            prose. This makes the communicative act auditable in a way
+            that conventional software rarely achieves.
+          </p>
+        </aside>
+      </section>
+
+      <section id="critical-counter-reading" data-diataxis="explanation">
+        <h2>Critical Counter-Reading</h2>
+
+        <p>
+          The communication metaphor is powerful, but it rests on
+          assumptions that deserve scrutiny. Two limitations are
+          particularly significant for the SEJA context.
+        </p>
+
+        <h3>The Single-Author Assumption</h3>
+
+        <p>
+          De Souza's formulation assumes an identifiable designer with
+          coherent intentions — a single "I" who speaks through the
+          interface. In practice, software is authored by teams, and
+          design intent is distributed across product managers, UX
+          researchers, engineers, and stakeholders whose visions may
+          conflict. The metacommunication message is not one voice but
+          a negotiated chorus, and the coherence of the message depends
+          on organizational processes that semiotic engineering does not
+          theorize.
+        </p>
+
+        <p>
+          SEJA inherits this assumption. The <code>product-design-as-intended.md</code>
+          file is written in the first person singular — "I have designed
+          this harness..." — even when the actual design process involves
+          multiple contributors. The promote workflow (where design
+          intentions move from <em>implemented</em> to <em>established</em>
+          status) partially addresses the temporal dimension: it
+          acknowledges that design intent evolves as understanding grows.
+          But it does not address the <em>social</em> dimension: whose
+          "I" is speaking when multiple designers have contributed to the
+          intent? The single-author assumption remains embedded in the
+          file format, the phrasing rule, and the governance model.
+        </p>
+
+        <h3>The One-Shot Framing and Iterative Reality</h3>
+
+        <p>
+          The "one-shot" characterization of the metacommunication act
+          emphasizes that the designer speaks once, through the deployed
+          artifact, and cannot clarify or elaborate in real time. This
+          framing correctly captures the asymmetry of designer-user
+          communication — the designer cannot be present at interaction
+          time to explain their reasoning. But it understates the
+          iterative nature of real design practice, where the
+          metacommunication message is continuously revised through user
+          feedback, telemetry, and evolving understanding.
+        </p>
+
+        <p>
+          Eco's (1979) concept of the "open work" (<em>opera aperta</em>)
+          provides a useful counter-frame. Eco argues that every text —
+          and by extension, every designed artifact — is completed by the
+          reader's interpretation, not by the author's intention alone.
+          Users bring their own cultural context, prior experience, and
+          interpretive strategies to the interface. They do not passively
+          receive the designer's message; they actively construct meaning,
+          and their construction may diverge from the designer's intent in
+          ways the designer cannot predict or control. The metacommunication
+          message, however carefully crafted, is always <em>opened</em>
+          by the user's reading of it.
+        </p>
+
+        <p>
+          SEJA does not resolve this tension. Its governance model
+          privileges designer intent — the constitution is authoritative,
+          the metacommunication message is the highest-level artifact,
+          and the lifecycle enforces alignment with stated design vision.
+          This is a legitimate architectural choice, but it is a choice,
+          not a theoretical necessity. An alternative harness grounded in
+          Eco's semiotics might prioritize <em>negotiated meaning</em>
+          over <em>delivered intent</em>, treating user interpretations
+          as co-constitutive of the system's communicative act rather than
+          as deviations from it. The fact that SEJA does not take this
+          path reflects a design decision — one that should be understood
+          as such, not mistaken for a theoretical inevitability.
+        </p>
+      </section>
+
+      <section id="references" data-diataxis="reference">
+        <h2>References</h2>
+        <ul>
+          <li>
+            de Souza, C.S. (2005). <cite>The Semiotic Engineering of
+            Human-Computer Interaction</cite>. Cambridge, MA: MIT Press.
+          </li>
+          <li>
+            Eco, U. (1979). <cite>The Role of the Reader: Explorations
+            in the Semiotics of Texts</cite>. Bloomington: Indiana
+            University Press.
+          </li>
+        </ul>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 5: Foundations and Philosophy</h2>
+    <ol>
+      <li aria-current="page">
+        <a href="software-as-communication.html">Software as Designed Communication</a>
+        <ul>
+          <li><a href="#the-communication-metaphor">The Communication Metaphor</a></li>
+          <li><a href="#designers-deputy">Designer's Deputy</a></li>
+          <li><a href="#critical-counter-reading">Critical Counter-Reading</a></li>
+          <li><a href="#references">References</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="sign-systems.html">Sign Systems and Communicability</a>
+      </li>
+      <li>
+        <a href="extended-metacommunication.html">The Extended Metacommunication Template</a>
+      </li>
+      <li>
+        <a href="reflective-practice.html">Reflective Practice</a>
+      </li>
+      <li>
+        <a href="abduction-plural-readings.html">Abduction and Plural Readings</a>
+      </li>
+      <li>
+        <a href="governable-epistemic.html">The Governable and Epistemic Thesis</a>
+      </li>
+      <li>
+        <a href="agent-reads-harness.html">How the Agent Reads the Harness</a>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Chapter navigation: Ch.1 omits Previous -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <span></span>
+    <a href="sign-systems.html">Next: Sign Systems and Communicability</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

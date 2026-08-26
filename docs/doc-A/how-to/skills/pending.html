@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="how-to">
+  <meta name="doc-volume" content="How-To Guides">
+  <meta name="doc-chapter" content="How to Manage Pending Actions">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>How to Manage Pending Actions -- SEJA Documentation</title>
+
+  <!-- CSS depth: 2 (sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../../index.html">Home</a>
+    <a href="../../tutorials/index.html">Tutorials</a>
+    <a href="../index.html">How-To Guides</a>
+    <a href="../../reference/index.html">Reference</a>
+    <a href="../../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../../index.html">Home</a></li>
+      <li><a href="../index.html">How-To Guides</a></li>
+      <li><a href="index.html">Skill-by-Skill Guides</a></li>
+      <li>How to Manage Pending Actions</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-howto">
+    <article>
+      <p class="vol-accent"><strong>how-to</strong></p>
+
+      <h1>How to Manage Pending Actions</h1>
+
+      <p>
+        Goal: see and resolve the outstanding human actions the harness is tracking
+        for you. The <code>/pending</code> skill lists each action with type-specific
+        advice, then stops. The ledger lives at <code>_output/pending.jsonl</code>
+        and is append-only, so history is never lost. Six subcommands cover the full
+        lifecycle: <code>list</code>, <code>address</code>, <code>add</code>,
+        <code>done</code>, <code>snooze</code>, and <code>dismiss</code>.
+      </p>
+
+      <section id="when-to-use">
+        <h2>When to Use</h2>
+        <ul>
+          <li>When pre-skill tells you there are pending actions at the top of a skill invocation.</li>
+          <li>After <code>/implement</code>, if you chose to defer follow-up work for later review.</li>
+          <li>When the periodic curation trigger has fired.</li>
+          <li>Any time you want to review what the harness is tracking for you.</li>
+        </ul>
+      </section>
+
+      <section id="required-inputs">
+        <h2>Required Inputs</h2>
+        <ul>
+          <li>Nothing for a plain listing: <code>/pending</code>.</li>
+          <li>An item ID for a targeted subcommand, e.g. <code>/pending address pa-000003</code> or <code>/pending done pa-000003</code>.</li>
+          <li>For <code>add</code>, a type, source, and description; for <code>snooze</code>, an <code>--until</code> date; for <code>dismiss</code>, a <code>--reason</code>.</li>
+        </ul>
+      </section>
+
+      <section id="action-types">
+        <h2>What the Ledger Tracks</h2>
+        <p>
+          The harness files a range of action types, each with a typical resolution.
+          Common ones include:
+        </p>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th scope="col">Type</th><th scope="col">Filed by</th><th scope="col">Typical resolution</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>mark-implemented</code></td><td>post-skill</td><td>Flip <code>STATUS</code> markers via <code>/pending address</code></td></tr>
+              <tr><td><code>test-implementation</code></td><td>post-skill</td><td>Run the plan's test plan manually</td></tr>
+              <tr><td><code>verify-as-coded</code></td><td>post-skill</td><td>Run <code>/explain drift</code> to confirm</td></tr>
+              <tr><td><code>update-documentation</code></td><td>post-skill / <code>--skip-docs</code></td><td>Run <code>/document --plan &lt;source&gt;</code></td></tr>
+              <tr><td><code>apply-promote-markers</code></td><td><code>/explain drift --promote</code></td><td>Write Decision entries, then <code>--apply-markers</code></td></tr>
+              <tr><td><code>incorporate-research-markers</code></td><td>post-skill</td><td>Flip <code>INCORPORATED</code> markers in UX research</td></tr>
+              <tr><td><code>spec-drift-check</code></td><td>periodic trigger</td><td>Run <code>/explain drift</code> to surface mismatches; promote if ready</td></tr>
+              <tr><td><code>periodic-curation</code></td><td>periodic trigger</td><td>Review the ledger: dismiss stale items, snooze blocked ones, close the curation entry</td></tr>
+              <tr><td><code>implement</code></td><td>post-skill (after <code>/plan</code>)</td><td>Run <code>/implement &lt;plan-id&gt;</code></td></tr>
+              <tr><td><code>review-downstream-plan</code></td><td><code>/implement</code> (file-overlap check)</td><td>Check whether upstream changes invalidated downstream plan assumptions</td></tr>
+              <tr><td><code>create-decision-entry</code></td><td><code>/research</code> (decision-extract)</td><td>Create a <code>D-NNN</code> entry in as-intended</td></tr>
+              <tr><td><code>user-defined</code></td><td><code>/pending add</code></td><td>Whatever you described</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="step-by-step">
+        <h2>Step by Step</h2>
+
+        <ol>
+          <li>
+            <strong>List what is pending.</strong> Run <code>/pending</code>. Items
+            are grouped by type, each with advice on how to resolve it and which
+            skill or file to reach for.
+            <br><em>Expected output:</em> a grouped listing plus a footer of
+            available subcommands. The skill then stops -- it does not act on your
+            behalf.
+          </li>
+          <li>
+            <strong>Address a guided item.</strong> For marker-flip types
+            (<code>mark-implemented</code>, <code>incorporate-research-markers</code>),
+            run <code>/pending address &lt;id&gt;</code> to walk through per-candidate
+            flips with confirmation. For other types, the command prints
+            type-specific advice.
+          </li>
+          <li>
+            <strong>Manage the ledger.</strong> Choose the action that fits:
+            <ul>
+              <li><strong><code>done</code></strong> -- Recommended when the work is finished. Marks the item complete.</li>
+              <li><strong><code>snooze --until &lt;date&gt;</code></strong> -- Recommended when the item is valid but not now. It resurfaces on that date.</li>
+              <li><strong><code>dismiss --reason &lt;text&gt;</code></strong> -- Recommended when the item is no longer relevant. NOT recommended when the work still needs doing -- prefer <code>snooze</code>. The reason is recorded.</li>
+              <li><strong><code>add</code></strong> -- Recommended when you want the harness to track a custom reminder that pre-skill surfaces until resolved.</li>
+            </ul>
+          </li>
+        </ol>
+      </section>
+
+      <section id="expected-outputs">
+        <h2>Expected Outputs</h2>
+        <ul>
+          <li>A grouped listing of outstanding actions with per-type resolution advice.</li>
+          <li>An updated append-only ledger entry in <code>_output/pending.jsonl</code> after a mutation (never a rewrite of history).</li>
+          <li>For <code>address</code> on marker-flip types, confirmed marker changes applied via <code>apply_marker.py</code>.</li>
+        </ul>
+      </section>
+
+      <section id="common-mistakes">
+        <h2>Common Mistakes</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th scope="col">Mistake</th><th scope="col">Better approach</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Expecting <code>/pending</code> to resolve everything automatically.</td>
+                <td>The listing stops after showing advice. You choose <code>address</code>, <code>done</code>, <code>snooze</code>, or <code>dismiss</code>.</td>
+              </tr>
+              <tr>
+                <td>Editing <code>_output/pending.jsonl</code> by hand.</td>
+                <td>Mutate through <code>/pending</code> subcommands so the append-only history stays intact.</td>
+              </tr>
+              <tr>
+                <td>Dismissing an item that still needs doing.</td>
+                <td>Use <code>snooze</code> to defer; reserve <code>dismiss</code> for items that are genuinely no longer relevant.</td>
+              </tr>
+              <tr>
+                <td>Trying to mutate the ledger from <code>/critique</code>.</td>
+                <td><code>/critique health</code> only reports the count. Mutations flow through <code>/pending</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="cross-references">
+        <h2>Cross-References</h2>
+        <ul>
+          <li><a href="../governance.html">Governance Operations</a> (Ch. 3) -- the pending ledger in the wider governance workflow.</li>
+          <li><a href="implement.html">How to Implement a Plan</a> -- resolve <code>implement</code> and review items.</li>
+          <li><a href="explain.html">How to Explain Behavior or Code</a> -- run <code>/explain drift --promote</code> after curation.</li>
+          <li><a href="../../reference/scripts-reference.html">Scripts Reference</a> (Vol. 3) -- the <code>pending.py</code> and <code>apply_marker.py</code> scripts.</li>
+        </ul>
+      </section>
+
+    </article>
+
+    <nav aria-label="chapter navigation">
+      <a href="reflect.html">Back: How to Reflect</a>
+      <a href="qa-log.html">Next: How to Log a Q&amp;A Session</a>
+    </nav>
+
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../../reference/scripts-reference.html">Scripts Reference</a> -- the <code>pending.py</code> and <code>apply_marker.py</code> scripts behind the ledger.</li>
+        <li><a href="../../explanation/design-decisions.html">Design Decisions and Trade-offs</a> -- why the ledger is append-only and human-resolved.</li>
+        <li><a href="../../tutorials/drift-detection.html">Detecting and Resolving Drift</a> -- resolving verify-as-coded and promote-marker items in context.</li>
+      </ul>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#when-to-use">When to Use</a></li>
+      <li><a href="#required-inputs">Required Inputs</a></li>
+      <li><a href="#action-types">What the Ledger Tracks</a></li>
+      <li><a href="#step-by-step">Step by Step</a></li>
+      <li><a href="#expected-outputs">Expected Outputs</a></li>
+      <li><a href="#common-mistakes">Common Mistakes</a></li>
+      <li><a href="#cross-references">Cross-References</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../../index.html">Collection Index</a>
+      <a href="../../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T20:50:00Z</p>
+  </footer>
+
+</body>
+</html>

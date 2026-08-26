@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="3">
+  <meta name="doc-chapter" content="2">
+  <meta name="doc-phase" content="1">
+  <meta name="doc-status" content="draft">
+
+  <title>Skills In Depth -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 3: The Execution Layer</a></li>
+      <li>Skills In Depth</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>Skills In Depth</h1>
+
+      <section id="skill-system-overview" data-diataxis="explanation">
+        <h2>Skill System Overview</h2>
+
+        <p>
+          SEJA organizes agent capabilities into 17 skills: 15 user-facing
+          skills invoked via slash commands, plus 2 internal lifecycle hooks
+          (<code>pre-skill</code> and <code>post-skill</code>) that run
+          automatically before and after every user-facing skill invocation.
+          Skills are the fundamental unit of work in the harness.
+        </p>
+
+        <h3>The Canonical Lifecycle Path</h3>
+
+        <p>
+          Skills are designed to be invoked in a specific order that moves
+          work from understanding through design, implementation, validation,
+          and reflection. The canonical lifecycle path is:
+        </p>
+
+        <pre><code>/research (or /explain)
+    |
+    v
+/design  |  /plan
+    |
+    v
+/implement
+    |
+    v
+/critique
+    |
+    v
+/document  |  /communicate
+    |
+    v
+/reflect</code></pre>
+
+        <p>
+          On the first iteration, <code>/seja-setup</code> hands off to
+          <code>/design</code> to configure the project. From iteration 2
+          onward, start with <code>/research</code> (or <code>/explain</code>)
+          to investigate what you are about to change, then branch into
+          <code>/design</code> when intent needs to change or into
+          <code>/plan</code> when it does not.
+        </p>
+
+        <h3>Skill Dispatch Mechanism</h3>
+
+        <p>
+          Every skill invocation follows the same dispatch sequence:
+        </p>
+
+        <ol>
+          <li>The user invokes a slash command (e.g., <code>/plan Add user auth</code>).</li>
+          <li>The skill's <code>SKILL.md</code> file is read and its YAML frontmatter parsed for metadata: name, description, argument hints, context budget tier, and reference file lists.</li>
+          <li><code>pre-skill</code> runs its 6-stage pipeline (help, brief-log, budget-eval, pending-check, ref-load, constitution) to set up context.</li>
+          <li>The skill body executes its mode-specific logic.</li>
+          <li><code>post-skill</code> runs its 13-step pipeline (brief completion, as-coded alignment, QA log, commit, index regeneration, telemetry, next-step suggestions) to close out the invocation.</li>
+        </ol>
+
+        <h3>Context Budget Tiers</h3>
+
+        <p>
+          Each skill declares a context budget tier in its YAML frontmatter
+          that controls how much project state is loaded into the agent's
+          context window during pre-skill:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Loads</th>
+              <th>Used by</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>light</code></td>
+              <td>Brief-log only. Skips all reference files, briefs index, and constitution.</td>
+              <td>Skills that need minimal context (e.g., <code>/help</code>, <code>/pending</code>)</td>
+            </tr>
+            <tr>
+              <td><code>standard</code></td>
+              <td>Briefs index (not full briefs), mandatory references (<code>conventions.md</code>, <code>permissions.md</code>, <code>constraints.md</code>), skill-specific references (eager and lazy), and constitution.</td>
+              <td>Most skills (<code>/research</code>, <code>/explain</code>, <code>/design</code>, <code>/reflect</code>)</td>
+            </tr>
+            <tr>
+              <td><code>heavy</code></td>
+              <td>Full briefs with recency windowing (first 50 entries), plan index, mandatory references, skill-specific references, and constitution.</td>
+              <td>Skills that need broad project awareness (<code>/plan</code>, <code>/implement</code>, <code>/critique</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Within the <code>standard</code> and <code>heavy</code> tiers,
+          skills can further control reference loading via eager vs. lazy
+          declarations. Eager references are loaded immediately during
+          pre-skill; lazy references are listed as available but only loaded
+          on demand when the skill needs them.
+        </p>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Per-skill reference sections: 7 lifecycle skills (Part A)     -->
+      <!-- ============================================================ -->
+
+      <section id="research" data-diataxis="reference">
+        <h2>/research</h2>
+
+        <h3>Purpose</h3>
+        <p>
+          Investigates the codebase, architecture, or design decisions and
+          produces actionable recommendations. Use <code>/research</code>
+          when you need guidance on a design decision, want to understand
+          trade-offs, or need an overview of what exists. Two modes:
+          <strong>research</strong> (default, question-driven Q&amp;A with
+          perspective analysis) and <strong>inventory</strong>
+          (<code>--inventory</code>, codebase element catalog). From
+          iteration 2 onward, <code>/research</code> is the usual lifecycle
+          entry point.
+        </p>
+
+        <h3>Parameters</h3>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>&lt;question or topic&gt;</code></td><td>The question or topic to research (required)</td></tr>
+            <tr><td><code>--inventory &lt;pattern&gt;</code></td><td>Switch to inventory mode: catalog codebase elements matching the pattern</td></tr>
+            <tr><td><code>--deep</code></td><td>Activate structured expert council debate for high-stakes decisions</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Prerequisites</h3>
+        <p>
+          No strict prerequisites. Works on any project with or without
+          design files. When <code>product-design/product-design-as-coded.md</code>
+          exists, it is loaded eagerly to provide design context.
+        </p>
+
+        <h3>Workflow</h3>
+        <ol>
+          <li>Pre-skill runs and loads references (as-coded file eagerly; as-intended, shared definitions, report conventions, review perspectives on demand).</li>
+          <li>The agent researches the question thoroughly, reading codebase files, design docs, and searching the web as needed.</li>
+          <li>Expert analysis runs: in standard mode, the <code>research-reviewer</code> agent evaluates from multiple perspectives; in <code>--deep</code> mode, the <code>council-debate</code> agent convenes a 5-7 member expert council.</li>
+          <li>A structured report is saved with Q&amp;A log, perspective synthesis, and prioritized recommendations (HIGH/MEDIUM/LOW).</li>
+          <li>If design decisions are detected, a decision-extract proposal flow offers to create structured D-NNN entries.</li>
+        </ol>
+
+        <h3>Subagent Delegations</h3>
+        <dl>
+          <dt><code>research-reviewer</code></dt>
+          <dd>Standard mode: evaluates the question against applicable review perspectives and returns prioritized recommendations.</dd>
+          <dt><code>council-debate</code></dt>
+          <dd><code>--deep</code> mode: runs a 2-round structured debate across a 5-7 member expert council with named archetypes.</dd>
+        </dl>
+
+        <h3>Reference Files Loaded</h3>
+        <p>
+          <strong>Eager:</strong> <code>product-design/product-design-as-coded.md</code>.
+          <strong>Lazy:</strong> <code>product-design/product-design-as-intended.md</code>,
+          <code>general/shared-definitions.md</code>,
+          <code>general/report-conventions.md</code>,
+          <code>general/review-perspectives.md</code>,
+          <code>template/docs/ddr.md</code>.
+        </p>
+
+        <h3>Expected Outputs</h3>
+        <p>
+          <strong>Research mode:</strong> <code>_output/research-logs/research-&lt;id&gt;-&lt;slug&gt;.md</code>
+          with header, tags, Q&amp;A log, and recommendations summary.
+          <strong>Inventory mode:</strong> <code>_output/inventories/inventory-&lt;id&gt;-&lt;slug&gt;.md</code>
+          with a structured catalog of matched elements.
+        </p>
+
+        <h3>Common Mistakes</h3>
+        <dl>
+          <dt>Skipping /research and going straight to /plan</dt>
+          <dd>Leads to plans that miss architectural context or existing patterns. Research first to understand the landscape, especially from iteration 2 onward.</dd>
+          <dt>Using standard mode for high-stakes architectural decisions</dt>
+          <dd>Standard mode uses a single reviewer agent. For decisions with significant trade-offs (e.g., framework migration, data model redesign), use <code>--deep</code> to activate the expert council debate.</dd>
+          <dt>Not following up on decision-extract proposals</dt>
+          <dd>When the skill detects design decisions and offers D-NNN entries, deferring them is fine, but skipping them entirely loses the design rationale while it is fresh.</dd>
+        </dl>
+      </section>
+
+      <section id="explain" data-diataxis="reference">
+        <h2>/explain</h2>
+
+        <h3>Purpose</h3>
+        <p>
+          Produces clear explanations of how parts of the system work, with
+          visual diagrams and analogies. Six mode types cover different
+          explanation needs: <strong>architecture</strong> (system structure and
+          design choices), <strong>behavior</strong> (emergent behavior from
+          the user's perspective), <strong>behavior-evolution</strong> (how
+          behavior changed over time), <strong>code</strong> (how code works,
+          aimed at junior developers), <strong>data-model</strong> (entity
+          relationships and refactoring opportunities), and
+          <strong>drift</strong> (compare as-coded and as-intended design specs
+          with optional sync).
+        </p>
+
+        <h3>Parameters</h3>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>architecture [brief]</code></td><td>Explain system architecture, component relationships, and design choices</td></tr>
+            <tr><td><code>behavior [brief]</code></td><td>Explain emergent behavior from a user's perspective</td></tr>
+            <tr><td><code>behavior-evolution [brief]</code></td><td>Explain current behavior AND how it evolved over time</td></tr>
+            <tr><td><code>code [brief]</code></td><td>Explain how code works, aimed at junior developers</td></tr>
+            <tr><td><code>data-model [brief]</code></td><td>Explain data model, pitfalls, and refactoring opportunities</td></tr>
+            <tr><td><code>drift [scope]</code></td><td>Compare as-coded and as-intended specs. Scope: <code>all</code>, <code>conceptual-design</code>, <code>metacomm</code>, <code>--promote</code>, <code>--scope since-plan plan-NNNNNN</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>Prerequisites</h3>
+        <p>
+          No strict prerequisites for general modes (architecture, behavior,
+          code, data-model). The <strong>drift</strong> mode requires
+          <code>product-design/product-design-as-intended.md</code> and
+          <code>product-design/product-design-as-coded.md</code> to exist
+          for meaningful comparison.
+        </p>
+
+        <h3>Workflow</h3>
+        <ol>
+          <li>Pre-skill runs and loads shared definitions and report conventions eagerly.</li>
+          <li>Mode detection determines which explanation type to produce (prompts the user if not specified).</li>
+          <li>For general modes, the skill delegates to a specialized generator agent with the brief and output path.</li>
+          <li>For drift mode, the skill runs inline: reads as-intended and as-coded files, compares section by section, produces a drift summary, and optionally offers a sync workflow or promote workflow.</li>
+          <li>The report is saved and post-skill commits it.</li>
+        </ol>
+
+        <h3>Subagent Delegations</h3>
+        <dl>
+          <dt><code>explanation-generator</code></dt>
+          <dd>Handles behavior, code, and data-model modes.</dd>
+          <dt><code>architecture-explainer</code></dt>
+          <dd>Handles architecture mode with a multi-phase survey/identify/write workflow.</dd>
+          <dt><code>evolution-explainer</code></dt>
+          <dd>Handles behavior-evolution mode by mining plan history and building timelines.</dd>
+        </dl>
+
+        <h3>Reference Files Loaded</h3>
+        <p>
+          <strong>Eager:</strong> <code>general/shared-definitions.md</code>,
+          <code>general/report-conventions.md</code>.
+          <strong>Lazy:</strong> <code>product-design/product-design-as-coded.md</code>,
+          <code>product-design/product-design-as-intended.md</code>.
+        </p>
+
+        <h3>Expected Outputs</h3>
+        <p>
+          Each mode produces a report in its respective output directory:
+          <code>behavior-&lt;id&gt;-&lt;slug&gt;.md</code>,
+          <code>architecture-&lt;id&gt;-&lt;slug&gt;.md</code>,
+          <code>evolution-&lt;id&gt;-&lt;slug&gt;.md</code>,
+          <code>dev-onboarding-&lt;id&gt;-&lt;slug&gt;.md</code>,
+          <code>data-model-&lt;id&gt;-&lt;slug&gt;.md</code>, or
+          <code>research-&lt;id&gt;-&lt;slug&gt;.md</code> (drift mode).
+        </p>
+
+        <h3>Common Mistakes</h3>
+        <dl>
+          <dt>Using /explain to generate documentation for others</dt>
+          <dd><code>/explain</code> answers <em>your</em> questions about the system. For artifacts intended for other audiences, use <code>/document</code>, <code>/communicate</code>, or <code>/onboard</code>.</dd>
+          <dt>Running drift without design files</dt>
+          <dd>Drift mode compares as-intended and as-coded specs. If neither file exists, the comparison is empty. Run <code>/design</code> first to create the design intent artifacts.</dd>
+        </dl>
+      </section>
+
+      <section id="design" data-diataxis="reference">
+        <h2>/design</h2>
+
+        <h3>Purpose</h3>
+        <p>
+          Defines or updates a project's design foundations: stack choices,
+          conventions, conceptual design (entities, permissions, UX patterns),
+          metacommunication intent, standards, and constitution. Serves both
+          initial configuration (after <code>/seja-setup</code>) and ongoing
+          design evolution. Six modes cover the design lifecycle: interactive
+          questionnaire (default), from a pre-filled spec file, adding
+          documentation templates, generating a blank spec, interview-driven
+          conversation, and updating existing design sections.
+        </p>
+
+        <h3>Parameters</h3>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>[spec-file-path]</code></td><td>Path to a pre-filled spec file for automated configuration (Mode 2)</td></tr>
+            <tr><td><code>--mode interview</code></td><td>Run in Interview-Driven mode: conversational intake instead of fixed questionnaire (Mode 5)</td></tr>
+            <tr><td><code>--generate-spec</code></td><td>Generate a blank spec skeleton to fill out offline (Mode 4)</td></tr>
+            <tr><td><code>--add-docs</code></td><td>Add documentation templates to an existing project (Mode 3)</td></tr>
+            <tr><td><code>update &lt;section-slug&gt;</code></td><td>Jump directly to an update flow for a specific section. Valid slugs: <code>stack</code>, <code>conceptual</code>, <code>metacomm</code>, <code>backend-standards</code>, <code>frontend-standards</code>, <code>ux-standards</code>, <code>ui-standards</code>, <code>i18n</code>, <code>security</code>, <code>testing</code>, <code>constitution</code>, <code>full</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>Prerequisites</h3>
+        <p>
+          For initial design: <code>/seja-setup</code> should have been run
+          first to scaffold the harness topology and populate
+          <code>conventions.md</code> with stack definitions. For design
+          updates: <code>product-design/conventions.md</code> and
+          <code>product-design/product-design-as-intended.md</code> must exist.
+        </p>
+
+        <h3>Workflow</h3>
+        <ol>
+          <li>Detection logic evaluates invocation arguments and the state of <code>product-design/</code> files to determine the active mode (1-5 or Design Update).</li>
+          <li>For initial design (Modes 1, 2, 5): walks the user through a questionnaire or interview to gather stack choices, conceptual design, metacommunication, and standards.</li>
+          <li>Templates are instantiated from <code>.claude/references/template/</code> into <code>product-design/</code>, populating design-intent artifacts with the user's answers.</li>
+          <li>A verification pass checks semantic fidelity between questionnaire answers and generated files, fixing gaps.</li>
+          <li>For Design Update: shows current summary, offers an interactive menu to update specific sections, and regenerates dependent files.</li>
+        </ol>
+
+        <h3>Subagent Delegations</h3>
+        <p>
+          <code>/design</code> does not delegate to subagents. All work
+          runs inline in the current context.
+        </p>
+
+        <h3>Reference Files Loaded</h3>
+        <p>
+          <strong>All references loaded eagerly (no eager/lazy split):</strong>
+          <code>general/report-conventions.md</code>,
+          <code>general/review-perspectives.md</code>,
+          <code>general/shared-definitions.md</code>.
+          Templates in <code>.claude/references/template/</code> are read
+          during instantiation.
+        </p>
+
+        <h3>Expected Outputs</h3>
+        <p>
+          Generates or updates files in <code>product-design/</code>:
+          <code>conventions.md</code>, <code>constitution.md</code>,
+          <code>product-design-as-intended.md</code>,
+          <code>ux-research-results.md</code>, <code>standards.md</code>,
+          <code>design-standards.md</code>,
+          <code>security-checklists.md</code>, and (for brownfield projects)
+          <code>product-design-as-coded.md</code>. Also amends
+          <code>CLAUDE.md</code> with design-intent references.
+        </p>
+
+        <h3>Common Mistakes</h3>
+        <dl>
+          <dt>Running /design without /seja-setup first</dt>
+          <dd><code>/design</code> expects the harness topology and <code>conventions.md</code> to already exist. Run <code>/seja-setup</code> to scaffold the project structure before configuring design intent.</dd>
+          <dt>Confusing /design with /plan</dt>
+          <dd><code>/design</code> defines <em>what</em> to build and <em>why</em> (entities, permissions, metacommunication). <code>/plan</code> defines <em>how</em> to build it. Design comes before planning in the lifecycle.</dd>
+          <dt>Skipping the verification pass</dt>
+          <dd>The verification pass checks that generated files faithfully reflect questionnaire answers. Interrupting the skill before verification completes leaves semantic gaps in the design artifacts.</dd>
+        </dl>
+      </section>
+
+      <section id="plan" data-diataxis="reference">
+        <h2>/plan</h2>
+
+        <h3>Purpose</h3>
+        <p>
+          Creates a step-by-step plan for a feature, bug fix, or
+          improvement. Three modes: <strong>standard</strong> (single plan,
+          default), <strong>lightweight</strong> (<code>--light</code>, quick
+          proposal for small changes), and <strong>roadmap</strong>
+          (<code>--roadmap</code>, full product roadmap with
+          dependency-aware execution waves). Each plan is a self-contained
+          artifact that <code>/implement</code> can execute without
+          additional context.
+        </p>
+
+        <h3>Parameters</h3>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>&lt;brief&gt;</code></td><td>Description of the task to plan (required)</td></tr>
+            <tr><td><code>--light</code></td><td>Generate a lightweight proposal instead of a full plan</td></tr>
+            <tr><td><code>--plan</code></td><td>Force single-plan mode (skip auto-detection)</td></tr>
+            <tr><td><code>--roadmap</code></td><td>Generate a full product roadmap with dependency-aware waves</td></tr>
+            <tr><td><code>--from-spec &lt;path&gt;</code></td><td>Parse roadmap from a pre-filled spec file (use with <code>--roadmap</code>)</td></tr>
+            <tr><td><code>--auto</code></td><td>Auto-generate roadmap from project reference files (use with <code>--roadmap</code>)</td></tr>
+            <tr><td><code>--only-unimplemented</code></td><td>Scope roadmap to REQ items lacking STATUS markers (use with <code>--roadmap --auto</code>)</td></tr>
+            <tr><td><code>--framing metacomm</code></td><td>Frame the brief as a designer's metacommunication message (I/you phrasing)</td></tr>
+            <tr><td><code>--review &lt;level&gt;</code></td><td>Override complexity-gated review depth (<code>light</code>, <code>standard</code>, <code>deep</code>)</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Prerequisites</h3>
+        <p>
+          <code>product-design/conventions.md</code> must exist (design
+          guard). If missing, the skill stops and directs the user to run
+          <code>/design</code> first. Research should typically precede
+          planning to ensure architectural context is understood.
+        </p>
+
+        <h3>Workflow</h3>
+        <ol>
+          <li>Design guard verifies <code>conventions.md</code> exists. Mode detection determines standard, lightweight, or roadmap based on flags or brief analysis.</li>
+          <li>The plan is decomposed into steps, each with Files, References, Depends on, Interface, Verify, Tests, Docs, Deploy, and Traces metadata.</li>
+          <li>A complexity-gated two-phase review runs: Phase 1 shortlists 3-6 perspectives from the 16 available; Phase 2 runs targeted deep-dives on deferred concerns.</li>
+          <li>The plan file is saved with amendments from the review incorporated.</li>
+          <li>Post-skill files an <code>implement</code> pending action so the plan is tracked for execution.</li>
+        </ol>
+
+        <h3>Subagent Delegations</h3>
+        <dl>
+          <dt><code>plan-reviewer</code></dt>
+          <dd>Runs the two-phase perspective review on the drafted plan and returns a review log with amendments.</dd>
+        </dl>
+
+        <h3>Reference Files Loaded</h3>
+        <p>
+          <strong>Eager:</strong> <code>product-design/product-design-as-coded.md</code>,
+          <code>product-design/product-design-as-intended.md</code>,
+          <code>general/report-conventions.md</code>,
+          <code>general/coding-standards.md</code>,
+          <code>general/review-perspectives-index.md</code>.
+          <strong>Lazy:</strong> <code>product-design/standards.md</code>,
+          <code>product-design/security-checklists.md</code>,
+          <code>product-design/design-standards.md</code>,
+          <code>general/review-perspectives.md</code>,
+          <code>general/review-log-template.md</code>,
+          <code>template/plan-step.md</code>,
+          <code>template/roadmap-summary.md</code>,
+          <code>template/proposal.md</code>.
+        </p>
+
+        <h3>Expected Outputs</h3>
+        <p>
+          <strong>Standard mode:</strong> <code>_output/plans/plan-&lt;id&gt;-&lt;slug&gt;.md</code>
+          with header, steps, review log, and Q&amp;A log.
+          <strong>Lightweight mode:</strong> <code>_output/proposals/proposal-&lt;id&gt;-&lt;slug&gt;.md</code>.
+          <strong>Roadmap mode:</strong> <code>_output/roadmaps/roadmap-&lt;id&gt;-&lt;slug&gt;.md</code>
+          plus individual plan files for each work item.
+        </p>
+
+        <h3>Common Mistakes</h3>
+        <dl>
+          <dt>Writing vague step descriptions</dt>
+          <dd>Each step must be self-contained enough for a fresh subagent to execute it without prior context. Include specific file paths, function names, and verification criteria.</dd>
+          <dt>Skipping the Verify field</dt>
+          <dd>Steps without Verify criteria cannot be objectively confirmed as complete. Every step should have at least one testable assertion.</dd>
+          <dt>Not checking file existence during planning</dt>
+          <dd>Steps that reference files which do not exist will fail during implementation. Verify that referenced source files exist before finalizing the plan.</dd>
+        </dl>
+      </section>
+
+      <section id="implement" data-diataxis="reference">
+        <h2>/implement</h2>
+
+        <h3>Purpose</h3>
+        <p>
+          Executes a previously approved plan step by step. Four execution
+          modes: <strong>auto</strong> (default, each step in a fresh
+          subagent), <strong>manual</strong> (<code>--manual</code>,
+          sequential in current context), <strong>roadmap</strong>
+          (<code>--roadmap</code>, all plans wave by wave), and
+          <strong>pending</strong> (<code>--pending</code>, execute all
+          pending plans). Creates a rollback branch before starting and
+          includes a Quality Gate at the end (validation, code review,
+          tests, smoke tests).
+        </p>
+
+        <h3>Parameters</h3>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>&lt;planned-item-id&gt;</code></td><td>The 6-digit ID of the plan to execute (required unless <code>--roadmap</code> or <code>--pending</code>)</td></tr>
+            <tr><td><code>--manual</code></td><td>Execute all steps sequentially in the current context</td></tr>
+            <tr><td><code>--roadmap &lt;roadmap-id&gt;</code></td><td>Execute all plans in a roadmap wave by wave</td></tr>
+            <tr><td><code>--pending</code></td><td>Execute all pending plans by generating a lightweight roadmap</td></tr>
+            <tr><td><code>--max-iterations N</code></td><td>Cap auto-mode iterations (default: 20)</td></tr>
+            <tr><td><code>--dry-run</code></td><td>Preview changes without applying them</td></tr>
+            <tr><td><code>--skip-checks</code></td><td>Skip the Quality Gate at the end</td></tr>
+            <tr><td><code>--skip-docs</code></td><td>Skip automatic documentation generation; file a pending entry instead</td></tr>
+            <tr><td><code>--checkpoint &lt;wave|plan|none&gt;</code></td><td>Checkpoint granularity for roadmap mode (default: <code>wave</code>)</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Prerequisites</h3>
+        <p>
+          A plan file must exist at <code>_output/plans/plan-&lt;id&gt;-*.md</code>
+          (created by <code>/plan</code>). The plan should have been reviewed
+          and approved before execution.
+        </p>
+
+        <h3>Workflow</h3>
+        <ol>
+          <li>The plan file is located via the macro index. A rollback branch (<code>pre-plan-&lt;id&gt;</code>) is created from the current HEAD.</li>
+          <li>In auto mode, each step is dispatched to a fresh <code>general-purpose</code> subagent with the step description and a progress file for cross-iteration learnings.</li>
+          <li>Steps with explicit <code>Tests:</code> fields follow a TDD red-green cycle: write the failing test first, then implement until it passes.</li>
+          <li>The Quality Gate runs at the end: <code>/critique validate</code>, <code>/critique review</code>, test runner, and optionally smoke tests. A generator-critic loop retries critical findings up to 2 times.</li>
+          <li>Post-skill handles as-coded alignment, documentation auto-run, pending action creation, and commit.</li>
+        </ol>
+
+        <h3>Subagent Delegations</h3>
+        <dl>
+          <dt><code>general-purpose</code> (executor agents)</dt>
+          <dd>Auto mode: each plan step runs in a fresh subagent with the step description, plan context, and progress file. The skill constructs prompts dynamically from step metadata.</dd>
+          <dt><code>standards-checker</code></dt>
+          <dd>Quality Gate: runs project validation scripts.</dd>
+          <dt><code>code-reviewer</code></dt>
+          <dd>Quality Gate: reviews changes against quality perspectives.</dd>
+          <dt><code>test-runner</code></dt>
+          <dd>Quality Gate: runs the project test suite.</dd>
+        </dl>
+
+        <h3>Reference Files Loaded</h3>
+        <p>
+          <strong>Eager:</strong> <code>product-design/product-design-as-coded.md</code>,
+          <code>product-design/product-design-as-intended.md</code>,
+          <code>general/report-conventions.md</code>,
+          <code>general/coding-standards.md</code>.
+          <strong>Lazy:</strong> <code>product-design/standards.md</code>,
+          <code>product-design/security-checklists.md</code>,
+          <code>general/review-perspectives.md</code>.
+        </p>
+
+        <h3>Expected Outputs</h3>
+        <p>
+          The plan file is updated with step checkboxes marked as done.
+          A progress file (<code>plan-&lt;id&gt;-progress.md</code>) tracks
+          cross-iteration learnings during auto mode and is merged into
+          the plan file at wrap-up. Source code changes are committed
+          per the plan steps.
+        </p>
+
+        <h3>Common Mistakes</h3>
+        <dl>
+          <dt>Implementing without a plan</dt>
+          <dd>Ad-hoc implementation bypasses the design guard, review process, and traceability. Always create a plan first, even for small changes (use <code>/plan --light</code>).</dd>
+          <dt>Amending commits when a new commit is safer</dt>
+          <dd>In projects with concurrent sessions, <code>--amend</code> can absorb unrelated modified files. Prefer a follow-up commit over amending an existing one.</dd>
+          <dt>Skipping the Quality Gate</dt>
+          <dd>The Quality Gate catches regressions that individual step execution misses. Use <code>--skip-checks</code> only when you plan to run critique separately.</dd>
+        </dl>
+      </section>
+
+      <section id="critique" data-diataxis="reference">
+        <h2>/critique</h2>
+
+        <h3>Purpose</h3>
+        <p>
+          Unified quality gate with ten mutually exclusive modes covering
+          validation scripts, code review, smoke tests, preflight checks,
+          harness health diagnostics, test plan generation, documentation
+          consistency, git freshness, telemetry analysis, and semiotic
+          inspection. One skill for all "is it OK?" questions.
+        </p>
+
+        <h3>Parameters</h3>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>validate [scope]</code></td><td>Run project validation scripts. Scope: <code>all</code>, <code>i18n</code>, <code>auth</code>, <code>migrations</code>, <code>constants</code>, <code>po</code>, <code>coverage</code>, <code>tests</code>, <code>spec</code></td></tr>
+            <tr><td><code>review [scope]</code></td><td>Structured code review against quality perspectives. Scope: <code>staged</code>, file path, or directory</td></tr>
+            <tr><td><code>smoke [scope]</code></td><td>Runtime smoke tests. Scope: <code>all</code>, <code>api</code>, <code>ui</code></td></tr>
+            <tr><td><code>preflight [scope]</code></td><td>Combined validate + review in one pass. Scope: <code>staged</code>, <code>all</code>, or directory</td></tr>
+            <tr><td><code>health</code></td><td>Harness self-diagnosis (9 built-in checks). Supports <code>--verbose</code>, <code>--source &lt;path&gt;</code></td></tr>
+            <tr><td><code>test-plan [brief]</code></td><td>Generate a structured manual test plan</td></tr>
+            <tr><td><code>docs [--plugins LIST]</code></td><td>Documentation consistency check via 6 plugin-based scanners</td></tr>
+            <tr><td><code>freshness</code></td><td>Compare local branches to upstream; advisory-only, never pulls</td></tr>
+            <tr><td><code>telemetry</code></td><td>Usage analytics from <code>telemetry.jsonl</code></td></tr>
+            <tr><td><code>semiotic-inspection [scope]</code></td><td>SIM-based communicability evaluation of an interface</td></tr>
+            <tr><td><code>--depth &lt;level&gt;</code></td><td>Override review depth for <code>review</code> and <code>preflight</code> modes (<code>light</code>, <code>standard</code>, <code>deep</code>)</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Prerequisites</h3>
+        <p>
+          Varies by mode. <code>validate</code> requires validation scripts
+          registered in the plugin registry. <code>review</code> requires
+          code changes to review (staged, a file, or a directory).
+          <code>smoke</code> requires a running application and smoke test
+          registry. <code>health</code> requires the harness to be installed.
+        </p>
+
+        <h3>Workflow</h3>
+        <ol>
+          <li>Pre-skill runs and parses the mode argument. Stack filtering applies to <code>validate</code> and <code>preflight</code> modes, loading only scripts matching the project's backend and frontend frameworks.</li>
+          <li>The mode-appropriate agent or script is dispatched with the scope argument.</li>
+          <li>Results are collected into a structured critique report with pass/fail/warning classifications.</li>
+          <li>The report is saved to <code>_output/critique-logs/</code> and presented to the user.</li>
+        </ol>
+
+        <h3>Subagent Delegations</h3>
+        <dl>
+          <dt><code>standards-checker</code></dt>
+          <dd><code>validate</code> and <code>preflight</code> modes: runs project validation scripts and aggregates results.</dd>
+          <dt><code>code-reviewer</code></dt>
+          <dd><code>review</code> and <code>preflight</code> modes: reviews code against the 16 quality perspectives at the specified depth.</dd>
+          <dt><code>test-runner</code></dt>
+          <dd><code>smoke</code> mode: runs the configured smoke test suite.</dd>
+          <dt><code>harness-health-evaluator</code></dt>
+          <dd><code>health</code> mode: runs 9 built-in harness self-diagnosis checks.</dd>
+          <dt><code>test-plan-generator</code></dt>
+          <dd><code>test-plan</code> mode: generates a structured manual test plan from a brief and recent plans.</dd>
+          <dt><code>semiotic-inspector</code></dt>
+          <dd><code>semiotic-inspection</code> mode: conducts a SIM evaluation of interface communicability.</dd>
+        </dl>
+
+        <h3>Reference Files Loaded</h3>
+        <p>
+          <strong>All loaded eagerly (no eager/lazy split):</strong>
+          <code>general/report-conventions.md</code>,
+          <code>product-design/standards.md</code>,
+          <code>product-design/design-standards.md</code>,
+          <code>product-design/security-checklists.md</code>,
+          <code>general/review-perspectives.md</code>,
+          <code>general/review-perspectives-index.md</code>,
+          <code>general/review-log-template.md</code>.
+        </p>
+
+        <h3>Expected Outputs</h3>
+        <p>
+          <code>_output/critique-logs/critique-&lt;id&gt;-&lt;slug&gt;.md</code>
+          containing the mode-specific report. All modes except
+          <code>telemetry</code> produce a saved report. <code>test-plan</code>
+          mode additionally produces a test plan artifact.
+        </p>
+
+        <h3>Common Mistakes</h3>
+        <dl>
+          <dt>Running review without reading the diff first</dt>
+          <dd>The review agent needs something to review. Ensure changes are staged or specify a file or directory path as the scope.</dd>
+          <dt>Running all critique modes when one is sufficient</dt>
+          <dd>Each mode serves a specific purpose. Use <code>validate</code> for script-based checks, <code>review</code> for code changes, <code>preflight</code> for pre-merge, and <code>health</code> for harness diagnostics. Running all of them when only one applies wastes context budget.</dd>
+          <dt>Treating advisory findings as blocking</dt>
+          <dd>The review distinguishes between critical findings (must fix) and advisory findings (nice to have). Critical issues block merges; advisory ones can be deferred.</dd>
+        </dl>
+      </section>
+
+      <section id="reflect" data-diataxis="reference">
+        <h2>/reflect</h2>
+
+        <h3>Purpose</h3>
+        <p>
+          Helps you step back and reflect on specific work through two
+          explicit lenses: the <strong>product lens</strong> (what you built,
+          whether it does what you intended) and the <strong>practice
+          lens</strong> (how you worked, what patterns emerge). Three modes:
+          <strong>conversational</strong> (default, pick artifacts and write
+          your reflection), <strong>deep</strong> (<code>--deep</code>,
+          visualization-backed practice evolution narrative), and
+          <strong>telemetry</strong> (<code>--telemetry</code>, statistical
+          pattern mining from usage data).
+        </p>
+
+        <h3>Parameters</h3>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>(no arguments)</td><td>Conversational mode: pick artifacts, choose a lens, write your reflection</td></tr>
+            <tr><td><code>--deep [scope]</code></td><td>Deep reflection mode with event matrix visualization and practice narrative</td></tr>
+            <tr><td><code>--telemetry</code></td><td>Statistical telemetry mining mode (V1 analysis primitives)</td></tr>
+            <tr><td><code>--since &lt;duration&gt;</code></td><td>Time window for <code>--telemetry</code> or <code>--deep</code>. Accepts ISO datetime or <code>Nd</code> suffix (default: <code>30d</code>)</td></tr>
+            <tr><td><code>--skill &lt;name&gt;</code></td><td>Filter telemetry to a single skill (use with <code>--telemetry</code>)</td></tr>
+            <tr><td><code>--dry-run</code></td><td>Print the report without writing to disk (use with <code>--telemetry</code>)</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Prerequisites</h3>
+        <p>
+          No strict prerequisites. Works best when there are artifacts to
+          reflect on (plans, research reports, or other outputs). The
+          <code>--deep</code> and <code>--telemetry</code> modes require
+          <code>telemetry.jsonl</code> to exist with data within the
+          specified time window.
+        </p>
+
+        <h3>Workflow</h3>
+        <ol>
+          <li><strong>Conversational mode:</strong> asks the user to pick a scope (recent plans, recent research, specific artifact, time window, or free-form), summarizes chosen artifacts, asks which lens (product, practice, or both), poses the lens-appropriate open-ended question, and records the user's response verbatim.</li>
+          <li><strong>Deep mode:</strong> reads telemetry and briefs within a time window, optionally filtered by a scope keyword, and produces an event matrix visualization (Vega-Lite), a transition graph (Graphviz DOT), and a past-tense practice evolution narrative.</li>
+          <li><strong>Telemetry mode:</strong> runs 5 analysis primitives (sequence mining, duration anomalies, revision rate, stuck loops, decision reversals) over the telemetry data.</li>
+          <li>All modes save a reflection report to <code>_output/reflections/</code>.</li>
+        </ol>
+
+        <h3>Subagent Delegations</h3>
+        <p>
+          <code>/reflect</code> does not delegate to subagents. All modes
+          run inline using co-located Python scripts for data processing
+          and visualization generation.
+        </p>
+
+        <h3>Reference Files Loaded</h3>
+        <p>
+          <strong>Eager:</strong> <code>product-design/conventions.md</code>,
+          <code>general/constraints.md</code>.
+          <strong>Lazy:</strong> <code>general/shared-definitions.md</code>,
+          <code>general/skill-graph.md</code>,
+          <code>general/coding-standards.md</code>.
+        </p>
+
+        <h3>Expected Outputs</h3>
+        <p>
+          <code>_output/reflections/reflection-&lt;id&gt;-&lt;slug&gt;.md</code>
+          containing the reflection report. Deep mode additionally produces
+          companion visualization files (event matrix and transition graph
+          in SVG, HTML, and Vega-Lite/DOT formats).
+        </p>
+
+        <h3>Common Mistakes</h3>
+        <dl>
+          <dt>Expecting prescriptive recommendations from /reflect</dt>
+          <dd><code>/reflect</code> is strictly non-prescriptive: it records observations and your own words, never "you should" or "consider changing." For prescriptive follow-up, use <code>/research</code>.</dd>
+          <dt>Reflecting on work that has not been implemented</dt>
+          <dd>The practice lens examines how you worked; if the research or plan has not been executed yet, there is no practice to reflect on. Implement first, then reflect.</dd>
+        </dl>
+      </section>
+
+      <section id="document" data-diataxis="reference">
+        <h2>/document</h2>
+
+        <h3>Purpose</h3>
+        <p>
+          Generates or updates project documentation based on plan
+          <code>Docs:</code> fields, auto-detection of recent git changes, or
+          explicit type selection. Supports six documentation types: readme,
+          contextual-help, api-reference, ddr, help-center, and changelog.
+          Runs after <code>/implement</code> to capture user-facing changes
+          while the implementation is fresh.
+        </p>
+
+        <h3>Parameters</h3>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>&lt;scope&gt;</code></td><td>What to document: a file path, module, feature name, or general topic</td></tr>
+            <tr><td><code>--plan &lt;id&gt;</code></td><td>Read <code>Docs:</code> fields from a plan file and generate documentation for each identified need</td></tr>
+            <tr><td><code>--auto-detect</code></td><td>Detect documentation needs from recent git changes using heuristics</td></tr>
+            <tr><td><code>--type &lt;type&gt;</code></td><td>Force a specific doc type: readme, contextual-help, api-reference, ddr, help-center, or changelog</td></tr>
+            <tr><td><code>--since &lt;ref&gt;</code></td><td>Override auto-detect bounding window (date, git SHA, or <code>last</code>)</td></tr>
+            <tr><td><code>--full-history</code></td><td>Ignore per-doc-type bounding windows and scan full git history</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Prerequisites</h3>
+        <ul>
+          <li><code>product-design/conventions.md</code> must exist (or template fallback)</li>
+          <li>For <code>--plan</code>: the plan file must exist with non-N/A <code>Docs:</code> fields</li>
+          <li>For <code>--auto-detect</code>: a git history with recent changes</li>
+        </ul>
+
+        <h3>Workflow</h3>
+        <ol>
+          <li>Run pre-skill to load references and log the brief</li>
+          <li>Determine scope and documentation type via mode detection (plan-driven, auto-detect, type-targeted, or bare scope)</li>
+          <li>For <code>--auto-detect</code>: compute per-doc-type bounding windows from the briefs index to avoid re-documenting unchanged areas</li>
+          <li>Launch one <code>document-generator</code> agent per doc type (parallel for multiple types), passing the resolved template, quality guide, and project context</li>
+          <li>Record document run metadata (HEAD SHA, generated types) for future bounding-window calculations</li>
+        </ol>
+
+        <h3>Subagent Delegations</h3>
+        <dl>
+          <dt>document-generator</dt>
+          <dd>Produces the actual documentation file(s). Receives the doc type, scope, template path, quality guide, and project context. Launched once per doc type; multiple types run in parallel.</dd>
+        </dl>
+
+        <h3>Reference Files Loaded</h3>
+        <ul>
+          <li><strong>Eager</strong>: <code>general/documentation-quality.md</code>, <code>general/report-conventions.md</code></li>
+          <li><strong>Lazy</strong>: none (standard budget tier)</li>
+        </ul>
+
+        <h3>Expected Outputs</h3>
+        <ul>
+          <li>Documentation files in project-appropriate locations (e.g., <code>README.md</code>, <code>docs/</code> subdirectories)</li>
+          <li>Updated briefs entry with SHA and generated doc types for future bounding windows</li>
+        </ul>
+
+        <h3>Common Mistakes</h3>
+        <dl>
+          <dt>Running <code>/document</code> before <code>/implement</code></dt>
+          <dd>Documentation should reflect implemented behavior, not planned behavior. Run <code>/implement</code> first so the generator reads actual code.</dd>
+
+          <dt>Using <code>--auto-detect</code> without understanding bounding windows</dt>
+          <dd>Auto-detect scans only changes since the last <code>/document</code> run of each type. Use <code>--full-history</code> for a clean-slate scan, or <code>--since last</code> to bound by the most recent run of any type.</dd>
+
+          <dt>Confusing <code>/document</code> with <code>/communicate</code></dt>
+          <dd><code>/document</code> produces project documentation (README, API reference, changelog). <code>/communicate</code> produces stakeholder-facing material tailored to a specific audience segment.</dd>
+        </dl>
+      </section>
+
+      <section id="communicate" data-diataxis="reference">
+        <h2>/communicate</h2>
+
+        <h3>Purpose</h3>
+        <p>
+          Generates tailored communication material for a specific stakeholder
+          audience segment. Four audiences are supported: Evaluators (CTOs,
+          tech leads assessing adoption), Clients (project commissioners and
+          funders), End Users (people using the built software), and Academics
+          (researchers in semiotic engineering, HCI, or AI-assisted
+          development). Each audience gets content in their language, focused
+          on what matters to them.
+        </p>
+
+        <h3>Parameters</h3>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>&lt;audience&gt;</code></td><td>Target audience: <code>evaluator(s)</code> / <code>client(s)</code> / <code>end-user(s)</code> / <code>academic(s)</code>, or tags EVL / CLT / USR / ACD</td></tr>
+            <tr><td><code>--format &lt;type&gt;</code></td><td>Output format: <code>md</code>, <code>html</code>, or <code>both</code> (default: both)</td></tr>
+            <tr><td><code>--all</code></td><td>Generate material for all 4 audience segments in parallel</td></tr>
+            <tr><td><code>--source &lt;file&gt;</code></td><td>Path to existing advisory or markdown file to reformat for the target audience</td></tr>
+            <tr><td><code>--deep</code></td><td>Include Deep-dive content sections</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Prerequisites</h3>
+        <ul>
+          <li><code>product-design/product-design-as-coded.md</code> should exist (provides the conceptual design the material is grounded in)</li>
+          <li><code>product-design/conventions.md</code> must exist (or template fallback)</li>
+        </ul>
+
+        <h3>Workflow</h3>
+        <ol>
+          <li>Run pre-skill to load references and log the brief</li>
+          <li>Parse arguments and resolve audience tag (EVL, CLT, USR, or ACD); if missing, present an interactive menu</li>
+          <li>Compute output path in a date-stamped folder (<code>_output/communication/YYYY-MM-DD/</code>) and reserve a global ID</li>
+          <li>Launch the <code>communication-generator</code> agent with audience template, Diataxis mapping, project context, and output path</li>
+          <li>Create or update a date-folder index if multiple artifacts exist for the same date</li>
+        </ol>
+
+        <h3>Subagent Delegations</h3>
+        <dl>
+          <dt>communication-generator</dt>
+          <dd>Produces the actual stakeholder material. Receives the audience tag, audience template, Diataxis mapping, project context (conceptual design, conventions, communication style), and output path. In batch mode (<code>--all</code>), one agent per audience runs in parallel.</dd>
+        </dl>
+
+        <h3>Reference Files Loaded</h3>
+        <ul>
+          <li><strong>Eager</strong>: <code>general/communication.md</code>, <code>general/shared-definitions.md</code>, <code>general/report-conventions.md</code>, <code>product-design/product-design-as-coded.md</code></li>
+          <li><strong>Lazy</strong>: per-audience templates in <code>general/communication/</code> (loaded by the generator agent)</li>
+        </ul>
+
+        <h3>Expected Outputs</h3>
+        <ul>
+          <li>Communication artifacts in <code>_output/communication/YYYY-MM-DD/</code> with both <code>.md</code> and <code>.html</code> versions (configurable via <code>--format</code>)</li>
+          <li>Date-folder index when multiple artifacts exist for the same date</li>
+        </ul>
+
+        <h3>Common Mistakes</h3>
+        <dl>
+          <dt>Using <code>/communicate</code> for project documentation</dt>
+          <dd><code>/communicate</code> produces audience-tailored stakeholder material. For project docs (README, API reference, changelog), use <code>/document</code>.</dd>
+
+          <dt>Running without conceptual design</dt>
+          <dd>The generator grounds material in <code>product-design/product-design-as-coded.md</code>. Without it, the output lacks project-specific substance. Run <code>/design</code> first to establish the conceptual design.</dd>
+        </dl>
+      </section>
+
+      <section id="onboard" data-diataxis="reference">
+        <h2>/onboard</h2>
+
+        <h3>Purpose</h3>
+        <p>
+          Generates a tailored onboarding plan for a new team member based on
+          their role family and expertise level. Three role families (Builder,
+          Shaper, Guardian) crossed with three expertise levels (L1 Contributor,
+          L2 Expert, L3 Leader) produce nine distinct onboarding profiles.
+          Plans include a welcome, day-one foundation, role- and level-specific
+          weeks, a 30-60-90 day timeline, and a prioritised reading list
+          grounded in the actual project codebase.
+        </p>
+
+        <h3>Parameters</h3>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>&lt;role-family&gt;</code></td><td>Role: <code>builder</code> / <code>shaper</code> / <code>guardian</code> (or BLD / SHP / GRD). Combinations allowed (e.g., <code>builder+guardian</code>)</td></tr>
+            <tr><td><code>&lt;expertise-level&gt;</code></td><td>Level: <code>L1</code>-<code>L3</code> or aliases (<code>contributor</code>, <code>junior</code>, <code>mid</code>, <code>expert</code>, <code>senior</code>, <code>leader</code>, <code>staff</code>)</td></tr>
+            <tr><td><code>[name]</code></td><td>Name of the new team member for personalization</td></tr>
+            <tr><td><code>--area &lt;focus&gt;</code></td><td>Focus area (e.g., <code>backend</code>, <code>frontend</code>, <code>auth</code>)</td></tr>
+            <tr><td><code>--format &lt;type&gt;</code></td><td>Output format: <code>md</code>, <code>html</code>, or <code>both</code> (default: both)</td></tr>
+            <tr><td><code>--all</code></td><td>Generate plans for all 9 role-level combinations in parallel</td></tr>
+            <tr><td><code>--all-levels &lt;role&gt;</code></td><td>Generate plans for all 3 levels of a single role family</td></tr>
+            <tr><td><code>--all-roles &lt;level&gt;</code></td><td>Generate plans for all 3 roles at a single level</td></tr>
+            <tr><td><code>--batch &lt;specs&gt;</code></td><td>Semicolon-separated spec list for parallel generation</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Prerequisites</h3>
+        <ul>
+          <li><code>product-design/conventions.md</code> must exist (or template fallback)</li>
+          <li><code>product-design/product-design-as-coded.md</code> should exist for project-specific content</li>
+        </ul>
+
+        <h3>Workflow</h3>
+        <ol>
+          <li>Run pre-skill to load references and log the brief</li>
+          <li>Parse arguments and resolve role tags and level; if missing, present interactive menus for role family and expertise level</li>
+          <li>Compute output path in a date-stamped folder (<code>_output/onboarding-plans/YYYY-MM-DD/</code>) and reserve a global ID</li>
+          <li>Launch the <code>onboarding-generator</code> agent with role/level templates, project context, and output path</li>
+          <li>Verify output files exist and display a result summary</li>
+        </ol>
+
+        <h3>Subagent Delegations</h3>
+        <dl>
+          <dt>onboarding-generator</dt>
+          <dd>Produces the onboarding plan. Receives the role tags, level, name, focus area, role-family template(s), level template, project context, and output path. In batch mode, one agent per spec runs in parallel.</dd>
+        </dl>
+
+        <h3>Reference Files Loaded</h3>
+        <ul>
+          <li><strong>Eager</strong>: <code>general/onboarding.md</code>, <code>general/shared-definitions.md</code>, <code>general/report-conventions.md</code>, <code>product-design/product-design-as-coded.md</code></li>
+          <li><strong>Lazy</strong>: per-role templates in <code>general/onboarding/</code> and per-level templates (loaded by the generator agent)</li>
+        </ul>
+
+        <h3>Expected Outputs</h3>
+        <ul>
+          <li>Onboarding plan files in <code>_output/onboarding-plans/YYYY-MM-DD/</code> with both <code>.md</code> and <code>.html</code> versions</li>
+        </ul>
+
+        <h3>Common Mistakes</h3>
+        <dl>
+          <dt>Confusing role families with job titles</dt>
+          <dd>Role families (Builder, Shaper, Guardian) are SEJA abstractions. A "tech lead" might be Builder+Guardian; a "PM who codes" might be Shaper+Builder. Use the combination syntax when a single family does not fit.</dd>
+
+          <dt>Generating all 9 plans when only one person is joining</dt>
+          <dd><code>--all</code> is useful for pre-populating a library. For a single hire, use the targeted invocation with their specific role and level.</dd>
+        </dl>
+      </section>
+
+      <section id="pending" data-diataxis="reference">
+        <h2>/pending</h2>
+
+        <h3>Purpose</h3>
+        <p>
+          Lists and addresses outstanding human actions from the pending
+          ledger. The harness automatically files pending actions during
+          post-skill (e.g., after <code>/implement</code> defers marker
+          flips, after plans identify documentation needs, or when periodic
+          triggers fire). This skill provides the interface to review, resolve,
+          snooze, or dismiss those actions. Twelve action types cover the full
+          lifecycle from marker flips to spec-drift checks to plan execution.
+        </p>
+
+        <h3>Parameters</h3>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>(none or <code>list</code>)</td><td>List all pending items with per-item resolution advice</td></tr>
+            <tr><td><code>address &lt;id&gt;</code></td><td>Run the guided resolution workflow for a specific item</td></tr>
+            <tr><td><code>add --type &lt;type&gt; --source &lt;id&gt; --description "&lt;text&gt;"</code></td><td>Append a new pending action</td></tr>
+            <tr><td><code>done &lt;id&gt;</code></td><td>Mark a pending item as done</td></tr>
+            <tr><td><code>snooze &lt;id&gt; --until &lt;date&gt;</code></td><td>Snooze an item until a future date</td></tr>
+            <tr><td><code>dismiss &lt;id&gt; [--reason &lt;text&gt;]</code></td><td>Dismiss an item without completing it</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Prerequisites</h3>
+        <ul>
+          <li>The pending ledger (<code>_output/pending.jsonl</code>) must exist (created automatically by post-skill when the first action is filed)</li>
+        </ul>
+
+        <h3>Workflow</h3>
+        <ol>
+          <li>Run pre-skill with light context budget (skips pending-check, orphan-check, compaction-check, and constitution to avoid recursion)</li>
+          <li>For <code>list</code>: run <code>pending.py list --status pending --json</code>, group items by type, and display each with type-specific resolution steps</li>
+          <li>For <code>address &lt;id&gt;</code>: dispatch based on item type -- marker-flip types (mark-implemented, incorporate-research-markers) get interactive guided workflows; other types get printed resolution advice</li>
+          <li>For <code>add</code>/<code>done</code>/<code>snooze</code>/<code>dismiss</code>: forward arguments directly to <code>pending.py</code></li>
+        </ol>
+
+        <h3>Subagent Delegations</h3>
+        <p>None. This skill runs entirely in the main context without delegating to subagents.</p>
+
+        <h3>Reference Files Loaded</h3>
+        <ul>
+          <li><strong>Eager</strong>: none (light context budget -- only mandatory refs loaded)</li>
+          <li><strong>Lazy</strong>: <code>general/shared-definitions.md</code></li>
+        </ul>
+
+        <h3>Expected Outputs</h3>
+        <ul>
+          <li>Console output listing pending items with resolution advice</li>
+          <li>State changes in <code>_output/pending.jsonl</code> (done, snoozed, or dismissed entries)</li>
+          <li>For marker-flip types: STATUS or INCORPORATED markers applied to design files via <code>apply_marker.py</code></li>
+        </ul>
+
+        <h3>Common Mistakes</h3>
+        <dl>
+          <dt>Ignoring pending items until they accumulate</dt>
+          <dd>Pre-skill surfaces a banner when overdue items exist. Address items promptly after <code>/implement</code> rather than letting them pile up -- stale pending actions lose context.</dd>
+
+          <dt>Using <code>done</code> instead of <code>address</code> for marker-flip types</dt>
+          <dd>For <code>mark-implemented</code> and <code>incorporate-research-markers</code> types, use <code>address</code> to get the guided marker-flip workflow. Using <code>done</code> closes the item without actually flipping the markers.</dd>
+        </dl>
+      </section>
+
+      <section id="publish" data-diataxis="reference">
+        <h2>/publish</h2>
+
+        <h3>Purpose</h3>
+        <p>
+          Publishes a tagged release to the public SEJA repository via the
+          automated publish pipeline. Wraps <code>tools/publish.py</code>,
+          which handles the full 8-step lifecycle: preflight checks, tag
+          creation, cloning the public repo, syncing harness files, running
+          smoke tests, committing, pushing, and closing the pending
+          <code>PUBLISH:</code> entry. Supports version inference from
+          CHANGELOG.md heuristics or an explicit version argument.
+        </p>
+
+        <h3>Parameters</h3>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>[version]</code></td><td>Version tag to publish (e.g., <code>v0.3.0</code>). When omitted, inferred from CHANGELOG.md and git tags.</td></tr>
+            <tr><td><code>--dry-run</code></td><td>Preview the full command sequence without executing destructive actions</td></tr>
+            <tr><td><code>--yes</code></td><td>Non-interactive mode: accept all defaults at confirmation prompts</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Prerequisites</h3>
+        <ul>
+          <li><code>seja-public/CHANGELOG.md</code> should have content under <code>## Unreleased</code></li>
+          <li>Working tree must be clean (no uncommitted changes)</li>
+          <li>The <code>simonedjb/seja</code> remote must be reachable</li>
+        </ul>
+
+        <h3>Workflow</h3>
+        <ol>
+          <li>Run pre-skill with light context budget</li>
+          <li>Resolve the version: use the explicit argument, or run <code>publish.py --infer-version</code> and confirm with the user</li>
+          <li>Run preflight checks via <code>publish.py --preflight-only --json</code>; auto-fix missing harness changelog if needed; present remaining issues to the user</li>
+          <li>Execute the full pipeline: <code>python tools/publish.py [version] [flags]</code></li>
+          <li>Report outcome: on success, confirm the version and closed pending entry; on failure, relay the script's recovery guidance</li>
+        </ol>
+
+        <h3>Subagent Delegations</h3>
+        <dl>
+          <dt>document-generator</dt>
+          <dd>Invoked only when the preflight detects a missing harness changelog entry. Generates a <code>## [VERSION]</code> entry in <code>.claude/CHANGELOG.md</code> from structured git history data.</dd>
+        </dl>
+
+        <h3>Reference Files Loaded</h3>
+        <ul>
+          <li><strong>Eager</strong>: none (light context budget)</li>
+          <li><strong>Lazy</strong>: none</li>
+        </ul>
+
+        <h3>Expected Outputs</h3>
+        <ul>
+          <li>A git tag on the source repository</li>
+          <li>Updated public repository with synced harness files and prose</li>
+          <li>Closed <code>PUBLISH:</code> pending entry</li>
+        </ul>
+
+        <h3>Common Mistakes</h3>
+        <dl>
+          <dt>Publishing with a dirty working tree</dt>
+          <dd>The preflight will flag uncommitted changes. Commit or stash before publishing to ensure the tag reflects a clean state.</dd>
+
+          <dt>Skipping <code>--dry-run</code> on the first publish</dt>
+          <dd>Use <code>--dry-run</code> to preview the full pipeline before committing to a live release. It verifies all preflight conditions without mutating any state.</dd>
+        </dl>
+      </section>
+
+      <section id="seja-setup" data-diataxis="reference">
+        <h2>/seja-setup</h2>
+
+        <h3>Purpose</h3>
+        <p>
+          Manages every harness-state transition in a project: install (copy
+          from source), finalise in place (<code>--here</code>), companion
+          workspace (<code>--workspace</code>), demo bootstrap
+          (<code>--demo</code>), and upgrade (<code>--upgrade</code>). Uses
+          state-driven dispatch: inspects the current directory via
+          <code>detect_setup_state.py</code> and routes to the correct action
+          based on detected state (no-harness, fresh-download, partial-init,
+          finalised, or dev-repo-refuse).
+        </p>
+
+        <h3>Parameters</h3>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>[target-directory]</code></td><td>Path to the target project directory</td></tr>
+            <tr><td><code>--here</code></td><td>Finalise SEJA setup in the current directory (use when SEJA was cloned directly)</td></tr>
+            <tr><td><code>--workspace</code></td><td>Create a companion workspace alongside an existing codebase</td></tr>
+            <tr><td><code>--demo</code></td><td>Set up with the pre-configured TaskFlow demo project</td></tr>
+            <tr><td><code>--upgrade</code></td><td>Upgrade harness files to the latest SemVer tag (or <code>--version &lt;tag&gt;</code>)</td></tr>
+            <tr><td><code>--version &lt;tag&gt;</code></td><td>Pin to a specific release tag (e.g., <code>v0.2.0</code>)</td></tr>
+            <tr><td><code>--dry-run</code></td><td>Preview upgrade changes without applying them</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Prerequisites</h3>
+        <ul>
+          <li>For install: a target directory (new or existing project)</li>
+          <li>For <code>--here</code>: SEJA files already present in the current directory</li>
+          <li>For <code>--upgrade</code>: an existing SEJA installation in the current directory</li>
+        </ul>
+
+        <h3>Workflow</h3>
+        <ol>
+          <li>Run pre-skill to load references and log the brief</li>
+          <li>Detect project state via <code>detect_setup_state.py --json</code></li>
+          <li>Route to the appropriate flow: install (copy harness, scaffold CLAUDE.md, populate conventions), finalise (reconcile existing files), workspace (create companion directory), demo (install + pre-fill TaskFlow files), or upgrade (refresh harness files, preserve project data)</li>
+          <li>For install: run the Section 1 questionnaire to populate <code>conventions.md</code> with stack definitions, scaffold stack-appropriate rules and CLAUDE.md</li>
+          <li>Hand off to <code>/design</code> for design-intent configuration (entities, permissions, metacommunication)</li>
+        </ol>
+
+        <h3>Subagent Delegations</h3>
+        <p>None. This skill runs entirely in the main context.</p>
+
+        <h3>Reference Files Loaded</h3>
+        <ul>
+          <li><strong>Eager</strong>: <code>general/shared-definitions.md</code>, <code>template/questionnaire.md</code>, <code>template/conventions.md</code></li>
+          <li><strong>Lazy</strong>: none</li>
+        </ul>
+
+        <h3>Expected Outputs</h3>
+        <ul>
+          <li>A fully scaffolded project directory with <code>.claude/</code>, <code>product-design/</code>, and <code>_output/</code> directories</li>
+          <li>Populated <code>CLAUDE.md</code>, <code>product-design/conventions.md</code>, and stack-appropriate rule files</li>
+          <li>A <code>.seja-version</code> file recording the installed version</li>
+        </ul>
+
+        <h3>Common Mistakes</h3>
+        <dl>
+          <dt>Running <code>/seja-setup</code> inside the SEJA development repository</dt>
+          <dd>The skill detects dev-repo state and refuses to run, preventing corruption of the harness source. Use standard git workflows for harness development.</dd>
+
+          <dt>Confusing <code>/seja-setup</code> with <code>/design</code></dt>
+          <dd><code>/seja-setup</code> scaffolds topology (stack, directory layout, CLAUDE.md, rules). <code>/design</code> defines design intent (entities, permissions, metacommunication, personas, standards, constitution). Setup creates; design refines.</dd>
+        </dl>
+      </section>
+
+      <section id="help" data-diataxis="reference">
+        <h2>/help</h2>
+
+        <h3>Purpose</h3>
+        <p>
+          Shows what skills are available and explains what each one does.
+          Three layers of progressive disclosure: a no-args overview grouped
+          by workflow category, per-skill detail cards with arguments and
+          related skills, and an interactive category browser with a Mermaid
+          skill-graph visualization. This is the discovery entry point for
+          users new to the harness.
+        </p>
+
+        <h3>Parameters</h3>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>[skill-name]</code></td><td>Show full details for a specific skill (Quick Guide, arguments, category, related skills)</td></tr>
+            <tr><td><code>--browse</code></td><td>Interactive category browser with skill graph</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Prerequisites</h3>
+        <ul>
+          <li>A SEJA harness installation with <code>.claude/skills/</code> directory</li>
+        </ul>
+
+        <h3>Workflow</h3>
+        <ol>
+          <li><strong>Layer 1 (no args)</strong>: List all user-facing skills grouped by category (Getting started, Design and plan, Understand the system, Quality and review, Communicate, Housekeeping) with one-sentence summaries</li>
+          <li><strong>Layer 2 (<code>/help &lt;skill&gt;</code>)</strong>: Load the skill's Quick Guide, display arguments, category, and related skills from the skill graph</li>
+          <li><strong>Layer 3 (<code>/help --browse</code>)</strong>: Scan all skill directories, group by <code>metadata.category</code>, render a Mermaid skill-relationship diagram, and walk the user through picking a category, then a skill to execute</li>
+        </ol>
+
+        <h3>Subagent Delegations</h3>
+        <p>None. This skill runs entirely in the main context.</p>
+
+        <h3>Reference Files Loaded</h3>
+        <ul>
+          <li><strong>Eager</strong>: none (light context budget)</li>
+          <li><strong>Lazy</strong>: <code>general/skill-graph.md</code> (loaded when displaying related skills)</li>
+        </ul>
+
+        <h3>Expected Outputs</h3>
+        <ul>
+          <li>Console output: skill overviews, detail cards, or interactive category browser</li>
+          <li>No files produced -- <code>/help</code> is purely informational</li>
+        </ul>
+
+        <h3>Common Mistakes</h3>
+        <dl>
+          <dt>Using <code>/help</code> to execute a skill</dt>
+          <dd><code>/help</code> explains and navigates; it does not perform the work itself. Once you know which skill to run, invoke it directly (e.g., <code>/plan</code>, not <code>/help plan</code>).</dd>
+
+          <dt>Not using <code>--browse</code> for discovery</dt>
+          <dd>Layer 3 (<code>--browse</code>) provides the richest exploration experience with category grouping and skill-graph visualization. Use it when you are unsure which skill fits your task.</dd>
+        </dl>
+      </section>
+
+      <section id="qa-log" data-diataxis="reference">
+        <h2>/qa-log</h2>
+
+        <h3>Purpose</h3>
+        <p>
+          Saves the current conversation (questions and answers) to a file
+          for future reference. Operates in two modes: standalone mode writes
+          to <code>_output/qa-logs/</code> with a reserved ID and
+          slug-based filename; companion mode (used by post-skill) produces
+          collocated QA logs next to the parent artifact.
+        </p>
+
+        <h3>Parameters</h3>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>[brief]</code></td><td>Short title for the QA log file. Derived from conversation topic if omitted</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Prerequisites</h3>
+        <ul>
+          <li>A conversation with useful decisions or insights worth preserving</li>
+        </ul>
+
+        <h3>Workflow</h3>
+        <ol>
+          <li>If a brief argument is provided, use it as the log title; otherwise derive one from the conversation topic</li>
+          <li>Reserve a unique ID via <code>reserve_id.py</code></li>
+          <li>Capture all user prompts and agent responses from the current session</li>
+          <li>Write the QA log file to the output directory</li>
+        </ol>
+
+        <h3>Subagent Delegations</h3>
+        <p>None. This skill runs entirely in the main context.</p>
+
+        <h3>Reference Files Loaded</h3>
+        <ul>
+          <li><strong>Eager</strong>: none (light context budget)</li>
+          <li><strong>Lazy</strong>: none</li>
+        </ul>
+
+        <h3>Expected Outputs</h3>
+        <ul>
+          <li><code>_output/qa-logs/qa-&lt;id&gt;-&lt;slug&gt;.md</code> (standalone mode)</li>
+          <li>Companion QA log collocated with parent artifact (companion mode)</li>
+        </ul>
+
+        <h3>Common Mistakes</h3>
+        <dl>
+          <dt>Running <code>/qa-log</code> before a meaningful conversation</dt>
+          <dd>The skill captures the full session; invoking it immediately after a single prompt produces a thin log with little reference value. Wait until the conversation has substance worth preserving.</dd>
+
+          <dt>Confusing standalone and companion modes</dt>
+          <dd>Standalone <code>/qa-log</code> writes to <code>_output/qa-logs/</code>. When invoked by post-skill, it writes a companion file next to the parent artifact. You do not need to invoke it manually after a skill invocation -- post-skill handles it.</dd>
+        </dl>
+      </section>
+
+      <section id="common-mistakes" data-diataxis="how-to">
+        <h2>Common Mistakes</h2>
+
+        <p>
+          These cross-cutting mistakes span multiple skills and reflect
+          fundamental misunderstandings of how the skill system operates.
+        </p>
+
+        <dl>
+          <dt>Running skills out of lifecycle order</dt>
+          <dd>
+            The canonical path exists for a reason: <code>/research</code>
+            builds understanding, <code>/plan</code> decomposes the work,
+            <code>/implement</code> executes the plan, <code>/critique</code>
+            validates the output, and <code>/document</code> captures the
+            result. Skipping <code>/plan</code> and jumping to
+            <code>/implement</code> produces unstructured changes.
+            Skipping <code>/critique</code> before <code>/document</code>
+            risks documenting buggy behavior. The lifecycle is
+            sequential for a reason -- each stage depends on the output of the
+            previous one.
+          </dd>
+
+          <dt>Misunderstanding context budget tiers</dt>
+          <dd>
+            The three tiers (light, standard, heavy) control how much context
+            pre-skill loads into the agent's context window. Light skips
+            references and briefs entirely -- appropriate for utility skills
+            like <code>/pending</code> and <code>/help</code> that do not need
+            project context. Standard loads the briefs index and skill-specific
+            references -- the default for most skills. Heavy loads full briefs
+            with recency windowing and the plan index -- used by skills that
+            need broad project awareness. Running a heavy-budget skill in a
+            session that has already consumed significant context can trigger
+            the compaction warning. Starting a fresh conversation is the
+            recommended response.
+          </dd>
+
+          <dt>Skipping pre-skill or post-skill hooks</dt>
+          <dd>
+            Pre-skill and post-skill are not optional ceremony -- they are
+            load-bearing lifecycle infrastructure. Pre-skill loads the
+            constitution, references, and permissions that constrain skill
+            behavior. Post-skill updates the as-coded design state, files
+            pending actions, regenerates indexes, and commits changes. A skill
+            that skips post-skill leaves orphaned STARTED briefs, uncommitted
+            files, and stale indexes.
+          </dd>
+
+          <dt>Running <code>/implement</code> on a stale plan</dt>
+          <dd>
+            A plan references specific files, line ranges, and design state at
+            the time it was written. If the codebase has changed significantly
+            since the plan was created (e.g., another plan was implemented, or
+            manual edits were made), the plan's assumptions may be invalid.
+            Review the plan's <code>Files</code> section against the current
+            codebase before executing. If drift is significant, regenerate the
+            plan with <code>/plan</code>.
+          </dd>
+        </dl>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 3: The Execution Layer</h2>
+    <ol>
+      <li>
+        <a href="lifecycle-pipeline.html">Lifecycle Pipeline</a>
+      </li>
+      <li aria-current="page">
+        <a href="skills-in-depth.html">Skills In Depth</a>
+        <ul>
+          <li><a href="#skill-system-overview">Skill System Overview</a></li>
+          <li><a href="#research">/research</a></li>
+          <li><a href="#explain">/explain</a></li>
+          <li><a href="#design">/design</a></li>
+          <li><a href="#plan">/plan</a></li>
+          <li><a href="#implement">/implement</a></li>
+          <li><a href="#critique">/critique</a></li>
+          <li><a href="#reflect">/reflect</a></li>
+          <li><a href="#document">/document</a></li>
+          <li><a href="#communicate">/communicate</a></li>
+          <li><a href="#onboard">/onboard</a></li>
+          <li><a href="#pending">/pending</a></li>
+          <li><a href="#publish">/publish</a></li>
+          <li><a href="#seja-setup">/seja-setup</a></li>
+          <li><a href="#help">/help</a></li>
+          <li><a href="#qa-log">/qa-log</a></li>
+          <li><a href="#common-mistakes">Common Mistakes</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="subagent-delegation.html">Subagent Delegation</a>
+      </li>
+      <li>
+        <a href="plans-and-implementation.html">Plans and Implementation</a>
+      </li>
+      <li>
+        <a href="quality-and-critique.html">Quality and Critique</a>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="lifecycle-pipeline.html">Previous: The Lifecycle Pipeline</a>
+    <a href="subagent-delegation.html">Next: Subagent Delegation</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

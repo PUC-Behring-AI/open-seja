@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-volume" content="5">
+  <meta name="doc-chapter" content="7">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+  <meta name="quality" content="publication">
+
+  <title>How the Agent Reads the Harness -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 5: Foundations and Philosophy</a></li>
+      <li>How the Agent Reads the Harness</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>How the Agent Reads the Harness</h1>
+
+      <p>
+        This chapter is unique among Vol. 5's theoretical foundations: it is
+        meta-documentation -- documentation about how the primary documentation
+        consumer, the Claude agent, processes the very harness files that govern
+        its behavior. Where the preceding chapters develop the intellectual
+        commitments behind SEJA (the communication metaphor, sign systems,
+        reflective practice, abduction, the governable-and-epistemic thesis),
+        this chapter makes visible the concrete interpretive machinery through
+        which those commitments are enacted. In semiotic engineering terms,
+        this chapter describes the channel through which the designer's
+        metacommunication message is delivered (de Souza 2005, Ch. 3): the
+        agent's context window is the medium, and the loading strategy is
+        the protocol that determines which parts of the message reach the
+        agent at any given moment.
+      </p>
+
+      <p>
+        Understanding this channel is not merely a technical curiosity. It has
+        direct consequences for how harness files should be written, how
+        reference material should be organized, and what persistence
+        mechanisms the designer can rely on. The designer who does not
+        understand the context window is designing communication without
+        understanding the medium -- the semiotic equivalent of writing a
+        letter without knowing whether it will be delivered by post, by
+        telegram, or by voice relay.
+      </p>
+
+      <section id="context-window-mechanics" data-diataxis="explanation">
+        <h2>Context-Window Mechanics</h2>
+
+        <p>
+          The Claude agent operates within a finite context window -- a
+          bounded region of text that constitutes, at any given moment,
+          the entirety of what the agent can "see." This is the fundamental
+          constraint that shapes every aspect of how the harness communicates
+          with the agent. Unlike a human developer who can hold a mental model
+          of a codebase that extends far beyond the file currently open on
+          screen, the agent's effective knowledge is limited to what is
+          literally present in its context window at the time of response
+          generation. There is no background memory, no latent recall of
+          files read in previous sessions, no implicit familiarity built
+          up over time. Each session begins, epistemically speaking, from
+          a blank slate populated only by what the harness loads.
+        </p>
+
+        <p>
+          This framing has a precise semiotic-engineering reading. In
+          de Souza's framework, the designer's metacommunication message is
+          delivered through the system itself, which acts as the designer's
+          deputy (de Souza 2005, Ch. 3). In SEJA, the harness files
+          collectively <em>are</em> the metacommunication message, and the
+          context window is the communication channel through which that
+          message reaches the agent. The channel is lossy and finite: not
+          all of the message can be transmitted simultaneously. The
+          loading strategy -- which files enter the context window, in
+          what order, at what moment -- determines which fragments of the
+          designer's intent the agent can act on at any given point in
+          the session.
+        </p>
+
+        <h3>The Primary Loading Mechanism</h3>
+
+        <p>
+          SEJA's pre-skill pipeline is the primary mechanism through which
+          harness files enter the agent's context window. When a user
+          invokes a skill (e.g., <code>/plan</code>, <code>/implement</code>,
+          <code>/research</code>), the pre-skill hook executes a sequence of
+          six stages: help, brief-log, budget-eval, pending-check, ref-load,
+          and constitution. The ref-load stage is where reference files are
+          injected into the context window. Three files are always loaded
+          regardless of the skill being invoked:
+        </p>
+
+        <dl>
+          <dt><code>product-design/conventions.md</code></dt>
+          <dd>
+            The project's signification system: variable definitions, directory
+            paths, stack choices, and the As-Intended/As-Coded Registry. This
+            file gives the agent the vocabulary to interpret project-specific
+            references -- without it, path variables like
+            <code>${PLANS_DIR}</code> or <code>${BRIEFS_FILE}</code> are
+            opaque tokens.
+          </dd>
+
+          <dt><code>.claude/references/general/permissions.md</code></dt>
+          <dd>
+            The agent's authorization boundaries: what it may read, write,
+            execute, and propose. Loading this file is a governance act --
+            it constrains the agent's behavior before any skill-specific
+            instructions take effect.
+          </dd>
+
+          <dt><code>.claude/references/general/constraints.md</code></dt>
+          <dd>
+            Behavioral constraints that apply across all skills: UTF-8
+            encoding, no invented data, no placeholder implementations,
+            the decision-point rationale convention, context management
+            rules, and the pinned anchors list. This file is, in effect,
+            the agent's code of conduct.
+          </dd>
+        </dl>
+
+        <p>
+          These three mandatory files establish what might be called the
+          agent's <em>minimal communicative ground</em> -- the irreducible
+          set of shared understandings without which the designer's
+          metacommunication message cannot be delivered at all.
+        </p>
+
+        <h3>Context Budget Tiers</h3>
+
+        <p>
+          Not all skills require the same depth of context. A lightweight
+          operation (e.g., checking help text) does not need the full
+          briefs log or plan index that a deep analysis requires. SEJA
+          addresses this through three context budget tiers, declared in
+          each skill's <code>SKILL.md</code> frontmatter under
+          <code>metadata.context_budget</code>:
+        </p>
+
+        <dl>
+          <dt><code>light</code></dt>
+          <dd>
+            Skips all briefs and reference files beyond the brief-log
+            entry itself. The ref-load and constitution stages are skipped
+            entirely. This tier is appropriate for skills that need
+            minimal context -- primarily the help stage and quick
+            informational lookups.
+          </dd>
+
+          <dt><code>standard</code> (default)</dt>
+          <dd>
+            Loads a briefs index (a compressed summary of recent skill
+            invocations) rather than the full briefs log. Proceeds to
+            ref-load and constitution stages. This tier balances
+            context-window conservation against having sufficient
+            operational context for most skill invocations.
+          </dd>
+
+          <dt><code>heavy</code></dt>
+          <dd>
+            Loads the full briefs log with recency windowing (the 50
+            most recent entries, with a summary note for older ones)
+            plus the plan index. Proceeds to ref-load and constitution
+            stages. This tier is reserved for skills that need deep
+            historical context -- principally <code>/critique</code>,
+            <code>/plan</code>, and <code>/implement</code>.
+          </dd>
+        </dl>
+
+        <p>
+          The tier system is a form of communicative economy: the designer
+          of the harness has pre-decided, for each skill, how much of the
+          project's history the agent needs to see. This is itself a design
+          decision with epistemic consequences -- a skill running at the
+          <code>light</code> tier cannot detect patterns that would be
+          visible at the <code>heavy</code> tier, because the evidence
+          is simply absent from the context window.
+        </p>
+      </section>
+
+      <section id="eager-vs-lazy-loading" data-diataxis="explanation">
+        <h2>Eager vs. Lazy Loading</h2>
+
+        <p>
+          Beyond the three mandatory files and the budget tier, each skill
+          declares its own set of reference files in the
+          <code>metadata.references</code> field of its <code>SKILL.md</code>
+          frontmatter. These skill-specific references carry the domain
+          knowledge the agent needs for that particular capability --
+          review perspectives for <code>/critique</code>, shared definitions
+          for <code>/research</code>, coding standards for
+          <code>/implement</code>. The question is: should all declared
+          references be loaded into the context window immediately, or
+          should some be held in reserve?
+        </p>
+
+        <p>
+          SEJA answers this with a two-mode loading strategy, determined by
+          whether the skill declares a <code>metadata.eager_references</code>
+          field in its frontmatter.
+        </p>
+
+        <h3>Mode 1: Eager-Only (Legacy)</h3>
+
+        <p>
+          When a skill's <code>SKILL.md</code> does not contain an
+          <code>eager_references</code> field, pre-skill reads and injects
+          every file listed in <code>metadata.references</code> into the
+          context window alongside the mandatory files. This is the
+          original behavior -- simple and predictable, but costly: every
+          declared reference consumes context-window space whether or not
+          the skill invocation actually needs it. An empty
+          <code>references: []</code> is valid under this mode, signaling
+          that the skill intentionally loads no additional references beyond
+          the mandatory set.
+        </p>
+
+        <h3>Mode 2: Demand-Pull</h3>
+
+        <p>
+          When a skill declares <code>eager_references</code>, pre-skill
+          partitions the reference set into two tiers:
+        </p>
+
+        <dl>
+          <dt>Eager tier</dt>
+          <dd>
+            Files listed in <code>eager_references</code> are read and
+            injected into the context window immediately, alongside the
+            mandatory files. These are references the skill needs in
+            every invocation -- for example, the <code>/reflect</code>
+            skill eagerly loads <code>conventions.md</code> and
+            <code>constraints.md</code> because reflection always requires
+            the project's vocabulary and behavioral rules.
+          </dd>
+
+          <dt>Lazy tier</dt>
+          <dd>
+            Files in <code>metadata.references</code> that are
+            <em>not</em> in <code>eager_references</code> become available
+            on demand. Pre-skill does not read or inject these files.
+            Instead, it emits an "Available references" block: a compact
+            numbered list where each entry shows the reference's path and
+            a trigger hint derived from its filename and subdirectory.
+            For example, <code>general/coding-standards.md</code> might
+            appear with the hint "when reviewing coding conventions."
+          </dd>
+        </dl>
+
+        <p>
+          An empty <code>eager_references: []</code> is valid, meaning
+          all skill-specific references are lazy and only the mandatory
+          files are loaded upfront. This configuration maximizes
+          context-window conservation at the cost of requiring the agent
+          to recognize when it needs additional context and explicitly
+          request it.
+        </p>
+
+        <h3>The Navigational Aid</h3>
+
+        <p>
+          The "Available references" block emitted during demand-pull
+          loading is, in semiotic terms, a metalinguistic sign (de Souza
+          2005, Ch. 4): it is a sign that tells the agent about other
+          signs it could load. The block does not contain the referenced
+          content -- it contains a description of what that content is
+          about and when it would be relevant. This mirrors the distinction
+          between a library catalog and the books it indexes: the catalog
+          occupies minimal space while providing enough information for the
+          reader to decide which books to retrieve.
+        </p>
+
+        <p>
+          The trigger hints serve a specific communicative function: they
+          tell the agent under what conditions loading the reference would
+          be valuable. A hint like "when reviewing security concerns"
+          attached to <code>general/security-checklists.md</code> creates
+          a conditional instruction -- if the agent encounters a security
+          question during the skill invocation, it knows where to find
+          the relevant reference and can load it at that point. The context
+          window pays the cost of the full file only when it is actually
+          needed.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Design rationale:</strong> The eager/lazy split is a
+            practical response to a theoretical constraint. De Souza's
+            metacommunication framework assumes the designer can deliver
+            a complete message through the system. But when the system is
+            an LLM with a finite context window, "complete" is impossible --
+            some parts of the message must be deferred. The eager/lazy
+            architecture makes this deferral explicit and navigable rather
+            than arbitrary and invisible.
+          </p>
+        </aside>
+      </section>
+
+      <section id="implications-for-documentation-authoring" data-diataxis="explanation">
+        <h2>Implications for Documentation Authoring</h2>
+
+        <p>
+          The mechanics described above are not merely implementation
+          details -- they have direct consequences for how harness files,
+          reference documents, and documentation should be written.
+          Anyone authoring content that will enter the agent's context
+          window is, whether they recognize it or not, composing part of
+          the designer's metacommunication message. The following
+          implications flow directly from the context-window constraint
+          and the loading strategy.
+        </p>
+
+        <h3>1. Every Reference File Competes for Context-Window Space</h3>
+
+        <p>
+          The context window is a shared resource. Every reference file
+          loaded during pre-skill occupies space that could be used for
+          the skill's actual work -- the plan being implemented, the code
+          being reviewed, the research question being investigated.
+          Verbose reference files dilute the signal-to-noise ratio of
+          the context window, potentially causing the agent to miss
+          critical instructions buried in a sea of secondary detail.
+        </p>
+
+        <p>
+          This is why SEJA's
+          <code>.claude/references/general/constraints.md</code> includes
+          the directive: "Whenever writing, editing, or revising
+          agent-facing instructions, be as concise as possible." The
+          directive is not a stylistic preference -- it is a
+          communicative necessity imposed by the channel's finite
+          capacity. A reference file that could say what it needs to
+          say in 200 lines but uses 800 is not merely wasteful; it
+          actively degrades the agent's ability to attend to other
+          loaded content.
+        </p>
+
+        <h3>2. Pinned Anchors Survive Compaction</h3>
+
+        <p>
+          As a conversation grows long, the system may compress prior
+          messages in the agent's context. When this happens, most
+          loaded content risks being summarized or dropped. SEJA
+          designates six categories of content as <em>pinned anchors</em> --
+          content that must survive any compaction event and be
+          re-injected verbatim:
+        </p>
+
+        <ol>
+          <li><code>product-design/constitution.md</code> -- the project's immutable principles</li>
+          <li><code>.claude/references/general/permissions.md</code> -- agent authorization boundaries</li>
+          <li><code>.claude/references/general/constraints.md</code> -- behavioral guardrails</li>
+          <li>The active skill's <code>SKILL.md</code> instructions</li>
+          <li>The active plan context (if executing a plan)</li>
+          <li>The session scratchpad</li>
+        </ol>
+
+        <p>
+          The pinned-anchor concept is a governance mechanism with a
+          semiotic rationale: these files represent the irreducible core
+          of the designer's metacommunication message. If the constitution
+          is lost to compaction, the agent may violate immutable principles.
+          If the permissions file is lost, the agent may exceed its
+          authorization boundaries. If the active skill instructions are
+          lost, the agent loses its task context entirely. Pinning ensures
+          that the most authoritative parts of the designer's message
+          survive even when the channel's capacity is exhausted.
+        </p>
+
+        <p>
+          The practical consequence for authors is a two-tier system:
+          content placed in pinned files is durable and can be relied
+          upon throughout a session; content in non-pinned files may be
+          summarized or lost during long sessions. Critical constraints,
+          security boundaries, and immutable rules belong in pinned files.
+          Supplementary context, examples, and elaboration belong in
+          non-pinned references that the agent can load on demand.
+        </p>
+
+        <h3>3. The Agent Does Not Remember Across Sessions</h3>
+
+        <p>
+          Each Claude Code session begins with a fresh context window.
+          The agent has no episodic memory of previous sessions -- it
+          does not recall which plans were discussed yesterday, which
+          design decisions were made last week, or which research
+          questions were investigated last month. Whatever the agent
+          knows about the project's history must be loaded from
+          persistent artifacts: the briefs log, the plan files, the
+          decision digest, the conversation trace.
+        </p>
+
+        <p>
+          SEJA provides two explicit persistence mechanisms for
+          cross-session continuity:
+        </p>
+
+        <dl>
+          <dt>Session scratchpad (<code>${TMP_DIR}/session-notes.md</code>)</dt>
+          <dd>
+            A timestamped log of key decisions, findings, TODOs, and
+            context from the current session. The scratchpad is a pinned
+            anchor, so it survives compaction within a session. Across
+            sessions, the designer can direct the agent to read the
+            previous session's scratchpad to recover context. The format
+            uses category tags (DECISION, FINDING, TODO, CONTEXT) to
+            support selective retrieval.
+          </dd>
+
+          <dt>Pending actions (<code>_output/pending.jsonl</code>)</dt>
+          <dd>
+            A machine-readable ledger of outstanding human actions filed
+            by skills during their execution. Each pending action carries
+            a type, a source (the skill or plan that created it), and a
+            description. The pre-skill pipeline's pending-check stage
+            surfaces overdue actions at the start of each skill invocation,
+            ensuring that deferred work is not silently forgotten across
+            sessions.
+          </dd>
+        </dl>
+
+        <p>
+          The implication for documentation authors is that no reference
+          file should assume the agent has seen it before. Each file
+          must be self-contained enough to be understood on first encounter,
+          because every loading is functionally a first encounter. Internal
+          cross-references between reference files are navigational aids
+          (they tell the agent where to find related content), not
+          continuity devices (they cannot assume the agent has already
+          loaded the target).
+        </p>
+
+        <h3>4. File Naming and Structure Affect Discoverability</h3>
+
+        <p>
+          The agent locates harness files through three mechanisms: glob
+          patterns (matching filenames against path conventions), grep
+          (searching file contents for keywords), and path convention
+          (knowing that skills live in <code>.claude/skills/</code>,
+          references in <code>.claude/references/</code>, templates in
+          <code>.claude/references/template/</code>). These mechanisms
+          are the agent's equivalent of a file browser or search engine --
+          they are how it navigates the harness when it needs information
+          that is not already in the context window.
+        </p>
+
+        <p>
+          This has direct consequences for how files should be named and
+          structured. A reference file named
+          <code>general/shared-definitions.md</code> is discoverable by
+          an agent looking for "definitions" or "shared" -- the filename
+          itself is a sign that communicates the file's purpose. A file
+          named <code>general/misc-notes.md</code> is opaque: the agent
+          has no way to know whether it contains relevant content without
+          reading it. Similarly, consistent heading structure within files
+          allows the agent to grep for section headings to locate specific
+          content without loading the entire file.
+        </p>
+
+        <p>
+          The <code>designer_description</code> field in YAML frontmatter
+          serves a specific discoverability function: it provides a
+          one-sentence summary of the file's purpose that can appear in
+          tool output (e.g., when the agent lists available files). This
+          is a metalinguistic sign -- a sign about the sign system itself --
+          that helps the agent decide whether to load the file into its
+          context window. See
+          <a href="sign-systems.html#metalinguistic-signs">Metalinguistic Signs</a>
+          for the theoretical framing of this concept.
+        </p>
+      </section>
+
+      <section id="critical-counter-reading" data-diataxis="explanation">
+        <h2>Critical Counter-Reading</h2>
+
+        <p>
+          This chapter describes the agent's reading process as though it
+          were a well-understood phenomenon amenable to systematic design.
+          Several limitations of this framing deserve honest examination.
+        </p>
+
+        <h3>Dual-Audience Tension</h3>
+
+        <p>
+          If harness files are optimized for LLM consumption -- concise,
+          structurally marked, front-loaded with critical information --
+          do they become less readable for human maintainers? The SEJA
+          harness is maintained by humans who must also read, understand,
+          and modify these files. A file written to maximize the agent's
+          attention to key directives (bold lead-ins, terse imperatives,
+          minimal narrative) may read as telegraphic or hostile to a human
+          maintainer expecting explanatory prose.
+        </p>
+
+        <p>
+          SEJA partially addresses this through the sibling-file pattern:
+          the agent-facing <code>SKILL.md</code> is optimized for
+          context-window efficiency, while the designer-facing
+          <code>SKILL-quickguide.md</code> and the maintainer-facing
+          <code>SKILL-rationale.md</code> provide the narrative context
+          that humans need. But this mitigation introduces its own risk:
+          maintaining three parallel representations of the same skill
+          creates opportunities for drift between them, and the harness
+          has no automated mechanism to detect such drift.
+        </p>
+
+        <h3>Documenting a Moving Target</h3>
+
+        <p>
+          This chapter describes context-window mechanics and loading
+          strategies as they operate with current LLM architectures. But
+          LLM architectures evolve: context windows grow larger, attention
+          mechanisms change, retrieval-augmented generation introduces
+          new patterns for accessing external knowledge. A chapter that
+          treats context-window finitude as a permanent constraint may
+          become misleading as models with effectively unlimited context
+          become available.
+        </p>
+
+        <p>
+          More subtly, the act of documenting the reading process may
+          alter the process itself. If future model versions are trained
+          on documentation that describes how current models process
+          context, the documentation becomes self-referential in ways
+          that are difficult to predict. This is a form of the observer
+          effect: describing the system changes the system being described.
+        </p>
+
+        <h3>Pinned Anchors: Governance or Attention Management?</h3>
+
+        <p>
+          The pinned-anchor concept is presented in this chapter as a
+          governance mechanism: certain files are too important to lose,
+          so they are protected from compaction. But an alternative reading
+          frames pinned anchors as an attention-management hack -- a way
+          to force the agent to attend to specific content by ensuring
+          it remains in the context window regardless of its relevance
+          to the current task. Under this reading, pinning is less about
+          governance and more about the designer's anxiety that the agent
+          might forget something important. The distinction matters:
+          governance is principled (the constitution is pinned because
+          it represents immutable commitments), while attention management
+          is pragmatic (the constitution is pinned because the agent
+          might otherwise ignore it).
+        </p>
+
+        <p>
+          SEJA's design does not fully resolve this tension. The pinned
+          anchors list is justified in governance terms (each entry has
+          a stated rationale in <code>constraints.md</code>), but the
+          mechanism itself -- keeping content in the context window to
+          ensure the agent attends to it -- is fundamentally an
+          attention-management technique. Whether that technique serves
+          governance purposes or merely simulates them depends on whether
+          the agent's "attention" to pinned content is genuinely
+          deliberative or merely a statistical artifact of token proximity.
+          This is a question the harness's own theoretical framework
+          cannot answer, because it lies at the boundary between semiotic
+          engineering (which assumes intentional communication) and machine
+          learning (which operates through statistical pattern matching).
+        </p>
+      </section>
+
+      <section id="references" data-diataxis="reference">
+        <h2>References</h2>
+        <ul>
+          <li>de Souza, C.S. (2005). <cite>The Semiotic Engineering of Human-Computer Interaction</cite>. Cambridge, MA: MIT Press.</li>
+          <li>Eco, U. (1976). <cite>A Theory of Semiotics</cite>. Bloomington: Indiana University Press.</li>
+        </ul>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 5: Foundations and Philosophy</h2>
+    <ol>
+      <li>
+        <a href="software-as-communication.html">Software as Designed Communication</a>
+      </li>
+      <li>
+        <a href="sign-systems.html">Sign Systems and Communicability</a>
+      </li>
+      <li>
+        <a href="extended-metacommunication.html">The Extended Metacommunication Template</a>
+      </li>
+      <li>
+        <a href="reflective-practice.html">Reflective Practice</a>
+      </li>
+      <li>
+        <a href="abduction-plural-readings.html">Abduction and Plural Readings</a>
+      </li>
+      <li>
+        <a href="governable-epistemic.html">The Governable and Epistemic Thesis</a>
+      </li>
+      <li aria-current="page">
+        <a href="agent-reads-harness.html">How the Agent Reads the Harness</a>
+        <ul>
+          <li><a href="#context-window-mechanics">Context-Window Mechanics</a></li>
+          <li><a href="#eager-vs-lazy-loading">Eager vs. Lazy Loading</a></li>
+          <li><a href="#implications-for-documentation-authoring">Implications for Documentation Authoring</a></li>
+          <li><a href="#critical-counter-reading">Critical Counter-Reading</a></li>
+          <li><a href="#references">References</a></li>
+        </ul>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Chapter navigation: Ch.7 = last chapter, Previous = Ch.6, no Next -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="governable-epistemic.html">Previous: The Governable and Epistemic Thesis</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

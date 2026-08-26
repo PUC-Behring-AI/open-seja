@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="reference">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="Inventory of the seventeen SEJA skills — fifteen user-facing skills and two internal lifecycle hooks — with each skill's description, category, context budget, and whether users can invoke it.">
+  <title>Skills Catalog — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/reference sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Skills Catalog</h1>
+      <p>The seventeen SEJA skills: fifteen user-facing skills plus the two internal lifecycle hooks that bracket every invocation.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Reference</a></li>
+        <li aria-current="page">Skills Catalog</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-reference">reference</span>
+          <span class="badge core-reference">reference</span>
+        </p>
+
+        <section data-diataxis="reference" aria-labelledby="overview">
+          <h2 id="overview">Overview</h2>
+          <p>
+            SEJA defines seventeen skills in <code>.claude/skills/&lt;name&gt;/SKILL.md</code>:
+            fifteen user-facing skills and two internal lifecycle hooks
+            (<code>pre-skill</code> and <code>post-skill</code>) that are not directly
+            invocable. The <em>Context Budget</em> column reports each skill's
+            <code>metadata.context_budget</code> tier, which pre-skill's
+            <code>budget-eval</code> stage reads to decide how many briefs and reference
+            files to load: <code>light</code> loads none, <code>standard</code> loads the
+            briefs index, and <code>heavy</code> loads full briefs with recency
+            windowing plus the plan index.
+          </p>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="lifecycle-path">
+          <h2 id="lifecycle-path">Canonical lifecycle path</h2>
+          <p>
+            The skills are grouped below by category, not lifecycle order. The
+            canonical lifecycle path — validate before you communicate — is:
+          </p>
+          <p>
+            <code>/research</code> (or <code>/explain</code>) &rarr;
+            <code>/design</code> | <code>/plan</code> &rarr;
+            <code>/implement</code> &rarr;
+            <code>/critique</code> &rarr;
+            <code>/document</code> | <code>/communicate</code> &rarr;
+            <code>/reflect</code>.
+          </p>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="user-facing-skills">
+          <h2 id="user-facing-skills">User-facing skills (15)</h2>
+          <p>
+            These fifteen skills are invocable directly by the user. Each ships a
+            <code>SKILL-quickguide.md</code> sibling with a designer-friendly
+            description, example, and usage scenario.
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>The fifteen user-facing skills.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Skill Name</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Context Budget</th>
+                  <th scope="col">User-Invocable</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">research</th>
+                  <td>Answer questions about the codebase, architecture, or design decisions, logging Q&amp;A pairs. With <code>--inventory</code>, catalog codebase elements matching a pattern.</td>
+                  <td>user-facing</td>
+                  <td>standard</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <th scope="row">explain</th>
+                  <td>Explains behavior, code, data model, architecture, or spec drift with visual diagrams and analogies.</td>
+                  <td>user-facing</td>
+                  <td>standard</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <th scope="row">design</th>
+                  <td>Define or update project design — stack, conventions, domain model, conceptual design, and standards.</td>
+                  <td>user-facing</td>
+                  <td>standard</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <th scope="row">plan</th>
+                  <td>Make a plan to add a feature, fix a bug, or refactor code. Supports metacomm framing for design-intent briefs.</td>
+                  <td>user-facing</td>
+                  <td>heavy</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <th scope="row">implement</th>
+                  <td>Execute a previously generated plan to add a feature, fix a bug, or refactor code.</td>
+                  <td>user-facing</td>
+                  <td>heavy</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <th scope="row">critique</th>
+                  <td>Critique quality: validation, code review, smoke tests, preflight, and harness health.</td>
+                  <td>user-facing</td>
+                  <td>heavy</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <th scope="row">document</th>
+                  <td>Generate or update project documentation based on plan <code>Docs:</code> fields, auto-detection, or explicit type selection.</td>
+                  <td>user-facing</td>
+                  <td>standard</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <th scope="row">communicate</th>
+                  <td>Generate tailored communication material for a specific audience segment.</td>
+                  <td>user-facing</td>
+                  <td>standard</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <th scope="row">reflect</th>
+                  <td>On-demand reflection anchored on specific plans, research reports, or other artifacts, recording the designer's words verbatim.</td>
+                  <td>user-facing</td>
+                  <td>standard</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <th scope="row">onboard</th>
+                  <td>Generate a tailored onboarding plan for a new team member based on their role and expertise level.</td>
+                  <td>user-facing</td>
+                  <td>standard</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <th scope="row">seja-setup</th>
+                  <td>Manage the SEJA harness in this project: install, finalise an in-place download, create a companion workspace, bootstrap a demo project, or upgrade harness files.</td>
+                  <td>user-facing</td>
+                  <td>standard</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <th scope="row">pending</th>
+                  <td>List and address outstanding human actions from the pending ledger: verify implementations, flip status markers, run periodic curation, manage deferred work.</td>
+                  <td>user-facing</td>
+                  <td>light</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <th scope="row">publish</th>
+                  <td>Publish a tagged release to the public SEJA repository via the automated publish pipeline.</td>
+                  <td>user-facing</td>
+                  <td>light</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <th scope="row">help</th>
+                  <td>Show contextual help, browse skills by category, or get details on a specific skill.</td>
+                  <td>user-facing</td>
+                  <td>light</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <th scope="row">qa-log</th>
+                  <td>Log the entire current Q&amp;A session into a file for future reference.</td>
+                  <td>user-facing</td>
+                  <td>light</td>
+                  <td>Yes</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="internal-skills">
+          <h2 id="internal-skills">Internal lifecycle hooks (2)</h2>
+          <p>
+            These two skills are internal lifecycle hooks — carrying
+            <code>user-invocable: false</code> and the <code>[Internal]</code> prefix —
+            invoked by other skills rather than by the user directly.
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>The two internal lifecycle-hook skills.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Skill Name</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Context Budget</th>
+                  <th scope="col">User-Invocable</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">pre-skill</th>
+                  <td>[Internal] Lifecycle hook invoked by other skills to load references and log briefs. Runs the six-stage pre-skill pipeline.</td>
+                  <td>internal</td>
+                  <td>standard</td>
+                  <td>No</td>
+                </tr>
+                <tr>
+                  <th scope="row">post-skill</th>
+                  <td>[Internal] Lifecycle hook invoked by other skills for briefs update, QA logging, and git commit.</td>
+                  <td>internal</td>
+                  <td>standard</td>
+                  <td>No</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="skill-map.html">Skill Map</a> &mdash; how these skills invoke agents, scripts, and references.</li>
+            <li><a href="../concepts/lifecycle-pipeline.html">The Lifecycle Pipeline</a> &mdash; the conceptual model of how skills chain through the lifecycle.</li>
+            <li><a href="../operations/plan-and-execute.html">Planning and Executing</a> &mdash; the operational how-to for the <code>/plan</code> and <code>/implement</code> skills.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Reference</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/reference sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

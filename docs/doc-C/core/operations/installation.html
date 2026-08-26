@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How to install the SEJA harness across all four modes -- greenfield or brownfield, collocated or companion workspace -- with a decision tree, version pinning, setup-state detection, and the install flag reference.">
+  <title>Installing SEJA — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/operations sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Installing SEJA</h1>
+      <p>Choose an installation mode and set up the harness in a new or existing project.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Operations</a></li>
+        <li aria-current="page">Installing SEJA</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge core-operations">operations</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="overview">
+          <h2 id="overview">Overview</h2>
+          <p>
+            <code>/seja-setup</code> is the single entry point into the harness.
+            It installs SEJA into a new or existing project, finalises an in-place
+            download, creates a companion workspace, bootstraps a demo, or upgrades
+            an existing install. This page covers the four <em>install</em> modes;
+            for refreshing an existing install see <a href="upgrade.html">Upgrading
+            SEJA</a>.
+          </p>
+          <p>
+            The choice of mode has two axes: whether your project is
+            <strong>new (greenfield)</strong> or <strong>existing
+            (brownfield)</strong>, and whether the harness lives
+            <strong>collocated</strong> in the project directory or in a
+            <strong>companion workspace</strong> beside the codebase. Those two
+            axes give four modes.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="decision-tree">
+          <h2 id="decision-tree">Which mode: a decision tree</h2>
+          <p>Answer two questions to land on your mode.</p>
+          <ol>
+            <li>
+              <strong>Is your project new or existing?</strong> New (no code yet)
+              is <em>greenfield</em>; an existing codebase is <em>brownfield</em>.
+              For brownfield, <code>/seja-setup</code> auto-detects the stack from
+              dependency files and pre-fills the scaffolding questionnaire as
+              confirmation prompts.
+            </li>
+            <li>
+              <strong>Same directory or companion workspace?</strong> Collocated
+              embeds <code>.claude/</code> and <code>product-design/</code> in the
+              project root. A companion workspace keeps the harness in its own git
+              repo beside the codebase; you operate on the codebase via
+              <code>claude --add-dir &lt;codebase-dir&gt;</code> through generated
+              launcher scripts.
+            </li>
+          </ol>
+          <div class="table-container">
+            <table>
+              <caption>The four installation modes by project state and topology.</caption>
+              <thead>
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col">Collocated (embedded)</th>
+                  <th scope="col">Companion workspace</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Greenfield (new project)</th>
+                  <td><strong>greenfield-collocated.</strong> <code>/seja-setup &lt;target&gt;</code> creates the directory and copies the harness in place; the project boots with a stack-scaffolded skeleton.</td>
+                  <td><strong>greenfield-workspace.</strong> <code>/seja-setup &lt;target&gt; --workspace</code> creates a workspace dir and a codebase dir, <code>git init</code>s each, and redirects harness files to the workspace.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Brownfield (existing codebase)</th>
+                  <td><strong>brownfield-collocated.</strong> <code>/seja-setup &lt;target&gt;</code> on an existing repo offers Embed; the harness is copied into the codebase root, with brownfield stack auto-detection pre-filling conventions.</td>
+                  <td><strong>brownfield-workspace.</strong> <code>/seja-setup &lt;target&gt; --workspace</code> creates a workspace alongside the codebase, offers to migrate any embedded harness files, and leaves the codebase unmodified.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <aside class="callout-tip">
+            <strong>Guided path.</strong> If you are unsure, run
+            <code>/seja-setup</code> with no arguments in a fresh directory and
+            choose <em>Guide me through setup</em>. It asks (a) greenfield or
+            brownfield, (b) embedded or companion workspace, and (c) the target
+            path, then routes to the right mode.
+          </aside>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="greenfield-collocated">
+          <h2 id="greenfield-collocated">Mode 1: greenfield-collocated</h2>
+          <p>
+            A brand-new project with the harness embedded in the project root.
+          </p>
+          <pre><code>/seja-setup ./my-project</code></pre>
+          <p>
+            The target directory does not exist yet, so <code>/seja-setup</code>
+            creates it, copies the harness files
+            (<code>.claude/references/</code>, all skill <code>SKILL.md</code>
+            files, agents, rules, scripts, harness metadata), runs the Section 1
+            scaffolding questionnaire to populate
+            <code>product-design/conventions.md</code>, scaffolds a stack-flavoured
+            <code>CLAUDE.md</code> and <code>.claude/rules/</code>, adds smoke-test
+            infrastructure when a backend is present, creates the
+            <code>_output/</code> workspace, and makes an initial commit. Then it
+            hands off to <code>/design</code> to define design intent.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="greenfield-workspace">
+          <h2 id="greenfield-workspace">Mode 2: greenfield-workspace</h2>
+          <p>
+            A new project where the harness lives in its own version-controlled
+            workspace, separate from the codebase.
+          </p>
+          <pre><code>/seja-setup ./my-project --workspace</code></pre>
+          <p>
+            Workspace routing asks for the workspace and codebase directory names,
+            creates both subdirectories, runs <code>git init</code> in each, and
+            redirects the harness files into the workspace directory. It always
+            generates launcher scripts (<code>launch.sh</code> /
+            <code>launch.bat</code>) that invoke <code>claude --add-dir
+            &lt;codebase-dir&gt;</code> so the harness can see and act on the
+            codebase from its own directory.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="brownfield-collocated">
+          <h2 id="brownfield-collocated">Mode 3: brownfield-collocated</h2>
+          <p>
+            An existing codebase with the harness embedded directly in it.
+          </p>
+          <pre><code>/seja-setup .</code></pre>
+          <p>
+            When the target is an existing git repo with source code,
+            <code>/seja-setup</code> asks whether to embed SEJA or create a
+            companion workspace; choosing <em>Embed</em> copies the harness into the
+            codebase root. Before the Section 1 questions, brownfield
+            stack auto-detection scans dependency files
+            (<code>package.json</code>, <code>requirements.txt</code>,
+            <code>pyproject.toml</code>, <code>Cargo.toml</code>,
+            <code>go.mod</code>, and more) and directory structure, then presents
+            each detected value (framework, database, test runner, directory
+            layout) as a confirmation prompt — "I detected <strong>flask</strong>;
+            correct?" — rather than an open-ended entry. Ambiguous or undetected
+            fields fall back to manual entry.
+          </p>
+          <aside class="callout-tip">
+            <strong>Already installed?</strong> If the target already has a
+            <code>.claude/</code>, <code>/seja-setup</code> offers <em>Overwrite
+            harness only</em> (recommended for upgrades — never touches
+            <code>product-design/</code>, settings, output, or
+            <code>CLAUDE.md</code>), <em>Overwrite everything</em> (destructive,
+            requires confirmation), or <em>Create companion workspace</em>.
+          </aside>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="brownfield-workspace">
+          <h2 id="brownfield-workspace">Mode 4: brownfield-workspace</h2>
+          <p>
+            An existing codebase with the harness kept in a separate companion
+            workspace, leaving the codebase itself unmodified.
+          </p>
+          <pre><code>/seja-setup . --workspace</code></pre>
+          <p>
+            Brownfield workspace routing asks for the workspace directory path,
+            detects any embedded harness files already in the codebase, offers to
+            migrate them to the workspace, and creates and <code>git init</code>s
+            the workspace directory. As with the greenfield workspace mode, it
+            generates <code>launch.sh</code> / <code>launch.bat</code> so the
+            harness operates on the codebase via <code>claude --add-dir</code>. The
+            companion workspace is its own git repo with version-controlled design
+            history.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="version-pinning">
+          <h2 id="version-pinning">Version pinning</h2>
+          <p>
+            Under the A2 release model, public SEJA ships tagged releases
+            (<code>vMAJOR.MINOR.PATCH</code>). <code>/seja-setup</code> resolves the
+            tag <strong>before</strong> any copy and writes it to
+            <code>&lt;target&gt;/.seja-version</code> as the baseline for future
+            upgrades. The resolution order is:
+          </p>
+          <ol>
+            <li><code>--version &lt;tag&gt;</code>, when supplied, wins;</li>
+            <li>otherwise the latest SemVer tag on the remote is used;</li>
+            <li>otherwise it warns and records <code>HEAD</code> (a pre-release fallback).</li>
+          </ol>
+          <p>
+            In workspace mode, <code>.seja-version</code> is written in the
+            workspace directory (where <code>.claude/</code> lives), not the
+            codebase directory. Pinning a specific baseline at install time makes
+            later <code>/seja-setup --upgrade</code> runs deterministic — see
+            <a href="upgrade.html">Upgrading SEJA</a>.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="setup-state-detection">
+          <h2 id="setup-state-detection">Setup-state detection</h2>
+          <p>
+            The very first action of every <code>/seja-setup</code> invocation is
+            state detection: it shells out to
+            <code>detect_setup_state.py --json</code> and parses the result. The
+            <code>state</code> field routes the no-argument flow to the right menu,
+            and it also protects the harness source repo from being treated as a
+            consumer project.
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>Detected setup states and how the no-argument flow responds.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">State</th>
+                  <th scope="col">Meaning and response</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">no-harness</th>
+                  <td>No harness present. Offers "I have a target directory" or "Guide me through setup".</td>
+                </tr>
+                <tr>
+                  <th scope="row">fresh-download</th>
+                  <td>SEJA files present but <code>product-design/</code> and <code>_output/</code> not populated. Offers to finalise here (<code>--here</code>) or target a different directory.</td>
+                </tr>
+                <tr>
+                  <th scope="row">partial-init</th>
+                  <td>Some but not all setup artefacts exist. Offers to finalise/reconcile here or upgrade harness files.</td>
+                </tr>
+                <tr>
+                  <th scope="row">finalised</th>
+                  <td>Harness plus project files exist. If <code>.seja-version</code> is already the latest, it reports "already up to date" and exits; otherwise offers upgrade, overwrite, or companion workspace.</td>
+                </tr>
+                <tr>
+                  <th scope="row">public-clone-soft-confirm</th>
+                  <td>A clone of public SEJA with no divergence. Soft-confirms before finalising in place.</td>
+                </tr>
+                <tr>
+                  <th scope="row">dev-repo-refuse</th>
+                  <td>Inside a SEJA development repo. Hard-refuses no-argument routing and <code>--here</code> to avoid corrupting the harness source.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="flag-reference">
+          <h2 id="flag-reference">Flag reference</h2>
+          <p>The install-relevant flags:</p>
+          <dl>
+            <dt><code>--here</code></dt>
+            <dd>
+              Finalise setup in the current directory without copying harness
+              files — use when you ran
+              <code>git clone https://github.com/simonedjb/seja my-project</code>
+              directly into your project folder. It pins the version, scaffolds the
+              output and project directories, runs the scaffolding questionnaire,
+              and creates an initial commit. Incompatible with
+              <code>--workspace</code>, <code>--demo</code>, and
+              <code>--upgrade</code>.
+            </dd>
+            <dt><code>--workspace</code></dt>
+            <dd>
+              Create a separate companion workspace for working alongside an
+              existing codebase, rather than embedding the harness in the codebase
+              root. Drives the greenfield-workspace and brownfield-workspace modes.
+            </dd>
+            <dt><code>--demo</code></dt>
+            <dd>
+              Install and pre-fill the TaskFlow demo design files, then write a
+              <code>WALKTHROUGH.md</code> guided tour. The scaffolding questionnaire
+              is skipped; demo mode uses a pre-answered conventions file.
+              Incompatible with <code>--workspace</code> and
+              <code>--upgrade</code>.
+            </dd>
+          </dl>
+          <aside class="callout-tip">
+            <strong>Next step.</strong> After any install mode completes, open a
+            Claude Code session in the target (or workspace) directory and run
+            <code>/design</code> to define entities, permissions, metacommunication,
+            personas, and standards.
+          </aside>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="upgrade.html">Upgrading SEJA</a> &mdash; refresh an existing install to a newer release while preserving your project data.</li>
+            <li><a href="../concepts/profile-x-pattern.html">The Profile-X Pattern</a> &mdash; the collocated-vs-workspace topology in conceptual terms.</li>
+            <li><a href="../concepts/lifecycle-pipeline.html">The Lifecycle Pipeline</a> &mdash; where <code>/design</code> sits after setup on the canonical path.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Operations</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/operations sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

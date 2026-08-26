@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="how-to">
+  <meta name="doc-volume" content="How-To Guides">
+  <meta name="doc-chapter" content="Customization and Extension">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>Customization and Extension -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">How-To Guides</a></li>
+      <li>Customization and Extension</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-howto">
+    <article>
+      <p class="vol-accent"><strong>how-to</strong></p>
+
+      <h1>Customization and Extension</h1>
+
+      <p>
+        This advanced guide is for contributors and power users who want to extend
+        the harness itself: write a new <strong>skill</strong>, add a
+        <strong>subagent</strong> prompt, create a custom review
+        <strong>perspective</strong>, modify the pre-skill
+        <strong>pipeline</strong>, or add a new periodic <strong>trigger</strong>.
+        Each section is goal-first, and each notes the governance rule that gates
+        the extension -- SEJA deliberately makes adding surface area cost
+        justification.
+      </p>
+
+      <section id="new-skill">
+        <h2>How to Write a New Skill</h2>
+
+        <p>
+          A skill is a directory under <code>.claude/skills/&lt;name&gt;/</code>
+          containing a <code>SKILL.md</code> and, for user-invocable skills, a
+          sibling <code>SKILL-quickguide.md</code>.
+        </p>
+
+        <ol>
+          <li>
+            <strong>Justify the skill before you write it.</strong> New skills must
+            show their functionality cannot be a <em>mode</em> of an existing
+            skill. Independent existence needs 3 of 4 criteria: (a) distinct user
+            intent and mental model, (b) disjoint reference sets, (c) incompatible
+            execution topology, (d) different output strategy. The 10-mode
+            <code>/critique</code> is the model to follow for shared execution
+            patterns.
+            <br><em>Expected output:</em> a short justification you can defend at
+            review.
+          </li>
+          <li>
+            <strong>Write the frontmatter.</strong> SKILL.md opens with YAML that
+            follows the agentskills.io spec. Top-level fields
+            (<code>name</code>, <code>description</code>,
+            <code>compatibility</code>) conform to the spec; SEJA-specific fields
+            (<code>context_budget</code>, <code>eager_references</code>,
+            <code>references</code>, <code>skip_stages</code>,
+            <code>plan_format_version</code>, <code>questionnaire_version</code>)
+            live under <code>metadata</code> to avoid future spec conflicts.
+            <code>check_skill_spec.py</code> validates the shape.
+          </li>
+          <li>
+            <strong>Add the mandatory Quick Guide pointer.</strong> Within the
+            first 15 non-blank body lines, SKILL.md must carry a blockquote pointer
+            containing the literal token <code>SKILL-quickguide.md</code>. The
+            canonical form is
+            <code>&gt; Overview: see [./SKILL-quickguide.md](./SKILL-quickguide.md)</code>.
+            The <code>quickguide-pointer-compliance</code> scanner fails preflight
+            if it is missing or malformed.
+          </li>
+          <li>
+            <strong>Author the sibling Quick Guide.</strong> Put the
+            designer-facing narrative (What / Example / When to use / Next step) in
+            <code>SKILL-quickguide.md</code>. It is not added to
+            <code>metadata.references</code> and pre-skill does not load it during
+            normal stages; it is loaded on demand by <code>--help</code> and by
+            <code>/help &lt;skill&gt;</code> Layer 2.
+          </li>
+          <li>
+            <strong>Write the body and Arguments table.</strong> Keep executional
+            instructions in SKILL.md. Templates go under
+            <code>.claude/references/template/</code>; historical rationale and
+            private citations go in an optional <code>SKILL-rationale.md</code>
+            sibling (maintainer-only, never loaded at runtime).
+          </li>
+        </ol>
+
+        <aside class="callout-warning">
+          <p>
+            <strong>Runtime skill generation is deferred.</strong> Agents do not
+            create new <code>SKILL.md</code> files at runtime. That capability is
+            gated on a permission-inheritance model, mandatory constitution
+            injection, and a constrained template factory -- none of which is in
+            place yet.
+          </p>
+        </aside>
+      </section>
+
+      <section id="subagent">
+        <h2>How to Add a Subagent Prompt</h2>
+
+        <p>
+          Subagents are prompt files in <code>.claude/agents/</code>, run in
+          isolated context windows by thin-skill wrappers via the Agent tool. They
+          come in two authored roles (a third, Executor, is constructed dynamically
+          by <code>/implement</code> and is not a standalone file):
+        </p>
+
+        <ul>
+          <li><strong>Evaluator</strong> -- reviews one type of artifact through one lens (e.g. <code>code-reviewer</code>, <code>plan-reviewer</code>, <code>harness-health-evaluator</code>).</li>
+          <li><strong>Generator</strong> -- produces one type of self-contained artifact from well-defined inputs (e.g. <code>document-generator</code>, <code>onboarding-generator</code>, <code>communication-generator</code>).</li>
+        </ul>
+
+        <ol>
+          <li>
+            <strong>Justify single responsibility.</strong> New agents must show
+            their domain is distinct from every existing agent. Each agent operates
+            on one artifact type through one lens; do not merge agents or add
+            cross-cutting responsibilities.
+          </li>
+          <li>
+            <strong>Choose the dispatch.</strong> Use Dispatch A (wrapper &rarr;
+            subagent) when the mode is self-contained, has a stable prompt-in /
+            artifact-out contract, benefits from context isolation, and needs no
+            mid-flight interaction. Otherwise keep the work inline in the wrapper
+            (Dispatch B).
+          </li>
+          <li>
+            <strong>Wire the wrapper.</strong> A thin skill wrapper parses
+            arguments, runs interactive prompts, invokes the lifecycle hooks, and
+            delegates to the agent. The wrapper -- not the agent -- owns
+            <code>/pre-skill</code> and <code>/post-skill</code>; no dispatch fires
+            them twice.
+          </li>
+          <li>
+            <strong>Pass the constitution to generators.</strong> Generator agents
+            must receive the project constitution as part of their prompt for trust
+            boundary enforcement.
+          </li>
+        </ol>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Expected output.</strong> A new prompt file under
+            <code>.claude/agents/</code> plus a wrapper that dispatches to it,
+            keeping the single lifecycle-hook owner invariant intact.
+          </p>
+        </aside>
+      </section>
+
+      <section id="perspectives">
+        <h2>How to Create Custom Review Perspectives</h2>
+
+        <p>
+          Review perspectives are the domain lenses (SEC, PERF, DB, UX, A11Y, ...)
+          that <code>/critique review</code> and <code>/critique preflight</code>
+          apply to code, plans, and decisions. They live under
+          <code>.claude/references/general/review-perspectives/</code>, organised
+          into Essential / Standard / Deep tiers (P0 / P1-P2 / P3-P4) with an
+          auto-generated Essential summary.
+        </p>
+
+        <ol>
+          <li>
+            <strong>Add the perspective file in the right tier.</strong> Place a
+            new perspective in the tier that matches how often it should run:
+            Essential (P0) runs everywhere; Deep (P3-P4) runs only under
+            <code>--depth deep</code>.
+          </li>
+          <li>
+            <strong>Regenerate the Essential summary</strong> if you add or move a
+            P0 perspective, so the shortlist stays consistent with the tier files.
+          </li>
+        </ol>
+
+        <ul>
+          <li><strong>Essential tier</strong> -- Recommended for a lens that must apply to every review (e.g. security-classified concerns).</li>
+          <li><strong>Deep tier</strong> -- Recommended for a specialised lens that would add noise on routine reviews. NOT recommended to put a niche perspective in Essential -- it slows every preflight.</li>
+        </ul>
+      </section>
+
+      <section id="pipeline">
+        <h2>How to Modify the Pre-Skill Pipeline</h2>
+
+        <p>
+          Pre-skill runs as a pipeline of six composable stages -- <strong>help</strong>,
+          <strong>brief-log</strong>, <strong>budget-eval</strong>,
+          <strong>pending-check</strong>, <strong>ref-load</strong>, and
+          <strong>constitution</strong>. Three are critical and always run
+          (brief-log, budget-eval, ref-load); three are non-critical and
+          error-isolated (help, pending-check, constitution). The
+          <code>orphan-check</code> and <code>compaction-check</code> sub-steps now
+          live under <code>budget-eval</code>, though their legacy IDs are still
+          recognised.
+        </p>
+
+        <p>
+          A skill opts out of non-critical stages by declaring
+          <code>skip_stages: [stage-id, ...]</code> in its YAML frontmatter under
+          <code>metadata.skip_stages</code>. A skill can never skip pre-skill
+          entirely -- that is a constitutional invariant.
+        </p>
+
+        <ul>
+          <li><strong>Skip a non-critical stage</strong> -- Recommended when a stage's output topology does not fit the skill (e.g. a configuration skill that runs before <code>conventions.md</code> exists skips <code>constitution</code> and <code>pending-check</code>).</li>
+          <li><strong>Keep all stages</strong> -- Recommended for lifecycle-workflow skills that produce logged <code>_output/</code> artifacts and consume prior context. NOT recommended to skip critical stages -- <code>skip_stages</code> only affects the three non-critical ones.</li>
+        </ul>
+
+        <aside class="callout-warning">
+          <p>
+            <strong>The pipeline is intentionally monolithic.</strong> Pre-skill
+            (6 stages) and post-skill (13 steps) are kept in single files so the
+            full lifecycle is readable at once. Do not decompose them into
+            micro-hooks; use <code>skip_stages</code> for per-skill overrides.
+          </p>
+        </aside>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Pick a side for new skills.</strong> Lifecycle-workflow skills
+            invoke <code>/pre-skill</code> as their first step; configuration and
+            meta skills (<code>/seja-setup</code>, <code>/pending</code>,
+            <code>/help</code>, and the hooks themselves) skip it. The divide is
+            workflow versus infrastructure -- new skills should choose explicitly.
+          </p>
+        </aside>
+      </section>
+
+      <section id="triggers">
+        <h2>How to Add a Periodic Trigger</h2>
+
+        <p>
+          Periodic triggers file a pending-ledger entry at most once per interval,
+          surfacing recurring maintenance without blocking any skill. They are
+          declared in <code>.claude/references/template/conventions.md</code> (the
+          <code>check-git-freshness</code> trigger is the reference example -- it
+          files a pending entry when local branches drift from their upstreams).
+        </p>
+
+        <ol>
+          <li>
+            <strong>Declare the trigger and its interval.</strong> Add the trigger
+            to the conventions template so seeded projects inherit it. It should
+            file a pending entry (e.g. <code>spec-drift-check</code>,
+            <code>periodic-curation</code>) rather than run work directly.
+          </li>
+          <li>
+            <strong>Keep network and destructive work out of pre-skill.</strong>
+            Triggers surface a <em>signal</em>; the user resolves it on demand
+            (e.g. via <code>/critique freshness</code> or
+            <code>/explain drift</code>). Pre-skill must stay within its fast,
+            advisory-only budget -- no <code>git fetch</code>, no auto-pull, no
+            blocking prompts.
+          </li>
+        </ol>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Expected output.</strong> A trigger that, at most once per
+            interval, files a pending item you resolve with the appropriate
+            on-demand skill -- keeping recurring maintenance visible without
+            taxing every skill invocation.
+          </p>
+        </aside>
+      </section>
+
+      <section id="common-mistakes">
+        <h2>Common Mistakes</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Mistake</th>
+                <th scope="col">What happens</th>
+                <th scope="col">Fix</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Creating a new skill for work that is really a mode.</td>
+                <td>Skill count grows without justification; the governance test fails at review.</td>
+                <td>Add a mode to an existing skill unless you can meet 3 of the 4 independence criteria.</td>
+              </tr>
+              <tr>
+                <td>Omitting the <code>SKILL-quickguide.md</code> pointer.</td>
+                <td>The <code>quickguide-pointer-compliance</code> scanner fails preflight.</td>
+                <td>Add the blockquote pointer with the literal <code>SKILL-quickguide.md</code> token in the first 15 body lines.</td>
+              </tr>
+              <tr>
+                <td>Giving a subagent cross-cutting responsibilities.</td>
+                <td>Violates single-responsibility; the agent-count governance test blocks it.</td>
+                <td>Keep one artifact type and one lens per agent; add a new agent instead of overloading one.</td>
+              </tr>
+              <tr>
+                <td>Putting a niche perspective in the Essential tier.</td>
+                <td>Every preflight slows down for a lens that rarely applies.</td>
+                <td>Place specialised lenses in the Deep tier so they run only under <code>--depth deep</code>.</td>
+              </tr>
+              <tr>
+                <td>Trying to skip a critical pre-skill stage via <code>skip_stages</code>.</td>
+                <td>Only the three non-critical stages are skippable; the critical ones always run.</td>
+                <td>Design the skill to work with brief-log, budget-eval, and ref-load always present.</td>
+              </tr>
+              <tr>
+                <td>Making a periodic trigger do network or destructive work.</td>
+                <td>Breaks pre-skill's fast, advisory-only budget and non-destructive default.</td>
+                <td>File a pending signal; let the user resolve it with an on-demand skill.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </article>
+
+    <nav aria-label="chapter navigation">
+      <a href="design-intent.html">Back: Design Intent Maintenance</a>
+    </nav>
+
+    <!-- See also: cross-volume related chapters -->
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../reference/reference-files-catalog.html">Reference Files Catalog</a> — the reference files a new skill or perspective can draw on</li>
+        <li><a href="../reference/configuration-reference.html">Configuration Reference</a> — the convention variables and settings a customization must respect</li>
+        <li><a href="../explanation/design-decisions.html">Design Decisions</a> — why the pipelines are monolithic and skills must justify their existence</li>
+      </ul>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#new-skill">Write a New Skill</a></li>
+      <li><a href="#subagent">Add a Subagent Prompt</a></li>
+      <li><a href="#perspectives">Create Custom Review Perspectives</a></li>
+      <li><a href="#pipeline">Modify the Pre-Skill Pipeline</a></li>
+      <li><a href="#triggers">Add a Periodic Trigger</a></li>
+      <li><a href="#common-mistakes">Common Mistakes</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T22:55:00Z</p>
+  </footer>
+
+</body>
+</html>

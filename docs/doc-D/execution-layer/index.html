@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="doc-status" content="draft">
+  <meta name="doc-volume" content="3">
+  <meta name="doc-phase" content="1">
+
+  <title>Vol. 3: The Execution Layer -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li>Vol. 3: The Execution Layer</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <!-- PRINT-LINK:START -->
+      <p class="print-view-link"><a href="execution-layer-print.html">Single-page / print view</a> &mdash; the whole volume on one page.</p>
+      <!-- PRINT-LINK:END -->
+      <h1>Vol. 3: The Execution Layer <span class="phase-badge">Phase 1</span></h1>
+
+      <section id="purpose" data-diataxis="explanation">
+        <p>
+          This volume covers day-to-day usage of SEJA -- the lifecycle pipeline
+          that orchestrates work, the skill system that encapsulates agent
+          capabilities, subagent delegation for parallel tasks, plan-driven
+          implementation, and the quality critique loop. This is the
+          practitioner's primary reference for getting work done with SEJA.
+        </p>
+      </section>
+
+      <section id="chapters" data-diataxis="reference">
+        <h2>Chapters</h2>
+
+        <ol class="chapter-list">
+          <li>
+            <a href="lifecycle-pipeline.html">1. Lifecycle Pipeline</a>
+            <span class="chapter-summary">Documents the canonical lifecycle path from <code>/research</code> through <code>/reflect</code>, the 6 pre-skill stages and post-skill steps that bookend every skill invocation, enforcement mechanisms (CLAUDE.md rules, pre-commit hooks, validation scripts), lifecycle variations for bug fixes, documentation-only tasks, and refactoring, and the conversation trace protocol for non-skill exchanges.</span>
+          </li>
+          <li>
+            <a href="skills-in-depth.html">2. Skills In Depth</a>
+            <span class="chapter-summary">Per-skill reference for all 15 user-facing skills, covering purpose, parameters, prerequisites, workflow summary, subagent delegations, reference file loads, expected outputs, and common mistakes. Opens with a skill system overview explaining the dispatch mechanism and context budget tiers (light, standard, heavy).</span>
+          </li>
+          <li>
+            <a href="subagent-delegation.html">3. Subagent Delegation</a>
+            <span class="chapter-summary">Explains how skills delegate specialized work to subagents via the Agent tool, with a per-agent reference for all 16 agents: 9 evaluators (code-reviewer, council-debate, harness-health-evaluator, migration-validator, plan-reviewer, research-reviewer, semiotic-inspector, standards-checker, test-runner) and 7 generators (communication-generator, onboarding-generator, document-generator, test-plan-generator, explanation-generator, architecture-explainer, evolution-explainer). Includes a guide for writing custom subagents.</span>
+          </li>
+          <li>
+            <a href="plans-and-implementation.html">4. Plans and Implementation</a>
+            <span class="chapter-summary">Covers plan file structure (header, step format with Files/Verify/Tests/Docs/Traces metadata), the three planning modes (standard, lightweight proposal, roadmap), the complexity-gated two-phase review process, and the <code>/implement</code> executor with auto, manual, roadmap, and pending modes. Also documents progress tracking, checkpoint recovery, and design-intent traceability via Traces fields and STATUS markers.</span>
+          </li>
+          <li>
+            <a href="quality-and-critique.html">5. Quality and Critique</a>
+            <span class="chapter-summary">Documents the <code>/critique</code> skill's 10 modes (validate, review, smoke, preflight, health, test-plan, docs, freshness, telemetry, semiotic-inspection), the 16 review perspectives organized into Essential, Standard, and Deep tiers, the two-phase review process (perspective triage and scan followed by targeted deep-dives), and guidance for interpreting critique results.</span>
+          </li>
+        </ol>
+      </section>
+
+      <section id="reading-order" data-diataxis="explanation">
+        <h2>Recommended Reading Order</h2>
+        <p>
+          Start with "Lifecycle Pipeline" to understand the overall flow, then
+          "Skills In Depth" for the mechanism that powers each stage. Read
+          "Subagent Delegation" next to understand how complex tasks are
+          parallelized, then "Plans and Implementation" for the planning
+          workflow. Finish with "Quality and Critique" to learn how SEJA
+          validates its own outputs.
+        </p>
+      </section>
+
+      <section id="cross-references" data-diataxis="reference">
+        <h2>Related Volumes</h2>
+        <aside>
+          <p>
+            Execution is driven by design decisions documented in
+            <a href="../design-layer/index.html">Vol. 2: The Design Layer</a>.
+            The artifacts produced by execution are governed by
+            <a href="../governance-layer/index.html">Vol. 4: The Output and Governance Layer</a>.
+          </p>
+        </aside>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 3: The Execution Layer</h2>
+    <ol>
+      <li>
+        <a href="lifecycle-pipeline.html">Lifecycle Pipeline</a>
+      </li>
+      <li>
+        <a href="skills-in-depth.html">Skills In Depth</a>
+      </li>
+      <li>
+        <a href="subagent-delegation.html">Subagent Delegation</a>
+      </li>
+      <li>
+        <a href="plans-and-implementation.html">Plans and Implementation</a>
+      </li>
+      <li>
+        <a href="quality-and-critique.html">Quality and Critique</a>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Volume navigation -->
+  <nav aria-label="volume navigation" class="volume-nav">
+    <a href="../design-layer/index.html">Previous: Vol. 2 -- The Design Layer</a>
+    <a href="../governance-layer/index.html">Next: Vol. 4 -- The Output and Governance Layer</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

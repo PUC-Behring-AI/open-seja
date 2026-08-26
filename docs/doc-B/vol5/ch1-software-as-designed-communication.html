@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-volume" content="5">
+  <meta name="doc-chapter" content="1">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+
+  <title>Software as Designed Communication -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 5: Foundations and Philosophy</a></li>
+      <li>Software as Designed Communication</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>Software as Designed Communication</h1>
+
+      <p>
+        SEJA rests on a claim that is easy to state and consequential to
+        take seriously: <strong>software is a message</strong>. It is a
+        message about how to communicate that a designer sends to a user,
+        and every interface element, default, error string, and
+        interaction path is a fragment of that message. This chapter sets
+        out the theoretical source of that claim &mdash; the Semiotic
+        Engineering of Clarisse Sieckenius de Souza (2005) &mdash; and shows
+        how SEJA turns it into a concrete, mandatory design artifact. It
+        also does the harder work: it marks where the "software as message"
+        framing is strongest, where it strains, and what it leaves
+        unexplained. Later chapters in this volume build on the vocabulary
+        introduced here; this one establishes the ground.
+      </p>
+
+      <!-- Section 1: The Designer's Deputy -->
+      <section data-diataxis="explanation" id="designers-deputy">
+        <h2>The Designer's Deputy</h2>
+
+        <p>
+          Semiotic Engineering (de Souza, 2005) reframes human-computer
+          interaction as a species of <em>communication</em> rather than as
+          a species of cognition. Where cognitive approaches to HCI ask how
+          a user forms a mental model of a system and executes actions
+          against it, Semiotic Engineering asks a different question: what
+          is the system <em>saying</em>, who is saying it, and to whom? Its
+          answer is that an interactive system is a message from its
+          designers to its users about how the system can and should be
+          used to achieve a range of purposes.
+        </p>
+
+        <p>
+          The theory's central device for making this precise is the
+          <strong>designer's deputy</strong>. The designer is not present at
+          use time; the user interacts with software that was authored
+          weeks, months, or years earlier. Yet the designer's communicative
+          intent must reach the user somehow. In Semiotic Engineering, the
+          system's interface <em>is</em> the designer's proxy at runtime
+          &mdash; a deputy that speaks on the designer's behalf. Every
+          affordance the user encounters, every message the system emits,
+          every constraint that channels behaviour, is an utterance of this
+          deputy. The deputy does not merely enable interaction; it
+          conducts, on the designer's behalf, an ongoing act of
+          communication.
+        </p>
+
+        <p>
+          De Souza (2005) frames this as a deliberately unusual answer to
+          the question "who communicates with the user?" The naive answer is
+          "the system." The semiotic answer is "the designer, through the
+          system." This shift has teeth. It means an interface is
+          accountable in the way an authored text is accountable: it can be
+          coherent or incoherent, honest or misleading, complete or evasive
+          about its own intentions. It means usability problems are, at
+          root, <em>communication</em> failures &mdash; breakdowns in the
+          designer's message &mdash; not merely mismatches between a user's
+          mental model and a system's state model.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The designer's deputy is a
+            <em>role</em>, not a person. In a conventional product the
+            deputy is dispersed across the running interface. In SEJA, as
+            the final section of this chapter argues, the deputy role is
+            occupied by an unusually explicit agent &mdash; which is exactly
+            why the framing repays being made precise.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 2: Metacommunication and the Two Registers -->
+      <section data-diataxis="explanation" id="metacommunication">
+        <h2>Metacommunication and the Two Registers</h2>
+
+        <p>
+          If the interface is a message, what kind of message is it? Here
+          Semiotic Engineering introduces its defining concept:
+          <strong>metacommunication</strong>. The prefix <em>meta</em> is
+          load-bearing. The designer's message is not communication
+          <em>within</em> the system &mdash; it is communication
+          <em>about</em> communication: a message that tells the user how to
+          communicate with the system in order to accomplish their goals. It
+          is a communication whose content is a communicative system.
+        </p>
+
+        <p>
+          De Souza (2005) gives the metacommunication message a canonical
+          paraphrase, a template the designer is understood to be uttering
+          through the deputy:
+        </p>
+
+        <blockquote class="status-notice">
+          "Here is my understanding of who you are, what I've learned you
+          want or need to do, in which preferred ways, and why. This is the
+          system that I have therefore designed for you, and this is the way
+          you can or should use it in order to fulfil a range of purposes
+          that fall within this vision."
+        </blockquote>
+
+        <p>
+          Read closely, this is a first-person message. The "I" is the
+          designer; the "you" is the user. It carries the designer's model
+          of the user ("who you are"), the designer's model of the user's
+          needs ("what I've learned you want"), a justification ("and why"),
+          a claim about the artifact ("the system that I have therefore
+          designed"), and a set of usage prescriptions ("the way you can or
+          should use it"). Every one of these is a design decision made
+          visible. Metacommunication is thus not decoration on top of a
+          system &mdash; it is the semantic content the system was built to
+          convey.
+        </p>
+
+        <h3>Two Registers: System-Level and Meta-Level</h3>
+
+        <p>
+          Because the message is <em>about</em> communication, Semiotic
+          Engineering distinguishes two registers operating simultaneously
+          in any interaction (de Souza, 2005, Ch. 3):
+        </p>
+
+        <dl>
+          <dt>The system-level register (interaction)</dt>
+          <dd>
+            The moment-to-moment exchange between user and system: the user
+            clicks, the system responds; the user types a query, the system
+            returns results. This is communication <em>with</em> the deputy
+            &mdash; the running dialogue of use. It is what most usability
+            work observes and measures.
+          </dd>
+
+          <dt>The meta-level register (metacommunication)</dt>
+          <dd>
+            The single, global message the designer sends <em>through</em>
+            the totality of the system-level interaction. Every
+            system-level exchange is also a fragment of this larger message
+            &mdash; a piece of evidence about who the designer thinks the
+            user is and how the designer intends the system to be used. The
+            meta-level message is not uttered in any one screen; it is the
+            emergent utterance of all of them together.
+          </dd>
+        </dl>
+
+        <p>
+          The relationship between the two registers is the crux. Each
+          individual system-level exchange (a button press, a validation
+          error) is legible on its own. But it is also a <em>sample</em> of
+          the meta-level message: from the pattern of what the system
+          allows, forbids, defaults to, and explains, the user reconstructs
+          the designer's vision. When those samples are consistent, the user
+          receives a coherent message and interaction feels intelligible.
+          When they conflict &mdash; when the system's defaults imply one
+          model of the user and its error messages imply another &mdash; the
+          meta-level message fractures, and the user cannot tell what the
+          designer meant. Semiotic Engineering's central quality criterion,
+          <em>communicability</em> (the subject of
+          <a href="ch2-sign-systems-and-communicability.html">Chapter 2</a>),
+          is precisely the degree to which the meta-level message comes
+          through clearly across the system-level register.
+        </p>
+
+        <p>
+          This two-register analysis is what distinguishes Semiotic
+          Engineering from a merely metaphorical use of "communication."
+          The theory does not just say interfaces are like messages; it
+          identifies a specific structure &mdash; a global authored message
+          delivered through, and reconstructable from, a stream of local
+          interactions &mdash; and makes that structure the object of
+          design and evaluation.
+        </p>
+      </section>
+
+      <!-- Section 3: How SEJA Operationalizes Metacommunication -->
+      <section data-diataxis="explanation" id="seja-operationalization">
+        <h2>How SEJA Operationalizes Metacommunication</h2>
+
+        <p>
+          SEJA does not treat the metacommunication message as a background
+          metaphor. It elevates the message to a first-class, captured
+          design artifact and makes the harness the machinery that keeps
+          that message coherent across the lifecycle. Two operational
+          commitments carry this.
+        </p>
+
+        <h3>The Message as the Canonical Top-Level Artifact</h3>
+
+        <p>
+          When a project is configured through the <code>/design</code>
+          skill, the metacommunication message is elicited directly from
+          the designer and recorded as the <strong>Global Metacommunication
+          Vision</strong> &mdash; section 11 of
+          <code>product-design/product-design-as-intended.md</code>. This is
+          not an optional field. The <code>/design</code> skill classifies
+          the metacommunication message among its <em>required conceptual
+          design</em> inputs: it is prompted at question 0.1 (or at the
+          questionnaire's Final Step) and cannot be satisfied by a default.
+          The message the designer writes is the seed from which
+          project-specific per-feature intentions (section 14) and the
+          Extended Metacommunication Template guiding questions (section 12)
+          are developed.
+        </p>
+
+        <p>
+          Two properties of this capture are worth stating precisely, because
+          they follow from the theory rather than from convenience. First,
+          the message is recorded in the designer's <strong>first person</strong>:
+          the template for section 11 instructs the author to "use 'I' as
+          the designer and 'you' as the user &mdash; never third-person or
+          passive voice." This is the theory made literal &mdash; the
+          artifact is written as the utterance the deputy will deliver, not
+          as a third-party description of it. Second, when a designer
+          supplies a message, the harness records it <strong>verbatim</strong>.
+          The shared-definitions rule is explicit that a
+          user-provided metacommunication message must be recorded "exactly
+          as written, without summarization or editing," because "the
+          designer's precise wording carries intentional nuance;
+          paraphrasing distorts design intent." In Semiotic Engineering
+          terms: the artifact <em>is</em> the message, so editing the
+          artifact edits what the designer says to the user.
+        </p>
+
+        <p>
+          The canonical framing string SEJA uses to scaffold section 11 is
+          de Souza's own paraphrase, carried through the harness in
+          <code>.claude/references/general/shared-definitions.md</code> and
+          echoed in the section-11 template guidance. The theory's paraphrase
+          and the project's authoring prompt are, deliberately, the same
+          words. The full extended treatment of this message &mdash; its
+          slot structure, the section-12 guiding questions, and how it
+          decomposes into per-feature intentions &mdash; is the subject of
+          <a href="../vol2/ch1-metacommunication-message.html">Volume&nbsp;2,
+          Chapter&nbsp;1</a>; this chapter is concerned only with the
+          <em>why</em>.
+        </p>
+
+        <aside class="callout-warning">
+          <p>
+            <strong>Verified against live harness:</strong> the claim that
+            the metacommunication message is the canonical, required
+            top-level design artifact is checked against
+            <code>.claude/skills/design/SKILL.md</code> (Field
+            Classification: metacommunication message under "Required
+            conceptual design"; Mode 1 Final Step capture) and the section-11
+            template in
+            <code>product-design/product-design-as-intended.md</code>. The
+            verbatim and first-person rules are from
+            <code>.claude/references/general/shared-definitions.md</code>.
+          </p>
+        </aside>
+
+        <h3>The Deputy Is the Agent</h3>
+
+        <p>
+          SEJA's second commitment is the one that makes it an unusually
+          literal instance of the theory. In a conventional product the
+          designer's deputy is <em>the interface</em> &mdash; the message is
+          delivered through pixels, controls, and copy. In SEJA the designer
+          is a human working through an <strong>agent</strong>, and it is the
+          agent that plans, implements, documents, and communicates the
+          system. The metacommunication message is loaded into the agent's
+          governing context: the constitution and design-intent artifacts
+          &mdash; section 11 among them &mdash; are injected at every skill
+          invocation (this is the pre-skill reference-load and constitution
+          stages, detailed in
+          <a href="../vol3/ch1-lifecycle-pipeline.html">Volume&nbsp;3,
+          Chapter&nbsp;1</a>). The agent thereby becomes the deputy that
+          delivers and defends the designer's message across the build. The
+          message is the <em>content</em>; the agent is the <em>channel</em>
+          through which the designer's intent reaches the artifact &mdash;
+          and, ultimately, the user.
+        </p>
+
+        <p>
+          This is why the harness invests so heavily in keeping the message
+          coherent. The whole point of the two-register analysis is that
+          local decisions must remain consistent with the global message. In
+          SEJA, drift between what was intended (section 11 and its
+          decomposition) and what was built (the as-coded metacommunication
+          section) is exactly the fracturing of the meta-level message that
+          Semiotic Engineering warns against &mdash; and the harness makes
+          that drift detectable and reconcilable rather than invisible.
+          <a href="ch7-how-the-agent-reads-the-harness.html">Chapter&nbsp;7</a>
+          takes up how the agent, as deputy, reads and re-delivers the
+          harness's own metacommunication.
+        </p>
+      </section>
+
+      <!-- Section 4: Critical Counter-Reading -->
+      <section data-diataxis="explanation" id="critical-counter-reading">
+        <h2>Critical Counter-Reading: Where the One-Shot Message Strains</h2>
+
+        <p>
+          Intellectual honesty requires marking the limits of the framing
+          SEJA adopts. The "software as a single authored message" model is
+          strongest for the class of systems Semiotic Engineering was first
+          developed against: authored, editorially controlled artifacts with
+          an identifiable design authority and a broadly one-directional
+          communicative posture. For such systems the model is illuminating
+          and the coherence criterion is exactly right. But the model was
+          articulated as a <em>one-shot</em> message &mdash; a single global
+          utterance fixed at design time &mdash; and several system classes
+          strain that reading.
+        </p>
+
+        <h3>Interactive and Adaptive Systems</h3>
+
+        <p>
+          A recommender, a personalized feed, or an ML-driven interface does
+          not deliver a fixed message. What the user encounters is generated
+          at runtime and differs per user and per session; the "message" is
+          co-produced by the designer's intent, a model's learned behaviour,
+          and the user's own history. Semiotic Engineering accommodates
+          <em>interaction</em> as the system-level register, but the theory's
+          image of a single designer-authored meta-level message fits
+          awkwardly when the meta-level content is itself partly emergent and
+          not fully known to the designer in advance. The designer can author
+          the <em>policy</em> that generates behaviour, but the policy is a
+          weaker sense of "message" than the paraphrase in section&nbsp;2
+          suggests. SEJA's artifact captures designer <em>intent</em> well;
+          it is a less complete account of systems whose runtime message is
+          substantially machine-authored.
+        </p>
+
+        <h3>Multi-Designer and Long-Lived Products</h3>
+
+        <p>
+          The theory speaks of "the designer" in the singular, but real
+          products are authored by many hands over years, with turnover,
+          acquisitions, and competing internal factions. There may be no
+          single coherent "I" behind the message &mdash; the meta-level
+          utterance a user reconstructs may be the uneasy composite of
+          several designers' partly incompatible visions. This is not fatal
+          to the theory (a composite author is still an author), but it does
+          undercut the tidy first-person paraphrase, and it raises a question
+          the model does not answer on its own: whose message wins when
+          designers disagree? SEJA's answer is partly procedural &mdash; the
+          constitution and the recorded design intent are meant to hold a
+          single coherent authority &mdash; but that is a governance
+          commitment layered <em>on top of</em> the theory, not a consequence
+          of it.
+        </p>
+
+        <h3>The Risk of Over- and Under-Engineering</h3>
+
+        <p>
+          Two failure modes bracket SEJA's operationalization. It can
+          <em>over-engineer</em>: for a small, single-author tool with an
+          obvious purpose, eliciting a full first-person metacommunication
+          message, an extended template, and per-feature intentions may cost
+          more ceremony than the coherence it buys. And it can
+          <em>under-engineer</em>: capturing the message once, at design
+          time, does not by itself guarantee the running system still speaks
+          it &mdash; the artifact can become a museum piece that the code has
+          quietly outgrown. SEJA mitigates the latter with drift detection
+          and reconciliation, but the mitigation is only as good as the
+          discipline of running it. The framing tells you what coherence
+          <em>is</em>; it does not, by itself, keep a codebase coherent.
+        </p>
+
+        <h3>Open Questions</h3>
+
+        <p>
+          Some tensions the framing raises are not resolved by SEJA and are
+          worth naming as open:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Emergent meta-messages.</strong> When runtime behaviour
+            is machine-generated, how should a designer's intended message be
+            reconciled with the message the system actually delivers in
+            aggregate &mdash; and which one is the object of "communicability"?
+          </li>
+          <li>
+            <strong>The user as author.</strong> Semiotic Engineering casts
+            the user primarily as a <em>recipient</em> and interpreter of the
+            designer's message. In deeply configurable, user-scripted, or
+            collaborative systems, users co-author the message. The model has
+            resources for this (users as interpreters who talk back through
+            interaction) but does not foreground it, and SEJA's artifact does
+            not yet capture user-side authorship.
+          </li>
+          <li>
+            <strong>Agent as author vs. deputy.</strong> SEJA places an agent
+            in the deputy role. But an agent that generates code and copy is
+            not a neutral conduit &mdash; it introduces its own regularities
+            into the message. How much of the delivered meta-message is the
+            human designer's, and how much is the agent's, is a question the
+            "deputy" metaphor tends to hide rather than surface.
+            <a href="ch6-governable-and-epistemic.html">Chapter&nbsp;6</a>
+            returns to the governance side of this.
+          </li>
+        </ul>
+
+        <p>
+          None of these undercut the value of the framing; they mark its
+          edges. SEJA adopts Semiotic Engineering because, for the systems it
+          is built to help design, treating software as designed
+          communication yields a sharper design object &mdash; the message
+          &mdash; and a clearer failure mode &mdash; incoherence &mdash; than
+          the alternatives. Knowing where the model strains is part of using
+          it well.
+        </p>
+      </section>
+
+      <!-- Section: References -->
+      <section data-diataxis="explanation" id="references">
+        <h2>References</h2>
+
+        <ul>
+          <li>
+            de Souza, C. S. (2005). <em>The Semiotic Engineering of
+            Human-Computer Interaction</em>. MIT Press.
+          </li>
+        </ul>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- See also: curated cross-volume related chapters -->
+  <nav aria-label="see also" class="see-also">
+    <h2>See also</h2>
+    <ul>
+      <li><a href="ch2-sign-systems-and-communicability.html">Chapter 2: Sign Systems and Communicability</a> &mdash; the quality criterion that measures how well the meta-message comes through.</li>
+      <li><a href="../vol2/ch1-metacommunication-message.html">Volume 2, Chapter 1: The Metacommunication Message</a> &mdash; the message as a working design artifact.</li>
+      <li><a href="ch7-how-the-agent-reads-the-harness.html">Chapter 7: How the Agent Reads the Harness</a> &mdash; the agent as the designer's deputy in SEJA.</li>
+    </ul>
+  </nav>
+
+  <!-- Chapter navigation: Ch.1 omits Previous -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="ch2-sign-systems-and-communicability.html">Next: Sign Systems and Communicability</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

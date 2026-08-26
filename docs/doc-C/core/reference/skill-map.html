@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="reference">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="Static map of the seventeen SEJA skill nodes and their invokes / delegates / orchestrates relationships, drawn from the harness call-graph topology, with a textual description of the lifecycle path and delegation patterns.">
+  <title>Skill Map — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/reference sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Skill Map</h1>
+      <p>The seventeen skill nodes and how they invoke scripts, delegate to agents, and orchestrate the lifecycle hooks.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Reference</a></li>
+        <li aria-current="page">Skill Map</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-reference">reference</span>
+          <span class="badge core-reference">reference</span>
+        </p>
+
+        <section data-diataxis="reference" aria-labelledby="overview">
+          <h2 id="overview">Overview</h2>
+          <p>
+            This page extracts the <strong>skill-type nodes</strong> and their
+            relational edges — <code>invokes</code> (skill → script),
+            <code>delegates</code> (skill → subagent), and
+            <code>orchestrates</code> (skill → lifecycle hook) — from the same
+            harness topology summarized in the
+            <a href="call-graph.html">Call Graph</a> reference. There are
+            seventeen skill nodes: fifteen user-facing skills plus the two internal
+            lifecycle hooks, <code>/pre-skill</code> and <code>/post-skill</code>.
+            The tables below are static; there is no runtime fetch.
+          </p>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="skill-connections">
+          <h2 id="skill-connections">Skill connections</h2>
+          <p>
+            Each row is a skill node with its counts of outgoing
+            <code>invokes</code>, <code>delegates</code>, and
+            <code>orchestrates</code> edges, and the components it connects to.
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>The seventeen skill nodes and their invokes / delegates / orchestrates connections.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Skill</th>
+                  <th scope="col">Invokes</th>
+                  <th scope="col">Delegates</th>
+                  <th scope="col">Orchestrates</th>
+                  <th scope="col">Key connections</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">/research</th>
+                  <td>3</td>
+                  <td>2</td>
+                  <td>2</td>
+                  <td>Delegates to council-debate &amp; research-reviewer; orchestrates pre-skill / post-skill.</td>
+                </tr>
+                <tr>
+                  <th scope="row">/explain</th>
+                  <td>3</td>
+                  <td>3</td>
+                  <td>0</td>
+                  <td>Delegates to architecture-explainer, evolution-explainer, explanation-generator.</td>
+                </tr>
+                <tr>
+                  <th scope="row">/design</th>
+                  <td>1</td>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>Invokes check_secrets.py; orchestrates pre-skill.</td>
+                </tr>
+                <tr>
+                  <th scope="row">/plan</th>
+                  <td>4</td>
+                  <td>1</td>
+                  <td>2</td>
+                  <td>Delegates to plan-reviewer; invokes check_plan_coverage.py, reserve_id.py, pending.py.</td>
+                </tr>
+                <tr>
+                  <th scope="row">/implement</th>
+                  <td>4</td>
+                  <td>1</td>
+                  <td>2</td>
+                  <td>Delegates to test-runner; invokes macro-index / pending-roadmap generators.</td>
+                </tr>
+                <tr>
+                  <th scope="row">/critique</th>
+                  <td>5</td>
+                  <td>7</td>
+                  <td>2</td>
+                  <td>Heaviest delegator — 7 evaluator agents; invokes check_docs.py, check_git_freshness.py, and more.</td>
+                </tr>
+                <tr>
+                  <th scope="row">/document</th>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>0</td>
+                  <td>Delegates to document-generator.</td>
+                </tr>
+                <tr>
+                  <th scope="row">/communicate</th>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>2</td>
+                  <td>Delegates to communication-generator; orchestrates pre-skill / post-skill.</td>
+                </tr>
+                <tr>
+                  <th scope="row">/reflect</th>
+                  <td>6</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>Invokes the reflection-report and reflect_* analysis scripts.</td>
+                </tr>
+                <tr>
+                  <th scope="row">/onboard</th>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>2</td>
+                  <td>Delegates to onboarding-generator; orchestrates pre-skill / post-skill.</td>
+                </tr>
+                <tr>
+                  <th scope="row">/publish</th>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>2</td>
+                  <td>Delegates to document-generator; orchestrates pre-skill / post-skill.</td>
+                </tr>
+                <tr>
+                  <th scope="row">/pending</th>
+                  <td>2</td>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>Invokes apply_marker.py, pending.py; orchestrates pre-skill.</td>
+                </tr>
+                <tr>
+                  <th scope="row">/help</th>
+                  <td>1</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>Invokes generate_skill_map.py.</td>
+                </tr>
+                <tr>
+                  <th scope="row">/qa-log</th>
+                  <td>1</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>Invokes reserve_id.py.</td>
+                </tr>
+                <tr>
+                  <th scope="row">/seja-setup</th>
+                  <td>4</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>Invokes detect_setup_state.py, resolve_seja_version.py, upgrade_harness.py, and more.</td>
+                </tr>
+                <tr>
+                  <th scope="row">/pre-skill</th>
+                  <td>3</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>Internal hook — invokes conversation_trace.py, generate_briefs_index.py, pending.py.</td>
+                </tr>
+                <tr>
+                  <th scope="row">/post-skill</th>
+                  <td>10</td>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>Internal hook — densest fan-out: 10 scripts (briefs, indexes, digest, preflight, commit scope, telemetry).</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="topology">
+          <h2 id="topology">Lifecycle path and delegation patterns</h2>
+          <p>
+            The skill nodes trace the canonical lifecycle path:
+          </p>
+          <p>
+            <code>/research</code> (or <code>/explain</code>) →
+            <code>/design</code> | <code>/plan</code> →
+            <code>/implement</code> → <code>/critique</code> →
+            <code>/document</code> | <code>/communicate</code> →
+            <code>/reflect</code>.
+          </p>
+          <p>
+            Two structural patterns stand out in the edge data:
+          </p>
+          <ul>
+            <li>
+              <strong>The hook sandwich.</strong> Every skill that mutates state —
+              <code>/research</code>, <code>/plan</code>, <code>/implement</code>,
+              <code>/critique</code>, <code>/communicate</code>,
+              <code>/onboard</code>, <code>/publish</code> — <em>orchestrates</em>
+              both <code>/pre-skill</code> (at entry) and <code>/post-skill</code>
+              (at exit). Read-lean or pre-skill-only skills (<code>/design</code>,
+              <code>/pending</code>) orchestrate just <code>/pre-skill</code>.
+              <code>/post-skill</code> then carries the heaviest script fan-out
+              (10 invokes), because state alignment, index regeneration, gates, and
+              telemetry all live there.
+            </li>
+            <li>
+              <strong>Evaluator vs. generator delegation.</strong>
+              <code>/critique</code> is the heaviest delegator (7 evaluator
+              agents), and <code>/research</code> adds two more evaluators
+              (council-debate, research-reviewer). The generator skills each
+              delegate to exactly one matching agent: <code>/document</code> and
+              <code>/publish</code> → document-generator, <code>/communicate</code>
+              → communication-generator, <code>/onboard</code> →
+              onboarding-generator, <code>/explain</code> → its three explainer
+              agents, and <code>/plan</code> / <code>/implement</code> →
+              plan-reviewer / test-runner respectively.
+            </li>
+          </ul>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="skills-catalog.html">Skills Catalog</a> &mdash; the seventeen skills as a lookup table with context budgets and lifecycle roles.</li>
+            <li><a href="../concepts/lifecycle-pipeline.html">The Lifecycle Pipeline</a> &mdash; the conceptual model behind the pre-skill / post-skill hook orchestration.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Reference</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/reference sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

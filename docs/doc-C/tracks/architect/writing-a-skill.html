@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How to add a skill to the SEJA harness: the SKILL.md frontmatter contract, the mandatory pre-skill and post-skill lifecycle bookends, the SKILL-quickguide.md sibling, and where a skill's scripts live.">
+  <title>Writing a Skill &mdash; SEJA Documentation</title>
+  <!-- CSS depth: 2 (tracks/architect sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Writing a Skill</h1>
+      <p>The frontmatter contract, the lifecycle bookends, the sibling files, and where the scripts go.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#tracks">Tracks</a></li>
+        <li><a href="index.html">Architect</a></li>
+        <li aria-current="page">Writing a Skill</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge track-architect">Architect</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="before-you-add-a-skill">
+          <h2 id="before-you-add-a-skill">Before you add a skill</h2>
+          <p>
+            The harness governs skill count deliberately. A new skill must first
+            justify that its functionality <em>cannot</em> be a mode of an existing
+            skill &mdash; the ten-mode <code>/critique</code> consolidation is the
+            model to follow when several jobs share one execution pattern. A skill
+            earns independent existence by meeting at least <strong>three of four</strong>
+            criteria: distinct user intent and mental model, disjoint reference sets,
+            incompatible execution topology, and a different output strategy.
+          </p>
+          <p>
+            If your candidate fails that bar, the right move is a new <em>mode</em>
+            on an existing wrapper, not a new directory.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="the-skill-directory">
+          <h2 id="the-skill-directory">The skill directory</h2>
+          <p>
+            A skill is a directory under <code>.claude/skills/</code> named after the
+            slash command that invokes it. The directory holds three kinds of file:
+          </p>
+          <dl>
+            <dt><code>SKILL.md</code> <em>(required)</em></dt>
+            <dd>
+              YAML frontmatter plus the executional instructions the agent follows at
+              runtime. This is the only file pre-skill loads on the hot path.
+            </dd>
+            <dt><code>SKILL-quickguide.md</code> <em>(required for user-invocable skills)</em></dt>
+            <dd>
+              The designer-facing narrative &mdash; What / Example / When to use / Next
+              step. Internal lifecycle hooks have no Quick Guide and get no sibling.
+            </dd>
+            <dt><code>SKILL-rationale.md</code> <em>(optional)</em></dt>
+            <dd>
+              A maintainer-only companion holding plan and research citations and
+              architectural-decision prose that the agent does not need at runtime.
+              Adopt it once the body carries three or more artifact citations.
+            </dd>
+          </dl>
+          <p>
+            Skill-owned Python scripts live <em>next to</em> the <code>SKILL.md</code>
+            that uses them &mdash; see the section on scripts below.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="the-frontmatter-contract">
+          <h2 id="the-frontmatter-contract">The frontmatter contract</h2>
+          <p>
+            SEJA's frontmatter follows the agentskills.io universal specification.
+            Top-level fields conform to that spec; every SEJA-specific field is
+            namespaced under <code>metadata</code> so future spec fields cannot
+            collide with harness fields. New skills are validated against the spec
+            by <code>check_skill_spec.py</code>.
+          </p>
+
+          <h3 id="top-level-fields">Top-level fields</h3>
+          <dl>
+            <dt><code>name</code></dt>
+            <dd>
+              Required. Lowercase alphanumeric plus hyphens, 1&ndash;64 characters.
+              Must match the directory name.
+            </dd>
+            <dt><code>description</code></dt>
+            <dd>
+              Required, non-empty, up to 1024 characters. This is what the runtime
+              matches against a user's request, so lead with the trigger vocabulary
+              a user would actually type.
+            </dd>
+            <dt><code>argument-hint</code></dt>
+            <dd>
+              The argument signature shown to the user, e.g.
+              <code>"&lt;planned-item-id&gt; [--manual] [--dry-run]"</code>. Keep it in
+              sync with the skill's own Arguments table.
+            </dd>
+            <dt><code>compatibility</code></dt>
+            <dd>
+              A free-text statement of runtime assumptions. Harness skills declare
+              <code>"Designed for Claude Code with the SEJA harness"</code>.
+            </dd>
+          </dl>
+
+          <h3 id="metadata-fields">Metadata fields</h3>
+          <dl>
+            <dt><code>metadata.context_budget</code></dt>
+            <dd>
+              <code>light</code>, <code>standard</code>, or <code>heavy</code>
+              (default <code>standard</code>). This is the single highest-leverage
+              field you will set: it decides how much history and how many reference
+              files pre-skill pulls into context before your instructions run.
+              <code>light</code> loads nothing but the brief log;
+              <code>heavy</code> loads windowed briefs and the plan index.
+            </dd>
+            <dt><code>metadata.references</code></dt>
+            <dd>
+              Every reference file the skill may need. Paths beginning
+              <code>general/</code> resolve under <code>.claude/references/general/</code>,
+              <code>template/</code> under <code>.claude/references/template/</code>;
+              anything else resolves from the repository root. Declaring this field is
+              expected of every skill &mdash; its absence produces a pre-skill warning.
+            </dd>
+            <dt><code>metadata.eager_references</code></dt>
+            <dd>
+              The subset loaded upfront. Declaring this field switches pre-skill from
+              eager-only mode (read everything in <code>references</code>) to
+              demand-pull mode: eager entries are injected, and the remainder are
+              announced as an available-references list the agent pulls on demand.
+              An empty list is valid and means "all skill-specific refs are lazy".
+            </dd>
+            <dt><code>metadata.skip_stages</code></dt>
+            <dd>
+              Opts out of pre-skill's <em>non-critical</em> stages by ID, e.g.
+              <code>[pending-check, orphan-check, compaction-check, constitution]</code>.
+              The three critical stages cannot be skipped.
+            </dd>
+            <dt><code>metadata.category</code>, <code>metadata.version</code>, <code>metadata.last-updated</code></dt>
+            <dd>
+              Catalog metadata consumed by <code>/help</code>, the skills manifest,
+              and the call-graph generator.
+            </dd>
+            <dt>Contract-version fields</dt>
+            <dd>
+              <code>plan_format_version</code> and <code>questionnaire_version</code>
+              pin the structured-artifact format a skill produces or consumes, so a
+              consumer can refuse an artifact it does not understand rather than
+              misparse it.
+            </dd>
+          </dl>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="the-lifecycle-contract">
+          <h2 id="the-lifecycle-contract">The lifecycle contract</h2>
+          <p>
+            The harness's first technical principle is non-negotiable: every
+            user-facing skill <strong>starts with pre-skill and ends with
+            post-skill</strong>. A skill may opt out of non-critical pre-skill stages
+            via <code>skip_stages</code>, but it may never skip pre-skill entirely.
+            Lifecycle discipline is the core value the harness provides; bypassing it
+            defeats the governance model.
+          </p>
+          <p>
+            In practice the divide is workflow versus infrastructure.
+            <strong>Lifecycle-workflow skills</strong> &mdash; the ones that produce
+            logged artifacts and consume prior context &mdash; invoke pre-skill as their
+            first step. <strong>Configuration and meta skills</strong> that manipulate
+            the harness itself, or that may run before project conventions even exist,
+            opt out. A new skill must pick a side explicitly rather than inheriting one
+            by accident.
+          </p>
+          <aside class="callout-warning">
+            <p>
+              <strong>One lifecycle owner per invocation.</strong> If your skill
+              delegates work to a subagent, the <em>wrapper</em> keeps ownership of the
+              hooks. No dispatch may fire pre-skill or post-skill twice.
+            </p>
+          </aside>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="the-quickguide-sibling">
+          <h2 id="the-quickguide-sibling">The Quick Guide sibling</h2>
+          <p>
+            Every user-invocable skill ships a <code>SKILL-quickguide.md</code>
+            alongside its <code>SKILL.md</code>. The sibling body <em>is</em> the Quick
+            Guide &mdash; do not re-introduce a <code>## Quick Guide</code> heading inside
+            it. Designer-facing wording belongs there; executional instructions stay in
+            <code>SKILL.md</code>.
+          </p>
+          <p>
+            The pointer back is mandatory and structurally enforced.
+            <code>SKILL.md</code> must carry a blockquote line within the first fifteen
+            non-blank body lines, outside any fenced code block, containing the literal
+            token <code>SKILL-quickguide.md</code>. The canonical form is:
+          </p>
+          <pre><code>&gt; Overview: see [./SKILL-quickguide.md](./SKILL-quickguide.md)</code></pre>
+          <p>
+            Wording may drift within that envelope; the token and the shape may not.
+            A missing or malformed pointer fails preflight. The asymmetry with the
+            optional <code>SKILL-rationale.md</code> pointer is intentional: the Quick
+            Guide pointer is the discoverability anchor for a contributor opening
+            <code>SKILL.md</code> cold.
+          </p>
+          <p>
+            The sibling is never listed in <code>metadata.references</code> and is never
+            loaded on the hot path. It is read only when a designer asks for it &mdash;
+            by invoking a skill with <code>--help</code>, or through
+            <code>/help &lt;skill&gt;</code> &mdash; and both paths go through one shared
+            loader, which is the single source of truth for the file path.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="where-scripts-live">
+          <h2 id="where-scripts-live">Where a skill's scripts live</h2>
+          <p>
+            The harness splits Python helpers by ownership:
+          </p>
+          <ul>
+            <li>
+              <strong>Shared utilities</strong> live in
+              <code>.claude/skills/scripts/</code>. Anything more than one skill calls
+              belongs here &mdash; ID reservation, the pending ledger, marker application,
+              the project-config parser.
+            </li>
+            <li>
+              <strong>Skill-owned scripts</strong> live in the skill's own directory,
+              next to its <code>SKILL.md</code>.
+            </li>
+          </ul>
+          <p>
+            The split is not merely tidy &mdash; it is load-bearing for validation.
+            The check orchestrator discovers <code>check_*.py</code> in the shared
+            scripts directory <em>and</em> in every co-located skill subdirectory, so a
+            check script placed next to its skill is picked up automatically with no
+            registration step.
+          </p>
+          <p>
+            If a script carries private artifact citations, move them to a
+            <code>&lt;script&gt;-rationale.md</code> sibling and leave one module-level
+            pointer comment in the script. That keeps the shipped script self-contained
+            for consumers who have no access to the private artifacts.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="sourced-from">
+          <h2 id="sourced-from">Sourced from</h2>
+          <p>
+            This page was written from the harness files below. When any of them
+            changes, re-check this page against it &mdash; this list is the freshness
+            work-list for this chapter.
+          </p>
+          <ul>
+            <li><code>.claude/rules/harness-structure.md</code></li>
+            <li><code>.claude/references/general/harness-governance.md</code></li>
+            <li><code>.claude/skills/pre-skill/SKILL.md</code></li>
+            <li><code>.claude/skills/scripts/run_all_checks.py</code></li>
+            <li><code>.claude/skills/scripts/check_skill_spec.py</code></li>
+            <li><code>product-design/constitution.md</code> (principle T1)</li>
+          </ul>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="writing-a-subagent.html">Writing a Subagent</a> &mdash; the other half of the extension surface, for work that belongs in an isolated context.</li>
+            <li><a href="../../core/reference/pipeline-stages.html">Pipeline Stages</a> &mdash; what each pre-skill stage actually does, stage by stage.</li>
+            <li><a href="../../core/concepts/lifecycle-pipeline.html">The Lifecycle Pipeline</a> &mdash; why every skill is wrapped by the same two hooks.</li>
+            <li><a href="index.html">Architect Track</a> &mdash; back to the track gate.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Architect Track</a>
+        <a href="../../core/reference/index.html">Reference</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (tracks/architect sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="reference">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="Catalog of SEJA's sixteen subagents — nine evaluator agents and seven generator agents — with each agent's purpose and the tools it is allowed to use.">
+  <title>Agents Catalog — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/reference sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Agents Catalog</h1>
+      <p>The sixteen SEJA subagents: nine evaluators that review artifacts and seven generators that produce them.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Reference</a></li>
+        <li aria-current="page">Agents Catalog</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-reference">reference</span>
+          <span class="badge core-reference">reference</span>
+        </p>
+
+        <section data-diataxis="reference" aria-labelledby="overview">
+          <h2 id="overview">Overview</h2>
+          <p>
+            SEJA ships sixteen subagent prompts in <code>.claude/agents/</code>,
+            organized by role. <strong>Evaluator agents</strong> (9) review artifacts
+            against quality perspectives. <strong>Generator agents</strong> (7) produce
+            self-contained artifacts from well-defined inputs; they are invoked by
+            thin-skill wrappers and must receive the project constitution as part of
+            their prompt for trust-boundary enforcement. Each agent runs in an
+            isolated context window and is restricted to the tools listed in its
+            frontmatter. The <em>Tools</em> column below reproduces each agent's
+            allowed-tools list verbatim.
+          </p>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="evaluator-agents">
+          <h2 id="evaluator-agents">Evaluator agents (9)</h2>
+          <p>
+            Evaluator agents review code, plans, decisions, migrations, tests, and
+            the harness itself, reporting findings rather than mutating artifacts.
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>The nine evaluator subagents.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Agent</th>
+                  <th scope="col">Role</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Tools</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">code-reviewer</th>
+                  <td>Evaluator</td>
+                  <td>Reviews code changes against engineering and design perspectives (depth-gated — deep evaluates all 16; standard/light use a shortlisted subset). Reports findings with Adopted/Deferred/N/A status per perspective.</td>
+                  <td>Read, Glob, Grep, Bash</td>
+                </tr>
+                <tr>
+                  <th scope="row">council-debate</th>
+                  <td>Evaluator</td>
+                  <td>Runs a structured expert council debate for high-stakes design decisions. Five fixed archetypes plus 0-2 brief-specific experts surface trade-offs, tensions, and insights through position statements and cross-examination.</td>
+                  <td>Read, WebSearch</td>
+                </tr>
+                <tr>
+                  <th scope="row">harness-health-evaluator</th>
+                  <td>Evaluator</td>
+                  <td>Runs harness self-diagnosis across 9 built-in checks (skill system, briefs hygiene, plans hygiene, references, conventions, constitution, spec compliance, pending ledger, harness drift) and produces a Harness Health Report.</td>
+                  <td>Read, Bash, Grep, Write</td>
+                </tr>
+                <tr>
+                  <th scope="row">migration-validator</th>
+                  <td>Evaluator</td>
+                  <td>Validates Alembic migration chain integrity, checks for idempotency issues, PostgreSQL syntax problems, and common migration pitfalls.</td>
+                  <td>Read, Bash, Glob, Grep</td>
+                </tr>
+                <tr>
+                  <th scope="row">plan-reviewer</th>
+                  <td>Evaluator</td>
+                  <td>Reviews a plan against engineering and design perspectives using the complexity-gated two-phase review process. Returns the review log and any plan amendments.</td>
+                  <td>Read, Glob, Grep, Bash</td>
+                </tr>
+                <tr>
+                  <th scope="row">research-reviewer</th>
+                  <td>Evaluator</td>
+                  <td>Evaluates design decisions, open-ended questions, and trade-offs against engineering and design perspectives. Unlike code-reviewer (diffs) and plan-reviewer (structured plans), research-reviewer handles research questions and recommendations.</td>
+                  <td>Read, Glob, Grep, WebSearch</td>
+                </tr>
+                <tr>
+                  <th scope="row">semiotic-inspector</th>
+                  <td>Evaluator</td>
+                  <td>Conducts a Semiotic Inspection Method (SIM) evaluation of a project's interface communicability across metalinguistic, static, and dynamic sign classes.</td>
+                  <td>Read, Glob, Grep, Write</td>
+                </tr>
+                <tr>
+                  <th scope="row">standards-checker</th>
+                  <td>Evaluator</td>
+                  <td>Runs all project validation scripts and aggregates results into a unified compliance report.</td>
+                  <td>Read, Bash, Glob, Grep</td>
+                </tr>
+                <tr>
+                  <th scope="row">test-runner</th>
+                  <td>Evaluator</td>
+                  <td>Runs backend (pytest) and frontend (vitest) test suites, parses output, and reports failures with context including file, line, and error message.</td>
+                  <td>Read, Bash, Glob, Grep</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="generator-agents">
+          <h2 id="generator-agents">Generator agents (7)</h2>
+          <p>
+            Generator agents produce self-contained artifacts — communication
+            material, onboarding plans, documentation, test plans, and explanation
+            reports — invoked by thin-skill wrappers that handle argument parsing,
+            interactive prompts, and lifecycle hooks.
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>The seven generator subagents.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Agent</th>
+                  <th scope="col">Role</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Tools</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">communication-generator</th>
+                  <td>Generator</td>
+                  <td>Generates tailored communication material for a specific audience segment. Produces Markdown and/or HTML output files. Invoked by the <code>/communicate</code> skill (thin wrapper).</td>
+                  <td>Read, Bash, Glob, Grep, Write</td>
+                </tr>
+                <tr>
+                  <th scope="row">onboarding-generator</th>
+                  <td>Generator</td>
+                  <td>Generates a tailored onboarding plan for a new team member based on role family, expertise level, and project context. Invoked by the <code>/onboard</code> skill (thin wrapper).</td>
+                  <td>Read, Bash, Glob, Grep, Write</td>
+                </tr>
+                <tr>
+                  <th scope="row">document-generator</th>
+                  <td>Generator</td>
+                  <td>Generates or updates project documentation for a specific documentation type (readme, contextual-help, api-reference, ddr, help-center, changelog, spo). Invoked by the <code>/document</code> skill (thin wrapper).</td>
+                  <td>Read, Bash, Glob, Grep, Write</td>
+                </tr>
+                <tr>
+                  <th scope="row">test-plan-generator</th>
+                  <td>Generator</td>
+                  <td>Generates a structured manual test plan from a brief and the most recent DONE plans.</td>
+                  <td>Read, Glob, Grep, Write</td>
+                </tr>
+                <tr>
+                  <th scope="row">explanation-generator</th>
+                  <td>Generator</td>
+                  <td>Generates explanation reports for the behavior, code, and data-model modes of the <code>/explain</code> skill. Invoked by the <code>/explain</code> skill (thin wrapper).</td>
+                  <td>Read, Glob, Grep, Bash, WebSearch, Write</td>
+                </tr>
+                <tr>
+                  <th scope="row">architecture-explainer</th>
+                  <td>Generator</td>
+                  <td>Generates architecture explanation reports for the <code>/explain</code> skill. Invoked by the <code>/explain</code> skill (thin wrapper).</td>
+                  <td>Read, Glob, Grep, Bash, WebSearch, Write</td>
+                </tr>
+                <tr>
+                  <th scope="row">evolution-explainer</th>
+                  <td>Generator</td>
+                  <td>Generates behavior-evolution explanation reports for the <code>/explain</code> skill. Invoked by the <code>/explain</code> skill (thin wrapper).</td>
+                  <td>Read, Glob, Grep, Bash, WebSearch, Write</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="skills-catalog.html">Skills Catalog</a> &mdash; the skills whose thin wrappers invoke these generator agents.</li>
+            <li><a href="perspectives.html">Review Perspectives Catalog</a> &mdash; the perspectives that the evaluator agents apply.</li>
+            <li><a href="../concepts/review-perspectives.html">Review Perspectives</a> &mdash; the conceptual model behind the evaluators' multi-viewpoint analysis.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Reference</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/reference sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

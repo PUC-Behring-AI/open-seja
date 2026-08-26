@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How-to guide for the /reflect skill: reflect on your work through the product and practice lenses, with conversational, deep, and telemetry modes.">
+  <title>/reflect — SEJA Documentation</title>
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>/reflect</h1>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Skills</a></li>
+        <li aria-current="page">/reflect</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge core-skills">skills</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="what-it-does">
+          <h2 id="what-it-does">What it does</h2>
+          <p><code>/reflect</code> helps you reflect on specific work you have done, through two explicit lenses: the <strong>product lens</strong> (what you built &mdash; does it do what you intended?) and the <strong>practice lens</strong> (how you worked &mdash; what patterns emerge in how you designed and built it?). It records your own words verbatim; it is strictly non-prescriptive and never writes &ldquo;you should&rdquo; or &ldquo;we recommend.&rdquo;</p>
+          <p>Three modes are available. In <strong>conversational</strong> mode (the default), you pick a scope &mdash; recent plans, recent research, a specific artifact by ID, a time window, or free-form &mdash; the skill summarizes the chosen artifacts, asks which lens you are reflecting through, asks the lens-appropriate open-ended question, and saves your reflection. <strong>Deep</strong> mode (<code>--deep</code>) reads telemetry and briefs within a window and produces an event-matrix visualization, a transition graph, and a past-tense practice-evolution narrative. <strong>Telemetry</strong> mode (<code>--telemetry</code>) runs five statistical analysis primitives over usage data.</p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="when-to-run">
+          <h2 id="when-to-run">When to run it</h2>
+          <p>Run <code>/reflect</code> when you want to step back and look at specific work you have done. Use the <strong>product lens</strong> to examine what you built &mdash; a feature, a design decision, a finished spec &mdash; and ask whether it does what you intended. Use the <strong>practice lens</strong> (Sch&ouml;n&rsquo;s reflection-on-practice) to examine how you worked &mdash; the patterns that emerge, where you hesitated, what you would do differently.</p>
+          <p>Reach for <code>--deep</code> when you want a visual timeline and narrative chronicle of practice evolution across a period, and <code>--telemetry</code> when you want statistical pattern mining instead of narrative reflection.</p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="how-it-fits">
+          <h2 id="how-it-fits">How it fits the lifecycle</h2>
+          <p>On the canonical path &mdash; <code>/research</code> &rarr; <code>/design</code> | <code>/plan</code> &rarr; <code>/implement</code> &rarr; <code>/critique</code> &rarr; <code>/document</code> | <code>/communicate</code> &rarr; <code>/reflect</code> &mdash; <code>/reflect</code> is the closing stage, the step back after work is delivered.</p>
+          <p>Reflection feeds the next cycle. Because it is deliberately non-prescriptive, its natural follow-ups are forward-looking: <code>/research</code> for a prescriptive take on any pattern surfaced here, <code>/design</code> to turn a surfaced pattern into new design intent, or <code>/plan</code> to turn it into new work.</p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="research.html">/research</a> &mdash; the prescriptive follow-up for any insight that emerges.</li>
+            <li><a href="critique.html">/critique</a> &mdash; its telemetry mode surfaces usage patterns to reflect on.</li>
+            <li><a href="design.html">/design</a> &mdash; turn a surfaced pattern into new design intent.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Skills</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

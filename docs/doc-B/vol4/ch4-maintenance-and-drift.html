@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="4">
+  <meta name="doc-chapter" content="4">
+  <meta name="doc-phase" content="3">
+  <meta name="doc-status" content="draft">
+
+  <title>Maintenance and Drift -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 4: The Output and Governance Layer</a></li>
+      <li>Maintenance and Drift</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>Maintenance and Drift</h1>
+
+      <p>
+        A SEJA project accumulates two kinds of state that must stay in
+        alignment: <strong>design intent</strong> (what the designer meant to
+        build) and <strong>as-coded reality</strong> (what was actually built).
+        Over time, these diverge -- code changes, documentation ages, and
+        implemented items linger without being promoted to established status.
+        SEJA counters this drift with two mechanisms: <strong>freshness
+        policies</strong> that flag stale artifacts, and <strong>periodic
+        triggers</strong> that fire maintenance work at configured intervals.
+        This chapter documents both mechanisms as reference, then walks through
+        the two workflows a designer uses to resolve drift: <code>/explain
+        drift</code> (comparing intent against reality and promoting implemented
+        items) and the spec-drift-check periodic trigger.
+      </p>
+
+      <!-- Section 1: Freshness Policies -->
+      <section data-diataxis="reference" id="freshness-policies">
+        <h2>Freshness Policies</h2>
+
+        <p>
+          A <strong>freshness policy</strong> is a contract that declares how
+          long an artifact can go without review before it is considered stale.
+          SEJA carries freshness contracts in two places: git branch state and
+          documentation metadata.
+        </p>
+
+        <h3>Git Freshness</h3>
+
+        <p>
+          The <code>check_git_freshness.py</code> script compares local branches
+          to their upstreams for both the codebase (<code>seja-priv</code>) and
+          the companion workspace, surfacing behind/ahead counts. It
+          <strong>never pulls</strong> -- it only reports how far each branch has
+          drifted from its remote so the designer can decide whether to sync.
+          The script is invoked by <code>/critique freshness</code> and by the
+          <code>check-git-freshness</code> periodic trigger (see the next
+          section). A branch that is many commits behind its upstream is the
+          git-level analogue of a stale document: the local working state no
+          longer reflects the shared source of truth.
+        </p>
+
+        <h3>Documentation Freshness</h3>
+
+        <p>
+          Documentation templates and generated pages carry two classification
+          fields in their YAML frontmatter:
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>freshness</code></td>
+              <td>
+                Declares the per-type review interval for the document. When the
+                document has not been reviewed within its interval, it is flagged
+                as stale by the documentation quality checks.
+              </td>
+            </tr>
+            <tr>
+              <td><code>diataxis</code></td>
+              <td>
+                Declares the Diataxis type of the document
+                (<code>tutorial</code>, <code>how-to</code>,
+                <code>reference</code>, or <code>explanation</code>). For
+                system-isomorphic volumes, classification moves to the section
+                level via <code>data-diataxis</code> attributes and the file-level
+                <code>diataxis</code> meta tag is set to <code>mixed</code>.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The freshness standard is defined in
+          <code>.claude/references/general/documentation-quality.md</code>. Its
+          core principle is that documentation updates should be possible without
+          heroic effort -- automated validation (path liveness, terminology,
+          structural completeness) plus per-type freshness policies keep the
+          documentation set honest without requiring a full manual audit.
+        </p>
+
+        <h3>Which Files Carry Freshness Contracts</h3>
+
+        <p>
+          Not every file in a SEJA project carries a freshness contract. The
+          files that do fall into two groups:
+        </p>
+
+        <ul>
+          <li><strong>Documentation templates and pages</strong>
+          (<code>template/docs/*.md</code> and generated
+          <code>_output/docs/</code> content) -- via the <code>freshness</code>
+          and <code>diataxis</code> frontmatter fields.</li>
+          <li><strong>Git branches</strong> (codebase and workspace) -- via the
+          <code>check_git_freshness.py</code> behind/ahead comparison, which
+          treats divergence from upstream as a staleness signal.</li>
+        </ul>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> Freshness is a soft signal, not a hard gate.
+            A stale document or a behind branch produces a notice, not a blocked
+            commit. The designer decides whether to act. This keeps freshness
+            advisory -- it informs maintenance decisions without forcing them.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 2: Periodic Triggers -->
+      <section data-diataxis="reference" id="periodic-triggers">
+        <h2>Periodic Triggers</h2>
+
+        <p>
+          A <strong>periodic trigger</strong> is a maintenance action that should
+          recur at a fixed interval rather than in response to a specific event.
+          SEJA configures three periodic triggers in
+          <code>product-design/conventions.md</code> under the
+          <strong>Periodic Triggers</strong> heading. Each trigger has an
+          interval in days, an action type, and a description.
+        </p>
+
+        <h3>The Configured Triggers</h3>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Trigger</th>
+              <th>Interval</th>
+              <th>Action type</th>
+              <th>What it does</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Periodic curation</td>
+              <td>30 days</td>
+              <td><code>periodic-curation</code></td>
+              <td>
+                Review <code>product-design-as-intended.md</code> for items ready
+                to promote from <code>implemented</code> to
+                <code>established</code>.
+              </td>
+            </tr>
+            <tr>
+              <td>Spec-drift check</td>
+              <td>14 days</td>
+              <td><code>spec-drift-check</code></td>
+              <td>
+                Run <code>/explain drift</code> to surface drift between design
+                intent and as-coded state.
+              </td>
+            </tr>
+            <tr>
+              <td>Git freshness check</td>
+              <td>7 days</td>
+              <td><code>check-git-freshness</code></td>
+              <td>
+                Compare <code>seja-priv</code> and <code>seja-public</code> to
+                their upstreams; surface behind/ahead counts.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>How Triggers Are Configured</h3>
+
+        <p>
+          The intervals above are not hard-coded in a script -- they are read
+          from the conventions table. This makes them project-configurable: a
+          project that wants a tighter drift-check cadence edits the
+          <code>Interval (days)</code> column rather than modifying harness code.
+          The <code>project_config.py</code> module parses
+          <code>conventions.md</code> and supplies these values to the tools that
+          act on them.
+        </p>
+
+        <h3>How Triggers Fire</h3>
+
+        <p>
+          Periodic triggers surface through the <strong>pending ledger</strong>
+          (<code>_output/pending.jsonl</code>) and the pre-skill
+          <strong>pending-check</strong> stage. When a trigger's interval
+          elapses, an entry of the matching action type
+          (<code>periodic-curation</code>, <code>spec-drift-check</code>, or
+          <code>check-git-freshness</code>) becomes due. Pre-skill's
+          pending-check stage runs at the start of every skill invocation and
+          prints a banner of due and overdue actions, so the designer is reminded
+          of periodic maintenance without having to track intervals manually. The
+          <code>/pending</code> skill then lists and addresses these actions.
+        </p>
+
+        <h3>Threshold Configuration</h3>
+
+        <p>
+          Alongside the interval-based triggers, <code>conventions.md</code>
+          defines a set of thresholds that govern how pending actions escalate
+          and expire, and when post-skill files certain actions automatically:
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Threshold</th>
+              <th>Value</th>
+              <th>What it controls</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Pending plan age escalation</td>
+              <td>30 days</td>
+              <td>
+                Days before an open <code>implement</code> pending entry is
+                surfaced with the overdue banner.
+              </td>
+            </tr>
+            <tr>
+              <td>Verify-as-coded file threshold</td>
+              <td>5 files</td>
+              <td>
+                Minimum files changed before post-skill auto-creates a
+                <code>verify-as-coded</code> pending action.
+              </td>
+            </tr>
+            <tr>
+              <td>Pending age escalation</td>
+              <td>14 days</td>
+              <td>
+                Days before a pending action is flagged overdue in pre-skill
+                notices.
+              </td>
+            </tr>
+            <tr>
+              <td>Pending auto-dismiss</td>
+              <td>90 days</td>
+              <td>
+                Days after which unaddressed pending actions are auto-dismissed
+                by <code>pending.py cleanup</code>.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The escalation and dismissal thresholds form a
+            lifecycle: a pending action is filed, surfaced at 14 days (or 30 days
+            for plan-implement entries), and auto-dismissed at 90 days if never
+            addressed. This prevents the ledger from growing without bound while
+            still giving the designer a long window to act.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 3: The /explain drift Workflow -->
+      <section data-diataxis="how-to" id="explain-drift-workflow">
+        <h2>The /explain drift Workflow</h2>
+
+        <p>
+          The <code>/explain drift</code> workflow compares as-intended design
+          specs against as-coded reality, reports the differences, and optionally
+          syncs or promotes implemented items. This section is a how-to: it walks
+          through running a drift analysis and promoting implemented items to
+          established status.
+        </p>
+
+        <h3>Running a Drift Analysis</h3>
+
+        <p>
+          Invoke <code>/explain drift</code> with an optional scope argument:
+        </p>
+
+        <pre><code><span class="token-command">/explain drift</span> <span class="token-comment"># scope: all (default)</span>
+<span class="token-command">/explain drift</span> conceptual-design
+<span class="token-command">/explain drift</span> metacomm
+<span class="token-command">/explain drift</span> --scope since-plan plan-000676</code></pre>
+
+        <p>
+          Drift analysis (Step A) reads the As-Intended / As-Coded Registry from
+          <code>conventions.md</code>, then compares each in-scope pair
+          section by section:
+        </p>
+
+        <ul>
+          <li><strong>Conceptual Design drift</strong> compares
+          <code>product-design-as-coded.md § Conceptual Design</code> against the
+          design-intent file across entities, permissions, UX patterns, and
+          business rules.</li>
+          <li><strong>Metacomm drift</strong> compares the
+          <code>§ Metacommunication</code> sections for feature intentions,
+          implementation status, and designer intent.</li>
+        </ul>
+
+        <p>
+          Each difference is classified as <strong>Added</strong> (in
+          as-intended, not as-coded), <strong>Removed</strong> (in as-coded, not
+          as-intended), or <strong>Modified</strong> (in both, different). The
+          analysis also scans for <code>STATUS: implemented</code> markers
+          lacking an <code>ESTABLISHED:</code> stamp and collects them as
+          <strong>pending promotion</strong> items. The result is a drift report
+          with a summary table and a detailed change list, presented to the
+          designer.
+        </p>
+
+        <h3>The Sync Prompt</h3>
+
+        <p>
+          After presenting the report, <code>/explain drift</code> offers a sync
+          prompt (Step B). The designer may align metacomm with conceptual design
+          (or the reverse), reconcile both directions, promote implemented items,
+          or skip. Conflicts are <strong>never auto-resolved</strong> -- when the
+          two files disagree, the workflow presents both sides and asks the
+          designer to choose.
+        </p>
+
+        <h3>The Promote Workflow</h3>
+
+        <p>
+          Promotion is split into two phases so that the designer owns every word
+          of the Decision prose while the harness manages the STATUS lifecycle
+          structurally:
+        </p>
+
+        <dl>
+          <dt>Phase 3a -- Decision-entry proposal (<code>/explain drift --promote</code>)</dt>
+          <dd>
+            Scans registered Human (markers) files for
+            <code>STATUS: implemented</code> markers lacking
+            <code>ESTABLISHED:</code>, groups candidates by plan ID, and drafts
+            DDR-shaped Decision entries (Context, Decision, Consequences) with
+            auto-assigned <code>D-NNN</code> IDs. The drafts are written to
+            <code>_output/promote-proposals/promote-proposal-plan-&lt;id&gt;.md</code>
+            in copy-paste-friendly fenced blocks. This phase does
+            <strong>not</strong> modify
+            <code>product-design-as-intended.md</code> -- it only produces a
+            designer-owned draft and files an <code>apply-promote-markers</code>
+            pending action. The designer reviews the draft, edits it to their
+            voice, and copies the entries into
+            <code>product-design-as-intended.md § Decisions</code>.
+          </dd>
+
+          <dt>Phase 3b -- Marker flip (<code>/explain drift --promote --apply-markers plan-NNNNNN</code>)</dt>
+          <dd>
+            Verifies that the <code>### D-NNN:</code> entries were added to the
+            intent file using a <strong>heading-only grep</strong>
+            (<code>^###\s+D-NNN</code>) so that the designer's rewritten prose is
+            never matched. For each present entry, it runs a per-item
+            AskUserQuestion confirmation, then invokes <code>apply_marker.py</code>
+            to flip the STATUS marker. Post-skill's
+            <code>check_human_markers_only.py</code> verifies that the flip did
+            not bleed prose into the Human (markers) file.
+          </dd>
+        </dl>
+
+        <h3>The STATUS Marker Lifecycle</h3>
+
+        <p>
+          The promote workflow advances an as-intended item along the STATUS
+          state machine. The relevant transition is
+          <code>implemented -&gt; established</code>:
+        </p>
+
+        <pre><code><span class="token-keyword">proposed</span> -&gt; <span class="token-keyword">implemented</span> -&gt; <span class="token-keyword">established</span> -&gt; <span class="token-keyword">superseded</span></code></pre>
+
+        <p>
+          An item enters <code>implemented</code> when a plan implements it
+          (proposed by post-skill's DONE marker step). Promotion to
+          <code>established</code> is the human-confirmed acknowledgement that the
+          item has proven itself and become part of the settled design. The
+          marker itself is an inline HTML comment above the item's heading:
+        </p>
+
+        <pre><code><span class="token-comment">&lt;!-- STATUS: established | plan-000676 | 2026-07-15 --&gt;</span>
+<span class="token-keyword">###</span> Section Title</code></pre>
+
+        <p>
+          Legacy uppercase <code>STATUS: IMPLEMENTED</code> markers are detected
+          by the widened marker regex and <strong>replaced</strong> (not stacked)
+          by the lowercase form during a Phase 3b flip. Agents may propose new
+          implemented markers but must never remove or alter an existing
+          established marker -- these are audit records.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The two-phase split exists because Decision
+            entries are Human (markers) content -- the designer's precise wording
+            carries intentional nuance. Phase 3a produces a draft outside the
+            intent file; only after the designer copies and edits the entries
+            does Phase 3b touch the markers. This preserves designer voice while
+            letting the harness manage the structural lifecycle.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 4: The Spec-Drift-Check Workflow -->
+      <section data-diataxis="how-to" id="spec-drift-check-workflow">
+        <h2>The Spec-Drift-Check Workflow</h2>
+
+        <p>
+          The <code>spec-drift-check</code> periodic trigger (14-day interval) is
+          the scheduled counterpart to running <code>/explain drift</code> on
+          demand. It ensures that intent-versus-reality divergence is reviewed on
+          a regular cadence, not only when the designer happens to suspect drift.
+          This section walks through how the trigger surfaces drift and how the
+          designer resolves it.
+        </p>
+
+        <h3>How the Trigger Surfaces Drift</h3>
+
+        <ol>
+          <li>
+            When 14 days have elapsed since the last spec-drift check, a
+            <code>spec-drift-check</code> action becomes due in the pending
+            ledger.
+          </li>
+          <li>
+            At the start of the next skill invocation, pre-skill's
+            pending-check stage prints a banner listing the due
+            <code>spec-drift-check</code> action (flagged overdue after the
+            14-day pending age-escalation threshold).
+          </li>
+          <li>
+            The designer sees the reminder and knows a drift review is due.
+          </li>
+        </ol>
+
+        <h3>How the Designer Resolves It</h3>
+
+        <ol>
+          <li>
+            Run <code>/pending</code> to list outstanding actions, or invoke
+            <code>/explain drift</code> directly.
+          </li>
+          <li>
+            <code>/explain drift</code> produces the drift report (Step A) and
+            presents the summary and detailed changes.
+          </li>
+          <li>
+            Review the report. If drift is found, choose a resolution at the sync
+            prompt (Step B): align the two files in one direction, reconcile
+            both, or promote implemented items. If no drift is found, skip the
+            sync.
+          </li>
+          <li>
+            Once the review is complete, the <code>spec-drift-check</code> action
+            is marked done, resetting the 14-day interval for the next cycle.
+          </li>
+        </ol>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> A spec-drift check that finds no drift is still
+            valuable -- it confirms that intent and reality remain aligned and
+            resets the interval. The goal is not to force changes every 14 days
+            but to guarantee that unnoticed divergence never accumulates for
+            longer than one interval.
+          </p>
+        </aside>
+      </section>
+
+      <!-- See also cross-references -->
+      <aside class="see-also" aria-label="see also">
+        <h2>See Also</h2>
+        <ul>
+          <li>
+            <a href="../vol2/ch3-design-intent-files.html">Vol. 2, Ch. 3:
+            Design Intent Files</a> -- how the as-intended files that these
+            maintenance workflows read and promote are structured and maintained.
+          </li>
+          <li>
+            <a href="ch3-scripts-and-automation.html">Ch. 3: Scripts and
+            Automation</a> -- the scripts (<code>check_git_freshness.py</code>,
+            <code>apply_marker.py</code>, <code>pending.py</code>) that back these
+            workflows.
+          </li>
+        </ul>
+      </aside>
+
+    </article>
+  </main>
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="ch3-scripts-and-automation.html">Previous: Scripts and Automation</a>
+    <a href="ch5-release-and-publishing.html">Next: Release and Publishing</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

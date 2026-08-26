@@ -1,0 +1,868 @@
+@import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&family=Shippori+Mincho:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+/*
+ * SEJA doc-C shared stylesheet.
+ * Pattern 2: Co-located CSS File (see doc-guidelines.md Section G).
+ * Pattern 2b companion script: nav.js (co-located, progressive enhancement).
+ * Pages link to this file via relative <link> tags at depth-appropriate paths.
+ *
+ * doc-C is the "Alternative C" audience-routed documentation collection:
+ * a persistent navigation sidebar (.doc-nav) beside a prose column
+ * (.doc-content), with Diataxis-type, core-type, and audience-track badges
+ * so readers can orient by document kind and by their own track (practitioner,
+ * architect, scholar).
+ *
+ * Visual identity follows the SEJA Design System (design-system.html):
+ * wabi-sabi aesthetic, clay & earth tones, Zen Kaku Gothic New / Shippori
+ * Mincho / IBM Plex Mono typography.
+ * All color contrast ratios verified against WCAG 2.2 Level AA.
+ * Normative reference: _output/docs/doc-guidelines.md (Sections B, F, G).
+ *
+ * The light + dark :root token blocks below are inlined VERBATIM from the
+ * canonical token source (.claude/skills/scripts/html_assets/tokens.css /
+ * doc-guidelines.md Section F). Do not edit token values here directly --
+ * change tokens.css first, then re-sync. Collection-specific variables
+ * (--diataxis-*, --core-*, --track-*) are additive and intentional.
+ */
+
+/* ------------------------------------------------------------------ */
+/* CSS Custom Properties (Light Mode)                                  */
+/* ------------------------------------------------------------------ */
+
+:root {
+  /* Colors (SEJA design system — clay/earth palette on washi ground) */
+  --color-bg: #FAF8F4;            /* Washi ground */
+  --color-text: #2B2926;          /* Sumi -- 13.6:1 vs --color-bg */
+  --color-heading: #2B2926;       /* Sumi -- headings distinguished by serif font */
+  --color-link: #A86E4F;          /* Clay -- 4.6:1 vs --color-bg */
+  --color-link-visited: #8F5A3E;  /* Clay hover -- 5.9:1 vs --color-bg */
+  --color-code-bg: #F2EDE6;       /* Surface alt */
+  --color-code-text: #2B2926;     /* Sumi -- 11.8:1 vs --color-code-bg */
+  --color-border: #E0D8CD;        /* Warm border */
+  --color-aside-bg: #F2EDE6;      /* Surface alt */
+  --color-focus: #A86E4F;         /* Clay -- 4.6:1 vs --color-bg */
+  --color-status-bg: #F3E9E1;     /* Clay-50 */
+  --color-status-border: #C89B4A; /* Ochre/warning */
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;          /* 4px at base 16px */
+  --spacing-sm: 0.5rem;           /* 8px */
+  --spacing-md: 1rem;             /* 16px */
+  --spacing-lg: 2rem;             /* 32px */
+  --spacing-xl: 3rem;             /* 48px */
+
+  /* Typography (SEJA design system — three Japanese-minimalist families) */
+  --font-body: 'Zen Kaku Gothic New', Inter, system-ui, sans-serif;
+  --font-heading: 'Shippori Mincho', Georgia, serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --max-width: 52rem;             /* 832px content width */
+
+  /* Diataxis type accents -- doc-C-specific (SEJA semantic palette).
+     Used as badge borders + leading swatches (non-text, >=3:1). Badge label
+     text is always --color-text, so badge legibility does not depend on these. */
+  --diataxis-tutorial: #5F7A5F;      /* Success  -- 5.1:1 vs --color-bg */
+  --diataxis-howto: #A86E4F;         /* Clay     -- 4.5:1 vs --color-bg */
+  --diataxis-reference: #C89B4A;     /* Ochre    -- 3.3:1 vs --color-bg (large/non-text) */
+  --diataxis-explanation: #7D8471;   /* Sage     -- 3.6:1 vs --color-bg (large/non-text) */
+
+  /* Core-type accents -- doc-C-specific */
+  --core-skills: #A86E4F;            /* Clay */
+  --core-concepts: #7D8471;          /* Sage */
+  --core-operations: #5F7A5F;        /* Success */
+  --core-reference: #C89B4A;         /* Ochre */
+
+  /* Audience-track accents -- doc-C-specific */
+  --track-practitioner: #5F7A5F;     /* Success -- hands-on */
+  --track-architect: #A86E4F;        /* Clay    -- structural */
+  --track-scholar: #7D8471;          /* Sage    -- theoretical */
+
+  /* Layout */
+  --doc-nav-width: 16rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* CSS Custom Properties (Dark Mode)                                   */
+/* ------------------------------------------------------------------ */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #1C1A17;            /* Dark washi */
+    --color-text: #ECE7DF;          /* Light sumi -- 14.2:1 vs --color-bg */
+    --color-heading: #ECE7DF;       /* Light sumi */
+    --color-link: #C4957B;          /* Lightened clay -- 5.9:1 vs --color-bg */
+    --color-link-visited: #B5815F;  /* Mid clay -- 4.7:1 vs --color-bg */
+    --color-code-bg: #26231F;       /* Dark surface alt */
+    --color-code-text: #ECE7DF;     /* Light sumi -- 12.1:1 vs --color-code-bg */
+    --color-border: #3A352F;        /* Dark warm border */
+    --color-aside-bg: #26231F;      /* Dark surface alt */
+    --color-focus: #C4957B;         /* Lightened clay -- 5.9:1 vs --color-bg */
+    --color-status-bg: #2E2620;     /* Dark clay-50 */
+    --color-status-border: #C89B4A; /* Ochre/warning */
+
+    /* Diataxis type accents -- lightened SEJA semantic palette */
+    --diataxis-tutorial: #8FA88F;      /* Lightened success -- 6.4:1 vs --color-bg */
+    --diataxis-howto: #C4957B;         /* Lightened clay    -- 5.9:1 vs --color-bg */
+    --diataxis-reference: #D4B06A;     /* Lightened ochre   -- 7.3:1 vs --color-bg */
+    --diataxis-explanation: #A0A897;   /* Lightened sage    -- 6.8:1 vs --color-bg */
+
+    /* Core-type accents -- lightened */
+    --core-skills: #C4957B;
+    --core-concepts: #A0A897;
+    --core-operations: #8FA88F;
+    --core-reference: #D4B06A;
+
+    /* Audience-track accents -- lightened */
+    --track-practitioner: #8FA88F;
+    --track-architect: #C4957B;
+    --track-scholar: #A0A897;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Reduced Motion                                                      */
+/* ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: no-preference) {
+  a {
+    transition: color 0.2s ease;
+  }
+  .doc-nav a,
+  .doc-nav-toggle {
+    transition: color 0.2s ease, background-color 0.2s ease;
+  }
+  .status-notice {
+    transition: background-color 0.3s ease;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Base Reset                                                          */
+/* ------------------------------------------------------------------ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Base Typography                                                     */
+/* ------------------------------------------------------------------ */
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  color: var(--color-heading);
+  margin-bottom: var(--spacing-md);
+}
+
+h2 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: var(--color-heading);
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
+  scroll-margin-top: var(--spacing-md);
+}
+
+h3 {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  color: var(--color-heading);
+  margin-top: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  scroll-margin-top: var(--spacing-md);
+}
+
+h4 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--color-heading);
+  margin-top: var(--spacing-md);
+  margin-bottom: var(--spacing-xs);
+}
+
+p {
+  margin-bottom: var(--spacing-md);
+}
+
+/* ------------------------------------------------------------------ */
+/* Links and Focus                                                     */
+/* ------------------------------------------------------------------ */
+
+a {
+  color: var(--color-link);
+}
+
+a:visited {
+  color: var(--color-link-visited);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Skip-Navigation Link (WCAG 2.4.1)                                  */
+/* ------------------------------------------------------------------ */
+
+.skip-nav {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.skip-nav:focus {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: auto;
+  height: auto;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg);
+  color: var(--color-link);
+  font-size: 1rem;
+  z-index: 100;
+}
+
+/* ------------------------------------------------------------------ */
+/* Page Layout Shell                                                   */
+/* ------------------------------------------------------------------ */
+/* Single-column by default (mobile-first). At >=1024px the .doc-shell
+   becomes a two-column grid: navigation sidebar + prose content. */
+
+.doc-shell {
+  max-width: calc(var(--max-width) + var(--doc-nav-width) + var(--spacing-xl));
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+}
+
+/* ------------------------------------------------------------------ */
+/* Breadcrumb                                                          */
+/* ------------------------------------------------------------------ */
+
+.breadcrumb {
+  font-size: 0.875rem;
+  padding: var(--spacing-sm) 0;
+  margin-bottom: var(--spacing-md);
+}
+
+.breadcrumb ol {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.breadcrumb li + li::before {
+  content: "›";
+  margin-right: var(--spacing-xs);
+  color: var(--color-border);
+}
+
+.breadcrumb a {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.breadcrumb [aria-current="page"] {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+/* ------------------------------------------------------------------ */
+/* Navigation Sidebar (.doc-nav) -- Pattern 2b target                  */
+/* ------------------------------------------------------------------ */
+/* nav.js generates the in-page table of contents into .doc-nav and manages
+   scrollspy (.active), collapsible groups (aria-expanded), and Diataxis
+   filtering. With JS disabled, any server-authored .doc-nav content remains
+   fully usable (progressive enhancement). */
+
+.doc-nav {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.doc-nav h2,
+.doc-nav .doc-nav-title {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.doc-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.doc-nav li {
+  margin: 0;
+}
+
+.doc-nav a {
+  display: block;
+  text-decoration: none;
+  color: var(--color-text);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-left: 2px solid transparent;
+  border-radius: 0 3px 3px 0;
+}
+
+.doc-nav a:hover {
+  color: var(--color-link);
+  background-color: var(--color-aside-bg);
+}
+
+/* Scrollspy active state, written by nav.js */
+.doc-nav a.active {
+  color: var(--color-link);
+  border-left-color: var(--color-link);
+  font-weight: 600;
+  background-color: var(--color-aside-bg);
+}
+
+/* Nested (h3) TOC entries indent under their h2 parent */
+.doc-nav .toc-h3 a {
+  padding-left: var(--spacing-md);
+  font-size: 0.8125rem;
+}
+
+/* Collapsible groups. nav.js toggles aria-expanded on .doc-nav-toggle and
+   hides the sibling group list when collapsed. */
+.doc-nav-group {
+  margin-bottom: var(--spacing-sm);
+}
+
+.doc-nav-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: none;
+  border: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-heading);
+  text-align: left;
+  cursor: pointer;
+}
+
+.doc-nav-toggle::after {
+  content: "▾";
+  font-size: 0.75rem;
+  color: var(--color-text);
+}
+
+.doc-nav-toggle[aria-expanded="false"]::after {
+  content: "▸";
+}
+
+.doc-nav-toggle[aria-expanded="false"] + .doc-nav-group-items {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Diataxis Filter Controls (.doc-filter) -- written/read by nav.js    */
+/* ------------------------------------------------------------------ */
+
+.doc-filter {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.doc-filter .doc-nav-title {
+  margin-bottom: var(--spacing-xs);
+}
+
+.doc-filter button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: var(--spacing-xs) var(--spacing-xs) 0 0;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font: inherit;
+  font-size: 0.75rem;
+  color: var(--color-text);
+  background-color: var(--color-code-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.doc-filter button[aria-pressed="true"] {
+  color: var(--color-link);
+  border-color: var(--color-link);
+  font-weight: 600;
+}
+
+/* When a Diataxis filter is active, nav.js adds .dimmed to non-matching
+   sections. Dimmed content stays in the DOM (and accessible) but visually
+   recedes. */
+.doc-content section.dimmed {
+  opacity: 0.35;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .doc-content section {
+    transition: opacity 0.2s ease;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Content Column (.doc-content)                                       */
+/* ------------------------------------------------------------------ */
+
+.doc-content {
+  min-width: 0; /* allow long <pre> to scroll instead of stretching the grid */
+}
+
+.doc-content section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.doc-content ul,
+.doc-content ol {
+  margin-bottom: var(--spacing-md);
+  padding-left: var(--spacing-lg);
+}
+
+.doc-content li {
+  margin-bottom: var(--spacing-xs);
+}
+
+.doc-content dl {
+  margin-bottom: var(--spacing-md);
+}
+
+.doc-content dt {
+  font-weight: 600;
+  color: var(--color-heading);
+  margin-top: var(--spacing-sm);
+}
+
+.doc-content dd {
+  margin-left: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
+}
+
+.doc-content blockquote {
+  border-left: 3px solid var(--color-link);
+  background: var(--color-aside-bg);
+  margin: 0 0 var(--spacing-md) 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  color: var(--color-text);
+  font-size: 0.95rem;
+}
+
+.doc-content figure {
+  margin: var(--spacing-md) 0;
+}
+
+.doc-content figcaption {
+  font-size: 0.875rem;
+  font-style: italic;
+  color: var(--color-text);
+  margin-top: var(--spacing-xs);
+}
+
+/* ------------------------------------------------------------------ */
+/* Badge System                                                        */
+/* ------------------------------------------------------------------ */
+/* .badge is the base pill; a type modifier (.diataxis-*, .core-*, .track-*)
+   sets --badge-accent. Badge LABEL text is always --color-text (>=11:1, AA),
+   so legibility never depends on the accent; the accent shows only as the
+   border and a leading swatch (non-text, >=3:1). Badges must always carry a
+   text label -- never rely on color alone to convey the type (WCAG 1.4.1). */
+
+.badge {
+  --badge-accent: var(--color-border);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 0.125rem var(--spacing-sm);
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  background-color: var(--color-code-bg);
+  border: 1px solid var(--badge-accent);
+  border-radius: 999px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.badge::before {
+  content: "";
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  background-color: var(--badge-accent);
+  flex: 0 0 auto;
+}
+
+/* Diataxis type badges */
+.diataxis-tutorial    { --badge-accent: var(--diataxis-tutorial); }
+.diataxis-howto       { --badge-accent: var(--diataxis-howto); }
+.diataxis-reference   { --badge-accent: var(--diataxis-reference); }
+.diataxis-explanation { --badge-accent: var(--diataxis-explanation); }
+
+/* Core-type badges */
+.core-skills     { --badge-accent: var(--core-skills); }
+.core-concepts   { --badge-accent: var(--core-concepts); }
+.core-operations { --badge-accent: var(--core-operations); }
+.core-reference  { --badge-accent: var(--core-reference); }
+
+/* Audience-track badges */
+.track-practitioner { --badge-accent: var(--track-practitioner); }
+.track-architect    { --badge-accent: var(--track-architect); }
+.track-scholar      { --badge-accent: var(--track-scholar); }
+
+/* ------------------------------------------------------------------ */
+/* See-Also / Related Cross-References                                 */
+/* ------------------------------------------------------------------ */
+
+.see-also {
+  margin: var(--spacing-lg) 0;
+  padding: var(--spacing-md);
+  background-color: var(--color-aside-bg);
+  border-left: 4px solid var(--color-link);
+  border-radius: 0 4px 4px 0;
+  font-size: 0.95rem;
+}
+
+.see-also .see-also-title {
+  font-weight: 600;
+  color: var(--color-heading);
+  margin-bottom: var(--spacing-sm);
+}
+
+.see-also ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.see-also li {
+  margin-bottom: var(--spacing-xs);
+}
+
+/* ------------------------------------------------------------------ */
+/* Callout / Aside Styling                                             */
+/* ------------------------------------------------------------------ */
+
+.callout-tip,
+.callout-warning {
+  padding: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.callout-tip {
+  background-color: var(--color-aside-bg);
+  border-left: 4px solid var(--diataxis-tutorial);
+}
+
+.callout-warning {
+  background-color: var(--color-status-bg);
+  border-left: 4px solid var(--color-status-border);
+}
+
+/* ------------------------------------------------------------------ */
+/* Status Notice                                                       */
+/* ------------------------------------------------------------------ */
+
+.status-notice {
+  background-color: var(--color-status-bg);
+  border: 1px solid var(--color-status-border);
+  border-radius: 4px;
+  padding: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+  font-style: italic;
+}
+
+/* ------------------------------------------------------------------ */
+/* Code Blocks                                                         */
+/* ------------------------------------------------------------------ */
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background-color: var(--color-code-bg);
+  color: var(--color-code-text);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 3px;
+}
+
+pre {
+  background-color: var(--color-code-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+  overflow-x: auto;
+  line-height: 1.5;
+}
+
+pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.875rem;
+}
+
+/* Code Syntax Highlighting -- SEJA palette vs --color-code-bg */
+.token-keyword { color: #A86E4F; }  /* Clay    -- 4.5:1 vs #FAF8F4 */
+.token-string  { color: #5F7A5F; }  /* Success -- 5.1:1 vs #FAF8F4 */
+.token-comment { color: #6B655E; }  /* Muted   -- 4.7:1 vs #FAF8F4 */
+.token-command { color: #C89B4A; }  /* Ochre   -- 3.3:1 vs #FAF8F4 (large) */
+
+@media (prefers-color-scheme: dark) {
+  .token-keyword { color: #C4957B; }  /* Lightened clay    -- 5.9:1 vs #1C1A17 */
+  .token-string  { color: #8FA88F; }  /* Lightened success -- 6.4:1 vs #1C1A17 */
+  .token-comment { color: #A89F93; }  /* Muted dark        -- 5.4:1 vs #1C1A17 */
+  .token-command { color: #D4B06A; }  /* Lightened ochre   -- 7.3:1 vs #1C1A17 */
+}
+
+/* ------------------------------------------------------------------ */
+/* Tables                                                              */
+/* ------------------------------------------------------------------ */
+
+.table-container {
+  overflow-x: auto;
+  margin: var(--spacing-md) 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--spacing-md) 0;
+  font-size: 0.95rem;
+}
+
+th,
+td {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border);
+  text-align: left;
+}
+
+th {
+  background-color: var(--color-aside-bg);
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+/* ------------------------------------------------------------------ */
+/* Footer                                                              */
+/* ------------------------------------------------------------------ */
+
+footer {
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+  font-size: 0.875rem;
+}
+
+footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+footer a {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsive: Two-Column Layout (>=1024px)                            */
+/* ------------------------------------------------------------------ */
+/* Sidebar on the left, prose on the right. The sidebar sticks while the
+   reader scrolls the content column. */
+
+@media (min-width: 1024px) {
+  .doc-shell {
+    display: grid;
+    grid-template-columns: var(--doc-nav-width) 1fr;
+    grid-template-rows: auto auto 1fr auto;
+    gap: 0 var(--spacing-xl);
+  }
+
+  .skip-nav,
+  header,
+  .breadcrumb,
+  footer {
+    grid-column: 1 / -1;
+  }
+
+  .doc-nav {
+    grid-column: 1 / 2;
+    grid-row: 3 / 4;
+    position: sticky;
+    top: var(--spacing-md);
+    align-self: start;
+    max-height: calc(100vh - var(--spacing-xl));
+    overflow-y: auto;
+    padding-right: var(--spacing-sm);
+  }
+
+  .doc-content {
+    grid-column: 2 / 3;
+    grid-row: 3 / 4;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsive: Tablet (768px -- 1023px)                                */
+/* ------------------------------------------------------------------ */
+/* Sidebar collapses to a static block above the content. */
+
+@media (max-width: 1023px) {
+  .doc-nav {
+    position: static;
+    max-height: none;
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-md);
+    background-color: var(--color-aside-bg);
+    border-radius: 4px;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsive: Mobile (below 768px)                                    */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 767px) {
+  .doc-shell {
+    padding: var(--spacing-md);
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+  }
+
+  .breadcrumb ol {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  pre {
+    font-size: 0.8rem;
+  }
+
+  table {
+    font-size: 0.85rem;
+  }
+
+  th,
+  td {
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Print Stylesheet                                                    */
+/* ------------------------------------------------------------------ */
+
+@media print {
+  /* Hide navigation chrome; print the prose only */
+  .skip-nav,
+  .breadcrumb,
+  .doc-nav,
+  .doc-filter,
+  footer {
+    display: none;
+  }
+
+  .doc-shell {
+    display: block;
+    max-width: 100%;
+    padding: 0;
+  }
+
+  body {
+    color: #2B2926;
+    background: #FAF8F4;
+  }
+
+  /* Never print a section dimmed by an active filter */
+  .doc-content section.dimmed {
+    opacity: 1;
+  }
+
+  /* Page breaks around major headings */
+  h1 {
+    page-break-before: always;
+  }
+
+  h1:first-of-type {
+    page-break-before: avoid;
+  }
+
+  h2 {
+    page-break-before: auto;
+  }
+
+  h2, h3 {
+    page-break-after: avoid;
+  }
+
+  /* Show link URLs for cross-references */
+  a[href^="../"]::after,
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #6B655E;
+  }
+}

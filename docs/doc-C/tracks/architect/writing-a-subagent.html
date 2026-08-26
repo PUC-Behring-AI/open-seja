@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How to add a subagent to the SEJA harness: the agent prompt file shape, the evaluator and generator role split, the constitution-injection requirement for generators, and how a thin-wrapper skill invokes one.">
+  <title>Writing a Subagent &mdash; SEJA Documentation</title>
+  <!-- CSS depth: 2 (tracks/architect sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Writing a Subagent</h1>
+      <p>The prompt file shape, the role split, the trust boundary, and how a wrapper skill dispatches to one.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#tracks">Tracks</a></li>
+        <li><a href="index.html">Architect</a></li>
+        <li aria-current="page">Writing a Subagent</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge track-architect">Architect</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="when-a-subagent-is-the-answer">
+          <h2 id="when-a-subagent-is-the-answer">When a subagent is the answer</h2>
+          <p>
+            A subagent is the right shape when a unit of work is
+            <strong>self-contained</strong> &mdash; every input is available at dispatch,
+            no mid-flight coordination with the caller is needed &mdash; and when moving
+            it out of the caller's context is genuinely valuable, either because the
+            tool-call volume would bloat the parent or because several such units
+            should run in parallel.
+          </p>
+          <p>
+            The counter-indication is interactivity. Work that branches on user
+            answers mid-flight, or that loops on confirmation prompts, stays inline in
+            the wrapper skill's own instructions. A subagent has a stable contract
+            &mdash; prompt in, artifact or findings out &mdash; and that contract is what
+            makes the isolation safe.
+          </p>
+          <p>
+            As with skills, a new agent must justify itself against the existing
+            roster: its domain must be distinct from every agent already present.
+            The harness does not merge agents or bolt cross-cutting responsibilities
+            onto existing ones.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="the-three-roles">
+          <h2 id="the-three-roles">The three roles</h2>
+          <p>
+            Every agent falls into exactly one role, and the role decides both its
+            single responsibility and how it is invoked.
+          </p>
+          <dl>
+            <dt>Evaluator</dt>
+            <dd>
+              Reviews <strong>one type of artifact through one lens</strong> &mdash; code
+              diffs, plans, design decisions, validation scripts, test suites,
+              migrations. An evaluator reads and reports; it does not author the
+              artifact it judges.
+            </dd>
+            <dt>Generator</dt>
+            <dd>
+              Produces <strong>one type of artifact from well-defined inputs</strong>
+              &mdash; communication material, onboarding plans, documentation,
+              explanation reports. Generators are invoked by thin-skill wrappers,
+              never directly by users.
+            </dd>
+            <dt>Executor</dt>
+            <dd>
+              Executes plan steps in an isolated context. Executors are the one role
+              with <em>no standalone prompt file</em>: their prompts are constructed
+              dynamically from plan-step metadata at dispatch time.
+            </dd>
+          </dl>
+          <p>
+            The single-responsibility rule is what keeps this roster legible. Two
+            agents that both "review things" are still distinct if they review
+            different artifacts through different lenses; an agent that reviews diffs
+            <em>and</em> runs validators is one agent too few.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="the-prompt-file">
+          <h2 id="the-prompt-file">The prompt file</h2>
+          <p>
+            An agent is a single Markdown file in <code>.claude/agents/</code>, named
+            after the agent. It opens with YAML frontmatter and continues as the
+            agent's system prompt.
+          </p>
+          <dl>
+            <dt><code>name</code></dt>
+            <dd>Matches the filename stem; this is the identifier a wrapper dispatches to.</dd>
+            <dt><code>description</code></dt>
+            <dd>
+              Agent-facing. States what the agent reviews or produces and any
+              behaviour that varies by input, so the dispatching runtime can route
+              correctly.
+            </dd>
+            <dt><code>designer_description</code></dt>
+            <dd>
+              Human-facing, written in the first person to the designer. This is the
+              voice the catalogs and help surfaces show; it is not a restatement of
+              <code>description</code>.
+            </dd>
+            <dt><code>tools</code></dt>
+            <dd>
+              The explicit tool allowance, e.g. <code>Read, Glob, Grep, Bash</code>.
+              Grant the minimum the role needs: evaluators typically get read and
+              search tools only, while generators additionally get
+              <code>Write</code> because producing a file is their output contract.
+            </dd>
+          </dl>
+          <p>The body follows a consistent four-part shape:</p>
+          <ol>
+            <li>
+              <strong>Role statement and boundary.</strong> One sentence naming what
+              the agent is, plus &mdash; for generators &mdash; an explicit note that the
+              agent is the generation engine and the skill is the user-facing
+              orchestrator.
+            </li>
+            <li>
+              <strong>Input.</strong> The named parameters the wrapper will pass, each
+              with its type and permitted values. Optional inputs are marked as such
+              and given a stated default.
+            </li>
+            <li>
+              <strong>Process.</strong> Numbered steps. This is where scope-aware
+              reference loading belongs: name the files the agent must always read and
+              the ones it should read only when the input warrants, rather than having
+              it bulk-load everything.
+            </li>
+            <li>
+              <strong>Output.</strong> The exact artifact or report shape the caller
+              will receive. An agent's final text is a return value, not a message to
+              a human &mdash; specify it as data.
+            </li>
+          </ol>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="the-trust-boundary">
+          <h2 id="the-trust-boundary">The trust boundary</h2>
+          <aside class="callout-warning">
+            <p>
+              <strong>Generator agents must receive the project constitution as part
+              of their prompt.</strong> A generator authors files; the constitution is
+              what keeps that authorship inside the designer's governance. Omitting it
+              creates an agent that writes without constraint.
+            </p>
+          </aside>
+          <p>
+            In practice the generator's prompt instructs it to read
+            <code>product-design/constitution.md</code> before starting and to apply
+            its constraints throughout generation, proceeding without it only when the
+            file genuinely does not exist &mdash; the bootstrap case for a project that
+            has not been configured yet.
+          </p>
+          <p>
+            This is the same boundary that keeps runtime skill generation deferred in
+            the harness. Constitution injection being <em>mandatory and unbypassable</em>
+            is one of the stated prerequisites before agents may ever author new skills
+            at runtime.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="wiring-a-wrapper">
+          <h2 id="wiring-a-wrapper">Wiring a thin-wrapper skill</h2>
+          <p>
+            Delegating a mode's work to a subagent is one of the harness's two mode
+            dispatches. The wrapper skill keeps everything the agent should not own:
+            argument parsing, interactive prompts, result presentation, and &mdash;
+            critically &mdash; the lifecycle hooks.
+          </p>
+          <aside class="callout-warning">
+            <p>
+              <strong>The wrapper remains the single lifecycle-hook owner.</strong>
+              Pre-skill and post-skill are invoked by the wrapper, not by the mode and
+              not by the agent. No dispatch fires the hooks twice.
+            </p>
+          </aside>
+          <p>
+            The wrapper's job at dispatch is to assemble a <em>self-contained</em>
+            prompt: the agent starts with no view of the conversation that led to it,
+            so every path, every parameter, and every piece of project context it needs
+            must be passed explicitly. It then waits for the agent and presents the
+            result.
+          </p>
+          <p>
+            When promoting an existing inline mode to a delegated one, move the prose
+            into the agent prompt <strong>verbatim first</strong>. Make the refactor
+            behaviour-preserving in one commit and revise the content in a later one;
+            a simultaneous move-and-rewrite makes any resulting regression impossible
+            to attribute.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="parallel-execution">
+          <h2 id="parallel-execution">Agents that write files in parallel</h2>
+          <p>
+            Executor agents that run concurrently &mdash; the roadmap wave case &mdash; add
+            one further contract on top of everything above. Each runs in its own git
+            worktree and operates in <strong>deferred-write mode</strong>: it writes
+            only per-plan files and commits within its own branch, skipping the
+            lifecycle hooks entirely.
+          </p>
+          <p>
+            Shared mutable state is deliberately excluded from the parallel phase.
+            The briefs log, the pending ledger, the artifact index, and telemetry are
+            all updated afterwards by the orchestrator, serialized on the main branch,
+            precisely because concurrent appends to a shared file are the failure mode
+            worktree isolation cannot prevent.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="sourced-from">
+          <h2 id="sourced-from">Sourced from</h2>
+          <p>
+            This page was written from the harness files below. When any of them
+            changes, re-check this page against it &mdash; this list is the freshness
+            work-list for this chapter.
+          </p>
+          <ul>
+            <li><code>.claude/references/general/harness-governance.md</code></li>
+            <li><code>.claude/rules/harness-structure.md</code></li>
+            <li><code>.claude/agents/code-reviewer.md</code> (evaluator shape)</li>
+            <li><code>.claude/agents/document-generator.md</code> (generator shape)</li>
+            <li><code>.claude/skills/implement/SKILL.md</code> (executor and worktree contract)</li>
+            <li><code>product-design/constitution.md</code> (principle T1)</li>
+          </ul>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="writing-a-skill.html">Writing a Skill</a> &mdash; the wrapper side of the same extension surface.</li>
+            <li><a href="../../core/reference/agents-catalog.html">Agents Catalog</a> &mdash; the current roster, by role.</li>
+            <li><a href="../../core/reference/call-graph.html">Call Graph</a> &mdash; which skills delegate to which agents.</li>
+            <li><a href="index.html">Architect Track</a> &mdash; back to the track gate.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Architect Track</a>
+        <a href="../../core/reference/index.html">Reference</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (tracks/architect sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

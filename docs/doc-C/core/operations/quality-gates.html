@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How to run SEJA quality gates: the ten /critique modes, stack filtering via conventions.md, the --depth override, and the preflight checkpoint pattern.">
+  <title>Quality Gates — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/operations sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Quality Gates</h1>
+      <p>Validate, review, and smoke-test your work with the <code>/critique</code> modes.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Operations</a></li>
+        <li aria-current="page">Quality Gates</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge core-operations">operations</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="overview">
+          <h2 id="overview">Overview</h2>
+          <p>
+            <code>/critique</code> is SEJA's validation skill. It has ten mutually
+            exclusive modes covering everything from running validation scripts to
+            reviewing code, smoke-testing endpoints, checking harness health, and
+            evaluating interface communicability. One mode is required per
+            invocation. Validate before you communicate — <code>/critique</code>
+            sits between build and communicate on the canonical lifecycle.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="critique-modes">
+          <h2 id="critique-modes">The <code>/critique</code> modes</h2>
+          <div class="table-container">
+            <table>
+              <caption>The ten <code>/critique</code> modes.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Mode</th>
+                  <th scope="col">What it does</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">validate</th>
+                  <td>Runs project validation scripts. Scope: <code>all</code>, <code>i18n</code>, <code>auth</code>, <code>migrations</code>, <code>constants</code>, <code>po</code>, <code>coverage</code>, <code>tests</code>, or <code>spec</code>. The <code>standards-checker</code> agent is the execution engine.</td>
+                </tr>
+                <tr>
+                  <th scope="row">review</th>
+                  <td>Structured code review against quality perspectives via the <code>code-reviewer</code> agent. Scope: <code>staged</code>, a file, or a directory.</td>
+                </tr>
+                <tr>
+                  <th scope="row">smoke</th>
+                  <td>Runtime smoke tests. Scope: <code>all</code>, <code>api</code> (Flask test client, no servers needed), or <code>ui</code> (Playwright).</td>
+                </tr>
+                <tr>
+                  <th scope="row">preflight</th>
+                  <td>Combined validate + review in one pass — a pre-merge checkpoint. Scope: <code>staged</code>, <code>all</code>, or a directory.</td>
+                </tr>
+                <tr>
+                  <th scope="row">health</th>
+                  <td>Harness self-diagnosis: nine built-in checks via the <code>harness-health-evaluator</code> agent. <code>--source</code> enables the drift check.</td>
+                </tr>
+                <tr>
+                  <th scope="row">test-plan</th>
+                  <td>Generates a structured manual test plan from a brief and recent DONE plans.</td>
+                </tr>
+                <tr>
+                  <th scope="row">docs</th>
+                  <td>Documentation consistency check via <code>check_docs.py</code> plugin scanners (paths, env vars, command refs, terminology).</td>
+                </tr>
+                <tr>
+                  <th scope="row">freshness</th>
+                  <td>Compares local branches to their upstreams for the configured repos. Advisory only — never pulls.</td>
+                </tr>
+                <tr>
+                  <th scope="row">telemetry</th>
+                  <td>Usage analytics and skill-invocation statistics from <code>telemetry.jsonl</code>. Read-only: reserves no ID and files no critique log.</td>
+                </tr>
+                <tr>
+                  <th scope="row">semiotic-inspection</th>
+                  <td>SIM-based communicability evaluation via the <code>semiotic-inspector</code> agent. Scope: a feature, page, flow, or <code>all</code>.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="stack-filtering">
+          <h2 id="stack-filtering">Stack filtering via <code>conventions.md</code></h2>
+          <p>
+            The <code>validate</code> and <code>preflight</code> modes filter which
+            checks run to your project's stack. They read
+            <code>BACKEND_FRAMEWORK</code> and <code>FRONTEND_FRAMEWORK</code> from
+            <code>product-design/conventions.md</code> (via
+            <code>project_config.py</code>), then load the plugin registry and keep
+            each plugin whose <code>stack.backend</code> and
+            <code>stack.frontend</code> are either empty (stack-agnostic) or contain
+            your project's value. Only the matching scripts run; non-matching ones
+            are skipped silently.
+          </p>
+          <aside class="callout-tip">
+            <strong>Legacy fallback.</strong> If <code>conventions.md</code> has no
+            stack variables and they cannot be inferred from the codebase,
+            <code>/critique</code> runs all scripts and includes a warning advising
+            you to add <code>BACKEND_FRAMEWORK</code> and
+            <code>FRONTEND_FRAMEWORK</code> to enable filtering.
+          </aside>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="depth-override">
+          <h2 id="depth-override">The <code>--depth</code> override</h2>
+          <p>
+            The global <code>--depth &lt;light|standard|deep&gt;</code> flag
+            overrides review depth for the <code>review</code> and
+            <code>preflight</code> modes. The effective depth resolves as
+            <code>max(floor, flag)</code>, where <code>floor</code> is
+            <code>MINIMUM_REVIEW_DEPTH</code> from
+            <code>product-design/conventions.md</code> (default <code>light</code>).
+            With no <code>--depth</code> flag, the <code>code-reviewer</code> agent
+            evaluates all sixteen perspectives — equivalent to <code>deep</code>.
+            Lighter depths use the two-stage loading protocol to select four to six
+            relevant perspectives from the content of the change.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="preflight-checkpoint">
+          <h2 id="preflight-checkpoint">The preflight checkpoint pattern</h2>
+          <p>
+            <code>preflight</code> is the pre-merge checkpoint: it combines validate
+            and review into a single pass and produces a go/no-go verdict. It
+            resolves a scope (<code>staged</code> validates all and reviews staged;
+            <code>all</code> reviews everything modified; a directory reviews that
+            directory), applies stack filtering, then fans out —
+            <code>standards-checker</code>, <code>code-reviewer</code>, and the smoke
+            test (when the plan's <code>smoke</code> field is <code>true</code>) run
+            as concurrent agents, each writing its own section. If one check fails,
+            the others still produce results; preflight does not abort.
+          </p>
+          <p>
+            The verdict is conservative: <strong>READY</strong> only when all
+            validation checks pass and there are no HIGH-severity review issues;
+            otherwise <strong>NOT READY</strong>. Run preflight before merging so a
+            single command gives you the full validate-plus-review picture.
+          </p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="plan-and-execute.html">Planning and Executing</a> &mdash; the Quality Gate that <code>/implement</code> runs draws on these modes.</li>
+            <li><a href="ci-integration.html">CI Integration</a> &mdash; running these checks in continuous integration.</li>
+            <li><a href="../concepts/review-perspectives.html">Review Perspectives</a> &mdash; the sixteen perspectives that <code>review</code> and <code>preflight</code> evaluate.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Operations</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/operations sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

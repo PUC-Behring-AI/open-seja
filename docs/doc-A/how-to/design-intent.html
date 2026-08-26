@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="how-to">
+  <meta name="doc-volume" content="How-To Guides">
+  <meta name="doc-chapter" content="Design Intent Maintenance">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>Design Intent Maintenance -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">How-To Guides</a></li>
+      <li>Design Intent Maintenance</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-howto">
+    <article>
+      <p class="vol-accent"><strong>how-to</strong></p>
+
+      <h1>Design Intent Maintenance</h1>
+
+      <p>
+        Design intent is the authoritative record of what you meant to build. In
+        SEJA it lives in <code>product-design/product-design-as-intended.md</code>
+        -- a unified file holding the working intent (sections &sect;0-&sect;17),
+        a DDR-shaped Decisions section of <code>D-NNN</code> entries, and a
+        CHANGELOG. This guide covers the day-to-day operations that keep that
+        file honest: editing intent prose, flipping lifecycle
+        <strong>markers</strong>, creating <strong>Decision</strong> records,
+        running the <strong>promote</strong> workflow, and maintaining the
+        <strong>As-Intended / As-Coded Registry</strong>.
+      </p>
+
+      <section id="maintainer-model">
+        <h2>The Maintainer Model</h2>
+
+        <p>
+          <code>product-design-as-intended.md</code> is classified
+          <strong>Human (markers)</strong>. That means:
+        </p>
+        <ul>
+          <li><strong>Prose is human-authored.</strong> Only you write the intent narrative, sections, and Decision bodies. Agents may read and propose, but never write prose.</li>
+          <li><strong>Markers are agent-written, but only through one script.</strong> Agents update fixed-format lifecycle markers exclusively via <code>apply_marker.py</code>, and only after an explicit confirmation prompt in the same turn.</li>
+        </ul>
+        <p>
+          The companion verifier <code>check_human_markers_only.py</code> rejects
+          any prose mutation that slips through, and
+          <code>check_changelog_append_only.py</code> keeps the CHANGELOG
+          append-only. This split preserves the distinction between design intent
+          (human-authored) and implementation state (agent-maintained).
+        </p>
+      </section>
+
+      <section id="updating-intent">
+        <h2>How to Update the As-Intended File</h2>
+
+        <p>
+          To change what the project is meant to do, edit
+          <code>product-design/product-design-as-intended.md</code> directly --
+          this is your file. Add or revise sections, refine the metacommunication
+          message in &sect;11, and record designed journeys (JM-TB-NNN) in
+          &sect;15.
+        </p>
+
+        <aside class="callout-warning">
+          <p>
+            <strong>First-person voice is non-negotiable for the
+            metacommunication message.</strong> The &sect;11 message must use
+            first-person "I" for the designer and second-person "you" for the
+            user -- never "the designer", "the system", "the user"
+            (third-person), passive voice, or imperative mood. When you supply a
+            metacommunication message as input, the agent records it exactly as
+            written; paraphrasing distorts intent.
+          </p>
+        </aside>
+
+        <ul>
+          <li><strong>Change intent when the goal itself changes</strong> -- Recommended when what you want the system to do has shifted; run <code>/design</code> to reshape intent, or edit the file for small revisions.</li>
+          <li><strong>Leave intent alone when only the code needs to change</strong> -- NOT recommended to touch as-intended for a pure implementation fix; go to <code>/plan</code> instead. Intent and implementation are separate records.</li>
+        </ul>
+      </section>
+
+      <section id="markers">
+        <h2>How to Apply Markers with apply_marker.py</h2>
+
+        <p>
+          <code>apply_marker.py</code> is the sole write path for Human (markers)
+          files. It applies a lifecycle marker HTML comment or appends a CHANGELOG
+          line, rewriting the exact target line and leaving every other word
+          untouched. There are six marker kinds:
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Marker</th>
+                <th scope="col">What it does</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>STATUS</code></td>
+                <td>Sets an item's lifecycle state on a prose section. Lowercase state machine: <code>proposed &rarr; implemented &rarr; established &rarr; superseded</code>. Regression is rejected.</td>
+              </tr>
+              <tr>
+                <td><code>ESTABLISHED</code></td>
+                <td>Stamps an item as established (a promotion audit record). Stamp-kind marker -- no <code>--value</code>; requires <code>--plan</code>.</td>
+              </tr>
+              <tr>
+                <td><code>INCORPORATED</code></td>
+                <td>Stamps a UX-research item as incorporated by a plan. Stamp-kind marker; requires <code>--plan</code>.</td>
+              </tr>
+              <tr>
+                <td><code>CHANGELOG_APPEND</code></td>
+                <td>Appends a validated CHANGELOG line; requires <code>--note</code> and a recognised action value.</td>
+              </tr>
+              <tr>
+                <td><code>DECISION_APPEND</code></td>
+                <td>Appends a new <code>### D-NNN:</code> DDR-shaped Decision entry to the Decisions section with an auto-assigned ID.</td>
+              </tr>
+              <tr>
+                <td><code>REQ_TRACED_BY</code></td>
+                <td>Annotates an existing <code>&lt;!-- REQ-TYPE-NNN --&gt;</code> marker with a <code>traced_by</code> link to signal pre-tracing-system requirements. Stamp-kind marker; <code>--id</code> is the REQ ID.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>The general invocation shape is:</p>
+
+        <pre><code><span class="token-command">python</span> .claude/skills/scripts/apply_marker.py --file &lt;path&gt; --id &lt;entry-id&gt; --marker &lt;kind&gt; --value &lt;value&gt; [--plan &lt;plan-id&gt;] [--date &lt;YYYY-MM-DD&gt;] [--note &lt;text&gt;] [--dry-run]</code></pre>
+
+        <p>
+          <code>--value</code> is required for <code>STATUS</code>,
+          <code>CHANGELOG_APPEND</code>, and <code>DECISION_APPEND</code>. The
+          stamp-kind markers (<code>ESTABLISHED</code>, <code>INCORPORATED</code>)
+          take no <code>--value</code> but require <code>--plan</code>. Use
+          <code>--dry-run</code> to print the diff without writing.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Expected output.</strong> Exactly one marker line changes; all
+            surrounding prose is byte-identical. If the entry ID is not found or is
+            ambiguous, the script fails with a validation error and writes nothing.
+          </p>
+        </aside>
+
+        <ul>
+          <li><strong>Preview with <code>--dry-run</code> first</strong> -- Recommended when you are flipping several markers or automating a batch; confirm the diff before committing.</li>
+          <li><strong>Let the skill drive it</strong> -- Recommended in normal use: <code>/pending address</code> and the promote workflow call <code>apply_marker.py</code> for you with confirmation, so you rarely run it by hand.</li>
+        </ul>
+      </section>
+
+      <section id="decisions">
+        <h2>How to Create D-NNN Decision Records</h2>
+
+        <p>
+          Decision entries live in the <code>## Decisions</code> section of
+          <code>product-design-as-intended.md</code> under
+          <code>### D-NNN: Title</code> headings, in DDR shape (Context /
+          Decision / Consequences) with a stable ID. The <code>D-NNN</code>
+          namespace is orthogonal to the <code>REQ-TYPE-NNN</code> requirement
+          namespace -- never intermix them and never write <code>REQ-D-NNN</code>.
+        </p>
+
+        <p>
+          The usual capture mechanism is <code>/research</code>'s decision-extract
+          flow (step 9b): when advisory Q&amp;A surfaces a settled decision, it
+          offers to create a <code>D-NNN</code> entry via
+          <code>apply_marker.py --marker DECISION_APPEND</code>, with options to
+          create now, defer to the pending ledger, or skip. Each new Decision
+          carries its own <code>STATUS</code> marker above the heading, starting at
+          <code>proposed</code>.
+        </p>
+
+        <ul>
+          <li><strong>Create now</strong> -- Recommended when the decision is settled and you want it recorded immediately.</li>
+          <li><strong>Defer to the pending ledger</strong> -- Recommended when you want to record it but review the wording later; it files a <code>create-decision-entry</code> pending item.</li>
+          <li><strong>Skip</strong> -- Recommended when the exchange was exploratory and captured nothing decision-worthy.</li>
+        </ul>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Expected output.</strong> A new <code>### D-NNN:</code> entry
+            appended to the Decisions section with an auto-assigned ID and a
+            <code>STATUS: proposed</code> marker. Standalone published DDR files
+            (via <code>/document --type ddr</code>) can later be sourced from these
+            entries.
+          </p>
+        </aside>
+      </section>
+
+      <section id="promote">
+        <h2>How to Run the Promote Workflow</h2>
+
+        <p>
+          Promotion moves an item from "implemented in code" to "established design
+          intent". The promote workflow is <code>/explain drift --promote</code>,
+          split into two phases so the designer's voice is preserved:
+        </p>
+
+        <ol>
+          <li>
+            <strong>Phase 3a -- proposal generation.</strong> Run
+            <code>/explain drift --promote</code>. For items marked
+            <code>STATUS: implemented</code>, it drafts DDR-shaped Decision entries
+            from plan metadata and writes them to
+            <code>_output/promote-proposals/promote-proposal-plan-&lt;id&gt;.md</code>.
+            No markers are flipped and no design file is touched yet.
+            <br><em>Expected output:</em> a proposal file with draft Decision
+            entries for you to review.
+          </li>
+          <li>
+            <strong>Review and adopt in your voice.</strong> Read the draft
+            entries, edit them into your own wording, and copy the ones you accept
+            into the <code>## Decisions</code> section of
+            <code>product-design-as-intended.md</code>.
+          </li>
+          <li>
+            <strong>Phase 3b -- flip the markers.</strong> Run
+            <code>/explain drift --apply-markers plan-&lt;id&gt;</code>. This flips
+            the relevant <code>STATUS</code> markers from <code>implemented</code>
+            to <code>established</code> via <code>apply_marker.py</code>, using a
+            heading-only match so prose is never touched.
+            <br><em>Expected output:</em> a marker flip isolated as its own audit
+            event; <code>check_human_markers_only.py</code> guarantees only marker
+            lines change.
+          </li>
+        </ol>
+
+        <aside class="callout-warning">
+          <p>
+            <strong>Never remove or alter an existing established or implemented
+            marker.</strong> These are audit records. Agents may read them and
+            propose new markers, but the promote workflow only advances state
+            forward; regression (e.g. <code>established &rarr; implemented</code>)
+            is rejected by the state machine.
+          </p>
+        </aside>
+      </section>
+
+      <section id="registry">
+        <h2>How to Maintain the As-Intended / As-Coded Registry</h2>
+
+        <p>
+          The As-Intended / As-Coded Registry in
+          <code>product-design/conventions.md</code> declares every registered
+          as-intended / as-coded file pair, with a Section column that lets a
+          single file host multiple artifact types (tools discriminate by ID
+          prefix -- for example JM-TB-NNN designed journeys versus JM-E-NNN
+          discovered journeys). The Registry is the single source of truth for
+          <code>/design</code>, <code>/explain drift</code>, and post-skill DONE
+          marker proposals.
+        </p>
+
+        <p>
+          When you add a new registered design file or split an artifact type into
+          its own section, update the Registry so the drift and promote tooling can
+          find it. The as-intended half is <strong>Human (markers)</strong>; its
+          as-coded counterpart (<code>product-design-as-coded.md</code>) is
+          <strong>Agent</strong>-maintained via post-skill and has three H2
+          sections: Conceptual Design, Metacommunication, and Journey Maps.
+        </p>
+
+        <ul>
+          <li><strong>Register a new pair</strong> -- Recommended when you introduce a new design artifact you want drift-checked and promotable.</li>
+          <li><strong>Use the Section column for multi-type files</strong> -- Recommended when several artifact types share one file; the ID prefix keeps them discriminable. NOT recommended to leave the Section column blank for a shared file -- tooling then cannot route the types.</li>
+        </ul>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Expected output.</strong> A Registry that lists every
+            drift-tracked pair. Run <code>/explain drift</code> to confirm the new
+            pair is picked up, and <code>/critique health</code> to validate
+            conventions consistency.
+          </p>
+        </aside>
+      </section>
+
+      <section id="common-mistakes">
+        <h2>Common Mistakes</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Mistake</th>
+                <th scope="col">What happens</th>
+                <th scope="col">Fix</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Editing markers by hand with a text editor.</td>
+                <td><code>check_human_markers_only.py</code> rejects the change, or the marker stacks incorrectly.</td>
+                <td>Use <code>apply_marker.py</code> (directly or via the skill) as the sole write path.</td>
+              </tr>
+              <tr>
+                <td>Letting an agent rewrite intent prose.</td>
+                <td>Violates the Human (markers) classification; the verifier blocks it.</td>
+                <td>Author prose yourself; agents propose changes and write only markers after confirmation.</td>
+              </tr>
+              <tr>
+                <td>Copying promote proposals verbatim without editing.</td>
+                <td>The Decision entries read in machine voice, not yours; intent loses nuance.</td>
+                <td>Rewrite each adopted entry in your own words before pasting into the Decisions section.</td>
+              </tr>
+              <tr>
+                <td>Interpolating <code>D-NNN</code> into the REQ taxonomy (e.g. <code>REQ-D-NNN</code>).</td>
+                <td>Namespace collision; traceability tooling misroutes the ID.</td>
+                <td>Keep <code>D-NNN</code> Decisions and <code>REQ-TYPE-NNN</code> requirements strictly separate.</td>
+              </tr>
+              <tr>
+                <td>Writing the metacommunication message in third person or passive voice.</td>
+                <td>Breaks the semiotic I/you contract; the phrasing rule is violated.</td>
+                <td>Use first-person "I" for the designer and second-person "you" for the user throughout &sect;11.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </article>
+
+    <nav aria-label="chapter navigation">
+      <a href="governance.html">Back: Governance Operations</a>
+      <a href="customization.html">Next: Customization and Extension</a>
+    </nav>
+
+    <!-- See also: cross-volume related chapters -->
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../reference/file-format-reference.html">File Format Reference</a> — the exact syntax of markers, decision records, and the design-intent file</li>
+        <li><a href="../explanation/agent-as-reader.html">How the Agent Reads SEJA</a> — why intent is human-authored and the agent writes only markers</li>
+        <li><a href="../explanation/design-decisions.html#why-human-markers-classification">Design Decisions</a> — the reasoning behind the human-markers-only classification</li>
+      </ul>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#maintainer-model">The Maintainer Model</a></li>
+      <li><a href="#updating-intent">Update the As-Intended File</a></li>
+      <li><a href="#markers">Apply Markers with apply_marker.py</a></li>
+      <li><a href="#decisions">Create D-NNN Decision Records</a></li>
+      <li><a href="#promote">Run the Promote Workflow</a></li>
+      <li><a href="#registry">Maintain the As-Intended / As-Coded Registry</a></li>
+      <li><a href="#common-mistakes">Common Mistakes</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T22:55:00Z</p>
+  </footer>
+
+</body>
+</html>

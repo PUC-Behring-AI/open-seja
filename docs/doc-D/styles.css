@@ -1,0 +1,668 @@
+/*
+ * doc-D/styles.css — co-located stylesheet for the SEJA doc-D documentation collection
+ *
+ * Pattern 2 (co-located CSS) per doc-guidelines.md Section G. All 33 doc-D
+ * pages link this file via <link rel="stylesheet"> at their relative depth.
+ *
+ * Palette + typography: SEJA design-system clay/earth palette on washi ground,
+ * three Japanese-minimalist font families. Token :root (light) and dark
+ * @media blocks below are copied VERBATIM from
+ * `.claude/skills/scripts/html_assets/tokens.css` (the canonical source, which
+ * mirrors doc-guidelines.md Section F). Do NOT edit token values here — update
+ * Section F, then re-sync tokens.css, then re-sync this file.
+ *
+ * Migration note (plan-000712 step 7): doc-D (formerly doc-BC) was a SPLIT collection —
+ * 21 pages (design-layer/, foundations/, governance-layer/, authoring-guide)
+ * already carried the SEJA palette + fonts; 12 pages (execution-layer/,
+ * onboarding/, index.html, reading-map.html) still carried an OLD blue/purple
+ * palette (white bg / dark-blue links) and system fonts.
+ * This stylesheet unifies BOTH onto the canonical SEJA tokens. Because every
+ * component rule references semantic var(--color-*) tokens (no hardcoded old
+ * blues outside the per-page :root blocks that this file supersedes), the
+ * flip to SEJA tokens re-colours the old-blue pages automatically.
+ *
+ * Component rules are the UNION of every page's inline CSS (first-occurrence
+ * body wins for cosmetic conflicts; additive at-rules merged to a superset).
+ * See plan-000712-progress.md Iteration Log Step 7 for the per-page deltas.
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&family=Shippori+Mincho:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
+
+/* ── Light mode (default) ── */
+:root {
+  /* Colors (SEJA design system — clay/earth palette on washi ground) */
+  --color-bg: #FAF8F4;            /* Washi ground */
+  --color-text: #2B2926;          /* Sumi -- 13.6:1 vs --color-bg */
+  --color-heading: #2B2926;       /* Sumi -- headings distinguished by serif font */
+  --color-link: #A86E4F;          /* Clay -- 4.6:1 vs --color-bg */
+  --color-link-visited: #8F5A3E;  /* Clay hover -- 5.9:1 vs --color-bg */
+  --color-code-bg: #F2EDE6;       /* Surface alt */
+  --color-code-text: #2B2926;     /* Sumi -- 11.8:1 vs --color-code-bg */
+  --color-border: #E0D8CD;        /* Warm border */
+  --color-aside-bg: #F2EDE6;      /* Surface alt */
+  --color-focus: #A86E4F;         /* Clay -- 4.6:1 vs --color-bg */
+  --color-status-bg: #F3E9E1;     /* Clay-50 */
+  --color-status-border: #C89B4A; /* Ochre/warning */
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;          /* 4px at base 16px */
+  --spacing-sm: 0.5rem;           /* 8px */
+  --spacing-md: 1rem;             /* 16px */
+  --spacing-lg: 2rem;             /* 32px */
+  --spacing-xl: 3rem;             /* 48px */
+
+  /* Typography (SEJA design system — three Japanese-minimalist families) */
+  --font-body: 'Zen Kaku Gothic New', Inter, system-ui, sans-serif;
+  --font-heading: 'Shippori Mincho', Georgia, serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --max-width: 52rem;             /* 832px content width */
+}
+
+/* ── Dark mode (prefers-color-scheme: dark) ── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #1C1A17;            /* Dark washi */
+    --color-text: #ECE7DF;          /* Light sumi -- 14.2:1 vs --color-bg */
+    --color-heading: #ECE7DF;       /* Light sumi */
+    --color-link: #C4957B;          /* Lightened clay -- 5.9:1 vs --color-bg */
+    --color-link-visited: #B5815F;  /* Mid clay -- 4.7:1 vs --color-bg */
+    --color-code-bg: #26231F;       /* Dark surface alt */
+    --color-code-text: #ECE7DF;     /* Light sumi -- 12.1:1 vs --color-code-bg */
+    --color-border: #3A352F;        /* Dark warm border */
+    --color-aside-bg: #26231F;      /* Dark surface alt */
+    --color-focus: #C4957B;         /* Lightened clay -- 5.9:1 vs --color-bg */
+    --color-status-bg: #2E2620;     /* Dark clay-50 */
+    --color-status-border: #C89B4A; /* Ochre/warning */
+  }
+}
+
+/* ── Motion Preferences (opt-in; superset of both page variants) ── */
+@media (prefers-reduced-motion: no-preference) {
+  a { transition: color 0.2s ease; }
+  .status-notice { transition: background-color 0.3s ease; }
+}
+
+/* ── Base Reset ── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; }
+
+body {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+}
+
+/* ── Typography ── */
+h1 { font-family: var(--font-heading); font-size: 2rem; color: var(--color-heading); margin-bottom: var(--spacing-md); }
+h2 { font-family: var(--font-heading); font-size: 1.5rem; color: var(--color-heading); margin-top: var(--spacing-lg); margin-bottom: var(--spacing-sm); }
+h3 { font-family: var(--font-heading); font-size: 1.25rem; color: var(--color-heading); margin-top: var(--spacing-md); margin-bottom: var(--spacing-sm); }
+h4 { font-size: 1.1rem; color: var(--color-heading); margin-top: var(--spacing-md); margin-bottom: var(--spacing-sm); }
+
+p { margin-bottom: var(--spacing-md); }
+
+a { color: var(--color-link); }
+a:visited { color: var(--color-link-visited); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+
+/* ── Touch Targets ── */
+nav a, footer a {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ── Code ── */
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background-color: var(--color-code-bg);
+  color: var(--color-code-text);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 3px;
+}
+
+pre {
+  background-color: var(--color-code-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* ── Breadcrumb ── */
+.breadcrumb {
+  font-size: 0.875rem;
+  padding: var(--spacing-sm) 0;
+  margin-bottom: var(--spacing-md);
+}
+.breadcrumb ol {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+.breadcrumb li + li::before {
+  content: ">";
+  margin-right: var(--spacing-xs);
+  color: var(--color-border);
+}
+
+/* ── Status Notice ── */
+.status-notice {
+  background-color: var(--color-status-bg);
+  border: 1px solid var(--color-status-border);
+  border-radius: 4px;
+  padding: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+  font-style: italic;
+}
+
+/* ── Generic Tables ── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--spacing-md) 0;
+  font-size: 0.95rem;
+}
+th, td {
+  text-align: left;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border);
+}
+th {
+  background-color: var(--color-aside-bg);
+  font-weight: 600;
+}
+
+/* ── Definition Lists ── */
+dl { margin: var(--spacing-md) 0; }
+dt {
+  font-weight: 600;
+  margin-top: var(--spacing-sm);
+  color: var(--color-heading);
+}
+dd {
+  margin-left: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
+}
+
+/* ── Callouts / Asides ── */
+aside {
+  background-color: var(--color-aside-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+}
+aside.callout-tip {
+  border-left: 4px solid #2e7d32; /* semantic green -- "tip" accent (intentional, not part of the old blue palette) */
+}
+aside.callout-warning {
+  border-left: 4px solid var(--color-status-border);
+}
+
+/* ── Lists ── */
+ul, ol {
+  margin: var(--spacing-sm) 0 var(--spacing-md) var(--spacing-lg);
+}
+li {
+  margin-bottom: var(--spacing-xs);
+}
+li ul, li ol {
+  margin-top: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+}
+
+/* ── Footer ── */
+footer {
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+  font-size: 0.875rem;
+}
+footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+/* ── Skip-Navigation Link (WCAG 2.4.1) ── */
+.skip-nav {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 100;
+}
+.skip-nav:focus {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: auto;
+  height: auto;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg);
+  color: var(--color-link);
+  font-size: 1rem;
+  z-index: 100;
+}
+
+/* ── Section Outline (chapter pages) ── */
+.section-outline {
+  margin: var(--spacing-md) 0;
+}
+.section-outline li {
+  margin: var(--spacing-sm) 0;
+  margin-left: var(--spacing-lg);
+}
+
+/* ── Chapter / Volume Navigation ── */
+.chapter-nav,
+.volume-nav {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+}
+
+/* ── Chapter List (volume index pages) ── */
+.chapter-list {
+  list-style: none;
+  margin: var(--spacing-md) 0;
+}
+.chapter-list li {
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--spacing-sm) 0;
+}
+.chapter-list li:last-child {
+  border-bottom: none;
+}
+.chapter-list a {
+  font-weight: 600;
+}
+.chapter-list .chapter-summary {
+  display: block;
+  font-size: 0.9rem;
+  margin-top: var(--spacing-xs);
+}
+
+/* ── Phase Badge ── */
+.phase-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  vertical-align: middle;
+  margin-left: var(--spacing-sm);
+}
+
+/* ── Volume Cards (collection index) ── */
+.volume-cards {
+  list-style: none;
+  display: grid;
+  gap: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+}
+.volume-card {
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+.volume-card h3 {
+  margin-top: 0;
+}
+.volume-card .volume-meta {
+  font-size: 0.875rem;
+  color: var(--color-text);
+  opacity: 0.8;
+  margin-bottom: var(--spacing-sm);
+}
+.volume-card p {
+  margin-bottom: var(--spacing-sm);
+}
+.volume-card a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+/* ── Phasing / Cross-Reference Tables (collection index) ── */
+.phasing-table,
+.xref-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--spacing-md) 0;
+}
+.phasing-table th,
+.phasing-table td,
+.xref-table th,
+.xref-table td {
+  text-align: left;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+}
+.phasing-table th,
+.xref-table th {
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+/* ── Table Container (Horizontal Scroll) ── */
+.table-container {
+  overflow-x: auto;
+  margin: var(--spacing-md) 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Decision Tree (reading map) ── */
+.decision-tree {
+  background-color: var(--color-code-bg);
+  color: var(--color-code-text);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  line-height: 1.4;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: var(--spacing-md) 0;
+  white-space: pre;
+}
+
+/* ── Lookup Table (reading map) ── */
+.lookup-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--spacing-md) 0;
+  font-size: 0.9rem;
+}
+.lookup-table th,
+.lookup-table td {
+  text-align: left;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+.lookup-table th {
+  font-weight: 600;
+  color: var(--color-heading);
+  white-space: nowrap;
+}
+.lookup-table thead th {
+  border-bottom: 2px solid var(--color-border);
+}
+.lookup-table tbody tr:hover {
+  background-color: var(--color-aside-bg);
+}
+
+/* ── Audience Cards (reading map) ── */
+.audience-cards {
+  list-style: none;
+  display: grid;
+  gap: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+}
+.audience-card {
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+.audience-card h3 {
+  margin-top: 0;
+}
+.audience-card p {
+  margin-bottom: var(--spacing-sm);
+}
+.audience-card ol {
+  margin-left: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
+}
+.audience-card ol li {
+  margin-bottom: var(--spacing-xs);
+}
+
+/* ── Smooth Scroll (pure CSS; scroll-spy / in-page TOC jumps) ──
+ * Gated on prefers-reduced-motion, consistent with the Motion Preferences
+ * block above -- reduced-motion users get instant jumps, not animated scroll. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ── Extended Headings (h5/h6) ──
+ * The base stylesheet styles h1–h4 only. The consolidated print page demotes
+ * headings down to h5/h6, so these need sensible sizes/weights. Uses the heading
+ * font token and spacing tokens to stay consistent with h1–h4. */
+h5 {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-heading);
+  margin-top: var(--spacing-md);
+  margin-bottom: var(--spacing-xs);
+}
+h6 {
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-heading);
+  margin-top: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+}
+
+/* ── Consolidated Doc Layout (sidebar TOC + main) ──
+ * Two-column grid: sticky sidebar (.volume-toc) on the LEFT, <main> on the RIGHT.
+ * The generator emits <main> BEFORE .volume-toc in source order (so keyboard
+ * users reach content without tabbing through the whole TOC first). Grid column
+ * placement reverses the visual order: main -> right column, TOC -> left column.
+ * The widened container is scoped to body.has-doc-layout ONLY — the collection
+ * root index, reading-map, and authoring-guide keep the global 52rem centering. */
+body.has-doc-layout {
+  max-width: 72rem;
+}
+.doc-layout {
+  display: grid;
+  grid-template-columns: minmax(14rem, 16rem) minmax(0, 1fr);
+  gap: var(--spacing-lg);
+  align-items: start;
+}
+.doc-layout > main {
+  grid-column: 2;
+  min-width: 0; /* allow content (pre/tables) to shrink rather than overflow the grid track */
+}
+.doc-layout > .volume-toc {
+  grid-column: 1;
+}
+
+/* ── Volume TOC (sticky sidebar) ── */
+.volume-toc {
+  position: sticky;
+  top: var(--spacing-lg);
+  align-self: start;
+  max-height: calc(100dvh - 2 * var(--spacing-lg));
+  overflow-y: auto;
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+.volume-toc h2,
+.volume-toc .volume-toc-title {
+  font-size: 1rem;
+  margin-top: 0;
+  margin-bottom: var(--spacing-sm);
+}
+.volume-toc ul {
+  list-style: none;
+  margin: 0;
+}
+.volume-toc > ul,
+.volume-toc nav > ul {
+  margin-left: 0;
+}
+.volume-toc li {
+  margin-bottom: var(--spacing-xs);
+}
+/* Nested section list under the current chapter's <li>: clear indentation. */
+.volume-toc li ul {
+  margin-top: var(--spacing-xs);
+  margin-left: var(--spacing-md);
+  padding-left: var(--spacing-sm);
+  border-inline-start: 1px solid var(--color-border);
+}
+.volume-toc a {
+  display: block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-inline-start: 2px solid transparent; /* reserve space so active marker does not shift text */
+  text-decoration: none;
+}
+/* Active states — conveyed by MORE than color (WCAG 1.4.1):
+ * font-weight 600 AND a leading marker / border-inline-start cue.
+ * aria-current="page" = current page in the TOC.
+ * a.is-active / [aria-current="true"] = scroll-spy active section. */
+.volume-toc [aria-current="page"],
+.volume-toc a.is-active,
+.volume-toc [aria-current="true"] {
+  font-weight: 600;
+  border-inline-start: 2px solid var(--color-link);
+  background-color: var(--color-aside-bg);
+}
+.volume-toc [aria-current="page"]::before,
+.volume-toc a.is-active::before,
+.volume-toc [aria-current="true"]::before {
+  content: "▸ ";
+  color: var(--color-link);
+}
+
+/* ── Volume TOC Toggle (mobile / narrow viewports) ──
+ * Default is EXPANDED/visible so the no-JS fallback shows the full sidebar.
+ * A JS toggle switches .is-collapsed on .volume-toc at narrow widths. */
+.volume-toc-toggle {
+  display: none; /* shown only in the narrow-viewport media query below */
+  min-height: 44px;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--color-link);
+  background-color: var(--color-aside-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* ── Narrow-viewport collapse (desktop-first max-width override) ──
+ * Consistent with the collection's existing stylesheet, which uses only
+ * max-width queries (no min-width). At <=60rem the layout collapses to a single
+ * column, the TOC renders ABOVE the content and is no longer sticky. */
+@media (max-width: 60rem) {
+  body.has-doc-layout {
+    max-width: var(--max-width);
+  }
+  .doc-layout {
+    grid-template-columns: 1fr;
+  }
+  .doc-layout > main {
+    grid-column: 1;
+    order: 2;
+  }
+  .doc-layout > .volume-toc {
+    grid-column: 1;
+    order: 1;
+  }
+  .volume-toc {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+  }
+  .volume-toc-toggle {
+    display: inline-flex;
+  }
+  .volume-toc.is-collapsed {
+    display: none;
+  }
+}
+
+/* ── Print Stylesheet (superset: hides all nav variants used across the collection) ── */
+@media print {
+  .skip-nav,
+  nav[aria-label="breadcrumb"],
+  nav[aria-label="collection"],
+  nav[aria-label="chapter navigation"],
+  nav[aria-label="volume navigation"],
+  .volume-toc,
+  .volume-toc-toggle,
+  footer {
+    display: none;
+  }
+
+  body,
+  body.has-doc-layout {
+    max-width: 100%;
+    padding: 0;
+    color: #000;
+    background: #fff;
+  }
+
+  /* Consolidated print page: collapse the two-column layout to full-width single column. */
+  .doc-layout {
+    display: block;
+  }
+
+  h1 {
+    page-break-before: always;
+  }
+  h1:first-of-type {
+    page-break-before: avoid;
+  }
+  h2 {
+    page-break-before: auto;
+  }
+
+  h2, h3 {
+    page-break-after: avoid;
+  }
+
+  a[href^="../"]::after,
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+
+  .decision-tree {
+    font-size: 0.75em;
+    border: 1px solid #999;
+  }
+
+  .lookup-table {
+    font-size: 0.8rem;
+  }
+}

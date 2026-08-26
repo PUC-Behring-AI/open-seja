@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-volume" content="5">
+  <meta name="doc-chapter" content="7">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+
+  <title>How the Agent Reads the Harness -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 5: Foundations and Philosophy</a></li>
+      <li>How the Agent Reads the Harness</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>How the Agent Reads the Harness</h1>
+
+      <p>
+        The preceding six chapters treat the harness as a message: software
+        as designed communication, the sign systems that carry it, the
+        metacommunication template that structures it, the reflective and
+        abductive practices it disciplines, and the twin claims that it is at
+        once governable and epistemic. This closing chapter turns that lens
+        around. If the harness is a message, then there is a reader on the
+        other end of it -- and that reader is not the human designer but the
+        <em>agent</em>: Claude, the model reading skill files, reference
+        files, rules, and markers as its instructions for how to behave.
+      </p>
+
+      <p>
+        This is meta-documentation of an unusual kind: documentation about how
+        the reader of the documentation actually reads. It is unique to a
+        harness because in ordinary software the runtime executes bytes
+        deterministically; here the "runtime" is a language model that
+        <em>interprets</em> prose, and interpretation is fallible, budgeted,
+        and order-sensitive. Understanding how the agent reads the harness is
+        therefore not idle introspection. It explains why the harness is
+        shaped the way it is -- why frontmatter fields sit where they sit, why
+        some references load eagerly and others lazily, why the harness spends
+        a <code>designer_description</code> on files whose primary reader is a
+        machine. And it comes with a caution the rest of the volume has
+        earned: everything here is a reading of a reader whose interior we
+        cannot see.
+      </p>
+
+      <!-- Section 1: The Skill File as a Sign to be Read -->
+      <section data-diataxis="explanation" id="skill-file-as-sign">
+        <h2>The Skill File as a Sign to Be Read</h2>
+
+        <p>
+          A SEJA skill is a single Markdown file, <code>SKILL.md</code>,
+          living in <code>.claude/skills/&lt;name&gt;/</code>. Structurally it
+          is two parts: a block of YAML <strong>frontmatter</strong> between
+          <code>---</code> fences, followed by a Markdown <strong>body</strong>.
+          The frontmatter conforms to the <em>agentskills.io</em> portable
+          skill specification -- <code>name</code>, <code>description</code>,
+          optional <code>compatibility</code>, and an extensible
+          <code>metadata</code> block where SEJA-specific fields live. The
+          body is prose: the instructions the agent follows once the skill is
+          invoked.
+        </p>
+
+        <p>
+          The division is not cosmetic. The frontmatter is <em>data about the
+          skill</em> -- read and parsed by tooling and by the pre-skill
+          pipeline before the body ever runs. The body is <em>instruction to
+          the agent</em> -- read as the operative procedure. When the user
+          types <code>/plan add-token-rotation</code>, the harness does not
+          simply hand the body to the model and step back. It first routes the
+          invocation through <code>pre-skill</code>, which reads the calling
+          skill's <code>SKILL.md</code>, parses its frontmatter, and uses those
+          fields to decide <em>what else</em> to load into the context window
+          before the skill's own instructions take effect.
+        </p>
+
+        <p>
+          So the skill file is a sign in the semiotic sense developed earlier
+          in this volume: an expression (the file's text) paired with a content
+          (the behavior it is meant to produce in the agent). But the agent
+          does not read the whole harness at once. It reads what the pre-skill
+          pipeline places in front of it, in the order the pipeline places it,
+          within a budget the frontmatter declares. The rest of this chapter is
+          an account of that reading process and its consequences for anyone
+          who authors harness files.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The full mechanics of the pre-skill loading
+            stages -- help, brief-log, budget-eval, pending-check, ref-load,
+            constitution -- are documented in
+            <a href="../vol3/ch1-lifecycle-pipeline.html">Vol. 3, Ch. 1: The
+            Lifecycle Pipeline</a>. This chapter reads those same stages
+            through the question they raise for authoring: given that the agent
+            reads only what the pipeline loads, how should the harness be
+            written so the right things get read?
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 2: Context Budgets -->
+      <section data-diataxis="explanation" id="context-budgets">
+        <h2>Context-Window Budgets</h2>
+
+        <p>
+          The context window is finite. Every token spent loading a reference
+          file is a token unavailable for the skill's actual work and, more
+          subtly, one more token competing for the model's attention. SEJA
+          treats context as a budget to be spent deliberately, and it lets each
+          skill declare how much it wants to spend through a single frontmatter
+          field: <code>metadata.context_budget</code>. The pre-skill
+          <em>budget-eval</em> stage reads this field and loads accordingly.
+          The field takes one of three tiers; <code>standard</code> is the
+          default when the field is absent.
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>What budget-eval loads</th>
+              <th>Downstream effect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>light</code></td>
+              <td>Nothing beyond the brief-log entry -- no briefs, no reference files.</td>
+              <td>The ref-load and constitution stages are skipped entirely. The agent runs on the skill body and its own priors, nothing else.</td>
+            </tr>
+            <tr>
+              <td><code>standard</code> (default)</td>
+              <td>The <em>briefs index</em> -- a compact generated summary -- rather than the full briefs file.</td>
+              <td>Proceeds to orphan detection, then ref-load. Mandatory references plus skill-declared references are loaded.</td>
+            </tr>
+            <tr>
+              <td><code>heavy</code></td>
+              <td>The <em>full briefs file</em> with recency windowing (the first 50 entries, newest first, with older ones summarized as a count) and the plan index.</td>
+              <td>Proceeds to orphan detection and the compaction warning, then ref-load.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The tiers are chosen to match a skill's genuine need for history.
+          A skill that reasons over the arc of the project -- <code>/plan</code>,
+          <code>/implement</code>, <code>/critique</code> -- carries
+          <code>context_budget: heavy</code>, because prior briefs and the plan
+          index are the material it works from. A skill that produces a
+          bounded artifact from a fresh prompt -- <code>/design</code>,
+          <code>/document</code>, <code>/communicate</code> -- carries
+          <code>standard</code>, loading a compact briefs index rather than the
+          full log. The <code>light</code> tier is the austere case: brief-log
+          only, no references, no constitution. It exists for invocations where
+          loading governance context would cost more than it returns.
+        </p>
+
+        <aside class="callout-warning">
+          <p>
+            <strong>A budget is a governance decision, not just a performance
+            knob.</strong> The <code>light</code> tier skips the constitution
+            stage. A skill declaring <code>light</code> therefore runs
+            <em>without the project's immutable principles in context</em>.
+            That is acceptable only for invocations that cannot violate those
+            principles -- a help lookup, a trivial query. Raising a skill to
+            <code>heavy</code> to "be safe" is not free either: it crowds the
+            window with history the skill may never consult, diluting attention
+            on the instructions that matter. The tier is a claim about what the
+            skill needs to read well.
+          </p>
+        </aside>
+
+        <p>
+          Note that the pre-skill pipeline itself is an ordinary skill in this
+          respect. Its own <code>SKILL.md</code> declares
+          <code>context_budget: standard</code> and <code>references: []</code>
+          -- it loads the mandatory triad but no skill-specific references,
+          because its job is to load context for <em>other</em> skills, not to
+          reason from a reference set of its own.
+        </p>
+      </section>
+
+      <!-- Section 3: Eager vs Lazy Reference Loading -->
+      <section data-diataxis="explanation" id="eager-vs-lazy">
+        <h2>Eager and Lazy Reference Loading</h2>
+
+        <p>
+          The budget tier decides how much <em>history</em> to load. A second,
+          orthogonal decision governs how the skill's <em>reference files</em>
+          load: all at once, or on demand. This is the eager-versus-lazy
+          distinction, and it turns on whether the skill's frontmatter declares
+          an <code>eager_references</code> field alongside its
+          <code>references</code> list. The pre-skill <em>ref-load</em> stage
+          reads both fields and chooses a mode.
+        </p>
+
+        <dl>
+          <dt>Mode 1 -- Eager-only (no <code>eager_references</code> field)</dt>
+          <dd>
+            Every file listed in <code>metadata.references</code> is read and
+            injected into context immediately, before the skill body runs. This
+            is the legacy behavior: simple, predictable, and appropriate when a
+            skill's references are few and used on nearly every invocation. An
+            empty <code>references: []</code> is valid and means the skill
+            intentionally loads no skill-specific references at all.
+          </dd>
+
+          <dt>Mode 2 -- Demand-pull (<code>eager_references</code> present)</dt>
+          <dd>
+            The files listed in <code>eager_references</code> are loaded
+            immediately, alongside the mandatory triad. Any file in
+            <code>references</code> that is <em>not</em> also in
+            <code>eager_references</code> becomes <strong>lazy</strong>: it is
+            not read at load time. Instead, pre-skill emits an "Available
+            references" block -- a compact numbered list naming each lazy file
+            with a trigger hint derived from its name -- and the agent reads a
+            lazy file only when the work in front of it actually calls for that
+            reference. An empty <code>eager_references: []</code> is also valid:
+            it makes <em>every</em> skill-specific reference lazy, loading only
+            the mandatory triad upfront.
+          </dd>
+        </dl>
+
+        <p>
+          The mandatory triad is loaded in both modes regardless of budget (at
+          <code>standard</code> and <code>heavy</code>): the project's
+          <code>conventions.md</code>, <code>permissions.md</code>, and
+          <code>constraints.md</code>. Everything past that triad is what the
+          eager/lazy machinery governs.
+        </p>
+
+        <p>
+          A concrete example makes the mechanism legible. The
+          <code>/implement</code> skill declares
+          <code>context_budget: heavy</code> and a demand-pull reference set:
+        </p>
+
+        <pre><code><span class="token-keyword">metadata</span>:
+  <span class="token-keyword">context_budget</span>: <span class="token-string">heavy</span>
+  <span class="token-keyword">eager_references</span>:
+    - product-design/product-design-as-coded.md
+    - product-design/product-design-as-intended.md
+    - general/report-conventions.md
+    - general/coding-standards.md
+  <span class="token-keyword">references</span>:
+    - product-design/product-design-as-coded.md
+    - product-design/product-design-as-intended.md
+    - general/report-conventions.md
+    - general/coding-standards.md
+    - product-design/standards.md
+    - product-design/security-checklists.md
+    - general/review-perspectives.md</code></pre>
+
+        <p>
+          The four files in <code>eager_references</code> load upfront: they
+          are needed on essentially every implementation step, so paying for
+          them eagerly is justified. The three files in <code>references</code>
+          that are <em>not</em> repeated in <code>eager_references</code> --
+          <code>standards.md</code>, <code>security-checklists.md</code>, and
+          <code>review-perspectives.md</code> -- stay lazy. A step that touches
+          backend code pulls <code>standards.md</code>; a step touching
+          authentication pulls <code>security-checklists.md</code>; the quality
+          gate pulls <code>review-perspectives.md</code>. A step that touches
+          none of these pays for none of them. The design keeps a
+          history-heavy, reference-rich skill from loading its entire reference
+          set on every single step.
+        </p>
+
+        <p>
+          Demand-pull is, in the vocabulary of this volume, a bet about the
+          <em>model reader</em>. It assumes the agent can recognize, from a
+          trigger hint and the shape of the work, when a lazy reference is
+          relevant -- and will pull it. That bet is usually sound and
+          occasionally not, which the counter-reading below takes up.
+        </p>
+      </section>
+
+      <!-- Section 4: Attention and Ordering -->
+      <section data-diataxis="explanation" id="attention-and-ordering">
+        <h2>Attention, Ordering, and What the Agent Sees First</h2>
+
+        <p>
+          Loading a file into the context window is necessary but not
+          sufficient for the agent to <em>act</em> on it. A language model
+          distributes attention unevenly across its context, and that
+          distribution is shaped by position, salience, and repetition. Two
+          instructions that are both present in the window are not thereby
+          equal: the one that appears earlier, or is stated more explicitly, or
+          is repeated, tends to exert more pull on the model's output. This is
+          the practical reality behind SEJA's authoring conventions, and it is
+          worth stating plainly because it is easy to forget when writing
+          harness prose.
+        </p>
+
+        <h3>Why frontmatter order matters</h3>
+
+        <p>
+          Because frontmatter is parsed by tooling, one might assume field
+          order is irrelevant -- a YAML mapping is unordered by the standard.
+          But the frontmatter is also <em>read by the agent</em> as the first
+          thing it encounters in a skill file, and the same is true of the body
+          that follows. Ordering matters wherever a human or the model reads
+          top-to-bottom rather than by key lookup. The <code>name</code> and
+          <code>description</code> fields lead because they are the skill's
+          identity and its one-line self-description -- what the agent sees
+          first when deciding what this skill is for. The operative
+          instructions in the body are sequenced so that the most binding
+          constraints and the canonical procedure appear early, before the
+          variations and edge cases. An instruction buried below three screens
+          of exception-handling competes for less attention than one stated at
+          the top.
+        </p>
+
+        <h3>What the agent can miss</h3>
+
+        <p>
+          The corollary is that the agent can miss things that are present. A
+          constraint stated once, late, in a subordinate clause, inside a
+          reference file that loaded lazily and was pulled reluctantly, is a
+          constraint the model may not weight. SEJA's defenses against this are
+          deliberate redundancy where redundancy is cheap and enforcement where
+          it is not: the mandatory triad is loaded on every non-light
+          invocation so that permissions and constraints are never merely
+          "available"; the constitution is re-injected every standard/heavy
+          invocation rather than trusted to persist; and hard limits are
+          backed by validation scripts and pre-commit hooks rather than by
+          instruction-following alone. The lifecycle chapter calls this
+          defense-in-depth. Read from the agent's side, it is an admission that
+          reading is fallible and that important constraints cannot rest on the
+          hope that the model attended to them.
+        </p>
+
+        <h3>Why <code>designer_description</code> exists</h3>
+
+        <p>
+          A striking piece of evidence that the harness takes its own reading
+          seriously is the <code>designer_description</code> field. It appears
+          in the frontmatter of reference files, agents, and rules, and it is
+          governed by its own authoring rubric,
+          <code>general/designer-copy-voice.md</code>. Its purpose is
+          specifically <em>not</em> to instruct the agent at load time. It is a
+          human-facing paragraph, written in first person ("I", the file
+          speaking) addressed to "you" (the designer), that is surfaced in the
+          call-graph viewer's side panel -- a rendered explanation of what a
+          node is for, in the harness's own voice, so the whole viewer reads as
+          one system speaking rather than a patchwork of machine docstrings.
+        </p>
+
+        <p>
+          Why does a field whose reader is a human belong in a chapter about
+          how the agent reads? Because it marks the boundary the harness draws
+          between the two audiences. The <code>description</code> field is
+          terse, machine-oriented, and load-bearing at invocation time; the
+          <code>designer_description</code> is narrative, human-oriented, and
+          load-bearing only in the viewer. The harness maintains both
+          deliberately, and its marker governance (see below) forbids collapsing
+          the human-facing narrative into the machine-facing terse form during
+          conciseness passes. The existence of two descriptions, held apart by
+          rule, is the harness acknowledging that it is read by two very
+          different readers and refusing to let either reading degrade the
+          other.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The governance of
+            <code>designer_description</code> and the other markers the agent
+            reads and (narrowly) writes -- STATUS, ESTABLISHED, the File
+            Maintainer Classification that decides who may edit what -- is the
+            subject of
+            <a href="../vol2/ch4-marker-system.html">Vol. 2, Ch. 4:
+            The Marker System</a>. This chapter treats markers only as signs
+            the agent parses; that chapter treats them as a governed writing
+            surface.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 5: Critical Counter-Reading -->
+      <section data-diataxis="explanation" id="counter-reading">
+        <h2>Critical Counter-Reading: The Limits of Reading a Reader</h2>
+
+        <p>
+          Everything in this chapter is written in the confident register of
+          mechanism -- "the agent sees this first," "attention favors earlier
+          tokens," "demand-pull assumes the model will recognize relevance."
+          That register earns a warning. The harness reasons about the agent's
+          "attention" from the outside, and reasoning about a model's interior
+          from the outside is exactly the kind of inference this volume has
+          elsewhere urged caution about.
+        </p>
+
+        <h3>Attention is a metaphor, not an observation</h3>
+
+        <p>
+          We do not observe the model attending. We observe outputs and
+          retrofit an account of attention that would explain them. The
+          statement "an instruction stated early exerts more pull" is a
+          serviceable heuristic derived from aggregate behavior, not a measured
+          property of a specific invocation. Model architectures change; the
+          positional and salience effects that hold today may weaken or invert
+          with the next model. SEJA's ordering conventions are therefore
+          <em>defensive heuristics against a moving target</em>, not exploits of
+          a fixed mechanism. Authors should hold them as good practice with an
+          expiry date, not as laws.
+        </p>
+
+        <h3>The harness cannot verify that a reference was read</h3>
+
+        <p>
+          Loading a file into the context window guarantees the file is
+          present; it guarantees nothing about whether the model conditioned on
+          it. A lazy reference emitted in the "Available references" block may
+          go unpulled when it was needed, and no stage of the pipeline can
+          detect the omission -- the pipeline knows what it <em>offered</em>,
+          not what the agent <em>used</em>. This is why the harness leans on
+          out-of-band enforcement (validation scripts, hooks, the human in the
+          loop at decision points) for anything it cannot afford to have missed.
+          The honest position is that the eager/lazy machinery optimizes
+          <em>availability</em>, and availability is a necessary but not
+          sufficient condition for correct behavior.
+        </p>
+
+        <h3>Where SEJA may over- or under-engineer</h3>
+
+        <p>
+          The budget tiers and eager/lazy split are a real cost paid against a
+          benefit that is hard to measure. It is plausible that the harness
+          <em>over-engineers</em> here: three tiers and a two-list reference
+          scheme add cognitive load for authors and surface area for
+          misconfiguration, in service of context savings that a larger context
+          window or a more capable model might render moot. It is equally
+          plausible that it <em>under-engineers</em>: the scheme still treats
+          reference relevance as something the author declares in advance and
+          the model recognizes at runtime, when a more principled approach might
+          retrieve references by semantic match to the task at hand. SEJA's
+          current design is a defensible middle position, chosen for
+          legibility and auditability over sophistication -- but it is a
+          position, and this volume does not present it as the settled answer.
+        </p>
+
+        <h3>Open questions</h3>
+
+        <p>
+          Three questions remain genuinely open, and naming them is more honest
+          than papering over them:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Read-verification.</strong> Is there any reliable signal,
+            short of behavioral inference, that a loaded reference actually
+            shaped an output? Without one, the harness's reasoning about its own
+            reading stays a well-motivated guess.
+          </li>
+          <li>
+            <strong>Tier stability across models.</strong> The
+            <code>light</code>/<code>standard</code>/<code>heavy</code> tiers
+            were calibrated against particular model behaviors. How much of that
+            calibration survives a model change, and who re-calibrates it?
+          </li>
+          <li>
+            <strong>The authoring burden of ordering conventions.</strong> If
+            "put binding constraints early" is a heuristic against a moving
+            target, how much author effort should be spent optimizing order
+            versus investing in enforcement that does not depend on the model
+            attending at all?
+          </li>
+        </ul>
+
+        <p>
+          The chapter closes the volume by turning its theory on the harness's
+          own reader, and it ends by conceding that this reader is the one thing
+          in the whole account we cannot read directly. That concession is not a
+          failure of the theory; it is the theory being consistent with itself.
+          A harness grounded in the claim that meaning must cross a gap between
+          communicators has no license to pretend the gap between itself and its
+          agent has been closed.
+        </p>
+      </section>
+
+      <!-- References -->
+      <section data-diataxis="explanation" id="references">
+        <h2>References</h2>
+
+        <p>
+          This chapter is primarily SEJA-internal meta-documentation; its
+          claims about the harness are verified against the live
+          <code>.claude/</code> skill and reference files rather than external
+          scholarship. The theoretical framing it inherits -- software as
+          designed communication, the model reader, communicability -- is
+          documented in the preceding chapters of this volume and rests on the
+          following canonical sources.
+        </p>
+
+        <ul>
+          <li>
+            de Souza, C. S. (2005). <em>The Semiotic Engineering of
+            Human-Computer Interaction</em>. MIT Press.
+          </li>
+          <li>
+            Eco, U. (1979). <em>The Role of the Reader: Explorations in the
+            Semiotics of Texts</em>. Indiana University Press.
+          </li>
+        </ul>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- See also -->
+  <nav aria-label="see also" class="see-also">
+    <h2>See also</h2>
+    <ul>
+      <li><a href="../vol3/ch1-lifecycle-pipeline.html">Vol. 3, Ch. 1 -- The Lifecycle Pipeline</a>: the pipeline the harness text drives when read in order.</li>
+      <li><a href="../vol2/ch4-marker-system.html">Vol. 2, Ch. 4 -- The Marker System</a>: the designed signification system the agent reads and writes.</li>
+      <li><a href="ch6-governable-and-epistemic.html">Vol. 5, Ch. 6 -- The Governable AND Epistemic Thesis</a>: the argument this chapter's reading practice serves.</li>
+    </ul>
+  </nav>
+
+  <!-- Chapter navigation: Ch.7 is the last chapter, so "Next" is omitted -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="ch6-governable-and-epistemic.html">Previous: The Governable AND Epistemic Thesis</a>
+    <span></span>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

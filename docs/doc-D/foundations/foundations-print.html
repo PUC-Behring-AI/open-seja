@@ -1,0 +1,2803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vol. 5: Foundations and Philosophy -- Single Page -- SEJA Documentation</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 5: Foundations and Philosophy</a></li>
+      <li>Single Page</li>
+    </ol>
+  </nav>
+
+  <main id="main-content">
+    <article>
+      <h1>Vol. 5: Foundations and Philosophy</h1>
+
+    <nav aria-label="volume contents" class="volume-contents">
+      <ol>
+        <li>
+          <a href="#software-as-communication">Software as Designed Communication</a>
+          <ul>
+            <li><a href="#software-as-communication--the-communication-metaphor">The Communication Metaphor</a></li>
+            <li><a href="#software-as-communication--designers-deputy">Designer's Deputy</a></li>
+            <li><a href="#software-as-communication--critical-counter-reading">Critical Counter-Reading</a></li>
+            <li><a href="#software-as-communication--references">References</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#sign-systems">Sign Systems and Communicability</a>
+          <ul>
+            <li><a href="#sign-systems--static-signs">Static Signs</a></li>
+            <li><a href="#sign-systems--dynamic-signs">Dynamic Signs</a></li>
+            <li><a href="#sign-systems--metalinguistic-signs">Metalinguistic Signs</a></li>
+            <li><a href="#sign-systems--critical-counter-reading">Critical Counter-Reading</a></li>
+            <li><a href="#sign-systems--references">References</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#extended-metacommunication">The Extended Metacommunication Template</a>
+          <ul>
+            <li><a href="#extended-metacommunication--four-lifecycle-dimensions">Four Lifecycle Dimensions</a></li>
+            <li><a href="#extended-metacommunication--ethical-questions">Ethical Questions</a></li>
+            <li><a href="#extended-metacommunication--critical-counter-reading">Critical Counter-Reading</a></li>
+            <li><a href="#extended-metacommunication--references">References</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#reflective-practice">Reflective Practice</a>
+          <ul>
+            <li><a href="#reflective-practice--three-registers">Three Registers of Reflection</a></li>
+            <li><a href="#reflective-practice--seja-operationalization">SEJA Operationalization</a></li>
+            <li><a href="#reflective-practice--critical-counter-reading">Critical Counter-Reading</a></li>
+            <li><a href="#reflective-practice--references">References</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#abduction-plural-readings">Abduction and Plural Readings</a>
+          <ul>
+            <li><a href="#abduction-plural-readings--abductive-reasoning">Abductive Reasoning</a></li>
+            <li><a href="#abduction-plural-readings--council-debate">Council Debate</a></li>
+            <li><a href="#abduction-plural-readings--critical-counter-reading">Critical Counter-Reading</a></li>
+            <li><a href="#abduction-plural-readings--references">References</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#governable-epistemic">The Governable and Epistemic Thesis</a>
+          <ul>
+            <li><a href="#governable-epistemic--why-both-axes-are-required">Why Both Axes Are Required</a></li>
+            <li><a href="#governable-epistemic--how-the-harness-embodies-each">How the Harness Embodies Each</a></li>
+            <li><a href="#governable-epistemic--critical-counter-reading">Critical Counter-Reading</a></li>
+            <li><a href="#governable-epistemic--references">References</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#agent-reads-harness">How the Agent Reads the Harness</a>
+          <ul>
+            <li><a href="#agent-reads-harness--context-window-mechanics">Context-Window Mechanics</a></li>
+            <li><a href="#agent-reads-harness--eager-vs-lazy-loading">Eager vs. Lazy Loading</a></li>
+            <li><a href="#agent-reads-harness--implications-for-documentation-authoring">Implications for Documentation Authoring</a></li>
+            <li><a href="#agent-reads-harness--critical-counter-reading">Critical Counter-Reading</a></li>
+            <li><a href="#agent-reads-harness--references">References</a></li>
+          </ul>
+        </li>
+      </ol>
+    </nav>
+
+      <section id="software-as-communication" class="print-chapter" aria-label="Software as Designed Communication">
+<h2>Software as Designed Communication</h2>
+
+      <p>
+        Semiotic engineering begins with a claim that distinguishes it from
+        every other theory of human-computer interaction: software is not a
+        tool that a user operates, nor a medium through which information
+        flows, but a <em>one-shot communicative act</em> from designer to
+        user, delivered at interaction time by the software itself acting as
+        the designer's deputy (de Souza, 2005, Ch. 1). This chapter develops
+        that claim, traces its consequences for agent harness design, and
+        subjects it to the critical scrutiny it deserves.
+      </p>
+
+      <section id="software-as-communication--the-communication-metaphor" data-diataxis="explanation">
+        <h3>The Communication Metaphor</h3>
+
+        <p>
+          Most theories of HCI treat the interface as an instrument. The
+          user has a goal; the system provides affordances; successful
+          interaction means the goal is achieved efficiently. Usability
+          metrics — task completion time, error rate, learnability — flow
+          naturally from this framing. De Souza (2005) proposes a radical
+          alternative: every software artifact is a message. The designer
+          is the sender, the user is the receiver, and the interface is
+          the medium through which the designer says:
+        </p>
+
+        <blockquote>
+          <p>
+            "Here is my understanding of who you are, what I've learned you
+            want or need to do, in which preferred ways, and why. This is the
+            system that I have therefore designed for you, and this is the way
+            you can or should use it in order to fulfill a range of purposes
+            that fall within this vision."
+          </p>
+          <footer>— de Souza (2005, p. 84)</footer>
+        </blockquote>
+
+        <p>
+          This is the <em>metacommunication message</em> — a first-person,
+          designer-to-user statement that is not written down in any single
+          place within a conventional application but is instead distributed
+          across every design decision: every label, every layout choice,
+          every error message, every workflow constraint. The user
+          reconstructs this message — usually tacitly, often incompletely —
+          from the cumulative evidence of interacting with the system.
+        </p>
+
+        <p>
+          The communication metaphor is not a convenience or a pedagogical
+          shorthand. It is a theoretical commitment with structural
+          consequences. If software is a message, then design decisions are
+          communicative acts, and every design choice can be evaluated not
+          only by whether it works (the instrumental criterion) but by
+          whether it <em>communicates what the designer intends</em> (the
+          communicability criterion). A dropdown menu that is functionally
+          correct but semantically misleading — it works, but it says the
+          wrong thing — is a communicability failure even if no user ever
+          reports a bug.
+        </p>
+
+        <p>
+          De Souza draws on Peirce's semiotics to formalize this insight.
+          Signs — the elements of the interface — are not self-interpreting
+          tokens but triadic structures relating a representamen (the
+          perceptible form), an object (what the sign refers to), and an
+          interpretant (the effect the sign produces in the interpreter).
+          The designer selects representamens (icons, labels, interaction
+          patterns) to refer to objects (domain concepts, system states,
+          user intentions) and anticipates interpretants (the user's
+          understanding). When the anticipated interpretant matches the
+          user's actual interpretant, communication succeeds. When it does
+          not, the user experiences a <em>communicability breakdown</em> —
+          a moment of confusion that reveals a gap between the designer's
+          intended message and the message the user actually receives.
+        </p>
+
+        <p>
+          The communication framing also changes how we think about
+          interaction over time. In instrumental theories, a user who has
+          learned the interface has <em>mastered a tool</em>. In semiotic
+          engineering, a user who has learned the interface has
+          <em>understood a message</em> — they have reconstructed the
+          designer's metacommunication and can now anticipate the system's
+          behavior because they understand the communicative logic behind
+          it. This distinction matters: a tool can be used without
+          understanding; a message cannot be received without
+          interpretation.
+        </p>
+      </section>
+
+      <section id="software-as-communication--designers-deputy" data-diataxis="explanation">
+        <h3>Designer's Deputy</h3>
+
+        <p>
+          If software is a message, then someone must deliver it. De Souza
+          (2005, Ch. 3) introduces the concept of the <em>designer's
+          deputy</em>: the software system itself, acting as the designer's
+          representative at interaction time. The designer is absent — they
+          cannot sit beside every user and explain their reasoning. Instead,
+          the system must speak on their behalf, conveying the
+          metacommunication message through its structure, responses, and
+          constraints.
+        </p>
+
+        <p>
+          The deputy metaphor carries a specific implication: the system is
+          not autonomous. It does not have its own communicative intentions.
+          It is a <em>proxy</em> — it relays the designer's message, for
+          better or worse. When the deputy communicates well, users
+          understand the designer's vision and can work with the system
+          effectively. When the deputy communicates poorly — through
+          inconsistent terminology, contradictory affordances, or opaque
+          behavior — users receive a garbled version of the designer's
+          intent, and the communicative act fails regardless of whether
+          the system is technically functional.
+        </p>
+
+        <p>
+          The designer's deputy concept acquires new force in the context
+          of AI agent harnesses. In a conventional application, the deputy
+          is the interface: static layouts, dynamic responses, help text.
+          In SEJA, the deputy is the harness itself — the constellation of
+          skills, rules, references, and lifecycle hooks that shape the
+          AI agent's behavior. Claude, operating within SEJA's governance
+          structure, is the designer's deputy in a remarkably literal sense:
+          it reads the designer's metacommunication message from
+          <code>product-design-as-intended.md</code>, loads the designer's
+          immutable principles from <code>product-design/constitution.md</code>,
+          follows the designer's lifecycle constraints through pre-skill and
+          post-skill hooks, and consults the designer's review perspectives
+          when evaluating its own work. The agent does not substitute its
+          own judgment for the designer's intent; it delivers the designer's
+          message through the medium of AI-assisted development.
+        </p>
+
+        <p>
+          This is what the metacommunication message's I/you phrasing
+          encodes. When the designer writes "I have designed this harness
+          to be not only governable... but also epistemic," the first-person
+          voice is not a stylistic choice — it is a structural commitment
+          to the deputy relationship. The designer speaks; the harness
+          delivers; the user receives. The I/you frame makes the
+          communicative act explicit and the authorship traceable. For a
+          fuller treatment of how this message is structured and maintained
+          in practice, see
+          <a href="../design-layer/metacommunication.html#what-is-a-metacommunication-message">The Metacommunication Message</a>
+          in Vol. 2.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The deputy relationship in SEJA is
+            unusually transparent. In most software, the metacommunication
+            message is implicit — distributed across thousands of design
+            decisions, never stated in full. In SEJA, it is explicit:
+            §11 of <code>product-design-as-intended.md</code> contains
+            the designer's canonical metacommunication message in plain
+            prose. This makes the communicative act auditable in a way
+            that conventional software rarely achieves.
+          </p>
+        </aside>
+      </section>
+
+      <section id="software-as-communication--critical-counter-reading" data-diataxis="explanation">
+        <h3>Critical Counter-Reading</h3>
+
+        <p>
+          The communication metaphor is powerful, but it rests on
+          assumptions that deserve scrutiny. Two limitations are
+          particularly significant for the SEJA context.
+        </p>
+
+        <h4>The Single-Author Assumption</h4>
+
+        <p>
+          De Souza's formulation assumes an identifiable designer with
+          coherent intentions — a single "I" who speaks through the
+          interface. In practice, software is authored by teams, and
+          design intent is distributed across product managers, UX
+          researchers, engineers, and stakeholders whose visions may
+          conflict. The metacommunication message is not one voice but
+          a negotiated chorus, and the coherence of the message depends
+          on organizational processes that semiotic engineering does not
+          theorize.
+        </p>
+
+        <p>
+          SEJA inherits this assumption. The <code>product-design-as-intended.md</code>
+          file is written in the first person singular — "I have designed
+          this harness..." — even when the actual design process involves
+          multiple contributors. The promote workflow (where design
+          intentions move from <em>implemented</em> to <em>established</em>
+          status) partially addresses the temporal dimension: it
+          acknowledges that design intent evolves as understanding grows.
+          But it does not address the <em>social</em> dimension: whose
+          "I" is speaking when multiple designers have contributed to the
+          intent? The single-author assumption remains embedded in the
+          file format, the phrasing rule, and the governance model.
+        </p>
+
+        <h4>The One-Shot Framing and Iterative Reality</h4>
+
+        <p>
+          The "one-shot" characterization of the metacommunication act
+          emphasizes that the designer speaks once, through the deployed
+          artifact, and cannot clarify or elaborate in real time. This
+          framing correctly captures the asymmetry of designer-user
+          communication — the designer cannot be present at interaction
+          time to explain their reasoning. But it understates the
+          iterative nature of real design practice, where the
+          metacommunication message is continuously revised through user
+          feedback, telemetry, and evolving understanding.
+        </p>
+
+        <p>
+          Eco's (1979) concept of the "open work" (<em>opera aperta</em>)
+          provides a useful counter-frame. Eco argues that every text —
+          and by extension, every designed artifact — is completed by the
+          reader's interpretation, not by the author's intention alone.
+          Users bring their own cultural context, prior experience, and
+          interpretive strategies to the interface. They do not passively
+          receive the designer's message; they actively construct meaning,
+          and their construction may diverge from the designer's intent in
+          ways the designer cannot predict or control. The metacommunication
+          message, however carefully crafted, is always <em>opened</em>
+          by the user's reading of it.
+        </p>
+
+        <p>
+          SEJA does not resolve this tension. Its governance model
+          privileges designer intent — the constitution is authoritative,
+          the metacommunication message is the highest-level artifact,
+          and the lifecycle enforces alignment with stated design vision.
+          This is a legitimate architectural choice, but it is a choice,
+          not a theoretical necessity. An alternative harness grounded in
+          Eco's semiotics might prioritize <em>negotiated meaning</em>
+          over <em>delivered intent</em>, treating user interpretations
+          as co-constitutive of the system's communicative act rather than
+          as deviations from it. The fact that SEJA does not take this
+          path reflects a design decision — one that should be understood
+          as such, not mistaken for a theoretical inevitability.
+        </p>
+      </section>
+
+      <section id="software-as-communication--references" data-diataxis="reference">
+        <h3>References</h3>
+        <ul>
+          <li>
+            de Souza, C.S. (2005). <cite>The Semiotic Engineering of
+            Human-Computer Interaction</cite>. Cambridge, MA: MIT Press.
+          </li>
+          <li>
+            Eco, U. (1979). <cite>The Role of the Reader: Explorations
+            in the Semiotics of Texts</cite>. Bloomington: Indiana
+            University Press.
+          </li>
+        </ul>
+      </section>
+      </section>
+
+      <section id="sign-systems" class="print-chapter" aria-label="Sign Systems and Communicability">
+<h2>Sign Systems and Communicability</h2>
+
+      <p>
+        Semiotic engineering analyzes software interfaces through a tripartite
+        classification of signs: static, dynamic, and metalinguistic. This
+        taxonomy, introduced by de Souza (2005, Ch. 4), provides the
+        analytical vocabulary for evaluating <em>communicability</em> -- the
+        degree to which a system successfully conveys the designer's
+        metacommunication message. Where the
+        <a href="#software-as-communication">preceding chapter</a>
+        established that software is a designer-to-user communication, this
+        chapter asks: through what kinds of signs does that communication
+        actually occur?
+      </p>
+
+      <p>
+        In a traditional graphical interface, these sign classes map to
+        familiar categories: labels and icons (static), system responses and
+        state transitions (dynamic), help text and tooltips (metalinguistic).
+        In an agent harness like SEJA, the "interface" is not a visual
+        display but a collection of files, conventions, and lifecycle
+        behaviors that the AI agent reads and enacts. The sign classes still
+        apply, but the examples shift: the harness's directory structure is a
+        static sign; the lifecycle pipeline is a dynamic sign; the
+        <code>/help</code> skill is a metalinguistic sign. This chapter
+        develops each class with SEJA-specific examples and then subjects
+        the taxonomy itself to critical examination.
+      </p>
+
+      <section id="sign-systems--static-signs" data-diataxis="explanation">
+        <h3>Static Signs</h3>
+
+        <p>
+          Static signs are those whose meaning is encoded at design time and
+          remains available to the user independently of any interaction
+          sequence. In a graphical interface, static signs include labels,
+          icons, menu structures, and layout -- everything the user can
+          perceive before taking any action. De Souza characterizes them as
+          the "state-zero" of the interface: the designer's message as it
+          exists before the user arrives (de Souza, 2005, pp. 100-103).
+        </p>
+
+        <p>
+          Static signs encode what Eco (1976) calls the <em>signification
+          system</em>: the code of conventionalized expression-content pairs
+          that make meaning possible. They are the rules of the game, not
+          the game in play. A menu label means what it means regardless of
+          whether anyone clicks it; a file path communicates its purpose
+          regardless of whether any agent reads it.
+        </p>
+
+        <h4>SEJA's Static Signs</h4>
+
+        <p>
+          In the SEJA harness, static signs are the structural and naming
+          conventions that communicate the designer's organizational intent
+          before any skill is invoked:
+        </p>
+
+        <dl>
+          <dt>SKILL.md frontmatter fields</dt>
+          <dd>
+            The YAML frontmatter of every skill file -- <code>name</code>,
+            <code>description</code>, <code>metadata.context_budget</code>,
+            <code>metadata.references</code> -- communicates the skill's
+            identity, purpose, and resource requirements. These fields exist
+            and signify regardless of whether the skill is ever invoked.
+            The <code>designer_description</code> field on agent prompts
+            serves the same function: a first-person statement of what the
+            artifact is for, present before any interaction occurs.
+          </dd>
+
+          <dt><code>data-diataxis</code> attributes</dt>
+          <dd>
+            The Diataxis classification tags on documentation sections
+            (tutorial, how-to, reference, explanation) are static signs that
+            communicate the <em>kind</em> of content a section contains.
+            They tell both human readers and automated tooling what reading
+            mode is appropriate for each section, independent of the
+            section's actual content.
+          </dd>
+
+          <dt>File naming conventions</dt>
+          <dd>
+            The naming pattern <code>plan-NNNNNN-slug.md</code> communicates
+            that a file is a plan, what its sequence number is, and what it
+            concerns -- all before the file is opened. Similarly,
+            <code>research-NNNNNN-slug.md</code>,
+            <code>reflection-NNNNNN-slug.md</code>, and the
+            <code>SKILL.md</code> / <code>SKILL-quickguide.md</code> sibling
+            pattern encode artifact type and relationship through naming alone.
+          </dd>
+
+          <dt>Directory structure</dt>
+          <dd>
+            The harness directory tree -- <code>.claude/skills/</code>,
+            <code>.claude/agents/</code>, <code>.claude/references/</code>,
+            <code>.claude/rules/</code>, <code>product-design/</code> -- is
+            itself a static sign system. It communicates the harness's
+            conceptual architecture: skills are capabilities, agents are
+            delegates, references are shared knowledge, rules are contextual
+            constraints, and product-design holds the designer's intent.
+            A practitioner who has never used SEJA can infer its structure
+            from its directory layout alone.
+          </dd>
+        </dl>
+
+        <p>
+          The defining characteristic of static signs is that they are
+          available for interpretation before any interaction begins. They
+          establish the <em>signification potential</em> of the system --
+          the space of meanings that dynamic and metalinguistic signs will
+          subsequently activate (de Souza, 2005, p. 102).
+        </p>
+      </section>
+
+      <section id="sign-systems--dynamic-signs" data-diataxis="explanation">
+        <h3>Dynamic Signs</h3>
+
+        <p>
+          Dynamic signs are those whose meaning emerges through interaction
+          sequences -- state transitions, system responses, feedback loops,
+          and behavioral patterns that unfold over time. Where static signs
+          encode the designer's message at rest, dynamic signs encode the
+          message in motion: the designer communicates not only through what
+          the system <em>is</em> but through what it <em>does</em> in
+          response to user action (de Souza, 2005, pp. 103-108).
+        </p>
+
+        <p>
+          Dynamic signs are inherently temporal. A single system response
+          may be interpretable in isolation, but its full meaning depends on
+          the sequence in which it occurs. The same error message means
+          something different when it appears on a first attempt versus a
+          fifth. The same skill output carries different communicative weight
+          when it follows a plan versus when it follows a research inquiry.
+        </p>
+
+        <h4>SEJA's Dynamic Signs</h4>
+
+        <dl>
+          <dt>The lifecycle path</dt>
+          <dd>
+            The canonical progression -- research, plan, implement, critique,
+            document, communicate, reflect -- is a dynamic sign system. Each
+            transition communicates a design commitment: that research
+            precedes planning (understand before you build), that critique
+            precedes documentation (validate before you communicate), that
+            reflection follows implementation (learn from what you did). The
+            lifecycle is not merely a workflow; it is the designer's message
+            about the <em>order</em> in which design activities should occur
+            and why that order matters.
+          </dd>
+
+          <dt>The pre-skill / post-skill pipeline</dt>
+          <dd>
+            Every user-facing skill invocation triggers a pre-skill pipeline
+            (brief-log, budget-eval, pending-check, ref-load, constitution)
+            and concludes with a post-skill pipeline (DONE marking, commit,
+            decision flush). This bracketing behavior is a dynamic sign: it
+            communicates that every skill execution is a governed act --
+            logged, contextualized, and finalized. The agent does not simply
+            run a skill; it <em>performs a governed invocation</em>, and the
+            pre/post brackets make that governance visible.
+          </dd>
+
+          <dt>The conversation trace</dt>
+          <dd>
+            As a session progresses, the conversation trace accumulates
+            entries -- each exchange logged with an emitter, a message
+            summary, and a preceding-event link. This accumulation is itself
+            a dynamic sign: it communicates that SEJA values provenance and
+            traceability. The growing trace is the system saying, over and
+            over, "I am keeping a record of what we discussed and why."
+          </dd>
+
+          <dt>STATUS marker transitions</dt>
+          <dd>
+            The lifecycle markers on design-intent items --
+            <code>proposed</code>, <code>implemented</code>,
+            <code>established</code>, <code>superseded</code> -- form a
+            dynamic sign system whose meaning depends on the transition
+            sequence. A marker moving from <code>proposed</code> to
+            <code>implemented</code> communicates something different from a
+            marker moving from <code>established</code> to
+            <code>superseded</code>. The transition itself carries meaning
+            that the individual states do not.
+          </dd>
+        </dl>
+
+        <p>
+          Dynamic signs are where the designer's metacommunication message
+          becomes <em>performative</em>: not merely a statement of intent
+          but an enactment of it. When the pre-skill pipeline loads the
+          constitution before every skill invocation, it does not merely
+          <em>say</em> that the constitution is authoritative -- it
+          <em>demonstrates</em> that authority through behavior
+          (de Souza, 2005, p. 106).
+        </p>
+      </section>
+
+      <section id="sign-systems--metalinguistic-signs" data-diataxis="explanation">
+        <h3>Metalinguistic Signs</h3>
+
+        <p>
+          Metalinguistic signs are signs that explain other signs. They
+          constitute the system's self-referential capacity -- its ability
+          to communicate about its own signification system. In traditional
+          interfaces, metalinguistic signs include help text, tooltips,
+          error messages that explain what went wrong, and tutorials that
+          teach the user how to interpret the interface. De Souza identifies
+          metalinguistic signs as the layer where the designer most
+          explicitly "speaks" to the user about the system's own design
+          (de Souza, 2005, pp. 108-113).
+        </p>
+
+        <p>
+          Metalinguistic signs occupy a privileged position in the sign
+          taxonomy. They are the signs through which the designer can most
+          directly address communicability failures: when a user
+          misinterprets a static or dynamic sign, a metalinguistic sign is
+          the corrective mechanism. They are also the most explicitly
+          authored signs -- where static signs may emerge from structural
+          decisions and dynamic signs from interaction logic, metalinguistic
+          signs are almost always deliberately written to explain.
+        </p>
+
+        <h4>SEJA's Metalinguistic Signs</h4>
+
+        <dl>
+          <dt><code>/help</code> output and SKILL-quickguide.md files</dt>
+          <dd>
+            The <code>/help</code> skill and its per-skill
+            <code>SKILL-quickguide.md</code> siblings are SEJA's most direct
+            metalinguistic facilities. They explain what each skill does,
+            when to use it, and what to expect -- signs about signs. The
+            quickguide's designer-friendly descriptions and usage scenarios
+            translate the technical <code>SKILL.md</code> instructions
+            (themselves a mix of static and metalinguistic signs) into
+            narrative form accessible to the practitioner.
+          </dd>
+
+          <dt>The <code>/explain</code> skill</dt>
+          <dd>
+            SEJA's primary metalinguistic facility. The <code>/explain</code>
+            skill generates explanatory reports about the system's own
+            behavior, code, data model, architecture, and spec drift. It is
+            a sign that produces signs about signs: when a practitioner
+            invokes <code>/explain architecture</code>, the output is a
+            metalinguistic artifact that interprets the system's own
+            structural signs. See
+            <a href="../execution-layer/skills-in-depth.html#explain">
+            Skills In Depth</a> for the operational details of this skill.
+          </dd>
+
+          <dt>The Reading Map and this documentation collection</dt>
+          <dd>
+            The Reading Map that accompanies this documentation collection
+            is a metalinguistic sign par excellence: it explains how to
+            read the collection itself -- which volumes to start with,
+            which reading paths serve which audiences. This very chapter,
+            which analyzes the sign system of SEJA using the vocabulary of
+            semiotic engineering, is metalinguistic: it explains the
+            signification system that the harness embodies.
+          </dd>
+
+          <dt>The constitution</dt>
+          <dd>
+            The constitution (<code>product-design/constitution.md</code>)
+            occupies an interesting position. It is a metalinguistic sign
+            insofar as it explains the rules that govern all other signs in
+            the harness -- it tells the agent how to interpret and prioritize
+            everything else. But it is also a static sign: its content is
+            fixed at design time and does not change during interaction.
+            This dual classification is not a defect in the taxonomy but a
+            genuine feature of the artifact, as the Critical Counter-Reading
+            below discusses.
+          </dd>
+        </dl>
+
+        <p>
+          The density of metalinguistic signs in a system is itself a
+          communicative choice. SEJA is unusually rich in metalinguistic
+          apparatus -- quickguides, help output, explanation skills, this
+          documentation collection -- because the harness designer
+          recognizes that an AI agent reading harness files faces acute
+          interpretive challenges. The agent cannot ask a colleague what
+          a convention means; it must find the answer in the metalinguistic
+          signs the harness provides (de Souza, 2005, p. 111).
+        </p>
+      </section>
+
+      <section id="sign-systems--critical-counter-reading" data-diataxis="explanation">
+        <h3>Critical Counter-Reading</h3>
+
+        <p>
+          The tripartite taxonomy of static, dynamic, and metalinguistic
+          signs provides a productive analytical framework, but it is
+          neither exhaustive nor unproblematic. Several difficulties emerge
+          when applying it to SEJA's artifact system.
+        </p>
+
+        <h4>Classification Boundary Problems</h4>
+
+        <p>
+          Some SEJA artifacts resist clean classification into a single
+          sign class. The constitution, as noted above, functions
+          simultaneously as a static sign (its content is fixed) and a
+          metalinguistic sign (it explains the rules governing other signs).
+          The <code>SKILL.md</code> files exhibit a similar duality: their
+          frontmatter is a static sign (present before invocation), but
+          their instructional body functions metalinguistically (explaining
+          how the skill should behave). The <code>CLAUDE.md</code> file at
+          the project root is perhaps the most ambiguous: it is a static
+          sign (always loaded), a metalinguistic sign (it explains project
+          structure), and arguably participates in dynamic signification
+          (the agent's behavior changes based on which sections it
+          attends to).
+        </p>
+
+        <p>
+          De Souza acknowledges that signs may participate in multiple
+          classes depending on the analytical perspective adopted
+          (2005, p. 113). But this acknowledgment weakens the taxonomy's
+          discriminative power. If the same artifact can be classified
+          differently depending on the analyst's framing, the classification
+          becomes an interpretive choice rather than an empirical finding.
+        </p>
+
+        <h4>The Granularity Problem</h4>
+
+        <p>
+          The boundary between static and dynamic signs depends on the
+          granularity of analysis. At the level of a single session, the
+          constitution is a static sign -- it does not change. At the level
+          of a project's lifetime, the constitution is a dynamic sign --
+          it can be amended through decision records, and each amendment
+          changes the signification system. Similarly, the lifecycle path
+          is a dynamic sign within a session (the sequence unfolds through
+          interaction) but a static sign at the level of harness design
+          (the path is fixed by the designer). The taxonomy does not
+          specify which granularity is correct; the analyst must choose,
+          and different choices yield different analyses.
+        </p>
+
+        <h4>Signification versus Communication</h4>
+
+        <p>
+          Eco's (1976) distinction between <em>signification</em> and
+          <em>communication</em> introduces a deeper challenge. A
+          signification system is a set of rules that <em>make</em>
+          meaning possible -- the code that correlates expressions with
+          contents. Communication is the <em>use</em> of that system to
+          produce actual sign tokens in concrete situations. Eco argues
+          that the study of signification systems is logically prior to
+          and independent of the study of communication acts
+          (Eco, 1976, pp. 8-14).
+        </p>
+
+        <p>
+          Applied to SEJA, this distinction reveals a gap in the
+          three-class taxonomy. SEJA's reference files -- the constitution,
+          conventions, shared definitions, design-intent documents -- are
+          part of the signification system: they define the rules by which
+          the harness produces meaning. But they only <em>communicate</em>
+          when they are loaded into the agent's context window. A reference
+          file sitting on disk is a signification resource; the same file
+          loaded by pre-skill's ref-load stage is a communication act. The
+          tripartite taxonomy does not cleanly capture this distinction
+          between potential meaning (signification) and actual meaning
+          (communication). It classifies signs by their temporal behavior
+          (static vs. dynamic) and their referential target (object-level
+          vs. metalinguistic), but not by whether they are currently
+          participating in a communicative act.
+        </p>
+
+        <p>
+          This is not merely an academic point. The difference between
+          a reference file that is loaded (communicating) and one that is
+          available but not loaded (signifying but not communicating) has
+          practical consequences in SEJA. Lazy-loaded references exist in
+          the signification system -- the agent knows they are available --
+          but they do not communicate until the pre-skill pipeline brings
+          them into the context window. The three-class taxonomy treats
+          both as static signs, obscuring a distinction that matters for
+          understanding how the agent actually interprets the harness.
+        </p>
+
+        <h4>The Limits of Taxonomic Analysis</h4>
+
+        <p>
+          Finally, there is a methodological concern. Taxonomic analysis
+          encourages the analyst to assign every artifact a class, which
+          can create an illusion of exhaustiveness. Not every meaningful
+          aspect of an interface falls neatly into one of three categories.
+          The <em>absence</em> of a sign -- a gap in the reference files,
+          a missing quickguide, an unlogged decision -- can be as
+          communicatively significant as the presence of one. SEJA's gap
+          detection facilities (constitution principle Q2: "surface what is
+          not yet known") implicitly acknowledge that what the system
+          does <em>not</em> say is part of its communicative reality.
+          The tripartite taxonomy has no category for significant absences.
+        </p>
+      </section>
+
+      <section id="sign-systems--references" data-diataxis="reference">
+        <h3>References</h3>
+
+        <ul>
+          <li>
+            de Souza, C.S. (2005).
+            <cite>The Semiotic Engineering of Human-Computer Interaction</cite>.
+            Cambridge, MA: MIT Press.
+          </li>
+          <li>
+            Eco, U. (1976).
+            <cite>A Theory of Semiotics</cite>.
+            Bloomington: Indiana University Press.
+          </li>
+        </ul>
+      </section>
+      </section>
+
+      <section id="extended-metacommunication" class="print-chapter" aria-label="The Extended Metacommunication Template">
+<h2>The Extended Metacommunication Template</h2>
+
+      <p>
+        De Souza's original metacommunication template (2005) captures the
+        designer's message to the user: "Here is my understanding of who you
+        are, what I've learned you want or need to do, and this is the system
+        I have therefore designed for you." That formulation addresses a
+        single design moment -- the designer's understanding at the time of
+        release. Barbosa et al. (2021) extend this template by asking what
+        happens when design decisions carry ethical weight across an entire
+        lifecycle -- from initial conception through deployment and ongoing
+        evaluation. Their extended metacommunication template (EMT) adds
+        lifecycle dimensions and ethical questions that the original template
+        did not address, precisely because the original was conceived for
+        interactive systems where the designer's ethical responsibilities,
+        while real, were less visibly consequential than in AI-mediated systems.
+      </p>
+
+      <p>
+        This chapter examines the EMT as SEJA operationalizes it: not as
+        an abstract ethical framework, but as a set of concrete questions
+        embedded in the harness's design-intent documents and lifecycle
+        skills. It also honestly acknowledges where the operationalization
+        falls short of the aspiration.
+      </p>
+
+      <section id="extended-metacommunication--four-lifecycle-dimensions" data-diataxis="explanation">
+        <h3>Four Lifecycle Dimensions</h3>
+
+        <p>
+          Barbosa et al. (2021) argue that AI systems require metacommunication
+          to be extended across four lifecycle dimensions, each introducing
+          design decisions the original template does not address. The
+          dimensions are not stages in a waterfall sequence but perspectives
+          that recur throughout development. At each dimension, the designer
+          must articulate who is affected, what values are at stake, and what
+          trade-offs are being made -- questions that the original
+          metacommunication template left implicit.
+        </p>
+
+        <dl>
+          <dt>Conception</dt>
+          <dd>
+            What problem is the system intended to solve, and for whom? Whose
+            perspective defines the problem framing? What assumptions about
+            users, contexts, and values are embedded in the initial vision?
+            In SEJA, the <code>/design</code> skill's interview mode
+            operationalizes the conception dimension: it walks the designer
+            through questions about platform purpose, target users, domain
+            entities, and permission models. The metacommunication message
+            in <code>product-design-as-intended.md</code> §11 is the
+            canonical output of this dimension -- the designer's first-person
+            statement of who the user is and what the system is designed to
+            help them do.
+          </dd>
+
+          <dt>Design</dt>
+          <dd>
+            How are the system's structures and affordances shaped to serve
+            (or constrain) the users identified in conception? What is made
+            visible and what is hidden? What trade-offs between competing
+            values (e.g., simplicity vs. configurability, safety vs.
+            autonomy) are encoded in the design? SEJA operationalizes this
+            through the design-intent layer: <code>product-design-as-intended.md</code>
+            captures the target state, the constitution encodes immutable
+            principles, and the EMT guiding questions in §12 prompt the
+            designer to articulate their understanding of users, affected
+            others, intended contexts, and ethical implications at each stage.
+          </dd>
+
+          <dt>Implementation</dt>
+          <dd>
+            Does the built system faithfully realize the design intent, or
+            have implementation decisions introduced unintended divergences?
+            Where has pragmatic compromise overridden principled design?
+            SEJA's <code>/implement</code> skill addresses this through
+            plan-step traceability: each implementation step declares which
+            design-intent requirements it satisfies (via <code>Traces:</code>
+            metadata fields and <code>REQ-TYPE-NNN</code> identifiers), and
+            the as-coded state in <code>product-design-as-coded.md</code>
+            records what was actually built. The gap between as-intended and
+            as-coded is the implementation dimension's central concern.
+          </dd>
+
+          <dt>Evaluation</dt>
+          <dd>
+            Is the system serving its users as intended? What has been learned
+            since deployment that challenges the initial assumptions? What
+            remains unknown? SEJA operationalizes evaluation through two
+            complementary skills: <code>/critique</code> (systematic review
+            against design intent, using multiple review perspectives) and
+            <code>/reflect</code> (structured reflection on both the product
+            and the designer's practice). The <code>/explain drift</code>
+            workflow specifically targets the gap between design intent and
+            implementation state, making visible where the system has
+            diverged from its original metacommunication message.
+          </dd>
+        </dl>
+
+        <p>
+          The four dimensions map onto SEJA's canonical lifecycle path --
+          <code>/research</code> and <code>/design</code> (conception),
+          <code>/plan</code> and <code>/design</code> (design),
+          <code>/implement</code> (implementation), <code>/critique</code>
+          and <code>/reflect</code> (evaluation) -- though the mapping is
+          approximate rather than exact. Real design work revisits earlier
+          dimensions as understanding grows, and SEJA's lifecycle supports
+          this through its iterative structure. For a detailed account of
+          the lifecycle pipeline itself, see
+          <a href="../execution-layer/lifecycle-pipeline.html#the-canonical-path">
+          Lifecycle Pipeline</a>.
+        </p>
+      </section>
+
+      <section id="extended-metacommunication--ethical-questions" data-diataxis="explanation">
+        <h3>Ethical Questions</h3>
+
+        <p>
+          The EMT's distinctive contribution is not the lifecycle dimensions
+          themselves -- sequential development models have long recognized
+          conception, design, implementation, and evaluation as distinct
+          concerns. What Barbosa et al. (2021) add is the insistence that
+          each dimension carries ethical questions that must be explicitly
+          addressed, not left to emerge as side effects of technical decisions.
+          The ethical questions are structured around visibility, privilege,
+          and consequence: whose perspective is privileged in the problem
+          framing? What is made visible to users, and what is concealed?
+          What are the consequences of the design choices for those who did
+          not participate in making them?
+        </p>
+
+        <p>
+          SEJA's constitution provides one structured response to these
+          questions. Its three quality principles encode commitments that
+          bear directly on the EMT's ethical concerns:
+        </p>
+
+        <dl>
+          <dt>Q1: Design intent is authoritative</dt>
+          <dd>
+            The metacommunication message and constitution are the
+            highest-authority artifacts; no plan or implementation step may
+            contradict them without an explicit decision record (D-NNN)
+            approved by the designer. This principle addresses the EMT's
+            concern about accountability: design decisions are traceable to
+            a named designer who takes responsibility for them, not
+            diffused across an anonymous development process.
+          </dd>
+
+          <dt>Q2: Surface the unknown</dt>
+          <dd>
+            SEJA must surface what is not yet known, not only what has been
+            decided. Gaps, unverified assumptions, design debt, and epistemic
+            uncertainties must be made visible rather than silently omitted.
+            This principle directly operationalizes the EMT's visibility
+            concern: the system is designed to make its own limitations
+            visible rather than presenting a false appearance of
+            completeness. Gap-flagged topology cards, heuristic-labeled
+            coverage reports, and pre-skill pending notices are concrete
+            mechanisms through which unknowns are surfaced.
+          </dd>
+
+          <dt>Q3: Governable AND epistemic</dt>
+          <dd>
+            SEJA must be both governable and epistemic: governance without
+            epistemic support produces brittleness; epistemic support
+            without governance produces drift. This principle addresses
+            the EMT's concern about structural accountability -- it is not
+            enough for the system to produce knowledge about its own
+            design choices (epistemic); that knowledge must be embedded in
+            enforceable governance structures that prevent it from being
+            ignored.
+          </dd>
+        </dl>
+
+        <p>
+          Beyond the constitution, SEJA records ethical trade-offs through
+          its decision record mechanism. The <code>## Decisions</code>
+          section of <code>product-design-as-intended.md</code> captures
+          D-NNN entries in a DDR (Design Decision Record) shape: Context,
+          Decision, Consequences, and Rejected Alternatives. Each entry
+          records not only what was decided but why, what was considered and
+          rejected, and what consequences were anticipated. This is the
+          EMT's ethical-questions concern made concrete: when a design
+          choice privileges one user group over another, or when a
+          trade-off is made between competing values, the decision record
+          ensures that the reasoning is explicit and auditable rather than
+          buried in implementation details.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The EMT guiding questions in §12 of
+            <code>product-design-as-intended.md</code> are structured as
+            four numbered sections (Analysis, Design, Prototype,
+            Evaluation), each containing sub-questions about knowledge,
+            affected parties, contexts of use, and ethical implications.
+            The designer answers these in first person, maintaining the
+            I/you phrasing that makes the metacommunication act explicit.
+          </p>
+        </aside>
+      </section>
+
+      <section id="extended-metacommunication--critical-counter-reading" data-diataxis="explanation">
+        <h3>Critical Counter-Reading</h3>
+
+        <p>
+          The extended metacommunication template is aspirational in a
+          specific sense: it prescribes ethical reflection at each lifecycle
+          dimension but provides no mechanism to verify that the reflection
+          actually occurred or was genuinely engaged. A designer can fill in
+          the EMT guiding questions in §12 of
+          <code>product-design-as-intended.md</code> with perfunctory answers
+          that satisfy the template's structure without engaging with its
+          substance. The template creates affordances for ethical reasoning
+          but cannot ensure that reasoning happens.
+        </p>
+
+        <p>
+          SEJA operationalizes some of the EMT's questions more successfully
+          than others. Q2's gap-flagging mechanism (surface the unknown) has
+          concrete implementations: topology gap detection, heuristic-labeled
+          coverage reports, and pre-skill pending notices all make specific
+          unknowns visible. The decision record mechanism (D-NNN entries)
+          creates an auditable trail of trade-off reasoning. But the deeper
+          ethical questions -- whose perspective is privileged in the problem
+          framing? what are the consequences for affected parties who did not
+          participate? -- depend on the designer's willingness to engage
+          honestly with them. SEJA can prompt the questions; it cannot
+          evaluate the quality of the answers.
+        </p>
+
+        <p>
+          The FAccT framing (Barbosa et al. 2021) assumes a responsible
+          designer -- one who takes the ethical questions seriously and
+          engages with them in good faith. SEJA inherits this assumption
+          without independent verification. The constitution's Q1 principle
+          (design intent is authoritative) is both a strength and a
+          vulnerability in this regard: it ensures that the designer's stated
+          intent governs the system, but it also means that an irresponsible
+          designer's intent is equally authoritative. SEJA provides no
+          mechanism to challenge the ethical adequacy of the designer's
+          metacommunication message itself -- it can enforce that
+          implementation matches intent, but not that the intent is just.
+        </p>
+
+        <p>
+          A further limitation concerns the sequential presentation of the
+          four lifecycle dimensions. Barbosa et al. (2021) acknowledge that
+          the dimensions are not strictly sequential, but the EMT's structure
+          -- and SEJA's operationalization of it through a lifecycle pipeline
+          -- encourages a stage-gate reading: conception is settled before
+          design begins, design before implementation, implementation before
+          evaluation. Real design work is iterative and overlapping. A
+          finding in the evaluation dimension may invalidate assumptions
+          made in the conception dimension, requiring not merely a return to
+          an earlier stage but a reconceptualization of the problem itself.
+          SEJA's promote workflow (moving items from implemented to
+          established status) supports some forms of iteration, but the
+          lifecycle pipeline's sequential structure makes it easier to move
+          forward than to circle back. The EMT's ethical ambition would be
+          better served by a structure that makes iteration as natural as
+          progression -- a challenge that remains unresolved in SEJA's
+          current design.
+        </p>
+      </section>
+
+      <section id="extended-metacommunication--references" data-diataxis="reference">
+        <h3>References</h3>
+        <ul>
+          <li>
+            Barbosa, S.D.J., Silva, B.S., Silveira, M.S., Gasparini, I.,
+            Darin, T., and Barbosa, G.D.J. (2021). "Interação
+            Humano-Computador e Experiência do Usuário." Autopublicação.
+          </li>
+          <li>
+            de Souza, C.S. (2005). <cite>The Semiotic Engineering of
+            Human-Computer Interaction</cite>. Cambridge, MA: MIT Press.
+          </li>
+        </ul>
+      </section>
+      </section>
+
+      <section id="reflective-practice" class="print-chapter" aria-label="Reflective Practice">
+<h2>Reflective Practice</h2>
+
+      <p>
+        Donald Schon's <cite>The Reflective Practitioner</cite> (1983) introduced
+        a framework for understanding how professionals think in action that
+        has shaped fields from education to architecture. His central insight
+        is that competent practitioners do not simply apply theory to practice;
+        they engage in a continuous conversation with the situation, adjusting
+        their understanding as they work. This chapter traces three registers
+        of reflection that Schon identifies, shows how SEJA operationalizes
+        each through its skill pipeline and reference architecture, and
+        engages with serious counter-readings from Eraut and Boud that
+        question whether structured systems can genuinely foster reflective
+        practice or merely produce its institutional appearance.
+      </p>
+
+      <section id="reflective-practice--three-registers" data-diataxis="explanation">
+        <h3>Three Registers of Reflection</h3>
+
+        <p>
+          Schon (1983, pp. 49-69) distinguishes two primary registers of
+          professional reflection. A third -- knowing-in-action -- operates
+          beneath conscious awareness but is foundational to both. Together,
+          these three registers describe the full spectrum of professional
+          intelligence.
+        </p>
+
+        <h4>Knowing-in-Action</h4>
+
+        <p>
+          Before a practitioner reflects on anything, they already know a
+          great deal. Schon (1983, pp. 49-56) calls this <em>knowing-in-action</em>:
+          the tacit expertise that shapes practice without conscious thought.
+          An experienced software designer does not deliberate about whether
+          to validate user input -- the practice is embedded in their
+          repertoire. Knowing-in-action is not ignorance; it is knowledge
+          that has become so deeply internalized that it no longer requires
+          deliberation.
+        </p>
+
+        <p>
+          In SEJA, knowing-in-action takes an unusual form. The harness
+          encodes accumulated design knowledge in its reference files and
+          rules: <code>product-design/constitution.md</code> captures
+          immutable principles, <code>.claude/references/general/constraints.md</code>
+          codifies behavioral guardrails, and path-scoped rules in
+          <code>.claude/rules/</code> encode domain-specific conventions.
+          When the agent loads these files via pre-skill's ref-load stage,
+          it acquires what functions as a form of knowing-in-action -- a
+          repertoire of design knowledge that shapes its behavior without
+          per-instance deliberation. The agent does not decide afresh in
+          each session whether to follow the constitution; it operates
+          within the constitution as a structural given.
+        </p>
+
+        <h4>Reflection-in-Action</h4>
+
+        <p>
+          When the smooth flow of knowing-in-action encounters surprise --
+          an unexpected result, a design that does not behave as anticipated,
+          a requirement that resists the standard approach -- the practitioner
+          shifts to <em>reflection-in-action</em> (Schon 1983, pp. 56-69).
+          This is thinking while doing: the practitioner reframes the
+          problem, tries a new approach, and observes the consequences,
+          all within the same episode of practice. The key feature of
+          reflection-in-action is its immediacy -- it happens in the midst
+          of the work, not after it.
+        </p>
+
+        <p>
+          SEJA operationalizes a structural analogue of reflection-in-action
+          during <code>/research</code> and <code>/plan</code>. When the
+          agent encounters a design question during research, it may invoke
+          a council debate -- five expert archetypes offering competing
+          interpretations of the same evidence (see
+          <a href="#abduction-plural-readings">Abduction and Plural Readings</a>).
+          During planning, the agent compares its proposed implementation
+          against design intent, surfacing mismatches between what it is
+          about to build and what the designer has specified. These are not
+          retrospective reviews; they occur within the active flow of the
+          skill, shaping the work as it unfolds.
+        </p>
+
+        <h4>Reflection-on-Action</h4>
+
+        <p>
+          <em>Reflection-on-action</em> (Schon 1983, pp. 61-62) occurs after
+          the episode of practice is complete. The practitioner steps back
+          and examines what happened: what worked, what surprised them, what
+          they would do differently. Unlike reflection-in-action, which
+          operates under the pressure of the ongoing situation,
+          reflection-on-action has the luxury of temporal distance.
+        </p>
+
+        <p>
+          SEJA's explicit <code>/reflect</code> skill is the primary
+          operationalization of reflection-on-action. After completing a
+          block of implementation or research work, the designer invokes
+          <code>/reflect</code> to review specific artifacts -- plans,
+          research logs, or a time window of activity. The skill structures
+          this review through two lenses: a <em>product lens</em> (what
+          was built as a thing in the world) and a <em>practice lens</em>
+          (how the designer worked as a practitioner). The resulting
+          reflection report captures the designer's own words verbatim,
+          preserving the authenticity of their retrospective judgment.
+          For practical coverage of the skill's modes and parameters, see
+          <a href="../execution-layer/skills-in-depth.html#reflect">Skills In Depth</a>.
+        </p>
+
+        <figure>
+          <pre><code>Knowing-in-action     Reference files, rules, constitution
+        │                 (encoded repertoire -- shapes practice
+        │                  without per-instance deliberation)
+        ▼
+Reflection-in-action  /research council debate, /plan gap detection
+        │                 (reframing within the active flow)
+        │
+        ▼
+Reflection-on-action  /reflect skill, briefs log, /critique
+                          (stepping back after the episode)</code></pre>
+          <figcaption>
+            Schon's three registers mapped to SEJA lifecycle components.
+            The vertical flow represents increasing temporal distance from
+            the action.
+          </figcaption>
+        </figure>
+      </section>
+
+      <section id="reflective-practice--seja-operationalization" data-diataxis="explanation">
+        <h3>SEJA Operationalization</h3>
+
+        <p>
+          The <code>/reflect</code> skill is SEJA's most explicit
+          operationalization of Schon's framework. It offers three modes,
+          each providing a different depth of reflective engagement.
+        </p>
+
+        <h4>Conversational Mode (Default)</h4>
+
+        <p>
+          The default mode is a structured debrief. The skill asks the
+          designer to select artifacts to reflect on -- recent plans, research
+          reports, a specific artifact by ID, a time window, or a free-form
+          topic. It then summarizes the chosen artifacts, asks the designer
+          to choose a lens (product, practice, or both), and poses a single
+          open-ended question:
+        </p>
+
+        <dl>
+          <dt>Product lens</dt>
+          <dd>"Looking at these, what stands out about what you built -- what worked, what surprised you, or what is missing?"</dd>
+
+          <dt>Practice lens</dt>
+          <dd>"Looking at these, what stands out about how you worked -- what would you do differently as a practitioner?"</dd>
+        </dl>
+
+        <p>
+          The designer's response is recorded verbatim. This is a
+          deliberate design choice: the reflection report is a record of
+          the designer's own thinking, not the agent's analysis of it.
+        </p>
+
+        <h4>Deep Mode (<code>--deep</code>)</h4>
+
+        <p>
+          Deep mode extends conversational reflection with data
+          visualization. It reads telemetry and briefs within a time
+          window, optionally filtered by a scope keyword, and produces
+          three outputs: an event matrix visualization (showing skill
+          invocations over time), a transition graph (showing how skills
+          flow into each other), and a practice evolution narrative
+          written in past-tense chronicle form. Deep mode is exclusively
+          practice-oriented -- it surfaces how the designer worked over
+          time, not what they built. The narrative ends with a hand-off
+          paragraph pointing to <code>/research</code>, maintaining the
+          non-prescriptive boundary: the narrative describes patterns
+          but does not recommend actions.
+        </p>
+
+        <h4>Telemetry Mode (<code>--telemetry</code>)</h4>
+
+        <p>
+          Telemetry mode applies five statistical analysis primitives to
+          the telemetry log:
+        </p>
+
+        <dl>
+          <dt>Sequence mining</dt>
+          <dd>Identifies recurring skill invocation sequences that may indicate habitual patterns or established workflows.</dd>
+
+          <dt>Duration anomalies</dt>
+          <dd>Flags skill invocations whose duration deviates significantly from the baseline, potentially indicating either difficulty or unusually smooth execution.</dd>
+
+          <dt>Revision rate</dt>
+          <dd>Tracks how often the designer revises skill outputs. (In V1, this primitive degrades gracefully -- the measurement field exists but is not yet populated.)</dd>
+
+          <dt>Stuck loops</dt>
+          <dd>Detects repeated invocations of the same skill with similar briefs, which may indicate the designer is cycling without making progress.</dd>
+
+          <dt>Decision reversals</dt>
+          <dd>Identifies cases where a later decision contradicts an earlier one, surfacing potential design uncertainty or evolving understanding.</dd>
+        </dl>
+
+        <p>
+          Each primitive produces observation sentences that the orchestrator
+          embeds verbatim into the report. The observations describe what
+          the data shows; they do not prescribe what the designer should do
+          about it.
+        </p>
+
+        <h4>The Non-Prescriptive Rule</h4>
+
+        <p>
+          Across all three modes, <code>/reflect</code> operates under a
+          strictly non-prescriptive rule: the skill writes observations and
+          the designer's own words, never prescriptions. The generated
+          report must not contain phrases like "you should," "consider
+          changing," or "we recommend." This rule is enforced by automated
+          tests that scan generated reports for forbidden substrings.
+        </p>
+
+        <p>
+          The non-prescriptive rule is not merely a stylistic preference.
+          It reflects a theoretical commitment to Schon's account of
+          reflective practice: genuine reflection is the practitioner's own
+          act of reframing, not an external authority's instructions about
+          what to think. If the <code>/reflect</code> skill told the designer
+          what conclusions to draw, it would replace reflective practice
+          with doctrinal delivery -- precisely the pattern Schon critiques
+          in what he calls the "technical rationality" model of professional
+          knowledge (Schon 1983, pp. 21-49). By recording the designer's
+          words verbatim and presenting data without recommendations, the
+          skill creates structural conditions for reflection while leaving
+          the reflective act itself to the practitioner.
+        </p>
+      </section>
+
+      <section id="reflective-practice--critical-counter-reading" data-diataxis="explanation">
+        <h3>Critical Counter-Reading</h3>
+
+        <p>
+          Schon's framework has been enormously influential, but it has also
+          attracted serious critiques that bear directly on SEJA's claim to
+          operationalize reflective practice.
+        </p>
+
+        <h4>Eraut: Is Reflection-in-Action Coherent?</h4>
+
+        <p>
+          Michael Eraut (1994, pp. 141-154) mounts the most sustained
+          critique of Schon's central concept. Eraut argues that
+          reflection-in-action, as Schon describes it, conflates several
+          distinct cognitive processes -- rapid pattern recognition, intuitive
+          adjustment, conscious problem-solving, and metacognitive monitoring
+          -- under a single label that obscures more than it reveals. In
+          time-pressured situations (which characterize much professional
+          practice), practitioners act from well-rehearsed routines, not
+          from anything that deserves the name "reflection." What Schon
+          calls reflection-in-action may be better described as
+          "thinking-in-action" -- a broader category that does not carry
+          the specific epistemological weight Schon assigns to it.
+        </p>
+
+        <p>
+          This critique applies directly to SEJA's claim that
+          <code>/research</code> council debates and <code>/plan</code>
+          gap detection constitute reflection-in-action. These are
+          procedural steps executed by the agent as part of its workflow --
+          closer to Eraut's "thinking-in-action" than to Schon's richer
+          notion of a practitioner reframing a situation in dialogue with
+          its materials. The agent does not experience surprise or
+          puzzlement when it encounters a design gap; it executes a
+          prescribed detection algorithm. Whether this constitutes
+          reflection or merely systematic checking is a question SEJA's
+          framework does not resolve.
+        </p>
+
+        <h4>Boud: The Missing Affective Dimension</h4>
+
+        <p>
+          Boud, Keogh, and Walker (1985, pp. 18-40) argue that Schon's
+          account underplays the role of emotion in reflection. Their model
+          of reflection has three stages: returning to the experience,
+          attending to feelings, and re-evaluating the experience. The
+          middle stage is not optional -- reflection requires the
+          practitioner to acknowledge and work through the emotions
+          (frustration, satisfaction, anxiety, pride) that accompanied the
+          original experience. Without this affective engagement, what
+          passes for reflection is merely cognitive review -- an
+          intellectualized retrospective that misses the lived dimension
+          of professional practice.
+        </p>
+
+        <p>
+          This critique identifies a fundamental limitation in SEJA's
+          operationalization. An AI agent cannot have emotions. The
+          <code>/reflect</code> skill can ask the designer "what stands out
+          about how you worked?" but it cannot model or process the
+          affective dimension of that experience. If Boud et al. are right
+          that emotional engagement is constitutive of genuine reflection
+          (not merely a frequent accompaniment), then SEJA's
+          <code>/reflect</code> skill is structurally incapable of
+          facilitating the full reflective process. It can prompt the
+          cognitive and evaluative stages, but the affective stage depends
+          entirely on what the designer brings to the encounter.
+        </p>
+
+        <h4>Knowing-in-Action or Encoded Rules?</h4>
+
+        <p>
+          Schon's knowing-in-action describes tacit knowledge -- expertise
+          that the practitioner cannot fully articulate, that reveals itself
+          in the fluency of their practice rather than in propositional
+          statements. SEJA's reference files and rules are the opposite:
+          they are fully articulated, propositional, and explicit. The
+          constitution is not tacit knowledge; it is a written document. The
+          constraints file is not embedded expertise; it is a list of rules.
+        </p>
+
+        <p>
+          This is a category difference that Schon would likely note. Tacit
+          knowledge, in Polanyi's formulation that Schon draws on, is
+          knowledge that the knower "can know more than they can tell"
+          (Polanyi 1966, p. 4). SEJA's encoded knowledge is precisely what
+          has been told -- it exists only in its articulated form. What the
+          harness provides is not knowing-in-action in Schon's sense but
+          something closer to an institutional memory or a codified
+          standard operating procedure. The functional role is similar
+          (both shape practice without per-instance deliberation), but the
+          epistemic status is different. Encoded rules can be inspected,
+          questioned, and revised; tacit knowledge resists these operations
+          by definition.
+        </p>
+
+        <h4>The Paradox of Mandated Reflection</h4>
+
+        <p>
+          There is a deeper tension in any system that structures reflection
+          as a lifecycle step. Schon's reflective practitioner reflects
+          because the situation demands it -- because something unexpected
+          happens, because a routine approach fails, because the materials
+          talk back. SEJA's lifecycle positions <code>/reflect</code> as
+          an available step in a canonical sequence. The question is whether
+          reflection that is structurally available (and, in some workflow
+          configurations, expected) can be genuine, or whether it becomes
+          a pro forma exercise -- a box to check rather than a genuine
+          encounter with one's own practice.
+        </p>
+
+        <p>
+          SEJA's non-prescriptive rule is a partial response to this
+          tension. By refusing to tell the designer what to conclude, the
+          skill preserves space for genuine engagement. But the structural
+          affordance alone cannot guarantee that the designer will use it
+          reflectively rather than perfunctorily. This is an inherent
+          limitation of any designed system that seeks to support an
+          essentially human cognitive and affective practice.
+        </p>
+      </section>
+
+      <section id="reflective-practice--references" data-diataxis="reference">
+        <h3>References</h3>
+        <ul>
+          <li>Schon, D.A. (1983). <cite>The Reflective Practitioner: How Professionals Think in Action</cite>. New York: Basic Books.</li>
+          <li>Eraut, M. (1994). <cite>Developing Professional Knowledge and Competence</cite>. London: Falmer Press.</li>
+          <li>Boud, D., Keogh, R. and Walker, D. (1985). <cite>Reflection: Turning Experience into Learning</cite>. London: Kogan Page.</li>
+          <li>Polanyi, M. (1966). <cite>The Tacit Dimension</cite>. Garden City, NY: Doubleday.</li>
+        </ul>
+      </section>
+      </section>
+
+      <section id="abduction-plural-readings" class="print-chapter" aria-label="Abduction and Plural Readings">
+<h2>Abduction and Plural Readings</h2>
+
+      <p>
+        Every time an agent reads a design-intent file and decides what to do,
+        it performs an act of interpretation under uncertainty. The designer's
+        metacommunication message is finite; the situations the agent encounters
+        are not. Bridging this gap requires a mode of reasoning that neither
+        deduction nor induction can supply: <em>abduction</em> -- inference to
+        the best explanation. This chapter traces abductive reasoning from its
+        origins in Peirce's logic of inquiry to its operationalization in
+        SEJA's council-debate mechanism, where multiple expert perspectives
+        generate competing readings of the same evidence. The argument is that
+        provisionality -- holding multiple interpretations open before
+        committing -- is not a deficiency to be overcome but a structural
+        feature that produces better design decisions.
+      </p>
+
+      <section id="abduction-plural-readings--abductive-reasoning" data-diataxis="explanation">
+        <h3>Abductive Reasoning</h3>
+
+        <p>
+          Charles Sanders Peirce distinguished three modes of inference, each
+          with a different relationship to certainty. <em>Deduction</em> moves
+          from premises to a conclusion that necessarily follows: if the
+          premises are true, the conclusion cannot be false. <em>Induction</em>
+          generalizes from observed instances to a probable pattern: the more
+          cases confirm the pattern, the stronger the inference, but certainty
+          remains out of reach. <em>Abduction</em> -- Peirce's third mode, and
+          the one he regarded as the most creative -- moves in the opposite
+          direction: from a surprising observation to a hypothesis that would,
+          if true, render the observation unsurprising
+          (Peirce, <cite>Collected Papers</cite>, 5.189).
+        </p>
+
+        <p>
+          Peirce formalized the abductive syllogism as follows:
+        </p>
+
+        <figure>
+          <pre><code>The surprising fact C is observed.
+But if A were true, C would be a matter of course.
+Hence, there is reason to suspect that A is true.</code></pre>
+          <figcaption>
+            Peirce's canonical form of abductive inference
+            (<cite>Collected Papers</cite>, 5.189).
+          </figcaption>
+        </figure>
+
+        <p>
+          The critical word is <em>suspect</em>. Abduction does not prove its
+          conclusion; it proposes a hypothesis worthy of further investigation.
+          Peirce was explicit that abduction is the only mode of inference that
+          introduces genuinely new ideas -- deduction merely explicates what is
+          already contained in the premises, and induction merely confirms or
+          disconfirms what has already been hypothesized. Abduction is the
+          inferential leap that gets inquiry started
+          (Peirce, <cite>Collected Papers</cite>, 5.171).
+        </p>
+
+        <h4>Abduction in Design Interpretation</h4>
+
+        <p>
+          De Souza (2005, Ch. 2) situates abduction at the center of
+          human-computer interaction. When a user encounters a software
+          interface, they do not have direct access to the designer's
+          intentions. What they observe are signs -- icons, labels, behaviors,
+          feedback -- and from these signs they abductively infer what the
+          designer meant. The user's interpretation is always provisional: a
+          hypothesis about designer intent that may be revised as interaction
+          continues and new signs are encountered. Communicability, in semiotic
+          engineering, is precisely the quality of the interface that supports
+          accurate abduction -- that allows the user to form correct hypotheses
+          about designer intent from the available signs.
+        </p>
+
+        <p>
+          SEJA extends this abductive dynamic from human-computer interaction
+          to human-agent collaboration. When the agent reads
+          <code>product-design/product-design-as-intended.md</code>, it
+          performs an abductive inference: from the signs available in the
+          document (the metacommunication message, the entity hierarchy, the
+          permission model, the decision records), it forms a hypothesis
+          about what the designer intends. This hypothesis governs the agent's
+          subsequent behavior -- how it plans, what it implements, what it
+          flags as a potential gap. But the hypothesis is always provisional.
+          The designer's intent is richer than any document can express, and
+          the agent's reading is shaped by the context window's contents, the
+          order in which files were loaded, and the particular question that
+          prompted the reading.
+        </p>
+
+        <h4>Provisionality as a Structural Feature</h4>
+
+        <p>
+          SEJA embeds provisionality directly into its lifecycle through the
+          promote workflow. When a plan is implemented, its design decisions
+          receive the status marker <code>implemented</code> -- an explicit
+          acknowledgment that this is the current best reading of what the
+          designer intends, not a claim of certainty. Only when the designer
+          reviews the implementation, confirms that it matches their intent,
+          and runs the promote workflow does the status advance to
+          <code>established</code>. The transition from <code>implemented</code>
+          to <code>established</code> is a deliberate commitment: the designer
+          is asserting that this particular abductive reading has been verified
+          against their actual intent and can now be treated as settled ground
+          for future work.
+        </p>
+
+        <p>
+          This two-stage commitment mirrors Peirce's distinction between
+          abduction and confirmation. The agent's initial interpretation
+          (abduction) produces a hypothesis; the designer's review
+          (confirmation) tests it. The harness makes this distinction
+          structural rather than leaving it to individual discipline. A
+          decision record marked <code>implemented</code> carries a different
+          epistemic status than one marked <code>established</code>, and the
+          harness treats them accordingly: <code>implemented</code> items may
+          be revisited without a formal decision record, while
+          <code>established</code> items require an explicit
+          <code>superseded</code> transition.
+        </p>
+      </section>
+
+      <section id="abduction-plural-readings--council-debate" data-diataxis="explanation">
+        <h3>Council Debate</h3>
+
+        <p>
+          If abduction is the reasoning mode appropriate to interpretation
+          under uncertainty, then <em>plural</em> abduction -- generating
+          multiple competing hypotheses rather than settling on the first
+          plausible one -- is the strategy appropriate to high-stakes design
+          decisions where the cost of a wrong interpretation is high. SEJA
+          operationalizes plural abduction through the council-debate
+          mechanism, defined in
+          <code>.claude/agents/council-debate.md</code>.
+        </p>
+
+        <h4>The Five Fixed Archetypes</h4>
+
+        <p>
+          The council comprises five fixed archetypes, each embodying a
+          distinct set of priorities that shape how they read the same
+          evidence:
+        </p>
+
+        <dl>
+          <dt>Security Advocate</dt>
+          <dd>
+            Prioritizes safety, data protection, and worst-case scenarios.
+            Reads design artifacts through the lens of what could go wrong,
+            what attack surfaces are exposed, and what the consequences of
+            failure would be.
+          </dd>
+
+          <dt>DX Pragmatist</dt>
+          <dd>
+            Prioritizes developer productivity, simplicity, and shipping
+            speed. Reads design artifacts through the lens of what a
+            developer will actually encounter: how many steps a task
+            requires, how discoverable the workflow is, and whether the
+            abstraction is worth its complexity cost.
+          </dd>
+
+          <dt>UX Champion</dt>
+          <dd>
+            Prioritizes user experience, accessibility, and discoverability.
+            Reads design artifacts from the user's perspective: what is the
+            experience of encountering this for the first time, what
+            assumptions about user knowledge are embedded, and where will
+            users get lost.
+          </dd>
+
+          <dt>Architecture Purist</dt>
+          <dd>
+            Prioritizes clean boundaries, long-term maintainability, and
+            adherence to established patterns. Reads design artifacts for
+            structural coherence: whether components have clear
+            responsibilities, whether the abstraction levels are consistent,
+            and whether today's expedient choice creates tomorrow's
+            architectural debt.
+          </dd>
+
+          <dt>Product Strategist</dt>
+          <dd>
+            Prioritizes business value, time-to-market, and user adoption.
+            Reads design artifacts for strategic alignment: whether the
+            feature serves the product's positioning, whether the investment
+            is proportional to the expected return, and whether the design
+            supports the growth trajectory.
+          </dd>
+        </dl>
+
+        <p>
+          In addition to the five fixed archetypes, the council may include
+          zero to two <em>brief-specific experts</em> drawn from a pool of
+          domain specialists (Agentic AI Expert, Data Engineer,
+          DevOps/Platform Engineer, Domain Specialist). These additional
+          perspectives are selected by the caller based on the specific
+          question under debate.
+        </p>
+
+        <h4>The Debate Process</h4>
+
+        <p>
+          The council debate proceeds through two structured rounds followed
+          by a synthesis:
+        </p>
+
+        <dl>
+          <dt>Round 1 -- Position Statements</dt>
+          <dd>
+            Each archetype states their position on the question in two to
+            three sentences. Positions must be authentic to the archetype's
+            priorities -- the Security Advocate argues from security concerns,
+            not from a general desire for quality. The constraint is
+            deliberate: it forces each perspective to commit to its genuine
+            priority rather than hedging toward a premature consensus.
+          </dd>
+
+          <dt>Round 2 -- Cross-Examination</dt>
+          <dd>
+            Each archetype responds to the others' positions, focusing on
+            genuine tensions: where they agree, where their assumptions
+            conflict, and what risks the other positions overlook. The
+            governing rule is that cross-examination must surface real
+            tensions, not polite acknowledgments. A cross-examination that
+            says "the Security Advocate raises a valid point, and I agree"
+            has failed; one that says "the Security Advocate's proposed
+            mitigation would add three steps to every deployment, which
+            conflicts with my priority of developer velocity" has succeeded.
+          </dd>
+
+          <dt>Synthesis</dt>
+          <dd>
+            The debate concludes with three outputs: consensus points where
+            the archetypes agree, unresolved disagreements with the core
+            tension behind each, and a recommended path forward that names
+            the trade-offs rather than papering over them. The synthesis is
+            not a vote or a compromise; it is an honest map of the decision
+            landscape as illuminated by five distinct reading positions.
+          </dd>
+        </dl>
+
+        <h4>From Plural Readings to Design Decisions</h4>
+
+        <p>
+          The council debate does not make decisions. It surfaces the
+          interpretive space within which a decision must be made. The designer
+          receives a transcript that makes visible which priorities are in
+          tension, which trade-offs are unavoidable, and which assumptions
+          underlie each position. The designer then decides -- and the decision
+          is recorded in a D-NNN entry in
+          <code>product-design/product-design-as-intended.md</code> with its
+          context, consequences, and rejected alternatives made explicit.
+        </p>
+
+        <p>
+          This separation -- plural readings by the council, singular decision
+          by the designer -- reflects the semiotic engineering commitment to
+          designer authority (see
+          <a href="#software-as-communication">Software as Designed
+          Communication</a>). The council provides the epistemic breadth; the
+          designer provides the intentional commitment. For practical coverage
+          of how subagents are delegated and managed within the harness, see
+          <a href="../execution-layer/subagent-delegation.html#the-delegation-model">Subagent
+          Delegation</a>.
+        </p>
+      </section>
+
+      <section id="abduction-plural-readings--critical-counter-reading" data-diataxis="explanation">
+        <h3>Critical Counter-Reading</h3>
+
+        <p>
+          The account above presents abductive reasoning and plural readings
+          as straightforward goods -- more hypotheses, better decisions. Three
+          lines of critique complicate this picture.
+        </p>
+
+        <h4>Abduction Without Verification</h4>
+
+        <p>
+          Abduction generates hypotheses; it does not validate them. Peirce
+          was clear that abduction is only the first stage of inquiry --
+          the hypothesis must subsequently be tested through deduction (what
+          consequences would follow if the hypothesis were true?) and
+          induction (do those consequences obtain in practice?)
+          (<cite>Collected Papers</cite>, 6.469--6.473). SEJA's promote
+          workflow provides one verification mechanism: the designer reviews
+          the agent's interpretation before advancing status from
+          <code>implemented</code> to <code>established</code>. But many
+          abductive readings never reach the promote stage. When the agent
+          interprets a design-intent file to produce a plan step, that
+          interpretation is acted upon without formal verification against the
+          designer's actual intent. The agent's reading may be plausible but
+          wrong -- and the error may not surface until the implementation is
+          critiqued, or not at all.
+        </p>
+
+        <h4>Breadth Without Depth</h4>
+
+        <p>
+          The council-debate mechanism produces five independent readings of
+          the same evidence. But independence does not guarantee quality.
+          Each archetype's position is generated in two to three sentences --
+          a constraint that enforces conciseness but risks superficiality.
+          Five shallow readings do not aggregate into one deep one. A single
+          expert who has spent hours studying the specific problem may see
+          things that five archetypes, each spending a paragraph, will miss.
+          The council's value lies in the <em>diversity</em> of perspectives,
+          not in the <em>depth</em> of any individual perspective -- and there
+          are design questions where depth matters more than diversity.
+        </p>
+
+        <p>
+          The five-archetype set is itself a design choice, not a theoretical
+          necessity. The archetypes (Security Advocate, DX Pragmatist, UX
+          Champion, Architecture Purist, Product Strategist) reflect a
+          particular understanding of which priorities matter in software
+          design. A different set of archetypes -- an Accessibility Advocate,
+          an Ethics Reviewer, a Performance Engineer, a Domain Expert -- would
+          surface different tensions and produce different syntheses. The
+          council is not a neutral analytical instrument; it is a perspective
+          selector, and the perspectives it selects determine what it can see.
+          The brief-specific expert pool partially addresses this by allowing
+          domain specialists to join the fixed five, but the pool itself is
+          finite and reflects the harness designer's judgments about which
+          additional perspectives are worth having.
+        </p>
+
+        <h4>Simulated Community, Not Social Inquiry</h4>
+
+        <p>
+          Peirce's theory of inquiry is deeply social. He argued that the
+          fixation of belief requires a <em>community of inquirers</em> --
+          real agents who bring genuinely different experiences, interests,
+          and assumptions to the investigation
+          (<cite>Collected Papers</cite>, 5.311). The community corrects
+          individual bias not because its members adopt different roles but
+          because they <em>are</em> different: their life experiences,
+          training, and stakes in the outcome are irreducibly distinct.
+        </p>
+
+        <p>
+          SEJA's council debate simulates this community. The five archetypes
+          are generated by the same language model, drawing on the same
+          training data, within the same context window. Their "disagreements"
+          are produced by a single system adopting different roles, not by
+          genuinely independent agents with genuinely different stakes. The
+          Security Advocate has no actual stake in security; it is performing
+          security concern. The DX Pragmatist has no actual deadline; it is
+          performing urgency. This is not a community of inquiry in Peirce's
+          sense -- it is a structured simulation of one.
+        </p>
+
+        <p>
+          This does not make the council debate useless. Role-adoption can
+          surface considerations that a single undifferentiated analysis
+          would overlook, and the structured cross-examination format makes
+          those considerations visible to the designer who does have genuine
+          stakes. But the epistemic status of the output is different from
+          what Peirce envisioned. The council produces a <em>map of possible
+          concerns</em>, not a <em>convergence toward truth through social
+          inquiry</em>. The designer should read the debate transcript as a
+          prompt for their own thinking, not as a substitute for it
+          (de Souza, 2005, Ch. 2).
+        </p>
+      </section>
+
+      <section id="abduction-plural-readings--references" data-diataxis="reference">
+        <h3>References</h3>
+
+        <ul>
+          <li>
+            de Souza, C.S. (2005).
+            <cite>The Semiotic Engineering of Human-Computer Interaction</cite>.
+            Cambridge, MA: MIT Press.
+          </li>
+          <li>
+            Peirce, C.S. (1931--1958).
+            <cite>Collected Papers of Charles Sanders Peirce</cite>,
+            vols. 1--8. Edited by C. Hartshorne, P. Weiss, and A. Burks.
+            Cambridge, MA: Harvard University Press.
+          </li>
+        </ul>
+      </section>
+      </section>
+
+      <section id="governable-epistemic" class="print-chapter" aria-label="The Governable and Epistemic Thesis">
+<h2>The Governable AND Epistemic Thesis</h2>
+
+      <p>
+        SEJA's architecture rests on a single compound commitment: the harness must be
+        simultaneously <em>governable</em> and <em>epistemic</em>. The conjunction is
+        not an additive wish list — it is the core structural claim from which the
+        harness's organization follows. This chapter traces the claim to its origin in
+        SEJA's metacommunication message and constitution, maps the two axes onto
+        concrete harness mechanisms, and subjects the thesis to a critical counter-reading
+        that questions whether the conjunction holds as tightly as the design implies.
+      </p>
+
+      <!-- Section 1: Why Both Axes Are Required -->
+      <section id="governable-epistemic--why-both-axes-are-required" data-diataxis="explanation">
+        <h3>Why Both Axes Are Required</h3>
+
+        <p>
+          SEJA's constitution, principle Q3, states the thesis in its most compressed form:
+          "Governance without epistemic support produces brittleness; epistemic support
+          without governance produces drift. Both axes are required" (SEJA
+          <code>product-design/constitution.md</code>, Q3). The rationale traces directly
+          to the designer's metacommunication message in §11 of
+          <code>product-design/product-design-as-intended.md</code>: "I have designed this
+          harness to be not only governable — structured by a lifecycle of linked skills
+          … — but also epistemic: equipped to help you track evolving design intent,
+          surface what is unknown or unlearned, and remain responsible throughout the
+          entire software design and development process." The designer does not present
+          the two properties as independent features on a roadmap; they are introduced
+          as a single, indivisible design posture.
+        </p>
+
+        <h4>The Brittleness of Governance Alone</h4>
+
+        <p>
+          A system that enforces rules without surfacing what is unknown will reliably
+          execute rules that may themselves be wrong. Consider a lifecycle that requires
+          every implementation to pass through a planning phase and every plan to trace
+          requirements. If the requirements were written against an outdated understanding
+          of the user — and no mechanism exists to flag that the understanding is outdated —
+          the lifecycle dutifully produces implementations that satisfy stale design intent.
+          The governance machinery is functioning correctly; the governed outcome is
+          incorrect. This is the brittleness that Q3 identifies: compliance without
+          comprehension. In de Souza's terms (2005, Ch. 1), the designer's deputy is
+          faithfully delivering a message that the designer would no longer endorse if
+          confronted with what the deputy has since encountered. The deputy follows
+          instructions but cannot question them.
+        </p>
+
+        <p>
+          Brittleness in governance systems is not unique to agent harnesses. Organizational
+          compliance regimes exhibit the same pattern: checklists and audits enforce
+          established procedures while actively discouraging the questioning of whether
+          those procedures remain appropriate. What makes the brittleness especially
+          acute in an LLM-based system is the agent's capacity for compliance without
+          understanding — the agent can follow governance rules with perfect consistency
+          precisely because it lacks the situated judgment to recognize when the rules
+          conflict with emergent reality.
+        </p>
+
+        <h4>The Drift of Epistemic Support Alone</h4>
+
+        <p>
+          The converse pathology is equally recognizable. A system that surfaces uncertainty,
+          flags gaps, and invites plural readings — but provides no enforcement mechanism
+          to ensure the designer acts on what is surfaced — produces a growing inventory
+          of acknowledged-but-unaddressed unknowns. The agent detects that a design-intent
+          section has not been updated since a major implementation diverged from the
+          original plan. It flags the drift. The flag is advisory. Nothing in the system
+          prevents the next implementation from proceeding as if the drift had been
+          resolved. Over time, the gap between what the system knows it does not know
+          and what the designer has actually investigated widens — not because the
+          epistemic machinery failed, but because no governance mechanism converts
+          epistemic signals into actionable constraints.
+        </p>
+
+        <p>
+          This is the drift that Q3 identifies: understanding without accountability.
+          The designer is informed but not required to act on the information. In a
+          semiotic engineering frame, the system is producing metalinguistic signs that
+          explain other signs (de Souza 2005, Ch. 4) — gap notices, drift reports,
+          heuristic labels — but these metalinguistic signs have no performative force.
+          They describe what is wrong without compelling a response.
+        </p>
+
+        <h4>The Conjunction as Structural Necessity</h4>
+
+        <p>
+          The "AND" in Q3 is therefore not a preference but a structural claim: neither
+          axis alone produces a system that can sustain alignment between designer intent
+          and agent behavior over the lifetime of a project. Governance provides the
+          mechanism for enforcing alignment; epistemic support provides the mechanism
+          for detecting when alignment has been lost. Without governance, detection is
+          inert. Without epistemic support, enforcement is blind. The conjunction asserts
+          that a system possessing only one axis will eventually degrade — not because
+          it has a bug, but because the axis it lacks is the one required to address
+          the failure mode the present axis cannot see.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The brittleness/drift distinction maps to a familiar
+            software engineering tension: static analysis (governance) catches violations
+            of declared rules, while exploratory testing (epistemic support) discovers
+            problems the rules did not anticipate. Neither substitutes for the other.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 2: How the Harness Embodies Each -->
+      <section id="governable-epistemic--how-the-harness-embodies-each" data-diataxis="explanation">
+        <h3>How the Harness Embodies Each</h3>
+
+        <p>
+          The abstract thesis becomes concrete through specific harness mechanisms.
+          This section enumerates the primary components of each axis, tracing each
+          to the constitution principle it serves and the failure mode it addresses.
+        </p>
+
+        <h4>The Governance Axis</h4>
+
+        <p>
+          Governance in SEJA is not a single enforcement point but a distributed
+          network of constraints, each addressing a different scale of potential
+          misalignment. The following mechanisms collectively ensure that the agent's
+          behavior remains within the boundaries the designer has established:
+        </p>
+
+        <dl>
+          <dt>Lifecycle enforcement (T1)</dt>
+          <dd>
+            Every user-facing skill begins with pre-skill and ends with post-skill.
+            Pre-skill loads the constitution, checks pending actions, and injects
+            reference files; post-skill marks completion, commits artifacts, and
+            flushes decision digests. This pipeline is not optional: "Skills may
+            opt out of non-critical stages via <code>skip_stages</code> but may
+            never skip pre-skill entirely" (<code>product-design/constitution.md</code>,
+            T1). The lifecycle is the primary governance mechanism — it ensures that
+            every agent action occurs within a context that includes the designer's
+            stated principles, the project's current state, and any outstanding
+            obligations.
+          </dd>
+
+          <dt>Constitution as immutable authority (Q1)</dt>
+          <dd>
+            The constitution is loaded first by pre-skill, before conventions or
+            any other reference file. Its principles take precedence over everything
+            else: "no plan or implementation step may contradict them without an
+            explicit D-NNN decision record approved by the designer"
+            (<code>product-design/constitution.md</code>, Q1). The constitution
+            embodies a governance pattern that de Souza (2005, Ch. 1) would
+            recognize as value inscription — making the designer's non-negotiable
+            commitments explicit and machine-readable so that the deputy (the
+            harnessed agent) cannot inadvertently violate them.
+          </dd>
+
+          <dt>Human (markers) classification (T2)</dt>
+          <dd>
+            Certain files — notably <code>product-design/product-design-as-intended.md</code>
+            and <code>product-design/ux-research-results.md</code> — carry a
+            <code>Human (markers)</code> classification that restricts the agent to
+            writing only structured lifecycle markers (STATUS flags, DECISION_APPEND
+            entries, CHANGELOG appends) via <code>apply_marker.py</code> after explicit
+            designer confirmation. The agent may not write prose in these files. This
+            classification preserves the fundamental semiotic engineering distinction
+            between designer-authored intent and agent-maintained implementation state
+            (de Souza 2005, Ch. 3): the designer's words remain the designer's words.
+          </dd>
+
+          <dt>Pre-commit hooks (S2)</dt>
+          <dd>
+            The pre-commit hook runs <code>check_no_private_leaks.py --staged</code>
+            on every commit, enforcing the boundary between private design rationale
+            and public-facing artifacts. Constitution principle S2 prohibits bypassing
+            the hook via <code>--no-verify</code> without an explicit D-NNN decision
+            record. The hook is a governance mechanism operating at the boundary
+            between the harness and the version control system — the last checkpoint
+            before artifacts leave the designer's controlled environment.
+          </dd>
+
+          <dt>Validation scripts</dt>
+          <dd>
+            A suite of validation scripts — <code>run_all_checks.py</code>,
+            <code>check_human_markers_only.py</code>,
+            <code>check_section_boundary_writes.py</code>,
+            <code>check_skill_spec.py</code>, and others — provides automated
+            verification of harness invariants. These scripts enforce structural
+            rules that would be impractical to verify manually: that marker files
+            contain only permitted marker patterns, that section boundaries in
+            unified files are respected, that skill metadata conforms to the
+            agentskills.io specification. <code>/critique preflight</code> runs
+            these checks before any commit, converting advisory governance into
+            blocking enforcement at the point of action.
+          </dd>
+        </dl>
+
+        <h4>The Epistemic Axis</h4>
+
+        <p>
+          The epistemic axis complements governance with mechanisms that surface
+          uncertainty, invite scrutiny, and make the limits of current understanding
+          visible. Where governance asks "does this conform?", epistemic support
+          asks "do we know enough to trust this conformance?"
+        </p>
+
+        <dl>
+          <dt>Gap flagging (Q2)</dt>
+          <dd>
+            Constitution principle Q2 requires that SEJA "surface what is not yet
+            known, not only what has been decided." This manifests through multiple
+            mechanisms: heuristic-labeled coverage reports that distinguish between
+            confirmed and inferred coverage, gap-flagged cards in product topology
+            views that highlight areas where design intent has not been specified,
+            and the explicit epistemic questions in the Extended Metacommunication
+            Template (§12 of <code>product-design/product-design-as-intended.md</code>)
+            that ask the designer to state what they do and do not know about their
+            users. Gap flagging is the epistemic axis's first line — it converts
+            absence of information into a visible, addressable artifact.
+          </dd>
+
+          <dt>Council debate (plural readings)</dt>
+          <dd>
+            The council-debate subagent (<code>.claude/agents/council-debate.md</code>)
+            convenes five fixed expert archetypes — Security Advocate, DX Pragmatist,
+            UX Champion, Architecture Purist, and Product Strategist — plus optional
+            domain-specific experts to deliberate a question through position statements
+            and cross-examination. The goal is not consensus but the explicit surfacing
+            of tensions: "Each archetype must argue from their genuine priority, not
+            hedge toward agreement" (council-debate agent prompt). This mechanism
+            operationalizes what Peirce would recognize as the method of inquiry
+            through a community — although, as the
+            <a href="#abduction-plural-readings--abductive-reasoning">Abduction and Plural
+            Readings</a> chapter notes, SEJA's community is simulated rather than social.
+          </dd>
+
+          <dt>Structured reflection (<code>/reflect</code>)</dt>
+          <dd>
+            The <code>/reflect</code> skill implements Schön's (1983) reflection-on-action
+            as a structured prompt. It offers three modes: conversational (quick debrief),
+            deep (practice-evolution narrative with event matrix and transition graph
+            visualizations), and telemetry (statistical pattern mining across skill
+            invocations). Crucially, <code>/reflect</code> is strictly non-prescriptive:
+            it writes observations and records the designer's own words verbatim but
+            never recommends what the designer should conclude (see
+            <a href="#reflective-practice--seja-operationalization">Reflective Practice</a>).
+            The epistemic contribution is the structured occasion for reflection, not
+            the reflection itself.
+          </dd>
+
+          <dt>Drift detection (<code>/explain drift</code>)</dt>
+          <dd>
+            The <code>/explain drift</code> workflow compares the as-intended design
+            state (<code>product-design/product-design-as-intended.md</code>) against
+            the as-coded state (<code>product-design/product-design-as-coded.md</code>)
+            to identify where implementation has diverged from intent. Drift is not
+            automatically corrected — the designer must review each divergence and
+            decide whether to update the intent (via the promote workflow) or the
+            implementation. The mechanism surfaces misalignment without presuming
+            which side is wrong — an epistemic posture rather than a governance action.
+          </dd>
+
+          <dt>Pending actions (deferred work visible)</dt>
+          <dd>
+            The pending-actions ledger (<code>_output/pending.jsonl</code>) tracks
+            outstanding human obligations — items that require the designer's judgment
+            and cannot be resolved by the agent alone. Pending actions include
+            marker promotions, implementation verifications, documentation updates,
+            and deferred design decisions. Pre-skill's pending-check stage surfaces
+            overdue items at the start of every skill invocation. The epistemic
+            function is making deferred work visible: the system cannot forget what
+            it has not yet addressed, even across session boundaries.
+          </dd>
+
+          <dt>Heuristic-labeled coverage</dt>
+          <dd>
+            When <code>/plan</code> generates a coverage check or
+            <code>/critique</code> evaluates requirement traceability, the results
+            distinguish between confirmed coverage (a plan step explicitly traces a
+            requirement) and heuristic coverage (a plan step appears to address a
+            requirement based on content similarity but does not declare the trace).
+            The heuristic label is an epistemic signal: it tells the designer that
+            the system's confidence in the coverage claim is bounded, inviting
+            verification rather than assuming completeness.
+          </dd>
+        </dl>
+
+        <h4>The Mutual Constitution</h4>
+
+        <p>
+          The two axes are not independent feature sets that happen to coexist in
+          the same harness. They are mutually constitutive: governance mechanisms
+          produce the structured artifacts that epistemic mechanisms analyze, and
+          epistemic mechanisms produce the assessments that governance mechanisms
+          enforce. The lifecycle pipeline (governance) generates briefs, plans,
+          and telemetry entries that the <code>/reflect</code> skill (epistemic)
+          mines for practice patterns. The drift detection workflow (epistemic)
+          produces divergence reports that the promote workflow (governance)
+          converts into marker flips. The constitution (governance) articulates
+          Q2 (epistemic). Each axis creates the conditions under which the other
+          can operate.
+        </p>
+
+        <p>
+          In de Souza's framework (2005, Ch. 1), this mutual constitution is
+          recognizable as the relationship between signification and communication:
+          the governance axis establishes the signification system — the conventions
+          that make meaning possible — while the epistemic axis enacts communication —
+          the production of specific signs within that system. A signification system
+          without communication is a code that no one speaks; communication without
+          a signification system is noise. SEJA's design thesis is that an agent
+          harness requires both.
+        </p>
+      </section>
+
+      <!-- Section 3: Critical Counter-Reading -->
+      <section id="governable-epistemic--critical-counter-reading" data-diataxis="explanation">
+        <h3>Critical Counter-Reading</h3>
+
+        <p>
+          The "governable AND epistemic" thesis makes a strong structural claim:
+          that the two axes are not merely complementary but mutually necessary,
+          and that SEJA's architecture instantiates both. Three lines of criticism
+          challenge this claim at different levels.
+        </p>
+
+        <h4>The Maturity Asymmetry</h4>
+
+        <p>
+          In practice, SEJA's governance machinery is substantially more mature than
+          its epistemic support. The lifecycle pipeline enforces sequencing with
+          reliable consistency; the pre-commit hook blocks prohibited content; the
+          constitution loads on every invocation. By contrast, the epistemic mechanisms
+          are largely advisory. Gap flagging in product topology surfaces gaps but
+          does not prevent the designer from proceeding as if the gaps were not there.
+          Drift detection reports divergences but does not block implementations that
+          widen the drift. The pending-actions ledger surfaces overdue items but imposes
+          no consequence for ignoring them. If the thesis claims that both axes are
+          required, the current harness delivers one axis as enforcement and the other
+          as suggestion — a gap between the thesis and its instantiation that the
+          thesis itself should predict, since governance without epistemic enforcement
+          is precisely the brittleness pattern Q3 warns against.
+        </p>
+
+        <h4>The Independence Assumption</h4>
+
+        <p>
+          The Q3 formulation treats the two axes as separable — one can have governance
+          without epistemic support, or vice versa, and each isolated axis exhibits a
+          distinctive failure mode. But governance decisions are themselves epistemic
+          questions. Deciding what to enforce (which constitution principles to include,
+          which lifecycle stages to make mandatory, which file classifications to adopt)
+          requires knowing what works and what does not — which is an epistemic matter.
+          The two axes are not independent dimensions of a design space but entangled
+          aspects of a single design process. If the "AND" is structural necessity rather
+          than additive preference, it follows that the axes cannot be meaningfully
+          separated even in principle — which undermines the utility of describing them
+          as two distinct axes at all.
+        </p>
+
+        <h4>The Designer's Disposition</h4>
+
+        <p>
+          The epistemic axis ultimately depends on the designer's willingness to engage
+          with uncertainty. SEJA can surface gaps, flag drift, and present plural readings,
+          but it cannot ensure that the designer investigates the gaps, resolves the drift,
+          or takes the alternative readings seriously. The epistemic axis assumes a designer
+          who subscribes to what the metacommunication message calls "a responsible
+          epistemic posture" — who is "aware of what [they] have learned about [their]
+          system's users, and equally aware of what [they] have not yet learned"
+          (<code>product-design/product-design-as-intended.md</code>, §11). This
+          is a human disposition that the harness can invite but cannot install.
+          A designer who dismisses gap notices, ignores drift reports, and skips
+          reflection will use a system that is governable but not, in practice,
+          epistemic — regardless of what the architecture provides. The thesis
+          describes a structural property of the harness; whether that property
+          translates into an epistemic property of the <em>collaboration</em>
+          depends on the human participant.
+        </p>
+
+        <p>
+          None of these criticisms invalidate the thesis, but they bound it. The
+          "governable AND epistemic" claim is best read as a design aspiration
+          that the harness partially instantiates — an orientation toward a
+          structural ideal rather than a claim that the ideal has been fully
+          achieved. The maturity asymmetry is a recognized gap, not a hidden one.
+          The entanglement of the axes may be a feature of the domain rather than
+          a flaw in the framework. And the dependence on the designer's disposition
+          is a limitation shared by every design methodology that respects the
+          designer's autonomy — the alternative is a system that overrides the
+          designer's judgment, which would undermine the collaborative relationship
+          semiotic engineering values (de Souza 2005, Ch. 3).
+        </p>
+      </section>
+
+      <!-- References -->
+      <section id="governable-epistemic--references" data-diataxis="reference">
+        <h3>References</h3>
+        <ul>
+          <li>de Souza, C.S. (2005). <cite>The Semiotic Engineering of Human-Computer Interaction</cite>. Cambridge, MA: MIT Press.</li>
+          <li>Schön, D.A. (1983). <cite>The Reflective Practitioner: How Professionals Think in Action</cite>. New York: Basic Books.</li>
+        </ul>
+      </section>
+      </section>
+
+      <section id="agent-reads-harness" class="print-chapter" aria-label="How the Agent Reads the Harness">
+<h2>How the Agent Reads the Harness</h2>
+
+      <p>
+        This chapter is unique among Vol. 5's theoretical foundations: it is
+        meta-documentation -- documentation about how the primary documentation
+        consumer, the Claude agent, processes the very harness files that govern
+        its behavior. Where the preceding chapters develop the intellectual
+        commitments behind SEJA (the communication metaphor, sign systems,
+        reflective practice, abduction, the governable-and-epistemic thesis),
+        this chapter makes visible the concrete interpretive machinery through
+        which those commitments are enacted. In semiotic engineering terms,
+        this chapter describes the channel through which the designer's
+        metacommunication message is delivered (de Souza 2005, Ch. 3): the
+        agent's context window is the medium, and the loading strategy is
+        the protocol that determines which parts of the message reach the
+        agent at any given moment.
+      </p>
+
+      <p>
+        Understanding this channel is not merely a technical curiosity. It has
+        direct consequences for how harness files should be written, how
+        reference material should be organized, and what persistence
+        mechanisms the designer can rely on. The designer who does not
+        understand the context window is designing communication without
+        understanding the medium -- the semiotic equivalent of writing a
+        letter without knowing whether it will be delivered by post, by
+        telegram, or by voice relay.
+      </p>
+
+      <section id="agent-reads-harness--context-window-mechanics" data-diataxis="explanation">
+        <h3>Context-Window Mechanics</h3>
+
+        <p>
+          The Claude agent operates within a finite context window -- a
+          bounded region of text that constitutes, at any given moment,
+          the entirety of what the agent can "see." This is the fundamental
+          constraint that shapes every aspect of how the harness communicates
+          with the agent. Unlike a human developer who can hold a mental model
+          of a codebase that extends far beyond the file currently open on
+          screen, the agent's effective knowledge is limited to what is
+          literally present in its context window at the time of response
+          generation. There is no background memory, no latent recall of
+          files read in previous sessions, no implicit familiarity built
+          up over time. Each session begins, epistemically speaking, from
+          a blank slate populated only by what the harness loads.
+        </p>
+
+        <p>
+          This framing has a precise semiotic-engineering reading. In
+          de Souza's framework, the designer's metacommunication message is
+          delivered through the system itself, which acts as the designer's
+          deputy (de Souza 2005, Ch. 3). In SEJA, the harness files
+          collectively <em>are</em> the metacommunication message, and the
+          context window is the communication channel through which that
+          message reaches the agent. The channel is lossy and finite: not
+          all of the message can be transmitted simultaneously. The
+          loading strategy -- which files enter the context window, in
+          what order, at what moment -- determines which fragments of the
+          designer's intent the agent can act on at any given point in
+          the session.
+        </p>
+
+        <h4>The Primary Loading Mechanism</h4>
+
+        <p>
+          SEJA's pre-skill pipeline is the primary mechanism through which
+          harness files enter the agent's context window. When a user
+          invokes a skill (e.g., <code>/plan</code>, <code>/implement</code>,
+          <code>/research</code>), the pre-skill hook executes a sequence of
+          six stages: help, brief-log, budget-eval, pending-check, ref-load,
+          and constitution. The ref-load stage is where reference files are
+          injected into the context window. Three files are always loaded
+          regardless of the skill being invoked:
+        </p>
+
+        <dl>
+          <dt><code>product-design/conventions.md</code></dt>
+          <dd>
+            The project's signification system: variable definitions, directory
+            paths, stack choices, and the As-Intended/As-Coded Registry. This
+            file gives the agent the vocabulary to interpret project-specific
+            references -- without it, path variables like
+            <code>${PLANS_DIR}</code> or <code>${BRIEFS_FILE}</code> are
+            opaque tokens.
+          </dd>
+
+          <dt><code>.claude/references/general/permissions.md</code></dt>
+          <dd>
+            The agent's authorization boundaries: what it may read, write,
+            execute, and propose. Loading this file is a governance act --
+            it constrains the agent's behavior before any skill-specific
+            instructions take effect.
+          </dd>
+
+          <dt><code>.claude/references/general/constraints.md</code></dt>
+          <dd>
+            Behavioral constraints that apply across all skills: UTF-8
+            encoding, no invented data, no placeholder implementations,
+            the decision-point rationale convention, context management
+            rules, and the pinned anchors list. This file is, in effect,
+            the agent's code of conduct.
+          </dd>
+        </dl>
+
+        <p>
+          These three mandatory files establish what might be called the
+          agent's <em>minimal communicative ground</em> -- the irreducible
+          set of shared understandings without which the designer's
+          metacommunication message cannot be delivered at all.
+        </p>
+
+        <h4>Context Budget Tiers</h4>
+
+        <p>
+          Not all skills require the same depth of context. A lightweight
+          operation (e.g., checking help text) does not need the full
+          briefs log or plan index that a deep analysis requires. SEJA
+          addresses this through three context budget tiers, declared in
+          each skill's <code>SKILL.md</code> frontmatter under
+          <code>metadata.context_budget</code>:
+        </p>
+
+        <dl>
+          <dt><code>light</code></dt>
+          <dd>
+            Skips all briefs and reference files beyond the brief-log
+            entry itself. The ref-load and constitution stages are skipped
+            entirely. This tier is appropriate for skills that need
+            minimal context -- primarily the help stage and quick
+            informational lookups.
+          </dd>
+
+          <dt><code>standard</code> (default)</dt>
+          <dd>
+            Loads a briefs index (a compressed summary of recent skill
+            invocations) rather than the full briefs log. Proceeds to
+            ref-load and constitution stages. This tier balances
+            context-window conservation against having sufficient
+            operational context for most skill invocations.
+          </dd>
+
+          <dt><code>heavy</code></dt>
+          <dd>
+            Loads the full briefs log with recency windowing (the 50
+            most recent entries, with a summary note for older ones)
+            plus the plan index. Proceeds to ref-load and constitution
+            stages. This tier is reserved for skills that need deep
+            historical context -- principally <code>/critique</code>,
+            <code>/plan</code>, and <code>/implement</code>.
+          </dd>
+        </dl>
+
+        <p>
+          The tier system is a form of communicative economy: the designer
+          of the harness has pre-decided, for each skill, how much of the
+          project's history the agent needs to see. This is itself a design
+          decision with epistemic consequences -- a skill running at the
+          <code>light</code> tier cannot detect patterns that would be
+          visible at the <code>heavy</code> tier, because the evidence
+          is simply absent from the context window.
+        </p>
+      </section>
+
+      <section id="agent-reads-harness--eager-vs-lazy-loading" data-diataxis="explanation">
+        <h3>Eager vs. Lazy Loading</h3>
+
+        <p>
+          Beyond the three mandatory files and the budget tier, each skill
+          declares its own set of reference files in the
+          <code>metadata.references</code> field of its <code>SKILL.md</code>
+          frontmatter. These skill-specific references carry the domain
+          knowledge the agent needs for that particular capability --
+          review perspectives for <code>/critique</code>, shared definitions
+          for <code>/research</code>, coding standards for
+          <code>/implement</code>. The question is: should all declared
+          references be loaded into the context window immediately, or
+          should some be held in reserve?
+        </p>
+
+        <p>
+          SEJA answers this with a two-mode loading strategy, determined by
+          whether the skill declares a <code>metadata.eager_references</code>
+          field in its frontmatter.
+        </p>
+
+        <h4>Mode 1: Eager-Only (Legacy)</h4>
+
+        <p>
+          When a skill's <code>SKILL.md</code> does not contain an
+          <code>eager_references</code> field, pre-skill reads and injects
+          every file listed in <code>metadata.references</code> into the
+          context window alongside the mandatory files. This is the
+          original behavior -- simple and predictable, but costly: every
+          declared reference consumes context-window space whether or not
+          the skill invocation actually needs it. An empty
+          <code>references: []</code> is valid under this mode, signaling
+          that the skill intentionally loads no additional references beyond
+          the mandatory set.
+        </p>
+
+        <h4>Mode 2: Demand-Pull</h4>
+
+        <p>
+          When a skill declares <code>eager_references</code>, pre-skill
+          partitions the reference set into two tiers:
+        </p>
+
+        <dl>
+          <dt>Eager tier</dt>
+          <dd>
+            Files listed in <code>eager_references</code> are read and
+            injected into the context window immediately, alongside the
+            mandatory files. These are references the skill needs in
+            every invocation -- for example, the <code>/reflect</code>
+            skill eagerly loads <code>conventions.md</code> and
+            <code>constraints.md</code> because reflection always requires
+            the project's vocabulary and behavioral rules.
+          </dd>
+
+          <dt>Lazy tier</dt>
+          <dd>
+            Files in <code>metadata.references</code> that are
+            <em>not</em> in <code>eager_references</code> become available
+            on demand. Pre-skill does not read or inject these files.
+            Instead, it emits an "Available references" block: a compact
+            numbered list where each entry shows the reference's path and
+            a trigger hint derived from its filename and subdirectory.
+            For example, <code>general/coding-standards.md</code> might
+            appear with the hint "when reviewing coding conventions."
+          </dd>
+        </dl>
+
+        <p>
+          An empty <code>eager_references: []</code> is valid, meaning
+          all skill-specific references are lazy and only the mandatory
+          files are loaded upfront. This configuration maximizes
+          context-window conservation at the cost of requiring the agent
+          to recognize when it needs additional context and explicitly
+          request it.
+        </p>
+
+        <h4>The Navigational Aid</h4>
+
+        <p>
+          The "Available references" block emitted during demand-pull
+          loading is, in semiotic terms, a metalinguistic sign (de Souza
+          2005, Ch. 4): it is a sign that tells the agent about other
+          signs it could load. The block does not contain the referenced
+          content -- it contains a description of what that content is
+          about and when it would be relevant. This mirrors the distinction
+          between a library catalog and the books it indexes: the catalog
+          occupies minimal space while providing enough information for the
+          reader to decide which books to retrieve.
+        </p>
+
+        <p>
+          The trigger hints serve a specific communicative function: they
+          tell the agent under what conditions loading the reference would
+          be valuable. A hint like "when reviewing security concerns"
+          attached to <code>general/security-checklists.md</code> creates
+          a conditional instruction -- if the agent encounters a security
+          question during the skill invocation, it knows where to find
+          the relevant reference and can load it at that point. The context
+          window pays the cost of the full file only when it is actually
+          needed.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Design rationale:</strong> The eager/lazy split is a
+            practical response to a theoretical constraint. De Souza's
+            metacommunication framework assumes the designer can deliver
+            a complete message through the system. But when the system is
+            an LLM with a finite context window, "complete" is impossible --
+            some parts of the message must be deferred. The eager/lazy
+            architecture makes this deferral explicit and navigable rather
+            than arbitrary and invisible.
+          </p>
+        </aside>
+      </section>
+
+      <section id="agent-reads-harness--implications-for-documentation-authoring" data-diataxis="explanation">
+        <h3>Implications for Documentation Authoring</h3>
+
+        <p>
+          The mechanics described above are not merely implementation
+          details -- they have direct consequences for how harness files,
+          reference documents, and documentation should be written.
+          Anyone authoring content that will enter the agent's context
+          window is, whether they recognize it or not, composing part of
+          the designer's metacommunication message. The following
+          implications flow directly from the context-window constraint
+          and the loading strategy.
+        </p>
+
+        <h4>1. Every Reference File Competes for Context-Window Space</h4>
+
+        <p>
+          The context window is a shared resource. Every reference file
+          loaded during pre-skill occupies space that could be used for
+          the skill's actual work -- the plan being implemented, the code
+          being reviewed, the research question being investigated.
+          Verbose reference files dilute the signal-to-noise ratio of
+          the context window, potentially causing the agent to miss
+          critical instructions buried in a sea of secondary detail.
+        </p>
+
+        <p>
+          This is why SEJA's
+          <code>.claude/references/general/constraints.md</code> includes
+          the directive: "Whenever writing, editing, or revising
+          agent-facing instructions, be as concise as possible." The
+          directive is not a stylistic preference -- it is a
+          communicative necessity imposed by the channel's finite
+          capacity. A reference file that could say what it needs to
+          say in 200 lines but uses 800 is not merely wasteful; it
+          actively degrades the agent's ability to attend to other
+          loaded content.
+        </p>
+
+        <h4>2. Pinned Anchors Survive Compaction</h4>
+
+        <p>
+          As a conversation grows long, the system may compress prior
+          messages in the agent's context. When this happens, most
+          loaded content risks being summarized or dropped. SEJA
+          designates six categories of content as <em>pinned anchors</em> --
+          content that must survive any compaction event and be
+          re-injected verbatim:
+        </p>
+
+        <ol>
+          <li><code>product-design/constitution.md</code> -- the project's immutable principles</li>
+          <li><code>.claude/references/general/permissions.md</code> -- agent authorization boundaries</li>
+          <li><code>.claude/references/general/constraints.md</code> -- behavioral guardrails</li>
+          <li>The active skill's <code>SKILL.md</code> instructions</li>
+          <li>The active plan context (if executing a plan)</li>
+          <li>The session scratchpad</li>
+        </ol>
+
+        <p>
+          The pinned-anchor concept is a governance mechanism with a
+          semiotic rationale: these files represent the irreducible core
+          of the designer's metacommunication message. If the constitution
+          is lost to compaction, the agent may violate immutable principles.
+          If the permissions file is lost, the agent may exceed its
+          authorization boundaries. If the active skill instructions are
+          lost, the agent loses its task context entirely. Pinning ensures
+          that the most authoritative parts of the designer's message
+          survive even when the channel's capacity is exhausted.
+        </p>
+
+        <p>
+          The practical consequence for authors is a two-tier system:
+          content placed in pinned files is durable and can be relied
+          upon throughout a session; content in non-pinned files may be
+          summarized or lost during long sessions. Critical constraints,
+          security boundaries, and immutable rules belong in pinned files.
+          Supplementary context, examples, and elaboration belong in
+          non-pinned references that the agent can load on demand.
+        </p>
+
+        <h4>3. The Agent Does Not Remember Across Sessions</h4>
+
+        <p>
+          Each Claude Code session begins with a fresh context window.
+          The agent has no episodic memory of previous sessions -- it
+          does not recall which plans were discussed yesterday, which
+          design decisions were made last week, or which research
+          questions were investigated last month. Whatever the agent
+          knows about the project's history must be loaded from
+          persistent artifacts: the briefs log, the plan files, the
+          decision digest, the conversation trace.
+        </p>
+
+        <p>
+          SEJA provides two explicit persistence mechanisms for
+          cross-session continuity:
+        </p>
+
+        <dl>
+          <dt>Session scratchpad (<code>${TMP_DIR}/session-notes.md</code>)</dt>
+          <dd>
+            A timestamped log of key decisions, findings, TODOs, and
+            context from the current session. The scratchpad is a pinned
+            anchor, so it survives compaction within a session. Across
+            sessions, the designer can direct the agent to read the
+            previous session's scratchpad to recover context. The format
+            uses category tags (DECISION, FINDING, TODO, CONTEXT) to
+            support selective retrieval.
+          </dd>
+
+          <dt>Pending actions (<code>_output/pending.jsonl</code>)</dt>
+          <dd>
+            A machine-readable ledger of outstanding human actions filed
+            by skills during their execution. Each pending action carries
+            a type, a source (the skill or plan that created it), and a
+            description. The pre-skill pipeline's pending-check stage
+            surfaces overdue actions at the start of each skill invocation,
+            ensuring that deferred work is not silently forgotten across
+            sessions.
+          </dd>
+        </dl>
+
+        <p>
+          The implication for documentation authors is that no reference
+          file should assume the agent has seen it before. Each file
+          must be self-contained enough to be understood on first encounter,
+          because every loading is functionally a first encounter. Internal
+          cross-references between reference files are navigational aids
+          (they tell the agent where to find related content), not
+          continuity devices (they cannot assume the agent has already
+          loaded the target).
+        </p>
+
+        <h4>4. File Naming and Structure Affect Discoverability</h4>
+
+        <p>
+          The agent locates harness files through three mechanisms: glob
+          patterns (matching filenames against path conventions), grep
+          (searching file contents for keywords), and path convention
+          (knowing that skills live in <code>.claude/skills/</code>,
+          references in <code>.claude/references/</code>, templates in
+          <code>.claude/references/template/</code>). These mechanisms
+          are the agent's equivalent of a file browser or search engine --
+          they are how it navigates the harness when it needs information
+          that is not already in the context window.
+        </p>
+
+        <p>
+          This has direct consequences for how files should be named and
+          structured. A reference file named
+          <code>general/shared-definitions.md</code> is discoverable by
+          an agent looking for "definitions" or "shared" -- the filename
+          itself is a sign that communicates the file's purpose. A file
+          named <code>general/misc-notes.md</code> is opaque: the agent
+          has no way to know whether it contains relevant content without
+          reading it. Similarly, consistent heading structure within files
+          allows the agent to grep for section headings to locate specific
+          content without loading the entire file.
+        </p>
+
+        <p>
+          The <code>designer_description</code> field in YAML frontmatter
+          serves a specific discoverability function: it provides a
+          one-sentence summary of the file's purpose that can appear in
+          tool output (e.g., when the agent lists available files). This
+          is a metalinguistic sign -- a sign about the sign system itself --
+          that helps the agent decide whether to load the file into its
+          context window. See
+          <a href="#sign-systems--metalinguistic-signs">Metalinguistic Signs</a>
+          for the theoretical framing of this concept.
+        </p>
+      </section>
+
+      <section id="agent-reads-harness--critical-counter-reading" data-diataxis="explanation">
+        <h3>Critical Counter-Reading</h3>
+
+        <p>
+          This chapter describes the agent's reading process as though it
+          were a well-understood phenomenon amenable to systematic design.
+          Several limitations of this framing deserve honest examination.
+        </p>
+
+        <h4>Dual-Audience Tension</h4>
+
+        <p>
+          If harness files are optimized for LLM consumption -- concise,
+          structurally marked, front-loaded with critical information --
+          do they become less readable for human maintainers? The SEJA
+          harness is maintained by humans who must also read, understand,
+          and modify these files. A file written to maximize the agent's
+          attention to key directives (bold lead-ins, terse imperatives,
+          minimal narrative) may read as telegraphic or hostile to a human
+          maintainer expecting explanatory prose.
+        </p>
+
+        <p>
+          SEJA partially addresses this through the sibling-file pattern:
+          the agent-facing <code>SKILL.md</code> is optimized for
+          context-window efficiency, while the designer-facing
+          <code>SKILL-quickguide.md</code> and the maintainer-facing
+          <code>SKILL-rationale.md</code> provide the narrative context
+          that humans need. But this mitigation introduces its own risk:
+          maintaining three parallel representations of the same skill
+          creates opportunities for drift between them, and the harness
+          has no automated mechanism to detect such drift.
+        </p>
+
+        <h4>Documenting a Moving Target</h4>
+
+        <p>
+          This chapter describes context-window mechanics and loading
+          strategies as they operate with current LLM architectures. But
+          LLM architectures evolve: context windows grow larger, attention
+          mechanisms change, retrieval-augmented generation introduces
+          new patterns for accessing external knowledge. A chapter that
+          treats context-window finitude as a permanent constraint may
+          become misleading as models with effectively unlimited context
+          become available.
+        </p>
+
+        <p>
+          More subtly, the act of documenting the reading process may
+          alter the process itself. If future model versions are trained
+          on documentation that describes how current models process
+          context, the documentation becomes self-referential in ways
+          that are difficult to predict. This is a form of the observer
+          effect: describing the system changes the system being described.
+        </p>
+
+        <h4>Pinned Anchors: Governance or Attention Management?</h4>
+
+        <p>
+          The pinned-anchor concept is presented in this chapter as a
+          governance mechanism: certain files are too important to lose,
+          so they are protected from compaction. But an alternative reading
+          frames pinned anchors as an attention-management hack -- a way
+          to force the agent to attend to specific content by ensuring
+          it remains in the context window regardless of its relevance
+          to the current task. Under this reading, pinning is less about
+          governance and more about the designer's anxiety that the agent
+          might forget something important. The distinction matters:
+          governance is principled (the constitution is pinned because
+          it represents immutable commitments), while attention management
+          is pragmatic (the constitution is pinned because the agent
+          might otherwise ignore it).
+        </p>
+
+        <p>
+          SEJA's design does not fully resolve this tension. The pinned
+          anchors list is justified in governance terms (each entry has
+          a stated rationale in <code>constraints.md</code>), but the
+          mechanism itself -- keeping content in the context window to
+          ensure the agent attends to it -- is fundamentally an
+          attention-management technique. Whether that technique serves
+          governance purposes or merely simulates them depends on whether
+          the agent's "attention" to pinned content is genuinely
+          deliberative or merely a statistical artifact of token proximity.
+          This is a question the harness's own theoretical framework
+          cannot answer, because it lies at the boundary between semiotic
+          engineering (which assumes intentional communication) and machine
+          learning (which operates through statistical pattern matching).
+        </p>
+      </section>
+
+      <section id="agent-reads-harness--references" data-diataxis="reference">
+        <h3>References</h3>
+        <ul>
+          <li>de Souza, C.S. (2005). <cite>The Semiotic Engineering of Human-Computer Interaction</cite>. Cambridge, MA: MIT Press.</li>
+          <li>Eco, U. (1976). <cite>A Theory of Semiotics</cite>. Bloomington: Indiana University Press.</li>
+        </ul>
+      </section>
+      </section>
+    </article>
+  </main>
+
+  <nav aria-label="volume navigation" class="volume-nav">
+    <a href="index.html">Back to Vol. 5: Foundations and Philosophy index</a>
+  </nav>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

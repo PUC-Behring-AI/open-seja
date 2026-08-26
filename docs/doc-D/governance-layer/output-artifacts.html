@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="4">
+  <meta name="doc-chapter" content="1">
+  <meta name="doc-phase" content="3">
+  <meta name="doc-status" content="draft">
+
+  <title>Output Artifacts -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 4: The Output and Governance Layer</a></li>
+      <li>Output Artifacts</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>Output Artifacts</h1>
+
+      <p>
+        Every skill invocation in SEJA produces artifacts -- plan files,
+        research logs, critique reports, reflections, and more. All of these
+        land in the output directory (<code>_output/</code>), which serves as
+        the single root for generated content. This chapter catalogs the
+        output subdirectories, documents the key files that provide
+        observability and traceability, explains how artifacts move through
+        their lifecycle, and flags common mistakes that can break the
+        governance model.
+      </p>
+
+
+      <!-- Section 1: The Output Directory -->
+      <section id="output-directory" data-diataxis="reference">
+        <h2>The Output Directory</h2>
+
+        <p>
+          The output directory (<code>_output/</code>) is defined by the
+          <code>OUTPUT_DIR</code> variable in the project's
+          <code>conventions.md</code>. Every subdirectory within it is owned
+          by a specific skill or set of skills, and each follows a consistent
+          naming pattern that embeds the brief number for traceability.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Directory</th>
+                <th>Contents</th>
+                <th>Producing skill(s)</th>
+                <th>Typical naming pattern</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>plans/</code></td>
+                <td>Implementation plans, progress logs, and QA review files</td>
+                <td><code>/plan</code>, <code>/implement</code></td>
+                <td><code>plan-NNNNNN-&lt;slug&gt;.md</code>, <code>implement-NNNNNN-qa-&lt;slug&gt;.md</code></td>
+              </tr>
+              <tr>
+                <td><code>proposals/</code></td>
+                <td>Lightweight change proposals that do not require a full plan</td>
+                <td><code>/plan</code> (proposal mode)</td>
+                <td><code>proposal-NNNNNN-&lt;slug&gt;.md</code></td>
+              </tr>
+              <tr>
+                <td><code>roadmaps/</code></td>
+                <td>Multi-plan roadmaps linking related plans into a sequenced delivery view</td>
+                <td><code>/plan</code> (roadmap mode)</td>
+                <td><code>roadmap-NNNNNN-&lt;slug&gt;.md</code></td>
+              </tr>
+              <tr>
+                <td><code>research-logs/</code></td>
+                <td>Structured research reports answering codebase or architecture questions</td>
+                <td><code>/research</code></td>
+                <td><code>research-NNNNNN-&lt;slug&gt;.md</code></td>
+              </tr>
+              <tr>
+                <td><code>inventories/</code></td>
+                <td>Codebase element catalogs matching a pattern (files, symbols, dependencies)</td>
+                <td><code>/research --inventory</code></td>
+                <td><code>inventory-NNNNNN-&lt;slug&gt;.md</code></td>
+              </tr>
+              <tr>
+                <td><code>user-tests/</code></td>
+                <td>Manual test plans generated from recent implementation plans</td>
+                <td><code>/critique</code> (user-test mode)</td>
+                <td><code>user-test-NNNNNN-&lt;slug&gt;.md</code></td>
+              </tr>
+              <tr>
+                <td><code>explained-behaviors/</code></td>
+                <td>Behavior explanation reports</td>
+                <td><code>/explain behavior</code></td>
+                <td><code>explain-NNNNNN-&lt;slug&gt;.md</code></td>
+              </tr>
+              <tr>
+                <td><code>explained-code/</code></td>
+                <td>Code explanation reports</td>
+                <td><code>/explain code</code></td>
+                <td><code>explain-NNNNNN-&lt;slug&gt;.md</code></td>
+              </tr>
+              <tr>
+                <td><code>explained-data-model/</code></td>
+                <td>Data model explanation reports</td>
+                <td><code>/explain data-model</code></td>
+                <td><code>explain-NNNNNN-&lt;slug&gt;.md</code></td>
+              </tr>
+              <tr>
+                <td><code>explained-architecture/</code></td>
+                <td>Architecture explanation reports</td>
+                <td><code>/explain architecture</code></td>
+                <td><code>explain-NNNNNN-&lt;slug&gt;.md</code></td>
+              </tr>
+              <tr>
+                <td><code>behavior-evolution/</code></td>
+                <td>Behavior evolution analysis reports tracking how a behavior changed over time</td>
+                <td><code>/explain evolution</code></td>
+                <td><code>evolution-NNNNNN-&lt;slug&gt;.md</code></td>
+              </tr>
+              <tr>
+                <td><code>reflections/</code></td>
+                <td>On-demand reflection reports anchored on specific artifacts</td>
+                <td><code>/reflect</code></td>
+                <td><code>reflection-NNNNNN-&lt;slug&gt;.md</code></td>
+              </tr>
+              <tr>
+                <td><code>onboarding-plans/</code></td>
+                <td>Tailored onboarding plans for new team members by role and expertise level</td>
+                <td><code>/onboard</code></td>
+                <td>Date-stamped subdirectories or <code>onboarding-NNNNNN-&lt;slug&gt;.md</code></td>
+              </tr>
+              <tr>
+                <td><code>communication/</code></td>
+                <td>Audience-tailored stakeholder material (presentations, summaries)</td>
+                <td><code>/communicate</code></td>
+                <td>Date-stamped subdirectories or <code>communication-NNNNNN-&lt;slug&gt;.md</code></td>
+              </tr>
+              <tr>
+                <td><code>critique-logs/</code></td>
+                <td>Critique reports, code review findings, preflight check results, validation reports</td>
+                <td><code>/critique</code></td>
+                <td><code>critique-NNNNNN-&lt;slug&gt;.md</code>, <code>check-NNNNNN-&lt;slug&gt;.md</code></td>
+              </tr>
+              <tr>
+                <td><code>docs/</code></td>
+                <td>Generated documentation output (HTML documentation collections, changelogs)</td>
+                <td><code>/document</code></td>
+                <td>Subdirectories per doc type (one per documentation collection)</td>
+              </tr>
+              <tr>
+                <td><code>qa-logs/</code></td>
+                <td>Logged Q&amp;A sessions for future reference</td>
+                <td><code>/qa-log</code></td>
+                <td>Mixed naming -- <code>advisory-NNNNNN-qa-&lt;slug&gt;.md</code>, <code>document-NNNNNN-qa-&lt;slug&gt;.md</code></td>
+              </tr>
+              <tr>
+                <td><code>generated-scripts/</code></td>
+                <td>One-off helper scripts generated during plan execution</td>
+                <td><code>/implement</code></td>
+                <td><code>&lt;descriptive-name&gt;.py</code>, <code>plan-NNNNNN-&lt;slug&gt;.py</code></td>
+              </tr>
+              <tr>
+                <td><code>tmp/</code></td>
+                <td>Session-scoped working memory, temporary helper scripts, and scratch files</td>
+                <td>Various (session notes managed by post-skill)</td>
+                <td><code>session-notes.md</code> and ad-hoc files</td>
+              </tr>
+              <tr>
+                <td><code>advisory-logs/</code></td>
+                <td>Legacy advisory log output (advisory reports from earlier harness versions)</td>
+                <td>Legacy advisory skill</td>
+                <td><code>advisory-NNNNNN-&lt;slug&gt;.md</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          All subdirectory paths are defined as variables in
+          <code>conventions.md</code> (e.g., <code>PLANS_DIR</code>,
+          <code>RESEARCH_DIR</code>, <code>REFLECTIONS_DIR</code>), making
+          them relocatable if a project overrides the output root.
+        </p>
+      </section>
+
+
+      <!-- Section 2: Key Files -->
+      <section id="key-files" data-diataxis="reference">
+        <h2>Key Files</h2>
+
+        <p>
+          Beyond the subdirectories, the output directory and the product
+          design directory contain several key files that provide
+          observability, traceability, and design-state tracking. These files
+          are registered in the Key Files table of
+          <code>conventions.md</code>.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>File</th>
+                <th>Purpose</th>
+                <th>Format</th>
+                <th>Maintained by</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>_output/briefs.md</code></td>
+                <td>Execution log of all skill invocations. Each brief records what skill ran, what it produced, and its outcome. The chronological record of harness activity.</td>
+                <td>Markdown (append-only)</td>
+                <td>Agent</td>
+              </tr>
+              <tr>
+                <td><code>_output/briefs-index.md</code></td>
+                <td>Lightweight briefs index with one-line summaries per brief. Enables fast lookup without reading the full briefs log.</td>
+                <td>Markdown</td>
+                <td>Agent</td>
+              </tr>
+              <tr>
+                <td><code>_output/INDEX.md</code></td>
+                <td>Single global artifact index. Maps every generated artifact to its brief number, type, and location.</td>
+                <td>Markdown</td>
+                <td>Agent</td>
+              </tr>
+              <tr>
+                <td><code>product-design/constitution.md</code></td>
+                <td>Project constitution -- immutable principles (tenets T1--T4) that constrain agent behavior. Cannot be overridden by any skill or plan.</td>
+                <td>Markdown</td>
+                <td>Human</td>
+              </tr>
+              <tr>
+                <td><code>product-design/product-design-as-coded.md</code></td>
+                <td>Unified implementation state. The agent-maintained mirror of what is actually built, as opposed to what was intended.</td>
+                <td>Markdown</td>
+                <td>Agent</td>
+              </tr>
+              <tr>
+                <td><code>product-design/product-design-changelog.md</code></td>
+                <td>As-built conceptual design changelog. Records when and why the as-coded state changed.</td>
+                <td>Markdown</td>
+                <td>Agent</td>
+              </tr>
+              <tr>
+                <td><code>product-design/product-design-as-intended.md</code></td>
+                <td>Unified working intent (sections 0--17) plus Decisions plus CHANGELOG. The designer's authoritative description of what SEJA should be.</td>
+                <td>Markdown</td>
+                <td>Human (markers)</td>
+              </tr>
+              <tr>
+                <td><code>product-design/ux-research-results.md</code></td>
+                <td>UX research: personas, problem scenarios, journeys, and CHANGELOG. Records the user research that grounds design decisions.</td>
+                <td>Markdown</td>
+                <td>Human (markers)</td>
+              </tr>
+              <tr>
+                <td><code>product-design/standards.md</code></td>
+                <td>Unified engineering standards governing code quality, testing, and implementation conventions.</td>
+                <td>Markdown</td>
+                <td>Human / Agent</td>
+              </tr>
+              <tr>
+                <td><code>product-design/design-standards.md</code></td>
+                <td>Unified design standards governing UX patterns, documentation structure, and communication conventions.</td>
+                <td>Markdown</td>
+                <td>Human / Agent</td>
+              </tr>
+              <tr>
+                <td><code>_output/tmp/session-notes.md</code></td>
+                <td>Session-scoped working memory. A scratchpad for cross-session persistence of notes, decisions, and context the agent needs to carry forward.</td>
+                <td>Markdown</td>
+                <td>Agent</td>
+              </tr>
+              <tr>
+                <td><code>_output/decision-digest.jsonl</code></td>
+                <td>Machine-readable decision index. Each line records a design decision with its rationale, alternatives considered, and outcome.</td>
+                <td>JSONL</td>
+                <td>Agent</td>
+              </tr>
+              <tr>
+                <td><code>_output/conversation-trace.jsonl</code></td>
+                <td>Append-only conversation trace log. Records every user-agent exchange outside of active skills, enabling session reconstruction and audit.</td>
+                <td>JSONL</td>
+                <td>Agent</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          The "Maintained by" column reflects a key governance distinction.
+          <strong>Agent</strong> files are written exclusively by skills and
+          lifecycle hooks -- humans should not hand-edit them (see
+          <a href="#common-mistakes">Common Mistakes</a>).
+          <strong>Human</strong> files are authored entirely by the designer.
+          <strong>Human (markers)</strong> files are authored by the designer
+          but receive structured lifecycle markers (STATUS, INCORPORATED,
+          DECISION_APPEND, CHANGELOG_APPEND) written by the agent via
+          <code>apply_marker.py</code> after explicit confirmation.
+        </p>
+      </section>
+
+
+      <!-- Section 3: Artifact Lifecycle -->
+      <section id="artifact-lifecycle" data-diataxis="explanation">
+        <h2>Artifact Lifecycle</h2>
+
+        <p>
+          SEJA artifacts are not static files -- they move through a
+          predictable lifecycle driven by the skill execution pipeline.
+          Understanding this lifecycle clarifies why certain files exist,
+          how they relate to each other, and what happens when a skill
+          completes.
+        </p>
+
+        <h3>Creation</h3>
+        <p>
+          Artifacts are created by skill execution. When a user invokes a
+          skill (e.g., <code>/plan</code>, <code>/research</code>,
+          <code>/reflect</code>), the skill writes its output to the
+          appropriate subdirectory under <code>_output/</code>. The file
+          name embeds the brief number assigned by pre-skill, which links
+          the artifact back to its entry in the briefs log.
+        </p>
+
+        <h3>Commit and Registration</h3>
+        <p>
+          After the skill completes, post-skill commits the new artifact to
+          version control and registers it in <code>_output/INDEX.md</code>.
+          The INDEX entry records the artifact's type, brief number, file
+          path, and a one-line summary. This ensures that every artifact
+          is discoverable through a single index, regardless of which
+          subdirectory it landed in.
+        </p>
+
+        <h3>The Briefs Log as Chronological Record</h3>
+        <p>
+          The briefs log (<code>_output/briefs.md</code>) is the
+          chronological backbone of the output directory. Each brief entry
+          records what skill ran, the parameters it received, the artifacts
+          it produced, and the outcome. Because briefs are append-only and
+          sequentially numbered, they provide a total ordering of all
+          harness activity. The lightweight briefs index
+          (<code>_output/briefs-index.md</code>) provides fast lookups into
+          this log without requiring the agent to read the entire file.
+        </p>
+
+        <h3>The Conversation Trace as Inter-Skill Record</h3>
+        <p>
+          Between skill invocations, the conversation trace
+          (<code>_output/conversation-trace.jsonl</code>) records every
+          user-agent exchange. Each entry carries a session ID, an event ID,
+          and a preceding-event-ID that chains entries into a directed
+          sequence. This trace fills the gap that the briefs log leaves:
+          while briefs capture skill executions, the conversation trace
+          captures the discussions, decisions, and context that happen
+          between skills.
+        </p>
+
+        <h3>The Session Scratchpad for Cross-Session Persistence</h3>
+        <p>
+          The session notes file (<code>_output/tmp/session-notes.md</code>)
+          serves as working memory that persists across Claude Code sessions.
+          Unlike the briefs log (which is a historical record) or the
+          conversation trace (which is an audit trail), the session
+          scratchpad is a living document that the agent reads at session
+          start and updates as needed. It carries forward context, open
+          questions, and in-progress state that would otherwise be lost
+          when a session ends.
+        </p>
+      </section>
+
+
+      <!-- Section 4: Common Mistakes -->
+      <section id="common-mistakes" data-diataxis="how-to">
+        <h2>Common Mistakes</h2>
+
+        <dl>
+          <dt>Hand-editing generated artifacts</dt>
+          <dd>
+            Constitution tenet T3 states that generated artifacts (plans,
+            research logs, reflections, as-coded files) are agent-maintained
+            and must never be hand-edited by the designer. Agents write them
+            via post-skill or designated skill steps only. Hand-editing
+            creates divergence between the artifact's content and the
+            machine-readable record (briefs, INDEX, decision digest),
+            which can cause validation scripts to report false drift.
+          </dd>
+
+          <dt>Deleting <code>_output/</code> files without understanding dependencies</dt>
+          <dd>
+            Artifacts in <code>_output/</code> are cross-referenced by the
+            briefs log, the artifact index, the decision digest, and
+            sometimes by other artifacts (e.g., a roadmap references its
+            constituent plans). Deleting an artifact without updating these
+            references leaves dangling pointers that confuse both the agent
+            and validation checks. If cleanup is needed, use
+            <code>/pending</code> to manage lifecycle transitions rather
+            than manual deletion.
+          </dd>
+
+          <dt>Confusing <code>briefs.md</code> with the session scratchpad</dt>
+          <dd>
+            The briefs log (<code>_output/briefs.md</code>) is an
+            append-only historical record of skill executions -- it is never
+            edited or truncated. The session scratchpad
+            (<code>_output/tmp/session-notes.md</code>) is a living working
+            memory document that is read and rewritten across sessions.
+            They serve fundamentally different purposes: the briefs log
+            answers "what happened," while the session scratchpad answers
+            "what do I need to remember right now." Writing working notes
+            into the briefs log or treating the scratchpad as a permanent
+            record both lead to confusion.
+          </dd>
+        </dl>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 4: The Output and Governance Layer</h2>
+    <ol>
+      <li aria-current="page">
+        <a href="output-artifacts.html">Output Artifacts</a>
+        <ul>
+          <li><a href="#output-directory">The Output Directory</a></li>
+          <li><a href="#key-files">Key Files</a></li>
+          <li><a href="#artifact-lifecycle">Artifact Lifecycle</a></li>
+          <li><a href="#common-mistakes">Common Mistakes</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="enforcement-architecture.html">Enforcement Architecture</a>
+      </li>
+      <li>
+        <a href="scripts-and-automation.html">Scripts and Automation</a>
+      </li>
+      <li>
+        <a href="maintenance-and-drift.html">Maintenance and Drift</a>
+      </li>
+      <li>
+        <a href="release-and-publishing.html">Release and Publishing</a>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Chapter navigation: Ch.1 omits Previous -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <span></span>
+    <a href="enforcement-architecture.html">Next: Enforcement Architecture</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="how-to">
+  <meta name="doc-volume" content="How-To Guides">
+  <meta name="doc-chapter" content="How to Define Design Intent">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>How to Define Design Intent -- SEJA Documentation</title>
+
+  <!-- CSS depth: 2 (sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../../index.html">Home</a>
+    <a href="../../tutorials/index.html">Tutorials</a>
+    <a href="../index.html">How-To Guides</a>
+    <a href="../../reference/index.html">Reference</a>
+    <a href="../../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../../index.html">Home</a></li>
+      <li><a href="../index.html">How-To Guides</a></li>
+      <li><a href="index.html">Skill-by-Skill Guides</a></li>
+      <li>How to Define Design Intent</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-howto">
+    <article>
+      <p class="vol-accent"><strong>how-to</strong></p>
+
+      <h1>How to Define Design Intent</h1>
+
+      <p>
+        Goal: establish or update your project's design intent -- stack,
+        conventions, domain model, conceptual design, standards, and the
+        metacommunication message. The <code>/design</code> skill owns design
+        intent; <code>/seja-setup</code> owns topology scaffolding. After
+        <code>/seja-setup</code> populates <code>product-design/conventions.md</code>
+        with stack definitions, <code>/design</code> generates the remaining
+        design-intent artifacts and amends <code>CLAUDE.md</code>.
+      </p>
+
+      <section id="when-to-use">
+        <h2>When to Use</h2>
+        <ul>
+          <li>Right after <code>/seja-setup</code>, to define design intent for a new project.</li>
+          <li>Anytime you want to update design foundations -- domain model, standards, or the metacommunication message.</li>
+          <li>When you want to jump straight to one section with <code>/design update &lt;section-slug&gt;</code>.</li>
+        </ul>
+        <aside class="callout-tip">
+          <p>
+            <strong>Not for</strong> topology scaffolding (use
+            <code>/seja-setup</code>), planning implementation (use
+            <code>/plan</code>), or checking drift between intent and code (use
+            <code>/explain drift</code>).
+          </p>
+        </aside>
+      </section>
+
+      <section id="required-inputs">
+        <h2>Required Inputs</h2>
+        <ul>
+          <li>A project where <code>/seja-setup</code> has already populated <code>product-design/conventions.md</code> (for the post-setup flow).</li>
+          <li>Optionally a pre-filled spec file for the non-interactive path, e.g. <code>/design specs/my-project.md</code>.</li>
+          <li>For a targeted update, a valid section slug: <code>stack</code>, <code>conceptual</code>, <code>metacomm</code>, <code>backend-standards</code>, <code>frontend-standards</code>, <code>ux-standards</code>, <code>ui-standards</code>, <code>i18n</code>, <code>security</code>, <code>testing</code>, <code>constitution</code>, or <code>full</code>.</li>
+        </ul>
+      </section>
+
+      <section id="step-by-step">
+        <h2>Step by Step</h2>
+
+        <ol>
+          <li>
+            <strong>Choose a mode.</strong>
+            <ul>
+              <li><strong>Interactive questionnaire (default)</strong> -- Recommended when you know your stack and want speed. NOT recommended when you have not yet formalized your idea.</li>
+              <li><strong>Interview (<code>--mode interview</code>)</strong> -- Recommended when you want to think out loud and let the skill synthesize structured outputs. NOT recommended when you already have a spec ready to feed in.</li>
+              <li><strong>From a spec file (<code>/design &lt;path&gt;</code>)</strong> -- Recommended when you have a pre-filled spec and want all artifacts generated without prompts.</li>
+              <li><strong>Generate a blank spec (<code>--generate-spec</code>)</strong> -- Recommended when you want to fill out the spec offline first.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Walk through the sections.</strong> In the default post-setup
+            flow, the skill skips Section 1 (stack already answered) and walks
+            through Section 0 (metacommunication) and Sections 2-5+ (conceptual
+            design, UX / visual design, standards, docs).
+            <br><em>Expected output:</em> the skill generates
+            <code>product-design/product-design-as-intended.md</code>,
+            <code>product-design/ux-research-results.md</code>,
+            <code>product-design/standards.md</code>,
+            <code>product-design/design-standards.md</code>,
+            <code>product-design/security-checklists.md</code>, and
+            <code>product-design/constitution.md</code>, and amends
+            <code>CLAUDE.md</code>.
+          </li>
+          <li>
+            <strong>Or target one section.</strong> Run
+            <code>/design update conceptual</code> (or any valid slug) to jump
+            directly to that section's update dialog, skipping the menu.
+          </li>
+          <li>
+            <strong>Review the generated intent.</strong> Read the generated files
+            end to end -- entity names, role labels, and the metacommunication
+            message are hardest to change once plans are written against them.
+          </li>
+        </ol>
+      </section>
+
+      <section id="expected-outputs">
+        <h2>Expected Outputs</h2>
+        <ul>
+          <li>A populated <code>product-design/</code> directory with intent, UX research, standards, and constitution files.</li>
+          <li>An amended <code>CLAUDE.md</code> reflecting the project's design.</li>
+          <li>A first-person metacommunication message ("I want you to ... so you can ...") captured in <code>product-design/product-design-as-intended.md</code>.</li>
+        </ul>
+      </section>
+
+      <section id="common-mistakes">
+        <h2>Common Mistakes</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th scope="col">Mistake</th><th scope="col">Better approach</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Using <code>/design</code> to scaffold directories or detect the stack.</td>
+                <td>Topology and stack detection belong to <code>/seja-setup</code>; <code>/design</code> owns design intent.</td>
+              </tr>
+              <tr>
+                <td>Editing the constitution as if it were agent-writable.</td>
+                <td><code>product-design/constitution.md</code> is Human-owned and never agent-altered. Edit it yourself.</td>
+              </tr>
+              <tr>
+                <td>Writing the metacommunication message in third person.</td>
+                <td>Use the first-person "I / you" convention -- it is the designer speaking to the user through the system.</td>
+              </tr>
+              <tr>
+                <td>Jumping to <code>/plan</code> before reviewing generated intent.</td>
+                <td>Read and adjust the design files first; corrections are cheap now and expensive after plans reference them.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="cross-references">
+        <h2>Cross-References</h2>
+        <ul>
+          <li><a href="seja-setup.html">How to Set Up the Harness</a> -- scaffold topology before defining intent.</li>
+          <li><a href="plan.html">How to Make a Plan</a> -- or <code>/plan --roadmap</code> to generate a development roadmap from the new design.</li>
+          <li><a href="../design-intent.html">Design Intent Maintenance</a> (Ch. 4) -- maintain intent over time with markers and Decision records.</li>
+          <li><a href="../../explanation/dual-thesis.html">The Dual Thesis</a> (Vol. 4) -- why design intent is a first-class artifact.</li>
+        </ul>
+      </section>
+
+    </article>
+
+    <nav aria-label="chapter navigation">
+      <a href="explain.html">Back: How to Explain Behavior or Code</a>
+      <a href="plan.html">Next: How to Make a Plan</a>
+    </nav>
+
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../../explanation/dual-thesis.html">The Dual Thesis</a> -- why design intent is a first-class, human-authored artifact.</li>
+        <li><a href="../../explanation/emt.html">The Extended Metacommunication Template</a> -- the questionnaire behind the metacommunication message.</li>
+        <li><a href="../../tutorials/first-metacommunication.html">Writing Your First Metacommunication Message</a> -- a hands-on walkthrough of composing the message.</li>
+      </ul>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#when-to-use">When to Use</a></li>
+      <li><a href="#required-inputs">Required Inputs</a></li>
+      <li><a href="#step-by-step">Step by Step</a></li>
+      <li><a href="#expected-outputs">Expected Outputs</a></li>
+      <li><a href="#common-mistakes">Common Mistakes</a></li>
+      <li><a href="#cross-references">Cross-References</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../../index.html">Collection Index</a>
+      <a href="../../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T20:50:00Z</p>
+  </footer>
+
+</body>
+</html>

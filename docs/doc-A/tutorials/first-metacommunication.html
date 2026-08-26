@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="tutorial">
+  <meta name="doc-volume" content="Tutorials">
+  <meta name="doc-chapter" content="Writing Your First Metacommunication Message">
+  <meta name="doc-phase" content="stable">
+  <meta name="doc-status" content="published">
+
+  <title>Writing Your First Metacommunication Message -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element (WCAG 2.4.1) -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Volume navigation bar -->
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="../how-to/index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Tutorials</a></li>
+      <li>Writing Your First Metacommunication Message</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content area -->
+  <main id="main-content" class="chapter-content vol-tutorials">
+    <article>
+      <!-- Diataxis type badge -->
+      <p class="vol-accent"><strong>tutorial</strong></p>
+
+      <h1>Writing Your First Metacommunication Message</h1>
+
+      <p>
+        In <a href="first-project.html">Chapter 1</a>, you answered a question
+        about your design intent using "I" and "you" phrasing. That answer
+        became your metacommunication message -- a first-person statement from
+        you (the designer) to your user about what you built and why. This
+        tutorial explores what that message is, why it matters, and how to
+        write a good one.
+      </p>
+
+      <!-- Prerequisites -->
+      <section id="prerequisites">
+        <h2>Prerequisites</h2>
+
+        <ul>
+          <li>A working SEJA project (complete <a href="first-project.html">Chapter 1</a> first)</li>
+          <li>The to-do app project (<code>my-todo-app</code>) open in your terminal</li>
+        </ul>
+      </section>
+
+      <!-- What is a metacommunication message -->
+      <section id="what-is-metacommunication">
+        <h2>What Is a Metacommunication Message?</h2>
+
+        <p>
+          A metacommunication message is communication <em>about</em>
+          communication. When you design software, you are sending a message to
+          your users through the interface. The metacommunication message makes
+          that message explicit: it is a first-person statement where you, the
+          designer, tell the user what you intended them to understand and
+          experience.
+        </p>
+
+        <p>
+          In semiotic engineering -- the theoretical foundation behind SEJA --
+          every piece of software is a one-shot message from designer to user,
+          delivered through the interface. The designer is not present when the
+          user interacts with the software. The interface must communicate on the
+          designer's behalf. The metacommunication message captures what you want
+          that communication to say.
+        </p>
+
+        <aside class="callout-tip">
+          <h3>What just happened?</h3>
+          <p>
+            You have just encountered the core idea behind SEJA's design layer.
+            Most agent harnesses track what the code does. SEJA also tracks what
+            the designer <em>intends the code to communicate</em>. This is not
+            just a philosophical distinction -- it changes how the agent plans,
+            implements, and reviews your code. When the agent reads your
+            metacommunication message, it understands not just the feature
+            requirements but the user experience you are trying to create. For a
+            deeper exploration, see
+            <a href="../explanation/semiotic-engineering.html#the-metacommunication-template">
+            The Semiotic Engineering Foundation</a>.
+          </p>
+        </aside>
+      </section>
+
+      <!-- The I/you phrasing convention -->
+      <section id="the-i-you-convention">
+        <h2>The I/You Phrasing Convention</h2>
+
+        <p>
+          SEJA's metacommunication messages follow a strict phrasing convention:
+          <strong>"I"</strong> is the designer, <strong>"you"</strong> is the
+          user. This is not arbitrary -- it forces you to think from two
+          perspectives simultaneously: what you designed and what the user
+          experiences.
+        </p>
+
+        <h3>Before and after comparison</h3>
+
+        <p>
+          Consider how the same design intent reads in third person versus
+          first person:
+        </p>
+
+        <h4>Third-person (typical spec language)</h4>
+
+        <blockquote>
+          <p>
+            The application shall display tasks sorted by priority. Users can
+            filter tasks by status. The system supports three priority levels.
+          </p>
+        </blockquote>
+
+        <h4>First-person metacommunication (SEJA convention)</h4>
+
+        <blockquote>
+          <p>
+            When you open the task list, I show your tasks sorted by priority
+            because I want you to see the most urgent items first. I have given
+            you three priority levels -- high, medium, and low -- because I
+            believe more granularity would slow you down without helping you
+            decide. I let you filter by status so you can focus on what is
+            actionable right now.
+          </p>
+        </blockquote>
+
+        <p>
+          The first-person version captures three things the third-person
+          version misses:
+        </p>
+
+        <ul>
+          <li><strong>Intent</strong>: <em>why</em> tasks are sorted by priority (to surface urgency)</li>
+          <li><strong>Trade-off</strong>: <em>why</em> only three levels (more granularity would slow users down)</li>
+          <li><strong>User benefit</strong>: <em>what</em> the user gains from the filter (focus on actionable items)</li>
+        </ul>
+      </section>
+
+      <!-- Writing your message -->
+      <section id="writing-your-message">
+        <h2>Writing Your Message</h2>
+
+        <p>
+          Open the design skill to update your metacommunication message:
+        </p>
+
+        <pre><code><span class="token-command">/design</span> update metacomm</code></pre>
+
+        <p>
+          SEJA jumps directly to the metacommunication section. You will see your
+          current message and an invitation to revise it.
+        </p>
+
+        <h3>Step 1: Start with what the user sees</h3>
+
+        <p>
+          Begin your message by describing the first thing the user encounters.
+          Use "When you..." to anchor the statement in the user's experience:
+        </p>
+
+        <pre><code><span class="token-string">"When you open my to-do app, I show you a clean list of your
+tasks, sorted by priority. I want you to know at a glance
+what needs your attention first."</span></code></pre>
+
+        <h3>Step 2: Explain your design decisions</h3>
+
+        <p>
+          For each major decision, state what you chose and why. Use "I have
+          designed..." or "I chose..." to make the decision explicit:
+        </p>
+
+        <pre><code><span class="token-string">"I have designed the priority system with only three levels
+-- high, medium, and low -- because I believe that finer
+granularity creates decision fatigue without improving
+your ability to prioritize."</span></code></pre>
+
+        <h3>Step 3: Address what you chose not to do</h3>
+
+        <p>
+          The most revealing part of a metacommunication message is what you
+          decided <em>against</em>. State the alternative and why you rejected it:
+        </p>
+
+        <pre><code><span class="token-string">"I chose not to support due-date-based sorting by default,
+because I want you to think about importance, not just
+urgency. You can still see due dates, but priority comes
+first."</span></code></pre>
+
+        <h3>Expected output</h3>
+
+        <p>
+          After you confirm your revised message, SEJA updates section 11 of
+          <code>product-design/product-design-as-intended.md</code> with your
+          new metacommunication text. You can verify by opening the file and
+          looking for the metacommunication section.
+        </p>
+
+        <aside class="callout-tip">
+          <h3>What just happened?</h3>
+          <p>
+            You just wrote a metacommunication message that captures not just
+            what your to-do app does, but what you intend it to <em>say</em>
+            to the user through its interface. The "I/you" convention is not
+            just a writing style -- it is a cognitive tool. By forcing you to
+            speak as the designer addressing the user, it surfaces assumptions,
+            trade-offs, and values that third-person specs leave implicit.
+          </p>
+          <p>
+            This message is stored in
+            <code>product-design/product-design-as-intended.md</code> and is
+            read by the agent at the start of every planning session. When the
+            agent plans a new feature, it checks the feature against your
+            metacommunication message to ensure consistency. When the agent
+            reviews code, it evaluates whether the implementation communicates
+            what you intended.
+          </p>
+          <p>
+            The theoretical basis for this approach comes from Clarisse de
+            Souza's semiotic engineering, where software is understood as a
+            designed message from the designer to the user. For the full
+            theoretical background, see
+            <a href="../explanation/semiotic-engineering.html#software-as-designed-communication">
+            The Semiotic Engineering Foundation</a>.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Common mistakes -->
+      <section id="common-mistakes">
+        <h2>Common Mistakes</h2>
+
+        <p>
+          When writing metacommunication messages, avoid these patterns:
+        </p>
+
+        <dl>
+          <dt>Writing a feature list instead of a message</dt>
+          <dd>
+            <strong>Avoid</strong>: <em>"The app has tasks, tags, priorities,
+            and filters."</em><br>
+            <strong>Instead</strong>: <em>"I give you tasks you can tag and
+            prioritize because I want you to organize your work the way that
+            makes sense to you."</em>
+          </dd>
+
+          <dt>Forgetting the "why"</dt>
+          <dd>
+            <strong>Avoid</strong>: <em>"When you open the app, I show you
+            your tasks."</em><br>
+            <strong>Instead</strong>: <em>"When you open the app, I show you
+            your tasks sorted by priority because I want the most urgent
+            items to catch your eye immediately."</em>
+          </dd>
+
+          <dt>Using third-person language</dt>
+          <dd>
+            <strong>Avoid</strong>: <em>"Users can create tasks with
+            priorities."</em><br>
+            <strong>Instead</strong>: <em>"I let you create tasks with
+            priorities so you can decide what matters most."</em>
+          </dd>
+        </dl>
+      </section>
+
+      <!-- Summary -->
+      <section id="summary">
+        <h2>Summary</h2>
+
+        <p>In this tutorial, you:</p>
+
+        <ol>
+          <li>Learned what a metacommunication message is and why it matters</li>
+          <li>Understood the I/you phrasing convention and its cognitive purpose</li>
+          <li>Wrote a revised metacommunication message for your to-do app</li>
+          <li>Saw how the message is stored and used by the agent</li>
+        </ol>
+
+        <p>
+          The metacommunication message is the foundation of SEJA's design
+          layer. Every plan the agent creates, every review it performs, and
+          every documentation it generates is grounded in what you said you
+          intended to communicate. The next tutorial introduces a different
+          kind of deliberation: a structured council debate where multiple
+          expert perspectives argue about your design decisions.
+        </p>
+      </section>
+
+    </article>
+
+    <!-- Sequential chapter navigation -->
+    <nav aria-label="chapter navigation">
+      <a href="lifecycle-in-one-feature.html">Previous: The Lifecycle in One Feature</a>
+      <a href="first-council-debate.html">Next: Your First Council Debate</a>
+    </nav>
+
+    <!-- Cross-volume related chapters -->
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../explanation/semiotic-engineering.html#the-metacommunication-template">The Semiotic Engineering Foundation</a> -- the theoretical basis for treating a metacommunication message as a designed message</li>
+        <li><a href="../explanation/emt.html">The Extended Metacommunication Template</a> -- the four lifecycle dimensions and ethical questions the message answers</li>
+        <li><a href="../how-to/design-intent.html">Design Intent Maintenance</a> -- the goal-first guide to keeping this message accurate as your project evolves</li>
+      </ul>
+    </nav>
+  </main>
+
+  <!-- Sidebar table of contents -->
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#prerequisites">Prerequisites</a></li>
+      <li><a href="#what-is-metacommunication">What Is a Metacommunication Message?</a></li>
+      <li><a href="#the-i-you-convention">The I/You Phrasing Convention</a></li>
+      <li><a href="#writing-your-message">Writing Your Message</a></li>
+      <li><a href="#common-mistakes">Common Mistakes</a></li>
+      <li><a href="#summary">Summary</a></li>
+    </ul>
+  </aside>
+
+  <!-- Footer -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T12:00:00Z</p>
+  </footer>
+
+</body>
+</html>

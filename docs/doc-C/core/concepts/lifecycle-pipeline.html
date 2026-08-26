@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="The canonical path through the SEJA harness: skill invocation wrapped by the pre-skill and post-skill pipelines, and a decision matrix for when to reach for each lifecycle skill.">
+  <title>The Lifecycle Pipeline — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/concepts sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>The Lifecycle Pipeline</h1>
+      <p>How every skill is wrapped by a pre-skill and post-skill pipeline, and how to choose which skill to run.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Concepts</a></li>
+        <li aria-current="page">The Lifecycle Pipeline</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-explanation">explanation</span>
+          <span class="badge core-concepts">concepts</span>
+        </p>
+
+        <section data-diataxis="explanation" aria-labelledby="the-canonical-path">
+          <h2 id="the-canonical-path">The canonical path</h2>
+          <p>
+            SEJA is a governance layer for Claude Code: it structures AI-assisted
+            software work as a <strong>lifecycle</strong>, not a single free-form
+            conversation. The canonical path runs
+            <code>/research</code> (or <code>/explain</code>) &rarr;
+            <code>/design</code> | <code>/plan</code> &rarr;
+            <code>/implement</code> &rarr; <code>/critique</code> &rarr;
+            <code>/document</code> | <code>/communicate</code> &rarr;
+            <code>/reflect</code> &mdash; validate before you communicate. Each
+            stage is a <em>skill</em>, and every user-facing skill shares the same
+            shape: it opens with the pre-skill pipeline and closes with the
+            post-skill pipeline. The skill's own work sits in between.
+          </p>
+          <p>
+            This uniform wrapper is the harness's core value. Skills may opt out of
+            <em>non-critical</em> pipeline stages, but no skill may skip pre-skill
+            entirely: lifecycle discipline is non-negotiable (constitution
+            principle T1). The sections below describe the conceptual model &mdash;
+            what the two pipelines do and why &mdash; and a matrix for choosing a
+            skill.
+          </p>
+          <aside class="callout-tip">
+            <strong>Boundary.</strong> This page covers the conceptual model of the
+            pipeline. The Reference Core sibling
+            <code>pipeline-stages.html</code> is the exhaustive stage-by-stage
+            lookup table; consult it when you need the precise behaviour, inputs,
+            and skip rules of an individual stage.
+          </aside>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="skill-invocation">
+          <h2 id="skill-invocation">Skill invocation: the pre-skill / skill / post-skill sandwich</h2>
+          <p>
+            A skill invocation is always three phases. Pre-skill loads the context
+            the skill needs and logs the request; the skill does its work; post-skill
+            records the outcome, aligns state, and commits. The designer types one
+            command (for example <code>/plan Add a tagging feature</code>) and the
+            harness runs all three phases in order.
+          </p>
+          <p>
+            Two internal hooks &mdash; <code>pre-skill</code> and
+            <code>post-skill</code> &mdash; carry this out. They are not invoked
+            directly by designers; each user-facing skill calls them at its start
+            and end. Because the wrapper is uniform, every skill inherits the same
+            governance guarantees: the brief is logged, the constitution is loaded,
+            pending work is surfaced, and the result is committed.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="the-pre-skill-pipeline">
+          <h2 id="the-pre-skill-pipeline">The pre-skill pipeline: six stages</h2>
+          <p>
+            Pre-skill runs a pipeline of six composable stages. Three are
+            <strong>critical</strong> (they always run); the rest are
+            <strong>non-critical</strong> (error-isolated &mdash; they warn and
+            continue on failure &mdash; and skippable when a skill lists them in its
+            <code>metadata.skip_stages</code>).
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>The six pre-skill stages, in execution order.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Stage</th>
+                  <th scope="col">Criticality</th>
+                  <th scope="col">What it does</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">help</th>
+                  <td>Non-critical</td>
+                  <td>If the skill's arguments contain <code>--help</code>, show the skill's quick guide and stop before any other processing.</td>
+                </tr>
+                <tr>
+                  <th scope="row">brief-log</th>
+                  <td>Critical</td>
+                  <td>Insert a <code>STARTED</code> entry (timestamp, skill name, brief) at the top of the briefs log, link it into the conversation trace, and persist the brief for post-skill to consume.</td>
+                </tr>
+                <tr>
+                  <th scope="row">budget-eval</th>
+                  <td>Critical</td>
+                  <td>Read the skill's <code>context_budget</code> (light, standard, or heavy) and load briefs accordingly; run orphan-detection and, at the heavy tier, a compaction warning.</td>
+                </tr>
+                <tr>
+                  <th scope="row">pending-check</th>
+                  <td>Non-critical</td>
+                  <td>Print the pending-actions banner (overdue human actions). Purely informational; never blocks the invocation.</td>
+                </tr>
+                <tr>
+                  <th scope="row">ref-load</th>
+                  <td>Critical</td>
+                  <td>Load the mandatory references (conventions, permissions, constraints) plus the skill's declared references, eagerly or on demand.</td>
+                </tr>
+                <tr>
+                  <th scope="row">constitution</th>
+                  <td>Non-critical</td>
+                  <td>Read and inject <code>product-design/constitution.md</code> so the immutable principles govern the rest of the invocation.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            The tiered budget in <code>budget-eval</code> is how the harness keeps
+            context lean. A <code>light</code> skill loads only the brief log and
+            skips ref-load and constitution; a <code>standard</code> skill loads a
+            briefs <em>index</em> rather than the full log; a <code>heavy</code>
+            skill loads the full briefs log with recency windowing plus the plan
+            index. The <code>orphan-check</code> and <code>compaction-check</code>
+            legacy IDs are now sub-steps of <code>budget-eval</code>.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="the-post-skill-pipeline">
+          <h2 id="the-post-skill-pipeline">The post-skill pipeline: closing the loop</h2>
+          <p>
+            Post-skill is where the invocation's results become durable state. It
+            marks the brief <code>DONE</code>, records a telemetry entry, aligns the
+            implementation record with what was built, logs the Q&amp;A, verifies
+            the commit scope, regenerates indexes, and commits &mdash; then offers
+            a contextual next-step suggestion. The pipeline is
+            <strong>checkpointed</strong>: if it crashes partway, a checkpoint file
+            lets a re-run resume from the step after the last completed one.
+          </p>
+          <p>Conceptually, post-skill does four kinds of work:</p>
+          <ul>
+            <li>
+              <strong>Brief and telemetry closure.</strong> Flip the matching
+              <code>STARTED</code> brief to <code>DONE</code> and append a telemetry
+              record so the harness can measure its own behaviour.
+            </li>
+            <li>
+              <strong>State alignment</strong> (only after <code>/implement</code>).
+              Update <code>product-design-as-coded.md</code> to reflect what was
+              built, and propose flipping <code>STATUS</code> markers on the
+              corresponding as-intended items &mdash; always via
+              <code>apply_marker.py</code> and always after an AskUserQuestion
+              confirmation.
+            </li>
+            <li>
+              <strong>Documentation and pending work.</strong> Offer to run
+              <code>/document</code> when a plan declared documentation needs, and
+              file pending actions (verify-as-coded, test-implementation,
+              update-documentation) so nothing that needs a human is silently
+              dropped.
+            </li>
+            <li>
+              <strong>Commit and hand-off.</strong> Run a git-state safety check and
+              a commit-scope check, commit the affected files, and suggest the next
+              skill on the canonical path.
+            </li>
+          </ul>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="when-to-use-each-skill">
+          <h2 id="when-to-use-each-skill">A decision matrix: which skill next</h2>
+          <p>
+            The pipeline is the same for every skill; what varies is which skill you
+            reach for. Match your intent to the canonical path:
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>Choosing a lifecycle skill by intent.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Your intent</th>
+                  <th scope="col">Skill</th>
+                  <th scope="col">Where it sits</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Investigate what you are about to change; ask a question about the codebase or design</th>
+                  <td><code>/research</code></td>
+                  <td>Entry point</td>
+                </tr>
+                <tr>
+                  <th scope="row">Understand behaviour, code, architecture, or spec drift with diagrams and analogies</th>
+                  <td><code>/explain</code></td>
+                  <td>Entry point (alternative)</td>
+                </tr>
+                <tr>
+                  <th scope="row">Change design intent &mdash; stack, conventions, domain model, or conceptual design</th>
+                  <td><code>/design</code></td>
+                  <td>Intent branch</td>
+                </tr>
+                <tr>
+                  <th scope="row">Decide how to build something without changing intent</th>
+                  <td><code>/plan</code></td>
+                  <td>No-intent-change branch</td>
+                </tr>
+                <tr>
+                  <th scope="row">Execute an existing plan to add a feature, fix a bug, or refactor</th>
+                  <td><code>/implement</code></td>
+                  <td>Build</td>
+                </tr>
+                <tr>
+                  <th scope="row">Validate: run checks, code review, smoke tests, preflight, or harness health</th>
+                  <td><code>/critique</code></td>
+                  <td>Validate (before you communicate)</td>
+                </tr>
+                <tr>
+                  <th scope="row">Generate or update user and developer documentation</th>
+                  <td><code>/document</code></td>
+                  <td>Communicate branch</td>
+                </tr>
+                <tr>
+                  <th scope="row">Produce tailored material for a specific stakeholder audience</th>
+                  <td><code>/communicate</code></td>
+                  <td>Communicate branch</td>
+                </tr>
+                <tr>
+                  <th scope="row">Reflect on what was built or how you worked</th>
+                  <td><code>/reflect</code></td>
+                  <td>Close the loop</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            The split after the entry point is the key decision: branch into
+            <code>/design</code> when the change requires <em>intent to change</em>,
+            or into <code>/plan</code> when it does not. On the first iteration of a
+            project, <code>/seja-setup</code> hands off to <code>/design</code> to
+            configure the project; from the second iteration onward, start with
+            <code>/research</code> (or <code>/explain</code>).
+          </p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="marker-system.html">The Marker System</a> &mdash; the operational mechanics post-skill uses to write lifecycle state.</li>
+            <li><a href="enforcement-layers.html">Enforcement Layers</a> &mdash; how the pipeline's guarantees are actually enforced.</li>
+            <li><a href="../reference/pipeline-stages.html">Pipeline Stages (reference)</a> &mdash; the exhaustive lookup table for every pre-skill stage and post-skill step.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Concepts</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/concepts sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

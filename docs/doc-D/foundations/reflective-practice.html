@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-volume" content="5">
+  <meta name="doc-chapter" content="4">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+  <meta name="quality" content="publication">
+
+  <title>Reflective Practice -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 5: Foundations and Philosophy</a></li>
+      <li>Reflective Practice</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>Reflective Practice</h1>
+
+      <p>
+        Donald Schon's <cite>The Reflective Practitioner</cite> (1983) introduced
+        a framework for understanding how professionals think in action that
+        has shaped fields from education to architecture. His central insight
+        is that competent practitioners do not simply apply theory to practice;
+        they engage in a continuous conversation with the situation, adjusting
+        their understanding as they work. This chapter traces three registers
+        of reflection that Schon identifies, shows how SEJA operationalizes
+        each through its skill pipeline and reference architecture, and
+        engages with serious counter-readings from Eraut and Boud that
+        question whether structured systems can genuinely foster reflective
+        practice or merely produce its institutional appearance.
+      </p>
+
+      <section id="three-registers" data-diataxis="explanation">
+        <h2>Three Registers of Reflection</h2>
+
+        <p>
+          Schon (1983, pp. 49-69) distinguishes two primary registers of
+          professional reflection. A third -- knowing-in-action -- operates
+          beneath conscious awareness but is foundational to both. Together,
+          these three registers describe the full spectrum of professional
+          intelligence.
+        </p>
+
+        <h3>Knowing-in-Action</h3>
+
+        <p>
+          Before a practitioner reflects on anything, they already know a
+          great deal. Schon (1983, pp. 49-56) calls this <em>knowing-in-action</em>:
+          the tacit expertise that shapes practice without conscious thought.
+          An experienced software designer does not deliberate about whether
+          to validate user input -- the practice is embedded in their
+          repertoire. Knowing-in-action is not ignorance; it is knowledge
+          that has become so deeply internalized that it no longer requires
+          deliberation.
+        </p>
+
+        <p>
+          In SEJA, knowing-in-action takes an unusual form. The harness
+          encodes accumulated design knowledge in its reference files and
+          rules: <code>product-design/constitution.md</code> captures
+          immutable principles, <code>.claude/references/general/constraints.md</code>
+          codifies behavioral guardrails, and path-scoped rules in
+          <code>.claude/rules/</code> encode domain-specific conventions.
+          When the agent loads these files via pre-skill's ref-load stage,
+          it acquires what functions as a form of knowing-in-action -- a
+          repertoire of design knowledge that shapes its behavior without
+          per-instance deliberation. The agent does not decide afresh in
+          each session whether to follow the constitution; it operates
+          within the constitution as a structural given.
+        </p>
+
+        <h3>Reflection-in-Action</h3>
+
+        <p>
+          When the smooth flow of knowing-in-action encounters surprise --
+          an unexpected result, a design that does not behave as anticipated,
+          a requirement that resists the standard approach -- the practitioner
+          shifts to <em>reflection-in-action</em> (Schon 1983, pp. 56-69).
+          This is thinking while doing: the practitioner reframes the
+          problem, tries a new approach, and observes the consequences,
+          all within the same episode of practice. The key feature of
+          reflection-in-action is its immediacy -- it happens in the midst
+          of the work, not after it.
+        </p>
+
+        <p>
+          SEJA operationalizes a structural analogue of reflection-in-action
+          during <code>/research</code> and <code>/plan</code>. When the
+          agent encounters a design question during research, it may invoke
+          a council debate -- five expert archetypes offering competing
+          interpretations of the same evidence (see
+          <a href="abduction-plural-readings.html">Abduction and Plural Readings</a>).
+          During planning, the agent compares its proposed implementation
+          against design intent, surfacing mismatches between what it is
+          about to build and what the designer has specified. These are not
+          retrospective reviews; they occur within the active flow of the
+          skill, shaping the work as it unfolds.
+        </p>
+
+        <h3>Reflection-on-Action</h3>
+
+        <p>
+          <em>Reflection-on-action</em> (Schon 1983, pp. 61-62) occurs after
+          the episode of practice is complete. The practitioner steps back
+          and examines what happened: what worked, what surprised them, what
+          they would do differently. Unlike reflection-in-action, which
+          operates under the pressure of the ongoing situation,
+          reflection-on-action has the luxury of temporal distance.
+        </p>
+
+        <p>
+          SEJA's explicit <code>/reflect</code> skill is the primary
+          operationalization of reflection-on-action. After completing a
+          block of implementation or research work, the designer invokes
+          <code>/reflect</code> to review specific artifacts -- plans,
+          research logs, or a time window of activity. The skill structures
+          this review through two lenses: a <em>product lens</em> (what
+          was built as a thing in the world) and a <em>practice lens</em>
+          (how the designer worked as a practitioner). The resulting
+          reflection report captures the designer's own words verbatim,
+          preserving the authenticity of their retrospective judgment.
+          For practical coverage of the skill's modes and parameters, see
+          <a href="../execution-layer/skills-in-depth.html#reflect">Skills In Depth</a>.
+        </p>
+
+        <figure>
+          <pre><code>Knowing-in-action     Reference files, rules, constitution
+        │                 (encoded repertoire -- shapes practice
+        │                  without per-instance deliberation)
+        ▼
+Reflection-in-action  /research council debate, /plan gap detection
+        │                 (reframing within the active flow)
+        │
+        ▼
+Reflection-on-action  /reflect skill, briefs log, /critique
+                          (stepping back after the episode)</code></pre>
+          <figcaption>
+            Schon's three registers mapped to SEJA lifecycle components.
+            The vertical flow represents increasing temporal distance from
+            the action.
+          </figcaption>
+        </figure>
+      </section>
+
+      <section id="seja-operationalization" data-diataxis="explanation">
+        <h2>SEJA Operationalization</h2>
+
+        <p>
+          The <code>/reflect</code> skill is SEJA's most explicit
+          operationalization of Schon's framework. It offers three modes,
+          each providing a different depth of reflective engagement.
+        </p>
+
+        <h3>Conversational Mode (Default)</h3>
+
+        <p>
+          The default mode is a structured debrief. The skill asks the
+          designer to select artifacts to reflect on -- recent plans, research
+          reports, a specific artifact by ID, a time window, or a free-form
+          topic. It then summarizes the chosen artifacts, asks the designer
+          to choose a lens (product, practice, or both), and poses a single
+          open-ended question:
+        </p>
+
+        <dl>
+          <dt>Product lens</dt>
+          <dd>"Looking at these, what stands out about what you built -- what worked, what surprised you, or what is missing?"</dd>
+
+          <dt>Practice lens</dt>
+          <dd>"Looking at these, what stands out about how you worked -- what would you do differently as a practitioner?"</dd>
+        </dl>
+
+        <p>
+          The designer's response is recorded verbatim. This is a
+          deliberate design choice: the reflection report is a record of
+          the designer's own thinking, not the agent's analysis of it.
+        </p>
+
+        <h3>Deep Mode (<code>--deep</code>)</h3>
+
+        <p>
+          Deep mode extends conversational reflection with data
+          visualization. It reads telemetry and briefs within a time
+          window, optionally filtered by a scope keyword, and produces
+          three outputs: an event matrix visualization (showing skill
+          invocations over time), a transition graph (showing how skills
+          flow into each other), and a practice evolution narrative
+          written in past-tense chronicle form. Deep mode is exclusively
+          practice-oriented -- it surfaces how the designer worked over
+          time, not what they built. The narrative ends with a hand-off
+          paragraph pointing to <code>/research</code>, maintaining the
+          non-prescriptive boundary: the narrative describes patterns
+          but does not recommend actions.
+        </p>
+
+        <h3>Telemetry Mode (<code>--telemetry</code>)</h3>
+
+        <p>
+          Telemetry mode applies five statistical analysis primitives to
+          the telemetry log:
+        </p>
+
+        <dl>
+          <dt>Sequence mining</dt>
+          <dd>Identifies recurring skill invocation sequences that may indicate habitual patterns or established workflows.</dd>
+
+          <dt>Duration anomalies</dt>
+          <dd>Flags skill invocations whose duration deviates significantly from the baseline, potentially indicating either difficulty or unusually smooth execution.</dd>
+
+          <dt>Revision rate</dt>
+          <dd>Tracks how often the designer revises skill outputs. (In V1, this primitive degrades gracefully -- the measurement field exists but is not yet populated.)</dd>
+
+          <dt>Stuck loops</dt>
+          <dd>Detects repeated invocations of the same skill with similar briefs, which may indicate the designer is cycling without making progress.</dd>
+
+          <dt>Decision reversals</dt>
+          <dd>Identifies cases where a later decision contradicts an earlier one, surfacing potential design uncertainty or evolving understanding.</dd>
+        </dl>
+
+        <p>
+          Each primitive produces observation sentences that the orchestrator
+          embeds verbatim into the report. The observations describe what
+          the data shows; they do not prescribe what the designer should do
+          about it.
+        </p>
+
+        <h3>The Non-Prescriptive Rule</h3>
+
+        <p>
+          Across all three modes, <code>/reflect</code> operates under a
+          strictly non-prescriptive rule: the skill writes observations and
+          the designer's own words, never prescriptions. The generated
+          report must not contain phrases like "you should," "consider
+          changing," or "we recommend." This rule is enforced by automated
+          tests that scan generated reports for forbidden substrings.
+        </p>
+
+        <p>
+          The non-prescriptive rule is not merely a stylistic preference.
+          It reflects a theoretical commitment to Schon's account of
+          reflective practice: genuine reflection is the practitioner's own
+          act of reframing, not an external authority's instructions about
+          what to think. If the <code>/reflect</code> skill told the designer
+          what conclusions to draw, it would replace reflective practice
+          with doctrinal delivery -- precisely the pattern Schon critiques
+          in what he calls the "technical rationality" model of professional
+          knowledge (Schon 1983, pp. 21-49). By recording the designer's
+          words verbatim and presenting data without recommendations, the
+          skill creates structural conditions for reflection while leaving
+          the reflective act itself to the practitioner.
+        </p>
+      </section>
+
+      <section id="critical-counter-reading" data-diataxis="explanation">
+        <h2>Critical Counter-Reading</h2>
+
+        <p>
+          Schon's framework has been enormously influential, but it has also
+          attracted serious critiques that bear directly on SEJA's claim to
+          operationalize reflective practice.
+        </p>
+
+        <h3>Eraut: Is Reflection-in-Action Coherent?</h3>
+
+        <p>
+          Michael Eraut (1994, pp. 141-154) mounts the most sustained
+          critique of Schon's central concept. Eraut argues that
+          reflection-in-action, as Schon describes it, conflates several
+          distinct cognitive processes -- rapid pattern recognition, intuitive
+          adjustment, conscious problem-solving, and metacognitive monitoring
+          -- under a single label that obscures more than it reveals. In
+          time-pressured situations (which characterize much professional
+          practice), practitioners act from well-rehearsed routines, not
+          from anything that deserves the name "reflection." What Schon
+          calls reflection-in-action may be better described as
+          "thinking-in-action" -- a broader category that does not carry
+          the specific epistemological weight Schon assigns to it.
+        </p>
+
+        <p>
+          This critique applies directly to SEJA's claim that
+          <code>/research</code> council debates and <code>/plan</code>
+          gap detection constitute reflection-in-action. These are
+          procedural steps executed by the agent as part of its workflow --
+          closer to Eraut's "thinking-in-action" than to Schon's richer
+          notion of a practitioner reframing a situation in dialogue with
+          its materials. The agent does not experience surprise or
+          puzzlement when it encounters a design gap; it executes a
+          prescribed detection algorithm. Whether this constitutes
+          reflection or merely systematic checking is a question SEJA's
+          framework does not resolve.
+        </p>
+
+        <h3>Boud: The Missing Affective Dimension</h3>
+
+        <p>
+          Boud, Keogh, and Walker (1985, pp. 18-40) argue that Schon's
+          account underplays the role of emotion in reflection. Their model
+          of reflection has three stages: returning to the experience,
+          attending to feelings, and re-evaluating the experience. The
+          middle stage is not optional -- reflection requires the
+          practitioner to acknowledge and work through the emotions
+          (frustration, satisfaction, anxiety, pride) that accompanied the
+          original experience. Without this affective engagement, what
+          passes for reflection is merely cognitive review -- an
+          intellectualized retrospective that misses the lived dimension
+          of professional practice.
+        </p>
+
+        <p>
+          This critique identifies a fundamental limitation in SEJA's
+          operationalization. An AI agent cannot have emotions. The
+          <code>/reflect</code> skill can ask the designer "what stands out
+          about how you worked?" but it cannot model or process the
+          affective dimension of that experience. If Boud et al. are right
+          that emotional engagement is constitutive of genuine reflection
+          (not merely a frequent accompaniment), then SEJA's
+          <code>/reflect</code> skill is structurally incapable of
+          facilitating the full reflective process. It can prompt the
+          cognitive and evaluative stages, but the affective stage depends
+          entirely on what the designer brings to the encounter.
+        </p>
+
+        <h3>Knowing-in-Action or Encoded Rules?</h3>
+
+        <p>
+          Schon's knowing-in-action describes tacit knowledge -- expertise
+          that the practitioner cannot fully articulate, that reveals itself
+          in the fluency of their practice rather than in propositional
+          statements. SEJA's reference files and rules are the opposite:
+          they are fully articulated, propositional, and explicit. The
+          constitution is not tacit knowledge; it is a written document. The
+          constraints file is not embedded expertise; it is a list of rules.
+        </p>
+
+        <p>
+          This is a category difference that Schon would likely note. Tacit
+          knowledge, in Polanyi's formulation that Schon draws on, is
+          knowledge that the knower "can know more than they can tell"
+          (Polanyi 1966, p. 4). SEJA's encoded knowledge is precisely what
+          has been told -- it exists only in its articulated form. What the
+          harness provides is not knowing-in-action in Schon's sense but
+          something closer to an institutional memory or a codified
+          standard operating procedure. The functional role is similar
+          (both shape practice without per-instance deliberation), but the
+          epistemic status is different. Encoded rules can be inspected,
+          questioned, and revised; tacit knowledge resists these operations
+          by definition.
+        </p>
+
+        <h3>The Paradox of Mandated Reflection</h3>
+
+        <p>
+          There is a deeper tension in any system that structures reflection
+          as a lifecycle step. Schon's reflective practitioner reflects
+          because the situation demands it -- because something unexpected
+          happens, because a routine approach fails, because the materials
+          talk back. SEJA's lifecycle positions <code>/reflect</code> as
+          an available step in a canonical sequence. The question is whether
+          reflection that is structurally available (and, in some workflow
+          configurations, expected) can be genuine, or whether it becomes
+          a pro forma exercise -- a box to check rather than a genuine
+          encounter with one's own practice.
+        </p>
+
+        <p>
+          SEJA's non-prescriptive rule is a partial response to this
+          tension. By refusing to tell the designer what to conclude, the
+          skill preserves space for genuine engagement. But the structural
+          affordance alone cannot guarantee that the designer will use it
+          reflectively rather than perfunctorily. This is an inherent
+          limitation of any designed system that seeks to support an
+          essentially human cognitive and affective practice.
+        </p>
+      </section>
+
+      <section id="references" data-diataxis="reference">
+        <h2>References</h2>
+        <ul>
+          <li>Schon, D.A. (1983). <cite>The Reflective Practitioner: How Professionals Think in Action</cite>. New York: Basic Books.</li>
+          <li>Eraut, M. (1994). <cite>Developing Professional Knowledge and Competence</cite>. London: Falmer Press.</li>
+          <li>Boud, D., Keogh, R. and Walker, D. (1985). <cite>Reflection: Turning Experience into Learning</cite>. London: Kogan Page.</li>
+          <li>Polanyi, M. (1966). <cite>The Tacit Dimension</cite>. Garden City, NY: Doubleday.</li>
+        </ul>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 5: Foundations and Philosophy</h2>
+    <ol>
+      <li>
+        <a href="software-as-communication.html">Software as Designed Communication</a>
+      </li>
+      <li>
+        <a href="sign-systems.html">Sign Systems and Communicability</a>
+      </li>
+      <li>
+        <a href="extended-metacommunication.html">The Extended Metacommunication Template</a>
+      </li>
+      <li aria-current="page">
+        <a href="reflective-practice.html">Reflective Practice</a>
+        <ul>
+          <li><a href="#three-registers">Three Registers of Reflection</a></li>
+          <li><a href="#seja-operationalization">SEJA Operationalization</a></li>
+          <li><a href="#critical-counter-reading">Critical Counter-Reading</a></li>
+          <li><a href="#references">References</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="abduction-plural-readings.html">Abduction and Plural Readings</a>
+      </li>
+      <li>
+        <a href="governable-epistemic.html">The Governable and Epistemic Thesis</a>
+      </li>
+      <li>
+        <a href="agent-reads-harness.html">How the Agent Reads the Harness</a>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="extended-metacommunication.html">Previous: The Extended Metacommunication Template</a>
+    <a href="abduction-plural-readings.html">Next: Abduction and Plural Readings</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

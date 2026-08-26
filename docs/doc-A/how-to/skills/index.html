@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="how-to">
+  <meta name="doc-volume" content="How-To Guides">
+  <meta name="doc-chapter" content="Skill-by-Skill Guides">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>Skill-by-Skill Guides -- SEJA Documentation</title>
+
+  <!-- CSS depth: 2 (sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element (WCAG 2.4.1) -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Volume navigation bar -->
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../../index.html">Home</a>
+    <a href="../../tutorials/index.html">Tutorials</a>
+    <a href="../index.html">How-To Guides</a>
+    <a href="../../reference/index.html">Reference</a>
+    <a href="../../explanation/index.html">Explanation</a>
+  </nav>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../../index.html">Home</a></li>
+      <li><a href="../index.html">How-To Guides</a></li>
+      <li>Skill-by-Skill Guides</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content area -->
+  <main id="main-content" class="chapter-content vol-howto">
+    <article>
+      <!-- Diataxis type badge -->
+      <p class="vol-accent"><strong>how-to</strong></p>
+
+      <h1>Ch. 2: Skill-by-Skill Guides</h1>
+
+      <p>
+        SEJA exposes 15 user-facing skills (plus two internal lifecycle hooks,
+        <code>pre-skill</code> and <code>post-skill</code>, which run
+        automatically around every user-facing invocation and are not called
+        directly). Each user-facing skill has its own goal-first guide in this
+        chapter. This index groups those guides by the phase of the development
+        lifecycle they serve, so you can find the right skill by asking "where am
+        I in the work?" rather than memorizing skill names.
+      </p>
+
+      <!-- Canonical lifecycle path -->
+      <section id="the-canonical-lifecycle">
+        <h2>The Canonical Lifecycle</h2>
+
+        <p>
+          SEJA organizes work into a repeatable path. You begin by
+          <strong>understanding</strong> what you are about to change, then
+          <strong>shape intent</strong> (change the design, or plan within the
+          existing design), <strong>build</strong> the change,
+          <strong>validate</strong> it, <strong>share</strong> the results, and
+          <strong>reflect</strong> on what you learned. The canonical path is:
+        </p>
+
+        <figure>
+          <pre><code><span class="token-command">/research</span> (or <span class="token-command">/explain</span>)
+      │
+      ▼
+<span class="token-command">/design</span>  |  <span class="token-command">/plan</span>          (change intent, or plan within it)
+      │
+      ▼
+<span class="token-command">/implement</span>
+      │
+      ▼
+<span class="token-command">/critique</span>                    (validate before you communicate)
+      │
+      ▼
+<span class="token-command">/document</span>  |  <span class="token-command">/communicate</span>
+      │
+      ▼
+<span class="token-command">/reflect</span></code></pre>
+          <figcaption>
+            The canonical SEJA lifecycle: understand, shape intent, build,
+            validate, share, reflect. Validate before you communicate.
+          </figcaption>
+        </figure>
+
+        <p>
+          The path is a default, not a cage. On the first iteration of a project,
+          <code>/seja-setup &lt;target&gt;</code> hands off to <code>/design</code>
+          to configure the project; from iteration 2 onward you start with
+          <code>/research</code> (or <code>/explain</code>) to investigate what
+          you are about to change, then branch into <code>/design</code> when
+          intent needs to change or into <code>/plan</code> when it does not. The
+          cross-cutting skills below support the path from the side rather than
+          sitting on it.
+        </p>
+      </section>
+
+      <!-- Skill guides by phase -->
+      <section id="skill-guides-by-phase">
+        <h2>Skill Guides by Phase</h2>
+
+        <h3>Understand</h3>
+        <ul>
+          <li>
+            <code>/research</code> --
+            <a href="research.html">Answer questions about the codebase, architecture, or design decisions, logging Q&amp;A pairs</a>;
+            with <code>--inventory</code>, catalog codebase elements matching a pattern.
+          </li>
+          <li>
+            <code>/explain</code> --
+            <a href="explain.html">Explain behavior, code, data model, architecture, or spec drift</a>
+            with visual diagrams and analogies.
+          </li>
+        </ul>
+
+        <h3>Shape Intent</h3>
+        <ul>
+          <li>
+            <code>/design</code> --
+            <a href="design.html">Define or update project design</a>:
+            stack, conventions, domain model, conceptual design, and standards.
+          </li>
+          <li>
+            <code>/plan</code> --
+            <a href="plan.html">Make a plan to add a feature, fix a bug, or refactor code</a>;
+            supports metacomm framing for design-intent briefs.
+          </li>
+        </ul>
+
+        <h3>Build</h3>
+        <ul>
+          <li>
+            <code>/implement</code> --
+            <a href="implement.html">Execute a previously generated plan</a>
+            to add a feature, fix a bug, or refactor code.
+          </li>
+        </ul>
+
+        <h3>Validate</h3>
+        <ul>
+          <li>
+            <code>/critique</code> --
+            <a href="critique.html">Critique quality</a>:
+            validation, code review, smoke tests, preflight, and harness health.
+          </li>
+        </ul>
+
+        <h3>Share</h3>
+        <ul>
+          <li>
+            <code>/document</code> --
+            <a href="document.html">Generate or update project documentation</a>
+            based on plan Docs: fields, auto-detection, or explicit type selection.
+          </li>
+          <li>
+            <code>/communicate</code> --
+            <a href="communicate.html">Generate tailored communication material for a specific audience segment</a>.
+          </li>
+        </ul>
+
+        <h3>Reflect</h3>
+        <ul>
+          <li>
+            <code>/reflect</code> --
+            <a href="reflect.html">Run on-demand reflection anchored on specific plans, research reports, or other artifacts</a>,
+            recording your words verbatim.
+          </li>
+        </ul>
+
+        <h3>Cross-Cutting / Supporting</h3>
+        <p>
+          These skills support the lifecycle from the side. They can be run at any
+          point rather than at a fixed phase.
+        </p>
+        <ul>
+          <li>
+            <code>/pending</code> --
+            <a href="pending.html">List and address outstanding human actions from the pending ledger</a>:
+            verify implementations, flip status markers, run periodic curation, manage deferred work.
+          </li>
+          <li>
+            <code>/qa-log</code> --
+            <a href="qa-log.html">Log the entire current Q&amp;A session into a file</a>
+            for future reference; output goes to <code>_output/qa-logs/</code>.
+          </li>
+          <li>
+            <code>/onboard</code> --
+            <a href="onboard.html">Generate a tailored onboarding plan for a new team member</a>
+            based on their role and expertise level.
+          </li>
+          <li>
+            <code>/publish</code> --
+            <a href="publish.html">Publish a tagged release to the public SEJA repository</a>
+            via the automated publish pipeline.
+          </li>
+          <li>
+            <code>/seja-setup</code> --
+            <a href="seja-setup.html">Manage the SEJA harness in this project</a>:
+            install, finalise an in-place download, create a workspace, bootstrap a demo, or upgrade harness files.
+          </li>
+          <li>
+            <code>/help</code> --
+            <a href="help.html">Show contextual help, browse skills by category, or get details on a specific skill</a>.
+          </li>
+        </ul>
+      </section>
+
+      <!-- Cross-references -->
+      <section id="cross-references">
+        <h2>Cross-References</h2>
+
+        <ul>
+          <li><a href="../../reference/skills-reference.html">Skills Reference</a> (Vol. 3) -- exhaustive per-skill tables: arguments, modes, context budget tiers, skip stages, and subagent delegations.</li>
+          <li><a href="../installation.html">Ch. 1: Installation and Setup</a> -- get a working project before running these skills.</li>
+          <li><a href="../../explanation/agent-as-reader.html">Vol. 4: Explanation</a> -- why the lifecycle is shaped this way and how each skill embodies it.</li>
+        </ul>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Sidebar table of contents -->
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#the-canonical-lifecycle">The Canonical Lifecycle</a></li>
+      <li><a href="#skill-guides-by-phase">Skill Guides by Phase</a></li>
+      <li><a href="#cross-references">Cross-References</a></li>
+    </ul>
+  </aside>
+
+  <!-- Footer -->
+  <footer>
+    <section>
+      <h2>Related</h2>
+      <ul>
+        <li><a href="../index.html">Vol. 2: How-To Guides</a> -- volume index</li>
+        <li><a href="../../reference/skills-reference.html">Vol. 3: Skills Reference</a> -- per-skill specification tables</li>
+        <li><a href="../../explanation/agent-as-reader.html">Vol. 4: Explanation</a> -- conceptual foundations of the lifecycle</li>
+      </ul>
+    </section>
+
+    <nav aria-label="collection">
+      <a href="../../index.html">Collection Index</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T20:45:00Z</p>
+  </footer>
+
+</body>
+</html>

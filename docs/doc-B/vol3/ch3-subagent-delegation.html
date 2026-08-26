@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="3">
+  <meta name="doc-chapter" content="3">
+  <meta name="doc-phase" content="1">
+  <meta name="doc-status" content="draft">
+
+  <title>Subagent Delegation -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 3: The Execution Layer</a></li>
+      <li>Subagent Delegation</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>Subagent Delegation</h1>
+
+      <p>
+        This chapter documents how skills delegate work to specialized
+        subagents, provides a per-agent reference for all 16 agents (9
+        evaluators and 7 generators), and explains how to write custom
+        subagents.
+      </p>
+
+      <!-- Section 1: The Delegation Model -->
+      <section id="delegation-model" data-diataxis="explanation">
+        <h2>The Delegation Model</h2>
+
+        <p>
+          Skills in the SEJA harness follow a delegation pattern: when a skill
+          needs specialized analysis or content generation, it launches a
+          subagent rather than performing the work inline. The skill acts as an
+          orchestrator -- it parses arguments, manages lifecycle hooks, and
+          presents results -- while the subagent does the deep, focused work.
+          This separation keeps the orchestrator lean and lets the subagent
+          concentrate entirely on its domain without the overhead of lifecycle
+          management.
+        </p>
+
+        <h3>Why Delegate</h3>
+
+        <p>
+          Delegation solves two problems at once. First, specialized agents can
+          focus deeply on one task -- reviewing code against 16 engineering
+          perspectives, generating a stakeholder communication, or running a
+          structured council debate -- without their context window being
+          consumed by lifecycle hooks, argument parsing, pending-ledger checks,
+          and other orchestration concerns. Second, the main conversation
+          context stays clean: the detailed intermediate analysis (raw diff
+          parsing, per-perspective evaluation notes, codebase scanning) lives
+          in the subagent's context window and never pollutes the caller's.
+          Only the final result -- a structured report, a generated document,
+          or a pass/fail verdict -- flows back.
+        </p>
+
+        <h3>The Trust Boundary</h3>
+
+        <p>
+          Each subagent operates in a <em>fresh context window</em> with no
+          inherited state from the calling skill. The subagent does not see the
+          conversation history, does not know what the user said before the
+          skill was invoked, and does not have access to any variables or
+          in-memory structures from the orchestrator. This is a trust boundary:
+          the subagent can only act on what the skill explicitly passes in its
+          prompt.
+        </p>
+
+        <p>
+          This boundary is intentional. It ensures that subagent behavior is
+          reproducible (the same prompt produces the same analysis regardless
+          of conversation history) and that the subagent cannot accidentally
+          leak context from unrelated parts of the session. It also means that
+          the skill must be disciplined about what it includes in the prompt --
+          everything the subagent needs must be there, because nothing else
+          will be.
+        </p>
+
+        <h3>Prompt Construction</h3>
+
+        <p>
+          When a skill delegates to a subagent, it constructs a self-contained
+          prompt that includes everything the subagent needs to do its work.
+          The prompt typically contains:
+        </p>
+
+        <ul>
+          <li>The agent's role and instructions (read from its prompt file in
+            <code>.claude/agents/</code>)</li>
+          <li>The specific inputs for this invocation (e.g., the diff to
+            review, the question to research, the audience segment to generate
+            for)</li>
+          <li>File paths the agent should read for context (project
+            conventions, design files, review perspectives)</li>
+          <li>The output path where the agent should write its result</li>
+          <li>Any configuration parameters (review depth, output format,
+            scope constraints)</li>
+        </ul>
+
+        <p>
+          The skill uses the <code>Agent</code> tool to launch the subagent,
+          specifying the <code>subagent_type</code> parameter to select the
+          appropriate agent definition. The agent prompt file
+          (in <code>.claude/agents/</code>) becomes the agent's system-level
+          instructions, and the skill's constructed prompt provides the
+          task-specific context.
+        </p>
+
+        <h3>Result Processing</h3>
+
+        <p>
+          When the subagent completes, the skill reads the agent's output --
+          typically a structured report written to a file path the skill
+          specified. The skill then integrates this result into the broader
+          workflow: presenting it to the user, appending it to a plan file,
+          feeding it into subsequent lifecycle steps, or using it to gate
+          further actions (e.g., the quality gate in
+          <code>/implement</code> uses the code-reviewer's findings to decide
+          whether to proceed).
+        </p>
+
+        <p>
+          The skill does not blindly trust the subagent's output. It validates
+          that the expected output file was created, checks for expected
+          structure, and handles failure cases (agent error, timeout, missing
+          output) gracefully -- typically by reporting the failure and
+          continuing with the remaining checks.
+        </p>
+      </section>
+
+      <!-- Section 2: Agent Prompt Files -->
+      <section id="agent-prompt-files" data-diataxis="reference">
+        <h2>Agent Prompt Files</h2>
+
+        <p>
+          Every subagent in the harness is defined by a Markdown prompt file in
+          the <code>.claude/agents/</code> directory. These files are the
+          single source of truth for what each agent does, how it behaves, and
+          what tools it has access to.
+        </p>
+
+        <h3>File Format</h3>
+
+        <p>
+          Each agent prompt file follows a consistent structure:
+        </p>
+
+        <ol>
+          <li><strong>YAML frontmatter</strong> -- metadata enclosed in
+            <code>---</code> delimiters, containing the agent's name,
+            description, designer description, and available tools.</li>
+          <li><strong>Markdown body</strong> -- the agent's full instructions,
+            including its role definition, input specification, process steps,
+            and output format.</li>
+        </ol>
+
+        <p>
+          The YAML frontmatter fields are:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>name</code></td>
+              <td>The agent's identifier, matching the filename without the
+                <code>.md</code> extension (e.g., <code>code-reviewer</code>).</td>
+            </tr>
+            <tr>
+              <td><code>description</code></td>
+              <td>A concise, agent-facing summary of the agent's role (used in
+                tool listings and dispatch).</td>
+            </tr>
+            <tr>
+              <td><code>designer_description</code></td>
+              <td>A human-facing narrative explaining what the agent does and
+                why, written in second person ("When you hand me a diff...").</td>
+            </tr>
+            <tr>
+              <td><code>tools</code></td>
+              <td>Comma-separated list of tools the agent may use (e.g.,
+                <code>Read, Bash, Glob, Grep</code>).</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The Markdown body typically contains these sections:
+        </p>
+
+        <ul>
+          <li><strong>Role statement</strong> -- a one-sentence declaration of
+            the agent's purpose (e.g., "You are a code reviewer.").</li>
+          <li><strong>Input</strong> -- what the invoking skill passes and in
+            what format.</li>
+          <li><strong>Process</strong> -- the step-by-step procedure the agent
+            follows.</li>
+          <li><strong>Output Format</strong> -- the expected structure of the
+            agent's result.</li>
+        </ul>
+
+        <h3>Location and Naming</h3>
+
+        <p>
+          All 16 agent prompt files live in <code>.claude/agents/</code>. The
+          filename is the agent's kebab-case name with a <code>.md</code>
+          extension. The harness organizes agents into two categories:
+        </p>
+
+        <ul>
+          <li><strong>Evaluator agents</strong> (9 files) -- review artifacts
+            against quality perspectives and return structured findings.</li>
+          <li><strong>Generator agents</strong> (7 files) -- produce
+            self-contained artifacts (documents, reports, plans) from
+            well-defined inputs.</li>
+        </ul>
+
+        <p>
+          There is also a third pattern -- <strong>executor agents</strong> --
+          used by <code>/implement</code> in auto mode. These are not
+          standalone prompt files; the implement skill constructs their prompts
+          dynamically from plan step metadata. See
+          <a href="ch4-plans-and-implementation.html">Plans and Implementation</a>
+          for details.
+        </p>
+      </section>
+
+      <!-- Section 3: Evaluator Agents -->
+      <section id="evaluator-agents" data-diataxis="reference">
+        <h2>Evaluator Agents</h2>
+
+        <p>
+          Evaluator agents review artifacts -- code changes, plans, research
+          questions, migration chains, harness configuration -- against quality
+          perspectives and return structured findings. They read, analyze, and
+          judge; they do not create new project artifacts. All 9 evaluator
+          agents are invoked by the <code>/critique</code> skill (in its
+          various modes), and some are also invoked by <code>/plan</code>,
+          <code>/research</code>, and <code>/implement</code>. See
+          <a href="ch2-skills-in-depth.html">Skills In Depth</a> for which skills
+          invoke each agent and under what conditions.
+        </p>
+
+        <!-- code-reviewer -->
+        <h3 id="agent-code-reviewer">code-reviewer</h3>
+
+        <p>
+          Reviews code changes against engineering and design perspectives,
+          reporting findings with Adopted/Deferred/N/A status per perspective.
+        </p>
+
+        <table>
+          <tbody>
+            <tr>
+              <th>Inputs</th>
+              <td>A file path, directory, the word "staged" (for
+                <code>git diff --cached</code>), or raw diff output; an
+                optional review depth (<code>light</code>,
+                <code>standard</code>, or <code>deep</code>).</td>
+            </tr>
+            <tr>
+              <th>Outputs</th>
+              <td>A structured review report with a per-perspective evaluation
+                table (Adopted/Deferred/N/A per perspective), categorized
+                findings with severity (HIGH/MEDIUM/LOW), file paths, and line
+                numbers.</td>
+            </tr>
+            <tr>
+              <th>Invoked by</th>
+              <td><code>/critique review</code>,
+                <code>/critique preflight</code> (parallel fan-out).</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The code-reviewer uses a two-stage loading protocol for review
+          perspectives: it reads the perspective index first, selects 4-6
+          relevant perspectives based on the change content, then loads only
+          those perspective files. In <code>deep</code> mode, all 16
+          perspectives are evaluated. A vulnerability pre-scan checks for
+          dangerous patterns (injection, XSS, deserialization, template
+          injection) before the full perspective pass.
+        </p>
+
+        <!-- council-debate -->
+        <h3 id="agent-council-debate">council-debate</h3>
+
+        <p>
+          Runs a structured expert council debate for high-stakes design
+          decisions, surfacing trade-offs through position statements and
+          cross-examination.
+        </p>
+
+        <table>
+          <tbody>
+            <tr>
+              <th>Inputs</th>
+              <td>The question or decision to debate; optional council members
+                from the brief-specific pool (0-2); optional context pointers
+                (file paths, design docs, prior analysis).</td>
+            </tr>
+            <tr>
+              <th>Outputs</th>
+              <td>A debate transcript with position statements from 5-7 expert
+                archetypes, cross-examination exchanges, areas of agreement
+                and tension, and a recommended path that names the
+                trade-offs.</td>
+            </tr>
+            <tr>
+              <th>Invoked by</th>
+              <td><code>/research --deep</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The council always includes five fixed archetypes (Security Advocate,
+          DX Pragmatist, UX Champion, Architecture Purist, Product Strategist)
+          plus 0-2 brief-specific experts selected by the caller (Agentic AI
+          Expert, Data Engineer, DevOps/Platform Engineer, or Domain
+          Specialist).
+        </p>
+
+        <!-- harness-health-evaluator -->
+        <h3 id="agent-harness-health-evaluator">harness-health-evaluator</h3>
+
+        <p>
+          Runs 9 built-in harness self-diagnosis checks and produces a Harness
+          Health Report with PASS/WARN/FAIL status per check.
+        </p>
+
+        <table>
+          <tbody>
+            <tr>
+              <th>Inputs</th>
+              <td>A reserved <code>check-NNN</code> ID; the target output path;
+                an optional <code>verbose</code> flag; an optional
+                <code>source</code> path for the harness drift check.</td>
+            </tr>
+            <tr>
+              <th>Outputs</th>
+              <td>A Harness Health Report with a nine-row status table
+                (PASS/WARN/FAIL per check) and an overall N/9 tally. Checks
+                cover: skill system integrity, orphaned briefs, stale plans,
+                reference file completeness, conventions completeness,
+                constitution presence, skill spec compliance, pending ledger
+                summary, and harness drift.</td>
+            </tr>
+            <tr>
+              <th>Invoked by</th>
+              <td><code>/critique health</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          When the <code>source</code> input is provided, the drift check
+          compares the canonical harness root against the target project. When
+          omitted, the drift check reports INFO status and does not count
+          toward the pass/total tally (N/8+1 instead of N/9).
+        </p>
+
+        <!-- migration-validator -->
+        <h3 id="agent-migration-validator">migration-validator</h3>
+
+        <p>
+          Validates Alembic migration chain integrity, checks for idempotency
+          issues, PostgreSQL syntax problems, and common migration pitfalls.
+        </p>
+
+        <table>
+          <tbody>
+            <tr>
+              <th>Inputs</th>
+              <td><code>all</code> (full chain validation), a specific
+                migration file path, or <code>recent</code> (migrations since
+                last tagged release).</td>
+            </tr>
+            <tr>
+              <th>Outputs</th>
+              <td>A validation report covering chain integrity (broken links,
+                cycles, orphaned migrations, multiple heads) and per-file
+                inspection (non-idempotent operations, syntax issues,
+                foreign-key type mismatches, data-loss risks in downgrade
+                paths). Findings are separated into must-fix, warnings, and
+                best-practice suggestions.</td>
+            </tr>
+            <tr>
+              <th>Invoked by</th>
+              <td><code>/critique validate</code> (with
+                <code>migrations</code> scope).</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The migration-validator reads project conventions to locate the
+          migrations directory, ORM model definitions, and the chain validation
+          script. It performs both automated chain checking (via the script) and
+          deep file-by-file inspection.
+        </p>
+
+        <!-- plan-reviewer -->
+        <h3 id="agent-plan-reviewer">plan-reviewer</h3>
+
+        <p>
+          Reviews a plan against engineering and design perspectives using the
+          complexity-gated two-phase review process.
+        </p>
+
+        <table>
+          <tbody>
+            <tr>
+              <th>Inputs</th>
+              <td>The full plan text (header, actions, and to-do); the plan
+                file path; the review depth (Light, Standard, or Deep).</td>
+            </tr>
+            <tr>
+              <th>Outputs</th>
+              <td>A review log with Adopted/Deferred/N/A status per
+                perspective, one-line concerns, and any concrete amendments
+                the plan should absorb before implementation.</td>
+            </tr>
+            <tr>
+              <th>Invoked by</th>
+              <td><code>/plan</code> (Standard and Deep complexity).</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The plan-reviewer uses the same two-stage perspective loading
+          protocol as the code-reviewer. Phase 1 performs a triage scan across
+          the shortlisted perspectives. For Light reviews, it stops there. For
+          Standard and Deep reviews, Phase 2 performs targeted deep-dives on
+          deferred concerns that could cause regressions or incidents.
+        </p>
+
+        <!-- research-reviewer -->
+        <h3 id="agent-research-reviewer">research-reviewer</h3>
+
+        <p>
+          Evaluates design decisions, open-ended questions, and trade-offs
+          against engineering and design perspectives.
+        </p>
+
+        <table>
+          <tbody>
+            <tr>
+              <th>Inputs</th>
+              <td>The question, decision, or trade-off to evaluate; optional
+                context file paths; an optional review depth
+                (<code>light</code>, <code>standard</code>, or
+                <code>deep</code>).</td>
+            </tr>
+            <tr>
+              <th>Outputs</th>
+              <td>A structured analysis with a per-perspective status table,
+                detailed evaluation per perspective, and prioritized
+                recommendations with trade-offs.</td>
+            </tr>
+            <tr>
+              <th>Invoked by</th>
+              <td><code>/research</code> (standard mode, without
+                <code>--deep</code>).</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Unlike the code-reviewer (which operates on diffs) and the
+          plan-reviewer (which operates on structured plans), the
+          research-reviewer handles open-ended questions and recommendations
+          that do not have a fixed artifact structure.
+        </p>
+
+        <!-- semiotic-inspector -->
+        <h3 id="agent-semiotic-inspector">semiotic-inspector</h3>
+
+        <p>
+          Conducts a Semiotic Inspection Method (SIM) evaluation of a
+          project's interface communicability across metalinguistic, static,
+          and dynamic sign classes.
+        </p>
+
+        <table>
+          <tbody>
+            <tr>
+              <th>Inputs</th>
+              <td>A scope string (feature name, page, user flow, or
+                <code>all</code>); a reserved <code>check-NNN</code> ID; the
+                target output path.</td>
+            </tr>
+            <tr>
+              <th>Outputs</th>
+              <td>A SIM report with per-sign-class analysis (metalinguistic,
+                static, dynamic), independent metacommunication
+                reconstructions, collation of agreements and contradictions,
+                and a communicability judgment.</td>
+            </tr>
+            <tr>
+              <th>Invoked by</th>
+              <td><code>/critique semiotic-inspection</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The semiotic-inspector reads the project's metacommunication files to
+          establish the designer's intended message, constructs inspection
+          scenarios from user personas and goal-directed activities, then
+          analyzes each sign class independently before collating the findings.
+          This agent implements the formal SIM methodology from semiotic
+          engineering research.
+        </p>
+
+        <!-- standards-checker -->
+        <h3 id="agent-standards-checker">standards-checker</h3>
+
+        <p>
+          Runs all project validation scripts and aggregates results into a
+          unified compliance report.
+        </p>
+
+        <table>
+          <tbody>
+            <tr>
+              <th>Inputs</th>
+              <td><code>all</code> (run every validation script) or a specific
+                check name matching an entry in the project's Validation
+                Scripts table (e.g., <code>i18n</code>, <code>auth</code>,
+                <code>migrations</code>, <code>constants</code>).</td>
+            </tr>
+            <tr>
+              <th>Outputs</th>
+              <td>A unified compliance report with a pass/fail summary table
+                across all checks, error and warning counts, and specific
+                issues with file and line references.</td>
+            </tr>
+            <tr>
+              <th>Invoked by</th>
+              <td><code>/critique validate</code>,
+                <code>/critique preflight</code> (parallel fan-out).</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The standards-checker reads the Validation Scripts table from
+          <code>product-design/conventions.md</code> to discover which scripts
+          to run. It executes each script, captures stdout and stderr, strips
+          ANSI escape codes, and parses the output for pass/fail status, error
+          counts, and specific issues.
+        </p>
+
+        <!-- test-runner -->
+        <h3 id="agent-test-runner">test-runner</h3>
+
+        <p>
+          Runs backend and frontend test suites and reports failures with
+          actionable context.
+        </p>
+
+        <table>
+          <tbody>
+            <tr>
+              <th>Inputs</th>
+              <td><code>all</code> (both suites), <code>backend</code>,
+                <code>frontend</code>, <code>integration</code>, or a
+                specific test file path.</td>
+            </tr>
+            <tr>
+              <th>Outputs</th>
+              <td>A test summary with pass/fail/skip counts and, for each
+                failure, the file, test name, error message, classification
+                (test bug, source bug, environment issue, or flaky), and a
+                suggested next step.</td>
+            </tr>
+            <tr>
+              <th>Invoked by</th>
+              <td><code>/critique smoke</code>,
+                <code>/implement</code> (quality gate).</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The test-runner reads test commands from
+          <code>product-design/conventions.md</code> (variables like
+          <code>BACKEND_TEST_CMD</code>, <code>FRONTEND_TEST_CMD</code>) and
+          dispatches to the appropriate runner (pytest for backend, vitest for
+          frontend). It classifies each failure to help the developer
+          prioritize fixes.
+        </p>
+      </section>
+
+      <!-- Section 4: Generator Agents -->
+      <section id="generator-agents" data-diataxis="reference">
+        <h2>Generator Agents</h2>
+
+        <p>
+          Generator agents produce self-contained artifacts -- documents,
+          reports, onboarding plans, communication material -- from
+          well-defined inputs. Unlike evaluator agents, which judge existing
+          artifacts, generator agents create new ones. All generator agents
+          receive the project constitution as part of their prompt to enforce
+          trust boundary constraints during generation. See
+          <a href="ch2-skills-in-depth.html">Skills In Depth</a> for the skills
+          that invoke each generator and their full workflow context.
+        </p>
+
+        <!-- communication-generator -->
+        <h3 id="agent-communication-generator">communication-generator</h3>
+
+        <p>
+          Generates tailored stakeholder communication material for a specific
+          audience segment.
+        </p>
+
+        <table>
+          <tbody>
+            <tr>
+              <th>Inputs</th>
+              <td>An audience tag (<code>EVL</code>, <code>CLT</code>,
+                <code>USR</code>, or <code>ACD</code>); the audience reference
+                file path; the Diataxis mapping file path; project context
+                paths (conceptual design, conventions, communication style);
+                output path and ID; format (<code>md</code>, <code>html</code>,
+                or <code>both</code>); a <code>deep</code> flag; an optional
+                source file to reformat.</td>
+            </tr>
+            <tr>
+              <th>Outputs</th>
+              <td>A Markdown and/or HTML communication document tailored to
+                the target audience's tone, register, and content
+                expectations. No meta-commentary or internal notes.</td>
+            </tr>
+            <tr>
+              <th>Invoked by</th>
+              <td><code>/communicate</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The communication-generator loads the audience-specific content
+          guidance (tone, depth, vocabulary), the project's identity and value
+          proposition from the conceptual design, and the communication style
+          overrides. It produces material that speaks in the register the
+          target audience expects.
+        </p>
+
+        <!-- onboarding-generator -->
+        <h3 id="agent-onboarding-generator">onboarding-generator</h3>
+
+        <p>
+          Generates tailored onboarding plans for new team members based on
+          role family and expertise level.
+        </p>
+
+        <table>
+          <tbody>
+            <tr>
+              <th>Inputs</th>
+              <td>Role tags (<code>BLD</code>, <code>SHP</code>, and/or
+                <code>GRD</code>); expertise level (<code>L1</code>-
+                <code>L3</code>); optional member name and focus area; role
+                and level file paths; project context paths; output path and
+                ID; format.</td>
+            </tr>
+            <tr>
+              <th>Outputs</th>
+              <td>A personalized onboarding plan with a welcome, a day-one
+                universal foundation, role- and level-specific weekly
+                milestones, a 30-60-90 day timeline, and a prioritized
+                reading list referencing actual project files.</td>
+            </tr>
+            <tr>
+              <th>Invoked by</th>
+              <td><code>/onboard</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The onboarding-generator scans the actual codebase (using the
+          backend and frontend directories from conventions) to provide
+          concrete file references rather than generic advice. It supports
+          three role families (Builders, Shapers, Guardians) and three
+          expertise levels (Contributor, Expert, Leader).
+        </p>
+
+        <!-- document-generator -->
+        <h3 id="agent-document-generator">document-generator</h3>
+
+        <p>
+          Generates or updates project documentation for a specific
+          documentation type.
+        </p>
+
+        <table>
+          <tbody>
+            <tr>
+              <th>Inputs</th>
+              <td>A doc type (<code>readme</code>,
+                <code>contextual-help</code>, <code>api-reference</code>,
+                <code>ddr</code>, <code>help-center</code>,
+                <code>changelog</code>); scope (file path, module, feature
+                name); template path; quality guide path; project context
+                paths; output path; optional plan context.</td>
+            </tr>
+            <tr>
+              <th>Outputs</th>
+              <td>A documentation artifact matching the target doc type's
+                template, Diataxis classification, and quality standards.
+                Content is sourced from the actual codebase, not generic
+                filler.</td>
+            </tr>
+            <tr>
+              <th>Invoked by</th>
+              <td><code>/document</code>,
+                <code>/publish</code> (for changelog auto-generation).</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The document-generator reads the appropriate template from
+          <code>.claude/references/template/docs/</code>, the documentation
+          quality writing guide, and the project's conventions and conceptual
+          design. It supports parallel generation when multiple doc types are
+          requested.
+        </p>
+
+        <!-- test-plan-generator -->
+        <h3 id="agent-test-plan-generator">test-plan-generator</h3>
+
+        <p>
+          Generates structured manual test plans from a user-supplied brief
+          and the most recent completed plans.
+        </p>
+
+        <table>
+          <tbody>
+            <tr>
+              <th>Inputs</th>
+              <td>A test brief string; a reserved <code>usertest-NNN</code>
+                ID; the target output path; optional overrides for plan and
+                user test directories.</td>
+            </tr>
+            <tr>
+              <th>Outputs</th>
+              <td>A manual test plan with a header, user brief, agent
+                interpretation, and a to-do enumeration of plan steps phrased
+                as imperative commands with expected outcomes. Carries forward
+                unchecked items from prior test reports.</td>
+            </tr>
+            <tr>
+              <th>Invoked by</th>
+              <td><code>/critique test-plan</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The test-plan-generator reads the global artifact index to find
+          recently completed plans relevant to the brief, then phrases each
+          step as a command the user can walk through by hand (e.g., "Navigate
+          to X; do A, check B. The expected outcome is O").
+        </p>
+
+        <!-- explanation-generator -->
+        <h3 id="agent-explanation-generator">explanation-generator</h3>
+
+        <p>
+          Generates explanation reports for the behavior, code, and data-model
+          modes of the <code>/explain</code> skill.
+        </p>
+
+        <table>
+          <tbody>
+            <tr>
+              <th>Inputs</th>
+              <td>A mode (<code>behavior</code>, <code>code</code>, or
+                <code>data-model</code>); the user's brief or scope
+                description; the output path; the reserved artifact ID.</td>
+            </tr>
+            <tr>
+              <th>Outputs</th>
+              <td>An ID-stamped explanation report. Behavior and data-model
+                reports use a conversational, user-centered voice with roles,
+                goals, activities, and analogies. Code reports target junior
+                developers learning the stack.</td>
+            </tr>
+            <tr>
+              <th>Invoked by</th>
+              <td><code>/explain behavior</code>,
+                <code>/explain code</code>,
+                <code>/explain data-model</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The explanation-generator dispatches on the mode to determine the
+          output directory, filename convention, header label, and voice. It
+          reads the project constitution and applies its constraints throughout
+          generation.
+        </p>
+
+        <!-- architecture-explainer -->
+        <h3 id="agent-architecture-explainer">architecture-explainer</h3>
+
+        <p>
+          Generates architecture explanation reports covering system structure,
+          component boundaries, communication patterns, and design trade-offs.
+        </p>
+
+        <table>
+          <tbody>
+            <tr>
+              <th>Inputs</th>
+              <td>The user's brief or scope description; the output path; the
+                reserved artifact ID; an optional scope to focus on a specific
+                component or subsystem.</td>
+            </tr>
+            <tr>
+              <th>Outputs</th>
+              <td>An architecture explanation report aimed at onboarding
+                developers, focusing on the "why" behind architectural
+                decisions. Covers the full system when unscoped, or a specific
+                component and its dependencies when scoped.</td>
+            </tr>
+            <tr>
+              <th>Invoked by</th>
+              <td><code>/explain architecture</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The architecture-explainer uses a multi-phase workflow: survey the
+          system (read CLAUDE.md, conventions, scan directories), identify
+          major components and their relationships, then write the report with
+          trade-offs and multiple analogies for complex concepts.
+        </p>
+
+        <!-- evolution-explainer -->
+        <h3 id="agent-evolution-explainer">evolution-explainer</h3>
+
+        <p>
+          Generates behavior-evolution explanation reports tracing how a
+          feature reached its current state through plan history.
+        </p>
+
+        <table>
+          <tbody>
+            <tr>
+              <th>Inputs</th>
+              <td>The user's brief (the feature area to trace); the output
+                path; the reserved artifact ID.</td>
+            </tr>
+            <tr>
+              <th>Outputs</th>
+              <td>A behavior-evolution report with a current behavior snapshot
+                and a full evolution timeline showing waves of change, design
+                rationale, and how the feature morphed across plans.</td>
+            </tr>
+            <tr>
+              <th>Invoked by</th>
+              <td><code>/explain behavior-evolution</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The evolution-explainer mines the plan history by reading the global
+          artifact index, filtering plan IDs whose title or prefix-scope
+          touches the feature area, reading the full plan files, sorting
+          chronologically, and building a timeline that tells the story of how
+          the feature evolved.
+        </p>
+      </section>
+
+      <!-- Section 5: Writing Custom Subagents -->
+      <section id="writing-custom-subagents" data-diataxis="how-to">
+        <h2>Writing Custom Subagents</h2>
+
+        <p>
+          You can extend the harness with custom subagents by adding new
+          prompt files to <code>.claude/agents/</code>. Each file defines a
+          new agent type that skills can delegate to.
+        </p>
+
+        <h3>Step 1: Create the Prompt File</h3>
+
+        <p>
+          Create a new Markdown file in <code>.claude/agents/</code> with a
+          descriptive kebab-case name (e.g.,
+          <code>.claude/agents/my-custom-agent.md</code>). The filename
+          (without extension) becomes the agent's identifier.
+        </p>
+
+        <h3>Step 2: Write the Frontmatter</h3>
+
+        <p>
+          Add YAML frontmatter with the required fields:
+        </p>
+
+        <pre><code><span class="token-comment">---</span>
+<span class="token-keyword">name</span>: my-custom-agent
+<span class="token-keyword">description</span>: <span class="token-string">One-line summary of what this agent does.</span>
+<span class="token-keyword">designer_description</span>: <span class="token-string">"When you hand me X, I do Y and return Z."</span>
+<span class="token-keyword">tools</span>: Read, Glob, Grep
+<span class="token-comment">---</span></code></pre>
+
+        <p>
+          Choose the minimal set of tools the agent needs. Common
+          combinations:
+        </p>
+
+        <ul>
+          <li><code>Read, Glob, Grep</code> -- read-only analysis agents</li>
+          <li><code>Read, Glob, Grep, Bash</code> -- agents that run scripts
+            or commands</li>
+          <li><code>Read, Glob, Grep, Write</code> -- agents that produce
+            output files</li>
+          <li><code>Read, Bash, Glob, Grep, Write</code> -- agents that both
+            run commands and write output</li>
+        </ul>
+
+        <h3>Step 3: Write the Body</h3>
+
+        <p>
+          The Markdown body defines the agent's behavior. Follow this
+          structure:
+        </p>
+
+        <pre><code><span class="token-comment"># My Custom Agent</span>
+
+You are a [role]. Your task is to [purpose].
+
+<span class="token-comment">## Input</span>
+
+You will receive:
+- <span class="token-keyword">**item_a**</span>: description of first input
+- <span class="token-keyword">**item_b**</span>: description of second input
+
+<span class="token-comment">## Process</span>
+
+1. [First step]
+2. [Second step]
+3. [Third step]
+
+<span class="token-comment">## Output Format</span>
+
+[Describe the expected output structure]</code></pre>
+
+        <h3>Step 4: Invoke from a Skill</h3>
+
+        <p>
+          To use the new agent, the invoking skill launches it via the
+          <code>Agent</code> tool with <code>subagent_type</code> set to the
+          agent's name:
+        </p>
+
+        <pre><code>Agent({
+  <span class="token-keyword">subagent_type</span>: <span class="token-string">"my-custom-agent"</span>,
+  <span class="token-keyword">prompt</span>: <span class="token-string">"[self-contained prompt with all needed context]"</span>
+})</code></pre>
+
+        <p>
+          The agent prompt file content becomes the agent's system-level
+          instructions. The <code>prompt</code> parameter provides the
+          task-specific inputs. Remember: the agent starts with a fresh
+          context window, so the prompt must include everything the agent needs
+          -- file paths to read, scope constraints, output expectations.
+        </p>
+
+        <aside class="callout-tip">
+          <strong>Tip:</strong> Before creating a new agent, check whether an
+          existing agent already covers your use case. The 16 built-in agents
+          cover most common patterns. A new agent is warranted when you need a
+          fundamentally different analysis workflow or output format that the
+          existing agents cannot accommodate.
+        </aside>
+      </section>
+
+      <!-- Section 6: Common Mistakes -->
+      <section id="common-mistakes" data-diataxis="how-to">
+        <h2>Common Mistakes</h2>
+
+        <dl>
+          <dt>Passing too little context to a subagent</dt>
+          <dd>
+            <strong>Mistake:</strong> Assuming the subagent can see the
+            conversation history or infer context from prior interactions.
+            <br>
+            <strong>Consequence:</strong> The subagent produces generic or
+            incorrect output because it lacks the project-specific information
+            it needs.
+            <br>
+            <strong>Avoidance:</strong> Treat every subagent prompt as
+            self-contained. Include the file paths to read, the scope of the
+            task, the output format, and any constraints. The prompt is the
+            agent's entire world.
+          </dd>
+
+          <dt>Expecting subagents to share state</dt>
+          <dd>
+            <strong>Mistake:</strong> Launching two subagents in sequence and
+            expecting the second to build on what the first discovered.
+            <br>
+            <strong>Consequence:</strong> The second agent starts fresh with no
+            knowledge of the first agent's findings, leading to duplicated
+            work or inconsistent results.
+            <br>
+            <strong>Avoidance:</strong> If two tasks depend on each other, the
+            orchestrating skill must read the first agent's output and pass
+            the relevant findings to the second agent's prompt. Alternatively,
+            combine both tasks into a single agent if the dependency is tight.
+          </dd>
+
+          <dt>Using subagents for simple tasks</dt>
+          <dd>
+            <strong>Mistake:</strong> Delegating a task that could be done in
+            a few lines of inline work (reading one file, running one command)
+            to a full subagent.
+            <br>
+            <strong>Consequence:</strong> The context setup overhead (reading
+            the agent prompt file, constructing the self-contained prompt,
+            launching a fresh context window, processing the result) exceeds
+            the cost of doing the work inline.
+            <br>
+            <strong>Avoidance:</strong> Delegate when the task requires deep,
+            focused analysis across many files or perspectives. Keep simple
+            lookups, single-file reads, and straightforward commands inline in
+            the orchestrating skill.
+          </dd>
+
+          <dt>Not reading the subagent's result before proceeding</dt>
+          <dd>
+            <strong>Mistake:</strong> Launching a subagent and continuing the
+            workflow without checking whether the agent produced its expected
+            output.
+            <br>
+            <strong>Consequence:</strong> The workflow proceeds with missing or
+            malformed data, potentially producing invalid artifacts or
+            skipping quality gates.
+            <br>
+            <strong>Avoidance:</strong> After a subagent completes, verify that
+            the output file exists and contains the expected structure before
+            using the results. Handle failure cases (missing output, agent
+            error, timeout) gracefully by reporting the failure rather than
+            silently continuing.
+          </dd>
+        </dl>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="ch2-skills-in-depth.html">Previous: Skills In Depth</a>
+    <a href="ch4-plans-and-implementation.html">Next: Plans and Implementation</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

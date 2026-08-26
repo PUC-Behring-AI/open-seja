@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="3">
+  <meta name="doc-chapter" content="5">
+  <meta name="doc-phase" content="1">
+  <meta name="doc-status" content="draft">
+
+  <title>Quality and Critique -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 3: The Execution Layer</a></li>
+      <li>Quality and Critique</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>Quality and Critique</h1>
+
+      <p>
+        The <code>/critique</code> skill is SEJA's unified quality gate — one
+        skill for every "is it OK?" question. It provides ten mutually exclusive
+        modes covering static validation, structured code review, runtime smoke
+        tests, pre-merge preflight checks, harness self-diagnosis, test plan
+        generation, documentation consistency scanning, git freshness tracking,
+        telemetry analysis, and semiotic inspection. Each mode produces a
+        numbered critique log that becomes part of the project's quality trail.
+      </p>
+
+
+      <!-- ============================================================ -->
+      <section id="the-critique-system" data-diataxis="explanation">
+        <h2>The Critique System</h2>
+
+        <p>
+          In the SEJA lifecycle, critique occupies the verification position:
+          it runs after <code>/implement</code> and before
+          <code>/document</code> or <code>/communicate</code>. The principle
+          is <strong>validate before you communicate</strong> — no stakeholder
+          material should be generated until the implementation has passed
+          quality review.
+        </p>
+
+        <p>
+          The critique system is multi-modal by design. Different quality
+          questions require different tools: a code review needs the 16
+          review perspectives, a smoke test needs a running application, and a
+          harness health check needs access to internal SEJA structure. Rather
+          than splitting these into separate skills, <code>/critique</code>
+          provides one entry point with mode dispatch. Each invocation selects
+          exactly one mode, runs the appropriate checks, and produces a
+          numbered report file.
+        </p>
+
+        <p>
+          All modes except <code>telemetry</code> follow a shared execution
+          pattern: pre-skill lifecycle hook, mode-specific checks, report
+          generation with a reserved ID, result presentation, and post-skill
+          lifecycle hook. The <code>telemetry</code> mode is read-only and
+          produces no artifact.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> Use <code>/critique preflight</code> as
+            your pre-merge checkpoint — it combines validation and code review
+            in one pass and gives a clear go/no-go verdict.
+          </p>
+        </aside>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <section id="critique-modes" data-diataxis="reference">
+        <h2>Critique Modes</h2>
+
+        <p>
+          Ten modes are available, each targeting a different quality concern.
+          Modes are mutually exclusive — specify exactly one per invocation.
+          A global <code>--depth &lt;light|standard|deep&gt;</code> flag
+          overrides review depth for the <code>review</code> and
+          <code>preflight</code> modes.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Mode</th>
+                <th>Purpose</th>
+                <th>Scope Options</th>
+                <th>Output</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>validate</code></td>
+                <td>Run project validation scripts</td>
+                <td><code>all</code> (default), <code>i18n</code>, <code>auth</code>, <code>migrations</code>, <code>constants</code>, <code>po</code>, <code>coverage</code>, <code>tests</code>, <code>spec</code></td>
+                <td>Validation report with pass/fail per check</td>
+              </tr>
+              <tr>
+                <td><code>review</code></td>
+                <td>Structured code review against quality perspectives</td>
+                <td><code>staged</code> (default), file path, directory path</td>
+                <td>Review log with perspective evaluations</td>
+              </tr>
+              <tr>
+                <td><code>smoke</code></td>
+                <td>Runtime smoke tests against API endpoints or UI pages</td>
+                <td><code>all</code> (default), <code>api</code>, <code>ui</code></td>
+                <td>Smoke test report with PASS/WARN/FAIL per endpoint</td>
+              </tr>
+              <tr>
+                <td><code>preflight</code></td>
+                <td>Combined validate + review as a pre-merge checkpoint</td>
+                <td><code>staged</code> (default), <code>all</code>, directory path</td>
+                <td>Preflight report with go/no-go verdict</td>
+              </tr>
+              <tr>
+                <td><code>health</code></td>
+                <td>Harness self-diagnosis and integrity check</td>
+                <td>None (runs all 9 built-in checks); <code>--source &lt;path&gt;</code> enables drift check</td>
+                <td>Harness Health Report with PASS/WARN/FAIL per check</td>
+              </tr>
+              <tr>
+                <td><code>test-plan</code></td>
+                <td>Generate a structured manual test plan</td>
+                <td>A brief describing what to test</td>
+                <td>User test artifact with scenarios and expected results</td>
+              </tr>
+              <tr>
+                <td><code>docs</code></td>
+                <td>Documentation consistency check via plugin scanners</td>
+                <td><code>--plugins &lt;list&gt;</code>, <code>--verbose</code>, <code>--filter &lt;severity&gt;</code></td>
+                <td>Documentation consistency report</td>
+              </tr>
+              <tr>
+                <td><code>freshness</code></td>
+                <td>Compare local branches to upstream remotes</td>
+                <td>Implicit (configured repos)</td>
+                <td>Git freshness report with ahead/behind counts</td>
+              </tr>
+              <tr>
+                <td><code>telemetry</code></td>
+                <td>Usage analytics from <code>telemetry.jsonl</code></td>
+                <td>None</td>
+                <td>Displayed inline (no report file saved)</td>
+              </tr>
+              <tr>
+                <td><code>semiotic-inspection</code></td>
+                <td>SIM-based communicability evaluation</td>
+                <td>Feature name, page, user flow, or <code>all</code></td>
+                <td>SIM report with communicability judgment</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+
+        <!-- validate -->
+        <h3 id="mode-validate">validate</h3>
+
+        <p>
+          Orchestrates project validation scripts through the
+          <code>standards-checker</code> agent. Stack filtering reads
+          <code>BACKEND_FRAMEWORK</code> and <code>FRONTEND_FRAMEWORK</code>
+          from <code>product-design/conventions.md</code> and runs only
+          scripts matching the project's stack from the plugin registry at
+          <code>.claude/skills/scripts/check_plugin_registry.json</code>.
+        </p>
+
+        <p>
+          Scope dispatch routes specific checks to specialized agents: the
+          <code>migrations</code> scope launches both the
+          <code>standards-checker</code> and the
+          <code>migration-validator</code> agent for deep inspection; the
+          <code>tests</code> scope launches the <code>test-runner</code>
+          agent; the <code>spec</code> scope runs
+          <code>check_spec_conformance.py</code> directly; the
+          <code>all</code> scope runs the full standards check plus spec
+          conformance.
+        </p>
+
+        <p>
+          Output: a validation report with a summary table (check name,
+          status, error count, warning count) and per-failure details.
+        </p>
+
+
+        <!-- review -->
+        <h3 id="mode-review">review</h3>
+
+        <p>
+          Launches the <code>code-reviewer</code> agent against staged
+          changes (default), a specific file, or a directory. The agent
+          follows the two-stage loading protocol: load the perspective index,
+          select 4–6 relevant perspectives based on the change content, load
+          only those perspective files, evaluate, and return a structured
+          report.
+        </p>
+
+        <p>
+          Review depth is controlled by <code>--depth</code> with a floor
+          set by <code>MINIMUM_REVIEW_DEPTH</code> in
+          <code>product-design/conventions.md</code>. The effective depth is
+          <code>max(floor, flag)</code>. Without a <code>--depth</code> flag,
+          all 16 perspectives are evaluated (equivalent to
+          <code>deep</code>).
+        </p>
+
+        <p>
+          Output: a review log with a perspective evaluation table
+          (Adopted/Deferred/N/A per perspective), prioritized issues with
+          severity and file references, and recommendations.
+        </p>
+
+
+        <!-- smoke -->
+        <h3 id="mode-smoke">smoke</h3>
+
+        <p>
+          Runs runtime smoke tests driven by the endpoint registry at
+          <code>.claude/skills/scripts/smoke_test_registry.json</code>. API
+          smoke tests use the Flask test client against an in-memory SQLite
+          database — no servers required. UI smoke tests require Playwright
+          with both backend and frontend servers running.
+        </p>
+
+        <p>
+          Output: PASS/WARN/FAIL counts per endpoint, captured errors, and
+          an overall verdict. When failures are found, the user is asked
+          whether to investigate immediately, create a plan, or dismiss.
+        </p>
+
+
+        <!-- preflight -->
+        <h3 id="mode-preflight">preflight</h3>
+
+        <p>
+          The pre-merge checkpoint that combines validation and code review
+          into a single pass. Launches the <code>standards-checker</code>,
+          <code>code-reviewer</code>, and optionally smoke tests as
+          concurrent agent invocations. If one check fails, the others
+          still produce results — preflight does not abort on partial
+          failure.
+        </p>
+
+        <p>
+          Output: a merged report with validation summary, review perspective
+          table, and prioritized issues. The overall status is
+          <strong>READY</strong> only if all validation checks pass and no
+          HIGH-severity review issues were found; otherwise
+          <strong>NOT READY</strong>.
+        </p>
+
+
+        <!-- health -->
+        <h3 id="mode-health">health</h3>
+
+        <p>
+          Launches the <code>harness-health-evaluator</code> agent to run
+          9 built-in diagnostic checks:
+        </p>
+
+        <ol>
+          <li>Skill system integrity</li>
+          <li>Orphaned briefs (STARTED without matching DONE)</li>
+          <li>Stale plans</li>
+          <li>Reference file completeness</li>
+          <li>Conventions completeness</li>
+          <li>Constitution presence</li>
+          <li>Skill spec compliance</li>
+          <li>Pending ledger summary</li>
+          <li>Harness drift (when <code>--source &lt;path&gt;</code> is provided)</li>
+        </ol>
+
+        <p>
+          Output: a Harness Health Report with PASS/WARN/FAIL per check and
+          an overall N/9 tally. The <code>--verbose</code> flag adds detailed
+          output per check. The <code>--source</code> flag enables drift
+          detection against a canonical source harness directory.
+        </p>
+
+
+        <!-- test-plan -->
+        <h3 id="mode-test-plan">test-plan</h3>
+
+        <p>
+          Launches the <code>test-plan-generator</code> agent with a brief
+          describing what to test. The agent reads the plan index, filters
+          for recently completed plans relevant to the brief, carries forward
+          unchecked items from earlier user tests, and produces a structured
+          manual test plan. Each scenario is phrased as an imperative command
+          with its expected outcome.
+        </p>
+
+        <p>
+          Output: a user test artifact saved to
+          <code>${USER_TESTS_DIR}</code> with a reserved
+          <code>usertest-NNN</code> ID.
+        </p>
+
+
+        <!-- docs -->
+        <h3 id="mode-docs">docs</h3>
+
+        <p>
+          Runs <code>check_docs.py</code> with its 6 plugin-based scanners:
+          harness integrity, path liveness, environment variables, command
+          references, terminology, and structural completeness. Plugins can
+          be filtered with <code>--plugins</code>, output verbosity
+          controlled with <code>--verbose</code>, and severity filtered with
+          <code>--filter</code>.
+        </p>
+
+        <p>
+          Output: a documentation consistency report with error/warning/info
+          counts grouped by plugin, along with specific locations and
+          messages for each finding.
+        </p>
+
+
+        <!-- freshness -->
+        <h3 id="mode-freshness">freshness</h3>
+
+        <p>
+          Runs <code>check_git_freshness.py</code> to compare local branches
+          against their upstream remotes for all configured repositories
+          (workspace root plus codebase directory when distinct). The check
+          is advisory-only and <strong>never pulls</strong> automatically.
+        </p>
+
+        <p>
+          Output: per-repo sections with branch name, ahead/behind counts,
+          and suggested actions (pull, push, or investigate divergence).
+        </p>
+
+
+        <!-- telemetry -->
+        <h3 id="mode-telemetry">telemetry</h3>
+
+        <p>
+          A read-only informational mode that reads
+          <code>telemetry.jsonl</code> and displays skill invocation
+          statistics. Unlike all other modes, <code>telemetry</code> does
+          not reserve an ID, does not save a report file, and does not
+          invoke post-skill.
+        </p>
+
+
+        <!-- semiotic-inspection -->
+        <h3 id="mode-semiotic-inspection">semiotic-inspection</h3>
+
+        <p>
+          Launches the <code>semiotic-inspector</code> agent for a Semiotic
+          Inspection Method (SIM) evaluation. The agent reconstructs the
+          designer's metacommunication message across three sign classes —
+          metalinguistic (help text, error messages), static (layout, labels),
+          and dynamic (state transitions) — then collates them to produce a
+          communicability judgment.
+        </p>
+
+        <p>
+          The agent acts as <strong>evaluator-as-user-advocate</strong>,
+          representing users' interests through HCI knowledge. It applies
+          the 5 SIM scaffold questions and the 4 SigniFYIng Interaction
+          dimensions to surface where the three sign classes agree, where
+          they contradict, and where users are likely to lose the thread.
+        </p>
+
+        <p>
+          Output: a SIM report with per-sign-class analysis and an overall
+          communicability verdict.
+        </p>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <section id="review-perspectives" data-diataxis="reference">
+        <h2>Review Perspectives</h2>
+
+        <p>
+          SEJA evaluates changes through 16 domain lenses organized into
+          engineering and design categories. Each perspective defines a
+          checklist of prioritized questions at three tiers: Essential (P0
+          critical/blocking questions, always evaluated), Standard (P1–P2
+          questions for thorough review), and Deep (P3–P4 questions for
+          exhaustive analysis). The full perspective checklists are
+          agent-facing reference files at
+          <code>.claude/references/general/review-perspectives/</code>; this
+          section provides the summary index.
+        </p>
+
+        <h3>Engineering Perspectives</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Tag</th>
+                <th>Name</th>
+                <th>Tier</th>
+                <th>Scope</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>SEC</code></td>
+                <td>Security</td>
+                <td>Essential</td>
+                <td>Auth, input validation, secrets management, dependency vulnerabilities</td>
+              </tr>
+              <tr>
+                <td><code>PERF</code></td>
+                <td>Performance</td>
+                <td>Deep-dive</td>
+                <td>N+1 queries, unbounded loops, indexes, caching, bundle size</td>
+              </tr>
+              <tr>
+                <td><code>DB</code></td>
+                <td>Database</td>
+                <td>Essential</td>
+                <td>Schema migrations, backward compatibility, idempotency, constraints</td>
+              </tr>
+              <tr>
+                <td><code>API</code></td>
+                <td>API Design</td>
+                <td>Deep-dive</td>
+                <td>RESTful conventions, route consistency, request/response contracts</td>
+              </tr>
+              <tr>
+                <td><code>ARCH</code></td>
+                <td>Architecture</td>
+                <td>Essential</td>
+                <td>Layer boundaries, separation of concerns, dependency direction</td>
+              </tr>
+              <tr>
+                <td><code>DX</code></td>
+                <td>Developer Experience</td>
+                <td>Essential</td>
+                <td>Readability, conventions, documentation, error messages</td>
+              </tr>
+              <tr>
+                <td><code>I18N</code></td>
+                <td>Internationalization</td>
+                <td>Essential</td>
+                <td>i18n keys, locale support, pluralization, RTL, date/number formats</td>
+              </tr>
+              <tr>
+                <td><code>TEST</code></td>
+                <td>Testability</td>
+                <td>Essential</td>
+                <td>Test coverage, new test needs, mocking strategy, test isolation</td>
+              </tr>
+              <tr>
+                <td><code>OPS</code></td>
+                <td>Operations / DevOps</td>
+                <td>Deep-dive</td>
+                <td>Environment parity, logging, monitoring, deployment, config management</td>
+              </tr>
+              <tr>
+                <td><code>COMPAT</code></td>
+                <td>Compatibility</td>
+                <td>Deep-dive</td>
+                <td>API contract stability, schema evolution, browser/version support</td>
+              </tr>
+              <tr>
+                <td><code>DATA</code></td>
+                <td>Data Integrity &amp; Privacy</td>
+                <td>Deep-dive</td>
+                <td>PII handling, GDPR compliance, validation, audit trails</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Design Perspectives</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Tag</th>
+                <th>Name</th>
+                <th>Tier</th>
+                <th>Scope</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>UX</code></td>
+                <td>User Experience</td>
+                <td>Essential</td>
+                <td>User flows, feedback, error handling, navigation, discoverability</td>
+              </tr>
+              <tr>
+                <td><code>A11Y</code></td>
+                <td>Accessibility</td>
+                <td>Essential</td>
+                <td>WCAG AAA, contrast, keyboard nav, screen readers, focus management</td>
+              </tr>
+              <tr>
+                <td><code>VIS</code></td>
+                <td>Visual Design</td>
+                <td>Deep-dive</td>
+                <td>Design system consistency, CSS conventions, spacing, typography</td>
+              </tr>
+              <tr>
+                <td><code>RESP</code></td>
+                <td>Responsive Design</td>
+                <td>Deep-dive</td>
+                <td>Mobile/tablet/desktop breakpoints, fluid layouts, touch targets</td>
+              </tr>
+              <tr>
+                <td><code>MICRO</code></td>
+                <td>Microinteractions</td>
+                <td>Deep-dive</td>
+                <td>Hover/focus/active states, transitions, loading indicators, animations</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Perspective Status Vocabulary</h3>
+
+        <p>
+          Each perspective in a review is assigned one of three statuses:
+        </p>
+
+        <dl>
+          <dt><strong>Adopted</strong></dt>
+          <dd>Evaluated; concerns addressed in the current change.</dd>
+
+          <dt><strong>Deferred</strong></dt>
+          <dd>Evaluated; concerns identified but not addressed — the review
+              log records why, with pros and cons of deferral.</dd>
+
+          <dt><strong>N/A</strong></dt>
+          <dd>The perspective does not apply to this change (e.g., the
+              Database perspective for a pure frontend change).</dd>
+        </dl>
+
+        <h3>Perspective Shortcuts by Plan Prefix</h3>
+
+        <p>
+          The two-stage loading protocol uses plan prefix and scope to
+          determine a default shortlist. Reviewers may add up to 2 extra
+          perspectives if the change content warrants it.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Prefix-Scope</th>
+                <th>Default Perspectives</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><code>FEATURE-B</code></td><td>SEC, DB, API, ARCH, TEST, PERF</td></tr>
+              <tr><td><code>FEATURE-F</code></td><td>UX, A11Y, VIS, RESP, I18N, TEST, MICRO</td></tr>
+              <tr><td><code>FEATURE-X</code></td><td>SEC, DB, API, ARCH, UX, A11Y, I18N, TEST</td></tr>
+              <tr><td><code>FIX-B</code> / <code>REFACTOR-B</code></td><td>SEC, DB, ARCH, TEST, PERF, DX</td></tr>
+              <tr><td><code>FIX-F</code> / <code>REFACTOR-F</code></td><td>UX, A11Y, VIS, TEST, I18N, RESP</td></tr>
+              <tr><td><code>FIX-X</code> / <code>REFACTOR-X</code></td><td>SEC, DB, API, ARCH, UX, A11Y, I18N, TEST</td></tr>
+              <tr><td><code>CHORE-O</code> / <code>DOCUMENT-O</code></td><td>DX, OPS, COMPAT</td></tr>
+              <tr><td><code>CHORE-B/F/X</code></td><td>DX, OPS, COMPAT, TEST</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <section id="the-two-phase-review-process" data-diataxis="explanation">
+        <h2>The Two-Phase Review Process</h2>
+
+        <p>
+          Code review and plan review in SEJA follow a two-phase process
+          designed to keep context lean while ensuring thorough coverage.
+          The process is complexity-gated: simpler changes use a lighter
+          pass, while high-stakes changes trigger deeper analysis.
+        </p>
+
+        <h3>Phase 1: Perspective Triage and Scan</h3>
+
+        <p>
+          The reviewer loads the compact perspective index
+          (<code>.claude/references/general/review-perspectives-index.md</code>,
+          under 600 tokens) and selects 4–6 relevant perspectives based on
+          the change content. For each selected perspective, the reviewer
+          loads the full perspective file from
+          <code>.claude/references/general/review-perspectives/</code> and
+          evaluates the Essential (P0) questions. Perspectives that do not
+          apply to the change are marked N/A without loading their files.
+        </p>
+
+        <p>
+          For review depth <code>deep</code> or when explicitly requested,
+          all 16 perspective files are loaded and evaluated.
+        </p>
+
+        <h3>Phase 2: Targeted Deep-Dives</h3>
+
+        <p>
+          When Phase 1 identifies concerns that require further analysis,
+          the reviewer conducts targeted deep-dives on the affected
+          perspectives. Deep-dives evaluate Standard (P1–P2) and Deep
+          (P3–P4) questions for the perspectives where Essential screening
+          raised flags or where the change complexity warrants closer
+          examination.
+        </p>
+
+        <p>
+          Deep-dives are budget-controlled to prevent unbounded review
+          scope. The reviewer tracks convergence: once a perspective's
+          concerns have been fully characterized and the findings have
+          stabilized, the deep-dive concludes for that perspective.
+        </p>
+
+        <h3>Conflict Resolution</h3>
+
+        <p>
+          When two perspectives pull in opposite directions (e.g.,
+          Performance recommends caching while Security flags the cache as
+          an attack surface), the reviewer follows a fixed resolution order:
+        </p>
+
+        <ol>
+          <li><strong>SEC wins by default</strong> — unless the user
+              explicitly accepts the risk.</li>
+          <li><strong>A11Y is non-negotiable</strong> — never traded
+              against visual design or performance.</li>
+          <li><strong>Document the trade-off</strong> — record both the
+              chosen approach and the deferred concern with rationale.</li>
+          <li><strong>Ask when unclear</strong> — for non-default conflicts
+              (e.g., PERF vs DX), ask the user rather than choosing
+              silently.</li>
+        </ol>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <section id="interpreting-results" data-diataxis="how-to">
+        <h2>Interpreting Results</h2>
+
+        <h3>Validation Output</h3>
+
+        <p>
+          Validation reports present a summary table with each check script's
+          name, status (PASS, FAIL, or INFO), error count, and warning count.
+          The overall result line shows <code>X/Y checks passed</code>. Any
+          check with status FAIL requires attention; INFO results are
+          advisory.
+        </p>
+
+        <h3>Review Logs</h3>
+
+        <p>
+          Review logs contain a perspective evaluation table showing
+          Adopted/Deferred/N/A status per perspective, followed by
+          prioritized issues. Each issue carries a severity level, the
+          perspective that raised it, a description, and a file reference.
+          Focus on HIGH-severity issues first — these would block a release.
+          Deferred items include rationale and should be revisited in a
+          future iteration.
+        </p>
+
+        <h3>Preflight Verdicts</h3>
+
+        <p>
+          A preflight report ends with an overall status:
+          <strong>READY</strong> (all validation checks pass, no
+          HIGH-severity review issues) or <strong>NOT READY</strong>
+          (at least one check failed or a HIGH-severity issue was found).
+          Treat NOT READY as a merge blocker.
+        </p>
+
+        <h3>Health Reports</h3>
+
+        <p>
+          Health reports show PASS/WARN/FAIL per diagnostic check and an
+          overall <code>N/9</code> tally. WARN results indicate degraded
+          conditions (e.g., orphaned briefs, stale plans) that should be
+          addressed but do not block operation. FAIL results indicate
+          structural issues that need immediate attention.
+        </p>
+
+        <h3>What to Fix vs Defer</h3>
+
+        <p>
+          Fix immediately: HIGH-severity review findings, FAIL validation
+          checks, security and accessibility issues (SEC and A11Y
+          perspectives). Defer with documentation: MEDIUM-severity findings
+          in perspectives not central to the change, WARNING-level
+          validation results from non-critical checks. Do not defer:
+          anything that would violate the project constitution or compromise
+          user safety.
+        </p>
+
+        <h3>When to Re-Run</h3>
+
+        <p>
+          Re-run critique after fixing findings to confirm they are resolved.
+          A <code>preflight</code> pass before merge provides confidence
+          that the change is ready. For ongoing development, periodic
+          <code>health</code> and <code>freshness</code> checks catch
+          drift and staleness early.
+        </p>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <section id="common-mistakes" data-diataxis="how-to">
+        <h2>Common Mistakes</h2>
+
+        <dl>
+          <dt>Running review without reading the diff first</dt>
+          <dd>
+            The code review mode works best when the reviewer (human or
+            agent) has context about what changed and why. Running
+            <code>/critique review</code> on staged changes without
+            understanding the plan behind them leads to superficial
+            findings. Read the plan and the diff before reviewing.
+          </dd>
+
+          <dt>Ignoring Deferred findings</dt>
+          <dd>
+            Deferred perspectives are not dismissed — they represent
+            concerns that were evaluated and intentionally postponed.
+            Review logs record the rationale for each deferral. If Deferred
+            items accumulate across multiple reviews without being
+            addressed, they signal growing technical or design debt.
+          </dd>
+
+          <dt>Skipping preflight before merge</dt>
+          <dd>
+            The <code>/critique preflight</code> mode exists specifically
+            as a pre-merge checkpoint. Skipping it and relying solely on
+            individual <code>validate</code> or <code>review</code> runs
+            misses the combined verdict and the concurrent checks that
+            preflight provides.
+          </dd>
+
+          <dt>Treating advisory findings as blocking</dt>
+          <dd>
+            INFO-level validation results, WARNING-level health check
+            findings, and MEDIUM/LOW-severity review issues are advisory.
+            They should be reviewed and tracked but should not block a
+            merge if the core quality criteria (no FAIL validation, no
+            HIGH-severity review issues) are met.
+          </dd>
+
+          <dt>Running all critique modes when one is sufficient</dt>
+          <dd>
+            Each mode targets a specific quality concern. Running
+            <code>validate</code>, <code>review</code>,
+            <code>smoke</code>, and <code>health</code> in sequence when
+            only a code review was needed wastes time and context budget.
+            Use <code>preflight</code> when you need the combined
+            validate+review pass; use individual modes for targeted checks.
+          </dd>
+        </dl>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 3: The Execution Layer</h2>
+    <ol>
+      <li>
+        <a href="lifecycle-pipeline.html">Lifecycle Pipeline</a>
+      </li>
+      <li>
+        <a href="skills-in-depth.html">Skills In Depth</a>
+      </li>
+      <li>
+        <a href="subagent-delegation.html">Subagent Delegation</a>
+      </li>
+      <li>
+        <a href="plans-and-implementation.html">Plans and Implementation</a>
+      </li>
+      <li aria-current="page">
+        <a href="quality-and-critique.html">Quality and Critique</a>
+        <ul>
+          <li><a href="#the-critique-system">The Critique System</a></li>
+          <li><a href="#critique-modes">Critique Modes</a></li>
+          <li><a href="#review-perspectives">Review Perspectives</a></li>
+          <li><a href="#the-two-phase-review-process">The Two-Phase Review Process</a></li>
+          <li><a href="#interpreting-results">Interpreting Results</a></li>
+          <li><a href="#common-mistakes">Common Mistakes</a></li>
+        </ul>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Chapter navigation: Ch.5 omits Next -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="plans-and-implementation.html">Previous: Plans and Implementation</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

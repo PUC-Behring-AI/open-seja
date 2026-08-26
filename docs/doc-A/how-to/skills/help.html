@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="how-to">
+  <meta name="doc-volume" content="How-To Guides">
+  <meta name="doc-chapter" content="How to Get Help and Browse Skills">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>How to Get Help and Browse Skills -- SEJA Documentation</title>
+
+  <!-- CSS depth: 2 (sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../../index.html">Home</a>
+    <a href="../../tutorials/index.html">Tutorials</a>
+    <a href="../index.html">How-To Guides</a>
+    <a href="../../reference/index.html">Reference</a>
+    <a href="../../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../../index.html">Home</a></li>
+      <li><a href="../index.html">How-To Guides</a></li>
+      <li><a href="index.html">Skill-by-Skill Guides</a></li>
+      <li>How to Get Help and Browse Skills</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-howto">
+    <article>
+      <p class="vol-accent"><strong>how-to</strong></p>
+
+      <h1>How to Get Help and Browse Skills</h1>
+
+      <p>
+        Goal: find out what the harness can do, read the details of a specific
+        skill before you run it, or browse the full catalogue interactively and
+        launch a skill from a menu. The <code>/help</code> skill provides three
+        layers of progressive disclosure so you can go as shallow or as deep as
+        you need. It explains and navigates; it does not do the work itself.
+      </p>
+
+      <section id="when-to-use">
+        <h2>When to Use</h2>
+        <ul>
+          <li>You want an overview of every user-facing skill grouped by workflow category.</li>
+          <li>You need the details of one skill -- its guide, arguments, category, and related skills -- before invoking it.</li>
+          <li>You want to browse the catalogue by category and launch a skill from an interactive menu (<code>--browse</code>).</li>
+          <li>You want to see how the skills relate to each other as a visual graph.</li>
+        </ul>
+        <aside class="callout-tip">
+          <p>
+            <strong>Not for</strong> execution. Once you know which skill to run,
+            invoke it directly. <code>/help</code> stops after explaining.
+          </p>
+        </aside>
+      </section>
+
+      <section id="required-inputs">
+        <h2>Required Inputs</h2>
+        <p>
+          The argument pattern is <code>[skill-name | --browse]</code>.
+        </p>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Argument</th>
+                <th scope="col">Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><em>(none)</em></td>
+                <td>Layer 1 overview -- all user-facing skills grouped by workflow category, each with a one-sentence summary.</td>
+              </tr>
+              <tr>
+                <td><code>[skill-name]</code></td>
+                <td>Layer 2 detail card for one skill (Quick Guide, arguments, category, related skills).</td>
+              </tr>
+              <tr>
+                <td><code>--browse</code></td>
+                <td>Layer 3 interactive category browser with a Mermaid skill-relationship graph; lets you pick a category, then a skill to run.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="step-by-step">
+        <h2>Step by Step</h2>
+
+        <ol>
+          <li>
+            <strong>Start with the overview.</strong> Run <code>/help</code> with
+            no arguments. It lists all user-facing skills grouped into workflow
+            categories (Getting started, Design &amp; plan, Understand the system,
+            Quality &amp; review, Communicate, Housekeeping) with one-sentence
+            summaries.
+            <br><em>Expected output:</em> a categorised catalogue and a prompt
+            asking which skill or category you want to explore.
+          </li>
+          <li>
+            <strong>Drill into a specific skill.</strong> Run
+            <code>/help &lt;skill&gt;</code> (e.g. <code>/help research</code>).
+            The skill loads that skill's Quick Guide (What / Example / When to use
+            / Next step), its Arguments table, its category, and its related
+            skills from the skill graph.
+            <ul>
+              <li><strong>Read the Quick Guide first</strong> -- Recommended when you are deciding whether a skill fits your task.</li>
+              <li><strong>Jump to the Arguments table</strong> -- Recommended when you already know the skill and just need the flag surface.</li>
+            </ul>
+            <br><em>Expected output:</em> a detail card ending with an invitation
+            to run the skill.
+          </li>
+          <li>
+            <strong>Browse interactively.</strong> Run <code>/help --browse</code>.
+            The skill scans <code>.claude/skills/</code> for every
+            <code>SKILL.md</code> (excluding the internal <code>pre-skill</code>
+            and <code>post-skill</code> hooks), groups them by
+            <code>metadata.category</code>, shows category counts, renders a
+            Mermaid skill-relationship diagram, and walks you through picking a
+            category, then a skill, then executing it.
+            <br><em>Expected output:</em> a category menu, a relationship graph,
+            and a launch prompt for the chosen skill.
+          </li>
+        </ol>
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip.</strong> The relationship diagram is rendered from
+            <code>.claude/references/general/skill-map.mmd</code>. To regenerate
+            it, the harness runs
+            <code>python .claude/skills/help/generate_skill_map.py</code>.
+          </p>
+        </aside>
+      </section>
+
+      <section id="expected-outputs">
+        <h2>Expected Outputs</h2>
+        <ul>
+          <li>Layer 1: a categorised overview of every user-facing skill, plus drill-in options.</li>
+          <li>Layer 2: a per-skill detail card (Quick Guide, Arguments, category, related skills).</li>
+          <li>Layer 3: an interactive category browser with a Mermaid skill graph and a menu that launches the chosen skill.</li>
+        </ul>
+        <aside class="callout-tip">
+          <p>
+            <code>/help</code> writes nothing to <code>_output/</code>; it is a
+            read-only navigation aid.
+          </p>
+        </aside>
+      </section>
+
+      <section id="common-mistakes">
+        <h2>Common Mistakes</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th scope="col">Mistake</th><th scope="col">Better approach</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Expecting <code>/help</code> to perform the task.</td>
+                <td><code>/help</code> only explains and navigates. Invoke the target skill directly once you know its name.</td>
+              </tr>
+              <tr>
+                <td>Guessing a skill's flags instead of reading its card.</td>
+                <td>Run <code>/help &lt;skill&gt;</code> to see the authoritative Arguments table before invoking.</td>
+              </tr>
+              <tr>
+                <td>Looking for internal hooks in the browser.</td>
+                <td><code>pre-skill</code> and <code>post-skill</code> are deliberately excluded from the menu; they are lifecycle hooks, not user-invocable skills.</td>
+              </tr>
+              <tr>
+                <td>Ignoring the "related skills" section.</td>
+                <td>The skill graph shows the usual next step -- follow it to stay on the canonical lifecycle path.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="cross-references">
+        <h2>Cross-References</h2>
+        <ul>
+          <li><a href="index.html">Skill-by-Skill Guides</a> -- the how-to index of every skill, grouped by lifecycle phase.</li>
+          <li><a href="seja-setup.html">How to Manage the Harness with seja-setup</a> -- the first skill you run in a new project.</li>
+          <li><a href="../../reference/skills-reference.html">Skills Reference</a> (Vol. 3) -- exhaustive per-skill argument and mode tables.</li>
+        </ul>
+      </section>
+
+    </article>
+
+    <nav aria-label="chapter navigation">
+      <a href="seja-setup.html">Back: How to Manage the Harness with seja-setup</a>
+      <a href="../governance.html">Next: Governance Operations</a>
+    </nav>
+
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../../reference/skills-reference.html">Skills Reference</a> -- the authoritative per-skill argument and mode tables <code>/help</code> summarizes.</li>
+        <li><a href="../../explanation/agent-as-reader.html">The Agent as Reader</a> -- how progressive disclosure keeps the harness legible.</li>
+      </ul>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#when-to-use">When to Use</a></li>
+      <li><a href="#required-inputs">Required Inputs</a></li>
+      <li><a href="#step-by-step">Step by Step</a></li>
+      <li><a href="#expected-outputs">Expected Outputs</a></li>
+      <li><a href="#common-mistakes">Common Mistakes</a></li>
+      <li><a href="#cross-references">Cross-References</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../../index.html">Collection Index</a>
+      <a href="../../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T22:55:00Z</p>
+  </footer>
+
+</body>
+</html>

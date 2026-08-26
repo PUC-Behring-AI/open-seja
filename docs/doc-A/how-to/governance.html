@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="how-to">
+  <meta name="doc-volume" content="How-To Guides">
+  <meta name="doc-chapter" content="Governance Operations">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>Governance Operations -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">How-To Guides</a></li>
+      <li>Governance Operations</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-howto">
+    <article>
+      <p class="vol-accent"><strong>how-to</strong></p>
+
+      <h1>Governance Operations</h1>
+
+      <p>
+        This guide covers the recurring governance tasks that keep a SEJA project
+        honest: writing and maintaining a <strong>constitution</strong> of
+        immutable principles, managing the <strong>pending-actions ledger</strong>
+        that tracks outstanding human work, running the harness's own
+        <strong>quality gates</strong> before you commit, and enforcing the
+        <strong>pre-commit hook</strong> that guards the private/public boundary.
+        Each section is goal-first and marks its decision points.
+      </p>
+
+      <section id="constitution">
+        <h2>How to Write and Maintain a Constitution</h2>
+
+        <p>
+          The constitution lives at <code>product-design/constitution.md</code>.
+          It holds the non-negotiable commitments -- on design authority,
+          epistemic posture, privacy, lifecycle discipline, artifact integrity,
+          and authorship voice -- that every skill and agent must observe. It is
+          loaded <em>first</em> by pre-skill, before conventions or any other
+          reference file, so its rules take precedence over everything else. It is
+          classified <strong>Human</strong>: agents may read and propose changes,
+          but never write it.
+        </p>
+
+        <p>
+          <code>/design</code> generates the initial constitution (Interview-Driven
+          mode derives principles from your answers). Organise principles into the
+          template's sections: Technical, Quality, Security Invariants, Compliance
+          Requirements, plus an Enforcement section and a Changelog. Each principle
+          carries a stable ID (e.g. <code>T1</code>, <code>Q2</code>,
+          <code>S1</code>, <code>C1</code>) and a rationale.
+        </p>
+
+        <ul>
+          <li><strong>Derive principles by interview</strong> -- Recommended when the project is new and the design values are still being articulated; <code>/design</code> Mode 5 turns confirmed interview answers into principles.</li>
+          <li><strong>Hand-author from an existing charter</strong> -- Recommended when you already have written values and just need them in the template shape. NOT recommended when the values are implicit -- interview mode surfaces them better.</li>
+        </ul>
+
+        <aside class="callout-warning">
+          <p>
+            <strong>Amending the constitution.</strong> Any change must be
+            explicitly approved by the project lead and recorded in the file's
+            own Changelog section. Because the file is <strong>Human</strong>-
+            maintained, agents propose amendments via a confirmation prompt but
+            never edit the principles directly.
+          </p>
+        </aside>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Expected output.</strong> A
+            <code>product-design/constitution.md</code> with identified principles,
+            each with a rationale, plus an Enforcement section. Once present,
+            <code>/critique health</code> validates its presence as one of its
+            built-in checks.
+          </p>
+        </aside>
+      </section>
+
+      <section id="pending-ledger">
+        <h2>How to Manage the Pending Ledger</h2>
+
+        <p>
+          The pending-actions ledger at <code>_output/pending.jsonl</code> is the
+          harness's record of outstanding human work -- markers to flip, tests to
+          run, docs to update, decisions to write. It is append-only, so you never
+          lose history. Pre-skill surfaces open items at the top of every
+          lifecycle skill invocation. All mutation flows through the
+          <code>/pending</code> skill, which dispatches to the underlying
+          <code>pending.py</code> script.
+        </p>
+
+        <p>
+          <code>/pending</code> exposes six subcommands: <strong>list</strong>
+          (read-only listing with per-type advice), <strong>address</strong>
+          (guided resolution for marker-flip types), <strong>add</strong>,
+          <strong>done</strong>, <strong>snooze</strong>, and
+          <strong>dismiss</strong>.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Task</th>
+                <th scope="col">Command</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>List every open item grouped by type, each with resolution advice.</td>
+                <td><code>/pending</code></td>
+              </tr>
+              <tr>
+                <td>Run the guided resolution workflow for one item (per-candidate marker flips with confirmation).</td>
+                <td><code>/pending address pa-000003</code></td>
+              </tr>
+              <tr>
+                <td>File a custom reminder that pre-skill will keep surfacing.</td>
+                <td><code>/pending add --type user-defined --source plan-000042 --description "review CSRF middleware"</code></td>
+              </tr>
+              <tr>
+                <td>Mark an item complete.</td>
+                <td><code>/pending done pa-000003</code></td>
+              </tr>
+              <tr>
+                <td>Hide an item until a date, then resurface it.</td>
+                <td><code>/pending snooze pa-000005 --until 2026-05-01</code></td>
+              </tr>
+              <tr>
+                <td>Dismiss an item without completing it, recording a reason.</td>
+                <td><code>/pending dismiss pa-000007 --reason "no longer relevant after redesign"</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          The harness files many action types automatically -- for example
+          <code>mark-implemented</code>, <code>test-implementation</code>,
+          <code>verify-as-coded</code>, <code>update-documentation</code>,
+          <code>apply-promote-markers</code>, <code>spec-drift-check</code>,
+          <code>periodic-curation</code>,
+          <code>incorporate-research-markers</code>, <code>implement</code>,
+          <code>review-downstream-plan</code>, <code>create-decision-entry</code>,
+          and your own <code>user-defined</code> reminders. Each type comes with
+          type-specific advice on how to resolve it.
+        </p>
+
+        <ul>
+          <li><strong>Address now</strong> -- Recommended when the item is a marker flip the harness can walk you through with confirmation (e.g. <code>mark-implemented</code>).</li>
+          <li><strong>Snooze</strong> -- Recommended when the item is real but blocked on something dated; it resurfaces automatically.</li>
+          <li><strong>Dismiss</strong> -- Recommended when the item is genuinely obsolete. NOT recommended as a way to silence noise you intend to do later -- snooze instead so the history stays honest.</li>
+        </ul>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Expected output.</strong> A curated ledger where open items
+            reflect real outstanding work. <code>/critique health</code> reports
+            the pending-ledger count as a diagnostic signal only -- it never
+            mutates the ledger; that always flows through <code>/pending</code>.
+          </p>
+        </aside>
+      </section>
+
+      <section id="sync-pipeline">
+        <h2>How to Use the Private / Public Sync Pipeline</h2>
+
+        <p>
+          A SEJA project (and SEJA itself) can maintain a private working tree and
+          a polished public distribution. Private content -- design files, research
+          logs, plans, and the constitution -- must never reach the public repo
+          without explicit opt-in. Two mechanisms enforce this boundary at
+          authoring time:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Conditional markers for partial content.</strong> Wrap
+            private-only fragments inside a shared file in
+            <code>&lt;!-- priv-only-start --&gt;</code> /
+            <code>&lt;!-- priv-only-end --&gt;</code> HTML comments. The sync
+            tool's stripper removes everything between the markers (inclusive) when
+            copying <code>.md</code> files. The markers are invisible in rendered
+            Markdown and self-documenting in source.
+          </li>
+          <li>
+            <strong>The <code>scripts/priv/</code> directory for whole files.</strong>
+            Scripts with no public use case live in
+            <code>.claude/skills/scripts/priv/</code>, which is excluded from sync
+            entirely, so consumers never receive them.
+          </li>
+        </ul>
+
+        <p>
+          The release itself is orchestrated by <code>/publish</code>, which clones
+          the public repo into a temporary workspace, copies authored public prose,
+          generates <code>.claude/</code> with private directories excluded and
+          markers processed, runs smoke tests, commits, and pushes. You do not
+          hand-sync the public tree -- edit only the private sources and let the
+          pipeline generate the public copy.
+        </p>
+
+        <aside class="callout-warning">
+          <p>
+            <strong>Never recreate the public <code>.claude/</code> on disk.</strong>
+            It is generated ephemerally during publish. Edit the private
+            <code>.claude/</code> and <code>product-design/</code> sources; public
+            prose (README, CHANGELOG, docs) is authored directly in the public
+            tree.
+          </p>
+        </aside>
+      </section>
+
+      <section id="preflight">
+        <h2>How to Run Quality Gates</h2>
+
+        <p>
+          The <code>/critique</code> skill is the unified quality gate. It runs one
+          mode at a time; the governance-relevant modes are:
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Command</th>
+                <th scope="col">What it does</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>/critique validate</code></td>
+                <td>Runs all project validation scripts and reports pass/fail with details.</td>
+              </tr>
+              <tr>
+                <td><code>/critique preflight</code></td>
+                <td>Combined validate + review in one pass -- a go / no-go verdict for merging.</td>
+              </tr>
+              <tr>
+                <td><code>/critique preflight --depth light</code></td>
+                <td>A faster preflight with fewer perspectives.</td>
+              </tr>
+              <tr>
+                <td><code>/critique health</code></td>
+                <td>Harness self-diagnosis across 9 built-in checks (skill system, briefs hygiene, plans hygiene, references, conventions, constitution, spec compliance, pending ledger, harness drift).</td>
+              </tr>
+              <tr>
+                <td><code>/critique docs</code></td>
+                <td>Runs 6 documentation consistency scanners (harness integrity, path liveness, env vars, command refs, terminology, structural-completeness).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Run <code>/critique preflight</code> before committing anything
+          significant. Violations discovered during a review or preflight that
+          touch the constitution's Security Invariants are classified
+          <strong>blocking</strong> -- they must be resolved before commit, not
+          deferred.
+        </p>
+
+        <ul>
+          <li><strong>Preflight before commit</strong> -- Recommended for changes that touch source code or design intent; it gives a single go / no-go verdict.</li>
+          <li><strong>Health after an upgrade</strong> -- Recommended right after <code>/seja-setup --upgrade</code> to confirm the harness is internally consistent.</li>
+          <li><strong>Light preflight</strong> -- Recommended when you want a fast signal on a small change. NOT recommended as the final gate before a release; use full preflight there.</li>
+        </ul>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Expected output.</strong> A timestamped
+            <code>check-NNN</code> log under <code>_output/</code> with a
+            pass/fail verdict and per-perspective findings. A clean preflight is a
+            good moment to move to <code>/document</code> or <code>/reflect</code>.
+          </p>
+        </aside>
+      </section>
+
+      <section id="pre-commit-hook">
+        <h2>How to Enforce the Pre-Commit Hook</h2>
+
+        <p>
+          The pre-commit hook is the last line of defence for the private/public
+          boundary. Install it once per clone by running
+          <code>bash .githooks/install.sh</code>. On every commit it runs fast
+          preflight checks and the leak gate
+          (<code>check_no_private_leaks.py --staged</code>), which blocks the
+          commit if staged content would leak private material.
+        </p>
+
+        <aside class="callout-warning">
+          <p>
+            <strong>Never bypass the hook.</strong> Passing
+            <code>--no-verify</code> to circumvent it requires explicit designer
+            approval recorded in a Decision entry. Hook bypass is the most common
+            accidental path to leaking private content or shipping unvalidated
+            code -- treat it as a governance event, not a convenience.
+          </p>
+        </aside>
+
+        <ul>
+          <li><strong>Fix the flagged content</strong> -- Recommended always: resolve what the leak gate reports, then re-commit.</li>
+          <li><strong>Record an approved exception</strong> -- Recommended only when the project lead has approved it and the rationale is captured in a <code>D-NNN</code> Decision entry. NOT recommended as a routine unblock.</li>
+        </ul>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Expected output.</strong> Commits that pass the fast preflight
+            and leak gate. The same leak scan runs again during
+            <code>/publish</code> before syncing, so a passing commit is not a
+            substitute for the publish-time gate -- it is an early, local one.
+          </p>
+        </aside>
+      </section>
+
+      <section id="common-mistakes">
+        <h2>Common Mistakes</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Mistake</th>
+                <th scope="col">What happens</th>
+                <th scope="col">Fix</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Hand-editing <code>product-design/constitution.md</code> as an agent.</td>
+                <td>The file is <strong>Human</strong>-maintained; agent writes violate the maintainer classification.</td>
+                <td>Propose changes via a confirmation prompt; let the human author them and record the change in the Changelog.</td>
+              </tr>
+              <tr>
+                <td>Editing <code>_output/pending.jsonl</code> by hand.</td>
+                <td>Direct edits bypass the append-only contract and can corrupt the ledger.</td>
+                <td>Use <code>/pending</code> subcommands (add / done / snooze / dismiss) for every mutation.</td>
+              </tr>
+              <tr>
+                <td>Dismissing pending items you actually intend to do later.</td>
+                <td>The work disappears from pre-skill's surfaced list and is lost.</td>
+                <td>Snooze with <code>--until</code> so it resurfaces on schedule.</td>
+              </tr>
+              <tr>
+                <td>Recreating the public <code>.claude/</code> on disk to hand-sync.</td>
+                <td>There is no on-disk public mirror; hand-syncing diverges from the generated output.</td>
+                <td>Edit private sources only; run <code>/publish</code> to generate the public copy.</td>
+              </tr>
+              <tr>
+                <td>Committing with <code>--no-verify</code> to skip the hook.</td>
+                <td>The leak gate and fast preflight are skipped -- private content can slip out.</td>
+                <td>Fix the flagged content; bypass only with recorded designer approval in a <code>D-NNN</code> entry.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </article>
+
+    <nav aria-label="chapter navigation">
+      <a href="skills/index.html">Back: Skill-by-Skill Guides</a>
+      <a href="design-intent.html">Next: Design Intent Maintenance</a>
+    </nav>
+
+    <!-- See also: cross-volume related chapters -->
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../reference/scripts-reference.html">Scripts Reference</a> — the governance scripts behind preflight, sync, and the pre-commit hook</li>
+        <li><a href="../explanation/dual-thesis.html">The Governable and Epistemic Thesis</a> — why the constitution loads first and the boundary is enforced</li>
+      </ul>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#constitution">Write and Maintain a Constitution</a></li>
+      <li><a href="#pending-ledger">Manage the Pending Ledger</a></li>
+      <li><a href="#sync-pipeline">Private / Public Sync Pipeline</a></li>
+      <li><a href="#preflight">Run Quality Gates</a></li>
+      <li><a href="#pre-commit-hook">Enforce the Pre-Commit Hook</a></li>
+      <li><a href="#common-mistakes">Common Mistakes</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T22:55:00Z</p>
+  </footer>
+
+</body>
+</html>

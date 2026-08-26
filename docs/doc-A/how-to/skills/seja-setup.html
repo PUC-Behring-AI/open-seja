@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="how-to">
+  <meta name="doc-volume" content="How-To Guides">
+  <meta name="doc-chapter" content="How to Manage the Harness with seja-setup">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>How to Manage the Harness with seja-setup -- SEJA Documentation</title>
+
+  <!-- CSS depth: 2 (sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../../index.html">Home</a>
+    <a href="../../tutorials/index.html">Tutorials</a>
+    <a href="../index.html">How-To Guides</a>
+    <a href="../../reference/index.html">Reference</a>
+    <a href="../../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../../index.html">Home</a></li>
+      <li><a href="../index.html">How-To Guides</a></li>
+      <li><a href="index.html">Skill-by-Skill Guides</a></li>
+      <li>How to Manage the Harness with seja-setup</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-howto">
+    <article>
+      <p class="vol-accent"><strong>how-to</strong></p>
+
+      <h1>How to Manage the Harness with seja-setup</h1>
+
+      <p>
+        Goal: put the SEJA harness into a project, finalise a fresh download,
+        stand up a companion workspace, bootstrap the demo, or upgrade an
+        existing install to a newer release. <code>/seja-setup</code> is the
+        single entry point for every harness-state operation. It inspects the
+        current directory (via <code>detect_setup_state.py</code>) and routes
+        each invocation to the correct action, preserving project-specific
+        configuration. This guide focuses on the mechanics of the skill; for a
+        full walkthrough of each install variant with decision trees, see the
+        <a href="../installation.html">Installation and Setup</a> chapter.
+      </p>
+
+      <section id="when-to-use">
+        <h2>When to Use</h2>
+        <ul>
+          <li>You are installing SEJA into a new or existing project for the first time.</li>
+          <li>You cloned SEJA directly into a project folder and need to finalise it in place (<code>--here</code>).</li>
+          <li>You want a companion workspace that keeps design history out of the codebase (<code>--workspace</code>).</li>
+          <li>You want the pre-configured TaskFlow demo to explore SEJA (<code>--demo</code>).</li>
+          <li>You want to refresh harness files to the latest release without touching your project data (<code>--upgrade</code>).</li>
+        </ul>
+        <aside class="callout-tip">
+          <p>
+            <strong>Not for</strong> defining design intent (that is
+            <code>/design</code>), or for day-to-day lifecycle work. After the
+            first iteration you rarely run <code>/seja-setup</code> unless you
+            are upgrading. It merges the former <code>/setup</code> and
+            <code>/upgrade</code> into one unified command.
+          </p>
+        </aside>
+      </section>
+
+      <section id="required-inputs">
+        <h2>Required Inputs</h2>
+        <p>
+          The full argument pattern is
+          <code>[&lt;target-directory&gt;] [--here | --workspace | --demo | --upgrade] [--version &lt;tag&gt;] [--dry-run]</code>.
+        </p>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Argument</th>
+                <th scope="col">Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>&lt;target-directory&gt;</code></td>
+                <td>Path to the project directory to install into. Omit it for the no-argument flow, <code>--here</code>, or <code>--upgrade</code>.</td>
+              </tr>
+              <tr>
+                <td><code>--here</code></td>
+                <td>Finalise setup in the current directory without copying harness files (after cloning SEJA directly into the project folder).</td>
+              </tr>
+              <tr>
+                <td><code>--workspace</code></td>
+                <td>Create a separate companion workspace repository alongside a codebase.</td>
+              </tr>
+              <tr>
+                <td><code>--demo</code></td>
+                <td>Install with the pre-configured TaskFlow demo project (pre-filled conventions, constitution, conceptual design, and walkthrough).</td>
+              </tr>
+              <tr>
+                <td><code>--upgrade</code></td>
+                <td>Refresh harness files in an already-installed project to the latest release, preserving project-specific files.</td>
+              </tr>
+              <tr>
+                <td><code>--version &lt;tag&gt;</code></td>
+                <td>Pin to a specific public <code>seja</code> release tag (e.g. <code>v0.2.0</code>) instead of the latest SemVer tag.</td>
+              </tr>
+              <tr>
+                <td><code>--dry-run</code></td>
+                <td>Preview upgrade changes without applying them (valid with <code>--upgrade</code>).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <aside class="callout-warning">
+          <p>
+            <strong>Mutually exclusive.</strong> <code>--here</code>,
+            <code>--workspace</code>, <code>--demo</code>, and
+            <code>--upgrade</code> cannot be combined; <code>/seja-setup</code>
+            rejects any invalid combination with an error.
+          </p>
+        </aside>
+      </section>
+
+      <section id="step-by-step">
+        <h2>Step by Step</h2>
+
+        <ol>
+          <li>
+            <strong>Pick the operation.</strong> Install into a target directory,
+            finalise a fresh download in place, create a workspace, bootstrap the
+            demo, or upgrade. If unsure, run <code>/seja-setup</code> with no
+            arguments and let state detection route you.
+            <br><em>Expected output:</em> the skill reports the detected state and
+            the action it will take.
+          </li>
+          <li>
+            <strong>State detection classifies the directory.</strong>
+            <code>detect_setup_state.py</code> recognises six states:
+            <code>dev-repo-refuse</code> (the harness dev repo -- hard abort),
+            <code>public-clone-soft-confirm</code> (a clean public clone -- prompts to continue),
+            <code>fresh-download</code> (harness present, no project state -- proceeds),
+            <code>partial-init</code> (harness plus partial state -- proceeds with reconciliation),
+            <code>finalised</code> (a full project -- offers the upgrade menu),
+            and <code>no-harness</code> (nothing to finalise -- aborts).
+            <br><em>Expected output:</em> a state label and matching route.
+          </li>
+          <li>
+            <strong>Answer the Section&nbsp;1 scaffolding questionnaire (install only).</strong>
+            On first install, <code>/seja-setup</code> populates
+            <code>product-design/conventions.md</code> with stack definitions,
+            scaffolds <code>CLAUDE.md</code> and stack-flavored
+            <code>.claude/rules/</code>, and (if a backend is present) smoke-test
+            infrastructure. In brownfield projects it auto-detects the stack from
+            dependency files and presents detected values as confirmation prompts.
+            <br><em>Expected output:</em> a populated
+            <code>conventions.md</code> with no unresolved
+            <code>{{VAR}}</code> placeholders.
+          </li>
+          <li>
+            <strong>Choose your stack-presence mode.</strong> The install emits
+            only the rows and sections appropriate to your project:
+            <strong>full-stack</strong> (backend + frontend),
+            <strong>API-only</strong> (<code>FRONTEND_FRAMEWORK=none</code>),
+            <strong>frontend-only</strong> (<code>BACKEND_FRAMEWORK=none</code>),
+            or <strong>CLI / library</strong> (both <code>none</code>).
+          </li>
+          <li>
+            <strong>Handle git history and cleanup (with <code>--here</code>).</strong>
+            When finalising in place, the skill prompts for how to handle SEJA's
+            git history (re-init fresh, keep history and add a project remote, or
+            leave as-is) and presents a cleanup batch for harness-dev artefacts.
+            Nothing is deleted without an explicit second confirmation.
+            <br><em>Expected output:</em> an initial project commit and a handoff to <code>/design</code>.
+          </li>
+          <li>
+            <strong>Or run an upgrade.</strong> <code>/seja-setup --upgrade</code>
+            refreshes <code>.claude/</code> and non-project template references to
+            the latest SemVer tag (or <code>--version &lt;tag&gt;</code>), preserving
+            everything under <code>product-design/</code> and <code>_output/</code>.
+            Add <code>--dry-run</code> to preview first.
+            <br><em>Expected output:</em> a single reviewable upgrade commit;
+            project-specific files untouched.
+          </li>
+        </ol>
+      </section>
+
+      <section id="expected-outputs">
+        <h2>Expected Outputs</h2>
+        <ul>
+          <li>A populated project (or workspace) containing <code>.claude/</code>, <code>product-design/conventions.md</code>, a scaffolded <code>CLAUDE.md</code>, an <code>_output/</code> skeleton, and a <code>.seja-version</code> pin.</li>
+          <li>For <code>--workspace</code>: an independent git repository with <code>CODEBASE_DIR</code> set by absolute path and launcher scripts (<code>launch.sh</code> / <code>launch.bat</code>); the codebase itself is never written to.</li>
+          <li>For <code>--upgrade</code>: one upgrade commit with project files preserved.</li>
+          <li>A handoff message directing you to run <code>/design</code> after a fresh install, or <code>/critique health</code> then <code>/explain drift</code> after an upgrade.</li>
+        </ul>
+      </section>
+
+      <section id="common-mistakes">
+        <h2>Common Mistakes</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th scope="col">Mistake</th><th scope="col">Better approach</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Combining mutually exclusive flags (e.g. <code>--here --upgrade</code>).</td>
+                <td>Run one operation at a time; <code>/seja-setup</code> rejects invalid combinations.</td>
+              </tr>
+              <tr>
+                <td>Running <code>/seja-setup --here</code> or the no-arg flow inside the SEJA development repo.</td>
+                <td>State detection returns <code>dev-repo-refuse</code> and hard-aborts. Use an explicit target directory outside the dev repo.</td>
+              </tr>
+              <tr>
+                <td>Expecting an upgrade to overwrite your design files.</td>
+                <td>Upgrade preserves everything under <code>product-design/</code> and <code>_output/</code>. Use <code>--dry-run</code> first if unsure.</td>
+              </tr>
+              <tr>
+                <td>Running <code>/design</code> before reading what setup scaffolded.</td>
+                <td>Read the generated <code>conventions.md</code> and rule files first; entity and permission wording is hardest to change later.</td>
+              </tr>
+              <tr>
+                <td>Expecting source-code writes in a workspace install.</td>
+                <td>Setup never writes to the codebase. Launch the agent with <code>claude --add-dir &lt;codebase-path&gt;</code> before implementing.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="cross-references">
+        <h2>Cross-References</h2>
+        <ul>
+          <li><a href="../installation.html">Installation and Setup</a> -- the full decision tree across all four install variants.</li>
+          <li><a href="design.html">How to Define Design Intent</a> -- the usual next step after a fresh install.</li>
+          <li><a href="../governance.html">Governance Operations</a> -- managing the pending ledger, preflight, and the pre-commit hook.</li>
+          <li><a href="../../reference/configuration-reference.html">Configuration Reference</a> (Vol. 3) -- convention variables and project settings.</li>
+          <li><a href="../../reference/skills-reference.html">Skills Reference</a> (Vol. 3) -- exhaustive argument tables.</li>
+        </ul>
+      </section>
+
+    </article>
+
+    <nav aria-label="chapter navigation">
+      <a href="publish.html">Back: How to Publish a Release</a>
+      <a href="help.html">Next: How to Get Help and Browse Skills</a>
+    </nav>
+
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../../reference/configuration-reference.html">Configuration Reference</a> -- convention variables and project settings that setup populates.</li>
+        <li><a href="../../tutorials/first-project.html">Your First Project</a> -- a start-to-finish walkthrough from install onward.</li>
+      </ul>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#when-to-use">When to Use</a></li>
+      <li><a href="#required-inputs">Required Inputs</a></li>
+      <li><a href="#step-by-step">Step by Step</a></li>
+      <li><a href="#expected-outputs">Expected Outputs</a></li>
+      <li><a href="#common-mistakes">Common Mistakes</a></li>
+      <li><a href="#cross-references">Cross-References</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../../index.html">Collection Index</a>
+      <a href="../../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T22:55:00Z</p>
+  </footer>
+
+</body>
+</html>

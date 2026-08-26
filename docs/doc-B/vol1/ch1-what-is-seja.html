@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-volume" content="1">
+  <meta name="doc-chapter" content="1">
+  <meta name="doc-phase" content="1">
+  <meta name="doc-status" content="draft">
+
+  <title>What SEJA Is (and Is Not) -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 1: Onboarding and Orientation</a></li>
+      <li>What SEJA Is (and Is Not)</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>What SEJA Is (and Is Not)</h1>
+
+      <p>
+        Before diving into quickstart steps or skill references, it helps to
+        understand what SEJA actually is -- and, just as importantly, what it
+        is not. This chapter positions SEJA as an agent harness, distinguishes
+        "the agent" from "the harnessed agent," and previews the two
+        properties that make the harness distinctive.
+      </p>
+
+      <!-- Section 1: What SEJA Is -->
+      <section data-diataxis="explanation" id="what-seja-is">
+        <h2>What SEJA Is</h2>
+
+        <p>
+          SEJA (Software Engineering with AI) is a <strong>governance
+          layer</strong> for Claude Code, grounded in semiotic engineering
+          theory. It structures the entire lifecycle of AI-assisted software
+          development -- from research and design through planning,
+          implementation, critique, documentation, communication, and
+          reflection -- so that the AI stays aligned with the designer's
+          intent at every step.
+        </p>
+
+        <h3>An Agent Harness, Not a Framework</h3>
+
+        <p>
+          SEJA is not a library you import, a framework that scaffolds your
+          application code, or a platform that hosts your services. It is a
+          <em>harness</em>: a set of skills, rules, reference files, and
+          lifecycle hooks that sit between you (the human designer) and the AI
+          agent (Claude). The harness does not replace the agent or constrain
+          what it can do at the language level. Instead, it governs
+          <em>how</em> the agent works -- what it reads before acting, what
+          steps it follows, what checks it performs afterward, and what
+          artifacts it produces along the way.
+        </p>
+
+        <h3>The Agent vs. the Harnessed Agent</h3>
+
+        <p>
+          This distinction matters throughout the documentation:
+        </p>
+
+        <dl>
+          <dt>The agent (Claude, the raw LLM)</dt>
+          <dd>
+            A general-purpose language model that can generate code, answer
+            questions, and follow instructions. Without governance, it works
+            from whatever context is in its prompt window. It has no
+            persistent design memory, no lifecycle discipline, and no
+            mechanism to surface what it does not know.
+          </dd>
+
+          <dt>The harnessed agent (Claude running under SEJA)</dt>
+          <dd>
+            The same model, but operating within a structured governance
+            layer. Before every skill invocation, the harness loads the
+            project constitution, the designer's conventions, and any
+            relevant reference files (via the pre-skill hook). After every
+            skill invocation, the harness marks the work as done, commits
+            artifacts, and flushes decision records (via the post-skill
+            hook). The agent's output is now accountable to the designer's
+            stated intent -- not to the model's own heuristics.
+          </dd>
+        </dl>
+
+        <h3>What the Harness Provides</h3>
+
+        <p>
+          Three capabilities distinguish a SEJA-governed project from an
+          ungoverned Claude Code session:
+        </p>
+
+        <dl>
+          <dt>Lifecycle discipline</dt>
+          <dd>
+            Every user-facing skill follows a mandatory pipeline: pre-skill
+            (brief log, budget evaluation, pending check, reference load,
+            constitution load) followed by the skill's own work, followed by
+            post-skill (DONE marking, git commit, decision flush). Skills may
+            opt out of non-critical stages, but no skill may skip pre-skill
+            entirely. This pipeline is defined in
+            <code>.claude/skills/scripts/</code> and enforced by the
+            harness's hook system.
+          </dd>
+
+          <dt>Design-intent alignment</dt>
+          <dd>
+            The designer's metacommunication message -- a first-person
+            statement of who the user is, what the designer has learned they
+            need, and how the system is designed to serve them -- is the
+            highest-authority artifact in a SEJA project. It lives in
+            <code>product-design/product-design-as-intended.md</code>, and
+            the harness loads it (along with the project constitution in
+            <code>product-design/constitution.md</code>) into every agent
+            context. Plans must serve design intent. Implementations must
+            serve plans. Critiques evaluate against design intent, not
+            against the AI's own judgment.
+          </dd>
+
+          <dt>Epistemic scaffolding</dt>
+          <dd>
+            SEJA is designed to surface what is <em>not yet known</em>, not
+            only what has been decided. Gap detection in product topology
+            flags objectives without supporting tasks. Research logs label
+            heuristic inferences with explicit confidence indicators. Pending
+            actions surface unincorporated research and unverified
+            implementations. The designer's epistemic posture -- knowing what
+            you don't know -- is mirrored in the harness's tooling.
+          </dd>
+        </dl>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> If you have used Claude Code without SEJA,
+            the difference is not what the AI <em>can</em> do -- it is what
+            the AI <em>must</em> do. The harness adds structure and
+            accountability around the same underlying model.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 2: What SEJA Is Not -->
+      <section data-diataxis="explanation" id="what-seja-is-not">
+        <h2>What SEJA Is Not</h2>
+
+        <p>
+          Positioning SEJA clearly requires ruling out common misconceptions.
+          Each of the following describes something SEJA is frequently
+          confused with but is not.
+        </p>
+
+        <h3>Not a CI/CD Pipeline</h3>
+
+        <p>
+          SEJA includes validation scripts and a pre-commit hook, but it is
+          not a continuous integration system. It does not build your
+          application, run your test suite, or deploy your code. The harness
+          operates at the designer-to-agent layer -- it governs how the AI
+          plans and implements, not how the resulting code reaches production.
+          Your existing CI/CD pipeline remains separate and unchanged.
+        </p>
+
+        <h3>Not a Testing Framework</h3>
+
+        <p>
+          The <code>/critique</code> skill validates implementation against
+          design intent, and the harness runs preflight checks before
+          commits. But these are governance checks, not unit tests, integration
+          tests, or end-to-end tests. SEJA does not replace pytest, vitest,
+          or any other testing tool. It operates at a different level of
+          concern: whether the work aligns with what the designer intended,
+          not whether individual functions return correct values.
+        </p>
+
+        <h3>Not a Prompt Library</h3>
+
+        <p>
+          SEJA's skills are structured instructions for the AI agent, and the
+          harness does load reference files into the agent's context. But
+          SEJA is not a collection of reusable prompts that you copy into
+          your own workflows. The skills are bound to a lifecycle -- each one
+          has a pre-skill phase, a post-skill phase, and dependencies on the
+          artifacts produced by earlier skills. Extracting a single skill's
+          prompt text and using it outside the harness would lose the
+          governance structure that gives it meaning.
+        </p>
+
+        <h3>Not a Code Generator</h3>
+
+        <p>
+          Claude generates code; SEJA does not. The harness governs the
+          process by which code is planned, implemented, and reviewed -- but
+          the code itself comes from the underlying language model. SEJA
+          adds no code-generation capabilities beyond what Claude already
+          provides. What it adds is the discipline around when and how that
+          generation happens: after a plan has been approved, under the
+          constraints of the constitution, with a critique step to follow.
+        </p>
+
+        <h3>Not a Replacement for the Designer</h3>
+
+        <p>
+          SEJA enforces that the designer's intent is authoritative. The
+          metacommunication message, the constitution, and the design-intent
+          files are all human-authored -- classified as
+          <code>Human (markers)</code>, meaning the agent may write only
+          lifecycle markers into them, never prose. The harness cannot author
+          design intent on the designer's behalf. It can surface gaps, flag
+          drift, and structure the development process, but the design
+          decisions remain the human designer's responsibility.
+        </p>
+      </section>
+
+      <!-- Section 3: The Dual Thesis Preview -->
+      <section data-diataxis="explanation" id="dual-thesis-preview">
+        <h2>The Dual Thesis Preview</h2>
+
+        <p>
+          SEJA rests on two complementary properties. Neither is sufficient
+          alone; together they define what makes the harness distinctive.
+          This section previews both theses without developing them fully --
+          for the complete argument, see
+          <a href="../vol5/ch6-governable-and-epistemic.html#dual-thesis">The Dual
+          Thesis</a> in Vol. 5.
+        </p>
+
+        <h3>Governable</h3>
+
+        <p>
+          The designer controls the agent's behavior through explicit,
+          inspectable mechanisms. The project constitution in
+          <code>product-design/constitution.md</code> defines immutable
+          principles that no plan or implementation step may contradict
+          without a recorded decision. Lifecycle hooks enforce that every
+          skill invocation follows the pre-skill/post-skill pipeline.
+          Permissions are declared in
+          <code>.claude/settings.json</code> and
+          <code>.claude/references/general/permissions.md</code>, not inferred by the
+          model. The <code>Human (markers)</code> file classification
+          prevents the agent from overwriting human-authored design prose.
+          At every point, the designer can inspect what the agent was given,
+          what it did, and why -- because the harness makes the governance
+          structure visible, not hidden inside opaque prompts.
+        </p>
+
+        <h3>Epistemic</h3>
+
+        <p>
+          The harness does not merely execute instructions -- it surfaces
+          what is not yet known and makes uncertainty visible. Gap detection
+          flags design objectives that lack supporting implementation tasks.
+          Research logs label claims with confidence indicators rather than
+          presenting all inferences as equally certain. The pending ledger
+          tracks unincorporated research findings and unverified
+          implementations, ensuring that open questions do not silently
+          disappear. The designer's epistemic posture -- "I am aware of what
+          I have learned about my users and equally aware of what I have not
+          yet learned" -- is not just a philosophical stance; it is encoded
+          in the harness's tooling and surfaced in its outputs.
+        </p>
+
+        <h3>Why Both Are Required</h3>
+
+        <p>
+          Governance without epistemic support produces brittleness: the
+          agent follows rules precisely but cannot flag that the rules
+          themselves may be based on incomplete understanding. Epistemic
+          support without governance produces drift: the agent surfaces
+          uncertainties but has no mechanism to ensure they are addressed
+          before implementation proceeds. SEJA requires both axes. The
+          governance layer ensures that decisions are traceable and
+          accountable; the epistemic layer ensures that the basis for those
+          decisions is honest about its own limitations.
+        </p>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <span></span>
+    <a href="ch2-quickstart.html">Next: Quickstart</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

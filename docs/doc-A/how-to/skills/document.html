@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="how-to">
+  <meta name="doc-volume" content="How-To Guides">
+  <meta name="doc-chapter" content="How to Generate Documentation">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>How to Generate Documentation -- SEJA Documentation</title>
+
+  <!-- CSS depth: 2 (sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../../index.html">Home</a>
+    <a href="../../tutorials/index.html">Tutorials</a>
+    <a href="../index.html">How-To Guides</a>
+    <a href="../../reference/index.html">Reference</a>
+    <a href="../../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../../index.html">Home</a></li>
+      <li><a href="../index.html">How-To Guides</a></li>
+      <li><a href="index.html">Skill-by-Skill Guides</a></li>
+      <li>How to Generate Documentation</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-howto">
+    <article>
+      <p class="vol-accent"><strong>how-to</strong></p>
+
+      <h1>How to Generate Documentation</h1>
+
+      <p>
+        Goal: produce or update project documentation that someone else will read.
+        The <code>/document</code> skill generates structured documentation using
+        project templates and the documentation-quality writing guide. It has four
+        invocation modes -- plan-driven, auto-detect, type-targeted, and bare scope
+        -- and supports six documentation types: readme, contextual-help,
+        api-reference, ddr, help-center, and changelog.
+      </p>
+
+      <section id="when-to-use">
+        <h2>When to Use</h2>
+        <ul>
+          <li>After implementing a feature or fix that affects user-facing behavior, API contracts, or architectural decisions.</li>
+          <li>When a plan's <code>Docs:</code> fields already specify what to document (use <code>--plan</code>).</li>
+          <li>When you want a broad scan of what changed (use <code>--auto-detect</code>).</li>
+          <li>When you know exactly which type you need (use <code>--type</code>).</li>
+        </ul>
+        <aside class="callout-tip">
+          <p>
+            <strong>Not for</strong> stakeholder updates (use
+            <code>/communicate</code>) or personalized onboarding plans (use
+            <code>/onboard</code>). <code>/document</code> produces project
+            documentation artifacts.
+          </p>
+        </aside>
+      </section>
+
+      <section id="required-inputs">
+        <h2>Required Inputs</h2>
+        <ul>
+          <li>An invocation mode and, where relevant, a target: a plan ID (<code>--plan 000130</code>), a doc type (<code>--type readme</code>), or a bare scope (<code>/document src/auth</code>).</li>
+          <li>For auto-detect, a git history to scan (optionally bounded with <code>--since</code>).</li>
+          <li>Project design and template files, which the skill reads to shape the output.</li>
+        </ul>
+      </section>
+
+      <section id="step-by-step">
+        <h2>Step by Step</h2>
+
+        <ol>
+          <li>
+            <strong>Choose an invocation mode.</strong>
+            <ul>
+              <li><strong>Plan-driven (<code>--plan &lt;id&gt;</code>)</strong> -- Recommended when documentation needs are already captured in a plan's <code>Docs:</code> fields.</li>
+              <li><strong>Auto-detect (<code>--auto-detect</code>)</strong> -- Recommended when you want the skill to infer doc needs from recent git changes. NOT recommended when you already know the exact type.</li>
+              <li><strong>Type-targeted (<code>--type &lt;type&gt;</code>)</strong> -- Recommended when you know precisely which doc type you need.</li>
+              <li><strong>Bare scope (<code>/document &lt;path&gt;</code>)</strong> -- Recommended for ad-hoc documentation of a specific area; the skill infers the best type.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Bound the scan if using auto-detect.</strong> Use
+            <code>--since &lt;date&gt;</code>, <code>--since last</code> (changes
+            since the last <code>/document</code> run), or <code>--full-history</code>.
+            <br><em>Expected output:</em> matched doc types based on six heuristics
+            (new API routes, changed models, new UI components, config changes,
+            architectural shifts, breaking changes).
+          </li>
+          <li>
+            <strong>Run the skill.</strong> It generates or updates the documentation
+            in the appropriate project location using the matching template.
+            <br><em>Expected output:</em> generated or updated documentation files
+            for each identified need.
+          </li>
+          <li>
+            <strong>Validate consistency.</strong> Run <code>/critique docs</code> to
+            check the new documentation against the six consistency scanners.
+          </li>
+        </ol>
+      </section>
+
+      <section id="expected-outputs">
+        <h2>Expected Outputs</h2>
+        <ul>
+          <li>Generated or updated documentation of one of the six supported types (readme, contextual-help, api-reference, ddr, help-center, changelog).</li>
+          <li>Files written to the appropriate project documentation location, following the documentation-quality writing guide.</li>
+        </ul>
+      </section>
+
+      <section id="common-mistakes">
+        <h2>Common Mistakes</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th scope="col">Mistake</th><th scope="col">Better approach</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Using <code>/document</code> for a stakeholder update.</td>
+                <td>Stakeholder material is <code>/communicate</code>'s job; onboarding plans are <code>/onboard</code>'s.</td>
+              </tr>
+              <tr>
+                <td>Confusing <code>/document</code> with <code>/explain</code>.</td>
+                <td><code>/explain</code> is for understanding the system yourself; <code>/document</code> produces artifacts others read.</td>
+              </tr>
+              <tr>
+                <td>Running <code>--auto-detect --full-history</code> on a large repo by default.</td>
+                <td>Bound the scan with <code>--since last</code> or a date so you document the recent delta, not the entire history.</td>
+              </tr>
+              <tr>
+                <td>Skipping <code>/critique docs</code> afterward.</td>
+                <td>Validate the generated docs for path liveness, terminology, and structural completeness before publishing.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="cross-references">
+        <h2>Cross-References</h2>
+        <ul>
+          <li><a href="communicate.html">How to Communicate to an Audience</a> -- for stakeholder-facing material.</li>
+          <li><a href="explain.html">How to Explain Behavior or Code</a> -- to understand the system before documenting it.</li>
+          <li><a href="critique.html">How to Critique Quality</a> -- run <code>/critique docs</code> to validate consistency.</li>
+          <li><a href="../../reference/file-format-reference.html">File Format Reference</a> (Vol. 3) -- documentation file formats and metadata.</li>
+        </ul>
+      </section>
+
+    </article>
+
+    <nav aria-label="chapter navigation">
+      <a href="critique.html">Back: How to Critique Quality</a>
+      <a href="communicate.html">Next: How to Communicate to an Audience</a>
+    </nav>
+
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../../reference/scripts-reference.html">Scripts Reference</a> -- the documentation-consistency scanners and generator scripts.</li>
+        <li><a href="../../explanation/design-decisions.html">Design Decisions and Trade-offs</a> -- why documentation is generated from plan intent, not written ad hoc.</li>
+      </ul>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#when-to-use">When to Use</a></li>
+      <li><a href="#required-inputs">Required Inputs</a></li>
+      <li><a href="#step-by-step">Step by Step</a></li>
+      <li><a href="#expected-outputs">Expected Outputs</a></li>
+      <li><a href="#common-mistakes">Common Mistakes</a></li>
+      <li><a href="#cross-references">Cross-References</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../../index.html">Collection Index</a>
+      <a href="../../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T20:50:00Z</p>
+  </footer>
+
+</body>
+</html>

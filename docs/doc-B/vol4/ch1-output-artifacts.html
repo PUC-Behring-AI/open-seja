@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="4">
+  <meta name="doc-chapter" content="1">
+  <meta name="doc-phase" content="3">
+  <meta name="doc-status" content="draft">
+
+  <title>Output Artifacts -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 4: The Output and Governance Layer</a></li>
+      <li>Output Artifacts</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>Output Artifacts</h1>
+
+      <p>
+        Everything SEJA produces lands in one place: the
+        <code>_output/</code> directory. Plans, research logs, reflections,
+        critique reports, generated documentation, roadmaps, and the audit
+        trail that records every skill invocation all live here, organized
+        into a fixed set of typed subdirectories. This chapter is the
+        reference map for that tree: what each subdirectory holds, which
+        skill creates artifacts there, how each artifact type is named and
+        retired, and how the briefs log and conversation trace together
+        record the full history of the workspace. It closes with the
+        governing rule that makes the whole tree trustworthy -- generated
+        artifacts are agent-maintained and never hand-edited.
+      </p>
+
+      <!-- Section 1: The Output Directory Tree -->
+      <section data-diataxis="reference" id="output-directory-tree">
+        <h2>The Output Directory Tree</h2>
+
+        <p>
+          The output root is defined by the <code>OUTPUT_DIR</code>
+          convention variable in
+          <code>product-design/conventions.md</code> and resolves to
+          <code>_output/</code>. Beneath it, each artifact-producing skill
+          writes to its own typed subdirectory. The tree grows lazily: a
+          subdirectory is created the first time a skill needs to write
+          there, so a fresh workspace may show fewer directories than a
+          long-lived one. The subdirectories currently present in this
+          workspace are enumerated below.
+        </p>
+
+        <pre><code>_output/
+  <span class="token-command">adrs/</span>                        <span class="token-comment"># architecture decision records</span>
+  <span class="token-command">check-logs/</span>                 <span class="token-comment"># preflight / review check logs</span>
+  <span class="token-command">communication/</span>              <span class="token-comment"># stakeholder communication material</span>
+  <span class="token-command">critique-logs/</span>              <span class="token-comment"># critique / validation / review reports</span>
+  <span class="token-command">docs/</span>                        <span class="token-comment"># generated documentation (HTML/Markdown)</span>
+  <span class="token-command">explained-architecture/</span>     <span class="token-comment"># architecture explanations</span>
+  <span class="token-command">generated-scripts/</span>          <span class="token-comment"># skill-generated helper scripts</span>
+  <span class="token-command">inventories/</span>                <span class="token-comment"># codebase element inventories</span>
+  <span class="token-command">onboarding-plans/</span>           <span class="token-comment"># role-tailored onboarding plans</span>
+  <span class="token-command">perspective-council-review/</span> <span class="token-comment"># expert council debate outputs</span>
+  <span class="token-command">plans/</span>                       <span class="token-comment"># plan and implement artifacts</span>
+  <span class="token-command">presentations/</span>              <span class="token-comment"># generated presentation material</span>
+  <span class="token-command">promote-proposals/</span>          <span class="token-comment"># design-intent promotion proposals</span>
+  <span class="token-command">proposals/</span>                  <span class="token-comment"># lightweight change proposals</span>
+  <span class="token-command">qa-logs/</span>                    <span class="token-comment"># companion Q&amp;A log files</span>
+  <span class="token-command">reflections/</span>                <span class="token-comment"># reflection reports</span>
+  <span class="token-command">research-logs/</span>               <span class="token-comment"># research question logs</span>
+  <span class="token-command">roadmaps/</span>                   <span class="token-comment"># multi-plan development roadmaps</span>
+  <span class="token-command">semiotic-engineering/</span>       <span class="token-comment"># semiotic inspection working notes</span>
+  <span class="token-command">tmp/</span>                        <span class="token-comment"># temporary / session-scoped helpers</span></code></pre>
+
+        <p>
+          The table below documents each subdirectory: its purpose, the
+          skill (or lifecycle step) that creates artifacts there, and its
+          lifecycle -- how long its contents persist. Not every convention
+          variable in <code>conventions.md</code> has a directory on disk
+          yet (several, such as <code>user-tests/</code> or
+          <code>explained-code/</code>, are reserved but unpopulated); the table
+          lists only the directories that currently exist.
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Subdirectory</th>
+              <th>Purpose</th>
+              <th>Created by</th>
+              <th>Lifecycle</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>adrs/</code></td>
+              <td>Architecture Decision Records -- durable records of significant structural decisions (e.g. the A2 repo structure).</td>
+              <td><code>/design</code>, maintainers</td>
+              <td>Long-lived; superseded ADRs are marked, not deleted.</td>
+            </tr>
+            <tr>
+              <td><code>check-logs/</code></td>
+              <td>Preflight and review check outputs (<code>check-NNNNNN-*</code>).</td>
+              <td><code>/critique</code> (preflight, review modes)</td>
+              <td>Retained per run; older runs may be pruned during curation.</td>
+            </tr>
+            <tr>
+              <td><code>communication/</code></td>
+              <td>Stakeholder communication material (<code>COMMUNICATION_DIR</code>), often date-foldered by audience.</td>
+              <td><code>/communicate</code></td>
+              <td>Retained; regenerated when messaging changes.</td>
+            </tr>
+            <tr>
+              <td><code>critique-logs/</code></td>
+              <td>Critique, validation, and review reports (<code>CRITIQUE_LOGS_DIR</code>).</td>
+              <td><code>/critique</code></td>
+              <td>Retained per invocation as an audit record.</td>
+            </tr>
+            <tr>
+              <td><code>docs/</code></td>
+              <td>Generated user and developer documentation (<code>DOCS_DIR</code>), including this documentation collection.</td>
+              <td><code>/document</code></td>
+              <td>Long-lived; regenerated in place as the product evolves.</td>
+            </tr>
+            <tr>
+              <td><code>explained-architecture/</code></td>
+              <td>Architecture explanation reports (<code>EXPLAINED_ARCHITECTURE_DIR</code>).</td>
+              <td><code>/explain</code> (architecture mode)</td>
+              <td>Retained per report; regenerated on request.</td>
+            </tr>
+            <tr>
+              <td><code>generated-scripts/</code></td>
+              <td>Skill-generated helper scripts (<code>SCRIPTS_DIR</code>), such as one-off conversion utilities.</td>
+              <td>Skills that emit helper scripts</td>
+              <td>Retained; regenerated or removed as needs change.</td>
+            </tr>
+            <tr>
+              <td><code>inventories/</code></td>
+              <td>Codebase element inventories (<code>INVENTORIES_DIR</code>) cataloguing elements matching a pattern.</td>
+              <td><code>/research --inventory</code></td>
+              <td>Snapshot in time; supersede by regenerating.</td>
+            </tr>
+            <tr>
+              <td><code>onboarding-plans/</code></td>
+              <td>Role- and level-tailored onboarding plans (<code>ONBOARDING_PLANS_DIR</code>), often date-foldered.</td>
+              <td><code>/onboard</code></td>
+              <td>Retained; regenerated per new team member.</td>
+            </tr>
+            <tr>
+              <td><code>perspective-council-review/</code></td>
+              <td>Expert council debate outputs for high-stakes decisions (per-perspective reports and workflows).</td>
+              <td>Council debate subagent</td>
+              <td>Retained as a decision record.</td>
+            </tr>
+            <tr>
+              <td><code>plans/</code></td>
+              <td>Plan files (<code>PLANS_DIR</code>) and their implement/progress artifacts -- the core of the execution layer.</td>
+              <td><code>/plan</code>, <code>/implement</code></td>
+              <td>Long-lived; plans persist, progress files are consumed during execution.</td>
+            </tr>
+            <tr>
+              <td><code>presentations/</code></td>
+              <td>Generated presentation material, foldered by locale (e.g. <code>en-US</code>, <code>pt-BR</code>).</td>
+              <td><code>/communicate</code>, generators</td>
+              <td>Retained; regenerated on request.</td>
+            </tr>
+            <tr>
+              <td><code>promote-proposals/</code></td>
+              <td>Proposals to promote design-intent items from implemented to established status.</td>
+              <td><code>/explain drift --promote</code></td>
+              <td>Consumed once the designer applies or dismisses the proposal.</td>
+            </tr>
+            <tr>
+              <td><code>proposals/</code></td>
+              <td>Lightweight change proposals (<code>PROPOSALS_DIR</code>) from <code>/plan --light</code>.</td>
+              <td><code>/plan --light</code></td>
+              <td>Retained; may graduate into a full plan.</td>
+            </tr>
+            <tr>
+              <td><code>qa-logs/</code></td>
+              <td>Companion Q&amp;A log files (<code>QA_LOGS_DIR</code>) for artifact types that do not inline their Q&amp;A.</td>
+              <td>Post-skill step 3 (QA log), <code>/qa-log</code></td>
+              <td>Collocated with or retained alongside the parent artifact.</td>
+            </tr>
+            <tr>
+              <td><code>reflections/</code></td>
+              <td>Reflection reports (<code>REFLECTIONS_DIR</code>) capturing product and practice reflections verbatim.</td>
+              <td><code>/reflect</code></td>
+              <td>Long-lived; an append-only record of practice evolution.</td>
+            </tr>
+            <tr>
+              <td><code>research-logs/</code></td>
+              <td>Research question logs (<code>RESEARCH_DIR</code>) recording Q&amp;A investigations.</td>
+              <td><code>/research</code></td>
+              <td>Retained as the research artifact itself.</td>
+            </tr>
+            <tr>
+              <td><code>roadmaps/</code></td>
+              <td>Multi-plan development roadmaps (<code>ROADMAP_DIR</code>) sequencing waves of work.</td>
+              <td><code>/plan</code> (roadmap mode)</td>
+              <td>Long-lived; updated as waves complete.</td>
+            </tr>
+            <tr>
+              <td><code>semiotic-engineering/</code></td>
+              <td>Semiotic inspection working notes (concepts, mapping, current reading, synthesis).</td>
+              <td>Semiotic inspector subagent</td>
+              <td>Retained as an evolving analysis workspace.</td>
+            </tr>
+            <tr>
+              <td><code>tmp/</code></td>
+              <td>Temporary and session-scoped helpers (<code>TMP_DIR</code>), including session notes.</td>
+              <td>Any skill (working scratch)</td>
+              <td>Ephemeral; safe to discard between sessions.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Alongside the subdirectories, the output root holds a handful of
+          top-level files that are not artifacts per se but indexes and
+          logs: <code>INDEX.md</code> (the global artifact index),
+          <code>briefs.md</code> and <code>briefs-index.md</code> (the
+          execution log and its compact index),
+          <code>conversation-trace.jsonl</code>,
+          <code>decision-digest.jsonl</code>, <code>pending.jsonl</code>,
+          and <code>telemetry.jsonl</code>. The briefs log and the
+          conversation trace are covered under
+          <a href="#audit-trail">The Audit Trail</a> below.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The mapping from skill to output
+            directory is declared as <code>*_DIR</code> variables in the
+            "Directory Structure" table of
+            <code>product-design/conventions.md</code>. When a skill needs
+            to resolve its output path, it reads that variable rather than
+            hard-coding a folder name -- which is how a downstream project
+            can relocate the entire tree by changing one value.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 2: Artifact Types and Their Lifecycle -->
+      <section data-diataxis="reference" id="artifact-lifecycle">
+        <h2>Artifact Types and Their Lifecycle</h2>
+
+        <p>
+          Each artifact type follows a consistent lifecycle: it is
+          <strong>created</strong> by a skill, <strong>named</strong>
+          using a monotonic ID convention, and eventually
+          <strong>retired</strong> -- either superseded by regeneration,
+          consumed once acted upon, or retained permanently as a
+          historical record. Most artifact filenames share the shape
+          <code>&lt;type&gt;-&lt;NNNNNN&gt;-&lt;slug&gt;.&lt;ext&gt;</code>,
+          where the six-digit ID is drawn from a shared monotonic counter
+          so that IDs are globally ordered across all artifact types.
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Artifact type</th>
+              <th>Created by</th>
+              <th>Naming convention</th>
+              <th>Retirement</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Plan</td>
+              <td><code>/plan</code></td>
+              <td><code>&lt;prefix&gt;-NNNNNN-&lt;slug&gt;.md</code> (e.g. <code>implement-000187-...</code>); prefix reflects the plan class.</td>
+              <td>Retained; marked DONE after implementation. Progress files are consumed during execution.</td>
+            </tr>
+            <tr>
+              <td>Research log</td>
+              <td><code>/research</code></td>
+              <td><code>research-NNNNNN-&lt;slug&gt;.md</code></td>
+              <td>Retained -- the log is the artifact.</td>
+            </tr>
+            <tr>
+              <td>Reflection</td>
+              <td><code>/reflect</code></td>
+              <td><code>reflection-NNNNNN-&lt;slug&gt;.md</code> (with optional companion HTML).</td>
+              <td>Retained permanently; append-only practice record.</td>
+            </tr>
+            <tr>
+              <td>Proposal</td>
+              <td><code>/plan --light</code></td>
+              <td><code>proposal-NNNNNN-&lt;slug&gt;.md</code></td>
+              <td>Retained; may graduate into a full plan.</td>
+            </tr>
+            <tr>
+              <td>Promote proposal</td>
+              <td><code>/explain drift --promote</code></td>
+              <td><code>promote-proposal-plan-NNNNNN.md</code></td>
+              <td>Consumed once the designer applies or dismisses it.</td>
+            </tr>
+            <tr>
+              <td>Roadmap</td>
+              <td><code>/plan</code> (roadmap)</td>
+              <td><code>roadmap-NNNNNN-&lt;slug&gt;.md</code></td>
+              <td>Long-lived; updated wave by wave.</td>
+            </tr>
+            <tr>
+              <td>Advisory log</td>
+              <td>Legacy advisory flow</td>
+              <td><code>advisory-NNNNNN-&lt;slug&gt;.md</code></td>
+              <td>Retained for history; superseded by proposals/critiques.</td>
+            </tr>
+            <tr>
+              <td>Inventory</td>
+              <td><code>/research --inventory</code></td>
+              <td><code>inventory-NNNNNN-&lt;slug&gt;.md</code></td>
+              <td>Snapshot; superseded by regeneration.</td>
+            </tr>
+            <tr>
+              <td>Critique / check log</td>
+              <td><code>/critique</code></td>
+              <td><code>critique-NNNNNN-&lt;slug&gt;.md</code> / <code>check-NNNNNN-&lt;slug&gt;.md</code></td>
+              <td>Retained per invocation as an audit record.</td>
+            </tr>
+            <tr>
+              <td>Documentation</td>
+              <td><code>/document</code></td>
+              <td>Type-specific paths under <code>docs/</code> (HTML/Markdown).</td>
+              <td>Long-lived; regenerated in place.</td>
+            </tr>
+            <tr>
+              <td>Explanation</td>
+              <td><code>/explain</code></td>
+              <td><code>&lt;mode&gt;-NNNNNN-&lt;slug&gt;.md</code> (e.g. <code>architecture-000489-...</code>).</td>
+              <td>Retained per report; regenerated on request.</td>
+            </tr>
+            <tr>
+              <td>Onboarding plan</td>
+              <td><code>/onboard</code></td>
+              <td><code>onboarding-NNNNNN-&lt;slug&gt;.md</code> (often date-foldered).</td>
+              <td>Retained; regenerated per new team member.</td>
+            </tr>
+            <tr>
+              <td>Communication</td>
+              <td><code>/communicate</code></td>
+              <td><code>communication-NNNNNN-&lt;slug&gt;</code> (Markdown and/or HTML).</td>
+              <td>Retained; regenerated when messaging changes.</td>
+            </tr>
+            <tr>
+              <td>Q&amp;A log</td>
+              <td>Post-skill step 3, <code>/qa-log</code></td>
+              <td>Inlined in the parent artifact, or <code>&lt;parent&gt;-qa-&lt;slug&gt;.md</code> companion.</td>
+              <td>Lives and dies with its parent artifact.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The <strong>ID</strong> is assigned at creation time and never
+          reused: once <code>000489</code> is spent, the next artifact of
+          any type takes the next free number. This gives every artifact a
+          stable, globally unique handle that indexes, cross-references,
+          and the briefs log can point at unambiguously. Many artifacts
+          also carry a <code>source:</code> header naming the artifact that
+          spawned them; post-skill's cross-reference step (7c) uses this to
+          maintain a <code>spawned:</code> back-link on the source, so the
+          lineage of an artifact is traceable in both directions.
+        </p>
+
+        <aside class="callout-warning">
+          <p>
+            <strong>Note:</strong> Retirement rarely means deletion. Most
+            artifact types are retained even when superseded -- an
+            outdated research log or a completed plan is history, not
+            clutter. Only genuinely ephemeral content (the <code>tmp/</code>
+            tree, consumed progress files) is safe to discard. When in
+            doubt, prefer marking an artifact superseded over removing it,
+            so the audit trail stays intact.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 3: The Audit Trail -->
+      <section data-diataxis="explanation" id="audit-trail">
+        <h2>The Audit Trail</h2>
+
+        <p>
+          The output tree records not just <em>what</em> was produced but
+          <em>every action</em> that produced it. Two append-only logs at
+          the output root form the audit trail: the <strong>briefs
+          log</strong> captures every skill invocation, and the
+          <strong>conversation trace</strong> captures every non-skill
+          exchange. Between them, no user-agent interaction goes
+          unrecorded.
+        </p>
+
+        <h3>The Briefs Log</h3>
+
+        <p>
+          The briefs log (<code>_output/briefs.md</code>,
+          <code>BRIEFS_FILE</code>) is the execution log of all skill
+          invocations. It is written across the lifecycle in two halves,
+          giving each skill invocation a <strong>STARTED / DONE</strong>
+          lifecycle:
+        </p>
+
+        <ul>
+          <li>
+            <strong>STARTED</strong> is written by pre-skill (stage 2,
+            brief-log) the moment a skill begins, before any work runs.
+            The entry records a UTC timestamp, the skill name, and the
+            brief -- what the user asked the skill to do.
+          </li>
+          <li>
+            <strong>DONE</strong> is written by post-skill (step 1) when
+            the skill completes, marking the STARTED entry closed and
+            recording the completion timestamp and, where applicable, the
+            plan ID.
+          </li>
+        </ul>
+
+        <pre><code><span class="token-keyword">STARTED</span> | <span class="token-string">2026-07-15 09:12 UTC</span> | <span class="token-command">plan</span> | Add output-artifacts chapter
+<span class="token-keyword">DONE</span>    | <span class="token-string">2026-07-15 09:24 UTC</span> | <span class="token-command">plan</span> | plan-000676</code></pre>
+
+        <p>
+          Because STARTED is written first, a crash mid-skill leaves a
+          STARTED with no matching DONE. Subsequent pre-skill runs detect
+          these <strong>orphans</strong> and warn the user, so an
+          interrupted invocation never silently vanishes. The compact
+          <code>briefs-index.md</code> is regenerated from this log for
+          efficient loading during pre-skill.
+        </p>
+
+        <h3>The Conversation Trace</h3>
+
+        <p>
+          Not every exchange happens inside a skill. When the user asks a
+          question, discusses an approach, or gives an instruction outside
+          any <code>/skill</code> call, the briefs log would not capture it.
+          The <strong>conversation trace</strong>
+          (<code>_output/conversation-trace.jsonl</code>,
+          <code>CONVERSATION_TRACE_FILE</code>) fills that gap: an
+          append-only JSONL log where, after every non-skill response, the
+          agent records two entries -- the user's utterance and a short
+          summary of its own reply -- each with a sequential event ID and a
+          link to the preceding entry.
+        </p>
+
+        <p>
+          The two logs are stitched together at the seam where a
+          conversation leads into a skill. When a non-skill question is
+          followed by a skill invocation, pre-skill's brief-log stage
+          backfills a <code>led_to_skill</code> link onto the most recent
+          trace entry. The result is a single traceable chain: the question
+          that motivated a skill is linked to the skill that answered it,
+          which is linked through its brief to the artifact it produced.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The briefs STARTED/DONE lifecycle and the
+            conversation trace are complementary halves of the same audit
+            record. Reach for the briefs log to answer "what skills ran and
+            did they finish?"; reach for the conversation trace to answer
+            "what was discussed, and what led to that skill running?"
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 4: Artifact Immutability -->
+      <section data-diataxis="explanation" id="artifact-immutability">
+        <h2>Artifact Immutability</h2>
+
+        <p>
+          Every generated artifact in the output tree carries an implicit
+          contract: it is <strong>agent-maintained and never
+          hand-edited</strong>. In the "Key Files" registry of
+          <code>product-design/conventions.md</code>, a
+          <em>Maintained by</em> column marks each file as
+          <code>Agent</code>, <code>Human</code>, or
+          <code>Human (markers)</code>. Nearly everything under
+          <code>_output/</code> -- briefs, indexes, the decision digest,
+          the conversation trace, as-coded state -- is
+          <code>Agent</code>-maintained: the skills that write these files
+          own their contents end to end.
+        </p>
+
+        <p>
+          The reason is trust. The output tree is only useful as an audit
+          trail if it faithfully reflects what the harness actually did. If
+          a human quietly edits a research log, retimes a brief, or rewrites
+          a plan after the fact, the record no longer matches reality and
+          the trail can no longer be trusted. Keeping generated artifacts
+          agent-only preserves the invariant that the output tree is a
+          record of execution, not a document that anyone may revise.
+          Conceptually this mirrors the constitution's traceability
+          principle: what the harness records must trace back to what the
+          harness did, without undocumented mutation.
+        </p>
+
+        <p>
+          The rule is not merely a convention -- it is enforced. Files
+          classified <code>Human (markers)</code> may only be changed
+          through the marker mechanism (via <code>apply_marker.py</code>),
+          which permits lifecycle markers like STATUS or ESTABLISHED but
+          never free-form prose rewrites; post-skill and the pre-commit
+          hook run verifiers that reject unauthorized prose mutations to
+          those files. The practical consequence for anyone working in the
+          tree: to change a generated artifact, re-run the skill that
+          produced it. Do not hand-edit the file. Regeneration keeps the
+          artifact, its indexes, and its audit trail in sync; a manual edit
+          silently breaks that alignment.
+        </p>
+
+        <aside class="callout-warning">
+          <p>
+            <strong>Warning:</strong> Hand-editing an agent-maintained
+            artifact does not just risk a merge conflict -- it corrupts the
+            audit trail. The next regeneration will overwrite your changes,
+            and in the meantime the indexes and cross-references still point
+            at the version the harness believes it wrote. If an artifact is
+            wrong, fix the inputs and re-run the skill; never patch the
+            output by hand.
+          </p>
+        </aside>
+      </section>
+
+      <!-- See-also cross reference -->
+      <aside class="see-also">
+        <h2>See Also</h2>
+        <ul>
+          <li>
+            <a href="../vol3/index.html">Vol. 3: The Execution Layer</a>
+            -- documents the skills (<code>/plan</code>,
+            <code>/research</code>, <code>/critique</code>, and the rest)
+            that produce the artifacts catalogued in this chapter, and the
+            pre-skill / post-skill pipeline that writes the briefs log.
+          </li>
+          <li>
+            <a href="ch2-enforcement-architecture.html">Enforcement
+            Architecture</a> -- the mechanisms that enforce the
+            immutability rule and keep the output tree trustworthy.
+          </li>
+        </ul>
+      </aside>
+
+    </article>
+  </main>
+
+  <!-- Chapter navigation: Ch.1 omits Previous -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="ch2-enforcement-architecture.html">Next: Enforcement Architecture</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

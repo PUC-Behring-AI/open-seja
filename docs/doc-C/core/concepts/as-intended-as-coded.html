@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="SEJA's two-spec model: design intent (as-intended) versus implementation state (as-coded), the drift-reconciliation workflow that surfaces the gap between them, and the promote workflow that closes it.">
+  <title>As-Intended and As-Coded — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/concepts sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>As-Intended and As-Coded</h1>
+      <p>Two specifications, the drift between them, and how the harness reconciles it.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Concepts</a></li>
+        <li aria-current="page">As-Intended and As-Coded</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-explanation">explanation</span>
+          <span class="badge core-concepts">concepts</span>
+        </p>
+
+        <section data-diataxis="explanation" aria-labelledby="two-specifications">
+          <h2 id="two-specifications">Two specifications, deliberately separate</h2>
+          <p>
+            SEJA keeps two design specifications side by side rather than one. The
+            <strong>as-intended</strong> spec
+            (<code>product-design/product-design-as-intended.md</code>) records what
+            the designer <em>means</em> to build: the working design intent, the
+            DDR-shaped decisions, and the changelog. The <strong>as-coded</strong>
+            spec (<code>product-design/product-design-as-coded.md</code>) records what
+            was <em>actually built</em>: the conceptual design, metacommunication,
+            and journey maps as they exist in the implementation.
+          </p>
+          <p>
+            The two files have different owners, and that is the whole point. The
+            as-intended file is <em>Human (markers)</em>: its prose is authored only
+            by the designer, and agents may touch only its lifecycle markers. The
+            as-coded file is <em>Agent</em>: post-skill maintains it after each
+            <code>/implement</code> run to mirror the code. Keeping intent and
+            implementation in separate, differently-owned files means the gap
+            between &ldquo;what I wanted&rdquo; and &ldquo;what shipped&rdquo; is
+            always representable &mdash; it is the difference between two documents,
+            not a hidden inconsistency inside one.
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>The two specifications compared.</caption>
+              <thead>
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col">As-intended</th>
+                  <th scope="col">As-coded</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Records</th>
+                  <td>Design intent: what the designer means to build</td>
+                  <td>Implementation state: what was actually built</td>
+                </tr>
+                <tr>
+                  <th scope="row">File</th>
+                  <td><code>product-design-as-intended.md</code></td>
+                  <td><code>product-design-as-coded.md</code></td>
+                </tr>
+                <tr>
+                  <th scope="row">Classification</th>
+                  <td>Human (markers)</td>
+                  <td>Agent</td>
+                </tr>
+                <tr>
+                  <th scope="row">Maintained by</th>
+                  <td>Designer (prose); agents write only markers</td>
+                  <td>Post-skill, after each <code>/implement</code></td>
+                </tr>
+                <tr>
+                  <th scope="row">Sections</th>
+                  <td>&sect;0&ndash;&sect;17 intent, Decisions, changelog</td>
+                  <td>Conceptual Design, Metacommunication, Journey Maps</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            The pairing is declared in the <em>As-Intended / As-Coded Registry</em>
+            in <code>conventions.md</code>, the single source of truth read by
+            <code>/design</code>, <code>/explain drift</code>, and the post-skill
+            DONE-marking proposals.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="drift-reconciliation">
+          <h2 id="drift-reconciliation">Drift reconciliation</h2>
+          <p>
+            Because intent and implementation are separate documents, they can
+            <em>drift</em> apart: a feature is designed but not yet built, or built
+            but never written into intent, or built differently than intended. The
+            <code>/explain drift</code> workflow measures that gap and, optionally,
+            reconciles it.
+          </p>
+          <p>
+            Drift analysis reads the registry and compares each in-scope pair section
+            by section. For conceptual design it compares entities, permissions, UX
+            patterns, and business rules; for metacommunication it compares feature
+            intentions, implementation status, and stated designer intent. Each
+            difference is classified as <strong>Added</strong> (present in
+            as-intended but not as-coded), <strong>Removed</strong> (present in
+            as-coded but not as-intended), or <strong>Modified</strong> (present in
+            both but different). The result is a drift report with a summary table
+            and a list of detailed changes.
+          </p>
+          <p>
+            After presenting the summary, the workflow offers an optional
+            <em>sync</em>: align metacomm with the conceptual design, align the
+            conceptual design with metacomm, or reconcile both bidirectionally. When
+            the two files genuinely conflict, the harness never auto-resolves &mdash;
+            it presents both sides and asks the designer to decide, then records the
+            resolution verbatim. Drift analysis by itself is read-only; only the sync
+            step writes.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="the-promote-workflow">
+          <h2 id="the-promote-workflow">The promote workflow</h2>
+          <p>
+            Reconciliation has a second mode aimed specifically at closing the
+            intent-to-implementation loop: the <strong>promote</strong> workflow. Its
+            job is to move items marked <code>STATUS: implemented</code> up to
+            <code>established</code> &mdash; recording, in the designer's own words,
+            that an implemented decision is now a settled part of the design.
+          </p>
+          <p>
+            The workflow is deliberately split into two phases so the designer owns
+            every word of the decision prose while the harness manages only the
+            marker lifecycle:
+          </p>
+          <ul>
+            <li>
+              <strong>Phase 3a &mdash; proposal generation</strong>
+              (<code>/explain drift --promote</code>): the harness scans registered
+              Human (markers) files for <code>STATUS: implemented</code> items that
+              lack an <code>ESTABLISHED</code> stamp, drafts a DDR-shaped Decision
+              entry for each in a copy-paste-friendly proposal file, and files a
+              pending action. It does <strong>not</strong> touch the intent file
+              &mdash; the draft is the designer's to rewrite freely.
+            </li>
+            <li>
+              <strong>Phase 3b &mdash; marker flip</strong>
+              (<code>/explain drift --promote --apply-markers plan-NNNNNN</code>):
+              after the designer has copied the (possibly rewritten) Decision entries
+              into the intent file, the harness confirms each
+              <code>D-NNN</code> entry is present, asks per-item whether to flip its
+              <code>STATUS</code> from <code>implemented</code> to
+              <code>established</code>, and applies the change through
+              <code>apply_marker.py</code>.
+            </li>
+          </ul>
+          <p>
+            The two-phase shape is the key idea: the harness proposes and manages
+            markers, but the designer authors the prose. Promotion never rewrites
+            intent on the designer's behalf &mdash; it only records, structurally,
+            that intent and implementation have converged.
+          </p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="constitution.html">The Constitution</a> &mdash; the principle that design intent is authoritative over implementation.</li>
+            <li><a href="enforcement-layers.html">Enforcement Layers</a> &mdash; how marker-only writes to the intent file are enforced.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Concepts</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/concepts sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

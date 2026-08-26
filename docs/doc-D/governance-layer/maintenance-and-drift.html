@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="4">
+  <meta name="doc-chapter" content="4">
+  <meta name="doc-phase" content="3">
+  <meta name="doc-status" content="draft">
+
+  <title>Maintenance and Drift -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 4: The Output and Governance Layer</a></li>
+      <li>Maintenance and Drift</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>Maintenance and Drift</h1>
+
+      <p>
+        SEJA treats maintenance as a first-class concern rather than an
+        afterthought. Freshness policies define how long artifacts can go
+        without review, periodic triggers automate the scheduling of
+        maintenance tasks, the <code>/explain drift</code> workflow detects
+        and resolves discrepancies between design intent and implementation,
+        and the upgrade flow keeps the harness current across releases.
+        Together these mechanisms prevent the slow accumulation of staleness
+        that erodes design-intent fidelity over time.
+      </p>
+
+      <section id="freshness-policies" data-diataxis="reference">
+        <h2>Freshness Policies</h2>
+
+        <p>
+          SEJA defines staleness thresholds for recurring maintenance
+          activities and pending-action governance. These values are
+          configured in the Periodic Triggers table in
+          <code>product-design/conventions.md</code> and consumed by the
+          scripts that enforce them.
+        </p>
+
+        <h3>Periodic Activity Intervals</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Activity</th>
+              <th>Interval</th>
+              <th>Action Type</th>
+              <th>What Happens</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Periodic curation</td>
+              <td>30 days</td>
+              <td><code>periodic-curation</code></td>
+              <td>
+                Review <code>product-design-as-intended.md</code> for items
+                ready to promote from <code>implemented</code> to
+                <code>established</code>.
+              </td>
+            </tr>
+            <tr>
+              <td>Spec-drift check</td>
+              <td>14 days</td>
+              <td><code>spec-drift-check</code></td>
+              <td>
+                Run <code>/explain drift</code> to surface drift between
+                design intent and as-coded state.
+              </td>
+            </tr>
+            <tr>
+              <td>Git freshness check</td>
+              <td>7 days</td>
+              <td><code>check-git-freshness</code></td>
+              <td>
+                Compare local branches in the workspace and codebase
+                repositories to their upstreams; surface ahead/behind
+                counts. Never pulls automatically.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Pending-Action Thresholds</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Threshold</th>
+              <th>Value</th>
+              <th>Effect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Pending plan age escalation</td>
+              <td>30 days</td>
+              <td>
+                An open <code>implement</code> pending entry is surfaced
+                with the overdue banner during pre-skill.
+              </td>
+            </tr>
+            <tr>
+              <td>Pending age escalation</td>
+              <td>14 days</td>
+              <td>
+                Any pending action older than 14 days is flagged as overdue
+                in pre-skill notices.
+              </td>
+            </tr>
+            <tr>
+              <td>Verify-as-coded file threshold</td>
+              <td>5 files</td>
+              <td>
+                When a plan implementation touches 5 or more files,
+                post-skill auto-creates a <code>verify-as-coded</code>
+                pending action so the as-coded state can be reconciled.
+              </td>
+            </tr>
+            <tr>
+              <td>Pending auto-dismiss</td>
+              <td>90 days</td>
+              <td>
+                Unaddressed pending actions are auto-dismissed by
+                <code>pending.py cleanup</code> after 90 days. The
+                dismissal is recorded with the reason
+                <code>auto-dismissed: aged out</code>.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="periodic-triggers" data-diataxis="reference">
+        <h2>Periodic Triggers</h2>
+
+        <p>
+          Periodic triggers are the mechanism that converts freshness
+          policies into concrete pending actions. They run automatically
+          during pre-skill and are throttled by stamp files to avoid
+          redundant work.
+        </p>
+
+        <h3>How the Trigger Pipeline Works</h3>
+
+        <p>
+          Every skill invocation begins with pre-skill, which includes a
+          <code>pending-check</code> stage. This stage calls
+          <code>pending.py status</code>, which conditionally runs two
+          maintenance sub-tasks before assembling its output:
+        </p>
+
+        <ol>
+          <li>
+            <strong>Cleanup</strong> (24-hour throttle): runs
+            <code>pending.py cleanup</code> to auto-dismiss pending
+            actions that have exceeded the 90-day threshold and to
+            dismiss orphaned <code>implement</code> entries whose source
+            plan file has been deleted or already marked as done.
+            The throttle is tracked by the stamp file
+            <code>_output/.pending-cleanup-stamp</code>.
+          </li>
+          <li>
+            <strong>Periodic check</strong> (1-hour throttle): runs
+            <code>pending.py periodic-check</code>, which reads the
+            Periodic Triggers table from
+            <code>product-design/conventions.md</code>, computes how
+            many intervals have elapsed since the last pending action of
+            each trigger type, and creates new pending actions for any
+            that are due. The throttle is tracked by the stamp file
+            <code>_output/.pending-periodic-stamp</code>.
+          </li>
+        </ol>
+
+        <p>
+          Both sub-tasks are wrapped in broad exception handling so that a
+          failure in either one never blocks the pre-skill pipeline. If a
+          sub-task fails, a warning line is appended to the pre-skill status
+          output instead of crashing the skill invocation.
+        </p>
+
+        <h3>Pre-Skill Pending Notices</h3>
+
+        <p>
+          After cleanup and periodic check complete, the
+          <code>pending-check</code> stage formats a notice banner that
+          includes:
+        </p>
+
+        <ul>
+          <li>
+            A publish banner for any <code>PUBLISH:</code>-prefixed
+            pending actions (these have a shorter 3-day overdue window).
+          </li>
+          <li>
+            An implement banner showing up to 5 open plan-implementation
+            items, with age in days.
+          </li>
+          <li>
+            A general pending notice listing the count of remaining open
+            actions. When the count is zero, this line is suppressed.
+          </li>
+        </ul>
+
+        <p>
+          The banner is purely informational -- it never blocks the skill
+          invocation. Its purpose is to keep the designer aware of
+          accumulating maintenance debt so it can be addressed at a natural
+          pause point.
+        </p>
+
+        <h3>Git Freshness Check</h3>
+
+        <p>
+          The git freshness check is implemented by
+          <code>check_git_freshness.py</code>, located in the
+          <code>.claude/skills/critique/</code> directory. It can be
+          invoked directly via <code>/critique freshness</code> or
+          triggered as a periodic action.
+        </p>
+
+        <p>
+          The script resolves which repositories to check by reading the
+          harness root and <code>CODEBASE_DIR</code> from
+          <code>conventions.md</code>. When the codebase directory is an
+          absolute path distinct from the workspace root, both are checked.
+          For each repository, the script:
+        </p>
+
+        <ol>
+          <li>Identifies the current branch and its upstream tracking ref.</li>
+          <li>Fetches from the upstream remote (with a configurable timeout, default 5 seconds).</li>
+          <li>Computes ahead/behind counts using <code>git rev-list --count</code>.</li>
+          <li>
+            Reports the result with a suggested action: <code>git pull --ff-only</code>
+            when behind, check divergence when both ahead and behind, or
+            mark as up-to-date.
+          </li>
+        </ol>
+
+        <p>
+          The script never pulls changes automatically. It exits 0 in all
+          cases to avoid disrupting the caller. It also skips harness-dev
+          repositories (detected by the presence of
+          <code>seja-public</code>, <code>tools/sync_to_public.py</code>,
+          or <code>.claude/skills/scripts/priv</code> markers).
+        </p>
+
+        <h3>Worktree Health Check</h3>
+
+        <p>
+          <code>check_worktree_health.py</code> detects orphaned git
+          worktrees left behind by parallel wave execution. It runs
+          <code>git worktree list --porcelain</code> and flags any
+          worktrees beyond the main working tree. Orphaned worktrees can
+          lock files on Windows and waste disk space. The script is
+          invoked by <code>/critique health</code> and suggests removal
+          via <code>git worktree remove &lt;path&gt; &amp;&amp; git worktree prune</code>.
+        </p>
+      </section>
+
+      <section id="explain-drift-workflow" data-diataxis="how-to">
+        <h2>The <code>/explain drift</code> Workflow</h2>
+
+        <p>
+          Spec drift occurs when the as-coded state diverges from the
+          as-intended design -- features get added without updating the
+          design files, or design intent evolves without corresponding
+          implementation. The <code>/explain drift</code> workflow
+          detects these discrepancies and provides structured paths to
+          resolve them.
+        </p>
+
+        <h3>Running a Drift Analysis</h3>
+
+        <p>
+          Invoke <code>/explain drift</code> with an optional scope
+          argument:
+        </p>
+
+        <ul>
+          <li><code>all</code> (default) -- scan both conceptual design and metacommunication.</li>
+          <li><code>conceptual-design</code> -- scan only the conceptual design sections (entities, permissions, UX patterns, business rules).</li>
+          <li><code>metacomm</code> -- scan only the metacommunication sections (feature intentions, implementation status, designer intent).</li>
+          <li><code>--scope since-plan plan-NNNNNN</code> -- narrow the scan to registry rows touched by a specific plan, comparing only the as-intended and as-coded files referenced by that plan's Files section.</li>
+        </ul>
+
+        <p>
+          The drift analysis reads the As-Intended / As-Coded Registry from
+          <code>product-design/conventions.md</code> and compares each
+          registered pair file by file, section by section. For conceptual
+          design, it compares entities, permissions, UX patterns, and
+          business rules. For metacommunication, it compares feature
+          intentions, implementation status markers, and stated designer
+          intent. Each difference is classified as <strong>Added</strong>
+          (present in as-intended but not as-coded),
+          <strong>Removed</strong> (present in as-coded but not
+          as-intended), or <strong>Modified</strong> (in both but
+          different).
+        </p>
+
+        <p>
+          The analysis also scans for pending promotions: items marked
+          <code>STATUS: implemented</code> in registered Human (markers)
+          files that have not yet been promoted to
+          <code>established</code>. These are listed in the Pending
+          Promotions section of the drift report.
+        </p>
+
+        <h3>Sync and Promote Sub-Modes</h3>
+
+        <p>
+          After the drift report is presented, the designer chooses a
+          sync direction:
+        </p>
+
+        <ol>
+          <li>
+            <strong>Conceptual-design to metacomm</strong> -- for each
+            entity, feature, or UX pattern in the as-intended file lacking
+            a metacommunication entry, draft a metacommunication intention
+            and present it for confirmation.
+          </li>
+          <li>
+            <strong>Metacomm to conceptual-design</strong> -- for each
+            metacommunication intention implying entities, permissions, or
+            UX patterns not present in the conceptual design, propose
+            additions.
+          </li>
+          <li>
+            <strong>Bidirectional</strong> -- run both directions
+            sequentially, presenting all gaps and conflicts together for
+            human resolution.
+          </li>
+          <li>
+            <strong>Promote implemented items</strong> -- enter the
+            Phase 3a promote workflow (see below).
+          </li>
+          <li>
+            <strong>No</strong> -- skip sync entirely.
+          </li>
+        </ol>
+
+        <p>
+          Conflict detection is built in: when the two files disagree, both
+          sides are presented and the designer resolves. The workflow never
+          auto-resolves conflicts.
+        </p>
+
+        <h3>Phase 3a: Decision Entry Proposal Generation</h3>
+
+        <p>
+          Invoked via <code>/explain drift --promote</code>. This phase
+          reads registered Human (markers) files for
+          <code>STATUS: implemented</code> markers lacking an
+          <code>ESTABLISHED:</code> stamp, groups candidates by plan ID,
+          and for each candidate drafts a DDR-shaped Decision entry
+          (following the template in
+          <code>template/docs/ddr.md</code>). Each entry gets a stable
+          <code>D-NNN</code> ID assigned by scanning existing Decision
+          entries in <code>product-design-as-intended.md</code>.
+        </p>
+
+        <p>
+          The proposals are written to
+          <code>_output/promote-proposals/promote-proposal-plan-&lt;id&gt;.md</code>
+          as designer-owned drafts. The designer reviews, rewrites the
+          prose to their voice, and copies the entries into the Decisions
+          section of <code>product-design-as-intended.md</code>. A pending
+          action of type <code>apply-promote-markers</code> is filed to
+          track the follow-up (with deduplication: if one already exists
+          for the same plan, no duplicate is created).
+        </p>
+
+        <h3>Phase 3b: STATUS Marker Flip</h3>
+
+        <p>
+          Invoked via <code>/explain drift --promote --apply-markers plan-NNNNNN</code>.
+          This phase verifies that the designer has copied the
+          <code>D-NNN</code> entries into the as-intended file by
+          performing a heading-only grep
+          (<code>^###\s+D-NNN(?::|\s*$)</code>) -- it intentionally does
+          not match title text or body prose, preserving the designer's
+          voice.
+        </p>
+
+        <p>
+          For each verified entry, the designer is asked to confirm the
+          STATUS flip. Confirmed items are processed by
+          <code>apply_marker.py</code>:
+        </p>
+
+        <pre><code>python .claude/skills/scripts/apply_marker.py \
+  --file product-design/product-design-as-intended.md \
+  --id D-&lt;NNN&gt; \
+  --marker STATUS \
+  --value established \
+  --plan plan-&lt;id&gt; \
+  --date &lt;today&gt;</code></pre>
+
+        <p>
+          Post-skill's <code>check_human_markers_only.py</code> and
+          <code>check_changelog_append_only.py</code> verify that marker
+          flips do not bleed prose into Human (markers) files. The
+          <code>apply-promote-markers</code> pending action is closed when
+          all proposed entries have been verified and flipped; otherwise it
+          remains open with a message enumerating which entries are still
+          missing or were declined.
+        </p>
+      </section>
+
+      <section id="upgrade-and-migration" data-diataxis="how-to">
+        <h2>Upgrade and Migration</h2>
+
+        <p>
+          The <code>/seja-setup --upgrade</code> command refreshes harness
+          files from a newer SEJA release while preserving all
+          project-specific configuration and output. It is the recommended
+          way to keep a project's harness current without losing design
+          history.
+        </p>
+
+        <h3>What Gets Upgraded</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Files</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Skills</td>
+              <td><code>.claude/skills/*/SKILL.md</code></td>
+              <td>Auto-updated</td>
+            </tr>
+            <tr>
+              <td>General references</td>
+              <td><code>.claude/references/general/*.md</code></td>
+              <td>Auto-updated</td>
+            </tr>
+            <tr>
+              <td>Templates</td>
+              <td><code>.claude/references/template/**</code></td>
+              <td>Auto-updated</td>
+            </tr>
+            <tr>
+              <td>Harness metadata</td>
+              <td><code>.claude/CHANGELOG.md</code>, <code>VERSION</code>, <code>CHEATSHEET.md</code></td>
+              <td>Auto-updated</td>
+            </tr>
+            <tr>
+              <td>Scripts</td>
+              <td><code>.claude/skills/scripts/*.py</code></td>
+              <td>Auto-updated</td>
+            </tr>
+            <tr>
+              <td>Agents</td>
+              <td><code>.claude/agents/*.md</code></td>
+              <td>Show diff, ask per file (may have local tweaks)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>What Is Preserved</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Files</th>
+              <th>Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Rules</td>
+              <td><code>.claude/rules/*.md</code></td>
+              <td>Project-specific conventions; show diff for manual merge</td>
+            </tr>
+            <tr>
+              <td>Project definitions</td>
+              <td><code>product-design/**</code></td>
+              <td>Never overwritten -- this is the project's design history</td>
+            </tr>
+            <tr>
+              <td>Settings</td>
+              <td><code>.claude/settings.json</code>, <code>settings.local.json</code></td>
+              <td>User-configured permissions and preferences</td>
+            </tr>
+            <tr>
+              <td>Output</td>
+              <td><code>_output/</code></td>
+              <td>Plans, research logs, briefs, and all generated artifacts</td>
+            </tr>
+            <tr>
+              <td>Project README</td>
+              <td><code>CLAUDE.md</code></td>
+              <td>Contains project-specific build commands and architecture notes</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>How It Works</h3>
+
+        <ol>
+          <li>
+            <strong>Resolve target version</strong>: the upgrade flow
+            resolves the target release tag (latest SemVer tag on the
+            public <code>seja</code> repository, or an explicit
+            <code>--version &lt;tag&gt;</code>). If the resolved tag
+            matches the current <code>.seja-version</code>, the upgrade
+            exits with "Harness already up to date."
+          </li>
+          <li>
+            <strong>Locate source</strong>: if no local path is provided,
+            a shallow clone of the public repository at the target tag is
+            created in a temporary directory.
+          </li>
+          <li>
+            <strong>Run the upgrade script</strong>:
+            <code>upgrade_harness.py</code> copies auto-update files,
+            reports diffs for manual-merge files, and updates
+            <code>.seja-version</code>. Use <code>--dry-run</code> to
+            preview changes without applying them.
+          </li>
+          <li>
+            <strong>Review and follow up</strong>: the upgrade summary
+            highlights the version change, files auto-updated, and files
+            needing manual merge. Post-upgrade offers include adding new
+            convention variables, updating stale path references, and
+            regenerating <code>CLAUDE.md</code>.
+          </li>
+        </ol>
+
+        <p>
+          Upgrade never re-runs the Section 1 scaffolding questionnaire.
+          Projects with unresolved <code>{{VAR}}</code> placeholders in
+          <code>conventions.md</code> (from pre-scaffolding era) retain
+          them through the upgrade; run <code>/design update stack</code>
+          afterwards to fill them and regenerate downstream artifacts.
+        </p>
+      </section>
+
+      <section id="common-mistakes" data-diataxis="how-to">
+        <h2>Common Mistakes</h2>
+
+        <dl>
+          <dt>Ignoring spec-drift warnings</dt>
+          <dd>
+            The 14-day spec-drift check creates a pending action
+            reminding you to run <code>/explain drift</code>. Ignoring
+            it allows the gap between design intent and implementation
+            to widen silently. Small drift is easy to reconcile; large
+            drift requires painful forensics. Address drift reports
+            promptly -- even if the resolution is "the as-intended file
+            needs updating," that is a valid outcome worth recording.
+          </dd>
+
+          <dt>Hand-fixing drift instead of using the promote workflow</dt>
+          <dd>
+            When you see <code>STATUS: implemented</code> items awaiting
+            promotion, it is tempting to manually edit
+            <code>product-design-as-intended.md</code> to flip the
+            markers and write the Decision entries yourself. This
+            bypasses the governance pipeline: <code>apply_marker.py</code>
+            validates transition rules, <code>check_human_markers_only.py</code>
+            verifies that only marker content was changed, and
+            <code>check_changelog_append_only.py</code> ensures the
+            CHANGELOG was not corrupted. Use <code>/explain drift --promote</code>
+            (Phase 3a) to generate the proposal, review and copy the
+            entries, then run Phase 3b to flip markers through the
+            validated path.
+          </dd>
+
+          <dt>Letting pending actions accumulate past 90 days</dt>
+          <dd>
+            Pending actions older than 90 days are auto-dismissed by
+            <code>pending.py cleanup</code> with the reason
+            <code>auto-dismissed: aged out</code>. If the underlying
+            work was still needed, the auto-dismissal silently drops it
+            from the active ledger. Review pending items regularly --
+            either address them, snooze them with an explicit date
+            (<code>/pending snooze &lt;id&gt; --until YYYY-MM-DD</code>),
+            or dismiss them with a reason before the 90-day window
+            closes.
+          </dd>
+
+          <dt>Upgrading without reading the CHANGELOG</dt>
+          <dd>
+            <code>/seja-setup --upgrade</code> auto-updates skills,
+            scripts, references, and templates. If a release introduces
+            breaking changes -- new convention variables, renamed
+            scripts, altered skill behavior -- the upgrade succeeds but
+            downstream workflows may behave unexpectedly. Always read
+            <code>.claude/CHANGELOG.md</code> for the target version
+            before upgrading. The upgrade summary highlights new files
+            and diffs, but the CHANGELOG provides the rationale and
+            migration guidance that diffs alone cannot convey.
+          </dd>
+        </dl>
+      </section>
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 4: The Output and Governance Layer</h2>
+    <ol>
+      <li>
+        <a href="output-artifacts.html">Output Artifacts</a>
+      </li>
+      <li>
+        <a href="enforcement-architecture.html">Enforcement Architecture</a>
+      </li>
+      <li>
+        <a href="scripts-and-automation.html">Scripts and Automation</a>
+      </li>
+      <li aria-current="page">
+        <a href="maintenance-and-drift.html">Maintenance and Drift</a>
+        <ul>
+          <li><a href="#freshness-policies">Freshness Policies</a></li>
+          <li><a href="#periodic-triggers">Periodic Triggers</a></li>
+          <li><a href="#explain-drift-workflow">The /explain drift Workflow</a></li>
+          <li><a href="#upgrade-and-migration">Upgrade and Migration</a></li>
+          <li><a href="#common-mistakes">Common Mistakes</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="release-and-publishing.html">Release and Publishing</a>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="scripts-and-automation.html">Previous: Scripts and Automation</a>
+    <a href="release-and-publishing.html">Next: Release and Publishing</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>
