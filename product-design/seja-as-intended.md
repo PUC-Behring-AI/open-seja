@@ -429,10 +429,18 @@ orquestrador não é o ponto de variação certo.
 |---|---|---|
 | `Q-001` | Referência bibliográfica exata do artigo de Abrahão de que partiu o desenho de 1.1.2 -- autor(es), título, veículo, ano. Não foi inventada aqui de propósito. | citação de P-002 |
 | `Q-002` | A escala H-001 é ortogonal a BLD/SHP/GRD e L1-L3, ou colapsa parcialmente? Quantos pontos discretos ela precisa para ser operacional? | operacionalização de H-001 |
-| `Q-003` | Como o harness **detecta** a posição do humano na escala? Declaração explícita no `conventions.md`? Inferência a partir da interação? Escolha por sessão? | H-003 |
+| `Q-003` | Como o harness **detecta** a posição do humano na escala? Declaração explícita no `conventions.md`? Inferência a partir da interação? Escolha por sessão? **Sustentada em aberto por decisão de 2026-08-26 -- ver nota abaixo.** | H-003 |
 | `Q-004` | A retradução obrigatória (P-003) é um novo artefato, um novo modo de `/explain`, ou uma etapa do `post-skill`? | P-003 |
 | `Q-005` | Este documento fica em pt-BR ou é traduzido para en-US junto com `docs/`? O SEJA é publicado publicamente. | publicação |
 | `Q-006` | Relação entre este documento e o `product-design-as-intended.md` no formato §0-§17 do template -- ver nota abaixo. | estrutura |
+
+> **Nota sobre `Q-003`.** Esta questão está **deliberadamente sustentada em aberto**, e
+> não meramente sem resposta. A razão é de dependência: não se decide *como detectar* a
+> posição de alguém numa escala cujos pontos ainda não foram definidos -- e a granularidade
+> da escala é justamente o que `Q-002` mantém em aberto. Fixar um mecanismo de detecção
+> agora (campo em `conventions.md`, inferência, escolha por sessão) congelaria por via
+> indireta uma resposta a `Q-002` que ainda não temos. Fechar `Q-002` primeiro é o
+> caminho; até lá, `H-003` permanece como leitura, sem implementação.
 
 > **Nota sobre `Q-006`.** O esqueleto do template (`§0 Planned Changes`, `§1 Platform
 > Purpose`, `§2 Entity Hierarchy`, ... `§17`) é moldado para produto: hierarquia de
@@ -493,3 +501,4 @@ agente de IA dev assista o humano no desenvolvimento de software.
 ## CHANGELOG
 
 2026-08-26 | § 1 | added | - | Seção 1 (Princípios da engenharia semiótica) redigida a partir das notas da conversa com o Anax; P-001..P-007 registrados, H-001..H-004 registradas como hipóteses abdutivas, Q-001..Q-006 abertas
+2026-08-26 | Q-003 | held-open | - | detecção da posição na escala sustentada deliberadamente em aberto: depende de Q-002 (granularidade da escala), que precede
