@@ -1,0 +1,637 @@
+<title>O que é o SEJA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Karla:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#FAF8F7; --panel:#FFFFFF; --sunk:#F2EEEC;
+  --ink:#1A1614; --ink-2:#4A4341; --ink-3:#7A706C;
+  --rule:#E2DBD8; --rule-2:#CFC6C2;
+  --red:#B02A30; --red-soft:#F7E9E9; --red-edge:#E0BABB;
+  --slate:#4A5A6B; --slate-soft:#ECEFF2;
+  --green:#2E6B52;
+  --shadow:0 1px 2px rgba(26,22,20,.05), 0 10px 30px -16px rgba(26,22,20,.2);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#141113; --panel:#1C1819; --sunk:#221D1F;
+    --ink:#EDE7E4; --ink-2:#BCB2AE; --ink-3:#8B807C;
+    --rule:#2E2729; --rule-2:#433A3B;
+    --red:#E46A6E; --red-soft:#301C1E; --red-edge:#5C3538;
+    --slate:#9BB0C4; --slate-soft:#1B2229;
+    --green:#6FBF95;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#141113; --panel:#1C1819; --sunk:#221D1F;
+  --ink:#EDE7E4; --ink-2:#BCB2AE; --ink-3:#8B807C;
+  --rule:#2E2729; --rule-2:#433A3B;
+  --red:#E46A6E; --red-soft:#301C1E; --red-edge:#5C3538;
+  --slate:#9BB0C4; --slate-soft:#1B2229;
+  --green:#6FBF95;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -16px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper);color:var(--ink);margin:0;
+  font-family:"Karla","Helvetica Neue",Arial,sans-serif;
+  font-size:17px;line-height:1.68;-webkit-font-smoothing:antialiased;
+}
+.page{max-width:1240px;margin:0 auto;padding:0 clamp(18px,4vw,44px)}
+.col{max-width:44rem}
+
+/* ============ hero ============ */
+.hero{padding:clamp(44px,8vw,92px) 0 clamp(30px,4vw,44px)}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);margin:0 0 20px;
+}
+h1{
+  font-family:"Newsreader",Georgia,serif;font-weight:300;
+  font-size:clamp(2.6rem,7.5vw,4.6rem);line-height:1.02;letter-spacing:-.022em;
+  margin:0 0 26px;text-wrap:balance;
+}
+h1 em{font-style:italic;font-weight:400;color:var(--red)}
+.thesis{
+  font-family:"Newsreader",Georgia,serif;font-weight:400;
+  font-size:clamp(1.18rem,2.5vw,1.44rem);line-height:1.5;color:var(--ink-2);
+  max-width:38rem;margin:0 0 18px;
+}
+.thesis b{color:var(--ink);font-weight:600}
+.hero .src{font-size:13.5px;color:var(--ink-3);margin:26px 0 0}
+.hero .src code{font-size:.9em}
+
+/* ============ tri-state legend ============ */
+.legend{
+  display:grid;gap:0;grid-template-columns:1fr;margin:0 0 clamp(40px,6vw,64px);
+  border:1px solid var(--rule);border-radius:3px;overflow:hidden;background:var(--panel);
+}
+@media(min-width:760px){.legend{grid-template-columns:repeat(3,1fr)}}
+.legend > div{padding:19px 21px;border-bottom:1px solid var(--rule)}
+@media(min-width:760px){
+  .legend > div{border-bottom:0;border-right:1px solid var(--rule)}
+  .legend > div:last-child{border-right:0}
+}
+.legend .mk{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.legend .mk b{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;letter-spacing:.03em;
+}
+.sq{width:9px;height:9px;flex:0 0 auto}
+.sq.p{background:var(--ink)}
+.sq.h{border:1.5px solid var(--red);background:transparent;border-radius:50%}
+.sq.q{border:1.5px dotted var(--ink-3);background:transparent}
+.legend .mk .p-t{color:var(--ink)}
+.legend .mk .h-t{color:var(--red)}
+.legend .mk .q-t{color:var(--ink-3)}
+.legend p{font-size:14.3px;color:var(--ink-2);margin:0;line-height:1.55}
+.tally{
+  font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink-3);
+  margin:-46px 0 clamp(40px,6vw,64px);letter-spacing:.02em;
+}
+.tally b{color:var(--ink);font-weight:600}
+
+/* ============ layout with id-strip ============ */
+.body-grid{display:grid;grid-template-columns:1fr;gap:0}
+@media(min-width:1080px){
+  .body-grid{grid-template-columns:minmax(0,1fr) 92px;gap:48px;align-items:start}
+}
+aside.strip{display:none}
+@media(min-width:1080px){
+  aside.strip{
+    display:block;position:sticky;top:0;padding:40px 0;max-height:100vh;overflow-y:auto;
+  }
+  aside.strip .lbl{
+    font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--rule-2);margin:0 0 12px;
+  }
+  aside.strip ol{list-style:none;margin:0 0 20px;padding:0;display:flex;flex-direction:column;gap:2px}
+  aside.strip a{
+    display:flex;align-items:center;gap:7px;padding:3px 0;text-decoration:none;
+    font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-3);
+    transition:color .15s;
+  }
+  aside.strip a:hover,aside.strip a:focus-visible{color:var(--red)}
+  aside.strip a.is-h{color:var(--red);opacity:.82}
+  aside.strip a:hover .sq,aside.strip a:focus-visible .sq{transform:scale(1.35)}
+  aside.strip .sq{transition:transform .15s}
+}
+
+/* ============ sections ============ */
+.part{margin:0 0 clamp(52px,8vw,84px);scroll-margin-top:24px}
+.part-head{border-top:2px solid var(--ink);padding-top:14px;margin:0 0 34px}
+.part-head .n{
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--red);display:block;margin-bottom:5px;
+}
+.part-head h2{
+  font-family:"Newsreader",Georgia,serif;font-weight:400;
+  font-size:clamp(1.7rem,4vw,2.35rem);line-height:1.15;letter-spacing:-.012em;
+  margin:0;text-wrap:balance;
+}
+
+article.concept{margin:0 0 clamp(38px,5vw,54px);scroll-margin-top:24px}
+article.concept > header{display:flex;gap:12px;align-items:baseline;margin:0 0 12px;flex-wrap:wrap}
+.badge{
+  font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:600;
+  letter-spacing:.03em;padding:2px 8px;border-radius:2px;white-space:nowrap;flex:0 0 auto;
+}
+.badge.p{background:var(--ink);color:var(--paper)}
+.badge.h{background:transparent;color:var(--red);border:1.5px solid var(--red)}
+article.concept h3{
+  font-family:"Newsreader",Georgia,serif;font-weight:500;
+  font-size:clamp(1.24rem,2.6vw,1.5rem);line-height:1.28;margin:0;
+  letter-spacing:-.008em;text-wrap:balance;flex:1 1 300px;
+}
+.hyp-claim{
+  border-left:2px solid var(--red);background:var(--red-soft);
+  padding:14px 18px;margin:0 0 18px;border-radius:0 2px 2px 0;
+}
+.hyp-claim p{margin:0;font-size:16px;color:var(--ink);max-width:42rem}
+.hyp-claim .tag{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--red);display:block;margin-bottom:6px;font-weight:600;
+}
+
+p{max-width:40rem;margin:0 0 15px}
+.part p, article p{color:var(--ink-2)}
+p strong,li strong{color:var(--ink);font-weight:700}
+a{color:var(--red);text-underline-offset:2px;text-decoration-thickness:1px}
+a:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+code{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.845em;
+  background:var(--sunk);border:1px solid var(--rule);border-radius:2px;
+  padding:.08em .32em;white-space:nowrap;
+}
+em{font-style:italic}
+
+/* pull quote -- the page's big theses */
+blockquote.pull{
+  margin:26px 0;padding:0 0 0 22px;border-left:3px solid var(--red);max-width:40rem;
+}
+blockquote.pull p{
+  font-family:"Newsreader",Georgia,serif;font-size:clamp(1.14rem,2.4vw,1.33rem);
+  line-height:1.44;color:var(--ink);font-weight:400;margin:0 0 10px;
+}
+blockquote.pull p:last-child{margin-bottom:0}
+blockquote.pull p.sub{
+  font-family:"Karla",sans-serif;font-size:15px;color:var(--ink-2);line-height:1.6;
+}
+
+/* refutation pair -- abduction made physical */
+.abduction{
+  display:grid;grid-template-columns:1fr;gap:1px;background:var(--rule);
+  border:1px solid var(--rule);border-radius:3px;margin:22px 0 0;overflow:hidden;
+}
+@media(min-width:680px){.abduction{grid-template-columns:1fr 1fr}}
+.abduction > div{background:var(--panel);padding:16px 18px}
+.abduction h4{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.13em;
+  text-transform:uppercase;margin:0 0 8px;font-weight:600;
+}
+.abduction .yes h4{color:var(--green)}
+.abduction .no h4{color:var(--red)}
+.abduction p{font-size:14.6px;margin:0;color:var(--ink-2);max-width:none;line-height:1.55}
+
+ol.steps{margin:0 0 16px;padding:0;list-style:none;counter-reset:s;max-width:40rem;
+  display:flex;flex-direction:column;gap:12px}
+ol.steps li{counter-increment:s;display:flex;gap:14px;color:var(--ink-2)}
+ol.steps li::before{
+  content:counter(s);flex:0 0 auto;font-family:"IBM Plex Mono",monospace;
+  font-size:11.5px;font-weight:600;color:var(--red);line-height:1.75;
+  width:1.4em;border-top:1px solid var(--red-edge);
+}
+ul.marks{list-style:none;margin:0 0 16px;padding:0;max-width:40rem;
+  display:flex;flex-direction:column;gap:9px}
+ul.marks li{display:flex;gap:12px;color:var(--ink-2)}
+ul.marks li::before{content:"";flex:0 0 auto;width:5px;height:5px;background:var(--rule-2);
+  margin-top:.66em;border-radius:50%}
+
+.scroller{overflow-x:auto;margin:0 0 20px;border:1px solid var(--rule);border-radius:3px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:14.6px;min-width:540px}
+thead th{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:500;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);text-align:left;
+  padding:11px 14px;border-bottom:1px solid var(--rule-2);background:var(--sunk);
+}
+tbody td{padding:12px 14px;border-bottom:1px solid var(--rule);vertical-align:top;color:var(--ink-2)}
+tbody tr:last-child td{border-bottom:0}
+tbody td:first-child{color:var(--ink)}
+tbody th{
+  padding:12px 14px;border-bottom:1px solid var(--rule);vertical-align:top;
+  text-align:left;font-weight:500;color:var(--ink);font-size:14.6px;
+}
+.pill{
+  display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:9.5px;
+  letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px;
+  font-weight:600;white-space:nowrap;
+}
+.pill.block{background:var(--red-soft);color:var(--red);border:1px solid var(--red-edge)}
+.pill.hold{background:var(--slate-soft);color:var(--slate);border:1px solid var(--slate)}
+tr.blocking td:first-child{box-shadow:inset 3px 0 0 var(--red)}
+tr.held td:first-child{box-shadow:inset 3px 0 0 var(--slate)}
+
+pre{
+  font-family:"IBM Plex Mono",monospace;font-size:12.6px;line-height:1.72;
+  background:var(--sunk);border:1px solid var(--rule);border-radius:3px;
+  padding:16px 18px;overflow-x:auto;margin:0 0 18px;color:var(--ink-2);max-width:44rem;
+}
+
+figure{margin:0 0 26px}
+figure img{display:block;width:100%;height:auto;border:1px solid var(--rule);
+  border-radius:3px;background:#0d0b0c}
+figcaption{font-size:14px;color:var(--ink-2);margin-top:11px;line-height:1.55}
+figcaption b{color:var(--ink);font-weight:600}
+.figs{display:grid;gap:30px;grid-template-columns:1fr}
+@media(min-width:860px){.figs{grid-template-columns:1fr 1fr;align-items:start}}
+
+.refs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:13px;max-width:42rem}
+.refs li{font-size:14.6px;color:var(--ink-2);line-height:1.55;
+  padding-left:16px;border-left:1px solid var(--rule)}
+.refs b{color:var(--ink);font-weight:600}
+
+footer{border-top:1px solid var(--rule);padding:28px 0 64px;margin-top:20px;
+  font-size:13.5px;color:var(--ink-3)}
+footer p{max-width:42rem}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="page">
+
+<header class="hero">
+  <p class="eyebrow">product-design / seja-as-intended &middot; § 1</p>
+  <h1>O que é<br>o <em>SEJA</em></h1>
+  <p class="thesis">O SEJA não é um gerenciador de tarefas para agentes, nem uma camada de processo sobre o Claude Code. Ele é uma <b>aposta teórica</b>: a de que desenvolvimento de software assistido por IA é um problema de <b>comunicação projetada</b>.</p>
+  <p class="thesis">Os métodos da engenharia semiótica &mdash; construídos para a interação humano-computador &mdash; se transferem para a interação humano-agente-código com poder explicativo intacto.</p>
+  <p class="src">Quem lê o SEJA de fora tende a ver uma coleção de convenções arbitrárias. Quem lê a partir da tese vê um sistema de signos desenhado. Tudo o mais no harness &mdash; o sistema de marcadores, o ciclo de vida das skills, o catálogo de agentes &mdash; é consequência dela, e não o contrário.</p>
+</header>
+
+<div class="legend">
+  <div>
+    <div class="mk"><span class="sq p"></span><b class="p-t">P-NNN &middot; Princípio</b></div>
+    <p>Leitura assentada. Sustenta decisões de projeto hoje.</p>
+  </div>
+  <div>
+    <div class="mk"><span class="sq h"></span><b class="h-t">H-NNN &middot; Hipótese</b></div>
+    <p>Leitura provisória, no registro abdutivo. Carrega o que a confirmaria e o que a refutaria. <strong>Não é decisão tomada.</strong></p>
+  </div>
+  <div>
+    <div class="mk"><span class="sq q"></span><b class="q-t">Q-NNN &middot; Questão</b></div>
+    <p>Em aberto. Algumas por dependência, não por omissão.</p>
+  </div>
+</div>
+<p class="tally" style="margin-top:14px"><b>8</b> princípios &nbsp;·&nbsp; <b>4</b> hipóteses &nbsp;·&nbsp; <b>10</b> questões abertas</p>
+
+<div class="body-grid">
+<main>
+
+<section class="part" id="conceitos">
+  <div class="part-head"><span class="n">1.1</span><h2>Conceitos fundamentais</h2></div>
+
+  <article class="concept" id="p-001">
+    <header><span class="badge p">P-001</span><h3>O artefato é uma mensagem, não um produto</h3></header>
+    <p>A premissa central da engenharia semiótica (de Souza 2005) é que interação humano-computador é um caso particular de <strong>comunicação humana mediada por computador</strong>. A interface não é onde o usuário opera a máquina; é onde o designer fala com o usuário através de um substituto que fala em seu nome no momento do uso.</p>
+    <p>De Souza chama esse substituto de <strong>preposto do designer</strong> (<em>designer's deputy</em>). O preposto não é o sistema: é a voz do designer atravessando o sistema, num momento em que o designer não está na sala. Cada rótulo, cada mensagem de erro, cada valor-padrão é uma fala do preposto.</p>
+    <blockquote class="pull">
+      <p>Quando o usuário não sabe o que fazer, o preposto tropeçou no texto.</p>
+      <p class="sub">Isso é uma quebra de comunicação &mdash; e é diagnosticável como quebras de comunicação são diagnosticáveis.</p>
+    </blockquote>
+    <p>Consequência para o SEJA: cada artefato que o harness ajuda a produzir é andaime para essa comunicação. Não é sobrecarga de gestão. É um modo de ser mais deliberado sobre a mensagem que se está entregando.</p>
+  </article>
+
+  <article class="concept" id="p-002">
+    <header><span class="badge p">P-002</span><h3>A relação dev&#8596;código passou a ser mediada por um agente que produz código</h3></header>
+    <p>No desenho clássico da atividade de desenvolvimento, o desenvolvedor age sobre o código <em>apoiado por ferramentas</em>: editor, compilador, depurador, testes. A ferramenta amplia o alcance do dev, mas não fala por ele. O arranjo atual desloca isso:</p>
+    <pre>  [ dev ] ──fala──&gt; [ robô ] ──produz──&gt; [ código ]
+                        │
+                        └──apoiado por──&gt; [ ferramentas ]</pre>
+    <ol class="steps">
+      <li><strong>O dev fala.</strong> A entrada primária deixa de ser edição direta e passa a ser linguagem natural &mdash; isto é, passa a ser <em>mensagem</em>, com toda a ambiguidade, pressuposto e implicatura que mensagens carregam.</li>
+      <li><strong>O robô produz.</strong> O código deixa de ser autoria direta do humano e passa a ser um artefato <em>interpretado a partir de uma intenção</em>. Alguém traduziu, e <strong>a tradução pode estar errada sem estar quebrada</strong>.</li>
+      <li><strong>As ferramentas apoiam o robô, não o humano.</strong> O compilador, os testes e o linter passam a ser instrumentos do preposto, não do designer.</li>
+    </ol>
+    <p>O ponto teórico: o preposto <strong>deixou de ser estático</strong>. No modelo de 2005 ele é código escrito de antemão que repete um script fixo em tempo de uso. Aqui ele <em>compõe a fala no momento do uso</em>. Isso não invalida a teoria &mdash; amplia a superfície em que ela morde.</p>
+    <p>A extensão da engenharia semiótica ao pipeline de desenvolvimento já havia sido feita em SigniFYI (de Souza et al. 2016, <em>Software Developers as Users</em>). O acréscimo é que o desenvolvedor agora tem um <strong>preposto próprio, generativo</strong>, entre ele e o artefato.</p>
+  </article>
+
+  <article class="concept" id="p-002a">
+    <header><span class="badge p">P-002a</span><h3>Duas vias de autoria escrevem no mesmo artefato</h3></header>
+    <p>O esquema linear acima é o caminho <em>novo</em>, não o único. O robô <strong>não substituiu</strong> o time na produção de código: somou-se a ele. O arranjo real é de duas vias concorrentes de autoria sobre o mesmo artefato.</p>
+    <blockquote class="pull"><p>Quando dois prepostos escrevem no mesmo texto, de quem é a voz que o leitor está lendo?</p></blockquote>
+  </article>
+
+  <article class="concept" id="h-001">
+    <header><span class="badge h">H-001</span><h3>A escala citizen dev &#8596; power dev</h3></header>
+    <div class="hyp-claim">
+      <span class="tag">Hipótese</span>
+      <p>Existe uma escala contínua de desenvolvedores, ancorada em <strong>literacia de código</strong>, e o harness precisa se adequar à posição do humano que assiste.</p>
+    </div>
+    <p>Se o robô produz código a partir de uma intenção, a pergunta seguinte é: <strong>o humano consegue ler o que voltou?</strong> A resposta divide a população de usuários em algo que não é uma categoria, mas um contínuo.</p>
+    <div class="scroller">
+      <table>
+        <thead><tr><th>Polo</th><th>Quem é</th><th>Relação com o código</th><th>O que espera do robô</th></tr></thead>
+        <tbody>
+          <tr><th>User / citizen dev</th><td>Tem intenção e domínio do problema; não lê código</td><td>O código é opaco &mdash; não é signo legível para ele</td><td>Que a computabilidade do robô <strong>traduza de volta</strong> o código implementado para uma linguagem adequada a ele</td></tr>
+          <tr><td colspan="4" style="text-align:center;color:var(--ink-3);font-style:italic">&hellip; contínuo &hellip;</td></tr>
+          <tr><th>Power dev</th><td>Especialista em tecnologia</td><td>O código é o sistema de signos primário; lê fluentemente</td><td>Que o robô acelere, não que traduza; quer controle, rastreabilidade e governança</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <blockquote class="pull">
+      <p>Para o citizen dev, o código não pode ser a mensagem.</p>
+      <p class="sub">Se o receptor não decodifica o sistema de signos em que o artefato está expresso, entregar o artefato não é comunicar. O preposto tem obrigação de emitir a mensagem num registro que o receptor decodifique &mdash; e essa obrigação é <em>constitutiva</em>, não um recurso de conveniência.</p>
+    </blockquote>
+    <p>Em vocabulário da engenharia semiótica: para o power dev, o código funciona como signo <strong>estático</strong>, legível diretamente; para o citizen dev, o código só chega através de signos <strong>metalinguísticos</strong>, que falam <em>sobre</em> ele. A responsabilidade do harness por produzir esses signos cresce à medida que se desce a escala.</p>
+    <p><strong>Um terceiro eixo.</strong> O harness já estratifica audiência de duas maneiras: <strong>famílias de papel</strong> (BLD / SHP / GRD), por <em>função</em>; e <strong>níveis de expertise</strong> (L1 / L2 / L3), por <em>senioridade dentro da função</em>. A escala de <code>H-001</code> não é nenhuma das duas. Ela classifica por literacia de código, e cruza as outras: existe SHP sênior que não lê código, e existe BLD júnior que lê.</p>
+    <p>A leitura corrente é que se trata de um terceiro eixo, ortogonal &mdash; e que ele é o único dos três que determina <em>em que sistema de signos a mensagem de volta pode ser escrita</em>. Isso o torna o mais consequente dos três para efeito de comunicação, ainda que o menos representado no harness hoje.</p>
+    <p style="color:var(--ink-3);font-size:15px"><em>Em aberto (<code>Q-002</code>): se o eixo é de fato ortogonal ou colapsa parcialmente nos outros; e quantos pontos discretos precisa para ser operacional &mdash; um contínuo não é implementável, e dois polos provavelmente são grosseiros demais.</em></p>
+  </article>
+
+  <article class="concept" id="p-003">
+    <header><span class="badge p">P-003</span><h3>O SEJA tem um caminho de retorno, e ele é parte da mensagem</h3></header>
+    <p>O template de metacomunicação (de Souza 2005) é uma fala em primeira pessoa do designer ao usuário: <em>&ldquo;Eis meu entendimento de quem você é, eis o que aprendi que você quer, eis o sistema que construí para você, eis como você pode ou deve usá-lo.&rdquo;</em> Barbosa et al. (2021) o estenderam no <strong>EMT</strong>, com quatro dimensões de ciclo de vida e questões éticas explícitas.</p>
+    <p>Sob <code>P-002</code> e <code>H-001</code>, esse template ganha um segundo trajeto. Não basta o humano declarar intenção ao robô; o robô precisa <strong>devolver ao humano uma declaração do que entendeu e do que construiu</strong>, no registro que o humano decodifica:</p>
+    <pre>    intenção  ──────────────────&gt;  código executável
+   (humano)      tradução do robô      (artefato)
+       ^                                   │
+       └───────── retradução ──────────────┘
+              (signos metalinguísticos)</pre>
+    <p>A retradução é o que permite ao citizen dev <strong>exercer autoria sem ler código</strong>. Sem ela, ele não tem como verificar se o artefato corresponde à sua intenção, e a relação vira <strong>delegação cega</strong> &mdash; exatamente o oposto do que a engenharia semiótica considera comunicação bem-sucedida.</p>
+    <p>Parte dessa mão de volta já existe no harness (<code>/explain</code>, <code>/communicate</code>, <code>/document</code>), mas hoje ela é <strong>eletiva</strong>: o usuário precisa pedir. A intenção registrada é que, para posições baixas da escala, a retradução deixe de ser eletiva.</p>
+  </article>
+
+  <article class="concept" id="p-004">
+    <header><span class="badge p">P-004</span><h3>As convenções do SEJA são um sistema de significação projetado, não estilo</h3></header>
+    <p>De Souza, a partir de Peirce e Eco, classifica signos de interface em três classes:</p>
+    <ul class="marks">
+      <li><span><strong>Estáticos</strong> &mdash; lidos num único instante: um rótulo, um leiaute, um ícone.</span></li>
+      <li><span><strong>Dinâmicos</strong> &mdash; emergem da interação: uma transição de estado, uma confirmação.</span></li>
+      <li><span><strong>Metalinguísticos</strong> &mdash; explicam os outros dois: ajuda, mensagens de erro, tooltips.</span></li>
+    </ul>
+    <p>E, de Eco (1976), a distinção entre <strong>sistema de significação</strong> &mdash; o repertório socialmente convencionado de pares expressão-conteúdo disponível a um grupo &mdash; e <strong>processo de comunicação</strong> &mdash; o que alguém faz ao montar uma mensagem intencional a partir desse repertório. O vão entre os dois é onde mora a invenção.</p>
+    <p>O sistema de marcadores do SEJA (<code>STATUS</code>, <code>ESTABLISHED</code>, <code>CHANGELOG_APPEND</code>, e os oito <code>REQ-TYPE-NNN</code>) é um sistema de significação nesse sentido exato: um vocabulário pequeno e convencionado para eventos de ciclo de vida, com <strong>forma fixa</strong> (<code>apply_marker.py</code> a impõe) e <strong>lugar fixo</strong> (<code>check_human_markers_only.py</code> rejeita escrita fora do padrão). Ele existe para que designer e agente possam falar sobre movimento de intenção sem nenhum dos dois ter que reescrever prosa.</p>
+    <p>As quatro classificações de arquivo &mdash; <code>Human</code>, <code>Human (markers)</code>, <code>Agent</code>, <code>Human / Agent</code> &mdash; são o mesmo mecanismo aplicado à <strong>autoria</strong>: dizem de quem é a voz em cada arquivo do repositório, e impedem que as vozes se misturem.</p>
+  </article>
+
+  <article class="concept" id="h-002">
+    <header><span class="badge h">H-002</span><h3>Computabilidade da intenção</h3></header>
+    <div class="hyp-claim">
+      <span class="tag">Hipótese</span>
+      <p>O SEJA pode ser um bom instrumento para embasar a computabilidade dos agentes na medida em que eles transformam intenções em código executável.</p>
+    </div>
+    <blockquote class="pull"><p>Intenção só é computável quando é signo.</p>
+      <p class="sub">Uma intenção dita em prosa livre não é operável por um agente &mdash; não há como verificar se foi atendida, nem detectar quando deixou de ser.</p></blockquote>
+    <p>A aposta é que três propriedades, juntas, tornam intenção computável:</p>
+    <ol class="steps">
+      <li><strong>Expressão em sistema de signos fixo</strong> &mdash; a intenção mora num documento de estrutura conhecida, com IDs estáveis que um programa consegue endereçar.</li>
+      <li><strong>Rastreabilidade até o código</strong> &mdash; passos de plano declaram quais requisitos satisfazem, e <code>check_plan_coverage.py</code> verifica que nada foi silenciosamente pulado. A intenção deixa de ser preâmbulo e passa a ser <strong>contrato verificável</strong>.</li>
+      <li><strong>Deriva como cidadã de primeira classe</strong> &mdash; o par as-intended / as-coded, com <code>/explain drift</code>, faz do descolamento entre intenção e implementação algo <em>detectável e reconciliável</em>, em vez de algo que simplesmente acontece.</li>
+    </ol>
+    <p>Se a hipótese se sustenta, o SEJA não é apenas um harness para o dev: é o <strong>substrato sobre o qual um agente consegue raciocinar sobre intenção</strong> &mdash; e, por consequência, consegue produzir a retradução de <code>P-003</code> com fundamento, porque sabe <em>a que intenção</em> cada trecho de código responde.</p>
+    <div class="abduction">
+      <div class="yes"><h4>O que confirmaria</h4><p>Agentes respondendo &ldquo;esta mudança atende a qual intenção declarada?&rdquo; e &ldquo;o que na intenção ainda não tem código?&rdquo; sem inspeção humana.</p></div>
+      <div class="no"><h4>O que refutaria</h4><p>A rastreabilidade se degradando a ponto de os marcadores virarem ritual &mdash; a crítica de Eraut (1994) que <code>foundations.md</code> já registra contra os andaimes de reflexão.</p></div>
+    </div>
+  </article>
+</section>
+
+<section class="part" id="fluxos">
+  <div class="part-head"><span class="n">1.2</span><h2>Fluxos de trabalho</h2></div>
+
+  <article class="concept" id="p-005">
+    <header><span class="badge p">P-005</span><h3>Validar antes de comunicar</h3></header>
+    <p>O SEJA roda um único ciclo canônico em torno de qualquer engajamento. Leia <code>|</code> como &ldquo;escolha um, conforme a intenção&rdquo; e <code>&gt;</code> como &ldquo;e então&rdquo;.</p>
+    <pre>/research (ou /explain) &gt; /design | /plan &gt; /implement &gt; /critique &gt; /document | /communicate &gt; /reflect</pre>
+    <div class="scroller">
+      <table>
+        <thead><tr><th>Etapa</th><th>Skills</th><th>Propósito</th></tr></thead>
+        <tbody>
+          <tr><th>Investigar</th><td><code>/research</code> <code>/explain</code></td><td>fazer uma pergunta, ou entender como algo funciona</td></tr>
+          <tr><th>Dar forma</th><td><code>/design</code> <code>/plan</code></td><td>mudar a intenção, ou comprometer-se com uma construção</td></tr>
+          <tr><th>Construir</th><td><code>/implement</code></td><td>executar um plano aprovado</td></tr>
+          <tr><th>Validar</th><td><code>/critique</code></td><td>portão de qualidade antes que qualquer coisa voltada ao leitor saia</td></tr>
+          <tr><th>Comunicar</th><td><code>/document</code> <code>/communicate</code></td><td>artefatos para leitor, <strong>somente após validação</strong></td></tr>
+          <tr><th>Fechar o ciclo</th><td><code>/reflect</code></td><td>registrar o que o turno ensinou antes do próximo começar</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>O invariante que dá nome ao princípio é o <strong>único portão rígido</strong> do harness: <code>/critique</code> sempre precede <code>/document</code> e <code>/communicate</code>. Nada sai do envelope sem ter sido validado.</p>
+    <blockquote class="pull">
+      <p>Uma mensagem entregue sem validação é o preposto falando sem saber se o que diz é verdade.</p>
+      <p class="sub">Por isso o portão é uma posição semiótica, não uma etapa de processo.</p>
+    </blockquote>
+    <p>A entrada natural é <code>/research</code> ou <code>/explain</code>. A saída dessa investigação flui para <code>/design</code> se a <em>intenção</em> precisa mudar, ou para <code>/plan</code> se a intenção está assentada e o que falta é construir. A única exceção é a primeira iteração de um projeto novo, em que <code>/seja-setup</code> instala o harness e entrega a <code>/design</code>.</p>
+  </article>
+
+  <article class="concept" id="par">
+    <header><h3>O par as-intended / as-coded</h3></header>
+    <p>O harness mantém dois documentos em tensão deliberada, com estados de ciclo de vida <code>proposed &rarr; implemented &rarr; established &rarr; superseded</code>.</p>
+    <div class="scroller">
+      <table>
+        <thead><tr><th>Documento</th><th>O que registra</th><th>Voz</th></tr></thead>
+        <tbody>
+          <tr><td><code>product-design-as-intended.md</code></td><td>o que se <strong>pretende</strong></td><td>humana; agentes só marcam</td></tr>
+          <tr><td><code>product-design-as-coded.md</code></td><td>o que <strong>existe</strong></td><td>do agente; reconstruído após implementação</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>A distância entre os dois é a <strong>deriva</strong>, e <code>/explain drift</code> é o fluxo que a reconcilia. Manter os arquivos separados é uma escolha: fundir intenção e implementação num documento só apaga precisamente a informação mais valiosa &mdash; <strong>o que ainda não é</strong>.</p>
+  </article>
+
+  <article class="concept" id="h-003">
+    <header><span class="badge h">H-003</span><h3>Os fluxos variam ao longo da escala</h3></header>
+    <div class="hyp-claim">
+      <span class="tag">Hipótese &middot; decorrente de H-001</span>
+      <p>O caminho canônico é o mesmo, mas a superfície de contato e a obrigatoriedade da retradução variam com a posição do humano na escala.</p>
+    </div>
+    <div class="scroller">
+      <table>
+        <thead><tr><th></th><th>Citizen / user dev</th><th>Power dev</th></tr></thead>
+        <tbody>
+          <tr><th>Superfície primária</th><td><code>/design</code> <code>/explain</code> <code>/communicate</code></td><td><code>/plan</code> <code>/implement</code> <code>/critique</code></td></tr>
+          <tr><th><code>/plan</code> e <code>/implement</code></th><td>rodam com mais autonomia; o plano é resumido em prosa de intenção, não em passos técnicos</td><td>são o objeto central; o plano é revisado passo a passo</td></tr>
+          <tr><th>Retradução</th><td><strong>obrigatória</strong> &mdash; é como ele verifica o resultado</td><td>eletiva; o código já é legível</td></tr>
+          <tr><th>Papel do <code>/critique</code></th><td>prova de que a intenção foi atendida</td><td>prova de qualidade técnica e conformidade</td></tr>
+          <tr><th>Papel dos marcadores</th><td>invisíveis; o valor é a rastreabilidade automática</td><td>ferramenta de governança usada diretamente</td></tr>
+          <tr><th>Risco dominante</th><td><strong>delegação cega</strong> &mdash; aceitar o que não se consegue verificar</td><td><strong>ritual</strong> &mdash; produzir a forma do processo sem o conteúdo</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>O ciclo não se bifurca. O que muda é <strong>onde o humano toca nele</strong> e <strong>em que registro o preposto fala de volta</strong>. Essa é a formulação concreta de &ldquo;o harness e seus agentes precisam se adequar ao dev que estão assistindo&rdquo;.</p>
+    <p style="color:var(--ink-3);font-size:15px"><em>Em aberto (<code>Q-003</code>): como o harness detecta a posição do humano na escala. A questão está <strong>sustentada em aberto por decisão</strong>, não por omissão &mdash; ela depende de <code>Q-002</code>, a granularidade da escala, que precede. Enquanto <code>Q-002</code> não fechar, <code>H-003</code> permanece como leitura, sem implementação.</em></p>
+  </article>
+
+  <article class="concept" id="reflexao">
+    <header><h3>Os três registros de reflexão</h3></header>
+    <p>O SEJA carrega os três registros de Schön (1983) como andaimes concretos, deliberadamente mínimos para que a encenação não compense o esforço:</p>
+    <ul class="marks">
+      <li><span><strong>Reflexão-na-ação</strong> &mdash; a justificativa curta que acompanha cada opção em toda <code>AskUserQuestion</code>. Transforma uma bifurcação silenciosa numa deliberação visível.</span></li>
+      <li><span><strong>Reflexão-sobre-a-ação</strong> &mdash; a nota breve ao fim de <code>/implement</code>, <code>/plan</code>, <code>/design</code> e <code>/document</code>: o que de fato aconteceu, o que desviou do plano, sobre o que se está menos seguro agora do que no início.</span></li>
+      <li><span><strong>Reflexão-sobre-a-prática</strong> &mdash; a skill <code>/reflect</code>, que ancora numa escolha de artefatos, pergunta se a lente é o <strong>produto</strong> ou a <strong>prática</strong>, e registra as palavras do designer <strong>literalmente</strong>, sem prescrever mudança.</span></li>
+    </ul>
+    <p>O par natural de Schön aqui é a <strong>abdução</strong> de Peirce, e é por isso que as hipóteses deste documento carregam condições de refutação: é o modo de raciocínio que o SEJA declara adotar, aplicado a si mesmo.</p>
+  </article>
+</section>
+
+<section class="part" id="agentes">
+  <div class="part-head"><span class="n">1.3</span><h2>Agentes principais</h2></div>
+
+  <article class="concept" id="p-006">
+    <header><span class="badge p">P-006</span><h3>A skill é o orquestrador; o agente é a responsabilidade única</h3></header>
+    <div class="scroller">
+      <table>
+        <thead><tr><th></th><th>Skill</th><th>Agente</th></tr></thead>
+        <tbody>
+          <tr><th>Onde vive</th><td><code>.claude/skills/&lt;nome&gt;/SKILL.md</code></td><td><code>.claude/agents/&lt;nome&gt;.md</code></td></tr>
+          <tr><th>Como é chamado</th><td>por barra, pelo usuário (<code>/plan</code>)</td><td>pela skill; <strong>nunca</strong> diretamente</td></tr>
+          <tr><th>O que faz</th><td>conduz a conversa, segura o estado do ciclo de vida, faz as perguntas, <strong>decide quais agentes compor</strong></td><td>executa <strong>um papel sobre um tipo de artefato</strong></td></tr>
+          <tr><th>Contexto</th><td>o da conversa</td><td>janela isolada, ferramentas definidas</td></tr>
+          <tr><th>Devolve</th><td>a interação</td><td>artefato estruturado</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Duas skills internas &mdash; <code>pre-skill</code> e <code>post-skill</code> &mdash; envolvem toda invocação de skill de usuário. São elas que fazem os andaimes de reflexão acontecerem de forma consistente e auditável, em vez de dependerem de disciplina.</p>
+  </article>
+
+  <article class="concept" id="p-007">
+    <header><span class="badge p">P-007</span><h3>Todo agente é avaliador, gerador ou executor</h3></header>
+    <p><strong>Avaliadores</strong> revisam artefatos sob uma lente de qualidade e devolvem achados estruturados.</p>
+    <div class="scroller">
+      <table>
+        <thead><tr><th>Agente</th><th>Papel</th></tr></thead>
+        <tbody>
+          <tr><td><code>code-reviewer</code></td><td>revisa diffs contra 16 perspectivas de engenharia e design, com profundidade graduada</td></tr>
+          <tr><td><code>plan-reviewer</code></td><td>revisa um plano em processo de duas fases graduado por complexidade</td></tr>
+          <tr><td><code>research-reviewer</code></td><td>avalia decisões de design, questões abertas e trade-offs</td></tr>
+          <tr><td><code>council-debate</code></td><td>debate estruturado entre cinco arquétipos fixos mais 0-2 especialistas do tema</td></tr>
+          <tr><td><code>semiotic-inspector</code></td><td>avaliação SIM da comunicabilidade nas três classes de signo</td></tr>
+          <tr><td><code>harness-health-evaluator</code></td><td>9 checagens de autodiagnóstico do harness</td></tr>
+          <tr><td><code>standards-checker</code></td><td>agrega os scripts de validação num relatório de conformidade</td></tr>
+          <tr><td><code>test-runner</code></td><td>roda as suítes e classifica falhas com contexto</td></tr>
+          <tr><td><code>migration-validator</code></td><td>valida integridade de cadeia de migrações</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Geradores</strong> produzem artefatos autocontidos a partir de entradas bem definidas.</p>
+    <div class="scroller">
+      <table>
+        <thead><tr><th>Agente</th><th>Papel</th></tr></thead>
+        <tbody>
+          <tr><td><code>explanation-generator</code></td><td>explicações de comportamento, código e modelo de dados</td></tr>
+          <tr><td><code>architecture-explainer</code></td><td>estrutura do sistema, fronteiras, decisões-chave</td></tr>
+          <tr><td><code>evolution-explainer</code></td><td>como uma funcionalidade chegou ao estado atual</td></tr>
+          <tr><td><code>document-generator</code></td><td>documentação por tipo (readme, api-reference, ddr, changelog, ...)</td></tr>
+          <tr><td><code>communication-generator</code></td><td>material para um segmento de audiência (EVL, CLT, USR, ACD)</td></tr>
+          <tr><td><code>onboarding-generator</code></td><td>plano de integração por família de papel e nível</td></tr>
+          <tr><td><code>test-plan-generator</code></td><td>plano de teste manual estruturado</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Executores</strong> não estão catalogados: são construídos <strong>dinamicamente</strong> pelo modo automático de <code>/implement</code>, a partir dos metadados dos passos do plano. São a ponta que efetivamente transforma intenção em código.</p>
+    <p>O <code>council-debate</code> merece nota: ele é a operacionalização explícita da abdução. Vários especialistas rodam leituras abdutivas concorrentes sobre a mesma questão, postos em desacordo estruturado, para que a síntese entregue carregue as <strong>contra-leituras visíveis</strong>. A intenção é não fingir que uma recomendação é a única plausível.</p>
+  </article>
+
+  <article class="concept" id="h-004">
+    <header><span class="badge h">H-004</span><h3>O orquestrador que compõe</h3></header>
+    <div class="hyp-claim">
+      <span class="tag">Hipótese</span>
+      <p>O agente de workflow possui um orquestrador capaz de chamar diversos agentes e compor o que for necessário para que o agente de IA-dev assista o humano no desenvolvimento de software.</p>
+    </div>
+    <p>Nenhum agente isolado assiste o desenvolvedor. O que assiste é a <strong>composição</strong> &mdash; e o orquestrador é quem a decide. Uma passagem por <code>/critique</code> pode compor <code>standards-checker</code>, <code>test-runner</code>, <code>code-reviewer</code> e <code>semiotic-inspector</code>; uma passagem por <code>/research --deep</code> compõe <code>research-reviewer</code> e <code>council-debate</code>.</p>
+    <p>A consequência de projeto, e a razão pela qual esta hipótese fecha a seção: <strong>o orquestrador é o lugar onde a adequação ao dev se realiza.</strong> Se a composição é decidida em tempo de execução, então a posição do humano na escala <code>H-001</code> é uma <strong>entrada legítima da decisão de composição</strong> &mdash; e não uma bifurcação que precisaria ser costurada em cada skill separadamente.</p>
+    <blockquote class="pull">
+      <p>O orquestrador é o preposto. Os agentes são o vocabulário de que ele dispõe.</p>
+      <p class="sub">A mensagem é o que ele monta com eles, para este humano, neste turno.</p>
+    </blockquote>
+    <div class="abduction">
+      <div class="yes"><h4>O que confirmaria</h4><p>Composições visivelmente diferentes para a mesma solicitação vinda de pontos diferentes da escala, com retradução automática no polo citizen.</p></div>
+      <div class="no"><h4>O que refutaria</h4><p>A adequação exigindo bifurcação dentro de cada skill, o que indicaria que o orquestrador não é o ponto de variação certo.</p></div>
+    </div>
+  </article>
+</section>
+
+<section class="part" id="desenhos">
+  <div class="part-head"><span class="n">Origem</span><h2>Os desenhos</h2></div>
+  <p>A seção 1 é o preenchimento de uma caixa que o desenho já tinha reservado: o painel <code>Harness</code> da Figura 2 contém <code>Docs (O que é o SEJA)</code>, com exatamente estes três itens &mdash; conceitos fundamentais, fluxos de trabalho, agentes principais.</p>
+  <p>Convenção de leitura, tirada do próprio traço: <strong>branco = arranjo herdado, vermelho = acrescentado na sessão de 2026-08-26.</strong></p>
+  <div class="figs">
+    <figure>
+      <img src="design-software-project.png" alt="Desenho a mão do design do software project: caixa Projeto contendo um robô ao centro circulado em vermelho, uma caixa de código, o User/Citizen Dev à esquerda ligado por uma caixa LN, um time de figuras humanas, a caixa Convenções/Design/Intenção alimentada por uma seta vermelha grossa vinda de fora, e uma linha vermelha horizontal na base representando a escala.">
+      <figcaption><b>Figura 1 &mdash; Design do software project.</b> Tudo contido numa caixa &ldquo;Projeto&rdquo;: a unidade de análise é o projeto, não a sessão. Duas setas entram no <code>&lt;/&gt;</code>. O <code>LN</code> tem tráfego nos dois sentidos. A seta que alimenta <code>Convenções / Design / Intenção</code> atravessa a fronteira do projeto &mdash; o harness incide de fora. E a linha vermelha da base corre sob a população inteira de devs: a escala não está anexada a um indivíduo.</figcaption>
+    </figure>
+    <figure>
+      <img src="designt-harnerss.png" alt="Desenho a mão do design do harness: à esquerda o painel Agent WF com cabeçalho dividido em User Dev e Power Dev e itens Orquestrador, Research, Plan, Implement, Reflect; à direita o painel Harness contendo a caixa Docs (O que é o SEJA) com Princípios Eng. Semiótica e seus três itens, e abaixo uma seta apontando para LLM.">
+      <figcaption><b>Figura 2 &mdash; Design do harness.</b> <code>User Dev | Power Dev</code> são cabeçalho <em>sobre</em> o <code>Agent WF</code>, não conteúdo dele &mdash; os polos são entrada do agente de workflow. A pilha desenhada é <code>Docs &rarr; Harness &rarr; LLM</code>: o harness é a camada que faz o documento chegar ao modelo. É a leitura mais literal possível de <code>H-002</code>.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="part" id="abertas">
+  <div class="part-head"><span class="n">Estado</span><h2>O que ainda não está resolvido</h2></div>
+  <p>Dez questões seguem abertas. Duas travam trabalho real.</p>
+  <div class="scroller">
+    <table>
+      <thead><tr><th>ID</th><th>Questão</th><th>Estado</th></tr></thead>
+      <tbody>
+        <tr class="blocking"><td><code>Q-002</code> <span class="pill block">bloqueia</span></td><td>A escala é ortogonal a BLD/SHP/GRD e L1&ndash;L3? Quantos pontos discretos precisa?</td><td>Trava a operacionalização de <code>H-001</code> e <code>H-003</code></td></tr>
+        <tr class="blocking"><td><code>Q-008</code> <span class="pill block">bloqueia</span></td><td>O <code>Agent WF</code> desenhado lista um ciclo reduzido, sem <code>/critique</code> &mdash; o portão de <code>P-005</code></td><td>Divergência entre desenho e princípio</td></tr>
+        <tr><td><code>Q-001</code></td><td>Referência bibliográfica exata do artigo de Abrahão</td><td>Citação de <code>P-002</code> pendente</td></tr>
+        <tr><td><code>Q-007</code></td><td>Duas vias de autoria no mesmo <code>&lt;/&gt;</code>: o harness precisa distinguir as vozes?</td><td>Decorre de <code>P-002a</code></td></tr>
+        <tr><td><code>Q-009</code></td><td>&ldquo;Orquestrador&rdquo; aparece duas vezes na Figura 2 &mdash; dois níveis, ou ênfase?</td><td>Precisão de <code>H-004</code></td></tr>
+        <tr><td><code>Q-010</code></td><td>Elemento não identificado no alto à esquerda da Figura 1</td><td>Leitura do desenho</td></tr>
+        <tr><td><code>Q-004</code></td><td>A retradução obrigatória é novo artefato, novo modo de <code>/explain</code>, ou etapa do <code>post-skill</code>?</td><td>Implementação de <code>P-003</code></td></tr>
+        <tr><td><code>Q-005</code></td><td>Idioma do documento: pt-BR ou en-US junto com <code>docs/</code></td><td>Publicação</td></tr>
+        <tr><td><code>Q-006</code></td><td>Relação com o <code>product-design-as-intended.md</code> no formato §0&ndash;§17</td><td>Estrutura</td></tr>
+        <tr class="held"><td><code>Q-003</code> <span class="pill hold">sustentada</span></td><td>Como o harness detecta a posição do humano na escala?</td><td>Em aberto <strong>por decisão</strong> &mdash; depende de <code>Q-002</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="part" id="refs">
+  <div class="part-head"><span class="n">Fontes</span><h2>Referências</h2></div>
+  <ul class="refs">
+    <li><b>de Souza, C.S.</b> (2005). <em>The Semiotic Engineering of Human-Computer Interaction</em>. MIT Press. Template de metacomunicação, classes de signo, preposto do designer, comunicabilidade.</li>
+    <li><b>de Souza, C.S. e Leitão, C.F.</b> (2009). <em>Semiotic Engineering Methods for Scientific Research in HCI</em>. Morgan &amp; Claypool. Tratamento metodológico de SIM e CEM.</li>
+    <li><b>de Souza, C.S. et al.</b> (2016). <em>Software Developers as Users: Semiotic Investigations in Human-Centered Software Development</em> (SigniFYI). Springer. Extensão ao pipeline voltado ao desenvolvedor &mdash; base direta de <code>P-002</code>.</li>
+    <li><b>Barbosa, S.D.J. et al.</b> (2021). &ldquo;A Semiotics-based epistemic tool to reason about ethical issues in digital technology design and development.&rdquo; <em>Proc. FAccT '21</em>. O EMT.</li>
+    <li><b>Schön, D.A.</b> (1983). <em>The Reflective Practitioner</em>. Basic Books.</li>
+    <li><b>Eraut, M.</b> (1994). <em>Developing Professional Knowledge and Competence</em>. Falmer Press. Contra-leitura sobre os limites de andaimes de reflexão.</li>
+    <li><b>Eco, U.</b> (1976). <em>A Theory of Semiotics</em>. Sistema de significação vs. processo de comunicação.</li>
+    <li><b>Abrahão, ...</b> &mdash; <code>Q-001</code>, a completar.</li>
+  </ul>
+</section>
+
+</main>
+
+<aside class="strip" aria-label="Índice de conceitos">
+  <p class="lbl">Conceitos</p>
+  <ol>
+    <li><a href="#p-001"><span class="sq p"></span>P-001</a></li>
+    <li><a href="#p-002"><span class="sq p"></span>P-002</a></li>
+    <li><a href="#p-002a"><span class="sq p"></span>P-002a</a></li>
+    <li><a href="#h-001" class="is-h"><span class="sq h"></span>H-001</a></li>
+    <li><a href="#p-003"><span class="sq p"></span>P-003</a></li>
+    <li><a href="#p-004"><span class="sq p"></span>P-004</a></li>
+    <li><a href="#h-002" class="is-h"><span class="sq h"></span>H-002</a></li>
+    <li><a href="#p-005"><span class="sq p"></span>P-005</a></li>
+    <li><a href="#h-003" class="is-h"><span class="sq h"></span>H-003</a></li>
+    <li><a href="#p-006"><span class="sq p"></span>P-006</a></li>
+    <li><a href="#p-007"><span class="sq p"></span>P-007</a></li>
+    <li><a href="#h-004" class="is-h"><span class="sq h"></span>H-004</a></li>
+  </ol>
+  <p class="lbl">Também</p>
+  <ol>
+    <li><a href="#desenhos">Desenhos</a></li>
+    <li><a href="#abertas">Abertas</a></li>
+    <li><a href="#refs">Fontes</a></li>
+  </ol>
+</aside>
+
+</div>
+</div>
+
+<footer><div class="page">
+  <p>Fonte: <code>product-design/seja-as-intended.md</code> § 1. Este documento é derivado e deve ser regerado quando a fonte mudar. As notas de origem estão preservadas verbatim no <code>Apêndice A</code> da fonte; a leitura elemento a elemento dos desenhos, no <code>Apêndice B</code>. Versão Markdown em <code>docs/o-que-e-o-seja.md</code>.</p>
+</div></footer>

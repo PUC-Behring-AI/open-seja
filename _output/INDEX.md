@@ -9,3 +9,4 @@
 | 2026-08-27 00:45 UTC | Other |  | QA 000002 | 2026-08-27 00:45 UTC | Revisão para o Anax da seção 1 do SEJA as-in… |  | [qa-000002-revisao-anax-secao-1.md](qa-logs/qa-000002-revisao-anax-secao-1.md) |
 | 2026-08-12 02:18 UTC | QA Log | 000001 | npx open-seja installer wrapper |  | [plan-000001-qa-npx-open-seja-installer-wrapper.md](plans/plan-000001-qa-npx-open-seja-installer-wrapper.md) |
 | 2026-08-12 02:09 | Plan | 000001 | npx open-seja installer wrapper | OPEN | [plan-000001-npx-open-seja-installer-wrapper.md](plans/plan-000001-npx-open-seja-installer-wrapper.md) |
+| 2026-08-27 00:52 UTC | RESERVED | 000003 | qa: o-que-e-o-seja | RESERVED | |
