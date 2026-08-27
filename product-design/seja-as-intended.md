@@ -80,6 +80,20 @@ O desenho que estamos propondo desloca esse arranjo. Hoje temos:
                         └──apoiado por──> [ ferramentas ]
 ```
 
+![Design do software project](../docs/design-software-project.png)
+
+> **Figura 1 -- Design do software project** (desenho de origem, sessão com o Anax,
+> 2026-08-26). Leitura elemento a elemento no `Apêndice B`.
+
+<!-- P-002a -->
+**Ressalva que o desenho impõe (`P-002a`).** A Figura 1 mostra **duas setas entrando no
+`</>`**: uma vinda do robô e outra vinda do lado humano. Isto é, o robô **não substituiu**
+o time na produção de código -- ele se somou a ele. O esquema linear acima
+(`dev → robô → código`) é o caminho *novo*, não o único. O arranjo real é de **duas vias
+concorrentes de autoria sobre o mesmo artefato**, e isso levanta uma pergunta semiótica
+que o esquema linear esconde: quando dois prepostos escrevem no mesmo texto, de quem é
+a voz que o leitor está lendo? Ver `Q-007`.
+
 Três mudanças, todas com consequência semiótica:
 
 1. **O dev fala.** A entrada primária deixa de ser edição direta e passa a ser
@@ -397,10 +411,21 @@ A intenção é não fingir que uma recomendação é a única plausível.
 
 #### 1.3.3 O orquestrador que compõe
 
+![Design do harness](../docs/designt-harnerss.png)
+
+> **Figura 2 -- Design do harness** (desenho de origem, sessão com o Anax, 2026-08-26).
+> Leitura elemento a elemento no `Apêndice B`.
+
 <!-- H-004 -->
 **H-004 (hipótese) -- O agente de workflow possui um orquestrador capaz de chamar
 diversos agentes e compor o que for necessário para que o agente de IA-dev assista o
 humano no desenvolvimento de software.**
+
+O desenho já responde parte da hipótese antes de a discutirmos: na Figura 2, **`User Dev`
+e `Power Dev` não estão dentro do `Agent WF` -- estão como cabeçalho *sobre* ele**. Os
+dois polos são desenhados como *entrada* do agente de workflow, não como um caso de uso
+dele. Essa é exatamente a formulação que H-004 defende, e ela chegou pelo desenho antes
+de chegar pelo argumento.
 
 A leitura: nenhum agente isolado assiste o desenvolvedor. O que assiste é a **composição**
 -- e o orquestrador é quem decide a composição. Uma passagem por `/critique` pode compor
@@ -433,6 +458,10 @@ orquestrador não é o ponto de variação certo.
 | `Q-004` | A retradução obrigatória (P-003) é um novo artefato, um novo modo de `/explain`, ou uma etapa do `post-skill`? | P-003 |
 | `Q-005` | Este documento fica em pt-BR ou é traduzido para en-US junto com `docs/`? O SEJA é publicado publicamente. | publicação |
 | `Q-006` | Relação entre este documento e o `product-design-as-intended.md` no formato §0-§17 do template -- ver nota abaixo. | estrutura |
+| `Q-007` | Duas vias de autoria escrevem no mesmo `</>` (Figura 1). De quem é a voz que o leitor do código está lendo? O harness precisa distinguir trecho de autoria humana de trecho de autoria do preposto? | `P-002a` |
+| `Q-008` | O `Agent WF` da Figura 2 lista **Research → Plan → Implement → Reflect** -- um ciclo **reduzido**, sem `/design`, `/critique`, `/document` e `/communicate`. É simplificação do desenho, ou é uma proposta deliberada de ciclo mais curto para o agente de workflow? Se for deliberada, colide com `P-005` (validar antes de comunicar). | `P-005`, `H-004` |
+| `Q-009` | "Orquestrador" aparece **duas vezes** na Figura 2: dentro da lista do `Agent WF` e de novo, solto, fora da caixa. São dois níveis de orquestração (um por-workflow e um global), ou é repetição de ênfase? | `H-004` |
+| `Q-010` | O círculo com figura no alto à esquerda da Figura 1, alimentado por um humano e ligado ao `</>`, não foi identificado com segurança. O que representa? | leitura da Figura 1 |
 
 > **Nota sobre `Q-003`.** Esta questão está **deliberadamente sustentada em aberto**, e
 > não meramente sem resposta. A razão é de dependência: não se decide *como detectar* a
@@ -498,7 +527,81 @@ agente de IA dev assista o humano no desenvolvimento de software.
 
 ---
 
+## Apêndice B -- Leitura dos desenhos
+
+> Os dois desenhos (`docs/design-software-project.png`, `docs/designt-harnerss.png`) foram
+> feitos na mesma sessão com o Anax que gerou as notas do `Apêndice A`. Nesta leitura,
+> **branco = o arranjo herdado; vermelho = o que foi acrescentado na sessão.** Essa
+> distinção é significativa: o vermelho é, literalmente, a contribuição desta sessão.
+
+### B.1 Figura 1 -- Design do software project
+
+Tudo está contido numa caixa rotulada **"Projeto"**. A unidade de análise é o projeto,
+não a sessão nem o turno -- o que importa porque intenção, convenção e deriva só fazem
+sentido no horizonte do projeto.
+
+| Elemento | Cor | Leitura |
+|---|---|---|
+| **Robô** (figura de cabeça quadrada, ao centro) | circulado em **vermelho** | O terceiro interlocutor de `P-002`. Está no centro geométrico do desenho, e o círculo vermelho é a ênfase da sessão: ele é o elemento novo. |
+| **`</>`** (canto superior direito) | caixa branca, **remarcada em vermelho** | O código. Recebe **duas setas**: uma do robô, outra do lado humano -- base de `P-002a`. |
+| **`LN`** (caixa entre o User Dev e o robô) | **vermelho** | Linguagem natural, nomeada como artefato explícito. Tem tráfego **nos dois sentidos**: sobe para o robô e desce dele. É `P-003` desenhada. |
+| **User Dev / Citzen Dev** (figura humana, canto inferior esquerdo) | branco, rótulo branco | O polo de baixa literacia de código. Sua única via para o robô é o `LN`. |
+| **Time** (grupo de figuras humanas, centro-inferior) | branco | Os demais desenvolvedores. Ligados entre si e ao `</>`. |
+| **Convenções / Design / Intenção** (caixa, canto inferior direito) | caixa branca, **seta vermelha grossa** | A camada de design. A seta grossa vermelha entra nela **vindo de fora e de baixo da caixa "Projeto"** -- isto é, **o harness injeta a camada de design no projeto a partir de fora**. |
+| **Linha horizontal com terminações em T** (base do desenho) | **vermelho** | O eixo/escala. Corre **por baixo da população de desenvolvedores**, do `User Dev` à esquerda em direção ao time à direita. |
+
+Três coisas que o desenho acrescenta às notas:
+
+1. **A escala é propriedade da população, não do indivíduo em sessão.** A linha vermelha
+   é desenhada sob *todos* os humanos do projeto, não anexada a um deles. Isso reforça
+   a suspeita de `Q-003`: talvez a pergunta certa não seja "como detectar a posição deste
+   usuário?", e sim "como o projeto declara a distribuição de literacia do seu time?".
+2. **A camada de design vem de fora do projeto.** A seta vermelha grossa atravessa a
+   fronteira da caixa "Projeto". O harness não é parte do projeto: é o que se aplica
+   sobre ele. Isso é coerente com o padrão *workspace* que o `/seja-setup` oferece.
+3. **O `LN` é bidirecional por desenho.** `P-003` foi escrita como argumento; a figura
+   já a tinha como fato.
+
+### B.2 Figura 2 -- Design do harness
+
+Dois painéis lado a lado.
+
+**Painel esquerdo -- o agente de workflow** (todo em vermelho, isto é, todo novo):
+
+- Cabeçalho dividido em duas caixas: **`User Dev`** | **`Power Dev`**. Elas estão
+  *sobre* o painel, não dentro -- os polos são entrada do agente, não conteúdo dele.
+- Corpo: **`Agent WF`**, com os itens `Orquestrador`, `Research`, `Plan`, `Implement`,
+  `Reflect`. Um traço vertical liga `Research → Plan → Implement`, sugerindo sequência
+  ou laço.
+- Fora da caixa, abaixo: **`Orquestrador`** de novo, solto (ver `Q-009`).
+
+**Painel direito -- o harness:**
+
+- Rótulo **`Harness`** no topo, em vermelho.
+- Dentro, uma caixa branca: **`Docs (O que é o SEJA)`**, contendo
+  `- Princípios Eng. Semiótica`, com os três itens `• Conceitos fundamentais`,
+  `• Fluxos de trabalho`, `• Agentes principais`.
+- Abaixo, uma caixinha com seta para baixo apontando para **`LLM`**.
+
+Duas coisas que o desenho acrescenta:
+
+1. **Este documento é o artefato desenhado.** A caixa `Docs (O que é o SEJA)` contém
+   exatamente o índice da seção 1 deste arquivo. A seção 1 não é uma interpretação do
+   desenho -- é o preenchimento de uma caixa que o desenho já reservou.
+2. **O harness assenta sobre o LLM, e os Docs assentam sobre o harness.** A pilha
+   desenhada é `Docs → Harness → LLM`. O harness é a camada que faz o documento chegar
+   ao modelo -- o que é a leitura mais literal possível de `H-002`: a intenção vira
+   computável porque existe uma camada que a entrega ao modelo em forma operável.
+
+E uma divergência que o desenho expõe: o ciclo listado no `Agent WF` é **mais curto** que
+o caminho canônico de `P-005` -- faltam `/design`, `/critique`, `/document` e
+`/communicate`. Como `/critique` é o portão do único invariante rígido do harness, a
+ausência não é cosmética. Registrada em `Q-008`.
+
+---
+
 ## CHANGELOG
 
 2026-08-26 | § 1 | added | - | Seção 1 (Princípios da engenharia semiótica) redigida a partir das notas da conversa com o Anax; P-001..P-007 registrados, H-001..H-004 registradas como hipóteses abdutivas, Q-001..Q-006 abertas
 2026-08-26 | Q-003 | held-open | - | detecção da posição na escala sustentada deliberadamente em aberto: depende de Q-002 (granularidade da escala), que precede
+2026-08-26 | Apêndice B | added | - | desenhos de origem (design do software project e design do harness) incorporados; P-002a acrescentado a partir da Figura 1 (duas vias de autoria sobre o código); Q-007..Q-010 abertas
