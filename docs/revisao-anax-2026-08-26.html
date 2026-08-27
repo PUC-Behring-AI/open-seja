@@ -1,0 +1,456 @@
+<title>Revisão SEJA as-intended</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Karla:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#FAF8F7; --panel:#FFFFFF; --sunk:#F2EEEC;
+  --ink:#1A1614; --ink-2:#4A4341; --ink-3:#7A706C;
+  --rule:#E2DBD8; --rule-2:#CFC6C2;
+  --red:#B02A30; --red-soft:#F6E7E7; --red-edge:#E3BFC0;
+  --slate:#4A5A6B; --slate-soft:#EBEEF1;
+  --green:#2E6B52;
+  --shadow:0 1px 2px rgba(26,22,20,.05), 0 8px 24px -12px rgba(26,22,20,.16);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#141113; --panel:#1C1819; --sunk:#211C1E;
+    --ink:#EDE7E4; --ink-2:#BCB2AE; --ink-3:#8B807C;
+    --rule:#2E2729; --rule-2:#413839;
+    --red:#E46A6E; --red-soft:#2E1B1D; --red-edge:#5A3436;
+    --slate:#9BB0C4; --slate-soft:#1B2229;
+    --green:#6FBF95;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#141113; --panel:#1C1819; --sunk:#211C1E;
+  --ink:#EDE7E4; --ink-2:#BCB2AE; --ink-3:#8B807C;
+  --rule:#2E2729; --rule-2:#413839;
+  --red:#E46A6E; --red-soft:#2E1B1D; --red-edge:#5A3436;
+  --slate:#9BB0C4; --slate-soft:#1B2229;
+  --green:#6FBF95;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:"Karla","Helvetica Neue",Arial,sans-serif;
+  font-size:16.5px; line-height:1.65; margin:0;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(18px,4vw,40px)}
+
+/* ---------- header ---------- */
+.masthead{border-bottom:1px solid var(--rule);padding:clamp(36px,6vw,64px) 0 30px}
+.kicker{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 14px;
+}
+h1{
+  font-family:"Newsreader",Georgia,serif;font-weight:500;
+  font-size:clamp(2.1rem,5.2vw,3.15rem);line-height:1.08;
+  letter-spacing:-.015em;margin:0 0 18px;text-wrap:balance;
+}
+h1 em{font-style:italic;color:var(--red)}
+.standfirst{
+  font-family:"Newsreader",Georgia,serif;font-size:clamp(1.05rem,2.1vw,1.24rem);
+  line-height:1.55;color:var(--ink-2);max-width:60ch;margin:0 0 28px;
+}
+.meta{display:flex;flex-wrap:wrap;gap:8px 26px;font-size:13.5px;color:var(--ink-3)}
+.meta b{color:var(--ink-2);font-weight:500}
+.meta span{display:flex;gap:7px;align-items:baseline}
+
+/* the drawings' own key */
+.key{
+  display:flex;flex-wrap:wrap;gap:10px 24px;align-items:center;
+  margin-top:26px;padding:13px 16px;border:1px solid var(--rule);
+  border-radius:2px;background:var(--sunk);font-size:13.5px;color:var(--ink-2);
+}
+.key .lab{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3)}
+.key i{display:flex;align-items:center;gap:9px;font-style:normal}
+.stroke{display:block;width:30px;height:3px;border-radius:2px}
+.stroke.inherited{background:var(--ink-2)}
+.stroke.added{background:var(--red)}
+
+/* ---------- shell ---------- */
+.shell{display:grid;grid-template-columns:1fr;gap:0}
+@media(min-width:1000px){
+  .shell{grid-template-columns:196px minmax(0,1fr);gap:56px;align-items:start}
+}
+nav.rail{display:none}
+@media(min-width:1000px){
+  nav.rail{
+    display:block;position:sticky;top:0;padding:46px 0;
+    max-height:100vh;overflow-y:auto;
+  }
+  nav.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+  nav.rail a{
+    display:block;padding:5px 10px 5px 12px;border-left:2px solid var(--rule);
+    font-size:13.5px;color:var(--ink-3);text-decoration:none;line-height:1.35;
+    transition:color .15s,border-color .15s;
+  }
+  nav.rail a:hover,nav.rail a:focus-visible{color:var(--red);border-left-color:var(--red)}
+  nav.rail .num{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--rule-2);margin-right:7px}
+}
+main{padding:46px 0 96px;min-width:0}
+
+/* ---------- sections ---------- */
+section{margin:0 0 clamp(48px,7vw,76px);scroll-margin-top:24px}
+h2{
+  font-family:"Newsreader",Georgia,serif;font-weight:500;
+  font-size:clamp(1.5rem,3.2vw,1.95rem);line-height:1.2;letter-spacing:-.01em;
+  margin:0 0 8px;text-wrap:balance;
+}
+h2 .n{
+  font-family:"IBM Plex Mono",monospace;font-size:.62em;font-weight:500;
+  color:var(--red);margin-right:.6em;vertical-align:.12em;
+}
+h3{
+  font-family:"Newsreader",Georgia,serif;font-weight:600;
+  font-size:1.16rem;line-height:1.3;margin:0 0 6px;text-wrap:balance;
+}
+h4{
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:500;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);
+  margin:22px 0 8px;
+}
+.lede{color:var(--ink-2);max-width:66ch;margin:0 0 26px}
+p{max-width:68ch;margin:0 0 14px}
+a{color:var(--red);text-underline-offset:2px;text-decoration-thickness:1px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+strong{font-weight:700}
+code,.id{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.855em;
+  background:var(--sunk);border:1px solid var(--rule);border-radius:2px;
+  padding:.09em .34em;white-space:nowrap;
+}
+.id.hot{background:var(--red-soft);border-color:var(--red-edge);color:var(--red);font-weight:500}
+
+/* ---------- tables ---------- */
+.scroller{overflow-x:auto;margin:0 0 20px;border:1px solid var(--rule);border-radius:3px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:560px}
+thead th{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:500;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);
+  text-align:left;padding:11px 14px;border-bottom:1px solid var(--rule-2);
+  background:var(--sunk);white-space:nowrap;
+}
+tbody td{padding:12px 14px;border-bottom:1px solid var(--rule);vertical-align:top;color:var(--ink-2)}
+tbody tr:last-child td{border-bottom:0}
+tbody td:first-child{color:var(--ink)}
+td.num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+
+/* priority encoded in form, not just order */
+tr.blocking td:first-child{box-shadow:inset 3px 0 0 var(--red)}
+tr.later td:first-child{box-shadow:inset 3px 0 0 var(--rule-2)}
+tr.held td:first-child{box-shadow:inset 3px 0 0 var(--slate)}
+.pill{
+  display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10px;
+  letter-spacing:.1em;text-transform:uppercase;padding:2.5px 7px;border-radius:2px;
+  white-space:nowrap;font-weight:500;
+}
+.pill.block{background:var(--red-soft);color:var(--red);border:1px solid var(--red-edge)}
+.pill.hold{background:var(--slate-soft);color:var(--slate);border:1px solid var(--slate)}
+.pill.soon{background:var(--sunk);color:var(--ink-3);border:1px solid var(--rule-2)}
+
+/* ---------- decision cards ---------- */
+.dec{
+  border:1px solid var(--rule);border-radius:3px;background:var(--panel);
+  padding:22px 24px;margin:0 0 16px;box-shadow:var(--shadow);
+}
+.dec > .hd{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;margin-bottom:14px}
+.dec .tag{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;color:var(--red);
+  letter-spacing:.04em;
+}
+.dec h3{margin:0;flex:1 1 320px}
+.dec p{font-size:15.3px;max-width:64ch}
+.dec p:last-child{margin-bottom:0}
+.cons{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+.cons li{display:flex;gap:11px;font-size:14.7px;color:var(--ink-2);max-width:66ch}
+.cons .g{
+  font-family:"IBM Plex Mono",monospace;font-weight:600;flex:0 0 auto;
+  width:1.1em;text-align:center;line-height:1.5;
+}
+.cons .plus .g{color:var(--green)}
+.cons .minus .g{color:var(--red)}
+.cons .zero .g{color:var(--ink-3)}
+.alt{
+  margin-top:18px;padding:16px 18px;background:var(--sunk);
+  border-left:2px solid var(--rule-2);border-radius:0 2px 2px 0;
+}
+.alt h4{margin-top:0}
+
+/* ---------- figures ---------- */
+figure{margin:0 0 26px}
+figure img{
+  display:block;width:100%;height:auto;border:1px solid var(--rule);
+  border-radius:3px;background:#0d0b0c;
+}
+figcaption{font-size:13.5px;color:var(--ink-3);margin-top:9px;max-width:64ch}
+figcaption b{color:var(--ink-2);font-weight:500}
+.figs{display:grid;gap:26px;grid-template-columns:1fr}
+@media(min-width:820px){.figs{grid-template-columns:1fr 1fr;align-items:start}}
+
+/* ---------- callout ---------- */
+.note{
+  border:1px solid var(--red-edge);background:var(--red-soft);border-radius:3px;
+  padding:18px 20px;margin:0 0 20px;
+}
+.note h4{margin-top:0;color:var(--red)}
+.note p{max-width:64ch;font-size:15.3px}
+.note p:last-child{margin-bottom:0}
+
+pre{
+  font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.75;
+  background:var(--sunk);border:1px solid var(--rule);border-radius:3px;
+  padding:15px 17px;overflow-x:auto;margin:0 0 18px;color:var(--ink-2);
+}
+pre b{color:var(--ink);font-weight:600}
+
+ul.plain{list-style:none;margin:0 0 16px;padding:0;display:flex;flex-direction:column;gap:10px}
+ul.plain li{display:flex;gap:11px;max-width:68ch;color:var(--ink-2);font-size:15.3px}
+ul.plain li::before{content:"";flex:0 0 auto;width:5px;height:5px;border-radius:50%;
+  background:var(--rule-2);margin-top:.62em}
+ul.plain li.hot::before{background:var(--red)}
+
+footer{border-top:1px solid var(--rule);padding:26px 0 60px;font-size:13px;color:var(--ink-3)}
+footer p{max-width:66ch}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+<header class="masthead">
+  <p class="kicker">Pacote de revisão &middot; 2026-08-26</p>
+  <h1>SEJA <em>as-intended</em>,<br>seção 1</h1>
+  <p class="standfirst">Fechei a seção 1 do documento de intenção a partir das notas da nossa conversa e dos dois desenhos. Duas coisas exigem sua atenção antes de a seção 2 começar.</p>
+  <div class="meta">
+    <span><b>Para</b> Anax</span>
+    <span><b>De</b> Andrey</span>
+    <span><b>Branch</b> <code>seja-intention-docs</code></span>
+    <span><b>Artefato</b> <code>product-design/seja-as-intended.md</code></span>
+  </div>
+  <div class="key">
+    <span class="lab">Convenção dos desenhos</span>
+    <i><span class="stroke inherited"></span> branco = arranjo herdado</i>
+    <i><span class="stroke added"></span> vermelho = acrescentado nesta sessão</i>
+  </div>
+</header>
+
+<div class="shell">
+<nav class="rail" aria-label="Seções">
+  <ol>
+    <li><a href="#revisao"><span class="num">01</span>Precisa da sua revisão</a></li>
+    <li><a href="#decisoes"><span class="num">02</span>Decisões tomadas</a></li>
+    <li><a href="#divergencias"><span class="num">03</span>Divergências</a></li>
+    <li><a href="#docs"><span class="num">04</span>Docs gerados</a></li>
+    <li><a href="#desenhos"><span class="num">05</span>Os desenhos</a></li>
+    <li><a href="#repo"><span class="num">06</span>Estado do repo</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="revisao">
+  <h2><span class="n">01</span>O que precisa da sua revisão</h2>
+  <p class="lede">Dez questões abertas, em ordem de quanto destravam. As duas primeiras travam trabalho real; <span class="id hot">Q-003</span> está fechada para você de propósito.</p>
+  <div class="scroller">
+  <table>
+    <thead><tr><th>Questão</th><th>O quê</th><th>Trava</th><th>Preciso de você</th></tr></thead>
+    <tbody>
+      <tr class="blocking"><td><span class="id hot">Q-002</span> <span class="pill block">bloqueia</span></td><td>A escala citizen&#8596;power é ortogonal a BLD/SHP/GRD e L1&ndash;L3, ou colapsa? Quantos pontos discretos precisa?</td><td><code>Q-003</code> e toda a operacionalização de <code>H-001</code></td><td>Uma posição: quantos pontos, e se o eixo é mesmo independente</td></tr>
+      <tr class="blocking"><td><span class="id hot">Q-008</span> <span class="pill block">bloqueia</span></td><td>Seu <code>Agent WF</code> lista <code>Research &rarr; Plan &rarr; Implement &rarr; Reflect</code>. Faltam <code>/design</code>, <code>/critique</code>, <code>/document</code>, <code>/communicate</code></td><td>Coerência entre o desenho e <code>P-005</code></td><td>Simplificação do desenho, ou proposta deliberada de ciclo curto?</td></tr>
+      <tr class="blocking"><td><span class="id hot">Q-001</span></td><td>Referência exata do artigo do Abrahão</td><td>Citação de <code>P-002</code></td><td>Autor(es), título, veículo, ano</td></tr>
+      <tr class="blocking"><td><span class="id hot">Q-010</span></td><td>O círculo com figura no alto à esquerda da Figura 1</td><td>Leitura completa do desenho</td><td>O que ele representa? Não consegui identificar</td></tr>
+      <tr class="blocking"><td><span class="id hot">Q-009</span></td><td>&ldquo;Orquestrador&rdquo; aparece duas vezes na Figura 2</td><td>Precisão de <code>H-004</code></td><td>Dois níveis de orquestração, ou ênfase?</td></tr>
+      <tr class="blocking"><td><span class="id hot">Q-007</span></td><td>Duas vias de autoria escrevem no mesmo <code>&lt;/&gt;</code></td><td><code>P-002a</code></td><td>O harness precisa distinguir código humano de código do preposto?</td></tr>
+      <tr class="later"><td><span class="id">Q-004</span> <span class="pill soon">pode esperar</span></td><td>A retradução obrigatória é novo artefato, novo modo de <code>/explain</code>, ou etapa do <code>post-skill</code>?</td><td>Implementação de <code>P-003</code></td><td>Seção 2</td></tr>
+      <tr class="later"><td><span class="id">Q-005</span> <span class="pill soon">pode esperar</span></td><td>Documento fica em pt-BR ou vai para en-US junto com <code>docs/</code>?</td><td>Publicação</td><td>Seção 2</td></tr>
+      <tr class="later"><td><span class="id">Q-006</span> <span class="pill soon">pode esperar</span></td><td>Relação com o <code>product-design-as-intended.md</code> no formato §0&ndash;§17</td><td>Estrutura</td><td>Ver <code>D-2</code></td></tr>
+      <tr class="held"><td><span class="id">Q-003</span> <span class="pill hold">em aberto por decisão</span></td><td>Como o harness detecta a posição do humano na escala?</td><td>&mdash;</td><td><strong>Nada.</strong> Sustentada em aberto de propósito &mdash; ver <code>D-4</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="decisoes">
+  <h2><span class="n">02</span>Decisões tomadas</h2>
+  <p class="lede">Formato DDR. Todas reversíveis.</p>
+
+  <article class="dec">
+    <div class="hd"><span class="tag">D-1</span><h3>Registrar as duas hipóteses como abdutivas, não como decisões</h3></div>
+    <p><b>Contexto.</b> Suas notas trazem duas afirmações explicitamente marcadas como hipótese (a escala; o SEJA embasando a computabilidade). O documento precisava acomodá-las sem promovê-las a design assentado.</p>
+    <p><b>Decisão.</b> Numerá-las <code>H-NNN</code>, mantê-las separadas dos princípios <code>P-NNN</code>, e exigir de cada uma <strong>o que a confirmaria e o que a refutaria</strong>.</p>
+    <ul class="cons">
+      <li class="plus"><span class="g">+</span><span>Coerente com a postura que o próprio SEJA declara: abdução peirciana, leitura provisória até evidência melhor.</span></li>
+      <li class="plus"><span class="g">+</span><span>Impede que uma hipótese vire premissa por esquecimento.</span></li>
+      <li class="minus"><span class="g">&minus;</span><span>Torna o documento mais lento de ler do que uma especificação afirmativa.</span></li>
+    </ul>
+  </article>
+
+  <article class="dec">
+    <div class="hd"><span class="tag">D-2</span><h3>Escrever em arquivo separado, não no <code>product-design-as-intended.md</code></h3><span class="pill soon">reversível &middot; Q-006</span></div>
+    <p><b>Contexto.</b> O template do harness tem esqueleto fixo (<code>§0 Planned Changes</code>, <code>§1 Platform Purpose</code>, <code>§2 Entity Hierarchy</code>, &hellip; <code>§17</code>), moldado para produto: hierarquia de entidades, modelo de permissões, jornadas. A seção 1 que você pediu é fundamentação teórica &mdash; outro nível de abstração.</p>
+    <p><b>Decisão.</b> Escrever em <code>product-design/seja-as-intended.md</code>, com estrutura própria.</p>
+    <ul class="cons">
+      <li class="plus"><span class="g">+</span><span>A estrutura que você definiu (1.1 / 1.2 / 1.3) fica intacta.</span></li>
+      <li class="plus"><span class="g">+</span><span>Não conflita com os validadores do harness.</span></li>
+      <li class="minus"><span class="g">&minus;</span><span>Existem agora dois documentos &ldquo;as-intended&rdquo; possíveis, e o canônico não está decidido.</span></li>
+      <li class="zero"><span class="g">0</span><span>Rota de fusão registrada: a seção 1 viraria base de <code>§1 Platform Purpose</code> e <code>§3 Domain-Specific Concepts</code>; as hipóteses migrariam para <code>## Decisions</code>.</span></li>
+    </ul>
+    <div class="alt">
+      <h4>Alternativa rejeitada 01</h4>
+      <p style="margin-bottom:10px">Escrever direto no <code>product-design-as-intended.md</code>.</p>
+      <ul class="cons">
+        <li class="plus"><span class="g">+</span><span>Um só documento canônico, validado pelo harness.</span></li>
+        <li class="minus"><span class="g">&minus;</span><span><strong>Deformaria seu outline para caber num esqueleto de produto.</strong></span></li>
+        <li class="minus"><span class="g">&minus;</span><span>O arquivo é classificado <code>Human (markers)</code>: agentes não escrevem prosa nele, e o <code>check_human_markers_only.py</code> rejeitaria o commit. Adotá-lo como canônico exige que a autoria da prosa passe por um humano.</span></li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="dec">
+    <div class="hd"><span class="tag">D-3</span><h3>Preservar as notas e a leitura dos desenhos em apêndices</h3></div>
+    <p><b>Contexto.</b> As notas da conversa são fonte primária. A seção 1 é interpretação delas. Misturar as duas apagaria a distinção.</p>
+    <p><b>Decisão.</b> <code>Apêndice A</code> guarda suas notas <strong>verbatim</strong>, sem edição. <code>Apêndice B</code> faz a leitura elemento a elemento dos desenhos, usando a convenção do próprio traço.</p>
+    <ul class="cons">
+      <li class="plus"><span class="g">+</span><span>Dá para auditar a interpretação contra a fonte.</span></li>
+      <li class="plus"><span class="g">+</span><span>A convenção de cor separa o que veio do Abrahão do que veio da conversa.</span></li>
+      <li class="minus"><span class="g">&minus;</span><span>Repete conteúdo entre corpo e apêndice.</span></li>
+    </ul>
+  </article>
+
+  <article class="dec">
+    <div class="hd"><span class="tag">D-4</span><h3>Sustentar <code>Q-003</code> deliberadamente em aberto</h3><span class="pill hold">sua determinação</span></div>
+    <p><b>Contexto.</b> Eu havia apontado <code>Q-003</code> como a mais urgente para destravar implementação. Você determinou deixá-la aberta.</p>
+    <p><b>Decisão.</b> Registrá-la como <strong>sustentada em aberto por decisão</strong>, com a razão de dependência explícita, e não como pendência esquecida.</p>
+    <p><b>Razão registrada.</b> Não se decide <em>como detectar</em> a posição de alguém numa escala cujos pontos ainda não foram definidos. A granularidade é justamente o que <code>Q-002</code> mantém aberto. Fixar um mecanismo de detecção agora congelaria por via indireta uma resposta a <code>Q-002</code> que ainda não temos.</p>
+    <ul class="cons">
+      <li class="plus"><span class="g">+</span><span><code>H-003</code> permanece como leitura, sem implementação &mdash; ninguém vai codificar a variação do ciclo enquanto a escala não tiver pontos.</span></li>
+      <li class="plus"><span class="g">+</span><span>Um <code>/pending</code> futuro não vai tratar isso como omissão.</span></li>
+      <li class="zero"><span class="g">0</span><span>Ordem de resolução fica fixada: <code>Q-002</code> antes de <code>Q-003</code>.</span></li>
+    </ul>
+  </article>
+
+  <article class="dec">
+    <div class="hd"><span class="tag">D-5</span><h3>Escrever em pt-BR</h3><span class="pill soon">provisória &middot; Q-005</span></div>
+    <p><b>Contexto.</b> <code>docs/</code> inteiro está em en-US e o SEJA é publicado publicamente. A conversa de design, porém, corre em pt-BR.</p>
+    <p><b>Decisão.</b> pt-BR, por ser a língua de trabalho do design.</p>
+    <ul class="cons">
+      <li class="minus"><span class="g">&minus;</span><span>Descasa do resto de <code>docs/</code>; uma tradução ficará pendente se o documento for público.</span></li>
+    </ul>
+  </article>
+</section>
+
+<section id="divergencias">
+  <h2><span class="n">03</span>Divergências encontradas</h2>
+  <p class="lede">Duas coisas em que as fontes não fecham entre si. Nenhuma foi resolvida por mim.</p>
+
+  <div class="note">
+    <h4>3.1 &middot; O desenho corrigiu as notas &mdash; <span class="id hot">P-002a</span></h4>
+    <p>As notas dizem: <em>&ldquo;os devs falando com o robô, que produz código&rdquo;</em>. Eu escrevi <code>P-002</code> como <code>dev &rarr; robô &rarr; código</code>.</p>
+    <p><strong>A Figura 1 mostra duas setas entrando no <code>&lt;/&gt;</code></strong>: uma vinda do robô, outra vinda do lado humano. O robô <strong>não substituiu</strong> o time na autoria do código &mdash; somou-se a ele. O esquema linear é o caminho <em>novo</em>, não o único.</p>
+    <p>Acrescentei <code>P-002a</code> registrando isso, e a pergunta que o esquema linear escondia: quando dois prepostos escrevem no mesmo texto, de quem é a voz que o leitor está lendo? (<code>Q-007</code>)</p>
+  </div>
+
+  <div class="note">
+    <h4>3.2 &middot; O <code>Agent WF</code> é mais curto que o ciclo canônico &mdash; <span class="id hot">Q-008</span></h4>
+    <p>O harness tem um único invariante rígido, <code>P-005</code>: <strong>validar antes de comunicar</strong>. <code>/critique</code> sempre precede <code>/document</code> e <code>/communicate</code>.</p>
+    <p>O <code>Agent WF</code> da Figura 2 lista <code>Orquestrador</code>, <code>Research</code>, <code>Plan</code>, <code>Implement</code>, <code>Reflect</code>. Faltam <code>/design</code>, <code>/critique</code>, <code>/document</code> e <code>/communicate</code>. Como <code>/critique</code> é o portão desse invariante, a ausência não é cosmética: ou o desenho simplificou, ou está propondo deliberadamente um ciclo mais curto &mdash; e nesse caso colide com <code>P-005</code>.</p>
+  </div>
+</section>
+
+<section id="docs">
+  <h2><span class="n">04</span>Docs gerados</h2>
+
+  <h4>Coleções da Simone &middot; commit <code>e5aff94</code></h4>
+  <p>Quatro variantes editoriais da mesma documentação. Nenhuma foi editada &mdash; entraram como recebidas, menos 189 arquivos <code>:Zone.Identifier</code> (lixo de download do WSL).</p>
+  <div class="scroller">
+  <table>
+    <thead><tr><th>Coleção</th><th class="num">Arqs</th><th>Título</th><th>Estrutura</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><code>doc-A</code></td><td class="num">50</td><td>Reading Map</td><td>Diátaxis puro: <code>explanation/</code>, <code>how-to/</code>, <code>reference/</code>, <code>tutorials/</code></td><td>published</td></tr>
+      <tr><td><code>doc-B</code></td><td class="num">35</td><td>System-Isomorphic Edition</td><td>Volumes espelhando o próprio sistema (<code>vol1/</code>&hellip;<code>vol5/</code>)</td><td>published</td></tr>
+      <tr><td><code>doc-C</code></td><td class="num">62</td><td>Audience-Routed Collection</td><td>Núcleo comum + trilhas Practitioner / Architect / Scholar</td><td>published</td></tr>
+      <tr><td><code>doc-D</code></td><td class="num">42</td><td>&mdash;</td><td>Camadas: <code>foundations/</code>, <code>design-layer/</code>, <code>execution-layer/</code>, <code>onboarding/</code></td><td><strong>draft</strong></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Mais 5 arquivos <code>docs/call-graph.*</code> na raiz. <strong>Atenção</strong>: eles <em>diferem</em> dos <code>docs/concepts/call-graph.*</code> já versionados. Mantive os dois; falta decidir qual é o canônico.</p>
+
+  <h4>Documento de intenção &middot; commits <code>1480dee</code> <code>8fc7a32</code> <code>09219a0</code></h4>
+  <p><code>product-design/seja-as-intended.md</code>, 607 linhas. Oito princípios, quatro hipóteses, dez questões.</p>
+  <div class="scroller">
+  <table>
+    <thead><tr><th>Onde</th><th>ID</th><th>Conteúdo</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="7"><strong>1.1</strong><br>Conceitos<br>fundamentais</td><td><code>P-001</code></td><td>O artefato é uma mensagem, não um produto. Preposto do designer (de Souza 2005)</td></tr>
+      <tr><td><code>P-002</code></td><td>A relação dev&#8596;código passou a ser mediada por um agente que produz código</td></tr>
+      <tr><td><span class="id hot">P-002a</span></td><td>Ressalva da Figura 1: duas vias concorrentes de autoria sobre o mesmo artefato</td></tr>
+      <tr><td><span class="id hot">H-001</span></td><td>Escala citizen&#8596;power dev, ancorada em <strong>literacia de código</strong></td></tr>
+      <tr><td><code>P-003</code></td><td>Metacomunicação em dois sentidos: a retradução como obrigação constitutiva</td></tr>
+      <tr><td><code>P-004</code></td><td>Os marcadores do SEJA como sistema de significação projetado (Eco 1976)</td></tr>
+      <tr><td><span class="id hot">H-002</span></td><td>Computabilidade da intenção: signo fixo + rastreabilidade + deriva</td></tr>
+      <tr><td rowspan="4"><strong>1.2</strong><br>Fluxos de<br>trabalho</td><td><code>P-005</code></td><td>Ciclo canônico e o invariante &ldquo;validar antes de comunicar&rdquo;</td></tr>
+      <tr><td>&mdash;</td><td>Par as-intended / as-coded; a deriva como cidadã de primeira classe</td></tr>
+      <tr><td><span class="id hot">H-003</span></td><td>Variação da superfície de contato ao longo da escala (tabela por polo)</td></tr>
+      <tr><td>&mdash;</td><td>Os três registros de Schön e a abdução de Peirce</td></tr>
+      <tr><td rowspan="3"><strong>1.3</strong><br>Agentes<br>principais</td><td><code>P-006</code></td><td>Skill orquestra; agente executa</td></tr>
+      <tr><td><code>P-007</code></td><td>Três papéis: avaliadores, geradores, executores (catálogo real do harness)</td></tr>
+      <tr><td><span class="id hot">H-004</span></td><td>O orquestrador como lugar onde a adequação ao dev se realiza</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Mais <code>Apêndice A</code> (notas verbatim), <code>Apêndice B</code> (leitura dos desenhos), referências e CHANGELOG.</p>
+</section>
+
+<section id="desenhos">
+  <h2><span class="n">05</span>Os desenhos</h2>
+  <p class="lede">Commit <code>09219a0</code>. Referenciados em §1.1.2 e §1.3.3; lidos elemento a elemento no <code>Apêndice B</code>.</p>
+  <div class="figs">
+    <figure>
+      <img src="design-software-project.png" alt="Desenho a mão do design do software project: caixa Projeto contendo um robô ao centro circulado em vermelho, uma caixa de código, o User/Citizen Dev à esquerda ligado por uma caixa LN, um time de figuras humanas, a caixa Convenções/Design/Intenção alimentada por uma seta vermelha grossa vinda de fora, e uma linha vermelha horizontal na base representando a escala.">
+      <figcaption><b>Figura 1 &mdash; Design do software project.</b> Duas setas entram no <code>&lt;/&gt;</code>. O <code>LN</code> é bidirecional. A escala corre sob a população inteira de devs.</figcaption>
+    </figure>
+    <figure>
+      <img src="designt-harnerss.png" alt="Desenho a mão do design do harness: à esquerda o painel Agent WF com cabeçalho dividido em User Dev e Power Dev e itens Orquestrador, Research, Plan, Implement, Reflect; à direita o painel Harness contendo a caixa Docs (O que é o SEJA) com Princípios Eng. Semiótica e seus três itens, e abaixo uma seta apontando para LLM.">
+      <figcaption><b>Figura 2 &mdash; Design do harness.</b> <code>User Dev</code> e <code>Power Dev</code> são cabeçalho <em>sobre</em> o <code>Agent WF</code>, não conteúdo dele. A pilha é <code>Docs &rarr; Harness &rarr; LLM</code>.</figcaption>
+    </figure>
+  </div>
+
+  <h4>Três achados da leitura, além de <code>P-002a</code></h4>
+  <ul class="plain">
+    <li class="hot"><span><strong>A escala está desenhada sob a população inteira de devs</strong>, não anexada a um indivíduo. Isso reformula <code>Q-003</code>: talvez a pergunta certa não seja &ldquo;como detectar a posição deste usuário?&rdquo;, e sim &ldquo;como o projeto declara a distribuição de literacia do seu time?&rdquo;.</span></li>
+    <li class="hot"><span><strong>O harness incide de fora.</strong> A seta vermelha grossa que alimenta <code>Convenções/Design/Intenção</code> atravessa a fronteira da caixa &ldquo;Projeto&rdquo;.</span></li>
+    <li class="hot"><span><strong>A pilha desenhada é <code>Docs &rarr; Harness &rarr; LLM</code></strong>, e a caixa <code>Docs (O que é o SEJA)</code> contém exatamente o índice da seção 1. O documento não é interpretação do desenho: é o preenchimento de uma caixa que o desenho já tinha reservado.</span></li>
+  </ul>
+  <p>E <code>P-003</code> e <code>H-004</code> já estavam desenhadas antes de eu as argumentar: o <code>LN</code> é bidirecional por traço, e <code>User Dev | Power Dev</code> são cabeçalho sobre o <code>Agent WF</code>.</p>
+</section>
+
+<section id="repo">
+  <h2><span class="n">06</span>Estado do repositório</h2>
+  <pre><b>09219a0</b>  docs(as-intended): incorpora os desenhos de origem da sessão com o Anax
+<b>8fc7a32</b>  docs(as-intended): sustenta Q-003 deliberadamente em aberto
+<b>1480dee</b>  docs(as-intended): §1 Princípios da engenharia semiótica
+<b>e5aff94</b>  docs: adiciona coleções de documentação da Simone (doc-A..doc-D)</pre>
+  <p>Branch <code>seja-intention-docs</code>, a partir de <code>main</code> em <code>056a6de</code>. Não mergeada.</p>
+
+  <h4>Pendências de higiene &mdash; não tratadas, fora do escopo</h4>
+  <ul class="plain">
+    <li><span>O repositório <strong>não tem <code>.gitignore</code></strong>. <code>__pycache__/</code> e <code>_output/conversation-trace.jsonl</code> sujam o <code>git status</code>.</span></li>
+    <li><span>O arquivo <code>designt-harnerss.png</code> tem dois erros de digitação no nome.</span></li>
+    <li><span>Duplicidade <code>docs/call-graph.*</code> vs <code>docs/concepts/call-graph.*</code>.</span></li>
+  </ul>
+</section>
+
+</main>
+</div>
+
+<footer>
+  <p>Gerado por <code>/document</code> em 2026-08-27 00:39 UTC. Fonte: sessão de trabalho de 2026-08-26 sobre <code>product-design/seja-as-intended.md</code>. Versão Markdown versionada em <code>docs/revisao-anax-2026-08-26.md</code>.</p>
+</footer>
+</div>
