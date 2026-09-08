@@ -6,4 +6,4 @@
 | Date | Type | ID | Title | Status | File |
 |------|------|----|-------|--------|------|
 | 2026-08-12 02:18 UTC | QA Log | 000001 | npx open-seja installer wrapper |  | [plan-000001-qa-npx-open-seja-installer-wrapper.md](plans/plan-000001-qa-npx-open-seja-installer-wrapper.md) |
-| 2026-08-12 02:09 | Plan | 000001 | npx open-seja installer wrapper | OPEN | [plan-000001-npx-open-seja-installer-wrapper.md](plans/plan-000001-npx-open-seja-installer-wrapper.md) |
+| 2026-08-12 02:09 | Plan | 000001 | npx open-seja installer wrapper | DONE | [plan-000001-npx-open-seja-installer-wrapper.md](plans/plan-000001-npx-open-seja-installer-wrapper.md) |

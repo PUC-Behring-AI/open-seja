@@ -1,0 +1,38 @@
+{
+  "name": "open-seja",
+  "version": "0.1.0",
+  "description": "Installer wrapper for the open-seja Claude Code harness: clones the harness and hands off to an interactive Claude Code session running /seja-setup.",
+  "type": "commonjs",
+  "bin": {
+    "open-seja": "./bin/cli.js"
+  },
+  "scripts": {
+    "test": "node --test test/core.test.js test/cli.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "README.md"
+  ],
+  "keywords": [
+    "claude-code",
+    "seja",
+    "harness",
+    "installer",
+    "agent",
+    "scaffolding"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PUC-Behring-AI/open-seja.git"
+  },
+  "homepage": "https://github.com/PUC-Behring-AI/open-seja#readme",
+  "bugs": {
+    "url": "https://github.com/PUC-Behring-AI/open-seja/issues"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": "arodrigues-puc-rio"
+}

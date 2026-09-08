@@ -1,4 +1,4 @@
-# Plan 000001 | FEATURE-O | 2026-08-12 02:09 | npx open-seja installer wrapper | Review: standard
+# DONE | 2026-09-08 00:03 UTC | Plan 000001 | FEATURE-O | 2026-08-12 02:09 | npx open-seja installer wrapper | Review: standard
 plan_format_version: 1
 
 ## User brief
@@ -59,7 +59,7 @@ Criar a estrutura basica do pacote npm dentro do repositorio, sem logica ainda. 
 - **Interface**: `npm/package.json` declara `"bin": {"open-seja": "./bin/cli.js"}`
 - **Verify**: `node npm/bin/cli.js` roda sem erro de sintaxe (mesmo que ainda nao faca nada)
 - **Tests**: N/A (scaffolding puro, sem logica de negocio)
-- [ ] Done
+- [x] Done
 
 ### Step 2: Implementar `lib/core.js` -- parsing de argumentos e decisao clone/reuse/abort (logica pura, testavel)
 
@@ -70,7 +70,7 @@ Duas funcoes puras, sem I/O: `parseArgs(argv)` interpreta os argumentos de linha
 - **Interface**: exporta `parseArgs(argv: string[]) -> {target: string, upgrade: boolean, help: boolean}` (lanca erro descritivo se `target` ausente e `help` for `false`); `resolveTarget(target: string, targetExists: boolean, hasSejaVersion: boolean) -> {action: 'clone'|'reuse'|'abort', reason?: string}`
 - **Verify**: `node --test npm/test/core.test.js` passa
 - **Tests**: `parseArgs(['my-project'])` devolve `{target: 'my-project', upgrade: false, help: false}`; `parseArgs(['my-project', '--upgrade'])` devolve `upgrade: true`; `parseArgs(['--help'])` devolve `{help: true}` sem exigir `target`; `parseArgs([])` lanca erro cuja mensagem menciona o argumento `target` obrigatorio; `resolveTarget('x', false, false)` devolve `action: 'clone'`; `resolveTarget('x', true, true)` devolve `action: 'reuse'`; `resolveTarget('x', true, false)` devolve `action: 'abort'` com `reason` mencionando que o caminho existe e nao parece um checkout do open-seja
-- [ ] Done
+- [x] Done
 
 ### Step 3: Implementar `lib/bootstrap.js` -- clone, verificacao de pre-requisitos e handoff para o `claude`
 
@@ -82,7 +82,7 @@ Modulo fino que so' encapsula chamadas de `child_process`/`fs`, sem logica de de
 - **Interface**: exporta `clone(repoUrl: string, target: string) -> void`, `checkClaudeAvailable() -> boolean`, `launchClaude(cwd: string, initialPrompt: string) -> void`
 - **Verify**: `node -e "require('./npm/lib/bootstrap.js')"` carrega sem erro; execucao manual de `checkClaudeAvailable()` num terminal com `claude` instalado devolve `true`; **(Amendment A, iteration 1)** execucao manual de `checkClaudeAvailable()` e `launchClaude()` num Windows real (ou CI runner `windows-latest`) com `claude` instalado via `npm install -g` confirma que o CLI e' encontrado (sem `ENOENT`)
 - **Tests**: N/A (wrapper fino de I/O sobre `child_process`/`git`/`claude` -- sem logica de negocio assertavel sem mockar toda a fronteira de processo; coberto por verificacao manual no Step 4)
-- [ ] Done
+- [x] Done
 
 ### Step 4: Ligar `bin/cli.js` de ponta a ponta -- args, decisao, bootstrap e handoff
 
@@ -94,7 +94,7 @@ Preencher o stub do Step 1: ler `process.argv`, chamar `parseArgs`; se `help`, i
 - **Interface**: N/A (entry point, sem consumidores dentro do pacote)
 - **Verify**: `node npm/bin/cli.js --help` imprime o uso e sai com codigo 0; `node npm/bin/cli.js` (sem argumentos) sai com codigo != 0 e mensagem de erro clara
 - **Tests**: quando invocado com `--help`, a CLI imprime o texto de uso em stdout e sai com codigo 0 sem invocar `git` ou `claude` (teste de integracao via `child_process.execFileSync` na propria suite, unico caminho de entrada testado end-to-end). **(Amendment B, iteration 1)** Adicionar testes unitarios de `run(argv, deps)` com `bootstrap`/`fs` mockados: (a) `resolveTarget` devolvendo `abort` -> `deps.exit` chamado com codigo != 0 e a `reason` escrita em stderr, `bootstrap.clone`/`bootstrap.launchClaude` nunca chamados; (b) `resolveTarget` devolvendo `clone` -> `bootstrap.clone(repoUrl, target)` chamado com os argumentos esperados, seguido de `bootstrap.launchClaude(target, '/seja-setup')` (ou `'/seja-setup --upgrade'` quando `upgrade: true`); (c) `bootstrap.checkClaudeAvailable()` mockado para devolver `false` -> `deps.exit` chamado com codigo != 0, `bootstrap.launchClaude` nunca chamado
-- [ ] Done
+- [x] Done
 
 ### Step 5: Documentacao do pacote (`npm/README.md`) e metadados finais do `package.json`
 
@@ -107,7 +107,7 @@ Escrever `npm/README.md` com: o comando `npx open-seja <target>` e `npx open-sej
 - **Verify**: `npm/README.md` existe e documenta os dois comandos (instalar/atualizar); `npm pack --dry-run` dentro de `npm/` lista exatamente `bin/`, `lib/`, `README.md`, `package.json` (sem `test/` no pacote publicado)
 - **Tests**: N/A (documentacao + metadados)
 - **Docs**: `npm/README.md` e' documentacao nova voltada ao usuario final do wrapper -- nao toca o `README.md` da raiz do repositorio (mantido identico ao upstream por decisao explicita registrada no Step 6 do `/seja-setup --here`, 2026-08-12)
-- [ ] Done
+- [x] Done
 
 ## Outcomes
 
@@ -184,11 +184,11 @@ COMPAT's recommendation (`shell: true` for the two `claude`-invoking calls) and 
 
 ### Updated To Do (reflecting amended steps)
 
-- [ ] Step 1: Scaffold do pacote npm -- diretorio, package.json inicial e stub do entry point (unchanged)
-- [ ] Step 2: Implementar `lib/core.js` -- parsing de argumentos (`target`, `--upgrade`, `--help` -- **`--version` removido, Amendment C**) e decisao clone/reuse/abort (logica pura, testavel)
-- [ ] Step 3: Implementar `lib/bootstrap.js` -- clone, verificacao de pre-requisitos e handoff para o `claude`, **com `shell: process.platform === 'win32'` nas duas chamadas que invocam `claude` (Amendment A)**
-- [ ] Step 4: Ligar `bin/cli.js` de ponta a ponta via uma funcao exportada e testavel **`run(argv, deps)` (Amendment B)**, com testes unitarios para os caminhos abort/clone/claude-indisponivel alem do `--help` existente
-- [ ] Step 5: Documentacao do pacote (`npm/README.md`) e metadados finais do `package.json` (unchanged)
+- [x] Step 1: Scaffold do pacote npm -- diretorio, package.json inicial e stub do entry point (unchanged)
+- [x] Step 2: Implementar `lib/core.js` -- parsing de argumentos (`target`, `--upgrade`, `--help` -- **`--version` removido, Amendment C**) e decisao clone/reuse/abort (logica pura, testavel)
+- [x] Step 3: Implementar `lib/bootstrap.js` -- clone, verificacao de pre-requisitos e handoff para o `claude`, **com `shell: process.platform === 'win32'` nas duas chamadas que invocam `claude` (Amendment A)**
+- [x] Step 4: Ligar `bin/cli.js` de ponta a ponta via uma funcao exportada e testavel **`run(argv, deps)` (Amendment B)**, com testes unitarios para os caminhos abort/clone/claude-indisponivel alem do `--help` existente
+- [x] Step 5: Documentacao do pacote (`npm/README.md`) e metadados finais do `package.json` (unchanged)
 
 ### Re-evaluation & Convergence
 
@@ -211,3 +211,42 @@ All Phase 2 findings resolved with plan changes; no perspective remains Deferred
 | Perspectives Adopted | 5 (SEC, ARCH, COMPAT, TEST, DX — the latter three Adopted after iteration 1 amendments) |
 | Perspectives Deferred (with rationale) | 1 (OPS — light, pre-existing repo-wide absence of CI, not a regression introduced by this plan) |
 | Convergence reason | All Phase 2 findings resolved via plan amendment in iteration 1; no plan-changing concerns remain |
+
+## Implementation Summary
+
+Executed 2026-09-08 00:03 UTC in **manual mode** (5 steps, sequential in-context). All 5 steps completed; no partial or failed steps.
+
+### Delivered
+
+| File | Role |
+|------|------|
+| `npm/package.json` | Package manifest -- name `open-seja`, `bin.open-seja -> ./bin/cli.js`, `engines.node >=18`, `files` whitelist (`bin/`, `lib/`, `README.md`), `test` script |
+| `npm/lib/core.js` | Pure decision logic -- `REPO_URL`, `USAGE`, `parseArgs()`, `resolveTarget()`. No I/O. |
+| `npm/lib/bootstrap.js` | I/O boundary -- `clone()`, `checkClaudeAvailable()`, `launchClaude()`, private `runClaude()` helper |
+| `npm/bin/cli.js` | Entry point -- exported `run(argv, deps)` with injectable deps, plus `require.main` guard |
+| `npm/test/core.test.js` | 8 unit tests over `parseArgs` / `resolveTarget` |
+| `npm/test/cli.test.js` | 7 tests over `run()` -- `--help` and missing-target as subprocess integration tests, plus abort / clone / reuse+upgrade / claude-unavailable / clone-failure with mocked deps |
+| `npm/README.md` | User-facing docs -- both commands, prerequisites, what the wrapper does and explicitly does not do (no unattended CI use), license note |
+
+### Verification
+
+- `node --test npm/test/core.test.js npm/test/cli.test.js` -- **15/15 pass**.
+- `node npm/bin/cli.js --help` -> usage on stdout, exit 0. `node npm/bin/cli.js` (no args) -> error naming `target`, exit 1.
+- `npm pack --dry-run` -> exactly 5 files (`README.md`, `bin/cli.js`, `lib/bootstrap.js`, `lib/core.js`, `package.json`); `test/` correctly excluded.
+- `python .claude/skills/scripts/run_all_checks.py` -> 15 passed / 13 failed, **identical to the pre-change baseline** (verified by re-running on a stashed tree). All 13 failures are pre-existing and unrelated to `npm/`: N/A subsystems for this project (i18n, migrations, API auth, frontend/backend coverage), environment gaps (no `pip` for `pytest-cov`), and upstream harness files (`docs/concepts/call-graph.js`). No check output references `npm/`.
+
+### Deviations from the plan (and why)
+
+1. **`REPO_URL` corrected to `https://github.com/PUC-Behring-AI/open-seja`.** Step 5 specified `github.com/PUC-Behring-Institute-for-AI/open-seja`, which does not match this repository's actual `origin` (`git@github.com:PUC-Behring-AI/open-seja.git`). Used the HTTPS form so anonymous clones work without SSH keys. Left as-is would have made every `npx open-seja` invocation fail at the clone.
+2. **Amendment A implemented as a shell *command string*, not `shell: true` + args array.** The plan prescribed `{shell: process.platform === 'win32'}` alongside an args array. Node >= 22 deprecates exactly that combination (DEP0190, "arguments are not escaped, only concatenated") and emits a visible warning on every Windows run -- reproduced here on Node 24. Amendment A's *intent* (resolve `claude.cmd` npm-global shims on Windows) is preserved via a private `runClaude()` helper that composes a single pre-quoted command string on win32 and uses the plain no-shell args form elsewhere. Mechanism confirmed empirically: spawning a `.cmd` shim without a shell gives `ENOENT`, with the shell it exits 0. A shell remains unavoidable on Windows -- since the CVE-2024-27980 fix Node refuses to spawn `.cmd` directly at all. `clone()`, the only call carrying user input, stays shell-free, preserving the review log's SEC/COMPAT conflict resolution.
+3. **`spawnSync` instead of `spawn` for the handoff.** The wrapper has nothing to do after the handoff; a synchronous call keeps the process alive for the child's lifetime with `stdio: 'inherit'`, which is what "transparent handoff" requires.
+4. **Added `npm/test/cli.test.js`** (Step 4's `Files` field listed only `npm/bin/cli.js`, but its `Tests` field mandates four test cases). Also added `parseArgs` rejection of unknown options -- without it, the `--version` flag removed by Amendment C would be silently swallowed, reintroducing the exact Ib breakdown that amendment set out to remove.
+5. **Added clean handling for `git clone` failure** (found during the review pass, not in the plan). A private repo, absent network, or unwritable path made `execFileSync` throw and print a raw Node stack trace -- the single most likely real-world failure, presented in the least usable way. Now exits 1 with the repo and target named. Covered by a new test.
+
+### Outstanding -- human actions, outside plan scope
+
+- **`npm publish` from `npm/`** is required before `npx open-seja` resolves at all; it needs an npm account/token and the name `open-seja` to be free on the public registry. Explicitly out of scope per the plan's Outcomes.
+- **The GitHub repository must be publicly clonable.** The wrapper does an anonymous HTTPS clone; if `PUC-Behring-AI/open-seja` is private, the command works only for authenticated users.
+- **License decision.** The harness is CC BY-NC 4.0 (non-commercial). `package.json` declares `"license": "SEE LICENSE IN LICENSE"` since CC BY-NC is not an OSI SPDX software license, per Step 5. Publishing a non-commercial-licensed package to the public npm registry is a deliberate call, not a mechanical step.
+- **Windows verification on a real Windows host is still open.** Step 3's Verify field asks for a manual check with `claude` installed via `npm install -g` on Windows. Only the underlying shim-resolution *mechanism* was verified here (via `npm.cmd` as a stand-in), because `claude` in this environment lives in WSL, not on the Windows PATH.
+- **Rec 11 (configurable source/version)** remains out of scope, as planned.
