@@ -34,6 +34,7 @@
 | `EXPLAINED_ARCHITECTURE_DIR` | `${OUTPUT_DIR}/explained-architecture` | Architecture explanation output folder |
 | `BEHAVIOR_EVOLUTION_DIR` | `${OUTPUT_DIR}/behavior-evolution` | Behavior evolution explanation output folder |
 | `REFLECTIONS_DIR` | `${OUTPUT_DIR}/reflections` | Reflection report output folder |
+| `MOB_SESSIONS_DIR` | `${OUTPUT_DIR}/mob-sessions` | Mob programming session records |
 | `ONBOARDING_PLANS_DIR` | `${OUTPUT_DIR}/onboarding-plans` | Onboarding plan output folder |
 | `COMMUNICATION_DIR` | `${OUTPUT_DIR}/communication` | Communication material output folder |
 | `ROADMAP_DIR` | `${OUTPUT_DIR}/roadmaps` | Roadmap output folder |
