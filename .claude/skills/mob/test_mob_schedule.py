@@ -194,3 +194,40 @@ def test_markdown_table_with_clock_times():
     assert "| BUILD | 14:20 | 15:05 | 45 |" in out
     assert "| REFLECT | 15:05 | 15:20 | 15 |" in out
     assert "Slack: 15 min" in out
+
+
+# ---------------------------------------------------------------------------
+# --start parsing
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(("text", "hour", "minute"), [("14:00", 14, 0), ("9:05", 9, 5),
+                                                      ("23:59", 23, 59), (" 07:30 ", 7, 30)])
+def test_start_valid_keeps_local_offset(text, hour, minute):
+    now = datetime(2026, 9, 26, 11, 37, 42, 123, tzinfo=TZ)
+    parsed = mob_schedule._parse_start(text, now)
+    assert (parsed.hour, parsed.minute, parsed.second, parsed.microsecond) == (hour, minute, 0, 0)
+    assert parsed.date() == now.date()
+    assert parsed.utcoffset() == TZ.utcoffset(None)
+
+
+def test_start_default_is_now_with_seconds_zeroed():
+    now = datetime(2026, 9, 26, 11, 37, 42, tzinfo=TZ)
+    assert mob_schedule._parse_start(None, now) == datetime(2026, 9, 26, 11, 37, tzinfo=TZ)
+
+
+def test_start_cli_keeps_local_offset():
+    result = _run_cli("--start", "14:00", "--format", "json")
+    assert result.returncode == 0, result.stderr
+    start = datetime.fromisoformat(json.loads(result.stdout)["start"])
+    local_offset = datetime.now().astimezone().replace(hour=14, minute=0).utcoffset()
+    assert start.utcoffset() == local_offset
+    assert (start.hour, start.minute) == (14, 0)
+
+
+@pytest.mark.parametrize("text", ["24:00", "14:60", "14h00", "1400", "abc", "14:5", ""])
+def test_start_invalid_exits_2(text):
+    result = _run_cli("--start", text, "--format", "json")
+    assert result.returncode == 2
+    assert "--start" in result.stderr
+    assert result.stdout == ""

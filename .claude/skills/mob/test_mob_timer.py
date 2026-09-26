@@ -239,7 +239,7 @@ def test_dry_run_does_not_sleep(tmp_path):
 def test_sigterm_logs_ended_and_returns_0(tmp_path):
     def terminate(clock):
         if len(clock.sleeps) == 3:
-            os.kill(os.getpid(), signal.SIGTERM)
+            signal.raise_signal(signal.SIGTERM)
 
     clock = FakeClock(START, on_sleep=terminate)
     previous = signal.getsignal(signal.SIGTERM)
@@ -303,6 +303,44 @@ def test_status_applies_rebase_offset():
     assert status["minutes_remaining"] == pytest.approx(8)
 
 
+def test_status_during_reserve():
+    agenda = _agenda()
+    # OPENING 0-5, PLAN 5-20, BUILD 20-65, REFLECT 65-80, RESERVE 80-85, CLOSING 85-90
+    status = mob_timer.current_status(agenda, START + timedelta(minutes=82))
+    assert status["state"] == "running"
+    assert status["phase"] == "RESERVE"
+    assert status["minutes_remaining"] == pytest.approx(3)
+    assert status["driver"] is None
+    assert status["next_event"]["type"] == "phase_end"
+    assert status["next_event"]["phase"] == "RESERVE"
+
+
+def test_status_honors_speed_from_the_base():
+    agenda = _agenda()
+    now = START + timedelta(minutes=1)  # 1 real minute at speed 60 = agenda +60 min
+    status = mob_timer.current_status(agenda, now, speed=60)
+    assert status["now"] == now.isoformat()  # the real clock is still reported
+    assert status["speed"] == 60
+    assert status["phase"] == "BUILD"  # BUILD spans +20..+65
+    assert status["minutes_remaining"] == pytest.approx(5)
+    assert status["next_event"]["type"] == "phase_end"  # the 5-min warning fired at +60
+
+
+def test_status_with_speed_before_base_is_not_started():
+    status = mob_timer.current_status(_agenda(), START - timedelta(minutes=3), speed=60)
+    assert status["state"] == "not_started"
+    assert status["minutes_until_start"] == pytest.approx(3)
+
+
+def test_status_with_speed_and_rebase():
+    agenda = _agenda()
+    offset = timedelta(minutes=10)  # base 14:10
+    status = mob_timer.current_status(agenda, START + timedelta(minutes=10, seconds=10),
+                                      offset, speed=60)
+    assert status["phase"] == "PLAN"  # agenda +10 min: PLAN spans +5..+20
+    assert status["minutes_remaining"] == pytest.approx(10)
+
+
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
@@ -338,3 +376,57 @@ def test_cli_invalid_agenda_exits_2(tmp_path):
     result = _cli("status", "--agenda", str(bad))
     assert result.returncode == 2
     assert "mob_timer: error" in result.stderr
+
+
+def _write_agenda(tmp_path, agenda) -> Path:
+    path = tmp_path / "agenda.json"
+    path.write_text(json.dumps(agenda, ensure_ascii=False), encoding="utf-8")
+    return path
+
+
+def test_run_records_pid_in_started(tmp_path):
+    _, _, log = _run(_agenda(), tmp_path, FakeClock(START))
+    assert log[0]["type"] == "started"
+    assert log[0]["pid"] == os.getpid()
+
+
+def test_cli_status_uses_speed_from_started_record(tmp_path):
+    agenda_path = _write_agenda(tmp_path, _agenda())
+    base = datetime.now().astimezone() - timedelta(seconds=40)  # agenda +40 min at speed 60
+    offset = base - START
+    log = tmp_path / "timer.jsonl"
+    log.write_text(json.dumps({"type": "started", "rebase_offset_seconds": offset.total_seconds(),
+                               "speed": 60, "agenda_start": base.isoformat(),
+                               "pid": os.getpid()}) + "\n", encoding="utf-8")
+    result = _cli("status", "--agenda", str(agenda_path), "--log", str(log))
+    assert result.returncode == 0, result.stderr
+    data = json.loads(result.stdout)
+    assert data["speed"] == 60
+    assert data["phase"] == "BUILD"  # BUILD spans +20..+65; tolerant to ~20 s of startup
+    assert data["timer"] == "running"
+
+
+def _dead_pid() -> int:
+    proc = subprocess.Popen([sys.executable, "-c", "pass"])
+    proc.wait()
+    return proc.pid
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX liveness check only")
+def test_cli_status_reports_stale_when_timer_pid_is_gone(tmp_path):
+    agenda_path = _write_agenda(tmp_path, _agenda())
+    log = tmp_path / "timer.jsonl"
+    log.write_text(json.dumps({"type": "started", "rebase_offset_seconds": 0, "speed": 1,
+                               "pid": _dead_pid()}) + "\n", encoding="utf-8")
+    data = json.loads(_cli("status", "--agenda", str(agenda_path), "--log", str(log)).stdout)
+    assert data["timer"] == "stale"
+
+
+def test_cli_status_without_pid_keeps_running(tmp_path):
+    agenda_path = _write_agenda(tmp_path, _agenda())
+    log = tmp_path / "timer.jsonl"
+    log.write_text(json.dumps({"type": "started", "rebase_offset_seconds": 0}) + "\n",
+                   encoding="utf-8")
+    data = json.loads(_cli("status", "--agenda", str(agenda_path), "--log", str(log)).stdout)
+    assert data["timer"] == "running"
+    assert data["speed"] == 1

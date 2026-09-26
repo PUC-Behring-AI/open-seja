@@ -113,7 +113,7 @@ Dispatch: `--pending` -> pending; else `--roadmap` -> roadmap; else `--manual` -
 8. Run the [Quality Gate](#quality-gate) (skipped if `--skip-checks`).
 
 9. Mark the plan id with `# DONE | <YYYY-MM-DD HH:MM UTC> |`. Save. Invoke `python .claude/skills/scripts/pending.py done --source plan-<id> --type implement` (idempotent; one-line warning on non-zero exit; do not block -- post-skill step 2g.iv is the safety net).
-   **Partial stop**: if execution stops with steps still unchecked (at the user's request, or the caller's via the conversation-context channel, like `--roadmap` and `skip_qa_log`), do not mark `# DONE`, do not call `pending.py done`, and skip step 11. Append to the step 10 summary the line `PARTIAL: N/M steps; stopped by <reason>` (e.g. `session mob-session-<id>`). Steps 10 and 12 still run, so the completed work is committed.
+   **Partial stop**: applies only when a stop was requested -- by the user, or by the caller via the conversation-context channel (like `--roadmap` and `skip_qa_log`). Without such a request, reconcile the checkboxes first (tick every step actually done) before marking `# DONE`. When a stop was requested and steps remain unchecked, do not mark `# DONE`, do not call `pending.py done`, and skip step 11. Append to the step 10 summary the line `PARTIAL: N/M steps; stopped by <reason>` (e.g. `session mob-session-<id>`). Steps 10 and 12 still run, so the completed work is committed.
 
 10. Append a summary of all changes to the plan file.
 

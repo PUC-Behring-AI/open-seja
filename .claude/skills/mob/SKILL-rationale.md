@@ -45,6 +45,9 @@ In v1 the **driver operates the agent**: types the instructions and approvals of
 - **`status` as the source of truth**: the timer's lines reach the group through Claude Code's Monitor tool, and relayed lines lag while a question or a tool call is in progress. After a context compaction the agent also loses any remembered time. So the skill runs `status` (with the same `--log`, to keep the rebase offset) before every transition and every overrun decision, and never trusts remembered times. `status.state` comes from the clock alone; `status.timer` says whether the process is alive.
 - **Transitions in the state file**: the timer only knows the agenda's scheduled events, not when the group actually moved. The state file carries a `transitions` list stamped from `status.now`, and "actual" in the record comes from it.
 - **One timer per session**: two processes would announce the same events twice and write two logs.
+- **No `shift` subcommand (deferred)**: a `mob_timer.py shift` that re-times the rest of the agenda after the group uses the reserve or shortens a phase was considered. It was deferred: once the group deviates, the skill reads the actual phase from `transitions` and uses `status` only for the clock and remaining time, with rotations counted from BUILD's actual start. Revisit if rehearsals show the running timer's announcements confusing the group after a deviation.
+- **`pid` and `stale`**: the `started` record carries the timer's pid, so the skill can stop exactly that process (`kill -TERM`) and `status` can report `timer: "stale"` when a crash left the log saying "running".
+- **`status` honors `--speed`**: in a sped-up rehearsal, `status` maps the real clock to agenda time from the `started` record, so the reported phase matches the announcements.
 
 ## Partial stop contract with `/implement`
 

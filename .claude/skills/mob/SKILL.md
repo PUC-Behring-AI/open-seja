@@ -53,8 +53,9 @@ Sibling files (same folder): `mob-session-<id>-agenda.json`, `mob-session-<id>-t
 
 - Timer status: `python .claude/skills/mob/mob_timer.py status --agenda <agenda.json> --log <timer.jsonl>`. Always pass the **same** `--log` used by `run`, or the rebase offset is lost and every time is off.
 - Run `status` before every phase transition, before every overrun question, and after any context compaction; re-read the state file at the same moments. Never trust remembered times.
-- `status.phase`, `phase_end`, `minutes_remaining`, `driver` and `next_event` describe the agenda. `status.state` is computed from the clock only; read `status.timer` (`running` | `ended` | `interrupted` | `null`) to know whether the timer process is alive.
-- State file `mob-session-<id>-state.json`: `{"session": "<id>", "state": "running|completed|interrupted", "phase": "...", "plan_id": null, "reflection_id": null, "driver_index": 0, "participants": ["P1", ...], "research_data": false, "consent_confirmed": null, "transitions": [{"phase": "PLAN", "event": "start|end", "at": "<UTC ISO>"}], "pending": []}`. Participant **labels only**; never the name->pseudonym map. Update it at every transition, taking `at` from `status.now`.
+- `status.phase`, `phase_end`, `minutes_remaining`, `driver` and `next_event` describe the agenda. `status.state` is computed from the clock only; read `status.timer` (`running` | `ended` | `interrupted` | `stale` | `null`) to know whether the timer process is alive; `stale` (the log says running but its `pid` is gone) counts as not running.
+- Once the group uses the reserve or shortens a phase, the agenda no longer matches reality: the actual phase comes from the state file `transitions`, and `status` is used only for the clock (`now`) and the remaining time. Rotations are then computed from BUILD's actual start in `transitions`: the driver advances by one at a step boundary when the elapsed BUILD time has crossed the next `--rotation` mark.
+- State file `mob-session-<id>-state.json`: `{"session": "<id>", "state": "running|completed|interrupted", "phase": "...", "plan_id": null, "reflection_id": null, "driver_index": 0, "timer_pid": null, "participants": ["P1", ...], "research_data": false, "consent_confirmed": null, "transitions": [{"phase": "PLAN", "event": "start|end", "at": "<UTC ISO>"}], "pending": []}`. Participant **labels only**; never the name->pseudonym map. Update it at every transition, taking `at` from `status.now`.
 - Chained skills: before each `/plan`, `/implement` and `/reflect`, state in the conversation `parent_skill: mob (session mob-session-<id>)` so their post-skill step 8b records `parent_skill: mob` in telemetry. Do not rewrite or override any instruction of a chained skill; each one runs its own pre-skill/post-skill cycle and commits its own artifact.
 
 ## Skill-specific Instructions
@@ -71,7 +72,9 @@ Sibling files (same folder): `mob-session-<id>-agenda.json`, `mob-session-<id>-t
    - Ask the facilitator to confirm that every participant signed the protocol's consent form (TCLE). Without that confirmation, the session proceeds with initials or pseudonyms only and no identifiable reflection lines.
    - Pseudonyms (`P1`, `P2`, ...) are the default labels.
    - Tell the facilitator to keep the name->pseudonym map outside the repository (never under `_output/`).
-   - Warn that the plan, the reflection, this record and the commit messages go into the git history.
+   - Without consent confirmation, `--drivers` (step 4) receives pseudonyms or initials only.
+
+   In every case, warn that the plan, the reflection, the commit messages and the four session files -- record `.md`, `-agenda.json` (its `drivers` list), `-timer.jsonl` (driver names in `driver_change`) and `-state.json` -- go into the git history.
 
    Then ask in **plain text** (not AskUserQuestion) for the participant list, in the form the facilitator chooses (names, initials or pseudonyms; pseudonyms when research data), and the driver order. Never put participant names in the goal, the titles or commit messages.
 
@@ -83,7 +86,7 @@ Sibling files (same folder): `mob-session-<id>-agenda.json`, `mob-session-<id>-t
    Map the answers to `mob_schedule.py` flags (own minutes -> `--plan-min/--build-min/--reflect-min`; when all three are explicit and the duration answer was the default, drop `--duration`). Run:
    ```bash
    python .claude/skills/mob/mob_schedule.py <flags> --rotation <N> --drivers "<labels in driver order>" --format md
-   python .claude/skills/mob/mob_schedule.py <same flags> --format json > ${MOB_SESSIONS_DIR}/mob-session-<id>-agenda.json
+   python .claude/skills/mob/mob_schedule.py <flags> --rotation <N> --drivers "<labels in driver order>" --format json > ${MOB_SESSIONS_DIR}/mob-session-<id>-agenda.json
    ```
    On exit 2, show the error and re-ask the offending question. Show the md agenda and ask via AskUserQuestion: **Confirm** -- Recommended when the times and the driver order look right. / **Adjust** -- Recommended when any phase or the order is off; I ask again. Loop until confirmed.
 
@@ -91,19 +94,20 @@ Sibling files (same folder): `mob-session-<id>-agenda.json`, `mob-session-<id>-t
    ```bash
    python .claude/skills/mob/mob_timer.py run --agenda ${MOB_SESSIONS_DIR}/mob-session-<id>-agenda.json --log ${MOB_SESSIONS_DIR}/mob-session-<id>-timer.jsonl --rebase-now
    ```
-   Default: launch it through Claude Code's Monitor tool and relay each line (`HH:MM | PHASE | text`) to the group. If Monitor is unavailable or `--no-timer` was given, ask the facilitator to run the same command in a separate terminal, preferably projected. Tell the group that relayed announcements may lag while a question or a tool is in progress; `status` is the source of truth. The session is now in OPENING: introduce the roles and the first driver.
+   Default: launch it through Claude Code's Monitor tool and relay each line (`HH:MM | PHASE | text`) to the group. If Monitor is unavailable or `--no-timer` was given, ask the facilitator to run the same command in a separate terminal, preferably projected. Tell the group that relayed announcements may lag while a question or a tool is in progress; `status` is the source of truth. Once the log has its `started` record, copy its `pid` to `timer_pid` in the state file. The session is now in OPENING: introduce the roles and the first driver.
 
 6. **PLAN.** Run `status`; record the transition. Run `/plan "<goal>. The plan must fit in <build-min> min of BUILD, in small independent steps." --plan` (not `--light`: it produces a proposal without steps, which `/implement` cannot execute). Note the plan ID printed by the `/plan` post-skill and save it as `plan_id` in the state file.
 
 7. **BUILD.** Run `status`; record the transition. Run `/implement <plan_id> --manual --skip-docs` (`--manual` so the driver conducts each step; `--skip-docs` so the documentation question does not interrupt the session -- the `update-documentation` pending entry is filed instead). At each step boundary, run `status`; if a rotation is due, announce the new driver, update `driver_index`, then continue.
    At the 5-min BUILD warning (or at the first step boundary after it), ask via AskUserQuestion:
-   - **Use the reserve** -- Recommended when the current step is nearly done and the agenda still has RESERVE minutes. NOT recommended when REFLECT would be cut short.
+   - **Use the reserve** -- offered only when the agenda's `reserve` > 0. Recommended when the current step is nearly done and RESERVE minutes remain. NOT recommended when REFLECT would be cut short.
+   - **Shorten REFLECT by N min** -- offered only when `reserve` is 0. Recommended when the current step is nearly done; NOT recommended when REFLECT is already short.
    - **Stop BUILD** -- Recommended when the remaining steps will not fit; protecting REFLECT is the point of the timebox.
    Stopping: finish the step in progress, then tell `/implement`, via the conversation context, to stop with reason `session mob-session-<id>`. It follows the `/implement` Manual Mode step 9 partial stop (no `# DONE`, the `implement` pending entry stays open, `PARTIAL: N/M steps; stopped by session mob-session-<id>` in the plan summary, completed work committed). Copy the unchecked steps to `pending` in the state file.
 
 8. **REFLECT.** Run `status`; record the transition. Run `/reflect`. In its Step A, the facilitator chooses **A specific artifact by ID** and gives `plan-<plan_id>`. In its Step C, the facilitator types each participant's words on its own line, prefixed with the participant's label from the record (`P1: ...`, `Ana: ...`); `/reflect` records them verbatim. Save the reflection ID as `reflection_id`. When research data was declared without consent confirmation, remind the facilitator before Step C: no identifiable lines.
 
-9. **Close and write the record.** Run `status`. If `timer` is `running`, stop it with SIGTERM (the log receives `ended`, reason `terminated`). Set `state` in the state file (`completed`). Write `${MOB_SESSIONS_DIR}/mob-session-<id>-<slug>.md`:
+9. **Close and write the record.** Run `status`. If `timer` is `running`, stop it with `kill -TERM <timer_pid>` (the log receives `ended`, reason `terminated`); `stale` means it is already gone. Set `state` in the state file (`completed`). Write `${MOB_SESSIONS_DIR}/mob-session-<id>-<slug>.md`:
 
    ```markdown
    # Mob Session <id> | <YYYY-MM-DD HH:MM UTC> | <short title>
@@ -125,7 +129,7 @@ Sibling files (same folder): `mob-session-<id>-agenda.json`, `mob-session-<id>-t
 
 ## Explicit rules
 
-- **Overrun**: when `status` shows the agenda has moved past the phase the group is still in, ask via AskUserQuestion: **Use the reserve** -- Recommended when RESERVE minutes remain and the current phase is close to done. / **Shorten the next phase** -- Recommended when the reserve is spent or REFLECT must stay intact. Record the choice in the state file; the timer keeps the original agenda, so tell the group how far behind its announcements the group is.
-- **Abandonment**: if the group stops early, stop the timer with SIGTERM, let any running chained skill apply its own stop rule (`/implement` partial stop), write the record with `**State**: interrupted` and what was left in Pending, and run `/post-skill <id>`.
+- **Overrun**: when `status` shows the agenda has moved past the phase the group is still in, ask via AskUserQuestion: **Use the reserve** (only when `reserve` > 0) -- Recommended when RESERVE minutes remain and the current phase is close to done. / **Shorten the next phase** -- Recommended when the reserve is spent or REFLECT must stay intact. Record the choice in the state file; the timer keeps the original agenda, so tell the group how far behind its announcements the group is.
+- **Abandonment**: if the group stops early, stop the timer with `kill -TERM <timer_pid>` (unless `status.timer` is already `ended`, `interrupted` or `stale`), let any running chained skill apply its own stop rule (`/implement` partial stop), write the record with `**State**: interrupted` and what was left in Pending, and run `/post-skill <id>`.
 - **Context compaction**: re-read the state file and run `status` before doing anything else.
-- Never write participant names in the goal, titles, commit messages or state file when pseudonyms were chosen; never store the name->pseudonym map anywhere in the repository.
+- Never write participant names in the goal, titles or commit messages, nor -- when pseudonyms were chosen -- in any of the four session files (record, agenda `drivers`, timer log, state file); never store the name->pseudonym map anywhere in the repository.

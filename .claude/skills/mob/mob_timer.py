@@ -33,7 +33,8 @@ phase_warning. Every event is appended to --log as one JSON object per line
 (UTF-8): `ts` (real UTC time), `type`, `phase`, `scheduled` (agenda instant,
 after rebase), data fields (`driver`, `previous_driver`, `minutes_left`,
 `reason`) and a separate human `display` text. The first record is
-`{"type": "started", "rebase_offset_seconds": N, "speed": S, ...}`.
+`{"type": "started", "rebase_offset_seconds": N, "speed": S, "agenda_start",
+"pid"}` (agenda_start is the rebased base; pid is the timer process).
 
 --rebase-now shifts the whole agenda so it starts at launch time (durations
 kept) and records the shift in the `started` record. --speed N divides every
@@ -41,10 +42,14 @@ wait (offsets from the agenda start) by N, for tests and rehearsals. Without
 --rebase-now, events already in the past fire immediately (catch-up).
 --dry-run prints every event without sleeping or writing the log.
 
-`status` prints JSON computed from agenda + clock (+ the rebase offset read
-from --log): state (not_started | running | finished), phase,
-minutes_remaining, driver, next_event, and `timer` (the last lifecycle record
-in the log: running | ended | interrupted | null). --speed is not reflected.
+`status` prints JSON computed from agenda + clock (+ the rebase offset, speed
+and pid read from the `started` record of --log): state (not_started | running
+| finished), phase, minutes_remaining, driver, next_event, speed, and `timer`
+(the last lifecycle record in the log: running | ended | interrupted | null;
+"stale" when the log says running but the recorded pid no longer exists, POSIX
+only). With speed S != 1 the clock is mapped to agenda time as
+base + (now - base) * S, so phase, minutes_remaining and next_event are in
+agenda minutes while `now` stays the real clock.
 
 Usage
 -----
@@ -59,6 +64,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import json
+import os
 import signal
 import sys
 import time
@@ -219,7 +225,8 @@ def run_timer(
 
     _append_log(log_path, {"ts": _utc_iso(launch), "type": "started",
                            "rebase_offset_seconds": offset.total_seconds(),
-                           "speed": speed, "agenda_start": base.isoformat()})
+                           "speed": speed, "agenda_start": base.isoformat(),
+                           "pid": os.getpid()})
     current = events[0]
     try:
         with _sigterm_raises():
@@ -258,20 +265,30 @@ def _minutes(delta: timedelta) -> float:
     return round(delta.total_seconds() / 60, 2)
 
 
-def current_status(agenda: dict, now: datetime, rebase_offset: timedelta | None = None) -> dict:
-    """Where the session stands at `now`, from agenda + clock (+ rebase offset)."""
+def current_status(agenda: dict, now: datetime, rebase_offset: timedelta | None = None,
+                   speed: float = 1.0) -> dict:
+    """Where the session stands at `now`, from agenda + clock (+ rebase offset, speed).
+
+    With speed != 1 (a sped-up `run`), the real clock is mapped to agenda time
+    from the (rebased) agenda start: base + (now - base) * speed. Before the
+    base the clock is used as is (not_started). `now` in the output stays real.
+    """
     offset = rebase_offset or timedelta(0)
     phases = _phases(agenda, offset)
     events = build_events(agenda, offset)
+    real_now = now
+    base = phases[0][1]
+    if speed != 1 and now >= base:
+        now = base + (now - base) * speed
     upcoming = next((e for e in events if e.at > now), None)
     next_event = None if upcoming is None else {
         "type": upcoming.type, "phase": upcoming.phase, "at": upcoming.at.isoformat(),
         "in_minutes": _minutes(upcoming.at - now), "display": upcoming.display, **upcoming.data,
     }
-    status: dict = {"now": now.isoformat(), "state": "running", "phase": None,
+    status: dict = {"now": real_now.isoformat(), "state": "running", "phase": None,
                     "phase_end": None, "minutes_remaining": None, "driver": None,
                     "next_event": next_event,
-                    "rebase_offset_seconds": offset.total_seconds()}
+                    "rebase_offset_seconds": offset.total_seconds(), "speed": speed}
     if now < phases[0][1]:
         status.update(state="not_started", minutes_until_start=_minutes(phases[0][1] - now))
         return status
@@ -288,11 +305,21 @@ def current_status(agenda: dict, now: datetime, rebase_offset: timedelta | None 
     return status
 
 
-def _read_log(log_path: Path | None) -> tuple[timedelta | None, str | None]:
-    """(rebase offset of the last `started` record, last lifecycle state) from the log."""
+@dataclass(frozen=True)
+class LogInfo:
+    """What `status` needs from the timer log (last `started` record + lifecycle)."""
+
+    offset: timedelta | None = None
+    state: str | None = None
+    speed: float = 1.0
+    pid: int | None = None
+
+
+def _read_log(log_path: Path | None) -> LogInfo:
+    """Rebase offset, speed and pid of the last `started` record, and the last lifecycle state."""
     if log_path is None or not log_path.exists():
-        return None, None
-    offset, state = None, None
+        return LogInfo()
+    offset, state, speed, pid = None, None, 1.0, None
     for line in log_path.read_text(encoding="utf-8").splitlines():
         try:
             record = json.loads(line)
@@ -301,10 +328,32 @@ def _read_log(log_path: Path | None) -> tuple[timedelta | None, str | None]:
         kind = record.get("type")
         if kind == "started":
             offset = timedelta(seconds=float(record.get("rebase_offset_seconds") or 0))
+            speed = float(record.get("speed") or 1.0)
+            raw_pid = record.get("pid")
+            pid = int(raw_pid) if isinstance(raw_pid, int) else None
             state = "running"
         elif kind in ("ended", "interrupted"):
             state = kind
-    return offset, state
+    return LogInfo(offset, state, speed, pid)
+
+
+def _pid_alive(pid: int) -> bool:
+    """POSIX liveness probe; on Windows it cannot tell, so it answers True."""
+    if sys.platform == "win32":
+        return True
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def _timer_state(info: LogInfo) -> str | None:
+    if info.state == "running" and info.pid is not None and not _pid_alive(info.pid):
+        return "stale"
+    return info.state
 
 
 # ---------------------------------------------------------------------------
@@ -352,9 +401,9 @@ def main(argv: list[str] | None = None) -> int:
         agenda = _load_agenda(args.agenda)
         log_path = Path(args.log) if args.log else None
         if args.command == "status":
-            offset, timer_state = _read_log(log_path)
-            result = current_status(agenda, _local_now(), offset)
-            result["timer"] = timer_state
+            info = _read_log(log_path)
+            result = current_status(agenda, _local_now(), info.offset, info.speed)
+            result["timer"] = _timer_state(info)
             print(json.dumps(result, ensure_ascii=False, indent=2))
             return EXIT_OK
         if log_path is None and not args.dry_run:
