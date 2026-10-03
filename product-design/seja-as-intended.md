@@ -82,8 +82,8 @@ O desenho que estamos propondo desloca esse arranjo. Hoje temos:
 
 ![Design do software project](../docs/design-software-project.png)
 
-> **Figura 1 -- Design do software project** (desenho de origem, sessão com o Anax,
-> 2026-08-26). Leitura elemento a elemento no `Apêndice B`.
+> **Figura 1 -- Design do software project** (desenho de origem, sessão de design de 2026-08-26;
+> crédito: os designers). Leitura elemento a elemento no `Apêndice B`.
 
 <!-- P-002a -->
 **Ressalva que o desenho impõe (`P-002a`).** A Figura 1 mostra **duas setas entrando no
@@ -413,7 +413,7 @@ A intenção é não fingir que uma recomendação é a única plausível.
 
 ![Design do harness](../docs/designt-harnerss.png)
 
-> **Figura 2 -- Design do harness** (desenho de origem, sessão com o Anax, 2026-08-26).
+> **Figura 2 -- Design do harness** (desenho de origem, sessão de design de 2026-08-26; crédito: os designers).
 > Leitura elemento a elemento no `Apêndice B`.
 
 <!-- H-004 -->
@@ -777,7 +777,7 @@ Herdadas de `docs/foundations.md`, que é o primer em prosa desta mesma fundamen
 
 ## Apêndice A -- Notas de origem (verbatim)
 
-> Notas da conversa com o Anax, 2026-08-26, registradas literalmente conforme a
+> Notas da sessão de design entre os designers, 2026-08-26, registradas literalmente conforme a
 > disciplina do `/reflect`. Esta seção 1 é a leitura estruturada delas; o texto abaixo
 > é a fonte.
 
@@ -798,7 +798,7 @@ agente de IA dev assista o humano no desenvolvimento de software.
 ## Apêndice B -- Leitura dos desenhos
 
 > Os dois desenhos (`docs/design-software-project.png`, `docs/designt-harnerss.png`) foram
-> feitos na mesma sessão com o Anax que gerou as notas do `Apêndice A`. Nesta leitura,
+> feitos pelos designers na mesma sessão que gerou as notas do `Apêndice A`. Nesta leitura,
 > **branco = o arranjo herdado; vermelho = o que foi acrescentado na sessão.** Essa
 > distinção é significativa: o vermelho é, literalmente, a contribuição desta sessão.
 
@@ -870,17 +870,17 @@ ausência não é cosmética. Registrada em `Q-008`.
 
 ## CHANGELOG
 
-2026-08-26 | § 1 | added | - | Seção 1 (Princípios da engenharia semiótica) redigida a partir das notas da conversa com o Anax; P-001..P-007 registrados, H-001..H-004 registradas como hipóteses abdutivas, Q-001..Q-006 abertas
+2026-08-26 | § 1 | added | - | Seção 1 (Princípios da engenharia semiótica) redigida a partir das notas da sessão de design; P-001..P-007 registrados, H-001..H-004 registradas como hipóteses abdutivas, Q-001..Q-006 abertas
 2026-08-26 | Q-003 | held-open | - | detecção da posição na escala sustentada deliberadamente em aberto: depende de Q-002 (granularidade da escala), que precede
 2026-08-26 | Apêndice B | added | - | desenhos de origem (design do software project e design do harness) incorporados; P-002a acrescentado a partir da Figura 1 (duas vias de autoria sobre o código); Q-007..Q-010 abertas
 2026-09-18 | § 2 | added | - | Seção 2 (De AI-assisted a AI-Native: a hipótese) redigida: três fases como grão grosso de P-005, faixa EXPLAIN/COMMUNICATE, seta REDESIGN, trio as-conceived/as-intended/as-coded, governança como condição, Schön relido nas fases, harness que evolui da reflexão do time
 2026-09-18 | H-005 | added | - | três estados da intenção (as-conceived / as-intended / as-coded) e duas lacunas; só a segunda é verificável por máquina, a primeira é elicitável via P-003
 2026-09-18 | H-006 | added | - | skills e regras do harness evoluindo a partir dos registros de /reflect; WikiSkill (Tang et al., 2026) como referência e contraste
 2026-09-18 | Q-011..Q-013 | added | - | faixa contínua vs portão de P-005; método para avaliar a retradução; skill que consome os registros de /reflect
-2026-09-18 | Q-008 | answered | plan-000005 | fechada por D-001: o Agent WF de quatro itens da Figura 2 é o grão grosso do caminho canônico, não um ciclo sem validação
+2026-09-18 | Q-008 | answered | - | fechada por D-001: o Agent WF de quatro itens da Figura 2 é o grão grosso do caminho canônico, não um ciclo sem validação
 2026-09-18 | Q-004 | candidate | - | a faixa de 2.2 (etapa do post-skill que compara e devolve) é resposta candidata; segue aberta até o mecanismo rodar
 2026-09-18 | Q-006 | partial | - | seção ## Decisions criada neste arquivo independentemente da fusão com o template; D-NNN daqui ficam fora do decision digest e CHANGELOG_APPEND não aceita os IDs deste arquivo até o registro As-Intended/As-Coded e o regex do harness os conhecerem; Q-006 segue aberta só na fusão
 2026-09-18 | 1.2.4 | refined | - | reflexão-na-ação passa a incluir os microloops de PLAN e BUILD; /reflect se desdobra pelas lentes produto (sobre-a-ação) e prática (sobre-a-prática) -- ver 2.6
-2026-09-18 | H-007 | renumbered | plan-000004 | a hipótese que o plan-000004 (SEJA como serviço) propõe registrar passa a ser H-007, e a próxima questão aberta é Q-014
+2026-09-18 | H-007 | renumbered | - | a hipótese de SEJA como serviço passa a ser H-007, e a próxima questão aberta é Q-014
 2026-10-03 | H-008 | added | - | PLAN -> BUILD -> REFLECT de 2.1 como entrada, com portão determinístico por passo, reflexão transversal e espelho oferecido ao fim de cada fase (comunicação do plano, deriva do BUILD); fecha Q-008 por internalização; caso de H-004, dá condição operacional a D-001
 2026-10-03 | D-002 | added | - | o release apresenta as três fases como entrada, com o portão como condição, a taxa de escape do /critique final e os escapes de intenção como medidas, e /design obrigatório antes do ciclo; projetos sem portão ficam fora da medida
