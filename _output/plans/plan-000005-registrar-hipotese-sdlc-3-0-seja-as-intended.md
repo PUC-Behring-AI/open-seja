@@ -1,4 +1,4 @@
-# Plan 000005 | REDESIGN-O | 2026-09-18 14:28 | Registrar a hipótese SDLC 3.0 em seja-as-intended (seção 2 + Decisions) | Review: Light
+# DONE | 2026-10-03 16:02 UTC | Plan 000005 | REDESIGN-O | 2026-09-18 14:28 | Registrar a hipótese SDLC 3.0 em seja-as-intended (seção 2 + Decisions) | Review: Light
 plan_format_version: 1
 
 source: research log privado (arquivo Doutourado) -- mapear a hipótese SDLC 3.0 para o design-intent do open-seja
@@ -98,7 +98,7 @@ Rodar a suíte inteira depois: `pytest .claude/skills/scripts/tests/` (regressã
 - **Interface**: `human_markers_registry.HUMAN_MARKERS_FILES` contém `"product-design/seja-as-intended.md"`; `is_human_markers_file("product-design/seja-as-intended.md") -> True`
 - **Verify**: `pytest .claude/skills/scripts/tests/test_human_markers_registry.py` passa; `pytest .claude/skills/scripts/tests/` sem regressão; `python .claude/skills/scripts/apply_marker.py --file product-design/seja-as-intended.md --id Q-008 --marker STATUS --value proposed --dry-run` **não** retorna mais "is not classified as Human (markers)" (deve falhar adiante, com "entry id 'Q-008' not found", o que prova que o portão de allowlist foi passado sem escrever nada)
 - **Tests**: (1) quando `is_human_markers_file` recebe `"product-design/seja-as-intended.md"`, retorna `True`; (2) quando recebe a forma Windows `"product-design\\seja-as-intended.md"`, retorna `True` (cobre `normalize_path`); (3) quando recebe `"product-design/seja-as-intended.md.bak"` ou `"docs/seja-as-intended.md"`, retorna `False` (correspondência exata, não por sufixo); (4) para cada entrada de `HUMAN_MARKERS_FILES` que comece por `product-design/`, o arquivo existe em disco relativo à raiz do repo (`Path(__file__).resolve().parents[4]`) -- pega entrada morta na allowlist
-- [ ] Done
+- [x] Done
 
 ### Step 2: Entregar o bloco pronto para colar e o designer commitar a prosa por fora do post-skill
 
@@ -321,7 +321,7 @@ registrada em H-002. Abre Q-013.
 - **Interface**: N/A
 - **Verify**: `git log -1 --format=%s -- product-design/seja-as-intended.md` mostra o commit humano; `grep -c "^## Decisions$" product-design/seja-as-intended.md` = 1; `grep -n -A3 "^## Decisions" product-design/seja-as-intended.md` não mostra `---` antes de `## Referências`; `grep -c "<!-- H-005 -->\|<!-- H-006 -->" ...` = 2; a tabela de questões tem `Q-013`; `git status --porcelain product-design/seja-as-intended.md` vazio antes do Step 3
 - **Tests**: N/A (prosa humana)
-- [ ] Done
+- [x] Done
 
 ### Step 3: `--dry-run` e aplicar `D-001` via `DECISION_APPEND`, sem `--note`
 
@@ -353,7 +353,7 @@ Depois de aplicar, rodar `git add product-design/seja-as-intended.md && python3 
 - **Interface**: N/A
 - **Verify**: `--dry-run` imprime um diff em que `### D-001: O Agent WF de três fases ...` aparece **entre** `## Decisions` e `## Referências` (não depois de `## Referências`); após aplicar, `grep -n "^### D-001:" product-design/seja-as-intended.md` retorna uma linha com número menor que o de `## Referências`; `grep -c "Source:" product-design/seja-as-intended.md` = 0; `check_human_markers_only.py --staged` exit 0
 - **Tests**: N/A (marcador aplicado por script já coberto por `test_apply_marker.py::test_decision_append_first_entry`)
-- [ ] Done
+- [x] Done
 
 ### Step 4: Emendar o Step 6 do plan-000004 de forma aditiva
 
@@ -385,7 +385,7 @@ Origem: plan-000005 registrou `## Decisions` e `D-001` em `seja-as-intended.md`,
 - **Interface**: N/A
 - **Verify**: `git diff --stat` do arquivo mostra só linhas adicionadas (0 deletions); `grep -c "P4-S6-F" _output/plans/plan-000004-*.md` >= 8 (4 marcas + 4 substituições); os quatro fragmentos originais continuam presentes literalmente
 - **Tests**: N/A (artefato de plano)
-- [ ] Done
+- [x] Done
 
 ### Step 5: Verificações finais de C1 e das citações
 
@@ -404,7 +404,7 @@ Rodar, a partir da raiz do open-seja, antes do commit do post-skill:
 - **Interface**: N/A
 - **Verify**: itens 1, 2, 4 e 6 vazios/verdes; item 3 decidido e registrado na nota de reflexão do post-skill; item 5 sem divergência com o texto colado
 - **Tests**: N/A (verificação)
-- [ ] Done
+- [x] Done
 
 ## Outcomes
 
@@ -452,3 +452,17 @@ No inter-perspective conflicts detected.
 | Perspectives Adopted | 6 |
 | Perspectives Deferred (with rationale) | 0 |
 | Convergence reason | all resolved (Light: Phase 1 only) |
+
+## Implementation Summary
+
+Executado em modo manual, 5/5 passos, 2026-10-03 16:02 UTC.
+
+- Step 1: allowlist e teste ja estavam commitados (`536558a`); revalidados (6 testes verdes).
+- Step 2: prosa colada no arquivo (autorizacao do designer na sessao) e commitada por ele (`1c8b9e3`).
+- Step 3: `D-001` aplicado por `apply_marker.py` sem `--note`. O `check_human_markers_only.py --staged` reprovou as quatro linhas de corpo DDR (o regex de `DECISION_APPEND` so cobria o titulo). Por decisao do designer, o regex foi alargado em `human_markers_registry.py` para aceitar os rotulos `Context`, `Decision`, `Consequences`, `Rejected Alternatives`; dois testes novos em `test_check_human_markers_only.py`. Verificador passa (exit 0).
+- Step 4: plan-000004 emendado de forma aditiva (16 linhas, 0 remocoes; P4-S6-F1..F4).
+- Step 5: grep `stone|tecgraf` so acha o texto literal do comando; nenhum ID privado (o brief deste plano ja foi registrado com `research-NNNNNN`, entao o residual do item 3 nao existe); sem caracteres tipograficos; citacoes coladas sem alteracao.
+
+Desvio do plano: alteracao em `human_markers_registry.py` alem da allowlist (alarga `DECISION_APPEND`); pendencia para o upstream.
+
+Testes: suite de scripts 457 passam, 12 falham; as mesmas 12 falhavam antes do plano (base `536558a~1`: 446 passam, 12 falham). `run_all_checks.py`: falhas nao relacionadas (VERSION 0.7.1 vs CHANGELOG 0.9.1, worktrees orfaos de outros planos, checks de web app). `/critique review` nao foi executado.

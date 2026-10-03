@@ -204,3 +204,36 @@ def test_diff_from_file_with_env_var_allowed(tmp_path):
     diff = _write_diff(tmp_path, "")
     result = _run_with_registry(tmp_path, diff, allow_test_diff=True)
     assert result.returncode == 0
+
+
+def test_decision_append_entry_with_ddr_body_accepted(tmp_path):
+    diff_body = (
+        f"diff --git a/{MARKER_REL} b/{MARKER_REL}\n"
+        f"--- a/{MARKER_REL}\n"
+        f"+++ b/{MARKER_REL}\n"
+        "@@ -20,0 +21,8 @@\n"
+        "+### D-001: Sample decision title\n"
+        "+\n"
+        "+**Context**: Why the decision was needed.\n"
+        "+**Decision**: What was decided.\n"
+        "+**Consequences**: What follows from it.\n"
+        "+**Rejected Alternatives**: What was not chosen.\n"
+    )
+    result = _run_with_registry(tmp_path, _write_diff(tmp_path, diff_body))
+    assert result.returncode == 0, result.stderr
+    assert "PASS" in result.stdout
+
+
+def test_other_bold_label_lines_still_rejected(tmp_path):
+    # Only the four DDR labels are allowed; other prose that looks similar is not.
+    diff_body = (
+        f"diff --git a/{MARKER_REL} b/{MARKER_REL}\n"
+        f"--- a/{MARKER_REL}\n"
+        f"+++ b/{MARKER_REL}\n"
+        "@@ -20,0 +21,2 @@\n"
+        "+**Note**: slipped-in prose.\n"
+        "+Context: no bold markers.\n"
+    )
+    result = _run_with_registry(tmp_path, _write_diff(tmp_path, diff_body))
+    assert result.returncode == 1
+    assert "slipped-in prose" in result.stderr

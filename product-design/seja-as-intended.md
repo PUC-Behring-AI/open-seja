@@ -646,6 +646,13 @@ registrada em H-002. Abre Q-013.
 > Context / Decision / Consequences / Rejected Alternatives). Uma decisão fecha ou
 > reencaminha uma questão aberta; hipóteses não entram aqui até serem decididas.
 
+### D-001: O Agent WF de três fases é o grão grosso do caminho canônico; Q-008 fechada
+
+**Context**: A Figura 2 lista Research -> Plan -> Implement -> Reflect, mais curto que o ciclo de P-005. Q-008 perguntava se era simplificação do desenho ou proposta de ciclo sem validação.
+**Decision**: PLAN / BUILD / REFLECT são o caminho canônico em grão grosso: PLAN = investigar + dar forma; BUILD = `/implement` com `/critique` dentro; REFLECT = `/reflect`. O portão "validar antes de comunicar" permanece.
+**Consequences**: Q-008 fechada por testemunho do autor do desenho. `/document` e `/communicate` continuam depois de `/critique`; o "documentar" interno a BUILD é a voz do agente (nota do post-skill, as-coded), não artefato para leitor. Ver seção 2.1.
+**Rejected Alternatives**: tratar o Agent WF como ciclo reduzido sem `/critique` -- colide com o único invariante rígido do harness.
+
 ## Referências
 
 Herdadas de `docs/foundations.md`, que é o primer em prosa desta mesma fundamentação:

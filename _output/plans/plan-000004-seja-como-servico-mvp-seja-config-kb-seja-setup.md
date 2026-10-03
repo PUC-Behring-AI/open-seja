@@ -153,9 +153,15 @@ Fechar com o efeito sobre `P-003`, que é o mais consequente e o menos óbvio: a
 
 Redigir, ao fim de `docs/seja-as-a-service.md`, uma seção "Para registrar na intenção" contendo o bloco de prosa **pronto para colar** em `product-design/seja-as-intended.md`, e aplicar pelo script apenas o que o script sabe aplicar.
 
+> **Superseded por plan-000005 (2026-09-18) -- fragmento P4-S6-F2; ver Plan Amendment (iteração 2).**
+
 O bloco propõe: uma hipótese nova (o SEJA como serviço com fronteira própria, no registro abdutivo, com o que a confirmaria e o que a refutaria enunciados -- sem isso ela não entra) e as questões que a exploração abriu, entre elas a relação entre a pilha proposta e a Figura 2, a localização da KB frente ao Apêndice B.1 nota 2, e o `seja-config` como hospedeiro futuro do campo de escala que `Q-003` mantém em suspenso. Numerar continuando a sequência existente (a última hipótese é `H-004`, a última questão `Q-010`).
 
+> **Superseded por plan-000005 (2026-09-18) -- fragmento P4-S6-F1; ver Plan Amendment (iteração 2).**
+
 Registrar também, como achado do próprio passo, que o mecanismo de registro de decisão do SEJA **não está disponível neste arquivo**: `DECISION_APPEND` exige uma seção `## Decisions` que `seja-as-intended.md` não tem, de modo que decisões arquiteturais tomadas sobre o SEJA não têm hoje onde ser registradas em forma endereçável. Isso é matéria de `Q-006` (a relação entre este documento e o formato §0-§17 do template, que prevê `## Decisions`), e a questão nova deve apontar para ela em vez de propor a seção unilateralmente.
+
+> **Superseded por plan-000005 (2026-09-18) -- fragmento P4-S6-F3; ver Plan Amendment (iteração 2).**
 
 Não escrever a prosa no arquivo de intenção: ele é `Human (markers)`, e `check_human_markers_only.py` rejeita escrita de agente fora do padrão. `DECISION_APPEND` também não serve -- ele exige uma seção `## Decisions`, que `seja-as-intended.md` não tem. O que é aplicável é `CHANGELOG_APPEND`, e só após confirmação explícita do designer no mesmo turno:
 
@@ -172,6 +178,7 @@ Rodar sempre `--dry-run` primeiro e mostrar o diff antes de aplicar.
 - **References**: `.claude/references/general/shared-definitions.md` (classificação de manutenção), `.claude/skills/scripts/apply_marker.py`
 - **Depends on**: Step 1, Step 2, Step 3, Step 4, Step 5
 - **Interface**: N/A
+> **Superseded por plan-000005 (2026-09-18) -- fragmento P4-S6-F4; ver Plan Amendment (iteração 2).**
 - **Verify**: `apply_marker.py --dry-run` roda limpo e mostra o diff esperado; a hipótese proposta carrega condições de confirmação e refutação; a numeração continua de `H-004` e `Q-010`; a ausência da seção `## Decisions` está registrada e ligada a `Q-006`; nenhuma escrita direta em `seja-as-intended.md` fora do script
 - **Tests**: N/A (documento e marcador)
 - [ ] Done
@@ -298,3 +305,12 @@ Cinco emendas, todas aditivas. A seção `## Steps` foi atualizada no lugar (ún
 4. **SEC -> Step 3.** Acrescentado o bloco **fronteira de confiança na recuperação**: quem pode chamar, o que a chamada devolve, o que nunca sai do processo -- com os dois casos concretos (`conversation-trace.jsonl` e o mascaramento na escrita; trechos devolvidos fora do arquivo de origem). *Rationale*: as exclusões de ingestão não cobrem a segunda travessia, e o ponto do plano é justamente que quem chama deixa de ser só o Claude Code.
 
 5. **COMPAT -> Step 4.** Acrescentado o problema 2 (compatibilidade de projetos pré-KB e classificação SemVer da mudança), com recomendação a registrar -- KB aditiva e opcional no MVP, degradando para o comportamento atual quando ausente. O antigo problema 2 virou 3. *Rationale*: `.seja-version` e o modelo de release A2 dependem da classificação estar certa; deixá-la implícita é como o modelo de release quebra em silêncio.
+
+### Plan Amendment (iteração 2) -- 2026-09-18, por plan-000005
+
+Origem: plan-000005 registrou `## Decisions` e `D-001` em `seja-as-intended.md`, tomou `H-005`/`H-006` e `Q-011`..`Q-013`, e adicionou o arquivo a `HUMAN_MARKERS_FILES`. Quatro fragmentos do Step 6 ficam obsoletos; substituições:
+
+- **P4-S6-F1 ->** A seção `## Decisions` existe (entre `## Questões abertas` e `## Referências`, sem `---` antes de `## Referências`). Decisões que este plano assentar entram via `apply_marker.py --marker DECISION_APPEND --value "<título>\n**Context**: ...\n**Decision**: ...\n**Consequences**: ...\n**Rejected Alternatives**: ..."`, sem `--note`, `--dry-run` primeiro, confirmação explícita no mesmo turno. O achado sobre indisponibilidade do mecanismo não deve mais ser registrado; `Q-006` segue aberta só quanto à fusão com o template e ao decision digest.
+- **P4-S6-F2 ->** Numerar a hipótese deste plano como **`H-007`** e as questões novas a partir de **`Q-014`**.
+- **P4-S6-F3 ->** A prosa (H-007, Q-014..) continua sendo bloco pronto para colar, commitado pelo designer por fora do post-skill (o arquivo agora é guardado por `check_human_markers_only.py`). As linhas de `## CHANGELOG` também são prosa humana: `CHANGELOG_APPEND` não aceita os IDs (`H-NNN`, `Q-NNN`, `§ N`) nem as ações (`answered`, `candidate`, ...) deste arquivo. O comando de exemplo com `CHANGELOG_APPEND` não se aplica.
+- **P4-S6-F4 ->** Verify passa a ser: `apply_marker.py --dry-run` de `DECISION_APPEND` roda limpo quando houver decisão a registrar; a hipótese carrega condições de confirmação e refutação; a numeração é `H-007` / `Q-014`; nenhuma escrita direta em `seja-as-intended.md` pelo agente fora do script; o commit da prosa é humano e precede o commit de marcadores.

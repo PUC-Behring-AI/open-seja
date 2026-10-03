@@ -131,8 +131,14 @@ ALLOWED_MARKERS: dict[str, dict] = {
     "DECISION_APPEND": {
         # Appends a new ### D-NNN: section to the ## Decisions heading.
         # The value field carries the full DDR-shaped entry text.
-        # line_regex validates the heading line of the appended entry.
-        "line_regex": r"### D-\d{3}: .{1,200}",
+        # line_regex validates every line apply_marker.py writes for an entry: the
+        # heading, and the four DDR body labels (Context / Decision / Consequences /
+        # Rejected Alternatives). check_human_markers_only.py checks each diff line on
+        # its own, so the body lines must be allowed here or no entry could be committed.
+        "line_regex": (
+            r"### D-\d{3}: .{1,200}"
+            r"|\*\*(?:Context|Decision|Consequences|Rejected Alternatives)\*\*: .{1,2000}"
+        ),
         "allowed_values": None,
         "allowed_transitions": None,
     },
