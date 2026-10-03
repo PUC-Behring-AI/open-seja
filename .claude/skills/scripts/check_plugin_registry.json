@@ -80,6 +80,16 @@
     "critical": false
   },
   {
+    "script": "check_quality_gate.py",
+    "name": "Quality Gate",
+    "stack": {
+      "backend": ["any"],
+      "frontend": ["any"]
+    },
+    "scope": "gate",
+    "critical": true
+  },
+  {
     "script": "check_route_coverage.py",
     "name": "Route Coverage",
     "stack": {

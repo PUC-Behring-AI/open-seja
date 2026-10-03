@@ -44,6 +44,8 @@ Runs from the **target project** (not the source repo). Applies safe updates to 
 
 4. **Read project conventions**: read `product-design/conventions.md` for output-directory name and other project-specific paths.
 
+4b. **Quality gate check (before step 5)**: if the project has `gate.py` at its root, compare it with the project's own template copy (`.claude/references/template/quality-gate/python/gate.py`) BEFORE the auto-update of `.claude/references/template/**` overwrites it. Identical -> after the upgrade, replace the project's `gate.py` with the new template. Different (local changes) -> show the diff and ask whether to replace, keep, or merge. Never touch `.baseline` files in `QUALITY_DIR`.
+
 5. **Run upgrade script**: `python .claude/skills/scripts/upgrade_harness.py --from <source-path> --target . --new-version <resolved-tag>`. Add `--dry-run` for preview. Omit `--new-version` only on the pre-release HEAD fallback path. The script reads existing `.seja-version` for the banner's "from" half and writes the resolved tag on success.
 
 6. **Review summary**: highlight public-release pin change (e.g., `v0.1.0 -> v0.2.0`), internal harness version change, old-layout migration if any, new convention variables, files auto-updated vs needing manual merge.

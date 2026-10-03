@@ -136,6 +136,23 @@ metadata:
 
    Anchor name: `Scaffold-SmokeTestInfra`. Referenced by `/design` Update when the stack flips.
 
+7f. **Offer quality gate** (anchor: `Offer-QualityGate`). Runs before the initial commit (7b). Trigger: the Section 1 test answer includes `pytest`, regardless of `BACKEND_FRAMEWORK` (the CLI / library profile of 4c.3 is the typical case). Otherwise skip silently.
+
+   Ask with `AskUserQuestion` (rationale per C4):
+   - **Install the Python quality gate** -- Recommended when the project is Python with pytest and you want ruff, pyright, tests, CRAP and mutation checks behind one command with a human-owned baseline. NOT recommended when the project has no tests yet, is not Python, or you do not want extra dev dependencies.
+   - **Do not install** -- Recommended when you prefer to run your own checks. NOT recommended when agents will change code unattended.
+
+   On accept:
+   - Copy `.claude/references/template/quality-gate/python/gate.py` to the project root and `.../README.md` to `docs/quality-gate.md`.
+   - Show the block from `pyproject-dev.example.toml` and the matching `uv add --dev ...` command; do NOT run it.
+   - Append `## Quality Gate` to `product-design/conventions.md` with values in backticks: `GATE_FAST_CMD`, `GATE_FULL_CMD`, `GATE_COMMIT_CMD` (same value as `GATE_FULL_CMD`) and `QUALITY_DIR`.
+   - Add `_output/quality/`, `mutants/`, `.coverage` and `coverage.json` to `.gitignore`.
+   - Tell the user the first run must be `gate.py --init-baseline`.
+
+   On decline: do not emit the `## Quality Gate` section (absent = not installed; respects 4c.4, no placeholders).
+
+   Anchor name: `Offer-QualityGate`. Referenced by `--here` Step 4f.
+
 7b. **Initial commit**: `git add . && git commit -m "chore: set up SEJA harness"` in the target (or workspace) dir. Workspace+greenfield (2b created both): commit in both. Demo mode: this step runs after step 10 (so the commit includes demo files), not after 7. If `git commit` fails (git user.name/email unconfigured), warn and continue -- do not abort.
 
 8. **Handoff**: report the scaffolded stack summary and direct the user to `/design` for design-intent concerns. Construct the summary from the questionnaire answers: use the literal framework slugs for present stacks (e.g. `flask`, `react`) and the string `no backend` or `no frontend` when the user answered `framework: none`.

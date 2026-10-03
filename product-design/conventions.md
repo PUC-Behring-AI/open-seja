@@ -156,6 +156,18 @@
 
 ---
 
+## Quality Gate
+> Optional deterministic quality gate. Absent, empty, or `{{...}}` = gate not installed; the value must be in backticks for `project_config` to read it.
+
+| Variable | Value | Description |
+|----------|-------|-------------|
+| `GATE_FAST_CMD` |  | Fast gate command (lint, types, tests, CRAP); empty = gate not installed |
+| `GATE_FULL_CMD` |  | Full gate command (fast gate plus mutation testing); empty = gate not installed |
+| `GATE_COMMIT_CMD` |  | Commit hook command; install step 7f fills it with the `GATE_FULL_CMD` value; empty = no hook |
+| `QUALITY_DIR` | `${OUTPUT_DIR}/quality` | Directory for gate reports and baseline |
+
+---
+
 ## Workspace Deployment
 
 This project uses the **embedded** deployment pattern: `.claude/`, `product-design/`, and `_output/` live in the project root. `CODEBASE_DIR` is `.`. No companion-workspace separation is in use. Unlike a typical consumer project, this repo *is* the foundational SEJA harness source -- it is not itself installed via `/seja-setup <target>` from elsewhere; it was finalised in place via `/seja-setup --here` after being seeded from `simonedjb/seja`.
