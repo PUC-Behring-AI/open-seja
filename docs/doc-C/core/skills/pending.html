@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How-to guide for the /pending skill: list and address outstanding human actions from the pending ledger, flip status markers, and manage deferred work.">
+  <title>/pending — SEJA Documentation</title>
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>/pending</h1>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Skills</a></li>
+        <li aria-current="page">/pending</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge core-skills">skills</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="what-it-does">
+          <h2 id="what-it-does">What it does</h2>
+          <p><code>/pending</code> lists and addresses the outstanding human actions the harness is tracking for you. The ledger lives at <code>_output/pending.jsonl</code> and is append-only, so history is never lost. Invoked with no argument (or <code>list</code>), it groups every open item by type and prints each one with type-specific advice on how to resolve it &mdash; which skill to run, which file to open &mdash; then stops.</p>
+          <p>Six subcommands cover the full lifecycle: <strong>list</strong> (read-only listing with advice), <strong>address</strong> (a guided resolution workflow for marker-flip types), <strong>add</strong>, <strong>done</strong>, <strong>snooze</strong>, and <strong>dismiss</strong>. Action types the harness files include <code>implement</code>, <code>mark-implemented</code>, <code>test-implementation</code>, <code>verify-as-coded</code>, <code>update-documentation</code>, <code>apply-promote-markers</code>, <code>spec-drift-check</code>, <code>periodic-curation</code>, <code>incorporate-research-markers</code>, <code>create-decision-entry</code>, and <code>user-defined</code>. All state transitions flow through <code>pending.py</code>; the skill never writes to the ledger directly, and marker flips on Human (markers) files always go through <code>apply_marker.py</code>.</p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="when-to-run">
+          <h2 id="when-to-run">When to run it</h2>
+          <p>Run <code>/pending</code> after <code>/implement</code> if you chose to defer work for later review at post-skill, when pre-skill tells you there are pending actions, when the periodic curation trigger has fired, or any time you want to review what the harness is tracking for you.</p>
+          <p>Use <code>/pending address &lt;id&gt;</code> for a guided resolution of marker-flip types (it walks you through per-candidate confirmations), and <code>/pending add</code>, <code>done</code>, <code>snooze</code>, or <code>dismiss</code> to manage individual items. Pre-skill surfaces open items at the top of every skill invocation until they are resolved.</p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="how-it-fits">
+          <h2 id="how-it-fits">How it fits the lifecycle</h2>
+          <p><code>/pending</code> is a supporting skill that sits off the main lifecycle spine rather than at a fixed stage on it. The canonical path &mdash; <code>/research</code> &rarr; <code>/design</code> | <code>/plan</code> &rarr; <code>/implement</code> &rarr; <code>/critique</code> &rarr; <code>/document</code> | <code>/communicate</code> &rarr; <code>/reflect</code> &mdash; files pending actions at many points, and <code>/pending</code> is where you close the loop on them.</p>
+          <p><code>/pending</code> and <code>/critique</code> are intentionally separate: <code>/critique health</code> merely reports the pending-ledger count as a diagnostic, while every mutation of the ledger flows through <code>/pending</code>. Common follow-ups from a curated ledger are <code>/explain drift --promote</code> after addressing periodic-curation items and <code>/implement</code> once outstanding review items are cleared.</p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="../concepts/marker-system.html">Marker system</a> &mdash; the STATUS and INCORPORATED markers the address flow flips.</li>
+            <li><a href="critique.html">/critique</a> &mdash; its health mode reports the ledger count as a diagnostic.</li>
+            <li><a href="implement.html">/implement</a> &mdash; the step that most often files pending actions.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Skills</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

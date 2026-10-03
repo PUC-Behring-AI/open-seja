@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="SEJA's semiotic model: the four file classifications that decide who may write to a file, the traceability markers that stand in for design intent, and the epistemic stance the harness takes toward its own knowledge.">
+  <title>The Sign System — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/concepts sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>The Sign System</h1>
+      <p>Who may write to a file, what markers stand in for, and the epistemic posture behind them.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Concepts</a></li>
+        <li aria-current="page">The Sign System</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-explanation">explanation</span>
+          <span class="badge core-concepts">concepts</span>
+        </p>
+
+        <section data-diataxis="explanation" aria-labelledby="a-semiotic-model-of-authorship">
+          <h2 id="a-semiotic-model-of-authorship">A semiotic model of authorship</h2>
+          <p>
+            SEJA is grounded in semiotic engineering: the harness treats a software
+            project as a system of <em>signs</em> that carry the designer's meaning
+            to users, and it takes care that AI-generated changes never quietly
+            overwrite that meaning. The practical expression of this idea is a
+            <strong>sign system</strong> over the project's files: each file is
+            classified by <em>who may author its content</em>, and design intent is
+            made traceable through explicit markers. This page describes that model.
+          </p>
+          <aside class="callout-tip">
+            <strong>Boundary.</strong> This page covers the semiotic model &mdash;
+            the meaning behind the classifications and markers. The sibling
+            <a href="marker-system.html">Marker System</a> page covers the
+            operational mechanics: the marker syntax, the tooling that writes them,
+            and the enforcement that keeps agents inside the rules.
+          </aside>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="four-file-classifications">
+          <h2 id="four-file-classifications">Four file classifications</h2>
+          <p>
+            Every file in a SEJA project falls into one of four maintainer
+            classifications. The classification is not decoration: it decides
+            whether an agent may write prose to the file at all, or may touch only
+            its markers, or must leave it entirely to the designer.
+          </p>
+          <dl>
+            <dt>Human</dt>
+            <dd>
+              Authored by the human designer. The constitution and conventions are
+              the canonical examples: they encode the designer's non-negotiable
+              commitments and the project's ground truth. Agents read these files
+              constantly but do not rewrite them.
+            </dd>
+            <dt>Human (markers)</dt>
+            <dd>
+              The prose is human-authored, but the file also carries
+              machine-managed <em>markers</em> that track the lifecycle of
+              individual items. The design-intent and UX-research files are the
+              primary examples. Agents may write <strong>only</strong> the markers
+              &mdash; and only through <code>apply_marker.py</code>, never with a
+              direct <code>Edit</code> or <code>Write</code>. A verifier rejects any
+              non-marker change during the post-skill commit.
+            </dd>
+            <dt>Agent</dt>
+            <dd>
+              Generated and maintained by the harness: plans, research logs,
+              reflections, indexes, and the as-coded implementation record. These
+              are written by post-skill or designated skill steps and are never
+              hand-edited by the designer, so the machine-readable record cannot
+              silently diverge from the harness's validation scripts.
+            </dd>
+            <dt>Human / Agent</dt>
+            <dd>
+              Shared authorship: either party may write prose. The engineering and
+              design standards files are examples &mdash; a designer sets a standard
+              and an agent may later extend it, with no marker gate in between.
+            </dd>
+          </dl>
+          <p>
+            The dividing line that matters most runs between <em>design intent</em>
+            (human-authored, in Human and Human (markers) files) and
+            <em>implementation state</em> (agent-maintained, in Agent files). The
+            sign system exists to keep that line legible: an agent that wants to
+            record progress against a piece of design intent may set a marker on the
+            intent file, but it may not rewrite the intent itself.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="traceability-markers">
+          <h2 id="traceability-markers">Traceability markers</h2>
+          <p>
+            A marker is a small, structured HTML comment embedded next to an item of
+            design intent &mdash; a section, a row, a requirement. It is a
+            <em>sign that stands for a lifecycle fact</em>: &ldquo;this intended item
+            has been implemented,&rdquo; &ldquo;this decision is now
+            established,&rdquo; &ldquo;this research finding was incorporated.&rdquo;
+            Markers give design intent stable, greppable IDs (for example the
+            <code>D-NNN</code> decision namespace) so the harness can trace an idea
+            from a research question through to the commit that realised it.
+          </p>
+          <p>
+            Because markers are the only channel through which an agent may touch a
+            Human (markers) file, they are the hinge of the whole model. The agent
+            writes only the <code>STATUS</code>, <code>ESTABLISHED</code>,
+            <code>INCORPORATED</code>, <code>DECISION_APPEND</code>, and
+            <code>CHANGELOG_APPEND</code> markers &mdash; and only after the designer
+            confirms via an AskUserQuestion prompt. The prose around the marker stays
+            human-authored. This is how the harness records that intent has been met
+            without ever authoring the intent itself.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="the-epistemic-stance">
+          <h2 id="the-epistemic-stance">The epistemic stance</h2>
+          <p>
+            The sign system carries an <em>epistemic stance</em> as a preamble: SEJA
+            must surface what is <strong>not yet known</strong>, not only what has
+            been decided. Gaps, unverified assumptions, design debt, and open
+            questions are made visible &mdash; in gap-flagged topology cards,
+            heuristic-labelled coverage reports, and pending notices &mdash; rather
+            than silently omitted (constitution principle Q2).
+          </p>
+          <p>
+            This is why classification and markers are not merely permission
+            bookkeeping. A file left in the Human (markers) class with an
+            <em>unset</em> marker is itself a sign: it says the intended item has not
+            yet been implemented or established. The harness reads that absence and
+            reports it, rather than papering over it. Governance (who may write) and
+            epistemics (what is still unknown) are the two axes the sign system holds
+            together: governance without epistemic support produces brittleness,
+            epistemic support without governance produces drift (principle Q3).
+          </p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="marker-system.html">The Marker System</a> &mdash; the operational mechanics of markers and the tooling that writes them.</li>
+            <li><a href="enforcement-layers.html">Enforcement Layers</a> &mdash; how the classification rules are enforced at commit time.</li>
+            <li><a href="constitution.html">The Constitution</a> &mdash; the immutable principles the sign system serves.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Concepts</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/concepts sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

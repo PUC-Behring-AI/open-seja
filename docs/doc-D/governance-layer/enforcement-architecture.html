@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="4">
+  <meta name="doc-chapter" content="2">
+  <meta name="doc-phase" content="3">
+  <meta name="doc-status" content="draft">
+
+  <title>Enforcement Architecture -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 4: The Output and Governance Layer</a></li>
+      <li>Enforcement Architecture</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>Enforcement Architecture</h1>
+
+      <p>
+        SEJA enforces its governance model through a layered defense: advisory
+        checks that guide the agent during skill execution, blocking gates
+        that prevent bad commits from landing, and a comprehensive validation
+        orchestrator for CI pipelines. Each layer catches a different category
+        of issue. Together they ensure that design intent, privacy boundaries,
+        and authorship rules are maintained without relying on any single
+        checkpoint.
+      </p>
+
+      <!-- ============================================================ -->
+      <section id="multi-layer-enforcement" data-diataxis="explanation">
+        <h2>Multi-Layer Enforcement</h2>
+
+        <p>
+          Enforcement in SEJA operates at three layers, ordered from earliest
+          (in-session) to latest (CI pipeline). Each layer is designed so
+          that it catches issues that escaped the layer before it, and so
+          that the most disruptive failures are caught at the cheapest
+          point -- inside the skill session -- rather than after a commit
+          has already landed.
+        </p>
+
+        <h3>Layer 1: Post-Skill Advisory</h3>
+
+        <p>
+          After every skill execution, the post-skill lifecycle hook
+          (<code>.claude/skills/post-skill/SKILL.md</code>) runs a 13-step
+          pipeline. Several of these steps perform enforcement-relevant
+          checks:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Step 2e -- DONE marker proposal:</strong> the agent
+            proposes STATUS markers for as-intended items that appear to
+            have been implemented. The human confirms, defers, or skips
+            via <code>AskUserQuestion</code>.
+          </li>
+          <li>
+            <strong>Step 5 -- Git-state safety check:</strong> detects
+            rebase-in-progress, unmerged conflicts, or detached HEAD and
+            blocks the commit with a warning.
+          </li>
+          <li>
+            <strong>Step 6 -- Commit scope verification:</strong>
+            <code>verify_commit_scope.py</code> compares staged files
+            against the expected set for the skill and artifact type.
+            Unexpected files trigger a warning.
+          </li>
+          <li>
+            <strong>Step 6b -- Fast preflight gate:</strong>
+            <code>run_preflight_fast.py</code> runs the curated
+            subset of fast validation scripts (see Layer 2 below). At
+            this stage the gate is advisory -- it warns but does not
+            block, because post-skill runs after lengthy work and the
+            pre-commit hook provides the hard gate.
+          </li>
+          <li>
+            <strong>Step 6c -- Human markers verifier:</strong>
+            <code>check_human_markers_only.py --staged</code> rejects
+            any prose mutations in Human (markers) files. Violations
+            prompt an <code>AskUserQuestion</code> recommending abort.
+          </li>
+        </ul>
+
+        <p>
+          Advisory-layer checks surface problems early and give the agent
+          and designer the opportunity to correct them before any commit
+          is attempted. They do not block execution -- a designer can
+          choose to proceed -- but they ensure awareness.
+        </p>
+
+        <h3>Layer 2: Pre-Commit Blocking</h3>
+
+        <p>
+          The pre-commit hook (<code>.githooks/pre-commit</code>) is the
+          hard gate. It runs automatically on every <code>git commit</code>
+          and blocks the commit on failure. The hook executes two scripts
+          in sequence:
+        </p>
+
+        <ol>
+          <li>
+            <code>run_preflight_fast.py</code> -- runs a curated set of
+            fast validation checks designed to complete in under 10
+            seconds. These include convention consistency, retired-token
+            detection, skill-system integrity, secrets scanning,
+            skill-spec compliance, version-changelog sync, design-output
+            validation, plan coverage (blocking mode), human-markers
+            enforcement, changelog append-only verification,
+            section-boundary write enforcement, harness reference
+            coverage, docs frontmatter validation, mantra-banner
+            consistency, and (in <code>seja-priv</code>) the private-leak,
+            call-graph, and harness-reference freshness checks.
+          </li>
+          <li>
+            <code>check_no_private_leaks.py --staged</code> -- scans
+            staged <code>.md</code> files for private content that would
+            leak to <code>seja-public</code> on the next sync. This is
+            the pre-sync leak gate (see the
+            <a href="#leak-prevention">Leak Prevention</a> section
+            below).
+          </li>
+        </ol>
+
+        <p>
+          To install the pre-commit hook, run
+          <code>bash .githooks/install.sh</code> once per clone. The
+          install script sets <code>core.hooksPath</code> to
+          <code>.githooks/</code>. The hook can be bypassed with
+          <code>git commit --no-verify</code>, but constitution S2
+          prohibits this without explicit designer approval recorded in
+          a D-NNN decision entry.
+        </p>
+
+        <h3>Layer 3: CI Coverage</h3>
+
+        <p>
+          <code>run_all_checks.py</code> is the CI-independent validation
+          orchestrator. It discovers and runs every
+          <code>check_*.py</code> script in the
+          <code>.claude/skills/scripts/</code> directory and its
+          co-located skill subdirectories. Unlike
+          <code>run_preflight_fast.py</code> (which runs a curated
+          subset optimized for speed), <code>run_all_checks.py</code>
+          provides full coverage including checks that are too slow or
+          too broad for the pre-commit hook -- such as
+          lifecycle-fact-uniqueness, which performs O(N^2) comparisons
+          and can produce false positives during transitional doc states.
+        </p>
+
+        <p>
+          Key features of the CI orchestrator:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Automatic discovery:</strong> finds all
+            <code>check_*.py</code> scripts without a manual registry.
+          </li>
+          <li>
+            <strong>Stack filtering:</strong>
+            <code>--filter flask</code> or
+            <code>--filter react</code> limits execution to checks
+            matching the project's stack (via
+            <code>check_plugin_registry.json</code>).
+          </li>
+          <li>
+            <strong>JUnit XML output:</strong>
+            <code>--junit results.xml</code> produces a report
+            consumable by CI platforms.
+          </li>
+          <li>
+            <strong>Unified exit codes:</strong> 0 (all pass), 1 (one or
+            more failures), 2 (orchestrator error).
+          </li>
+        </ul>
+
+        <h3>Why Three Layers</h3>
+
+        <p>
+          Each layer catches a different category of problem at a
+          different cost point:
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Layer</th>
+                <th>When it runs</th>
+                <th>Blocking?</th>
+                <th>What it catches</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Post-skill advisory</td>
+                <td>End of every skill session</td>
+                <td>No (warns, recommends)</td>
+                <td>Scope contamination, unauthorized prose edits, missing markers, git-state anomalies</td>
+              </tr>
+              <tr>
+                <td>Pre-commit blocking</td>
+                <td>Every <code>git commit</code></td>
+                <td>Yes (blocks commit)</td>
+                <td>Convention drift, secrets, stale manifests, private-content leaks, human-marker violations</td>
+              </tr>
+              <tr>
+                <td>CI coverage</td>
+                <td>CI pipeline or on-demand</td>
+                <td>Yes (fails the build)</td>
+                <td>Full validation suite including slow/broad checks excluded from the pre-commit hot path</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          A problem detected at Layer 1 costs seconds to fix. The same
+          problem detected at Layer 3 costs a CI round-trip. The layered
+          model ensures that most issues never reach Layer 3.
+        </p>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="human-markers-classification" data-diataxis="reference">
+        <h2>Human (markers) Classification</h2>
+
+        <p>
+          The File Maintainer Classification (defined in
+          <code>.claude/references/general/shared-definitions.md</code>)
+          assigns one of four values to every reference file:
+          <strong>Human</strong>, <strong>Human (markers)</strong>,
+          <strong>Agent</strong>, and <strong>Human / Agent</strong>.
+          Files classified as <strong>Human (markers)</strong> are
+          governed by constitution T2: the prose in these files belongs
+          exclusively to the human designer, and agents may write only
+          fixed-format lifecycle markers via
+          <code>apply_marker.py</code> -- never direct prose.
+        </p>
+
+        <h3>What Agents May Write</h3>
+
+        <p>
+          The allowed marker types are defined in
+          <code>human_markers_registry.py</code> and enforced by
+          <code>check_human_markers_only.py</code>:
+        </p>
+
+        <ul>
+          <li>
+            <strong>STATUS:</strong> lifecycle state tracking
+            (<code>proposed</code>, <code>implemented</code>,
+            <code>established</code>, <code>superseded</code>, or
+            legacy uppercase <code>IMPLEMENTED</code>).
+          </li>
+          <li>
+            <strong>ESTABLISHED:</strong> legacy promotion stamp,
+            retained for migration.
+          </li>
+          <li>
+            <strong>INCORPORATED:</strong> records absorption of
+            research findings into design.
+          </li>
+          <li>
+            <strong>CHANGELOG_APPEND:</strong> timestamped changelog
+            entries with HTML-injection prevention.
+          </li>
+          <li>
+            <strong>DECISION_APPEND:</strong> new DDR-shaped
+            <code>### D-NNN:</code> decision entries appended to the
+            Decisions section.
+          </li>
+          <li>
+            <strong>REQ_TRACED_BY:</strong> annotates existing
+            <code>&lt;!-- REQ-TYPE-NNN --&gt;</code> markers with a
+            traced-by pseudo-plan.
+          </li>
+        </ul>
+
+        <p>
+          Every marker write must pass through
+          <code>apply_marker.py</code> after explicit
+          <code>AskUserQuestion</code> confirmation in the same turn.
+          The <code>check_human_markers_only.py</code> verifier parses
+          the staged git diff, filters to files in the registry, and
+          rejects any added or removed non-blank line that does not
+          match an allowed marker regex. Violations block the commit
+          during post-skill step 6c and during the pre-commit hook via
+          <code>run_preflight_fast.py</code>.
+        </p>
+
+        <h3>Registered Human (markers) Files</h3>
+
+        <p>
+          The following files are registered in
+          <code>human_markers_registry.py</code>:
+        </p>
+
+        <ul>
+          <li><code>.claude/skills/scripts/tests/fixtures/marker_fixture.md</code> (test fixture)</li>
+          <li><code>.claude/references/template/ux-research-results.md</code></li>
+          <li><code>product-design/ux-research-results.md</code></li>
+          <li><code>.claude/references/template/product-design-as-intended.md</code></li>
+          <li><code>product-design/product-design-as-intended.md</code></li>
+        </ul>
+
+        <p>
+          Both the template and project paths are registered for each
+          real file. The template path is what <code>/design</code> seeds
+          (and what harness-level tests touch); the project path is what
+          designer commits exercise via post-skill step 2e. For a
+          detailed treatment of the marker system itself -- types,
+          formats, state transitions, and the promote workflow -- see
+          <a href="../design-layer/marker-system.html">Vol. 2 Ch. 4: The Marker System</a>.
+        </p>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="leak-prevention" data-diataxis="reference">
+        <h2>Leak Prevention</h2>
+
+        <p>
+          <code>check_no_private_leaks.py</code>
+          (<code>.claude/skills/scripts/priv/check_no_private_leaks.py</code>)
+          enforces the boundary between private
+          (<code>seja-priv</code>) and public (<code>seja-public</code>)
+          content. Constitution S1 codifies this invariant: private
+          content -- design files, research logs, plans, product-design
+          files, and the constitution itself -- must never reach
+          <code>seja-public</code> without explicit opt-in. Accidental
+          exposure is irreversible once cached by search engines or CI
+          logs.
+        </p>
+
+        <h3>What the Script Prevents</h3>
+
+        <p>
+          The script operates in three modes, each targeting a different
+          stage of the content lifecycle:
+        </p>
+
+        <dl>
+          <dt>Pre-commit gate (<code>--staged</code>)</dt>
+          <dd>
+            Scans staged <code>.md</code> files in
+            <code>seja-priv</code> before they are committed. For each
+            file, it applies the same strip-private-sections transform
+            as <code>sync_to_public.py</code> (removing content between
+            <code>&lt;!-- priv-only-start --&gt;</code> and
+            <code>&lt;!-- priv-only-end --&gt;</code> markers), then
+            checks the stripped output for residual priv-only markers
+            (indicating malformed or unbalanced marker pairs) and
+            private-content fingerprints that survived the strip. Files
+            under <code>product-design/</code>,
+            <code>_output/</code>,
+            <code>.claude/skills/scripts/priv/</code>, and
+            <code>seja-public/</code> are excluded from staged-file
+            scanning because they are private by convention.
+          </dd>
+
+          <dt>Candidate scan (<code>--candidate DIR</code>)</dt>
+          <dd>
+            Performs a full leak scan of a candidate publish directory.
+            Used by <code>pre_publish_smoke.py</code> to validate a
+            publish workspace before release. Checks for priv-only
+            markers, private files (e.g.,
+            <code>generate_changelog_data.py</code>), private
+            directories (<code>priv/</code>, <code>project/</code>),
+            private patterns, and SKILL.md content fingerprints.
+          </dd>
+
+          <dt>Default mode (no arguments)</dt>
+          <dd>
+            Scans authored prose in
+            <code>seja-public/</code> (top-level <code>*.md</code> and
+            <code>docs/**/*.md</code>) for residual priv-only markers.
+            Also warns if
+            <code>seja-public/.claude/</code> exists on disk (it should
+            have been cleaned up after the last publish).
+          </dd>
+        </dl>
+
+        <h3>Content Fingerprints</h3>
+
+        <p>
+          Beyond marker stripping, the script maintains a list of
+          content fingerprints -- patterns like <code>--harness</code>,
+          <code>seja-priv</code>, <code>sync_to_public</code>,
+          <code>scripts/priv</code>, and
+          <code>pre_publish_smoke</code> -- that are inherently private
+          terminology. These fingerprints are checked only in
+          <code>SKILL.md</code> files (other files may legitimately
+          reference these terms). Matches inside fenced code blocks are
+          ignored.
+        </p>
+
+        <h3>Where It Runs</h3>
+
+        <ul>
+          <li>
+            <strong>Pre-commit hook:</strong> the
+            <code>.githooks/pre-commit</code> script runs
+            <code>check_no_private_leaks.py --staged</code> as its
+            second gate (after <code>run_preflight_fast.py</code>).
+            A failure blocks the commit.
+          </li>
+          <li>
+            <strong>Preflight fast checks:</strong>
+            <code>run_preflight_fast.py</code> includes the
+            <code>no-private-leaks</code> check in its curated set
+            (priv-only; silently omitted in public repos where the
+            <code>priv/</code> directory is absent).
+          </li>
+          <li>
+            <strong>Publish pipeline:</strong>
+            <code>pre_publish_smoke.py</code> calls
+            <code>check_no_private_leaks.py --candidate</code> to
+            validate the workspace before tagging a release.
+          </li>
+        </ul>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="path-scoped-rules" data-diataxis="reference">
+        <h2>Path-Scoped Rules</h2>
+
+        <p>
+          SEJA uses 7 rule files in <code>.claude/rules/</code> that are
+          auto-loaded when the agent works on files matching their
+          declared path scope. Each rule file surfaces domain-specific
+          review questions, standards references, and P0 review
+          perspectives relevant to the files being edited.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Rule File</th>
+                <th>Scope (path patterns)</th>
+                <th>Summary</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>backend.md</code></td>
+                <td><code>backend/**</code></td>
+                <td>Surfaces P0 review questions for security, database, and architecture alongside backend standards</td>
+              </tr>
+              <tr>
+                <td><code>frontend.md</code></td>
+                <td><code>frontend/src/**</code></td>
+                <td>Loads UX, accessibility, visual design, and responsive-behaviour review lenses with frontend and testing conventions</td>
+              </tr>
+              <tr>
+                <td><code>tests.md</code></td>
+                <td><code>**/*.test.*</code>, <code>**/test_*.py</code>, <code>backend/tests/**</code></td>
+                <td>Surfaces testability and developer-experience review questions alongside testing conventions</td>
+              </tr>
+              <tr>
+                <td><code>i18n.md</code></td>
+                <td><code>frontend/src/i18n/**</code>, <code>backend/translations/**</code></td>
+                <td>Loads internationalization review questions covering missing keys, locale formatting, plural rules, and RTL</td>
+              </tr>
+              <tr>
+                <td><code>migrations.md</code></td>
+                <td><code>backend/migrations/**</code></td>
+                <td>Surfaces database-change and security review questions for reversibility, data-loss risk, and lock behaviour</td>
+              </tr>
+              <tr>
+                <td><code>e2e.md</code></td>
+                <td><code>e2e/**</code></td>
+                <td>Loads testability, UX, and accessibility review lenses for end-to-end test files</td>
+              </tr>
+              <tr>
+                <td><code>harness-structure.md</code></td>
+                <td><code>.claude/**</code></td>
+                <td>Loads the harness structural inventory -- skills, agents, scripts, references, and rules</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Rules are loaded automatically by Claude Code's built-in
+          path-matching mechanism. When a file matching a rule's
+          <code>paths</code> pattern is opened for editing, the
+          corresponding rule content is injected into the agent's
+          context. This ensures that domain-specific governance is
+          always active without requiring the designer to remember which
+          standards apply.
+        </p>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="anti-patterns" data-diataxis="how-to">
+        <h2>Anti-patterns</h2>
+
+        <p>
+          The following practices undermine SEJA's enforcement
+          guarantees. Each pattern describes what goes wrong and what
+          to do instead.
+        </p>
+
+        <dl>
+          <dt>Bypassing the lifecycle</dt>
+          <dd>
+            <p>
+              Running code changes without first creating a plan via
+              <code>/plan</code>. Without a plan, there is no artifact
+              trail, no commit-scope verification, no coverage check,
+              and no post-skill alignment. The enforcement layers
+              assume a plan exists; skipping it disables most of their
+              value.
+            </p>
+            <p>
+              <strong>Instead:</strong> always start with
+              <code>/plan</code> (or <code>/plan --light</code> for
+              small changes). The plan is the anchor that connects
+              design intent to implementation to verification.
+            </p>
+          </dd>
+
+          <dt>Hand-editing Human (markers) files</dt>
+          <dd>
+            <p>
+              Directly editing the prose or markers in files classified
+              as Human (markers) -- such as
+              <code>product-design-as-intended.md</code> or
+              <code>ux-research-results.md</code> -- outside of
+              <code>apply_marker.py</code>. The
+              <code>check_human_markers_only.py</code> verifier will
+              reject the diff, and the commit will be blocked at the
+              pre-commit hook.
+            </p>
+            <p>
+              <strong>Instead:</strong> use
+              <code>apply_marker.py</code> for all marker writes, and
+              edit prose content as the human designer (not through the
+              agent). The agent proposes marker changes via
+              <code>AskUserQuestion</code> and routes confirmed changes
+              through the designated script.
+            </p>
+          </dd>
+
+          <dt>Skipping pre-commit hooks</dt>
+          <dd>
+            <p>
+              Using <code>git commit --no-verify</code> to bypass the
+              pre-commit hook chain. Constitution S2 explicitly
+              prohibits this without designer approval recorded in a
+              D-NNN decision entry. The hook is the last automated
+              gate before private content, convention violations, or
+              stale manifests land in the repository.
+            </p>
+            <p>
+              <strong>Instead:</strong> fix the failing check. If a
+              legitimate exception is needed, document it in a D-NNN
+              decision record first, then bypass with full
+              traceability.
+            </p>
+          </dd>
+
+          <dt>Mixing private content into public docs</dt>
+          <dd>
+            <p>
+              Allowing <code>seja-priv</code> content -- design
+              rationale, internal research, decision records,
+              product-design files -- to reach
+              <code>seja-public</code>. Constitution S1 codifies the
+              invariant: private content must never cross the boundary
+              without explicit opt-in. The leak is irreversible once
+              cached by search engines or CI pipelines.
+            </p>
+            <p>
+              <strong>Instead:</strong> wrap private content in
+              <code>&lt;!-- priv-only-start --&gt;</code> /
+              <code>&lt;!-- priv-only-end --&gt;</code> markers so the
+              sync tool strips it automatically. The pre-commit hook
+              and publish pipeline both verify that no private
+              fingerprints survive the strip.
+            </p>
+          </dd>
+
+          <dt>Circumventing constitution principles without D-NNN decision records</dt>
+          <dd>
+            <p>
+              Overriding or ignoring a constitution-level constraint
+              (T1-T4, Q1-Q3, S1-S2, C1-C2) without creating a formal
+              decision entry. The constitution is loaded into every
+              agent context via pre-skill and takes precedence over all
+              other guidance. Silent violations erode the governance
+              model because they leave no audit trail.
+            </p>
+            <p>
+              <strong>Instead:</strong> if a constitution principle
+              genuinely needs to be amended or temporarily overridden,
+              create a D-NNN decision entry documenting the context,
+              the decision, and the consequences. The entry provides
+              traceability and ensures the override is deliberate.
+            </p>
+          </dd>
+        </dl>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 4: The Output and Governance Layer</h2>
+    <ol>
+      <li>
+        <a href="output-artifacts.html">Output Artifacts</a>
+      </li>
+      <li aria-current="page">
+        <a href="enforcement-architecture.html">Enforcement Architecture</a>
+        <ul>
+          <li><a href="#multi-layer-enforcement">Multi-Layer Enforcement</a></li>
+          <li><a href="#human-markers-classification">Human (markers) Classification</a></li>
+          <li><a href="#leak-prevention">Leak Prevention</a></li>
+          <li><a href="#path-scoped-rules">Path-Scoped Rules</a></li>
+          <li><a href="#anti-patterns">Anti-patterns</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="scripts-and-automation.html">Scripts and Automation</a>
+      </li>
+      <li>
+        <a href="maintenance-and-drift.html">Maintenance and Drift</a>
+      </li>
+      <li>
+        <a href="release-and-publishing.html">Release and Publishing</a>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="output-artifacts.html">Previous: Output Artifacts</a>
+    <a href="scripts-and-automation.html">Next: Scripts and Automation</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

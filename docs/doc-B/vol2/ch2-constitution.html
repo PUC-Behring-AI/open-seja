@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="2">
+  <meta name="doc-chapter" content="2">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+
+  <title>The Constitution -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 2: The Design Layer</a></li>
+      <li>The Constitution</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>The Constitution</h1>
+
+      <p>
+        If the metacommunication message is the apex of the design layer,
+        the constitution is its bedrock. It is the one file whose contents
+        the agent is never permitted to override, work around, or quietly
+        reinterpret. Where design-intent files evolve as understanding
+        deepens, the constitution holds a small set of principles fixed:
+        the non-negotiable commitments on architecture, quality, security,
+        and compliance that every skill and every subagent must observe.
+        This chapter documents what a constitution contains, how you write
+        and maintain one over the life of a project, and why immutability --
+        anchored by the constitution's place in the pre-skill load order --
+        is the property that makes it worth having at all.
+      </p>
+
+      <p>
+        The live file lives at <code>product-design/constitution.md</code>.
+        New projects start from the template at
+        <code>.claude/references/template/constitution.md</code>, which
+        <code>/seja-setup</code> copies into place and <code>/design</code>
+        instantiates with project-specific principles.
+      </p>
+
+      <!-- Section 1: What a Constitution Contains (reference) -->
+      <section data-diataxis="reference" id="what-it-contains">
+        <h2>What a Constitution Contains</h2>
+
+        <p>
+          A SEJA constitution is a short Markdown file with a fixed section
+          structure. The template defines the sections; a project fills them
+          in. The document is deliberately small -- it should change rarely,
+          and every row in it is a hard rule rather than an aspiration.
+        </p>
+
+        <h3>Section Structure</h3>
+
+        <p>
+          The template and the live SEJA constitution share the same
+          skeleton. From top to bottom:
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Section</th>
+              <th>Column headings</th>
+              <th>What it records</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Project Identity</td>
+              <td>(prose)</td>
+              <td>A one-sentence mission statement and, optionally, the
+              primary users or audience. No table -- just the project's
+              name and reason to exist.</td>
+            </tr>
+            <tr>
+              <td>Technical Principles</td>
+              <td>#, Principle, Rationale</td>
+              <td>Non-negotiable architectural decisions, numbered
+              <code>T1</code>, <code>T2</code>, ... Hard rules, not
+              preferences.</td>
+            </tr>
+            <tr>
+              <td>Quality Principles</td>
+              <td>#, Principle, Rationale</td>
+              <td>Quality gates that cannot be bypassed, numbered
+              <code>Q1</code>, <code>Q2</code>, ...</td>
+            </tr>
+            <tr>
+              <td>Security Invariants</td>
+              <td>#, Invariant, Rationale</td>
+              <td>Security rules that must never be relaxed without explicit
+              sign-off, numbered <code>S1</code>, <code>S2</code>, ...</td>
+            </tr>
+            <tr>
+              <td>Compliance Requirements</td>
+              <td>#, Requirement, Regulation/Contract</td>
+              <td>Regulatory, contractual, or policy obligations, numbered
+              <code>C1</code>, <code>C2</code>, ... Left empty if none
+              apply.</td>
+            </tr>
+            <tr>
+              <td>Enforcement</td>
+              <td>(prose)</td>
+              <td>How the principles are loaded and checked, and the rule
+              for amending the document.</td>
+            </tr>
+            <tr>
+              <td>Changelog</td>
+              <td>(prose)</td>
+              <td>Versioned amendment history. Because the constitution
+              changes rarely, this section stays short.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Each principle carries its own ID prefix -- <code>T</code> for
+          technical, <code>Q</code> for quality, <code>S</code> for
+          security, <code>C</code> for compliance -- so that a plan, a
+          critique finding, or a decision record can cite the exact
+          principle it engages (for example, "blocked by <code>S1</code>").
+          Every row except the compliance table pairs the rule with a
+          <strong>Rationale</strong>: the reason the line exists. The
+          compliance table records the governing <strong>Regulation or
+          Contract</strong> in place of a free-form rationale.
+        </p>
+
+        <h3>The designer_description Header</h3>
+
+        <p>
+          The file opens with a YAML front-matter block containing a single
+          <code>designer_description</code> field written in the designer's
+          first-person voice. It is a human-facing narrative -- the file
+          introducing itself -- not a machine field, and it is preserved
+          verbatim (never compressed) through any maintenance pass.
+        </p>
+
+        <h3>A Worked Example</h3>
+
+        <p>
+          SEJA's own constitution is private to <code>seja-priv</code> and
+          instantiates this structure with eleven principles. A few
+          representative rows show the shape:
+        </p>
+
+        <div class="table-container">
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Section</th>
+              <th>Principle (abbreviated)</th>
+              <th>Rationale (abbreviated)</th>
+              <th>Cites</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>T1</code></td>
+              <td>Technical</td>
+              <td>Every user-facing skill starts with pre-skill and ends
+              with post-skill; skills may opt out of non-critical stages but
+              never skip pre-skill entirely.</td>
+              <td>Lifecycle discipline is the core value SEJA provides;
+              bypassing it defeats the governance model.</td>
+              <td>Lifecycle</td>
+            </tr>
+            <tr>
+              <td><code>Q1</code></td>
+              <td>Quality</td>
+              <td>Design intent is authoritative; no plan or implementation
+              step may contradict the metacommunication message or
+              constitution without an explicit <code>D-NNN</code> decision
+              record.</td>
+              <td>A plan that silently overrides design intent is a
+              governance failure.</td>
+              <td>Design authority</td>
+            </tr>
+            <tr>
+              <td><code>S1</code></td>
+              <td>Security</td>
+              <td>Private <code>seja-priv</code> content must never reach
+              <code>seja-public</code> without explicit opt-in; the
+              pre-commit hook runs
+              <code>check_no_private_leaks.py --staged</code> on every
+              commit.</td>
+              <td>Accidental exposure is irreversible once cached by search
+              engines or CI logs.</td>
+              <td>Privacy</td>
+            </tr>
+            <tr>
+              <td><code>C1</code></td>
+              <td>Compliance</td>
+              <td>GitHub repositories created via SEJA tooling must always
+              use <code>--private</code>.</td>
+              <td>Regulation/Contract: the "Private repositories only"
+              global rule.</td>
+              <td>Policy</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          Notice what these rows have in common: each is testable, each is a
+          line that a proposal could cross, and each carries the reason it
+          exists. That is the bar for constitution content. A rule you
+          cannot picture a plan violating does not belong here -- it belongs
+          in conventions or design intent, where the agent has room to
+          decide.
+        </p>
+      </section>
+
+      <!-- Section 2: Writing and Maintaining One (how-to) -->
+      <section data-diataxis="how-to" id="writing-and-maintaining">
+        <h2>Writing and Maintaining One</h2>
+
+        <p>
+          You do not author a constitution from a blank page. You start from
+          the template, fill in only the principles that are genuinely
+          immutable for your project, and then let the document accrete
+          slowly -- one amendment at a time, each justified by a decision
+          record.
+        </p>
+
+        <h3>Starting from the Template</h3>
+
+        <ol>
+          <li>
+            Confirm the template has been copied to
+            <code>product-design/constitution.md</code>.
+            <code>/seja-setup</code> does this for new projects; if the
+            file is missing, copy
+            <code>.claude/references/template/constitution.md</code> into
+            place yourself.
+          </li>
+          <li>
+            Replace the identity placeholder. Fill
+            <code>{{PROJECT_NAME}}</code> and the one-sentence mission, and
+            add a sentence about primary users if it clarifies scope.
+          </li>
+          <li>
+            Fill each principle table. The template ships example rows as
+            HTML comments (<code>&lt;!-- Example: ... --&gt;</code>) and
+            placeholder rows marked with <code>{{...}}</code>. Replace the
+            placeholders with your real rules, delete unused rows, and
+            <strong>delete the example comments</strong> once you have
+            written your own.
+          </li>
+          <li>
+            Leave sections empty where they do not apply. A project with no
+            regulatory obligations leaves the Compliance Requirements table
+            empty rather than inventing rows to fill it.
+          </li>
+          <li>
+            Write the first changelog entry. The template's
+            <code>### v1 -- {{YYYY-MM-DD HH:MM UTC}}</code> stub records that
+            the constitution was created; replace the timestamp with a real
+            one and note how the principles were derived.
+          </li>
+        </ol>
+
+        <p>
+          In practice <code>/design</code> drives this interactively. SEJA's
+          own constitution, for instance, was created via
+          <code>/design</code> in interview-driven mode, with its principles
+          derived from a confirmed interview exchange and mapped onto the
+          template's Technical / Quality / Security / Compliance sections --
+          exactly the workflow above, run as a conversation rather than by
+          hand.
+        </p>
+
+        <h3>Iterating Through Decision Records</h3>
+
+        <p>
+          Once written, the constitution should change rarely -- but "rarely"
+          is not "never." When a genuine need arises to add, remove, or
+          reword a principle, the change does not happen inline and
+          unannounced. It goes through the amendment discipline the
+          Enforcement section itself declares:
+        </p>
+
+        <ol>
+          <li>
+            <strong>Record the decision.</strong> Capture the reasoning as a
+            <code>D-NNN</code> decision record in
+            <code>product-design/product-design-as-intended.md</code>,
+            written via <code>apply_marker.py</code> with a
+            <code>DECISION_APPEND</code> marker. The decision explains why
+            the immutable line is moving.
+          </li>
+          <li>
+            <strong>Get explicit approval.</strong> The Enforcement section
+            requires that any amendment be explicitly approved by the
+            project lead -- the constitution is not something the agent may
+            revise on its own initiative.
+          </li>
+          <li>
+            <strong>Amend the file and the changelog.</strong> Make the
+            edit, then add a new versioned entry to the Changelog section
+            recording what changed and when.
+          </li>
+        </ol>
+
+        <p>
+          The same <code>D-NNN</code> mechanism has a second role: it is the
+          only sanctioned way to proceed when a plan or implementation would
+          otherwise contradict a principle. Rather than silently overriding
+          <code>Q1</code> or bypassing a security invariant, the designer
+          records an approved decision that authorizes the specific
+          exception. Without that record, the contradiction is a blocking
+          violation.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> Keep the constitution shorter than you
+            think it needs to be. Every principle you add is a line the
+            agent must check against on every relevant proposal. A tight
+            constitution of a handful of load-bearing rules is easier to
+            honour -- and easier to trust -- than a sprawling one where the
+            genuinely immutable commitments are lost among conveniences.
+          </p>
+        </aside>
+
+        <aside class="callout-warning">
+          <p>
+            <strong>Common mistakes.</strong> Two failure modes recur when
+            authoring a constitution:
+          </p>
+          <ul>
+            <li>
+              <strong>Putting mutable conventions in the constitution.</strong>
+              Naming schemes, formatting choices, directory layouts, and
+              tooling preferences change as a project matures. If you freeze
+              them here, every routine adjustment becomes a constitutional
+              amendment. Mutable conventions belong in
+              <code>product-design/conventions.md</code>; evolving intent
+              belongs in the design-intent files (see
+              <a href="ch3-design-intent-files.html">Ch. 3: Design Intent
+              Files</a>). The constitution holds only what must not change.
+            </li>
+            <li>
+              <strong>Writing principles without rationale.</strong> A rule
+              with no stated reason cannot be reasoned about. When a future
+              proposal presses against it, no one can tell whether the rule
+              still serves its purpose or has outlived it -- so it either
+              gets cargo-culted forever or discarded on a whim. Every
+              principle row pairs the rule with the reason it exists;
+              treat the Rationale column as mandatory, not decorative.
+            </li>
+          </ul>
+        </aside>
+      </section>
+
+      <!-- Section 3: Why Immutability Matters (explanation) -->
+      <section data-diataxis="explanation" id="why-immutability-matters">
+        <h2>Why Immutability Matters</h2>
+
+        <p>
+          An immutable file is only as strong as the guarantee that it is
+          actually consulted -- and consulted <em>first</em>, before the
+          agent has formed any competing intention. The constitution earns
+          its authority from where it sits in the lifecycle, not merely from
+          a sentence claiming it is authoritative.
+        </p>
+
+        <h3>Loaded into Every Context, Ahead of Everything Else</h3>
+
+        <p>
+          The constitution's own opening line states the arrangement plainly:
+          "The constitution is loaded first by pre-skill, before conventions
+          or any other reference file. Rules here take precedence over
+          everything else." In the pre-skill pipeline the constitution is
+          loaded as a dedicated stage and injected into the agent's context
+          for every skill invocation running at the <code>standard</code> or
+          <code>heavy</code> budget tier. Its principles are therefore
+          present before the skill does any of its own reasoning -- the
+          immutable ground is in place first, and everything the skill
+          subsequently proposes is measured against it. For the full
+          pre-skill ordering and how the constitution stage fits among the
+          six stages, see
+          <a href="../vol3/ch1-lifecycle-pipeline.html#pre-skill-stages">Vol.
+          3, Ch. 1: The Lifecycle Pipeline</a>.
+        </p>
+
+        <p>
+          Precedence is the second half of the guarantee. Being loaded is
+          not enough; the constitution must <em>win</em> when it conflicts
+          with anything else in context. The Enforcement section makes this
+          concrete: no plan or implementation step may contradict the
+          constitution without a recorded decision, and
+          <code>/critique validate</code> checks conformance against the
+          agent-facing constraints derived from the document. Violations
+          surfaced during <code>/critique review</code> or
+          <code>/critique preflight</code> are classified as
+          <strong>blocking</strong> -- they must be resolved before commit,
+          not deferred.
+        </p>
+
+        <h3>Extending the Boundary to Delegated Work</h3>
+
+        <p>
+          The trust boundary does not stop at the main agent. When a skill
+          delegates to a generator subagent, that subagent receives the
+          project constitution as part of its prompt, so a delegated task
+          cannot escape a principle simply by running in an isolated
+          context window. The immutable ground travels with the work.
+        </p>
+
+        <h3>Why "Immutable" Is a Feature, Not a Limitation</h3>
+
+        <p>
+          It is tempting to read immutability as rigidity -- a constraint
+          that gets in the way. The opposite is true. The value of a
+          constitution is precisely that the agent cannot talk itself out of
+          it mid-task. A conventions file can be revised in passing when a
+          proposal finds it inconvenient; a principle in the constitution
+          cannot. That asymmetry is deliberate. It concentrates the
+          project's genuinely non-negotiable commitments in one small,
+          highly visible file and puts a deliberate, human-approved amendment
+          process between those commitments and any change to them.
+        </p>
+
+        <p>
+          This is why the boundary between the constitution and the rest of
+          the design layer matters so much. Everything that <em>should</em>
+          evolve -- intent, conventions, research findings -- lives elsewhere,
+          free to change as understanding deepens. Everything that
+          <em>must not</em> evolve without ceremony lives here, protected by
+          load order, precedence, and the amendment discipline. Get that
+          division right and the constitution becomes the stable point the
+          whole design layer can pivot around.
+        </p>
+      </section>
+
+      <!-- See also: curated cross-volume links -->
+      <nav aria-label="see also" class="see-also">
+        <h2>See Also</h2>
+        <ul>
+          <li>
+            <a href="ch3-design-intent-files.html">Vol. 2, Ch. 3: Design
+            Intent Files</a> -- where mutable, evolving design intent lives,
+            in contrast to the immutable principles documented here.
+          </li>
+          <li>
+            <a href="../vol3/ch1-lifecycle-pipeline.html#pre-skill-stages">Vol.
+            3, Ch. 1: The Lifecycle Pipeline</a> -- the pre-skill stages that
+            load the constitution into every skill invocation.
+          </li>
+          <li>
+            <a href="ch1-metacommunication-message.html">Vol. 2, Ch. 1: The
+            Metacommunication Message</a> -- the apex artifact the
+            constitution shares highest authority with.
+          </li>
+        </ul>
+      </nav>
+
+    </article>
+  </main>
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="ch1-metacommunication-message.html">Previous: The Metacommunication Message</a>
+    <a href="ch3-design-intent-files.html">Next: Design Intent Files</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

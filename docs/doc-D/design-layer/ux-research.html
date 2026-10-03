@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="2">
+  <meta name="doc-chapter" content="5">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+
+  <title>UX Research Artifacts -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 2: The Design Layer</a></li>
+      <li>UX Research Artifacts</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>UX Research Artifacts</h1>
+
+      <p>
+        SEJA projects ground their design in structured UX research artifacts:
+        personas that model target users, problem scenarios that capture pain
+        points motivating the design, and discovered journeys that record how
+        users actually interact with the system. These artifacts live in
+        <code>product-design/ux-research-results.md</code>, classified as
+        <code>Human (markers)</code> -- prose is human-authored only, and
+        agents may write only INCORPORATED markers and CHANGELOG appends via
+        <code>apply_marker.py</code>.
+      </p>
+
+      <p>
+        This chapter documents the structure, purpose, and maintenance of
+        each artifact type, and explains the critical distinction between
+        discovered journeys (evidence from observation) and designed journeys
+        (intent from the designer).
+      </p>
+
+      <!-- Section 1: Personas -->
+      <section id="personas" data-diataxis="reference">
+        <h2>Personas</h2>
+
+        <p>
+          In SEJA's context, personas are structured archetypes of the
+          project's target users. They are not exhaustive user profiles but
+          focused models that capture the goals, frustrations, and relevant
+          context that shape design decisions. Each persona answers a slice
+          of the metacommunication message's opening clause: "Here is my
+          understanding of who you are."
+        </p>
+
+        <h3>Where Personas Live</h3>
+
+        <p>
+          Personas are defined in sections 1 and 2 of
+          <code>product-design/ux-research-results.md</code>. Section 1
+          contains a Persona Inventory table (summary) and full persona
+          profiles. Section 3 (Cross-Reference Map) links each persona to
+          the design artifacts it feeds.
+        </p>
+
+        <h3>How Personas Are Created</h3>
+
+        <p>
+          The <code>/design</code> skill generates personas during its Mode 5
+          (Interview-Driven) workflow. Phase A collects open-ended information
+          about the project's target users through conversational Q&amp;A.
+          Phase B synthesizes the interview data into structured persona
+          entries, assigning stable IDs and mapping goals to the Extended
+          Metacommunication Template (EMT) dimensions. The designer reviews
+          and confirms each persona during Phase C before the artifacts are
+          written.
+        </p>
+
+        <h3>Persona Entry Structure</h3>
+
+        <p>
+          Each persona entry follows a fixed structure with stable identifiers:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Format</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ID</td>
+              <td><code>R-P-NNN</code></td>
+              <td>Stable identifier; never reused, even for superseded personas</td>
+            </tr>
+            <tr>
+              <td>Name</td>
+              <td>Short given name</td>
+              <td>Human-readable label for cross-references</td>
+            </tr>
+            <tr>
+              <td>Role / Archetype</td>
+              <td>Free text</td>
+              <td>The user's primary relationship to the system</td>
+            </tr>
+            <tr>
+              <td>Bio</td>
+              <td>Narrative paragraph</td>
+              <td>Background, expertise, and context for design reasoning</td>
+            </tr>
+            <tr>
+              <td>Goals</td>
+              <td><code>G-NNN</code> entries</td>
+              <td>What the persona wants or needs to accomplish; referenced by problem scenarios and design features</td>
+            </tr>
+            <tr>
+              <td>Key Frustrations</td>
+              <td>Bullet list</td>
+              <td>Pain points that motivate design decisions</td>
+            </tr>
+            <tr>
+              <td>Relevant Context</td>
+              <td>Structured fields</td>
+              <td>Technical proficiency, usage frequency, domain knowledge</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Persona IDs use the <code>R-P-NNN</code> format (zero-padded,
+          starting at 001). IDs are stable and never reassigned -- a
+          superseded persona gets a new ID rather than reusing the old one.
+        </p>
+
+        <p>
+          The reference tables above describe the structure of individual
+          personas. The following section covers problem scenarios -- the
+          artifacts that connect personas to the design features they
+          motivate.
+        </p>
+      </section>
+
+      <!-- Section 2: Problem Scenarios -->
+      <section id="problem-scenarios" data-diataxis="reference">
+        <h2>Problem Scenarios</h2>
+
+        <p>
+          Problem scenarios are structured narratives that capture specific
+          pain points users experience without SEJA (or with earlier versions
+          of it). Each scenario describes a concrete situation where a user's
+          goals are frustrated, grounding abstract persona frustrations in
+          observable, testable contexts.
+        </p>
+
+        <h3>Where Problem Scenarios Live</h3>
+
+        <p>
+          Problem scenarios are defined in section 2 of
+          <code>product-design/ux-research-results.md</code>. The
+          Cross-Reference Map in section 3 links each scenario to the design
+          artifacts it feeds -- typically specific sections of
+          <code>product-design/product-design-as-intended.md</code> and
+          per-feature metacommunication intentions.
+        </p>
+
+        <h3>Scenario Entry Structure</h3>
+
+        <p>
+          Each problem scenario entry includes:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Format</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ID</td>
+              <td><code>R-PS-NNN</code></td>
+              <td>Stable identifier for cross-referencing</td>
+            </tr>
+            <tr>
+              <td>Persona(s)</td>
+              <td><code>R-P-NNN</code> references</td>
+              <td>Which personas experience this pain point</td>
+            </tr>
+            <tr>
+              <td>Goals</td>
+              <td><code>G-NNN</code> references</td>
+              <td>Which persona goals are frustrated</td>
+            </tr>
+            <tr>
+              <td>Setting</td>
+              <td>Narrative sentence</td>
+              <td>When and where the scenario occurs</td>
+            </tr>
+            <tr>
+              <td>Narrative</td>
+              <td>Multi-paragraph prose</td>
+              <td>What happens, why it is a problem, what the user cannot do</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Connecting Scenarios to Design</h3>
+
+        <p>
+          The traceability chain runs: <strong>Persona</strong> (who) →
+          <strong>Goal</strong> (what they need) → <strong>Problem
+          Scenario</strong> (what goes wrong) → <strong>Design
+          Feature</strong> (what SEJA does about it). The Cross-Reference
+          Map in section 3 of
+          <code>product-design/ux-research-results.md</code> records these
+          links explicitly, mapping each artifact ID to the design-intent
+          section it feeds. This ensures that no design feature exists without
+          a traceable motivation and no problem scenario is left unaddressed
+          without a conscious decision to defer it.
+        </p>
+
+        <p>
+          With personas and problem scenarios defining what users need and
+          where they struggle, the next section covers discovered journeys --
+          the artifacts that record how users actually behave once the system
+          is in use.
+        </p>
+      </section>
+
+      <!-- Section 3: Discovered Journeys -->
+      <section id="discovered-journeys" data-diataxis="how-to">
+        <h2>Discovered Journeys</h2>
+
+        <p>
+          SEJA distinguishes two kinds of journey maps, identified by their
+          ID prefixes. Understanding this distinction is essential for
+          maintaining accurate design records.
+        </p>
+
+        <h3>Discovered vs. Designed Journeys</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Attribute</th>
+              <th>Discovered Journeys</th>
+              <th>Designed Journeys</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ID prefix</td>
+              <td><code>JM-E-NNN</code></td>
+              <td><code>JM-TB-NNN</code></td>
+            </tr>
+            <tr>
+              <td>Source</td>
+              <td>Field observation of actual use</td>
+              <td>Designer's planned interaction flow</td>
+            </tr>
+            <tr>
+              <td>Nature</td>
+              <td>Evidence (what happened)</td>
+              <td>Intent (what should happen)</td>
+            </tr>
+            <tr>
+              <td>Location (as-intended)</td>
+              <td><code>ux-research-results.md</code> §5</td>
+              <td><code>product-design-as-intended.md</code> §15</td>
+            </tr>
+            <tr>
+              <td>Location (as-coded)</td>
+              <td>N/A</td>
+              <td><code>product-design-as-coded.md</code> Journey Maps</td>
+            </tr>
+            <tr>
+              <td>Maintained by</td>
+              <td>Human (researcher/designer)</td>
+              <td>Human (markers) / Agent (as-coded)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The distinction matters because discovered journeys are
+          <em>evidence</em> -- they record what actually happened when a user
+          interacted with the system, including unexpected paths,
+          workarounds, and breakdowns. Designed journeys are <em>intent</em>
+          -- they describe the interaction flow the designer planned. When
+          discovered journeys diverge from designed journeys, the gap is a
+          signal for design review, not a bug to fix.
+        </p>
+
+        <h3>Recording a Discovered Journey</h3>
+
+        <p>
+          Discovered journeys are recorded by the human designer or
+          researcher in section 5 of
+          <code>product-design/ux-research-results.md</code>. The section
+          is structurally append-only: new journeys are added at the end;
+          existing entries are never removed or reordered.
+        </p>
+
+        <p>To record a discovered journey:</p>
+
+        <ol>
+          <li>Observe the user's actual interaction path during field use
+              of the harness.</li>
+          <li>Write a narrative entry in
+              <code>ux-research-results.md</code> section 5, assigning the
+              next available <code>JM-E-NNN</code> ID.</li>
+          <li>Note the personas involved, the context, and any divergence
+              from designed journeys.</li>
+          <li>If the journey reveals a design gap, record it in the
+              Processing Status table (section 4) for future incorporation
+              into design intent.</li>
+        </ol>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> Harness tooling discriminates journey
+            types by ID prefix -- <code>JM-E-</code> for discovered,
+            <code>JM-TB-</code> for designed. Using the wrong prefix will
+            cause the journey to appear in the wrong file context and
+            confuse drift detection.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 4: Common Mistakes -->
+      <section id="common-mistakes" data-diataxis="how-to">
+        <h2>Common Mistakes</h2>
+
+        <dl>
+          <dt>Confusing discovered and designed journeys</dt>
+          <dd>
+            Discovered journeys (<code>JM-E-NNN</code>) and designed
+            journeys (<code>JM-TB-NNN</code>) use different ID prefixes,
+            live in different files, and serve different purposes. Discovered
+            journeys are evidence from field observation; designed journeys
+            are intent from the designer. Mixing them up -- recording a
+            planned flow as <code>JM-E-NNN</code> or an observed path as
+            <code>JM-TB-NNN</code> -- corrupts the evidence/intent
+            distinction and confuses drift detection, which relies on the
+            ID prefix to determine where each journey belongs.
+          </dd>
+
+          <dt>Hand-editing the UX research file with agent prose</dt>
+          <dd>
+            <code>product-design/ux-research-results.md</code> is classified
+            as <code>Human (markers)</code>. All narrative prose must be
+            written by the human designer or researcher. Agents may write
+            only INCORPORATED markers and CHANGELOG_APPEND entries, and
+            only via <code>apply_marker.py</code> after explicit
+            AskUserQuestion confirmation. Direct agent prose writes are
+            rejected by <code>check_human_markers_only.py</code> during
+            post-skill. If an agent needs to propose UX research content,
+            it should present the proposal to the designer for manual
+            incorporation.
+          </dd>
+
+          <dt>Treating personas as exhaustive user descriptions</dt>
+          <dd>
+            Personas are design archetypes, not comprehensive user profiles.
+            They capture enough about a user type to ground design reasoning
+            -- goals, frustrations, relevant context -- but they are
+            deliberately simplified. A persona named "Ana" does not describe
+            every semiotic engineer who might use SEJA; she models the
+            concerns and workflow that shape design decisions for that user
+            type. Personas evolve as the designer's understanding grows:
+            new observations may refine existing personas or prompt new ones
+            with fresh <code>R-P-NNN</code> IDs.
+          </dd>
+        </dl>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 2: The Design Layer</h2>
+    <ol>
+      <li>
+        <a href="metacommunication.html">The Metacommunication Message</a>
+      </li>
+      <li>
+        <a href="constitution-guide.html">The Constitution</a>
+      </li>
+      <li>
+        <a href="design-intent-files.html">Design Intent Files</a>
+      </li>
+      <li>
+        <a href="marker-system.html">The Marker System</a>
+      </li>
+      <li aria-current="page">
+        <a href="ux-research.html">UX Research Artifacts</a>
+        <ul>
+          <li><a href="#personas">Personas</a></li>
+          <li><a href="#problem-scenarios">Problem Scenarios</a></li>
+          <li><a href="#discovered-journeys">Discovered Journeys</a></li>
+          <li><a href="#common-mistakes">Common Mistakes</a></li>
+        </ul>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Chapter navigation: Ch.5 omits Next -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="marker-system.html">Previous: The Marker System</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

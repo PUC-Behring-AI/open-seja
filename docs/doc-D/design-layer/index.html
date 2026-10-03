@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="doc-status" content="draft">
+  <meta name="doc-volume" content="2">
+  <meta name="doc-phase" content="2">
+
+  <title>Vol. 2: The Design Layer -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li>Vol. 2: The Design Layer</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <!-- PRINT-LINK:START -->
+      <p class="print-view-link"><a href="design-layer-print.html">Single-page / print view</a> &mdash; the whole volume on one page.</p>
+      <!-- PRINT-LINK:END -->
+      <h1>Vol. 2: The Design Layer <span class="phase-badge">Phase 2</span></h1>
+
+      <section id="purpose" data-diataxis="explanation">
+        <p>
+          This volume explains how SEJA encodes design decisions as
+          first-class artifacts. The design layer is where the human designer's
+          intent -- expressed through metacommunication, a project constitution,
+          design-intent specs, and semiotic markers -- becomes the authoritative
+          source that drives every downstream execution and governance decision.
+          Understanding this layer is essential for anyone who wants to shape how
+          an agent behaves, not just use it.
+        </p>
+      </section>
+
+      <section id="chapters" data-diataxis="reference">
+        <h2>Chapters</h2>
+
+        <ol class="chapter-list">
+          <li>
+            <a href="metacommunication.html">1. The Metacommunication Message</a>
+            <span class="chapter-summary">What a metacommunication message is in semiotic engineering, how to write one using the Extended Metacommunication Template questionnaire, and the I/you phrasing rule that structures designer-to-user communication. Includes a worked example for a task manager project.</span>
+          </li>
+          <li>
+            <a href="constitution-guide.html">2. The Constitution</a>
+            <span class="chapter-summary">The project constitution's four-section structure (Technical Principles, Quality Principles, Security Invariants, Compliance Requirements), how to write and maintain one, and why immutable principles loaded before all other references are essential for governing agent behavior.</span>
+          </li>
+          <li>
+            <a href="design-intent-files.html">3. Design Intent Files</a>
+            <span class="chapter-summary">The as-intended/as-coded split that separates designer vision from implementation state, the full section structure of product-design-as-intended.md, and the promote workflow for advancing items from implemented to established status.</span>
+          </li>
+          <li>
+            <a href="marker-system.html">4. The Marker System</a>
+            <span class="chapter-summary">The three marker types (STATUS, INCORPORATED, DECISION_APPEND/CHANGELOG_APPEND), how to apply them using apply_marker.py, and how markers function as a designed signification system that enforces the boundary between human-authored prose and agent-maintained lifecycle state.</span>
+          </li>
+          <li>
+            <a href="ux-research.html">5. UX Research Artifacts</a>
+            <span class="chapter-summary">Personas, problem scenarios, and discovered journeys -- the structured UX research artifacts that ground SEJA projects in evidence about target users. Covers the distinction between discovered journeys (JM-E-NNN, evidence from field observation) and designed journeys (JM-TB-NNN, planned by the designer).</span>
+          </li>
+        </ol>
+      </section>
+
+      <section id="reading-order" data-diataxis="explanation">
+        <h2>Recommended Reading Order</h2>
+        <p>
+          Begin with "The Metacommunication Message" to understand the
+          foundational communication model and the I/you phrasing rule, then
+          "The Constitution" to see how immutable principles govern agent
+          behavior, and "Design Intent Files" to learn the as-intended/as-coded
+          split. "The Marker System" shows how lifecycle state is tracked
+          without altering human-authored prose. "UX Research Artifacts" rounds
+          out the volume with the personas, problem scenarios, and journey
+          observations that ground design in evidence. Readers already familiar
+          with semiotic engineering may skip ahead to "The Constitution."
+        </p>
+      </section>
+
+      <section id="cross-references" data-diataxis="reference">
+        <h2>Related Volumes</h2>
+        <aside>
+          <p>
+            The design layer feeds directly into
+            <a href="../execution-layer/index.html">Vol. 3: The Execution Layer</a>,
+            where skills and lifecycle stages implement the designer's intent.
+            For the semiotic engineering theory that underpins this layer, see
+            <a href="../foundations/index.html">Vol. 5: Foundations and Philosophy</a>.
+          </p>
+        </aside>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 2: The Design Layer</h2>
+    <ol>
+      <li>
+        <a href="metacommunication.html">The Metacommunication Message</a>
+      </li>
+      <li>
+        <a href="constitution-guide.html">The Constitution</a>
+      </li>
+      <li>
+        <a href="design-intent-files.html">Design Intent Files</a>
+      </li>
+      <li>
+        <a href="marker-system.html">The Marker System</a>
+      </li>
+      <li>
+        <a href="ux-research.html">UX Research Artifacts</a>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Volume navigation -->
+  <nav aria-label="volume navigation" class="volume-nav">
+    <a href="../onboarding/index.html">Previous: Vol. 1 -- Onboarding and Orientation</a>
+    <a href="../execution-layer/index.html">Next: Vol. 3 -- The Execution Layer</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

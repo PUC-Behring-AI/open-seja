@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-volume" content="5">
+  <meta name="doc-chapter" content="2">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+
+  <title>Sign Systems and Communicability -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 5: Foundations and Philosophy</a></li>
+      <li>Sign Systems and Communicability</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>Sign Systems and Communicability</h1>
+
+      <p>
+        The previous chapter established the founding premise of semiotic
+        engineering: software is a message from designers to users, sent once
+        at design time and unfolded across every subsequent interaction. This
+        chapter supplies the analytic machinery that makes the premise
+        operational. If software is a message, then it is built from
+        <strong>signs</strong> organized into <strong>sign systems</strong>,
+        and its success can be judged by a single criterion --
+        <strong>communicability</strong>: the degree to which the designer's
+        deputy succeeds in conveying, through those signs, who the users are
+        thought to be, what they are thought to want, and how the artifact is
+        meant to be used.
+      </p>
+
+      <p>
+        The chapter proceeds in four movements. First, it introduces de Souza's
+        <strong>Semiotic Inspection Method (SIM)</strong> and its partition of
+        interface signs into three classes -- metalinguistic, static, and
+        dynamic. Second, it recovers Eco's foundational distinction between
+        <strong>signification</strong> and <strong>communication</strong>, and
+        explains why the distinction is indispensable for interface analysis.
+        Third, it describes the <strong>SigniFYI Suite</strong>, the
+        SIM-anchored family of methods that de Souza and colleagues assembled to
+        capture and analyze metacommunication across a design's lifetime.
+        Finally, it grounds all of this in SEJA itself, showing that the marker
+        system is a <em>designed signification system</em> and that the review
+        perspectives constitute a <em>sign-class-aware inspection</em> regime --
+        before closing with a critical counter-reading of where the sign-system
+        analogy holds and where it is stretched when applied to an agent
+        harness.
+      </p>
+
+      <!-- Section 1: Signs, sign systems, communicability -->
+      <section data-diataxis="explanation" id="signs-and-communicability">
+        <h2>Signs, Sign Systems, and Communicability</h2>
+
+        <p>
+          A <strong>sign</strong>, in the tradition semiotic engineering draws
+          on, is anything that stands to somebody for something in some respect.
+          A label on a button, the shape of an icon, a colour that shifts from
+          grey to red, a sentence in an error message -- each is a sign, because
+          each is taken by an interpreter to mean more than its bare physical
+          form. A <strong>sign system</strong> is a structured repertoire of
+          such signs together with the conventions that govern how they combine
+          and how they are to be read. Natural language is a sign system;
+          so is a colour code, a menu grammar, or the vocabulary of states a
+          form can occupy.
+        </p>
+
+        <p>
+          Semiotic engineering evaluates an interface not primarily for
+          usability in the ergonomic sense but for
+          <strong>communicability</strong> -- the property of an interactive
+          artifact that lets its users readily and consistently reconstruct the
+          designer's intended message about what the system is, whom it is for,
+          and how it should be used. A highly usable interface can still have
+          poor communicability: users may complete tasks by trial and error
+          while never grasping <em>why</em> the system is shaped as it is,
+          leaving them stranded the moment a task falls outside the well-worn
+          path. Communicability is therefore about the transmission of design
+          rationale, not merely task throughput.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> Communicability is the emission-side
+            counterpart to usability's reception-side concern. Where usability
+            asks "can the user do the task?", communicability asks "does the
+            user understand the designer's story about the task well enough to
+            improvise when the task changes?"
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 2: SIM and the three sign classes -->
+      <section data-diataxis="explanation" id="sim-and-sign-classes">
+        <h2>The Semiotic Inspection Method and Its Three Sign Classes</h2>
+
+        <p>
+          De Souza and colleagues (2006) advance the Semiotic Inspection Method (SIM)
+          as the inspection technique proper to semiotic engineering. SIM is an
+          analyst-led method: an evaluator, acting as a knowledgeable
+          <strong>advocate for the user</strong> rather than as a stand-in for
+          any particular user, reconstructs the <em>designer's deputy's</em>
+          message from the signs present in the interface and then judges
+          whether that message is coherent enough to be received. The method's
+          organizing move is to partition the interface's signs into three
+          classes and to analyze each class <em>independently</em> before
+          collating the results -- a discipline that keeps the analyst from
+          smoothing over contradictions between what the interface says, what it
+          shows, and what it does.
+        </p>
+
+        <h3>The three sign classes, defined</h3>
+
+        <p>
+          The three classes are distinguished by the kind of interpretation each
+          sign invites. Precise definitions follow.
+        </p>
+
+        <dl>
+          <dt>Metalinguistic signs</dt>
+          <dd>
+            Signs that <strong>explicitly inform, illustrate, or explain other
+            signs</strong>. They are the interface talking <em>about</em> its
+            own signs and behaviours: help text, documentation, tooltips,
+            onboarding and tutorial copy, error and validation messages,
+            confirmation dialogs, empty-state prompts, and notifications. They
+            are "meta" because their referents are other signs in the same
+            interface. They carry the most direct trace of the designer's
+            intent, but users frequently skip them, so a message lodged only in
+            metalinguistic signs is a message at risk.
+          </dd>
+
+          <dt>Static signs</dt>
+          <dd>
+            Signs whose meaning can be interpreted <strong>independently of
+            temporal or causal relations</strong> -- a single-moment snapshot of
+            the interface. Layout, component structure, labels, icons, form
+            fields, menu options, navigation hierarchy, button text, visual
+            grouping, and typography are static signs. They express what the
+            system <em>is</em> at rest: the vocabulary and grammar of the
+            artifact frozen in one frame.
+          </dd>
+
+          <dt>Dynamic signs</dt>
+          <dd>
+            Signs bound to <strong>temporal and causal aspects</strong> of
+            interaction -- meanings that emerge only <em>through</em> use.
+            State transitions, conditional rendering, validation flows, loading
+            and progress states, hover and focus feedback, progressive
+            disclosure, animation triggers, and navigation transitions are
+            dynamic signs. They express how the system <em>behaves</em>: what
+            happens, in what order, and in response to what. Dynamic signs
+            cannot be read from a screenshot; they must be enacted.
+          </dd>
+        </dl>
+
+        <p>
+          SIM analyzes each class in isolation, reconstructing a separate
+          message from each -- conventionally message <em>X</em> from
+          metalinguistic signs, <em>Y</em> from static signs, and <em>Z</em>
+          from dynamic signs -- and only then <strong>collates</strong> the
+          three. Collation is where communicability is judged. The analyst asks
+          whether the three messages are <em>consistent</em> (do they tell the
+          same story?), <em>complete</em> (is every part of the designer's
+          intent carried by at least one class?), appropriately
+          <em>redundant</em> (are critical messages reinforced across classes,
+          rather than contradicting one another?), and well
+          <em>distributed</em> (is the burden of meaning spread across classes,
+          or dangerously concentrated in one -- for instance, all meaning in
+          metalinguistic help that users never open?). Where the three voices
+          agree, the interface tells one coherent story; where they diverge,
+          the analyst has located a communicability breakdown.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> SIM evaluates <em>emission</em> -- what the
+            designer's deputy communicates. Its sibling method, the
+            Communicability Evaluation Method (CEM; Prates, de Souza, &amp;
+            Barbosa, 2000), evaluates
+            <em>reception</em> by observing breakdowns as real users encounter
+            them. The two are complementary: SIM inspects the message as sent;
+            CEM measures the message as received.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 3: Signification vs. communication -->
+      <section data-diataxis="explanation" id="signification-vs-communication">
+        <h2>Signification vs. Communication (Eco)</h2>
+
+        <p>
+          Underneath SIM's three classes sits a distinction Eco draws in
+          <em>A Theory of Semiotics</em> (1976) between two phenomena that
+          ordinary language runs together. A <strong>signification system</strong>
+          is a code -- a socially conventionalized correlation between
+          expressions and contents that holds <em>whether or not anyone is
+          currently using it to say anything</em>. The traffic-light code, in
+          which red means stop, exists as a signification system even at three in
+          the morning on an empty road. <strong>Communication</strong>, by
+          contrast, is the actual process in which a sender exploits a
+          signification system to produce a message that a receiver then
+          interprets. Eco's thesis is that communication presupposes
+          signification -- there is no communicating without a code to
+          communicate <em>with</em> -- but the two are analytically separate:
+          a code can exist unused, and a communicative act can misfire even when
+          the code is sound.
+        </p>
+
+        <p>
+          This separation matters for interface analysis in three concrete ways.
+        </p>
+
+        <ul>
+          <li>
+            <strong>It locates two distinct failure modes.</strong> An interface
+            can fail because its underlying code is impoverished or
+            contradictory (a signification defect -- the icons simply do not
+            reliably correlate with any content), or because a well-formed code
+            is deployed in a way that does not reach the user (a communication
+            defect -- the right message exists but is buried where no one looks).
+            SIM's collation step is precisely the search for both: mismatches
+            between classes are often signification defects, while
+            maldistribution is a communication defect.
+          </li>
+          <li>
+            <strong>It justifies analyzing the artifact without watching a
+            user.</strong> Because the signification system is present in the
+            artifact independently of any given communicative episode, an
+            analyst can inspect it directly -- which is exactly what SIM does.
+            The method reads the code off the interface rather than inferring it
+            solely from observed behaviour.
+          </li>
+          <li>
+            <strong>It reframes the designer's task.</strong> The designer's job
+            is not only to send a good message but to <em>author the
+            signification system</em> through which every future message will be
+            sent. In semiotic engineering the interface is the code and the
+            message at once; the designer legislates the vocabulary users will
+            be forced to interpret.
+          </li>
+        </ul>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> Eco's <em>The Role of the Reader</em> (1979)
+            develops this into the apparatus of the <em>model reader</em>: a
+            text encodes a reader whose competences it presupposes. An interface likewise encodes a model user. When the
+            real user's competences diverge from the encoded model, the code is
+            intact but communication breaks -- the theme Volume 5 Chapter 5
+            develops under plural readings.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 4: The SigniFYI Suite -->
+      <section data-diataxis="explanation" id="signifyi-suite">
+        <h2>The SigniFYI Suite</h2>
+
+        <p>
+          SIM inspects a finished artifact at a single point in time. But
+          metacommunication is authored, revised, contested, and re-explained
+          across a whole design process, and much of that authoring never
+          reaches the shipped interface -- it lives in design documents,
+          discussions, and the tacit reasoning of the team. To capture
+          metacommunication as it is <em>produced</em>, not only as it is
+          finally emitted, de Souza and colleagues (2016) assembled the
+          <strong>SigniFYI Suite</strong>: a coordinated set of SIM-based tools
+          for capturing, tracing, and analyzing metacommunication across the
+          software lifecycle.
+        </p>
+
+        <p>
+          Described at a high level, the suite bundles complementary instruments
+          around the SIM core. It provides means to <strong>capture</strong> the
+          traces of a design process -- the artifacts, decisions, and
+          discussions in which the designer's message takes shape; a
+          <strong>manifestation</strong> lens that makes the intended
+          metacommunication explicit and inspectable; and analytic apparatus
+          for reading the resulting record through the semiotic-engineering
+          frame, so that consistency, completeness, redundancy, and distribution
+          can be assessed not just in the final product but along the path that
+          produced it. The suite also carries forward the
+          <strong>SigniFYIng Interaction</strong> quality dimensions --
+          consistency, completeness, redundancy, and distribution -- as the
+          rubric against which reconstructed metacommunication is judged. The
+          governing idea is that a design's communicability is better understood,
+          and better repaired, when the message can be traced back through the
+          decisions that formed it.
+        </p>
+
+        <div class="status-notice">
+          The SigniFYI Suite is a research instrument. SEJA does not implement
+          the suite as such; it borrows the suite's central discipline -- treat
+          the whole record of design intent as inspectable metacommunication --
+          and operationalizes it in the harness-specific ways described next.
+        </div>
+      </section>
+
+      <!-- Section 5: How this grounds SEJA -->
+      <section data-diataxis="explanation" id="grounding-in-seja">
+        <h2>How This Grounds SEJA</h2>
+
+        <p>
+          SEJA is a harness for designed communication, and the two constructs
+          just introduced -- a signification system and a sign-class-aware
+          inspection -- map onto concrete harness machinery.
+        </p>
+
+        <h3>The marker system as a designed signification system</h3>
+
+        <p>
+          SEJA's <strong>marker system</strong> is a deliberately authored
+          signification system laid over the project's design-intent files.
+          Its expression plane is a small, fixed vocabulary of HTML-comment
+          markers written immediately before the heading, table row, or bullet
+          they qualify; its content plane is the lifecycle state of the item so
+          marked. Verified against
+          <code>.claude/references/general/shared-definitions.md</code>, the
+          vocabulary comprises: a <code>STATUS</code> marker whose current
+          (SEJA 2.8.0+) form is a lowercase multi-value token driven by an
+          explicit state machine
+          (<code>proposed &rarr; implemented &rarr; established &rarr;
+          superseded</code>, with regressions rejected); an
+          <code>ESTABLISHED</code> stamp recording promotion; an
+          <code>INCORPORATED</code> stamp; and the append operations
+          <code>CHANGELOG_APPEND</code> and <code>DECISION_APPEND</code>. Legacy
+          uppercase <code>STATUS: IMPLEMENTED</code> markers remain valid and are
+          detected so that a promotion <em>replaces</em> rather than stacks.
+        </p>
+
+        <p>
+          What makes this a <em>signification system</em> in Eco's precise sense
+          is that the correlation between expression and content is fixed by
+          convention and enforced independently of any single act of use. The
+          allowed transitions live in a registry
+          (<code>human_markers_registry.ALLOWED_MARKERS</code>); the sole
+          sanctioned write path is <code>apply_marker.py</code>; and post-skill
+          step 6c runs <code>check_human_markers_only.py</code> to reject any
+          prose mutation of these "Human (markers)" files, so the agent may
+          write only well-formed markers and only after an explicit
+          confirmation. The code is thus authored once and then <em>governs</em>
+          every later message an agent tries to emit into those files -- exactly
+          the relationship signification bears to communication. The marker
+          system is treated at length in Volume 2. See
+          <a href="../vol2/ch4-marker-system.html">The Marker
+          System</a>.
+        </p>
+
+        <h3>Review perspectives as sign-class-aware inspection</h3>
+
+        <p>
+          SEJA's inspection regime is realized in two layers, both verified
+          against live harness files. The general one is the <strong>review
+          perspectives</strong> framework
+          (<code>.claude/references/general/review-perspectives.md</code>): a
+          checklist of sixteen domain lenses -- eleven engineering (SEC, PERF,
+          DB, API, ARCH, DX, I18N, TEST, OPS, COMPAT, DATA) and five design
+          (UX, A11Y, VIS, RESP, MICRO) -- each carried at three depth tiers
+          (Essential / Standard / Deep, priority-classified P0 through P4) and
+          resolved with an Adopted / Deferred / N/A status. This is not itself
+          SIM, and the chapter should not overstate it: it is a
+          <em>sign-class-aware</em> inspection in the looser sense that several
+          of these lenses are precisely where communicability is evaluated --
+          the UX and DX perspectives carry the emission/reception
+          Communicability sub-sections.
+        </p>
+
+        <p>
+          The genuinely SIM-shaped inspection is narrower and explicit: the
+          <code>semiotic-inspector</code> agent
+          (<code>.claude/agents/semiotic-inspector.md</code>), invoked through
+          <code>/critique semiotic-inspection</code>. This agent conducts a full
+          SIM evaluation across the three sign classes exactly as defined above
+          -- reading metalinguistic signs (help, errors, tooltips), static signs
+          (layout, labels, structure), and dynamic signs (transitions,
+          validation flows, loading states) independently; reconstructing
+          messages X, Y, and Z; then collating them against the SigniFYIng
+          Interaction dimensions of consistency, completeness, redundancy, and
+          distribution to produce a communicability judgment. Its own
+          documentation cites de Souza (2005), the SIM papers, and de Souza et
+          al. (2016) for those dimensions -- so SEJA's sign-class inspection is
+          not an analogy imposed from outside but a direct implementation of the
+          method this chapter describes.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The division of labour is deliberate. The
+            sixteen review perspectives give broad, deterministic coverage of
+            engineering and design concerns on every change; the
+            <code>semiotic-inspector</code> supplies the deep, dedicated
+            three-class reading when communicability itself is the question.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 6: Critical counter-reading -->
+      <section data-diataxis="explanation" id="critical-counter-reading">
+        <h2>Critical Counter-Reading</h2>
+
+        <p>
+          The sign-system frame earns its place in SEJA, but honesty requires
+          marking where it is strong and where it is stretched when carried from
+          human-computer interfaces to an agent harness.
+        </p>
+
+        <h3>Where the analogy is strongest</h3>
+
+        <p>
+          The marker system is a near-textbook signification system: a small,
+          conventionalized, machine-enforced code whose expressions correlate
+          reliably with contents (lifecycle states) and whose use is governed
+          independently of any single act -- precisely Eco's picture. Likewise,
+          the harness's user-facing documentation and skill outputs are genuine
+          interface signs across all three SIM classes, so a SIM reading of, for
+          example, a skill's help text (metalinguistic), its command grammar
+          (static), and its multi-step prompting flow (dynamic) is well founded.
+          Where SEJA presents surfaces that a human reads and acts on, the
+          analogy is not an analogy at all -- it is the method's home ground.
+        </p>
+
+        <h3>Where the analogy is stretched</h3>
+
+        <p>
+          Three tensions deserve naming.
+        </p>
+
+        <dl>
+          <dt>The receiver is partly a model, not a person</dt>
+          <dd>
+            SIM was built for interfaces read by humans, and its analyst is an
+            advocate <em>for the user</em>. In an agent harness a large fraction
+            of the "signs" -- reference files, agent prompts, structured specs --
+            are authored to be read by a language model. Communicability then
+            becomes partly a claim about how reliably a model reconstructs
+            intent from text, which is an empirical property of the model, not
+            only of the code. The theory frames the problem well but does not,
+            by itself, tell us whether a given phrasing communicates to a given
+            model. This is an open question, not a solved one.
+          </dd>
+
+          <dt>Static/dynamic partition blurs for text-and-tools artifacts</dt>
+          <dd>
+            SIM's static-versus-dynamic cut is crisp for a GUI, where a
+            screenshot really does freeze the static signs. Much of SEJA is
+            prose plus tool invocations, where the "temporal and causal"
+            character of a sign is a matter of when the agent reads it and what
+            it triggers, not of on-screen animation. The three classes remain a
+            useful heuristic, but their boundaries are softer here, and an
+            analyst can over-fit signs into classes the artifact does not
+            naturally support -- a risk the <code>semiotic-inspector</code>'s own
+            scaffold questions (which explicitly ask whether signs are
+            misclassified) are designed to check.
+          </dd>
+
+          <dt>Enforcement can over-engineer the code</dt>
+          <dd>
+            A machine-enforced signification system buys reliability at the cost
+            of expressive range. The marker vocabulary is deliberately tiny, and
+            its state machine forbids regressions; this is a feature for audit
+            integrity but means legitimate design realities that do not fit the
+            four states must be expressed elsewhere or not at all. Conversely,
+            the sixteen review perspectives risk the opposite failure --
+            <em>under</em>-engineering communicability by treating it as one
+            concern folded into UX/DX rather than a first-class axis, so that a
+            change with subtle metacommunication drift can pass a standard
+            review without ever triggering the dedicated
+            <code>semiotic-inspector</code>. Whether communicability deserves
+            its own always-on perspective, rather than an opt-in critique mode,
+            is a live design question for the harness.
+          </dd>
+        </dl>
+
+        <p>
+          None of these tensions defeats the frame; they mark its edges. The
+          sign-system analysis tells SEJA <em>what</em> to look for -- a
+          coherent, well-distributed message carried by an authored code -- while
+          leaving genuinely open <em>how well</em> that message lands on a
+          machine reader and <em>how much</em> enforcement is the right amount.
+        </p>
+      </section>
+
+      <!-- References -->
+      <section data-diataxis="explanation" id="references">
+        <h2>References</h2>
+
+        <ul>
+          <li>de Souza, C. S. (2005). <em>The Semiotic Engineering of
+          Human-Computer Interaction</em>. MIT Press.</li>
+          <li>de Souza, C. S., Leitão, C. F., Prates, R. O., &amp; da Silva, E. J.
+          (2006). The semiotic inspection method. In <em>Proceedings of VII
+          Brazilian Symposium on Human Factors in Computing Systems (IHC
+          2006)</em>, 148&ndash;157.</li>
+          <li>de Souza, C. S., &amp; Leitão, C. F. (2009). <em>Semiotic
+          Engineering Methods for Scientific Research in HCI</em>. Morgan &amp;
+          Claypool.</li>
+          <li>Prates, R. O., de Souza, C. S., &amp; Barbosa, S. D. J. (2000). A
+          method for evaluating the communicability of user interfaces.
+          <em>interactions</em>, 7(1), 31&ndash;38.</li>
+          <li>de Souza, C. S., Cerqueira, R. F. G., Afonso, L. M., Brandão, R. R.
+          M., &amp; Ferreira, J. S. J. (2016). <em>Software Developers as Users:
+          Semiotic Investigations in Human-Centered Software Development</em>.
+          Springer.</li>
+          <li>Eco, U. (1976). <em>A Theory of Semiotics</em>. Indiana University
+          Press.</li>
+          <li>Eco, U. (1979). <em>The Role of the Reader: Explorations in the
+          Semiotics of Texts</em>. Indiana University Press.</li>
+        </ul>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- See also: curated cross-volume related chapters -->
+  <nav aria-label="see also" class="see-also">
+    <h2>See also</h2>
+    <ul>
+      <li><a href="ch1-software-as-designed-communication.html">Software as Designed Communication</a> -- the founding premise this chapter builds signs onto.</li>
+      <li><a href="ch5-abduction-and-plural-readings.html">Abduction and Plural Readings</a> -- how the model reader is inferred and where readings diverge.</li>
+      <li><a href="../vol2/ch4-marker-system.html">The Marker System</a> -- SEJA's designed signification system in full.</li>
+    </ul>
+  </nav>
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="ch1-software-as-designed-communication.html">Previous: Software as Designed Communication</a>
+    <a href="ch3-extended-metacommunication-template.html">Next: The Extended Metacommunication Template</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

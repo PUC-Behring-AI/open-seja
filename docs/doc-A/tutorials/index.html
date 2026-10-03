@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="tutorial">
+  <meta name="doc-volume" content="Tutorials">
+  <meta name="doc-chapter" content="Index">
+  <meta name="doc-phase" content="stable">
+  <meta name="doc-status" content="published">
+
+  <title>Tutorials -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element (WCAG 2.4.1) -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Volume navigation bar -->
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="../how-to/index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li>Tutorials</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content area -->
+  <main id="main-content" class="chapter-content vol-tutorials">
+    <article>
+      <!-- Diataxis type badge -->
+      <p class="vol-accent"><strong>tutorial</strong></p>
+
+      <h1>Vol. 1: Tutorials -- Learn SEJA</h1>
+
+      <p>
+        Learning-oriented, guaranteed-outcome walkthroughs that build
+        understanding by doing. Each tutorial produces a concrete artifact you
+        can inspect, so you see the result of every step before moving on.
+        Start with Chapter 1 if you have never used SEJA; continue through the
+        remaining chapters to deepen your understanding of the lifecycle,
+        design intent, governance, and epistemic features.
+      </p>
+
+      <!-- Chapter listing -->
+      <section id="chapters">
+        <h2>Chapters</h2>
+
+        <ol>
+          <li>
+            <a href="first-project.html"><strong>Your First SEJA Project</strong></a>
+            -- Clone, set up, and design a working project from scratch using
+            <code>/seja-setup</code> and <code>/design</code>.
+          </li>
+          <li>
+            <a href="lifecycle-in-one-feature.html"><strong>The Lifecycle in One Feature</strong></a>
+            -- Walk through <code>/research</code>, <code>/plan</code>,
+            <code>/implement</code>, <code>/critique</code>, and
+            <code>/document</code> by adding a priority field to the to-do app.
+          </li>
+          <li>
+            <a href="first-metacommunication.html"><strong>Writing Your First Metacommunication Message</strong></a>
+            -- Produce a first-person metacommunication message via the design
+            questionnaire and understand the I/you phrasing convention.
+          </li>
+          <li>
+            <a href="first-council-debate.html"><strong>Your First Council Debate</strong></a>
+            -- Run a deep-research council debate to surface disagreement,
+            plural readings, and trade-offs on a high-stakes design question.
+          </li>
+          <li>
+            <a href="drift-detection.html"><strong>Drift Detection and Alignment</strong></a>
+            -- Introduce deliberate drift between design intent and code, then
+            resolve it with <code>/explain drift</code> and the promote workflow.
+          </li>
+        </ol>
+      </section>
+
+      <!-- Reading guide -->
+      <section id="reading-guide">
+        <h2>Reading Guide</h2>
+
+        <p>
+          The tutorials are designed to be read in order. Chapter 1 establishes
+          the project that Chapters 2-5 build on. However, Chapters 3-5 are
+          independent of each other and can be read in any order after
+          completing Chapters 1 and 2.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Chapter</th>
+                <th>Time</th>
+                <th>Depends on</th>
+                <th>You will learn</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Ch. 1: Your First SEJA Project</td>
+                <td>15 min</td>
+                <td>None</td>
+                <td>Project setup and design intent files</td>
+              </tr>
+              <tr>
+                <td>Ch. 2: The Lifecycle in One Feature</td>
+                <td>20 min</td>
+                <td>Ch. 1</td>
+                <td>The five-stage development lifecycle</td>
+              </tr>
+              <tr>
+                <td>Ch. 3: Metacommunication Message</td>
+                <td>15 min</td>
+                <td>Ch. 1</td>
+                <td>First-person design intent and the I/you convention</td>
+              </tr>
+              <tr>
+                <td>Ch. 4: Council Debate</td>
+                <td>15 min</td>
+                <td>Ch. 1</td>
+                <td>Multi-perspective argumentation for design decisions</td>
+              </tr>
+              <tr>
+                <td>Ch. 5: Drift Detection</td>
+                <td>15 min</td>
+                <td>Ch. 1, Ch. 2</td>
+                <td>As-intended vs. as-coded alignment and the promote workflow</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- What comes next -->
+      <section id="what-comes-next">
+        <h2>What Comes Next</h2>
+
+        <p>
+          After completing the tutorials, you are ready for the
+          <a href="../how-to/index.html">How-To Guides</a> (Vol. 2),
+          which provide goal-first guides for specific tasks: installation
+          variants, skill-by-skill workflows, governance operations, design
+          maintenance, and customization.
+        </p>
+      </section>
+
+    </article>
+
+    <!-- Volume navigation (prev/next volume) -->
+    <nav aria-label="volume navigation">
+      <a href="../how-to/index.html">Next: Vol. 2 -- How-To Guides</a>
+    </nav>
+  </main>
+
+  <!-- Sidebar table of contents -->
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#chapters">Chapters</a></li>
+      <li><a href="#reading-guide">Reading Guide</a></li>
+      <li><a href="#what-comes-next">What Comes Next</a></li>
+    </ul>
+  </aside>
+
+  <!-- Footer -->
+  <footer>
+    <section>
+      <h2>Related</h2>
+      <ul>
+        <li><a href="../how-to/index.html">Vol. 2: How-To Guides</a> -- task-oriented guides for experienced users</li>
+        <li><a href="../reference/index.html">Vol. 3: Reference</a> -- exhaustive specification for contributors and architects</li>
+        <li><a href="../explanation/index.html">Vol. 4: Explanation</a> -- theoretical foundations for academics and theorists</li>
+      </ul>
+    </section>
+
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T12:00:00Z</p>
+  </footer>
+
+</body>
+</html>

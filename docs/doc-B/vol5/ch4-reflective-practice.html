@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-volume" content="5">
+  <meta name="doc-chapter" content="4">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+
+  <title>Reflective Practice -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 5: Foundations and Philosophy</a></li>
+      <li>Reflective Practice</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>Reflective Practice</h1>
+
+      <p>
+        SEJA is a harness for a workflow, but it is also a theory of how good
+        professional work happens. That theory has a name and a lineage:
+        Donald Sch&ouml;n's <em>reflective practitioner</em>. When SEJA asks
+        you to pause at an <code>AskUserQuestion</code> decision point, when it
+        logs a Q&amp;A transcript alongside each artifact, and when it offers
+        <code>/reflect</code> at the end of a workflow, it is enacting a
+        particular claim about expertise: that competent practitioners do not
+        merely apply rules, but continuously converse with the situation in
+        front of them, reshaping their understanding as they go. This chapter
+        sets out Sch&ouml;n's account precisely, takes seriously the two
+        strongest critiques it has attracted, and then examines how &mdash; and
+        how faithfully &mdash; SEJA operationalizes each register of reflection.
+        It ends where honesty requires it to: with the open question of whether
+        an AI agent can reflect at all, or whether it merely scaffolds
+        reflection for the human designer who remains the practitioner.
+      </p>
+
+      <!-- Section 1: Schön's registers of reflection -->
+      <section data-diataxis="explanation" id="schon-registers">
+        <h2>Sch&ouml;n's Registers of Reflection</h2>
+
+        <p>
+          In <em>The Reflective Practitioner</em> (1983), Donald Sch&ouml;n
+          attacked what he called <strong>technical rationality</strong>: the
+          dominant model of professional knowledge in which practice is the
+          application of scientific theory to instrumental problems. Technical
+          rationality assumes that problems arrive pre-formed and that expertise
+          consists in selecting the correct technique. Sch&ouml;n observed that
+          real practice looks nothing like this. The problems professionals face
+          are messy, indeterminate, and value-laden; the hard part is not
+          solving the problem but <em>setting</em> it &mdash; framing an
+          ambiguous, troubling situation as a problem that can be worked on at
+          all. Competent practitioners handle this indeterminacy through what
+          Sch&ouml;n called an <em>artistry</em> that resists reduction to
+          rules. His project was to give that artistry an epistemology, and the
+          instrument he built for it was the vocabulary of reflection.
+        </p>
+
+        <p>
+          Sch&ouml;n distinguished several registers. Two are central, and a
+          third is often conflated with them but should be kept distinct.
+        </p>
+
+        <h3>Reflection-in-action</h3>
+
+        <p>
+          <strong>Reflection-in-action</strong> is thinking that happens
+          <em>while</em> the action is still underway, in the present tense of
+          doing, and that reshapes the action before it is complete. A jazz
+          musician who adjusts a phrase mid-improvisation to fit what the other
+          players just did; a physician who, sensing that a case does not match
+          the textbook, re-reads the symptoms on the fly; a designer who,
+          watching a sketch fail to say what it was meant to say, redraws it
+          differently &mdash; each is reflecting in action. Sch&ouml;n's phrase
+          for this is a <strong>reflective conversation with the
+          situation</strong>: the practitioner makes a move, the situation
+          &ldquo;talks back&rdquo; with unexpected consequences, and the
+          practitioner responds to that back-talk by reframing. Crucially,
+          reflection-in-action is bounded by what Sch&ouml;n called the
+          <strong>action-present</strong> &mdash; the stretch of time in which
+          intervention can still make a difference to the outcome. It is not
+          detached contemplation; it is inseparable from the doing.
+        </p>
+
+        <h3>Reflection-on-action</h3>
+
+        <p>
+          <strong>Reflection-on-action</strong> is the retrospective
+          counterpart: thinking back over an episode <em>after</em> it is
+          finished, in order to understand what happened, why a move worked or
+          failed, and what the situation revealed about one's own tacit
+          knowing. It is deliberate, past-tense, and separated from the pressure
+          of the action-present. Where reflection-in-action is the pilot
+          adjusting the controls, reflection-on-action is the debrief. It is the
+          register most legible to writing, because it can be recorded, revisited,
+          and shared &mdash; and it is therefore the register that documentation
+          and logging most naturally serve.
+        </p>
+
+        <h3>Reflection-on-practice</h3>
+
+        <p>
+          Sch&ouml;n's later work (and the reception that grew around it)
+          extends the frame to <strong>reflection-on-practice</strong>:
+          reflection not on a single episode but on the <em>pattern</em> of
+          one's practice over time &mdash; recurring habits, characteristic
+          framings, the moves one reaches for by default. This is a broader and
+          slower loop than reflection-on-action. Where reflection-on-action asks
+          &ldquo;what happened in <em>this</em> case?&rdquo;,
+          reflection-on-practice asks &ldquo;what kind of practitioner do these
+          cases, taken together, show me to be?&rdquo; It is the register of
+          professional identity and long-run growth, and &mdash; as this chapter
+          will show &mdash; SEJA deliberately provides it a distinct lens rather
+          than folding it into the per-episode retrospective.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> A useful way to keep the three registers
+            apart is by their time-relation to the action. Reflection-in-action
+            runs <em>during</em> (present tense, inside the action-present);
+            reflection-on-action runs <em>after a single episode</em> (past
+            tense, one case); reflection-on-practice runs <em>across many
+            episodes</em> (past tense, a pattern). SEJA maps a distinct
+            mechanism onto each &mdash; see &sect;&nbsp;<a href="#seja-operationalization">How
+            SEJA Operationalizes Each Register</a>.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 2: Counter-readings -->
+      <section data-diataxis="explanation" id="counter-readings">
+        <h2>Two Counter-Readings</h2>
+
+        <p>
+          Sch&ouml;n's framework became one of the most cited accounts of
+          professional learning of the late twentieth century, which is exactly
+          why it deserves to be read against its strongest critics rather than
+          adopted uncritically. Two critiques matter for SEJA, because each
+          identifies a way the framework can mislead if applied naively &mdash;
+          and SEJA is an application.
+        </p>
+
+        <h3>Eraut 1995: the &ldquo;Sch&ouml;n Shock&rdquo;</h3>
+
+        <p>
+          Michael Eraut's &ldquo;Sch&ouml;n Shock&rdquo; (1995) is the most
+          careful conceptual objection. Eraut argues that Sch&ouml;n's central
+          term, <em>reflection-in-action</em>, is dangerously ambiguous on the
+          question of <strong>time</strong>. When exactly is the
+          &ldquo;action-present&rdquo;? In a fast-moving clinical or design
+          situation, the window in which one could genuinely reflect &mdash;
+          stop, reconsider the frame, and alter course &mdash; may be so short
+          that what actually occurs is rapid, intuitive, largely tacit judgment
+          rather than anything we would recognize as reflection. Eraut's worry
+          is that Sch&ouml;n conflates two different things: (1) fast,
+          automatic professional judgment under time pressure, and (2) genuine
+          deliberative reflection, which needs a pause that the action-present
+          often does not afford. Squeeze the time available and
+          &ldquo;reflection-in-action&rdquo; either collapses into intuition or
+          smuggles in a covert interruption of the action. Eraut also charges
+          that Sch&ouml;n's celebrated case studies are reconstructed
+          retrospectively, so we cannot actually tell whether the reflection
+          happened <em>in</em> the action or was narrated <em>onto</em> it
+          afterward. The upshot for any system that claims to support
+          reflection-in-action: be honest about whether you are supporting real
+          in-flight reflection or merely inserting a decision pause &mdash; and
+          be sure the pause is affordable.
+        </p>
+
+        <h3>Boud, Keogh, and Walker 1985: the emotional dimension</h3>
+
+        <p>
+          Where Eraut presses on time, David Boud and colleagues press on
+          <strong>affect</strong>. In <em>Reflection: Turning Experience into
+          Learning</em> (1985), Boud, Keogh, and Walker argue that Sch&ouml;n's
+          account is too cognitivist &mdash; it treats reflection as an
+          intellectual operation on a situation and largely omits the
+          <em>feelings</em> that accompany experience. Their model of reflection
+          has three phases, and the middle one is explicitly emotional:
+          returning to and re-evaluating the experience requires
+          <strong>attending to feelings</strong> &mdash; using positive feelings
+          and, critically, <em>removing obstructing feelings</em> such as the
+          discomfort, defensiveness, or frustration that can block honest
+          re-examination. On this reading, reflection that suppresses or ignores
+          affect is impoverished; the emotional charge of an episode is not
+          noise to be filtered out but data about what mattered and where the
+          practitioner is stuck. For a harness, this is a pointed critique: a
+          reflection mechanism that captures only decisions and outcomes, and
+          never the practitioner's felt sense of the work, is capturing the
+          thinner half of what Boud et al. mean by reflection.
+        </p>
+
+        <p>
+          These are not footnotes to be filed and forgotten. Read together, the
+          two critiques set a bar. Eraut says: do not claim in-action reflection
+          where you have only a pause or an intuition. Boud et al. say: do not
+          claim reflection at all if you have stripped out the affect. SEJA
+          should be measured against both bars, not exempted from them.
+        </p>
+      </section>
+
+      <!-- Section 3: SEJA operationalization -->
+      <section data-diataxis="explanation" id="seja-operationalization">
+        <h2>How SEJA Operationalizes Each Register</h2>
+
+        <p>
+          SEJA does not treat &ldquo;reflection&rdquo; as a single feature. It
+          maps a distinct mechanism onto each of Sch&ouml;n's three registers,
+          and &mdash; as the following makes explicit &mdash; the mapping is
+          exact in one case, approximate in another, and openly named as
+          Sch&ouml;n in the third.
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Register</th>
+              <th>Time-relation</th>
+              <th>SEJA mechanism</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Reflection-in-action</td>
+              <td>During the workflow</td>
+              <td><code>AskUserQuestion</code> decision points</td>
+            </tr>
+            <tr>
+              <td>Reflection-on-action</td>
+              <td>After a single episode</td>
+              <td>Post-skill Q&amp;A logging (post-skill step 3)</td>
+            </tr>
+            <tr>
+              <td>Reflection-on-practice</td>
+              <td>Across many episodes</td>
+              <td><code>/reflect</code> (product vs. practice lens; <code>--deep</code> mode)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Reflection-in-action via <code>AskUserQuestion</code> decision points</h3>
+
+        <p>
+          At points where a skill faces a genuine fork &mdash; whether to
+          auto-run <code>/document</code> now or defer it, whether to apply
+          STATUS markers immediately or file them for later review, which
+          artifacts to bring into a reflection &mdash; SEJA surfaces an
+          <code>AskUserQuestion</code> decision point rather than choosing
+          silently. Each option carries a &ldquo;Recommended when / NOT
+          recommended when&rdquo; rationale, so the choice is presented as a
+          framing problem, not a menu. This is the harness's attempt at
+          reflection-<em>in</em>-action: the workflow is still underway, the
+          action-present is open, and the pause invites the designer to
+          reconsider the frame before the move is committed. The
+          <code>AskUserQuestion</code> pattern is used across the lifecycle
+          &mdash; for example, in post-skill's documentation auto-run
+          (<code>2b</code>), its DONE-marker proposal (<code>2e</code>), and its
+          next-step suggestions (step&nbsp;<code>12</code>), all defined in
+          <code>.claude/skills/post-skill/SKILL.md</code>, and in the
+          <code>/reflect</code> skill's own scope and lens prompts in
+          <code>.claude/skills/reflect/SKILL.md</code>.
+        </p>
+
+        <p>
+          Eraut's critique lands squarely here, and it is worth conceding
+          rather than deflecting. What an <code>AskUserQuestion</code> decision
+          point actually provides is a <em>structured pause</em> &mdash; an
+          interruption of the flow at which judgment is invited. Whether that
+          rises to Sch&ouml;n's reflection-in-action depends on whether the
+          designer uses the pause to re-frame or merely to click through. The
+          harness can afford the pause and can load it with rationale; it cannot
+          guarantee the reflection. SEJA arguably over-claims if it calls every
+          decision point &ldquo;reflection-in-action,&rdquo; and the honest
+          framing is Eraut's: these are affordances for in-flight judgment, and
+          the pause is designed to be cheap enough to be affordable without so
+          diluting it that it becomes a rubber-stamp.
+        </p>
+
+        <h3>Reflection-on-action via post-skill Q&amp;A logging</h3>
+
+        <p>
+          After every skill completes, post-skill step&nbsp;3 captures the
+          Q&amp;A of the session &mdash; the brief and the numbered exchanges
+          that produced the artifact. This is verified against the live
+          <code>.claude/skills/post-skill/SKILL.md</code>, whose step&nbsp;3
+          defines three branches evaluated in order:
+        </p>
+
+        <dl>
+          <dt>Branch A &mdash; skip</dt>
+          <dd>
+            When the parent passed <code>skip_qa_log: true</code>. Used only
+            when the skill's primary output <em>is</em> a Q&amp;A transcript
+            (currently <code>/research</code>, which embeds its own
+            <code>## Q&amp;A log</code>).
+          </dd>
+          <dt>Branch B &mdash; inline in the artifact file</dt>
+          <dd>
+            For <code>plan-</code>, <code>implement-</code>,
+            <code>roadmap-</code>, and <code>check-</code> artifacts, the
+            Q&amp;A is appended directly to the artifact under a
+            <code>## Q&amp;A Log</code> section, with numbered
+            <code>### Q1</code> / <code>### A1</code> exchanges continuing from
+            the last entry.
+          </dd>
+          <dt>Branch C &mdash; companion file</dt>
+          <dd>
+            For all other artifact types (advisory, communication, onboarding,
+            &hellip;), a sibling <code>&lt;prefix&gt;&lt;id&gt;-qa-&lt;slug&gt;.md</code>
+            file is written next to the parent artifact.
+          </dd>
+        </dl>
+
+        <p>
+          In every branch, the effect is the same: the episode is written down
+          in the past tense, after the action is complete, in a form that can be
+          revisited. That is precisely reflection-on-action's medium. The
+          logging is not itself reflection &mdash; a transcript is not an
+          insight &mdash; but it is the durable trace that later reflection reads
+          from. For the mechanics of where step&nbsp;3 sits in the pipeline, see
+          <a href="../vol3/ch1-lifecycle-pipeline.html#post-skill-steps">Vol.&nbsp;3,
+          Ch.&nbsp;1: The Lifecycle Pipeline</a>.
+        </p>
+
+        <p>
+          Here Boud et al.'s critique bites. Post-skill Q&amp;A logging captures
+          questions, decisions, and outcomes &mdash; the cognitive residue of
+          the episode &mdash; but it does not capture the designer's
+          <em>feelings</em> about the work: the frustration at a stuck loop, the
+          satisfaction of a clean cut, the unease that a shortcut was taken.
+          Boud, Keogh, and Walker would say this is reflection with its
+          emotional phase amputated. The one place SEJA does make room for felt
+          experience is the conversational <code>/reflect</code> flow, which
+          records the designer's own words verbatim &mdash; and there, affect
+          can enter through the door of free text. The logging layer itself,
+          though, is cognitivist by design, and that is a real limitation, not a
+          rounding error.
+        </p>
+
+        <h3>Reflection-on-practice via <code>/reflect</code></h3>
+
+        <p>
+          The <code>/reflect</code> skill is SEJA's dedicated instrument for the
+          slower loop. Verified against the live
+          <code>.claude/skills/reflect/SKILL.md</code>, its default
+          conversational flow first asks the designer, via
+          <code>AskUserQuestion</code>, to pick a <strong>lens</strong> &mdash;
+          and the skill's own option text names Sch&ouml;n explicitly:
+        </p>
+
+        <dl>
+          <dt>Product lens</dt>
+          <dd>
+            &ldquo;What I built as a thing in the world: does it do what I
+            intended? what did it reveal?&rdquo; Oriented to the artifact.
+          </dd>
+          <dt>Practice lens</dt>
+          <dd>
+            &ldquo;How I worked as a practitioner (Sch&ouml;n's
+            reflection-on-practice): what patterns emerge in how I designed and
+            built this?&rdquo; Oriented to the practitioner. The skill's own
+            copy cites Sch&ouml;n here by name.
+          </dd>
+          <dt>Both</dt>
+          <dd>
+            Product and practice in sequence, when the designer is uncertain
+            which lens fits or wants full coverage.
+          </dd>
+        </dl>
+
+        <p>
+          The lens then selects the reflection question the skill asks in plain
+          text (never as multiple choice &mdash; the skill's rule is that
+          reflection cannot be a menu): the product question asks what stands
+          out about <em>what you built</em>; the practice question asks what
+          stands out about <em>how you worked</em> and what you would do
+          differently. The designer's answer is recorded <strong>verbatim</strong>
+          in a reflection report under <code>${REFLECTIONS_DIR}</code>. A
+          strictly non-prescriptive rule governs the output: the skill writes
+          observations and the designer's own words, never &ldquo;you
+          should,&rdquo; &ldquo;consider changing X,&rdquo; or &ldquo;we
+          recommend&rdquo; &mdash; a constraint enforced by an automated test
+          that scans the generated report for the forbidden phrasings. This
+          verbatim, non-prescriptive stance is what lets affect survive into the
+          record: because the skill does not paraphrase, the designer's frustration
+          or doubt is preserved as written.
+        </p>
+
+        <p>
+          Beyond the default conversational flow, the live skill defines a
+          <strong><code>--deep</code></strong> mode that is explicitly
+          practice-oriented &mdash; its own documentation calls it
+          &ldquo;Sch&ouml;n's reflection-on-practice.&rdquo; Given a scope
+          keyword and a time window (<code>--deep [scope] [--since 30d]</code>),
+          it reads telemetry and briefs across the window and produces an event-matrix
+          visualization, a transition graph, and a past-tense
+          &ldquo;practice evolution&rdquo; narrative &mdash; surfacing
+          <em>how you worked over time, not what you built</em>. A third mode,
+          <code>--telemetry</code>, is a legacy statistical-mining flow over
+          <code>telemetry.jsonl</code>; it too is practice-oriented and stamps
+          its report with <code>Lens: practice</code>. The mapping to
+          Sch&ouml;n is therefore not a documentation gloss layered on after the
+          fact &mdash; it is written into the skill's own option copy and mode
+          descriptions.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The three <code>/reflect</code> modes span the
+            reflective loop by tempo. The default conversational flow anchors on
+            one or a few artifacts &mdash; closest to reflection-on-action.
+            <code>--deep</code> and <code>--telemetry</code> widen the window to
+            a period of work &mdash; squarely reflection-on-practice. Choosing a
+            mode is choosing how long a loop to close.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 4: Critical counter-reading -->
+      <section data-diataxis="explanation" id="critical-counter-reading">
+        <h2>Critical Counter-Reading: Where the Mapping Strains</h2>
+
+        <p>
+          It would be easy to present the three-register mapping as a tidy
+          success. It is not tidy, and pretending otherwise would violate the
+          spirit of the theory being applied. Three strains deserve naming.
+        </p>
+
+        <p>
+          <strong>The in-action register is the weakest fit.</strong> By
+          Eraut's own standard, a decision point is a pause, and a pause is not
+          yet reflection-in-action. Sch&ouml;n's in-action reflection is
+          continuous, embedded, and often tacit &mdash; the practitioner rarely
+          stops. SEJA's mechanism is discrete and explicit: it <em>does</em>
+          stop, at pre-declared forks. This is arguably a category difference,
+          not a faithful implementation. The defensible claim is narrower than
+          &ldquo;SEJA supports reflection-in-action&rdquo;: SEJA inserts
+          affordable, rationale-bearing pauses at which in-flight judgment
+          becomes possible. Whether the designer reflects is outside the
+          harness's reach.
+        </p>
+
+        <p>
+          <strong>The affective dimension is under-engineered.</strong> Boud et
+          al.'s emotional phase is present in exactly one place &mdash; the
+          verbatim free text of a <code>/reflect</code> answer &mdash; and
+          absent everywhere else. Post-skill logging, decision-point rationale,
+          telemetry, and the <code>--deep</code> practice narrative are all
+          cognitive and behavioral; none asks how the work <em>felt</em>. A
+          designer who never opens a conversational <code>/reflect</code> will
+          leave no affective trace at all. SEJA under-engineers here, and the
+          gap is structural rather than incidental.
+        </p>
+
+        <p>
+          <strong>Automation can crowd out reflection.</strong> There is a
+          tension internal to the harness. The more SEJA logs, indexes, and
+          reflects <em>on the designer's behalf</em> &mdash; generating event
+          matrices, transition graphs, and practice narratives automatically
+          &mdash; the more it risks substituting the appearance of reflection
+          for the act. A transition graph is not an insight; a verbatim answer
+          the designer never wrote is not their reflection. SEJA's
+          non-prescriptive rule is a deliberate guardrail against exactly this:
+          by refusing to tell the designer what to conclude, the harness keeps
+          the interpretive work where Sch&ouml;n would insist it belongs &mdash;
+          with the practitioner. But the guardrail is a policy, not a guarantee,
+          and the risk of reflection-theater is real.
+        </p>
+      </section>
+
+      <!-- Section 5: Open questions -->
+      <section data-diataxis="explanation" id="open-questions">
+        <h2>Open Question: Can an AI Agent Reflect?</h2>
+
+        <p>
+          The deepest question this chapter raises cannot be closed here, so it
+          is named as open. Sch&ouml;n's reflective practitioner is a
+          <em>person</em> &mdash; someone with a professional identity, a stake
+          in the outcome, and a felt sense of the situation talking back. When
+          SEJA &ldquo;reflects,&rdquo; who is the practitioner?
+        </p>
+
+        <p>
+          Two readings are available, and the harness's own design leans
+          decisively toward the second.
+        </p>
+
+        <dl>
+          <dt>Reading 1 &mdash; the agent reflects</dt>
+          <dd>
+            On this view, the agent's mid-workflow reconsideration of a frame,
+            its retrospective narration of an episode, and its pattern-mining
+            over telemetry are themselves species of reflection &mdash;
+            functionally, if not phenomenally. The objection is immediate: an
+            agent has no action-present in Sch&ouml;n's sense (nothing is at
+            stake for it), no professional identity to grow, and, on Boud et
+            al.'s terms, no feelings to attend to. What looks like
+            reflection-in-action may be, in Eraut's terms, fast pattern-matching
+            narrated as reflection &mdash; the very conflation Eraut warned
+            against, now instantiated in silicon.
+          </dd>
+          <dt>Reading 2 &mdash; the agent scaffolds the designer's reflection</dt>
+          <dd>
+            On this view &mdash; the one SEJA's mechanisms actually enact &mdash;
+            the practitioner is always the human designer, and the harness is
+            <em>scaffolding</em>: it opens the pause (decision points), preserves
+            the trace (Q&amp;A logging), and prompts the loop
+            (<code>/reflect</code>), but the reflecting is done by the person who
+            reads the rationale, revisits the transcript, and writes the verbatim
+            answer. The strictly non-prescriptive rule, the verbatim capture, and
+            the &ldquo;this is <em>your</em> practice&rdquo; framing of the
+            practice lens all point this way: SEJA is built to hand reflection
+            back to the designer, not to perform it for them.
+          </dd>
+        </dl>
+
+        <p>
+          The honest position is that SEJA is designed as Reading 2 and should
+          be described as Reading 2. Its value is not that the agent reflects
+          &mdash; it may not, in any sense Sch&ouml;n or Boud would accept
+          &mdash; but that it lowers the cost of the human designer's
+          reflection: it makes the pause affordable, the trace durable, and the
+          retrospective prompt unavoidable. Whether a future agent with
+          persistent memory, self-model, and something answering to stakes could
+          cross into Reading 1 is a question this documentation leaves open,
+          precisely because SEJA does not currently answer it and should not
+          pretend to.
+        </p>
+      </section>
+
+      <!-- References -->
+      <section data-diataxis="explanation" id="references">
+        <h2>References</h2>
+
+        <ul>
+          <li>
+            Sch&ouml;n, D. A. (1983). <em>The Reflective Practitioner: How
+            Professionals Think in Action</em>. Basic Books.
+          </li>
+          <li>
+            Eraut, M. (1995). &ldquo;Sch&ouml;n Shock: a case for reframing
+            reflection-in-action?&rdquo; <em>Teachers and Teaching</em>, 1(1),
+            9&ndash;22.
+          </li>
+          <li>
+            Boud, D., Keogh, R., &amp; Walker, D. (Eds.) (1985).
+            <em>Reflection: Turning Experience into Learning</em>. Kogan Page.
+          </li>
+        </ul>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- See also: curated cross-volume related chapters -->
+  <nav aria-label="see also" class="see-also">
+    <h2>See also</h2>
+    <ul>
+      <li><a href="../vol3/ch1-lifecycle-pipeline.html#post-skill-steps">Vol. 3, Ch. 1: The Lifecycle Pipeline</a> &mdash; where post-skill Q&amp;A logging sits in the pipeline.</li>
+      <li><a href="ch1-software-as-designed-communication.html">Vol. 5, Ch. 1: Software as Designed Communication</a> &mdash; the metacommunication frame reflection operates within.</li>
+      <li><a href="ch5-abduction-and-plural-readings.html">Vol. 5, Ch. 5: Abduction and Plural Readings</a> &mdash; the reasoning that reflection feeds.</li>
+    </ul>
+  </nav>
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="ch3-extended-metacommunication-template.html">Previous: The Extended Metacommunication Template</a>
+    <a href="ch5-abduction-and-plural-readings.html">Next: Abduction and Plural Readings</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

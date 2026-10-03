@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="0">
+  <meta name="doc-chapter" content="0">
+  <meta name="doc-phase" content="3">
+  <meta name="doc-status" content="published">
+
+  <title>SEJA Documentation -- Reading Map</title>
+
+  <!-- CSS depth: 0 (collection root) -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>SEJA Documentation</h1>
+
+      <p>
+        SEJA is an agent harness that makes Claude Code governable <em>and</em>
+        epistemic. It structures every AI-assisted development session around a
+        lifecycle of research, planning, implementation, critique, and reflection
+        -- grounded in semiotic engineering, reflective practice, and abductive
+        reasoning. This collection covers everything from first-time setup to the
+        theoretical foundations that distinguish SEJA from every other agent
+        harness.
+      </p>
+
+      <p>
+        This edition is written for <strong>every SEJA reader</strong> -- from
+        first-time users to contributors, architects, and theorists. It is
+        organized by the <em>kind</em> of help you need rather than by the
+        harness's internals: its four volumes follow the Diataxis model --
+        Tutorials to learn by doing, How-To guides to accomplish a specific
+        task, Reference to look a detail up, and Explanation to understand the
+        <em>why</em>. The intent is to let you enter by what you are trying to
+        do right now; the reading map below routes you to the matching volume.
+      </p>
+
+      <!-- ============================================================ -->
+      <!-- Reading Map: Decision Tree                                    -->
+      <!-- ============================================================ -->
+
+      <section id="reading-map">
+        <h2>What is your role?</h2>
+
+        <p>
+          Start here. Find the volume that matches your goal, then follow the
+          chapter links within it.
+        </p>
+
+        <dl>
+          <dt>New user -- "I want to get started"</dt>
+          <dd>
+            Begin with <a href="#vol-tutorials">Vol. 1: Tutorials</a>.
+            The five guided walkthroughs take you from zero to a working project
+            in under an hour, building understanding through hands-on experience.
+          </dd>
+
+          <dt>Experienced user -- "I need to accomplish a specific task"</dt>
+          <dd>
+            Go to <a href="#vol-howto">Vol. 2: How-To Guides</a>.
+            Goal-first guides cover installation variants, skill-by-skill
+            workflows, governance operations, design maintenance, and
+            customization.
+          </dd>
+
+          <dt>Contributor or architect -- "I need to look something up"</dt>
+          <dd>
+            Consult <a href="#vol-reference">Vol. 3: Reference</a>.
+            Exhaustive tables and specifications for every skill, subagent,
+            script, reference file, pipeline stage, file format, and
+            configuration variable.
+          </dd>
+
+          <dt>Academic or theorist -- "I want to understand the why"</dt>
+          <dd>
+            Read <a href="#vol-explanation">Vol. 4: Explanation</a>.
+            Narrative prose exploring the semiotic engineering foundation,
+            reflective practice, the dual design thesis, and the design
+            decisions behind SEJA.
+          </dd>
+
+          <dt>AI agent -- "I process this harness programmatically"</dt>
+          <dd>
+            Agent-facing documentation lives in <code>.claude/</code> (SKILL.md
+            files, references, rules). This human-readable collection is not
+            optimized for agent consumption. See
+            <a href="explanation/agent-as-reader.html">Vol. 4 Ch. 5:
+            How the Agent Reads SEJA</a> for how Claude processes the harness.
+          </dd>
+        </dl>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Volume Cards                                                  -->
+      <!-- ============================================================ -->
+
+      <section id="volumes">
+        <h2>Volumes</h2>
+
+        <!-- Volume 1: Tutorials ====================================== -->
+        <section id="vol-tutorials" class="vol-tutorials">
+          <h3><span class="vol-accent">Vol. 1: Tutorials</span> -- Learn SEJA</h3>
+
+          <p>
+            Learning-oriented, guaranteed-outcome walkthroughs that build
+            understanding by doing. Start here if you have never used SEJA.
+          </p>
+
+          <ol>
+            <li><a href="tutorials/first-project.html">Ch. 1: Your First SEJA Project</a>
+              -- Clone, set up, and design a working project from scratch.</li>
+            <li><a href="tutorials/lifecycle-in-one-feature.html">Ch. 2: The Lifecycle in One Feature</a>
+              -- Walk through research, plan, implement, critique, and document for a single feature.</li>
+            <li><a href="tutorials/first-metacommunication.html">Ch. 3: Writing Your First Metacommunication Message</a>
+              -- Produce a first-person metacommunication message via the design questionnaire.</li>
+            <li><a href="tutorials/first-council-debate.html">Ch. 4: Your First Council Debate</a>
+              -- Run a deep-research council debate to surface disagreement and plural readings.</li>
+            <li><a href="tutorials/drift-detection.html">Ch. 5: Drift Detection and Alignment</a>
+              -- Introduce deliberate drift, then resolve it with <code>/explain drift</code>.</li>
+          </ol>
+        </section>
+
+        <!-- Volume 2: How-To Guides ================================== -->
+        <section id="vol-howto" class="vol-howto">
+          <h3><span class="vol-accent">Vol. 2: How-To Guides</span> -- Use SEJA</h3>
+
+          <p>
+            Task-oriented, goal-first guides with decision points and
+            alternatives. Go here when you know what you want to accomplish.
+          </p>
+
+          <ol>
+            <li><a href="how-to/installation.html">Ch. 1: Installation and Setup</a>
+              -- Four guides: greenfield/brownfield x collocated/workspace.</li>
+            <li><a href="how-to/skills/index.html">Ch. 2: Skill-by-Skill Guides</a>
+              -- One section per user-facing skill: when to use, inputs, steps, outputs, common mistakes.</li>
+            <li><a href="how-to/governance.html">Ch. 3: Governance Operations</a>
+              -- Constitution, pending actions, priv/public sync, preflight.</li>
+            <li><a href="how-to/design-intent.html">Ch. 4: Design Intent Maintenance</a>
+              -- Updating as-intended, markers, decision records, the promote workflow.</li>
+            <li><a href="how-to/customization.html">Ch. 5: Customization and Extension</a>
+              -- Writing skills, subagents, review perspectives, and pipeline modifications.</li>
+          </ol>
+        </section>
+
+        <!-- Volume 3: Reference ====================================== -->
+        <section id="vol-reference" class="vol-reference">
+          <h3><span class="vol-accent">Vol. 3: Reference</span> -- Look Up SEJA</h3>
+
+          <p>
+            Information-oriented, exhaustive specification organized to mirror
+            the harness topology. Consult when you need precise details.
+          </p>
+
+          <ol>
+            <li><a href="reference/skills-reference.html">Ch. 1: Skills Reference</a>
+              -- Per-skill tables: parameters, prerequisites, outputs, lifecycle hooks, delegations.</li>
+            <li><a href="reference/subagent-reference.html">Ch. 2: Subagent Reference</a>
+              -- Per-agent: role, inputs, outputs, quality perspectives, constitution enforcement.</li>
+            <li><a href="reference/scripts-reference.html">Ch. 3: Scripts Reference</a>
+              -- Per-script: purpose, CLI interface, exit codes, dependencies.</li>
+            <li><a href="reference/reference-files-catalog.html">Ch. 4: Reference Files Catalog</a>
+              -- Per-file: scope, load mechanism, consumer skills, freshness policy.</li>
+            <li><a href="reference/pipeline-reference.html">Ch. 5: Pipeline Reference</a>
+              -- Pre-skill 6 stages and post-skill 13 steps with failure modes.</li>
+            <li><a href="reference/file-format-reference.html">Ch. 6: File Format Reference</a>
+              -- YAML frontmatter, marker syntax, JSONL trace, plan structure, brief log format.</li>
+            <li><a href="reference/configuration-reference.html">Ch. 7: Configuration Reference</a>
+              -- <code>conventions.md</code> variables, <code>constitution.md</code> structure, periodic triggers.</li>
+          </ol>
+        </section>
+
+        <!-- Volume 4: Explanation ==================================== -->
+        <section id="vol-explanation" class="vol-explanation">
+          <h3><span class="vol-accent">Vol. 4: Explanation</span> -- Understand SEJA</h3>
+
+          <p>
+            Understanding-oriented narrative prose exploring the <em>why</em>
+            behind the <em>what</em>. Read when you want to deepen your mental
+            model of SEJA's design.
+          </p>
+
+          <ol>
+            <li><a href="explanation/semiotic-engineering.html">Ch. 1: The Semiotic Engineering Foundation</a>
+              -- Software as designed communication, the designer's deputy, sign systems.</li>
+            <li><a href="explanation/emt.html">Ch. 2: The Extended Metacommunication Template</a>
+              -- Barbosa et al. 2021: four lifecycle dimensions and ethical questions.</li>
+            <li><a href="explanation/reflective-practice.html">Ch. 3: Reflective Practice in SEJA</a>
+              -- Schon's three registers and how SEJA operationalizes each.</li>
+            <li><a href="explanation/dual-thesis.html">Ch. 4: The Governable AND Epistemic Thesis</a>
+              -- Why both axes are structurally required and how features map to them.</li>
+            <li><a href="explanation/agent-as-reader.html">Ch. 5: How the Agent Reads SEJA</a>
+              -- Context-window mechanics, eager vs. lazy loading, agent attention patterns.</li>
+            <li><a href="explanation/design-decisions.html">Ch. 6: Design Decisions and Trade-offs</a>
+              -- Why 3 marker types, why path-scoped rules, why the as-intended/as-coded split.</li>
+          </ol>
+        </section>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Anti-pattern content placeholder                              -->
+      <!-- ============================================================ -->
+
+      <section id="anti-patterns">
+        <h2>How Not to Use SEJA</h2>
+
+        <p>
+          Knowing the common ways SEJA is misused is as valuable as knowing how
+          to use it well. <a href="anti-patterns.html">How Not to Use SEJA</a>
+          catalogs seven anti-patterns -- each with its symptom, its consequence,
+          and the correct approach -- that undermine SEJA's governance and
+          epistemic guarantees. Read it once you are comfortable with the
+          lifecycle.
+        </p>
+
+        <ul>
+          <li><a href="anti-patterns.html#bypassing-the-lifecycle">Bypassing the lifecycle</a>
+            -- skipping research, planning, or critique.</li>
+          <li><a href="anti-patterns.html#hand-editing-human-markers-files">Hand-editing Human (markers) files</a>
+            -- editing marker-managed files by hand instead of via the marker tooling.</li>
+          <li><a href="anti-patterns.html#skipping-pre-commit-hooks">Skipping pre-commit hooks</a>
+            -- bypassing preflight and the private-leak gate with <code>--no-verify</code>.</li>
+          <li><a href="anti-patterns.html#mixing-priv-content-into-public-docs">Mixing private content into public docs</a>
+            -- letting priv-only material reach the public collection.</li>
+          <li><a href="anti-patterns.html#ignoring-pending-actions">Ignoring pending actions</a>
+            -- leaving the <code>/pending</code> ledger unattended.</li>
+          <li><a href="anti-patterns.html#treating-the-constitution-as-optional">Treating the constitution as optional</a>
+            -- overriding non-negotiable rules without a decision record.</li>
+          <li><a href="anti-patterns.html#running-implement-without-a-plan">Running /implement without a plan</a>
+            -- coding before a plan exists in <code>_output/plans/</code>.</li>
+        </ul>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Implementation note                                           -->
+      <!-- ============================================================ -->
+
+      <section id="implementation-note">
+        <h2>About This Page</h2>
+
+        <p>
+          This <code>index.html</code> is the Reading Map for the SEJA
+          documentation collection. Every chapter link above resolves to a
+          completed page within this collection. Start from the volume that
+          matches your role, or jump straight to a chapter you need.
+        </p>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="#main-content">Back to top</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

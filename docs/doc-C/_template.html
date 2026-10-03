@@ -1,0 +1,163 @@
+<!--
+  ============================================================================
+  doc-C CHAPTER TEMPLATE  (_template.html)
+  ----------------------------------------------------------------------------
+  AUTHORING INPUT ONLY. This file is NEVER served to readers and is NEVER
+  linked from any page. It is the single structural source of truth that every
+  doc-C content page is copied from, so that all pages share one skeleton
+  (landmark order, breadcrumb shape, badge placement, TOC container, footer).
+  Normative reference: _output/docs/doc-guidelines.md (§A, §B, §C, §E, §G, §H).
+
+  ----------------------------------------------------------------------------
+  HOW TO USE (copy-and-rename step)
+  ----------------------------------------------------------------------------
+  1. Copy this file to its target path under _output/docs/doc-C/.
+  2. Rename it to the chapter's kebab-case filename (e.g. lifecycle-pipeline.html),
+     or to index.html for a track/section landing page.
+  3. Replace every {{...}} placeholder. Delete this comment block from the copy.
+
+  ----------------------------------------------------------------------------
+  MUSTACHE PLACEHOLDERS (the complete named set)
+  ----------------------------------------------------------------------------
+  {{PAGE_TITLE}}        Human page title (also used in <title> and <h1>).
+  {{META_DESCRIPTION}}  One-sentence meta description for <meta name="description">.
+  {{DIATAXIS_TYPE}}     Diataxis token: tutorial | howto | reference | explanation
+                        (NO hyphen — see "Diataxis token spelling" below).
+  {{DOC_STATUS}}        Publication status: stub | draft | published.
+  {{CSS_HREF}}          Relative path to styles.css (see CSS/JS depth guidance).
+  {{JS_SRC}}            Relative path to nav.js (see CSS/JS depth guidance).
+  {{HOME_HREF}}         Relative path to the collection root index.html
+                        (Reading Map); depth-2 → ../../index.html.
+  {{BREADCRUMB_ITEMS}}  Intermediate + final crumbs after the pinned "Home" crumb.
+                        Final crumb is plain text with aria-current="page".
+  {{BADGES}}            One or more <span class="badge …"> chips (Diataxis + core/track).
+  {{PAGE_CONTENT}}      The page body: <section data-diataxis="…">…</section> blocks.
+                        Exactly one <h1> is already emitted in <header>; use <h2>/<h3> below.
+  {{SEE_ALSO_ITEMS}}    2–4 curated <li><a …> cross-references.
+  {{FOOTER_ITEMS}}      Optional extra collection escape links (may be empty).
+
+  ----------------------------------------------------------------------------
+  CSS/JS DEPTH GUIDANCE (§G)
+  ----------------------------------------------------------------------------
+  Root page (doc-C/index.html)          → styles.css        / nav.js
+  depth-1 page (doc-C/<dir>/page.html)  → ../styles.css     / ../nav.js
+  depth-2 page (doc-C/<dir>/<sub>/…)    → ../../styles.css  / ../../nav.js
+  The default {{CSS_HREF}}/{{JS_SRC}} placeholders are filled for depth-2 (the
+  common Wave 1 case: core/concepts/*, core/operations/*, core/reference/*,
+  tracks/<track>/index.html). Adjust the prefix for other depths.
+
+  ----------------------------------------------------------------------------
+  PER-PAGE CHOICES
+  ----------------------------------------------------------------------------
+  • Diataxis type: pick tutorial | howto | reference | explanation. Use the SAME
+    token for <meta name="diataxis">, each <section data-diataxis="…">, and the
+    diataxis-* badge class.
+  • Accent badge: pick ONE core-type accent (.core-skills | .core-concepts |
+    .core-operations | .core-reference) OR ONE audience-track accent
+    (.track-practitioner | .track-architect | .track-scholar).
+  • Breadcrumb root crumb: the collection-pinned label is "Home" (§E allows the
+    root label to be collection-configurable; it is pinned to "Home" here for
+    the whole doc-C collection). Do not rename it per page.
+  • In-page TOC: the <nav class="doc-nav"> container is left EMPTY on purpose —
+    the collection-wide "all-in" decision. nav.js populates it from the
+    .doc-content <h2>/<h3> headings. With JS off the page stays navigable via
+    headings + breadcrumb.
+  • See also: carry 2–4 curated links.
+  • Cross-reference affordances (§C): a link to a page that a later plan WILL
+    build uses href="#placeholder"; a reference to something NO plan will ever
+    build renders as plain-text "(coming soon)" with NO href (honest affordance).
+
+  ----------------------------------------------------------------------------
+  DIATAXIS TOKEN SPELLING (amendment B)
+  ----------------------------------------------------------------------------
+  The token set is the NO-HYPHEN set: tutorial | howto | reference | explanation.
+  Used identically for <meta name="diataxis">, data-diataxis on <section>s, and
+  the diataxis-* badge class. This matches nav.js (DIATAXIS_LABELS keys) and
+  styles.css (.diataxis-howto). doc-guidelines §A's prose writes "how-to" WITH a
+  hyphen — that is prose, not the machine token. Emitting data-diataxis="how-to"
+  breaks the nav.js filter label and matches no badge accent class. Always
+  author "howto".
+
+  ----------------------------------------------------------------------------
+  SEE-ALSO TITLE ELEMENT (amendment A)
+  ----------------------------------------------------------------------------
+  The "See also" title is <p class="see-also-title">See also</p> — NOT the
+  <h2>See also</h2> shown in doc-guidelines §C. Rationale: styles.css styles only
+  .see-also .see-also-title, and nav.js sweeps every .doc-content <h2>/<h3> into
+  the in-page TOC — an <h2> here would render oversized and pollute the TOC.
+  This is a deliberate, collection-wide deviation from §C's example; do not
+  "correct" it to an <h2>.
+
+  ----------------------------------------------------------------------------
+  nav.js HTML CONTRACT (§G Pattern 2b)
+  ----------------------------------------------------------------------------
+  nav.js (loaded with defer) reads the .doc-content prose column (falling back to
+  <main>) and turns its <h2>/<h3> into the TOC injected into .doc-nav; reads
+  data-diataxis on <section>s to build the filter; assigns slug ids to headings
+  lacking one; and no-ops silently when .doc-nav or .doc-content is absent.
+  Therefore an authored page MUST provide the empty .doc-nav container and put
+  prose inside .doc-content, and SHOULD add data-diataxis to <section>s that
+  carry a Diataxis classification.
+  ============================================================================
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Classification metadata: set per page -->
+  <meta name="diataxis" content="{{DIATAXIS_TYPE}}">
+  <meta name="doc-status" content="{{DOC_STATUS}}"><!-- stub|draft|published -->
+  <meta name="description" content="{{META_DESCRIPTION}}">
+  <title>{{PAGE_TITLE}} — SEJA Documentation</title>
+  <!-- CSS depth: 2 (sub-directory page, e.g. core/concepts/*, tracks/*/index.html).
+       Root: styles.css | depth-1: ../styles.css | depth-2: ../../styles.css -->
+  <link rel="stylesheet" href="{{CSS_HREF}}"><!-- default ../../styles.css -->
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>{{PAGE_TITLE}}</h1>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="{{HOME_HREF}}">Home</a></li><!-- root crumb pinned "Home"; depth-2 → ../../index.html -->
+        {{BREADCRUMB_ITEMS}}<!-- intermediate crumbs; last crumb plain text w/ aria-current="page" -->
+      </ol>
+    </nav>
+
+    <!-- In-page TOC target. LEFT EMPTY on purpose: nav.js populates it from the
+         .doc-content h2/h3 headings (collection-wide all-in TOC decision).
+         With JS disabled the page stays navigable via headings + breadcrumb. -->
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>{{BADGES}}</p><!-- e.g. <span class="badge diataxis-explanation">explanation</span>
+                                  <span class="badge core-concepts">Concepts</span> -->
+        {{PAGE_CONTENT}}<!-- <section data-diataxis="...">…</section> blocks; one <h1> already above -->
+
+        <nav class="see-also" aria-label="see also"><!-- 2–4 curated cross-volume links -->
+          <p class="see-also-title">See also</p>
+          <ul>
+            {{SEE_ALSO_ITEMS}}
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="{{HOME_HREF}}">Reading Map</a>
+        {{FOOTER_ITEMS}}<!-- optional extra collection escape routes -->
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2. Root: nav.js | depth-1: ../nav.js | depth-2: ../../nav.js -->
+  <script src="{{JS_SRC}}" defer></script><!-- default ../../nav.js -->
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-status" content="draft">
+  <meta name="doc-volume" content="3">
+  <meta name="doc-phase" content="1">
+
+  <title>Vol. 3: The Execution Layer -- SEJA Documentation, System-Isomorphic Edition</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection -- System-Isomorphic Edition</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li>Vol. 3: The Execution Layer</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>Vol. 3: The Execution Layer <span class="phase-badge">Phase 1</span></h1>
+
+      <div class="status-notice">
+        This volume is in draft status. Chapter content has been written for Phase 1; editorial review is pending.
+      </div>
+
+      <section id="purpose" data-diataxis="explanation">
+        <p>
+          This volume covers day-to-day usage of SEJA -- the lifecycle pipeline
+          that orchestrates work, the skill system that encapsulates agent
+          capabilities, subagent delegation for parallel tasks, plan-driven
+          implementation, and the quality critique loop. This is the
+          practitioner's primary reference for getting work done with SEJA.
+        </p>
+      </section>
+
+      <section id="chapters" data-diataxis="reference">
+        <h2>Chapters</h2>
+
+        <ol class="chapter-list">
+          <li>
+            <a href="ch1-lifecycle-pipeline.html">1. The Lifecycle Pipeline</a>
+            <span class="chapter-summary">Documents the three-phase pipeline that wraps every skill invocation: pre-skill, skill execution, and post-skill. Covers the canonical skill ordering, enforcement mechanisms, lifecycle variations, and conversation trace integration.</span>
+          </li>
+          <li>
+            <a href="ch2-skills-in-depth.html">2. Skills In Depth</a>
+            <span class="chapter-summary">Per-skill reference for all user-facing skills and internal lifecycle hooks. Each entry follows a consistent template: purpose, parameters, prerequisites, workflow summary, subagent delegations, reference file loads, expected outputs, and common mistakes.</span>
+          </li>
+          <li>
+            <a href="ch3-subagent-delegation.html">3. Subagent Delegation</a>
+            <span class="chapter-summary">Explains the thin-orchestrator delegation model that separates skill-level coordination from engine-level work. Provides per-agent reference cards for evaluators and generators, covering agent prompt file format, trust boundaries, and result processing.</span>
+          </li>
+          <li>
+            <a href="ch4-plans-and-implementation.html">4. Plans and Implementation</a>
+            <span class="chapter-summary">Covers the anatomy of a plan file, planning modes, complexity-gated review, and the <code>/implement</code> executor with its execution modes. Documents progress tracking, checkpoint recovery, rollback branches, and design-intent traceability.</span>
+          </li>
+          <li>
+            <a href="ch5-quality-and-critique.html">5. Quality and Critique</a>
+            <span class="chapter-summary">Documents the <code>/critique</code> skill's modes and the review perspectives organized into Essential and Deep-dive tiers. Explains the two-phase review process, stack-based filtering, conflict resolution between perspectives, and how to interpret validation results.</span>
+          </li>
+        </ol>
+      </section>
+
+      <section id="reading-order" data-diataxis="explanation">
+        <h2>Recommended Reading Order</h2>
+        <p>
+          Start with "Lifecycle Pipeline" to understand the overall flow, then
+          "Skills In Depth" for the mechanism that powers each stage. Read
+          "Subagent Delegation" next to understand how complex tasks are
+          parallelized, then "Plans and Implementation" for the planning
+          workflow. Finish with "Quality and Critique" to learn how SEJA
+          validates its own outputs.
+        </p>
+      </section>
+
+      <section id="cross-references" data-diataxis="reference">
+        <h2>Related Volumes</h2>
+        <aside>
+          <p>
+            Execution is driven by design decisions documented in
+            <a href="../vol2/index.html">Vol. 2: The Design Layer</a>.
+            The artifacts produced by execution are governed by
+            <a href="../vol4/index.html">Vol. 4: Output and Governance</a>.
+          </p>
+        </aside>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Volume navigation -->
+  <nav aria-label="volume navigation" class="volume-nav">
+    <a href="../vol2/index.html">Previous: Vol. 2 -- The Design Layer</a>
+    <a href="../vol4/index.html">Next: Vol. 4 -- Output and Governance</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

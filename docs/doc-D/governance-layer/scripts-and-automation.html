@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="4">
+  <meta name="doc-chapter" content="3">
+  <meta name="doc-phase" content="3">
+  <meta name="doc-status" content="draft">
+
+  <title>Scripts and Automation -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 4: The Output and Governance Layer</a></li>
+      <li>Scripts and Automation</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>Scripts and Automation</h1>
+
+      <p>
+        The SEJA harness automates its governance, validation, and artifact
+        management through a suite of Python scripts distributed across
+        several directories. This chapter provides a per-script reference
+        grouped by functional category, followed by how-to guidance on using
+        the validation orchestrator and extending it with new checks.
+      </p>
+
+      <p>
+        Scripts live in four locations:
+        <code>.claude/skills/scripts/</code> (shared utilities),
+        co-located skill subdirectories such as <code>.claude/skills/critique/</code>,
+        <code>.claude/skills/design/</code>, <code>.claude/skills/explain/</code>,
+        and <code>.claude/skills/post-skill/</code> (skill-owned scripts next
+        to their <code>SKILL.md</code>),
+        <code>.claude/skills/scripts/priv/</code> (private-only scripts excluded
+        from public releases), and <code>tools/</code> (release pipeline
+        utilities). The validation orchestrator <code>run_all_checks.py</code>
+        discovers scripts across all of these locations automatically.
+      </p>
+
+
+      <!-- ================================================== -->
+      <section data-diataxis="reference">
+        <h2>Script Categories</h2>
+
+        <p>
+          The tables below group every script by its functional role. The
+          <em>Typical invocation</em> column shows the most common way each
+          script is called; most scripts also accept <code>--help</code> for
+          full option details.
+        </p>
+
+
+        <!-- ---- 1. Validation ---- -->
+        <h3>Validation</h3>
+        <p>
+          Validation scripts enforce harness invariants, project conventions,
+          and codebase integrity constraints. Each script exits
+          <code>0</code> on pass, <code>1</code> when violations are found,
+          and <code>2</code> on script error. Two orchestrators aggregate
+          them: <code>run_all_checks.py</code> (full sweep with JUnit XML)
+          and <code>run_preflight_fast.py</code> (curated fast subset for
+          git hooks, under 10 seconds).
+        </p>
+
+        <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Script</th>
+              <th>Purpose</th>
+              <th>Typical invocation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>run_all_checks.py</code></td>
+              <td>CI-independent validation orchestrator; discovers and runs all <code>check_*.py</code> scripts with unified exit codes and optional JUnit XML output</td>
+              <td><code>python .claude/skills/scripts/run_all_checks.py --root .</code></td>
+            </tr>
+            <tr>
+              <td><code>run_preflight_fast.py</code></td>
+              <td>Fast preflight gate (&lt;10s) for git hooks and CI; runs a curated subset of checks</td>
+              <td><code>python .claude/skills/scripts/run_preflight_fast.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_conventions.py</code></td>
+              <td>Validates that every <code>${VARIABLE}</code> in SKILL.md and reference files is defined in <code>conventions.md</code></td>
+              <td><code>python .claude/skills/scripts/check_conventions.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_design_output.py</code></td>
+              <td>Scans design output files for unsubstituted placeholders, phrasing violations, cross-file inconsistencies, and missing field values</td>
+              <td><code>python .claude/skills/scripts/check_design_output.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_design_system_token_drift.py</code></td>
+              <td>Guards CSS design-token consistency between canonical <code>tokens.css</code> and consumer stylesheets</td>
+              <td><code>python .claude/skills/scripts/check_design_system_token_drift.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_harness_drift.py</code></td>
+              <td>Compares canonical harness source against a target workspace; reports added, removed, or diverged files</td>
+              <td><code>python .claude/skills/scripts/check_harness_drift.py --source &lt;dir&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>check_human_markers_only.py</code></td>
+              <td>Verifies that diffs to Human (markers) files contain only allowed marker mutations, no prose changes</td>
+              <td><code>python .claude/skills/scripts/check_human_markers_only.py --staged</code></td>
+            </tr>
+            <tr>
+              <td><code>check_retired_tokens.py</code></td>
+              <td>Guards against retired harness tokens (dead variable names, removed skill references) lingering in live <code>.claude/</code> files</td>
+              <td><code>python .claude/skills/scripts/check_retired_tokens.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_skill_spec.py</code></td>
+              <td>Validates SKILL.md frontmatter against the agentskills.io universal spec (name shape, description length, metadata shape)</td>
+              <td><code>python .claude/skills/scripts/check_skill_spec.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_skill_system.py</code></td>
+              <td>Validates full <code>.claude/</code> skill system integrity: SKILL.md frontmatter, reference resolution, dependency cycles, agent definitions</td>
+              <td><code>python .claude/skills/scripts/check_skill_system.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_telemetry.py</code></td>
+              <td>Validates <code>telemetry.jsonl</code> schema: required fields, correct types, allowed enum values</td>
+              <td><code>python .claude/skills/scripts/check_telemetry.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_unused_files.py</code></td>
+              <td>Detects orphaned source files (Python, JS/TS) not imported or referenced anywhere in the codebase</td>
+              <td><code>python .claude/skills/scripts/check_unused_files.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_validation_constants_sync.py</code></td>
+              <td>Detects drift between backend and frontend validation constants (e.g., max-length rules)</td>
+              <td><code>python .claude/skills/scripts/check_validation_constants_sync.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_version_changelog_sync.py</code></td>
+              <td>Verifies the VERSION file matches the latest CHANGELOG heading</td>
+              <td><code>python .claude/skills/scripts/check_version_changelog_sync.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_vuln_patterns.py</code></td>
+              <td>Scans code for vulnerability patterns from the SEJA threat model (shell injection, unsafe deserialization, path traversal)</td>
+              <td><code>python .claude/skills/scripts/check_vuln_patterns.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_worktree_health.py</code></td>
+              <td>Detects orphaned git worktrees from parallel wave execution</td>
+              <td><code>python .claude/skills/scripts/check_worktree_health.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_api_auth_decorators.py</code></td>
+              <td>Verifies every backend API route has <code>@jwt_required()</code> and authorization checks</td>
+              <td><code>python .claude/skills/scripts/check_api_auth_decorators.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_api_contract_sync.py</code></td>
+              <td>Compares backend Marshmallow schema fields with frontend TypeScript interfaces for drift</td>
+              <td><code>python .claude/skills/scripts/check_api_contract_sync.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_backend_test_coverage.py</code></td>
+              <td>Runs pytest with coverage, groups by subpackage, lists completely untested files</td>
+              <td><code>python .claude/skills/scripts/check_backend_test_coverage.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_frontend_test_coverage.py</code></td>
+              <td>Runs vitest with v8 coverage, groups by subpackage, lists completely untested files</td>
+              <td><code>python .claude/skills/scripts/check_frontend_test_coverage.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_i18n_keys.py</code></td>
+              <td>Checks i18n key coverage: frontend <code>t("key")</code> calls vs JSON locale files and backend Flask-Babel .po catalog parity</td>
+              <td><code>python .claude/skills/scripts/check_i18n_keys.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_migration_chain.py</code></td>
+              <td>Validates Alembic migration revision chain: multiple heads, orphan revisions, cycles, idempotency</td>
+              <td><code>python .claude/skills/scripts/check_migration_chain.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_po_parity.py</code></td>
+              <td>Verifies Flask-Babel <code>.po</code> catalog parity between locales: missing entries, empty msgstr, fuzzy entries</td>
+              <td><code>python .claude/skills/scripts/check_po_parity.py</code></td>
+            </tr>
+            <tr>
+              <td><code>check_route_coverage.py</code></td>
+              <td>Detects frontend/backend API drift: backend routes without frontend callers and frontend API calls to undefined routes</td>
+              <td><code>python .claude/skills/scripts/check_route_coverage.py</code></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          The following validation scripts live in co-located skill
+          subdirectories rather than the shared <code>scripts/</code>
+          directory. They are still discovered by
+          <code>run_all_checks.py</code> and included in the preflight
+          fast gate where applicable.
+        </p>
+
+        <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Script</th>
+              <th>Location</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>check_docs.py</code></td>
+              <td><code>.claude/skills/critique/</code></td>
+              <td>Plugin-based documentation consistency checker with 6 scanners: harness integrity, path liveness, env vars, command refs, terminology, structural-completeness</td>
+            </tr>
+            <tr>
+              <td><code>check_git_freshness.py</code></td>
+              <td><code>.claude/skills/critique/</code></td>
+              <td>Compares local branches to upstream for codebase and companion workspace; never pulls; advisory-only (always exits 0)</td>
+            </tr>
+            <tr>
+              <td><code>check_spec_conformance.py</code></td>
+              <td><code>.claude/skills/critique/</code></td>
+              <td>Validates codebase against declarative spec checks in <code>spec-checks.yaml</code> (file-exists, grep-match, grep-absent, model-field, route-exists)</td>
+            </tr>
+            <tr>
+              <td><code>check_plan_coverage.py</code></td>
+              <td><code>.claude/skills/design/</code></td>
+              <td>Verifies plan coverage against design-intent requirements (REQ-TYPE-NNN markers); reports uncovered requirements grouped by section</td>
+            </tr>
+            <tr>
+              <td><code>check_secrets.py</code></td>
+              <td><code>.claude/skills/design/</code></td>
+              <td>Scans staged files (or all tracked files) for API keys, passwords, tokens, connection strings, and AWS credentials</td>
+            </tr>
+            <tr>
+              <td><code>check_changelog_append_only.py</code></td>
+              <td><code>.claude/skills/explain/</code></td>
+              <td>Enforces append-only discipline on changelog files; rejects deletions or reordering of existing entries</td>
+            </tr>
+            <tr>
+              <td><code>check_section_boundary_writes.py</code></td>
+              <td><code>.claude/skills/post-skill/</code></td>
+              <td>Rejects contiguous write regions that cross an H2 section boundary in registered multi-section as-coded files</td>
+            </tr>
+            <tr>
+              <td><code>check_no_private_leaks.py</code></td>
+              <td><code>.claude/skills/scripts/priv/</code></td>
+              <td>Pre-commit gate that detects private content (markers, fingerprints, patterns) that would leak to the public repository</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+
+        <!-- ---- 2. Generation ---- -->
+        <h3>Generation</h3>
+        <p>
+          Generation scripts produce derived artifacts -- indexes, manifests,
+          reports, and interactive HTML -- from source data. Several support
+          a <code>--check</code> flag that verifies output freshness without
+          regenerating, enabling use as validation checks in the preflight
+          gate.
+        </p>
+
+        <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Script</th>
+              <th>Purpose</th>
+              <th>Typical invocation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>generate_briefs_index.py</code></td>
+              <td>Generates a lightweight briefs index (one-line summaries, newest first) from <code>_output/briefs.md</code> for fast pre-skill scanning</td>
+              <td><code>python .claude/skills/scripts/generate_briefs_index.py</code></td>
+            </tr>
+            <tr>
+              <td><code>generate_cheatsheet.py</code></td>
+              <td>Generates <code>.claude/CHEATSHEET.md</code> from SKILL.md frontmatter, grouped by category</td>
+              <td><code>python .claude/skills/scripts/generate_cheatsheet.py</code></td>
+            </tr>
+            <tr>
+              <td><code>generate_essential_perspectives_summary.py</code></td>
+              <td>Extracts Essential (P0) questions from all 16 review perspective files into a single summary</td>
+              <td><code>python .claude/skills/scripts/generate_essential_perspectives_summary.py</code></td>
+            </tr>
+            <tr>
+              <td><code>generate_macro_index.py</code></td>
+              <td>Regenerates <code>_output/INDEX.md</code> with all output artifacts (plans, advisories, roadmaps) sorted newest first</td>
+              <td><code>python .claude/skills/scripts/generate_macro_index.py</code></td>
+            </tr>
+            <tr>
+              <td><code>generate_pending_roadmap.py</code></td>
+              <td>Generates a roadmap from pending implement entries, grouping non-overlapping plans into parallel waves</td>
+              <td><code>python .claude/skills/scripts/generate_pending_roadmap.py</code></td>
+            </tr>
+            <tr>
+              <td><code>generate_skill_graph.py</code></td>
+              <td>Parses the <code>skill-graph.md</code> table and produces <code>skill-graph.json</code> for programmatic lookup; <code>--check</code> validates freshness</td>
+              <td><code>python .claude/skills/scripts/generate_skill_graph.py</code></td>
+            </tr>
+            <tr>
+              <td><code>generate_skills_manifest.py</code></td>
+              <td>Generates a compact JSON manifest (name, description, argument-hint, category) from SKILL.md frontmatter; <code>--check</code> validates freshness</td>
+              <td><code>python .claude/skills/scripts/generate_skills_manifest.py</code></td>
+            </tr>
+            <tr>
+              <td><code>html_report.py</code></td>
+              <td>Converts extended Markdown (with <code>:::directive</code> blocks) to rich, self-contained HTML with profile-based CSS/JS bundles</td>
+              <td><code>python .claude/skills/scripts/html_report.py input.md -o output.html</code></td>
+            </tr>
+            <tr>
+              <td><code>md_to_html.py</code></td>
+              <td>Converts a Markdown file to a styled standalone HTML document with all CSS inlined</td>
+              <td><code>python .claude/skills/scripts/md_to_html.py input.md -o output.html</code></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          The following generation scripts live in co-located or private
+          directories:
+        </p>
+
+        <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Script</th>
+              <th>Location</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>generate_decision_digest.py</code></td>
+              <td><code>.claude/skills/post-skill/</code></td>
+              <td>Harvests D-NNN entries and advisory recommendations into <code>_output/decision-digest.jsonl</code></td>
+            </tr>
+            <tr>
+              <td><code>generate_telemetry_report.py</code></td>
+              <td><code>.claude/skills/critique/</code></td>
+              <td>Aggregates <code>telemetry.jsonl</code> into a markdown report with frequency tables, duration averages, and sparklines</td>
+            </tr>
+            <tr>
+              <td><code>generate_spo.py</code></td>
+              <td><code>.claude/skills/scripts/priv/</code></td>
+              <td>Generates an interactive self-contained Structured Product Overview HTML from <code>product-overview.yaml</code> or <code>call-graph.json</code></td>
+            </tr>
+            <tr>
+              <td><code>generate_changelog_data.py</code></td>
+              <td><code>.claude/skills/scripts/priv/</code></td>
+              <td>Extracts structured change data from git history for harness changelog generation</td>
+            </tr>
+            <tr>
+              <td><code>generate_call_graph.py</code></td>
+              <td><code>.claude/skills/scripts/priv/</code></td>
+              <td>Statically parses SKILL.md, agents, and scripts to discover nodes and edges; emits JSON, Mermaid Markdown, and an interactive Cytoscape.js HTML viewer</td>
+            </tr>
+            <tr>
+              <td><code>generate_harness_reference.py</code></td>
+              <td><code>.claude/skills/scripts/priv/</code></td>
+              <td>Generates harness reference documentation for the public repository</td>
+            </tr>
+            <tr>
+              <td><code>generate_perspectives_reference.py</code></td>
+              <td><code>.claude/skills/scripts/priv/</code></td>
+              <td>Generates review perspectives reference documentation for the public repository</td>
+            </tr>
+            <tr>
+              <td><code>generate_skills_reference.py</code></td>
+              <td><code>.claude/skills/scripts/priv/</code></td>
+              <td>Generates skills reference documentation for the public repository</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+
+        <!-- ---- 3. Marker management ---- -->
+        <h3>Marker Management</h3>
+        <p>
+          <code>apply_marker.py</code> is the sole write path for Human
+          (markers) files -- the design files whose content is classified as
+          human-authored and whose mutations are restricted to structured
+          marker operations. No other script or direct edit is permitted to
+          modify these files.
+        </p>
+
+        <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Script</th>
+              <th>Purpose</th>
+              <th>Typical invocation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>apply_marker.py</code></td>
+              <td>Applies lifecycle markers to design files. Supported marker types: <code>STATUS</code> (flip implementation status), <code>ESTABLISHED</code> (mark items as established), <code>INCORPORATED</code> (mark research as incorporated), <code>CHANGELOG_APPEND</code> (append changelog entries), <code>DECISION_APPEND</code> (append new D-NNN decision entries with auto-assigned IDs), and <code>REQ_TRACED_BY</code> (annotate REQ markers with traceability links to implementing plans)</td>
+              <td><code>python .claude/skills/scripts/apply_marker.py --marker STATUS --file &lt;path&gt; --id &lt;id&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>human_markers_registry.py</code></td>
+              <td>Shared library listing Human (markers) files and their allowed marker patterns; used by <code>apply_marker.py</code> and <code>check_human_markers_only.py</code></td>
+              <td>Imported as a module, not invoked directly</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+
+        <!-- ---- 4. Index and metadata ---- -->
+        <h3>Index and Metadata</h3>
+        <p>
+          These scripts manage artifact IDs, roadmap linkage, and the
+          pending-actions ledger that tracks outstanding human actions
+          across the project.
+        </p>
+
+        <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Script</th>
+              <th>Purpose</th>
+              <th>Typical invocation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>reserve_id.py</code></td>
+              <td>Reserves the next 6-digit artifact ID in <code>_output/INDEX.md</code> and appends a RESERVED row</td>
+              <td><code>python .claude/skills/scripts/reserve_id.py</code></td>
+            </tr>
+            <tr>
+              <td><code>update_roadmap_plan_id.py</code></td>
+              <td>Backfills a reserved plan ID into a roadmap Wave Summary row, replacing <code>plan-TBD</code></td>
+              <td><code>python .claude/skills/scripts/update_roadmap_plan_id.py --roadmap &lt;file&gt; --plan-id &lt;id&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>pending.py</code></td>
+              <td>Manages the <code>_output/pending.jsonl</code> append-only ledger with subcommands: <code>add</code>, <code>done</code>, <code>snooze</code>, <code>dismiss</code>, <code>list</code>, <code>due</code>, <code>cleanup</code>, <code>periodic-check</code>, <code>status</code></td>
+              <td><code>python .claude/skills/scripts/pending.py list</code></td>
+            </tr>
+            <tr>
+              <td><code>mark_brief_done.py</code></td>
+              <td>Finds a STARTED entry in <code>briefs.md</code> matching a pattern and rewrites it as DONE with timestamp and optional plan ID</td>
+              <td><code>python .claude/skills/scripts/mark_brief_done.py --pattern &lt;slug&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>update_cross_refs.py</code></td>
+              <td>Updates an artifact's source file <code>spawned:</code> field when a new artifact links back to it</td>
+              <td><code>python .claude/skills/scripts/update_cross_refs.py --source &lt;file&gt; --spawned &lt;id&gt;</code></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+
+        <!-- ---- 5. Conversion and sync ---- -->
+        <h3>Conversion and Sync</h3>
+        <p>
+          The publish pipeline uses these scripts to synchronize harness
+          files from the private repository to the public one while
+          stripping private-only content.
+        </p>
+
+        <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Script</th>
+              <th>Location</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>sync_to_public.py</code></td>
+              <td><code>tools/</code></td>
+              <td>Copies <code>.claude/</code> from seja-priv to a target directory (defaults to <code>seja-public/</code>), excluding <code>settings.json</code> and <code>settings.local.json</code></td>
+            </tr>
+            <tr>
+              <td><code>check_no_private_leaks.py</code></td>
+              <td><code>.claude/skills/scripts/priv/</code></td>
+              <td>Pre-commit gate that scans for private-only markers, fingerprints, and known patterns that would escape the private boundary. Supports <code>--staged</code> (pre-commit), <code>--candidate DIR</code> (publish validation), and default (post-sync check)</td>
+            </tr>
+            <tr>
+              <td><code>upgrade_harness.py</code></td>
+              <td><code>.claude/skills/scripts/</code></td>
+              <td>Replaces harness files (skills, rules, agents, references, scripts) with a newer SEJA version while preserving project data</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+
+        <!-- ---- 6. Lifecycle support ---- -->
+        <h3>Lifecycle Support</h3>
+        <p>
+          These scripts are invoked by the pre-skill and post-skill lifecycle
+          hooks, or provide shared configuration used across the entire script
+          suite.
+        </p>
+
+        <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Script</th>
+              <th>Purpose</th>
+              <th>Typical invocation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>conversation_trace.py</code></td>
+              <td>Append-only conversation trace log; records utterances with emitter, type, session linkage, and automatic secret masking</td>
+              <td><code>python .claude/skills/scripts/conversation_trace.py append --session-id &lt;id&gt; --emitter user --message "..."</code></td>
+            </tr>
+            <tr>
+              <td><code>brief_state.py</code></td>
+              <td>Persists and retrieves brief text between pre-skill and post-skill via a session-scoped state file</td>
+              <td><code>python .claude/skills/scripts/brief_state.py save --session-id &lt;id&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>project_config.py</code></td>
+              <td>Central configuration library; parses <code>conventions.md</code> and exposes project-specific paths and settings to all scripts. Not invoked directly -- imported by other scripts</td>
+              <td>Imported as a module: <code>from project_config import REPO_ROOT</code></td>
+            </tr>
+            <tr>
+              <td><code>build_telemetry.py</code></td>
+              <td>Validates 18 telemetry fields and appends one JSON line to <code>telemetry.jsonl</code>; single write path for telemetry</td>
+              <td><code>python .claude/skills/scripts/build_telemetry.py --skill &lt;name&gt; --outcome &lt;done|skipped&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>verify_commit_scope.py</code></td>
+              <td>Checks staged git files against expected post-skill file patterns; reports unexpected or missing files as JSON</td>
+              <td><code>python .claude/skills/scripts/verify_commit_scope.py</code></td>
+            </tr>
+            <tr>
+              <td><code>seja_harness_hook.py</code></td>
+              <td>UserPromptSubmit hook that injects a SEJA lifecycle reminder on every user prompt submission</td>
+              <td>Configured in <code>settings.json</code> hooks; not invoked directly</td>
+            </tr>
+            <tr>
+              <td><code>load_quickguide.py</code></td>
+              <td>Library that loads SKILL-quickguide.md sibling files and returns body with YAML frontmatter stripped</td>
+              <td>Imported as a module, not invoked directly</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+
+        <!-- ---- 7. Design support ---- -->
+        <h3>Design Support</h3>
+        <p>
+          These scripts support design traceability by connecting plans
+          to design-intent requirements, managing the design system, and
+          handling workspace creation.
+        </p>
+
+        <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Script</th>
+              <th>Purpose</th>
+              <th>Typical invocation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>check_plan_coverage.py</code></td>
+              <td>Extracts requirement IDs (REQ-TYPE-NNN) from <code>product-design-as-intended.md</code>, scans plans for <code>Traces:</code> metadata, and computes coverage gaps</td>
+              <td><code>python .claude/skills/design/check_plan_coverage.py --mode blocking</code></td>
+            </tr>
+            <tr>
+              <td><code>design_system.py</code></td>
+              <td>Library that extracts CSS custom properties and design tokens from HTML design system files for downstream generators</td>
+              <td>Imported as a module, not invoked directly</td>
+            </tr>
+            <tr>
+              <td><code>create_workspace.py</code></td>
+              <td>Creates a project workspace from the foundational SEJA harness alongside an existing codebase without modifying it</td>
+              <td><code>python .claude/skills/scripts/create_workspace.py --target &lt;dir&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>count_loc.py</code></td>
+              <td>Counts source files and lines across frontend, backend, and harness; separates physical lines from code-only lines</td>
+              <td><code>python .claude/skills/scripts/count_loc.py</code></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+
+        <!-- ---- 8. Testing ---- -->
+        <h3>Testing</h3>
+        <p>
+          Test runner scripts orchestrate backend, frontend, and end-to-end
+          test suites, as well as API smoke tests.
+        </p>
+
+        <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Script</th>
+              <th>Purpose</th>
+              <th>Typical invocation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>run_all_tests.py</code></td>
+              <td>Runs backend (pytest), frontend (vitest), and e2e (Playwright) test suites sequentially, saving ANSI-free transcripts</td>
+              <td><code>python .claude/skills/scripts/run_all_tests.py</code></td>
+            </tr>
+            <tr>
+              <td><code>smoke_test_core.py</code></td>
+              <td>Library providing a generic framework for registry-driven API smoke testing (SmokeTestRunner, run_registry, auth adapters)</td>
+              <td>Imported as a module, not invoked directly</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+
+        <!-- ---- 9. Migration and backfill ---- -->
+        <h3>Migration and Backfill</h3>
+        <p>
+          One-time or idempotent scripts that migrate data between harness
+          versions or backfill missing metadata. These are typically run
+          once during an upgrade and are safe to re-run.
+        </p>
+
+        <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Script</th>
+              <th>Purpose</th>
+              <th>Typical invocation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>run_migrations.py</code></td>
+              <td>Runs pending SEJA harness migration scripts between versions during <code>/seja-setup --upgrade</code></td>
+              <td><code>python .claude/skills/scripts/run_migrations.py</code></td>
+            </tr>
+            <tr>
+              <td><code>migrate_to_global_ids.py</code></td>
+              <td>One-shot migration from mixed 4/6-digit per-type IDs to globally unique 6-digit chronological IDs</td>
+              <td><code>python .claude/skills/scripts/migrate_to_global_ids.py</code></td>
+            </tr>
+            <tr>
+              <td><code>backfill_decision_digest.py</code></td>
+              <td>One-time backfill of <code>decision-digest.jsonl</code> from existing advisory logs (HIGH/MEDIUM recommendations)</td>
+              <td><code>python .claude/skills/scripts/backfill_decision_digest.py --dry-run</code></td>
+            </tr>
+            <tr>
+              <td><code>backfill_open_plans.py</code></td>
+              <td>One-shot backfill of implement pending entries from unfinished plans; auto-dismisses stale ones</td>
+              <td><code>python .claude/skills/scripts/backfill_open_plans.py</code></td>
+            </tr>
+            <tr>
+              <td><code>backfill_qa_dates.py</code></td>
+              <td>One-time migration to add dates to existing QA log headers using body content, git history, or file mtime</td>
+              <td><code>python .claude/skills/scripts/backfill_qa_dates.py</code></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          Additional private-only migration scripts in
+          <code>.claude/skills/scripts/priv/</code> include
+          <code>migrate_plan_done_rename.py</code>,
+          <code>migrate_quickguide.py</code>,
+          <code>migrate_references_paths.py</code>,
+          <code>bump_version.py</code>, and
+          <code>scan_public_docs_for_filenames.py</code>.
+          These are excluded from public releases and are used during
+          harness development.
+        </p>
+
+      </section>
+
+
+      <!-- ================================================== -->
+      <section data-diataxis="how-to">
+        <h2>Using <code>run_all_checks.py</code></h2>
+
+        <p>
+          <code>run_all_checks.py</code> is the CI-independent validation
+          orchestrator. It discovers every <code>check_*.py</code> script in
+          <code>.claude/skills/scripts/</code> and in co-located skill
+          subdirectories (such as <code>critique/</code>,
+          <code>design/</code>, <code>explain/</code>, and
+          <code>post-skill/</code>), runs each one sequentially, and rolls
+          the results into a single pass/fail verdict.
+        </p>
+
+        <h3>Running the full suite</h3>
+        <pre><code>python .claude/skills/scripts/run_all_checks.py --root .</code></pre>
+        <p>
+          The <code>--root</code> flag tells the orchestrator where the
+          repository root is. Each check script is executed as a subprocess
+          with a 120-second timeout.
+        </p>
+
+        <h3>Reading the output</h3>
+        <p>
+          As each check runs, the orchestrator prints its name followed by
+          <code>PASS</code>, <code>FAIL</code>, or <code>ERROR</code>. After
+          all checks complete, a summary table is printed:
+        </p>
+        <pre><code>SEJA Validation Orchestrator -- Results
+----------------------------------------------
+Script                              Status  Duration
+----------------------------------------------
+check_conventions.py                PASS      0.42s
+check_design_output.py              FAIL      1.23s
+check_skill_system.py               PASS      0.87s
+----------------------------------------------
+2 passed, 1 failed, 3.52s total</code></pre>
+        <p>
+          For failed or errored checks, the script's stdout and stderr are
+          printed indented below the status line in non-verbose mode. In
+          <code>--verbose</code> mode, child output streams directly to the
+          console as it runs.
+        </p>
+
+        <h3>JUnit XML output</h3>
+        <pre><code>python .claude/skills/scripts/run_all_checks.py --root . --junit results.xml</code></pre>
+        <p>
+          The <code>--junit</code> flag writes a standard JUnit XML report.
+          Each check becomes a <code>&lt;testcase&gt;</code> in a
+          <code>seja-checks</code> testsuite. Failures include the check's
+          combined stdout/stderr as the failure message text. This format
+          integrates with CI platforms that parse JUnit XML (GitHub Actions,
+          Jenkins, GitLab CI).
+        </p>
+
+        <h3>Filtering by stack</h3>
+        <pre><code>python .claude/skills/scripts/run_all_checks.py --root . --filter flask</code></pre>
+        <p>
+          When <code>check_plugin_registry.json</code> exists in the scripts
+          directory, the <code>--filter</code> flag restricts execution to
+          checks whose registry entry matches the given stack keyword. Checks
+          marked with <code>"any"</code> in their stack always run. Checks
+          not in the registry also run by default.
+        </p>
+
+        <h3>Exit codes</h3>
+        <dl>
+          <dt><code>0</code></dt>
+          <dd>All checks passed.</dd>
+          <dt><code>1</code></dt>
+          <dd>One or more checks failed (validation violations found).</dd>
+          <dt><code>2</code></dt>
+          <dd>Orchestrator error (no scripts found, script directory missing) or one or more checks encountered a runtime error.</dd>
+        </dl>
+
+        <h3>When to use which orchestrator</h3>
+        <p>
+          Use <code>run_preflight_fast.py</code> for git hooks and quick
+          local validation -- it runs a curated subset of fast checks and
+          completes in under 10 seconds. Use <code>run_all_checks.py</code>
+          for CI pipelines and thorough validation sweeps -- it discovers
+          and runs every check script, with JUnit XML support for CI
+          integration.
+        </p>
+      </section>
+
+
+      <!-- ================================================== -->
+      <section data-diataxis="how-to">
+        <h2>Extending the Validation Suite</h2>
+
+        <p>
+          To add a new validation check that integrates with
+          <code>run_all_checks.py</code>, follow these conventions:
+        </p>
+
+        <ol>
+          <li>
+            <strong>Name the script <code>check_&lt;what&gt;.py</code></strong>.
+            The orchestrator discovers scripts by globbing for
+            <code>check_*.py</code> in <code>.claude/skills/scripts/</code>
+            and in co-located skill subdirectories. Any file matching this
+            pattern is automatically included.
+          </li>
+          <li>
+            <strong>Exit <code>0</code> for pass, <code>1</code> for
+            failure</strong>. The orchestrator interprets any non-zero exit
+            code as a failure. Use exit code <code>2</code> for script
+            errors (missing dependencies, invalid arguments) to distinguish
+            them from validation findings.
+          </li>
+          <li>
+            <strong>Print findings to stdout</strong>. When violations are
+            found, print human-readable diagnostics to stdout. The
+            orchestrator captures this output and includes it in the JUnit
+            XML report for failed checks. Print errors and warnings to
+            stderr.
+          </li>
+          <li>
+            <strong>Accept <code>--root</code> or auto-detect</strong>. Import
+            <code>project_config.py</code> for repository root detection:
+            <pre><code>from project_config import REPO_ROOT</code></pre>
+            This ensures the script works regardless of the current working
+            directory.
+          </li>
+          <li>
+            <strong>Keep execution fast</strong>. The orchestrator enforces a
+            120-second timeout per script. If your check should run in the
+            fast preflight gate (under 10 seconds total for all fast checks),
+            add it to the <code>FAST_CHECKS</code> list in
+            <code>run_preflight_fast.py</code>.
+          </li>
+          <li>
+            <strong>Optionally register in
+            <code>check_plugin_registry.json</code></strong>. If your check
+            is stack-specific (e.g., only relevant for Flask or React
+            projects), add an entry with the script name and stack metadata
+            so the <code>--filter</code> flag can include or exclude it.
+          </li>
+        </ol>
+
+        <p>
+          A minimal check script looks like this:
+        </p>
+        <pre><code>#!/usr/bin/env python3
+"""check_example.py -- Validate example constraint.
+
+Invocation: agent-invoked
+Lifecycle: active
+
+Exit codes: 0 = pass, 1 = violations found, 2 = script error.
+"""
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from project_config import REPO_ROOT
+
+def main() -> int:
+    violations = []
+    # ... scan for violations ...
+    for v in violations:
+        print(v)
+    return 1 if violations else 0
+
+if __name__ == "__main__":
+    sys.exit(main())</code></pre>
+      </section>
+
+
+      <!-- ================================================== -->
+      <section data-diataxis="how-to">
+        <h2>Common Mistakes</h2>
+
+        <dl>
+          <dt>Running individual check scripts instead of <code>run_all_checks.py</code></dt>
+          <dd>
+            Individual scripts report their own findings but produce no
+            aggregated summary, no JUnit XML, and no unified exit code. The
+            orchestrator provides a single pass/fail verdict, a summary table
+            with per-check durations, and optional CI-compatible XML output.
+            Always use <code>run_all_checks.py</code> for comprehensive
+            validation and <code>run_preflight_fast.py</code> for quick
+            pre-commit checks.
+          </dd>
+
+          <dt>Ignoring exit codes</dt>
+          <dd>
+            Every check and orchestrator script communicates its verdict
+            through its exit code. A script that prints warnings but exits
+            <code>0</code> is considered passing. Piping output to
+            <code>grep</code> or visually scanning for keywords is
+            unreliable -- check <code>$?</code> or the process return code.
+            CI pipelines should fail the build on non-zero exit from
+            <code>run_all_checks.py</code>.
+          </dd>
+
+          <dt>Not updating <code>run_all_checks.py</code> when adding new check scripts</dt>
+          <dd>
+            <code>run_all_checks.py</code> discovers <code>check_*.py</code>
+            scripts automatically via glob, so new scripts in the standard
+            locations are included without changes. However, if you want
+            your script in the <em>fast</em> preflight gate, you must
+            manually add it to the <code>FAST_CHECKS</code> list in
+            <code>run_preflight_fast.py</code>. Forgetting this means the
+            check runs in full CI sweeps but not in git hooks.
+          </dd>
+
+          <dt>Editing generated files that scripts will overwrite</dt>
+          <dd>
+            Files produced by generation scripts -- such as
+            <code>_output/INDEX.md</code>,
+            <code>.claude/CHEATSHEET.md</code>,
+            <code>skill-graph.json</code>, and
+            <code>decision-digest.jsonl</code> -- are regenerated
+            automatically. Manual edits to these files will be silently
+            overwritten on the next generation run. Edit the source data
+            instead.
+          </dd>
+
+          <dt>Modifying Human (markers) files directly</dt>
+          <dd>
+            Human (markers) files must be modified exclusively through
+            <code>apply_marker.py</code>. Direct edits bypass the
+            marker-type validation and will be rejected by
+            <code>check_human_markers_only.py</code> in the preflight gate.
+            Use the appropriate <code>--marker</code> type flag to apply
+            the desired change.
+          </dd>
+        </dl>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 4: The Output and Governance Layer</h2>
+    <ol>
+      <li>
+        <a href="output-artifacts.html">Output Artifacts</a>
+      </li>
+      <li>
+        <a href="enforcement-architecture.html">Enforcement Architecture</a>
+      </li>
+      <li aria-current="page">
+        <a href="scripts-and-automation.html">Scripts and Automation</a>
+      </li>
+      <li>
+        <a href="maintenance-and-drift.html">Maintenance and Drift</a>
+      </li>
+      <li>
+        <a href="release-and-publishing.html">Release and Publishing</a>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="enforcement-architecture.html">Previous: Enforcement Architecture</a>
+    <a href="maintenance-and-drift.html">Next: Maintenance and Drift</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

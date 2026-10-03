@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="4">
+  <meta name="doc-chapter" content="5">
+  <meta name="doc-phase" content="3">
+  <meta name="doc-status" content="draft">
+
+  <title>Release and Publishing -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 4: The Output and Governance Layer</a></li>
+      <li>Release and Publishing</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>Release and Publishing</h1>
+
+      <p>
+        This chapter documents the <code>/publish</code> pipeline end to end --
+        from tag conventions and version inference through the ephemeral publish
+        workspace to the final priv/public sync -- explaining how SEJA releases
+        are cut, validated, and pushed to the public repository.
+      </p>
+
+      <section id="the-publish-pipeline" data-diataxis="how-to">
+        <h2>The <code>/publish</code> Pipeline</h2>
+
+        <p>
+          To cut a release, invoke <code>/publish [version]</code> in Claude
+          Code. The skill accepts an optional version argument in
+          <code>vMAJOR.MINOR.PATCH</code> format (e.g., <code>v2.14.0</code>).
+          When no version is provided, <code>publish.py</code> infers the next
+          tag from <code>CHANGELOG.md</code> and existing git tags, then
+          prompts for confirmation. Two flags modify behavior:
+          <code>--dry-run</code> previews the full command sequence without
+          executing any destructive actions, and <code>--yes</code> accepts
+          all defaults at confirmation prompts for non-interactive use.
+        </p>
+
+        <p>
+          The pipeline delegates to <code>tools/publish.py</code>, which
+          orchestrates a 10-step lifecycle:
+        </p>
+
+        <ol>
+          <li>
+            <strong>Preflight checks.</strong> Validates that the working tree
+            is clean, <code>seja-public/CHANGELOG.md</code> has unreleased
+            content, no pre-existing tag matches the target version, and the
+            remote origin is reachable. If
+            <code>.claude/CHANGELOG.md</code> lacks a heading for the target
+            version, the skill auto-generates the entry by collecting
+            structured change data from git history via
+            <code>generate_changelog_data.py</code> and delegating to the
+            <code>document-generator</code> agent.
+          </li>
+          <li>
+            <strong>Cut tag.</strong> Creates the git tag in the local
+            <code>seja-priv</code> repository via <code>cut_tag.py</code>.
+          </li>
+          <li>
+            <strong>Clone public repo.</strong> Shallow-clones the public
+            <code>seja</code> repository into
+            <code>_output/tmp/publish-workspace/</code>.
+          </li>
+          <li>
+            <strong>Copy authored prose.</strong> Copies public-only prose
+            from <code>seja-public/</code> -- files like
+            <code>CHANGELOG.md</code>, <code>README.md</code>,
+            <code>LICENSE</code>, and the <code>docs/</code> directory --
+            into the clone.
+          </li>
+          <li>
+            <strong>Sync harness files.</strong> Runs
+            <code>sync_to_public.py --target &lt;clone-dir&gt;</code> to
+            generate the <code>.claude/</code> directory in the clone. This
+            copies the harness from <code>seja-priv</code>, strips content
+            between <code>&lt;!-- priv-only-start --&gt;</code> /
+            <code>&lt;!-- priv-only-end --&gt;</code> markers, unwraps
+            <code>&lt;!-- pub-only-start --&gt;</code> /
+            <code>&lt;!-- pub-only-end --&gt;</code> markers, and excludes
+            private directories (<code>priv/</code>,
+            <code>project/</code>), settings files, and test scripts.
+          </li>
+          <li>
+            <strong>Smoke test.</strong> Runs
+            <code>pre_publish_smoke.py --candidate &lt;clone-dir&gt;</code>
+            to validate the clone, including a final
+            <code>check_no_private_leaks.py</code> scan to ensure no
+            private content has leaked into the publish workspace.
+          </li>
+          <li>
+            <strong>Commit.</strong> Stages all changes in the clone and
+            commits with a <code>Release vX.Y.Z</code> message.
+          </li>
+          <li>
+            <strong>Push.</strong> Pushes the commit and tag to the public
+            repository's <code>main</code> branch.
+          </li>
+          <li>
+            <strong>Cleanup.</strong> Deletes the temporary clone directory
+            (in a <code>finally</code> block to ensure cleanup even on
+            failure).
+          </li>
+          <li>
+            <strong>Close pending entry.</strong> Marks the
+            <code>PUBLISH:</code> pending-ledger entry as done via
+            <code>pending.py</code>.
+          </li>
+        </ol>
+
+        <p>
+          On success, the skill reports the published version. On failure, it
+          relays the error message and recovery instructions printed by
+          <code>publish.py</code> -- the script's recovery guidance is
+          authoritative and should not be second-guessed.
+        </p>
+      </section>
+
+      <section id="tag-conventions" data-diataxis="reference">
+        <h2>Tag Conventions</h2>
+
+        <p>
+          SEJA uses semantic versioning. Tags follow the format
+          <code>vMAJOR.MINOR.PATCH</code> -- always prefixed with
+          <code>v</code>. Any core-team member may cut a tag. The cadence is
+          manual: releases happen when a coherent batch of changes is ready,
+          targeting at most roughly one release per week. Smaller changes are
+          batched together rather than shipped individually.
+        </p>
+
+        <h3>Version inference</h3>
+
+        <p>
+          When no explicit version is provided, <code>publish.py</code>
+          infers the next tag through a two-step process:
+        </p>
+
+        <ol>
+          <li>
+            <strong>Discover the baseline.</strong> The baseline is
+            <code>max(highest_git_tag, highest_changelog_heading)</code>
+            using semver comparison. Ties prefer git tags because a tag
+            represents an actual cut, while a changelog heading may describe
+            a planned entry not yet released. When the changelog heading
+            wins, the script emits a note so the operator knows which
+            source drove the baseline.
+          </li>
+          <li>
+            <strong>Determine the bump level.</strong> The script first
+            checks for an explicit hint comment in the
+            <code>## Unreleased</code> section of
+            <code>seja-public/CHANGELOG.md</code>:
+            <code>&lt;!-- bump: patch|minor|major --&gt;</code>. If no hint
+            is present, the script applies a heuristic based on subsection
+            headings: a <code>### Breaking changes</code> heading triggers a
+            major bump, <code>### Added</code> triggers minor, and
+            everything else defaults to patch. Under <code>v0.x</code>, a
+            major intent collapses to a minor bump (the contract-evolving
+            rule).
+          </li>
+        </ol>
+
+        <h3>Unified version namespace</h3>
+
+        <p>
+          SEJA uses one version, one CHANGELOG entry, one tag. Both
+          <code>.claude/CHANGELOG.md</code> (the harness changelog) and
+          <code>seja-public/CHANGELOG.md</code> (the public changelog)
+          use the same version number. SemVer allows gaps, so the public
+          repository jumped from <code>v0.2.0</code> to the first internal
+          version issued under the unified namespace policy. A gap note
+          in the public changelog explains the jump for consumers.
+        </p>
+
+        <h3>Hotfix policy</h3>
+
+        <p>
+          The default rule is forward-fix on <code>main</code> and tag the
+          next patch version. If a consumer is actively blocked on an older
+          version, the team revisits per-case whether a
+          <code>release/&lt;minor&gt;.x</code> branch is warranted.
+        </p>
+      </section>
+
+      <section id="the-ephemeral-publish-workspace" data-diataxis="explanation">
+        <h2>The Ephemeral Publish Workspace</h2>
+
+        <p>
+          A key architectural decision in SEJA's release model is that
+          <code>seja-public/.claude/</code> does not exist on disk. The
+          harness files that consumers receive in the public
+          <code>seja</code> repository are never stored persistently in
+          <code>seja-public/</code> -- they are generated ephemerally during
+          each publish cycle.
+        </p>
+
+        <p>
+          When <code>/publish</code> runs, <code>publish.py</code> creates a
+          temporary clone of the public repository at
+          <code>_output/tmp/publish-workspace/</code>. This clone is
+          populated in two passes: first, authored public-only prose
+          (CHANGELOG, README, LICENSE, docs) is copied from
+          <code>seja-public/</code>; second,
+          <code>sync_to_public.py --target</code> generates the
+          <code>.claude/</code> directory by copying harness files from
+          <code>seja-priv</code> and stripping private content. The clone is
+          then committed, tagged, and pushed to the public repository.
+          Afterward, the clone directory is deleted.
+        </p>
+
+        <p>
+          This ephemeral approach provides several guarantees:
+        </p>
+
+        <ul>
+          <li>
+            The harness files in the public repository always match the
+            private repository at the time of release -- there is no
+            opportunity for the two to drift because the public copy is
+            regenerated from scratch each time.
+          </li>
+          <li>
+            Private content is stripped during generation, not after the
+            fact. The <code>sync_to_public.py</code> script excludes entire
+            directories (<code>priv/</code>, <code>project/</code>),
+            specific files (<code>settings.json</code>,
+            <code>settings.local.json</code>, test scripts), and inline
+            content between <code>priv-only-start</code> /
+            <code>priv-only-end</code> markers. The
+            <code>pre_publish_smoke.py</code> test suite validates the
+            result before any push occurs.
+          </li>
+          <li>
+            There is no stale <code>.claude/</code> directory sitting in
+            <code>seja-public/</code> between releases that could
+            accidentally be committed, modified, or mistaken for the
+            canonical source. The canonical source is always
+            <code>seja-priv/.claude/</code>.
+          </li>
+        </ul>
+
+        <p>
+          The <code>check_no_private_leaks.py</code> script reinforces this
+          model: its default invocation warns if
+          <code>seja-public/.claude/</code> exists on disk at all, since its
+          presence indicates a cleanup failure from a previous publish run.
+        </p>
+      </section>
+
+      <section id="the-priv-public-boundary" data-diataxis="reference">
+        <h2>The Priv/Public Boundary</h2>
+
+        <p>
+          The separation between <code>seja-priv</code> and the public
+          <code>seja</code> repository is not a deployment convenience -- it
+          is a security boundary codified in the project constitution.
+          Constitution invariant S1 states that private content must never
+          reach <code>seja-public</code> without explicit opt-in.
+          Compliance requirement C2 specifies that the
+          <code>product-design/</code> directory is permanently private and
+          never synced. The <a href="enforcement-architecture.html">Enforcement
+          Architecture</a> chapter documents the layered gates that enforce
+          this boundary.
+        </p>
+
+        <h3>What stays in <code>seja-priv</code></h3>
+
+        <ul>
+          <li>
+            <code>product-design/</code> -- constitution, conventions,
+            design-intent files, as-coded state, UX research results, and
+            all agent-facing structured specifications.
+          </li>
+          <li>
+            <code>_output/</code> -- plans, research logs, critiques,
+            roadmaps, briefs, conversation traces, pending ledger, and this
+            documentation collection.
+          </li>
+          <li>
+            <code>.claude/skills/scripts/priv/</code> -- private-only
+            scripts such as <code>check_no_private_leaks.py</code> and
+            <code>generate_changelog_data.py</code>.
+          </li>
+          <li>
+            <code>.claude/skills/scripts/project/</code> -- project-specific
+            scripts that are not part of the reusable harness.
+          </li>
+          <li>
+            <code>tools/</code> -- release tooling including
+            <code>publish.py</code>, <code>sync_to_public.py</code>, and
+            the sync runbook.
+          </li>
+          <li>
+            Inline content between <code>&lt;!-- priv-only-start --&gt;</code>
+            and <code>&lt;!-- priv-only-end --&gt;</code> markers in any
+            <code>.md</code> file -- stripped during sync.
+          </li>
+        </ul>
+
+        <h3>What reaches <code>seja</code> (public)</h3>
+
+        <ul>
+          <li>
+            <code>.claude/</code> harness files -- skills, agents,
+            references, rules, and shared scripts (excluding the
+            <code>priv/</code> and <code>project/</code> subdirectories,
+            settings files, and test scripts). Generated by
+            <code>sync_to_public.py</code> during publish.
+          </li>
+          <li>
+            <code>CLAUDE.md</code> -- the project instructions file, with
+            private sections stripped.
+          </li>
+        </ul>
+
+        <h3>Public-only prose</h3>
+
+        <p>
+          Certain files exist only in the public repository and have no
+          counterpart in <code>seja-priv</code>: the public
+          <code>CHANGELOG.md</code>, <code>README.md</code>,
+          <code>LICENSE</code>, <code>TRADEMARKS</code>, and the
+          <code>docs/</code> directory. These are authored directly in
+          <code>seja-public/</code> (a Git submodule within
+          <code>seja-priv</code>) and copied into the temporary clone
+          during publish. They do not flow back to <code>seja-priv</code>.
+        </p>
+      </section>
+
+      <section id="common-mistakes" data-diataxis="how-to">
+        <h2>Common Mistakes</h2>
+
+        <dl>
+          <dt>Editing the standalone <code>seja/</code> clone instead of
+            <code>seja-public/</code></dt>
+          <dd>
+            The public <code>seja</code> repository should never be edited
+            directly. Public-only prose is authored in
+            <code>seja-public/</code> within <code>seja-priv</code>, and
+            harness files are generated during publish. Edits made directly
+            to a standalone <code>seja/</code> clone will be overwritten on
+            the next release.
+          </dd>
+
+          <dt>Recreating <code>seja-public/.claude/</code> on disk</dt>
+          <dd>
+            The <code>.claude/</code> directory in <code>seja-public/</code>
+            is generated ephemerally during publish and should never exist
+            on disk between releases. If it appears,
+            <code>check_no_private_leaks.py</code> will warn about it.
+            Delete it rather than trying to maintain it manually.
+          </dd>
+
+          <dt>Publishing without running <code>--dry-run</code> first</dt>
+          <dd>
+            The <code>--dry-run</code> flag prints the full sequence of
+            commands that would execute -- including the git clone URL,
+            target directory, and push commands -- so you can visually
+            verify correctness before a live run. Skipping this step risks
+            publishing with an unexpected version number or against an
+            incorrect remote.
+          </dd>
+
+          <dt>Forgetting to update <code>CHANGELOG.md</code> before
+            tagging</dt>
+          <dd>
+            The pipeline checks that
+            <code>seja-public/CHANGELOG.md</code> has content in its
+            <code>## Unreleased</code> section before proceeding. If the
+            harness changelog (<code>.claude/CHANGELOG.md</code>) is also
+            missing an entry for the target version, the skill will
+            auto-generate one -- but the public changelog must be updated
+            manually. The preflight check will block the release if it finds
+            an empty unreleased section.
+          </dd>
+        </dl>
+      </section>
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 4: The Output and Governance Layer</h2>
+    <ol>
+      <li>
+        <a href="output-artifacts.html">Output Artifacts</a>
+      </li>
+      <li>
+        <a href="enforcement-architecture.html">Enforcement Architecture</a>
+      </li>
+      <li>
+        <a href="scripts-and-automation.html">Scripts and Automation</a>
+      </li>
+      <li>
+        <a href="maintenance-and-drift.html">Maintenance and Drift</a>
+      </li>
+      <li aria-current="page">
+        <a href="release-and-publishing.html">Release and Publishing</a>
+        <ul>
+          <li><a href="#the-publish-pipeline">The /publish Pipeline</a></li>
+          <li><a href="#tag-conventions">Tag Conventions</a></li>
+          <li><a href="#the-ephemeral-publish-workspace">The Ephemeral Publish Workspace</a></li>
+          <li><a href="#the-priv-public-boundary">The Priv/Public Boundary</a></li>
+          <li><a href="#common-mistakes">Common Mistakes</a></li>
+        </ul>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Chapter navigation: Ch.5 omits Next -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="maintenance-and-drift.html">Previous: Maintenance and Drift</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

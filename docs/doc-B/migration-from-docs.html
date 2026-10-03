@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="reference">
+  <meta name="doc-status" content="draft">
+
+  <title>Migration from the Existing Docs -- SEJA Documentation Collection -- System-Isomorphic Edition</title>
+
+    <!-- CSS depth: 0 -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection -- System-Isomorphic Edition</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="index.html">Collection</a></li>
+      <li>Migration from the Existing Docs</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>Migration from the Existing Docs</h1>
+
+      <section id="about" data-diataxis="explanation">
+        <p>
+          This page is <strong>informational</strong>. It maps the content of
+          the existing SEJA public documentation set (the
+          <code>docs/</code> tree that ships in the public
+          <code>seja</code> repository) onto the five-volume
+          <em>system-isomorphic</em> collection you are reading now. Its purpose is
+          to help a reader who knows the old docs find the equivalent material
+          here, and to make the reorganization legible.
+        </p>
+        <p>
+          This is <strong>not a plan to delete or retire the existing
+          docs</strong>. The <code>docs/</code> tree is preserved and remains
+          the canonical, release-bound documentation set. This collection is
+          complementary: it reorganizes and expands the same underlying
+          material into a system-isomorphic volume structure, and it adds
+          conceptual depth (the Foundations volume) that the flat docs tree
+          treats more briefly. Where a chapter in this collection and an existing doc cover
+          the same ground, treat the existing doc as authoritative for exact
+          command syntax and release-bound details, and treat the chapter in this collection
+          as the narrative, teaching-oriented companion.
+        </p>
+      </section>
+
+      <section id="how-to-read-the-table" data-diataxis="reference">
+        <h2>How to Read the Mapping</h2>
+        <p>
+          The table is grouped by directory in the existing docs tree
+          (<code>docs/</code>, <code>docs/how-to/</code>,
+          <code>docs/concepts/</code>, <code>docs/reference/</code>) plus the
+          repository top-level entries. Each row records where the existing
+          document's content now lives in this collection and the nature of the
+          relationship:
+        </p>
+        <dl>
+          <dt>Superseded</dt>
+          <dd>
+            The chapter in this collection covers the same material more fully or as part of
+            a larger narrative. The existing doc is still preserved, but the
+            chapter in this collection is the fuller treatment of that topic here.
+          </dd>
+          <dt>Complementary</dt>
+          <dd>
+            Both cover related ground from different angles. The existing doc
+            remains the go-to for its specific task or lookup; the chapter in this collection adds context or teaches the concept behind it.
+          </dd>
+          <dt>Standalone</dt>
+          <dd>
+            The existing doc has no direct equivalent in this collection. It is typically a
+            generated artifact, a machine-readable data file, or a
+            contributor-facing detail that sits outside this collection's
+            scope.
+          </dd>
+        </dl>
+      </section>
+
+      <section id="top-level" data-diataxis="reference">
+        <h2>Repository Top-Level</h2>
+        <table class="phasing-table">
+          <thead>
+            <tr>
+              <th>Existing doc</th>
+              <th>New location in this collection</th>
+              <th>Relationship</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>README.md</code></td>
+              <td><a href="vol1/index.html">Vol. 1: Onboarding and Orientation</a> &mdash; esp. <a href="vol1/ch1-what-is-seja.html">Ch. 1: What SEJA Is</a> and <a href="vol1/ch2-quickstart.html">Ch. 2: Quickstart</a></td>
+              <td>Complementary</td>
+            </tr>
+            <tr>
+              <td><code>CHANGELOG.md</code></td>
+              <td>&mdash;</td>
+              <td>Standalone</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="docs-root" data-diataxis="reference">
+        <h2><code>docs/</code> (top of the docs tree)</h2>
+        <table class="phasing-table">
+          <thead>
+            <tr>
+              <th>Existing doc</th>
+              <th>New location in this collection</th>
+              <th>Relationship</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>docs/quickstart.md</code></td>
+              <td><a href="vol1/ch2-quickstart.html">Vol. 1, Ch. 2: Quickstart</a></td>
+              <td>Superseded</td>
+            </tr>
+            <tr>
+              <td><code>docs/concepts.md</code></td>
+              <td><a href="vol2/index.html">Vol. 2: The Design Layer</a> (sign system, markers, design intent) and <a href="vol3/ch1-lifecycle-pipeline.html">Vol. 3, Ch. 1: The Lifecycle Pipeline</a></td>
+              <td>Superseded</td>
+            </tr>
+            <tr>
+              <td><code>docs/foundations.md</code></td>
+              <td><a href="vol5/index.html">Vol. 5: Foundations</a> (semiotic-engineering primer across Ch. 1&ndash;5)</td>
+              <td>Superseded</td>
+            </tr>
+            <tr>
+              <td><code>docs/foundations-assessment.md</code></td>
+              <td><a href="vol5/ch2-sign-systems-and-communicability.html">Vol. 5, Ch. 2</a> and <a href="vol5/ch6-governable-and-epistemic.html">Ch. 6: The Governable AND Epistemic Thesis</a> (concept-to-artifact correspondences)</td>
+              <td>Complementary</td>
+            </tr>
+            <tr>
+              <td><code>docs/troubleshooting.md</code></td>
+              <td><a href="vol3/ch5-quality-and-critique.html">Vol. 3, Ch. 5: Quality and Critique</a> and <a href="vol4/ch4-maintenance-and-drift.html">Vol. 4, Ch. 4: Maintenance and Drift</a></td>
+              <td>Complementary</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="docs-how-to" data-diataxis="reference">
+        <h2><code>docs/how-to/</code></h2>
+        <table class="phasing-table">
+          <thead>
+            <tr>
+              <th>Existing doc</th>
+              <th>New location in this collection</th>
+              <th>Relationship</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>docs/how-to/greenfield-collocated.md</code></td>
+              <td><a href="vol1/ch2-quickstart.html">Vol. 1, Ch. 2: Quickstart</a></td>
+              <td>Complementary</td>
+            </tr>
+            <tr>
+              <td><code>docs/how-to/greenfield-workspace.md</code></td>
+              <td><a href="vol1/ch2-quickstart.html">Vol. 1, Ch. 2: Quickstart</a></td>
+              <td>Complementary</td>
+            </tr>
+            <tr>
+              <td><code>docs/how-to/brownfield-collocated.md</code></td>
+              <td><a href="vol1/ch2-quickstart.html">Vol. 1, Ch. 2: Quickstart</a></td>
+              <td>Complementary</td>
+            </tr>
+            <tr>
+              <td><code>docs/how-to/brownfield-workspace.md</code></td>
+              <td><a href="vol1/ch2-quickstart.html">Vol. 1, Ch. 2: Quickstart</a></td>
+              <td>Complementary</td>
+            </tr>
+            <tr>
+              <td><code>docs/how-to/plan-and-execute.md</code></td>
+              <td><a href="vol3/ch4-plans-and-implementation.html">Vol. 3, Ch. 4: Plans and Implementation</a></td>
+              <td>Complementary</td>
+            </tr>
+            <tr>
+              <td><code>docs/how-to/quality-gates.md</code></td>
+              <td><a href="vol3/ch5-quality-and-critique.html">Vol. 3, Ch. 5: Quality and Critique</a></td>
+              <td>Complementary</td>
+            </tr>
+            <tr>
+              <td><code>docs/how-to/upgrade.md</code></td>
+              <td><a href="vol4/ch5-release-and-publishing.html">Vol. 4, Ch. 5: Release and Publishing</a> and <a href="vol1/ch2-quickstart.html">Vol. 1, Ch. 2: Quickstart</a></td>
+              <td>Complementary</td>
+            </tr>
+            <tr>
+              <td><code>docs/how-to/which-communicative-skill.md</code></td>
+              <td><a href="vol3/ch2-skills-in-depth.html">Vol. 3, Ch. 2: Skills In Depth</a></td>
+              <td>Complementary</td>
+            </tr>
+            <tr>
+              <td><code>docs/how-to/team-and-stakeholders.md</code></td>
+              <td><a href="vol3/ch2-skills-in-depth.html">Vol. 3, Ch. 2: Skills In Depth</a></td>
+              <td>Complementary</td>
+            </tr>
+            <tr>
+              <td><code>docs/how-to/ci-integration.md</code></td>
+              <td><a href="vol4/ch3-scripts-and-automation.html">Vol. 4, Ch. 3: Scripts and Automation</a></td>
+              <td>Complementary</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="docs-concepts" data-diataxis="reference">
+        <h2><code>docs/concepts/</code></h2>
+        <table class="phasing-table">
+          <thead>
+            <tr>
+              <th>Existing doc</th>
+              <th>New location in this collection</th>
+              <th>Relationship</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>docs/concepts/skill-map.md</code>, <code>skill-map.svg</code></td>
+              <td><a href="vol3/ch2-skills-in-depth.html">Vol. 3, Ch. 2: Skills In Depth</a></td>
+              <td>Complementary</td>
+            </tr>
+            <tr>
+              <td><code>docs/concepts/call-graph.md</code>, <code>call-graph.html</code>, <code>call-graph.css</code>, <code>call-graph.js</code>, <code>call-graph.json</code></td>
+              <td>&mdash; (generated interactive artifact; see <a href="vol3/ch3-subagent-delegation.html">Vol. 3, Ch. 3</a> for the delegation model it visualizes)</td>
+              <td>Standalone</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="docs-reference" data-diataxis="reference">
+        <h2><code>docs/reference/</code></h2>
+        <table class="phasing-table">
+          <thead>
+            <tr>
+              <th>Existing doc</th>
+              <th>New location in this collection</th>
+              <th>Relationship</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>docs/reference/glossary.md</code></td>
+              <td><a href="vol1/ch4-glossary.html">Vol. 1, Ch. 4: Glossary</a></td>
+              <td>Superseded</td>
+            </tr>
+            <tr>
+              <td><code>docs/reference/skills.md</code></td>
+              <td><a href="vol3/ch2-skills-in-depth.html">Vol. 3, Ch. 2: Skills In Depth</a></td>
+              <td>Superseded</td>
+            </tr>
+            <tr>
+              <td><code>docs/reference/agents.md</code></td>
+              <td><a href="vol3/ch3-subagent-delegation.html">Vol. 3, Ch. 3: Subagent Delegation</a></td>
+              <td>Superseded</td>
+            </tr>
+            <tr>
+              <td><code>docs/reference/perspectives.md</code></td>
+              <td><a href="vol3/ch5-quality-and-critique.html">Vol. 3, Ch. 5: Quality and Critique</a></td>
+              <td>Complementary</td>
+            </tr>
+            <tr>
+              <td><code>docs/reference/harness-reference.md</code></td>
+              <td><a href="vol4/ch1-output-artifacts.html">Vol. 4, Ch. 1: Output Artifacts</a> and <a href="vol4/ch3-scripts-and-automation.html">Ch. 3: Scripts and Automation</a></td>
+              <td>Complementary</td>
+            </tr>
+            <tr>
+              <td><code>docs/reference/release-process.md</code></td>
+              <td><a href="vol4/ch5-release-and-publishing.html">Vol. 4, Ch. 5: Release and Publishing</a></td>
+              <td>Complementary</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="not-yet-mapped" data-diataxis="explanation">
+        <h2>Content Without a Direct Existing-Doc Source</h2>
+        <p>
+          Some chapters in this collection have no single existing-doc counterpart because
+          they draw material together from the harness itself rather than from
+          the flat docs tree. The clearest examples are
+          <a href="vol1/ch3-reading-map.html">Vol. 1, Ch. 3: Reading Map</a>
+          (a navigation aid specific to this collection),
+          <a href="vol2/ch1-metacommunication-message.html">Vol. 2, Ch. 1: The Metacommunication Message</a>,
+          and the later Foundations chapters
+          (<a href="vol5/ch3-extended-metacommunication-template.html">Vol. 5, Ch. 3</a>,
+          <a href="vol5/ch4-reflective-practice.html">Ch. 4</a>,
+          <a href="vol5/ch5-abduction-and-plural-readings.html">Ch. 5</a>,
+          <a href="vol5/ch7-how-the-agent-reads-the-harness.html">Ch. 7</a>).
+          These expand the brief treatment in
+          <code>docs/foundations.md</code> and <code>docs/concepts.md</code>
+          into standalone chapters.
+        </p>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="index.html">Collection Index</a>
+      <a href="vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+    <p class="gen-meta">
+      Generated 2026-07-16 &middot; Source: research-000661; mapped against seja-public/docs/.
+    </p>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-volume" content="5">
+  <meta name="doc-chapter" content="3">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+  <meta name="quality" content="publication">
+
+  <title>The Extended Metacommunication Template -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 5: Foundations and Philosophy</a></li>
+      <li>The Extended Metacommunication Template</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>The Extended Metacommunication Template</h1>
+
+      <p>
+        De Souza's original metacommunication template (2005) captures the
+        designer's message to the user: "Here is my understanding of who you
+        are, what I've learned you want or need to do, and this is the system
+        I have therefore designed for you." That formulation addresses a
+        single design moment -- the designer's understanding at the time of
+        release. Barbosa et al. (2021) extend this template by asking what
+        happens when design decisions carry ethical weight across an entire
+        lifecycle -- from initial conception through deployment and ongoing
+        evaluation. Their extended metacommunication template (EMT) adds
+        lifecycle dimensions and ethical questions that the original template
+        did not address, precisely because the original was conceived for
+        interactive systems where the designer's ethical responsibilities,
+        while real, were less visibly consequential than in AI-mediated systems.
+      </p>
+
+      <p>
+        This chapter examines the EMT as SEJA operationalizes it: not as
+        an abstract ethical framework, but as a set of concrete questions
+        embedded in the harness's design-intent documents and lifecycle
+        skills. It also honestly acknowledges where the operationalization
+        falls short of the aspiration.
+      </p>
+
+      <section id="four-lifecycle-dimensions" data-diataxis="explanation">
+        <h2>Four Lifecycle Dimensions</h2>
+
+        <p>
+          Barbosa et al. (2021) argue that AI systems require metacommunication
+          to be extended across four lifecycle dimensions, each introducing
+          design decisions the original template does not address. The
+          dimensions are not stages in a waterfall sequence but perspectives
+          that recur throughout development. At each dimension, the designer
+          must articulate who is affected, what values are at stake, and what
+          trade-offs are being made -- questions that the original
+          metacommunication template left implicit.
+        </p>
+
+        <dl>
+          <dt>Conception</dt>
+          <dd>
+            What problem is the system intended to solve, and for whom? Whose
+            perspective defines the problem framing? What assumptions about
+            users, contexts, and values are embedded in the initial vision?
+            In SEJA, the <code>/design</code> skill's interview mode
+            operationalizes the conception dimension: it walks the designer
+            through questions about platform purpose, target users, domain
+            entities, and permission models. The metacommunication message
+            in <code>product-design-as-intended.md</code> §11 is the
+            canonical output of this dimension -- the designer's first-person
+            statement of who the user is and what the system is designed to
+            help them do.
+          </dd>
+
+          <dt>Design</dt>
+          <dd>
+            How are the system's structures and affordances shaped to serve
+            (or constrain) the users identified in conception? What is made
+            visible and what is hidden? What trade-offs between competing
+            values (e.g., simplicity vs. configurability, safety vs.
+            autonomy) are encoded in the design? SEJA operationalizes this
+            through the design-intent layer: <code>product-design-as-intended.md</code>
+            captures the target state, the constitution encodes immutable
+            principles, and the EMT guiding questions in §12 prompt the
+            designer to articulate their understanding of users, affected
+            others, intended contexts, and ethical implications at each stage.
+          </dd>
+
+          <dt>Implementation</dt>
+          <dd>
+            Does the built system faithfully realize the design intent, or
+            have implementation decisions introduced unintended divergences?
+            Where has pragmatic compromise overridden principled design?
+            SEJA's <code>/implement</code> skill addresses this through
+            plan-step traceability: each implementation step declares which
+            design-intent requirements it satisfies (via <code>Traces:</code>
+            metadata fields and <code>REQ-TYPE-NNN</code> identifiers), and
+            the as-coded state in <code>product-design-as-coded.md</code>
+            records what was actually built. The gap between as-intended and
+            as-coded is the implementation dimension's central concern.
+          </dd>
+
+          <dt>Evaluation</dt>
+          <dd>
+            Is the system serving its users as intended? What has been learned
+            since deployment that challenges the initial assumptions? What
+            remains unknown? SEJA operationalizes evaluation through two
+            complementary skills: <code>/critique</code> (systematic review
+            against design intent, using multiple review perspectives) and
+            <code>/reflect</code> (structured reflection on both the product
+            and the designer's practice). The <code>/explain drift</code>
+            workflow specifically targets the gap between design intent and
+            implementation state, making visible where the system has
+            diverged from its original metacommunication message.
+          </dd>
+        </dl>
+
+        <p>
+          The four dimensions map onto SEJA's canonical lifecycle path --
+          <code>/research</code> and <code>/design</code> (conception),
+          <code>/plan</code> and <code>/design</code> (design),
+          <code>/implement</code> (implementation), <code>/critique</code>
+          and <code>/reflect</code> (evaluation) -- though the mapping is
+          approximate rather than exact. Real design work revisits earlier
+          dimensions as understanding grows, and SEJA's lifecycle supports
+          this through its iterative structure. For a detailed account of
+          the lifecycle pipeline itself, see
+          <a href="../execution-layer/lifecycle-pipeline.html#the-canonical-path">
+          Lifecycle Pipeline</a>.
+        </p>
+      </section>
+
+      <section id="ethical-questions" data-diataxis="explanation">
+        <h2>Ethical Questions</h2>
+
+        <p>
+          The EMT's distinctive contribution is not the lifecycle dimensions
+          themselves -- sequential development models have long recognized
+          conception, design, implementation, and evaluation as distinct
+          concerns. What Barbosa et al. (2021) add is the insistence that
+          each dimension carries ethical questions that must be explicitly
+          addressed, not left to emerge as side effects of technical decisions.
+          The ethical questions are structured around visibility, privilege,
+          and consequence: whose perspective is privileged in the problem
+          framing? What is made visible to users, and what is concealed?
+          What are the consequences of the design choices for those who did
+          not participate in making them?
+        </p>
+
+        <p>
+          SEJA's constitution provides one structured response to these
+          questions. Its three quality principles encode commitments that
+          bear directly on the EMT's ethical concerns:
+        </p>
+
+        <dl>
+          <dt>Q1: Design intent is authoritative</dt>
+          <dd>
+            The metacommunication message and constitution are the
+            highest-authority artifacts; no plan or implementation step may
+            contradict them without an explicit decision record (D-NNN)
+            approved by the designer. This principle addresses the EMT's
+            concern about accountability: design decisions are traceable to
+            a named designer who takes responsibility for them, not
+            diffused across an anonymous development process.
+          </dd>
+
+          <dt>Q2: Surface the unknown</dt>
+          <dd>
+            SEJA must surface what is not yet known, not only what has been
+            decided. Gaps, unverified assumptions, design debt, and epistemic
+            uncertainties must be made visible rather than silently omitted.
+            This principle directly operationalizes the EMT's visibility
+            concern: the system is designed to make its own limitations
+            visible rather than presenting a false appearance of
+            completeness. Gap-flagged topology cards, heuristic-labeled
+            coverage reports, and pre-skill pending notices are concrete
+            mechanisms through which unknowns are surfaced.
+          </dd>
+
+          <dt>Q3: Governable AND epistemic</dt>
+          <dd>
+            SEJA must be both governable and epistemic: governance without
+            epistemic support produces brittleness; epistemic support
+            without governance produces drift. This principle addresses
+            the EMT's concern about structural accountability -- it is not
+            enough for the system to produce knowledge about its own
+            design choices (epistemic); that knowledge must be embedded in
+            enforceable governance structures that prevent it from being
+            ignored.
+          </dd>
+        </dl>
+
+        <p>
+          Beyond the constitution, SEJA records ethical trade-offs through
+          its decision record mechanism. The <code>## Decisions</code>
+          section of <code>product-design-as-intended.md</code> captures
+          D-NNN entries in a DDR (Design Decision Record) shape: Context,
+          Decision, Consequences, and Rejected Alternatives. Each entry
+          records not only what was decided but why, what was considered and
+          rejected, and what consequences were anticipated. This is the
+          EMT's ethical-questions concern made concrete: when a design
+          choice privileges one user group over another, or when a
+          trade-off is made between competing values, the decision record
+          ensures that the reasoning is explicit and auditable rather than
+          buried in implementation details.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The EMT guiding questions in §12 of
+            <code>product-design-as-intended.md</code> are structured as
+            four numbered sections (Analysis, Design, Prototype,
+            Evaluation), each containing sub-questions about knowledge,
+            affected parties, contexts of use, and ethical implications.
+            The designer answers these in first person, maintaining the
+            I/you phrasing that makes the metacommunication act explicit.
+          </p>
+        </aside>
+      </section>
+
+      <section id="critical-counter-reading" data-diataxis="explanation">
+        <h2>Critical Counter-Reading</h2>
+
+        <p>
+          The extended metacommunication template is aspirational in a
+          specific sense: it prescribes ethical reflection at each lifecycle
+          dimension but provides no mechanism to verify that the reflection
+          actually occurred or was genuinely engaged. A designer can fill in
+          the EMT guiding questions in §12 of
+          <code>product-design-as-intended.md</code> with perfunctory answers
+          that satisfy the template's structure without engaging with its
+          substance. The template creates affordances for ethical reasoning
+          but cannot ensure that reasoning happens.
+        </p>
+
+        <p>
+          SEJA operationalizes some of the EMT's questions more successfully
+          than others. Q2's gap-flagging mechanism (surface the unknown) has
+          concrete implementations: topology gap detection, heuristic-labeled
+          coverage reports, and pre-skill pending notices all make specific
+          unknowns visible. The decision record mechanism (D-NNN entries)
+          creates an auditable trail of trade-off reasoning. But the deeper
+          ethical questions -- whose perspective is privileged in the problem
+          framing? what are the consequences for affected parties who did not
+          participate? -- depend on the designer's willingness to engage
+          honestly with them. SEJA can prompt the questions; it cannot
+          evaluate the quality of the answers.
+        </p>
+
+        <p>
+          The FAccT framing (Barbosa et al. 2021) assumes a responsible
+          designer -- one who takes the ethical questions seriously and
+          engages with them in good faith. SEJA inherits this assumption
+          without independent verification. The constitution's Q1 principle
+          (design intent is authoritative) is both a strength and a
+          vulnerability in this regard: it ensures that the designer's stated
+          intent governs the system, but it also means that an irresponsible
+          designer's intent is equally authoritative. SEJA provides no
+          mechanism to challenge the ethical adequacy of the designer's
+          metacommunication message itself -- it can enforce that
+          implementation matches intent, but not that the intent is just.
+        </p>
+
+        <p>
+          A further limitation concerns the sequential presentation of the
+          four lifecycle dimensions. Barbosa et al. (2021) acknowledge that
+          the dimensions are not strictly sequential, but the EMT's structure
+          -- and SEJA's operationalization of it through a lifecycle pipeline
+          -- encourages a stage-gate reading: conception is settled before
+          design begins, design before implementation, implementation before
+          evaluation. Real design work is iterative and overlapping. A
+          finding in the evaluation dimension may invalidate assumptions
+          made in the conception dimension, requiring not merely a return to
+          an earlier stage but a reconceptualization of the problem itself.
+          SEJA's promote workflow (moving items from implemented to
+          established status) supports some forms of iteration, but the
+          lifecycle pipeline's sequential structure makes it easier to move
+          forward than to circle back. The EMT's ethical ambition would be
+          better served by a structure that makes iteration as natural as
+          progression -- a challenge that remains unresolved in SEJA's
+          current design.
+        </p>
+      </section>
+
+      <section id="references" data-diataxis="reference">
+        <h2>References</h2>
+        <ul>
+          <li>
+            Barbosa, S.D.J., Silva, B.S., Silveira, M.S., Gasparini, I.,
+            Darin, T., and Barbosa, G.D.J. (2021). "Interação
+            Humano-Computador e Experiência do Usuário." Autopublicação.
+          </li>
+          <li>
+            de Souza, C.S. (2005). <cite>The Semiotic Engineering of
+            Human-Computer Interaction</cite>. Cambridge, MA: MIT Press.
+          </li>
+        </ul>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 5: Foundations and Philosophy</h2>
+    <ol>
+      <li>
+        <a href="software-as-communication.html">Software as Designed Communication</a>
+      </li>
+      <li>
+        <a href="sign-systems.html">Sign Systems and Communicability</a>
+      </li>
+      <li aria-current="page">
+        <a href="extended-metacommunication.html">The Extended Metacommunication Template</a>
+        <ul>
+          <li><a href="#four-lifecycle-dimensions">Four Lifecycle Dimensions</a></li>
+          <li><a href="#ethical-questions">Ethical Questions</a></li>
+          <li><a href="#critical-counter-reading">Critical Counter-Reading</a></li>
+          <li><a href="#references">References</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="reflective-practice.html">Reflective Practice</a>
+      </li>
+      <li>
+        <a href="abduction-plural-readings.html">Abduction and Plural Readings</a>
+      </li>
+      <li>
+        <a href="governable-epistemic.html">The Governable and Epistemic Thesis</a>
+      </li>
+      <li>
+        <a href="agent-reads-harness.html">How the Agent Reads the Harness</a>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="sign-systems.html">Previous: Sign Systems and Communicability</a>
+    <a href="reflective-practice.html">Next: Reflective Practice</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

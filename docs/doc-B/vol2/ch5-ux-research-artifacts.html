@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="2">
+  <meta name="doc-chapter" content="5">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+
+  <title>UX Research Artifacts -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 2: The Design Layer</a></li>
+      <li>UX Research Artifacts</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>UX Research Artifacts</h1>
+
+      <p>
+        The metacommunication message says <em>who I understand you to be</em>
+        and <em>what I have learned you want or need to do</em>. Those are
+        empirical claims -- and empirical claims need evidence. SEJA keeps that
+        evidence in a single Human (markers) file,
+        <code>product-design/ux-research-results.md</code>: personas
+        (<code>R-P-NNN</code>), problem scenarios (<code>R-PS-NNN</code>), a
+        cross-reference map, a processing-status table, and discovered user
+        journeys (<code>JM-E-NNN</code>). This chapter is a reference to the
+        artifacts as they actually exist in SEJA's own research file, a how-to
+        for populating them through <code>/design</code>, and an explanation of
+        how this evidence base grounds the designer's first-person
+        "I want you to&hellip;" statement in observation rather than assumption.
+      </p>
+
+      <!-- Section 1: The Research File -->
+      <section data-diataxis="reference" id="the-research-file">
+        <h2>The Research File</h2>
+
+        <p>
+          All UX research artifacts live in one file:
+          <code>product-design/ux-research-results.md</code>. It is classified
+          <code>Human (markers)</code> -- prose (personas, problem scenarios,
+          journey observations) is authored only by the designer or researcher;
+          agents may write fixed-format lifecycle markers
+          (<code>INCORPORATED</code>, <code>CHANGELOG_APPEND</code>) and only
+          through <code>apply_marker.py</code> after an <code>AskUserQuestion</code>
+          confirmation. Direct agent prose writes are rejected by
+          <code>check_human_markers_only.py</code> during post-skill.
+        </p>
+
+        <p>
+          The file has three stable ID namespaces, and the IDs never move: an
+          entry revised in place keeps its ID; an entry that is superseded mints
+          a new one.
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Prefix</th>
+              <th>Artifact</th>
+              <th>Section</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>R-P-NNN</code></td>
+              <td>Persona</td>
+              <td>&sect;1 Personas</td>
+            </tr>
+            <tr>
+              <td><code>R-PS-NNN</code></td>
+              <td>Problem scenario</td>
+              <td>&sect;2 Problem Scenarios</td>
+            </tr>
+            <tr>
+              <td><code>JM-E-NNN</code></td>
+              <td>Discovered (empirical) user journey</td>
+              <td>&sect;5 Discovered User Journeys</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The file's own section layout is: &sect;1 Personas, &sect;2 Problem
+          Scenarios, &sect;3 Cross-Reference Map, &sect;4 Processing Status,
+          &sect;5 Discovered User Journeys, and a trailing append-only
+          <code>## CHANGELOG</code>. The subsections that follow walk each of
+          these using the artifacts that are actually recorded in SEJA's
+          research file.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Note:</strong> The <code>JM-E-NNN</code> journeys in
+            &sect;5 are the empirical, field-observed journeys -- what users
+            <em>actually do</em>. They are distinct from the designed journeys
+            (<code>JM-TB-NNN</code>) in
+            <code>product-design-as-intended.md &sect;15</code> (what the
+            designer intends) and the implemented journeys in
+            <code>product-design-as-coded.md &sect; Journey Maps</code> (what
+            was built). The flow is one-directional: discovered journeys inform
+            designed journeys, never the reverse.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 2: Personas -->
+      <section data-diataxis="reference" id="personas">
+        <h2>Personas (&sect;1)</h2>
+
+        <p>
+          A persona is a user archetype with goals, frustrations, and context.
+          SEJA's own research file records three personas, all confirmed during
+          the <code>/design</code> Mode 5 interview (2026-06-28). Each persona
+          carries a set of goals with stable <code>G-NNN</code> IDs -- these are
+          the machine-readable anchor for the metacommunication message's
+          "what I've learned you want or need to do" clause (see
+          <a href="#grounding-the-message">Grounding the Message</a>).
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Role / Archetype</th>
+              <th>Primary goal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>R-P-001</code></td>
+              <td>Ana</td>
+              <td>Semiotic Engineer-Designer</td>
+              <td>Bridge design theory and AI-assisted implementation without losing the metacommunication thread</td>
+            </tr>
+            <tr>
+              <td><code>R-P-002</code></td>
+              <td>Beto</td>
+              <td>Pragmatic Developer</td>
+              <td>Build well-structured software with AI governance that requires no per-session context restating</td>
+            </tr>
+            <tr>
+              <td><code>R-P-003</code></td>
+              <td>Clara</td>
+              <td>Tech Lead / Architect</td>
+              <td>Maintain design coherence and surface drift across a team or codebase over time</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Each persona entry expands the inventory row with a bio, a goal list,
+          key frustrations, and relevant context (technical proficiency, usage
+          frequency, domain knowledge). The three personas span the axis SEJA is
+          built for -- from the theorist to the pragmatist to the governor:
+        </p>
+
+        <dl>
+          <dt><code>R-P-001</code> Ana &mdash; the theorist</dt>
+          <dd>
+            A semiotic-engineering graduate who treats the metacommunication
+            message as the primary design artifact. Her goals: encode design
+            intent as a machine-readable artifact (<code>G-001</code>), detect
+            drift from the message before it is expensive to reverse
+            (<code>G-002</code>), and keep an honest picture of what she does and
+            does not yet know about her users (<code>G-003</code>). Her
+            frustration is with AI tools that treat design documents as optional
+            context rather than authoritative constraints.
+          </dd>
+
+          <dt><code>R-P-002</code> Beto &mdash; the pragmatist</dt>
+          <dd>
+            A senior engineer who wants governance without ceremony. His goals:
+            AI help that stays within his architectural choices without
+            re-explaining them each session (<code>G-004</code>), structured
+            feedback on whether the implementation matches the plan
+            (<code>G-005</code>), and transparency about why the AI chose an
+            approach (<code>G-006</code>). His frustration is pasting design
+            context into every new conversation because state does not persist.
+          </dd>
+
+          <dt><code>R-P-003</code> Clara &mdash; the governor</dt>
+          <dd>
+            A tech lead responsible for design coherence over time. Her goals:
+            surface drift early (<code>G-007</code>), keep a shared authoritative
+            decision record that survives personnel changes (<code>G-008</code>),
+            and generate stakeholder-appropriate material from design intent
+            without rewriting it per audience (<code>G-009</code>). Her
+            frustration is design decisions that live in someone's head or a
+            chat thread but not in the codebase.
+          </dd>
+        </dl>
+      </section>
+
+      <!-- Section 3: Problem Scenarios -->
+      <section data-diataxis="reference" id="problem-scenarios">
+        <h2>Problem Scenarios (&sect;2)</h2>
+
+        <p>
+          A problem scenario is a narrative of user pain <em>without</em> SEJA
+          (or with an earlier version of it). Each is tied to one or more
+          personas and their <code>G-NNN</code> goals, with a setting and a
+          concrete story. SEJA's research file records three, pre-populated from
+          design-interview knowledge and to be enriched with field observation
+          as the harness is used in production.
+        </p>
+
+        <div class="table-container">
+          <table class="ref-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Personas</th>
+                <th>Goals</th>
+                <th>The pain</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>R-PS-001</code></td>
+                <td>Design Intent Lost in Translation</td>
+                <td><code>R-P-001</code>, <code>R-P-002</code></td>
+                <td><code>G-001</code>, <code>G-002</code>, <code>G-004</code></td>
+                <td>A new AI conversation has no memory of last session's design decisions; the AI produces a working implementation that makes a structural choice the designer explicitly rejected, and the drift compounds across the team.</td>
+              </tr>
+              <tr>
+                <td><code>R-PS-002</code></td>
+                <td>The Gap That Wasn't Surfaced</td>
+                <td><code>R-P-001</code>, <code>R-P-003</code></td>
+                <td><code>G-003</code>, <code>G-007</code></td>
+                <td>A critique reports "all designed features are implemented" -- technically true -- but two problem scenarios from the research layer were never addressed in the design intent, leaving a missing research-to-design linkage that nothing traverses.</td>
+              </tr>
+              <tr>
+                <td><code>R-PS-003</code></td>
+                <td>Stakeholder Communication from Scratch</td>
+                <td><code>R-P-003</code></td>
+                <td><code>G-009</code></td>
+                <td>Detailed design-intent documents, plan histories, and decision records exist, but none are in a stakeholder-ready format; the designer rebuilds slides by hand each quarter, and they go stale the moment the design evolves.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          These scenarios are not decorative. <code>R-PS-002</code> is the
+          scenario that directly motivates SEJA's product-topology gap-detection
+          feature, and <code>R-PS-003</code> is what motivates the
+          <code>/communicate</code> skill -- the research artifacts are the
+          documented origin of design decisions, not an afterthought to them.
+        </p>
+      </section>
+
+      <!-- Section 4: Cross-Reference Map and Processing Status -->
+      <section data-diataxis="reference" id="cross-reference-and-status">
+        <h2>Cross-Reference Map (&sect;3) and Processing Status (&sect;4)</h2>
+
+        <p>
+          Two tables connect the research artifacts to the rest of the design
+          layer and track their incorporation.
+        </p>
+
+        <h3>Cross-Reference Map</h3>
+
+        <p>
+          The map (&sect;3) records, for each artifact ID, which design artifact
+          it feeds and the relationship. In SEJA's own file, all three personas
+          feed the Extended Metacommunication Template question 1.1 ("what I know
+          about you") in
+          <code>product-design-as-intended.md &sect;12 EMT 1.1</code>; the
+          problem scenarios feed EMT 1.3 (contexts of use) and, for
+          <code>R-PS-002</code> and <code>R-PS-003</code>, the specific features
+          they motivate (product topology and <code>/communicate</code>). The
+          relationship is <code>Feeds</code>: research is upstream, design intent
+          is downstream.
+        </p>
+
+        <h3>Processing Status</h3>
+
+        <p>
+          The status table (&sect;4) is a convenience view over the inline
+          <code>INCORPORATED</code> markers on each entry -- the authoritative
+          record is the marker on the heading itself, applied by post-skill via
+          <code>apply_marker.py</code> after confirmation. In SEJA's own file,
+          all six entries are currently <code>pending</code>: created via the
+          <code>/design</code> Mode 5 interview but not yet incorporated into a
+          plan. When a persona or scenario is incorporated into a design
+          iteration, post-skill proposes an
+          <code>&lt;!-- INCORPORATED: plan-NNNNNN | YYYY-MM-DD --&gt;</code>
+          marker via <code>AskUserQuestion</code>, and the status flips.
+        </p>
+      </section>
+
+      <!-- Section 5: Discovered User Journeys -->
+      <section data-diataxis="reference" id="discovered-journeys">
+        <h2>Discovered User Journeys (&sect;5)</h2>
+
+        <p>
+          Discovered journeys (<code>JM-E-NNN</code>) are journey maps observed
+          through field study of the system in <em>actual use</em> -- contextual
+          inquiry, usability studies, diary studies. Each entry carries a
+          required research source (method, date, sample size), optional persona
+          and problem-scenario links, a goal, pre-conditions, and a step-by-step
+          observation table (observation, touchpoint, user emotion, pain point,
+          source). They are empirical: they describe what users do, not what was
+          designed or built.
+        </p>
+
+        <p>
+          In SEJA's own research file, &sect;5 is currently empty by design:
+        </p>
+
+        <blockquote class="status-notice">
+          No discovered journeys recorded yet. Populate from field observation
+          as SEJA matures.
+        </blockquote>
+
+        <p>
+          This is honest, not a placeholder to be filled with invented data. The
+          section is <strong>structurally append-only</strong> for prose:
+          <code>check_changelog_append_only.py</code> (run by the fast preflight
+          gate at post-skill step 6b) diffs
+          it against the prior commit with a prose-only rule, so
+          <code>apply_marker.py</code> can insert <code>INCORPORATED</code>
+          markers above existing <code>JM-E-NNN</code> headings without tripping
+          a middle-insertion violation -- but no prose line can be removed,
+          modified, or inserted in the middle. Only prose additions at the end
+          are allowed. The emptiness itself carries meaning: SEJA has designed
+          journeys (<code>JM-TB-NNN</code>) but has not yet observed field
+          journeys, and the file says so plainly rather than pretending
+          otherwise.
+        </p>
+      </section>
+
+      <!-- Section 6: Populating the Artifacts via /design -->
+      <section data-diataxis="how-to" id="populating-via-design">
+        <h2>Populating the Artifacts via <code>/design</code></h2>
+
+        <p>
+          The research file is instantiated and populated through
+          <code>/design</code>. You never write the artifacts by hand into an
+          agent context -- the Human (markers) classification forbids agent prose
+          writes, and the designer authors the prose. Here is how the artifacts
+          come to exist.
+        </p>
+
+        <h3>Where the file comes from</h3>
+
+        <p>
+          During template instantiation, <code>/design</code> copies
+          <code>template/ux-research-results.md</code> to
+          <code>product-design/ux-research-results.md</code>. It pre-populates
+          personas and user-community details from the questionnaire's
+          persona/user question (Q2.10) and the target-user question (Q2.1) when
+          those were provided. The instantiated file keeps its
+          <code>Human (markers)</code> classification, so from that point on the
+          designer owns the prose and agents contribute only markers.
+        </p>
+
+        <h3>The interview path (Mode 5)</h3>
+
+        <p>
+          SEJA's own personas and scenarios were captured through Mode 5
+          (Interview-Driven), triggered by <code>/design --mode interview</code>.
+          Mode 5 is a conversational intake rather than a fixed form:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Phase A -- Open-ended interview:</strong> the skill asks
+            adaptive questions covering platform purpose, target users, domain
+            entities, permissions, constraints, and edge cases, recording each
+            exchange as a verbatim triple (agent question, user response
+            verbatim, agent interpretation) in a transcript file.
+          </li>
+          <li>
+            <strong>Phase B -- Synthesis:</strong> the skill enumerates every
+            field in its Field Classification and assigns a confidence label to
+            each: <code>DS</code> (directly stated), <code>INF</code> (inferred),
+            or <code>PAC</code> (proposed-and-confirmed).
+          </li>
+          <li>
+            <strong>Phase C -- Confirmation:</strong> security-critical inferred
+            fields must be confirmed to <code>DS</code> or <code>PAC</code> via
+            <code>AskUserQuestion</code>; other inferred fields are reviewed in
+            a batch; gaps are filled with a single focused question each.
+          </li>
+          <li>
+            <strong>Phase D -- Instantiation:</strong> the confirmed values feed
+            template instantiation (the same step described above), writing the
+            personas and problem scenarios into the research file.
+          </li>
+        </ul>
+
+        <p>
+          The confidence labels are why SEJA's personas can honestly say "all
+          three were confirmed during the <code>/design</code> Mode 5 interview"
+          -- the label records that these were not silently assumed but stated
+          or confirmed by the designer.
+        </p>
+
+        <h3>Populating discovered journeys later</h3>
+
+        <p>
+          Personas and problem scenarios can be seeded at design time from
+          interview knowledge, but discovered journeys (<code>JM-E-NNN</code>)
+          come from field observation and are added as the system is used. You
+          append them to &sect;5 following the entry pattern (research source,
+          persona/scenario links, goal, pre-conditions, an observation-step
+          table, and key findings). Because &sect;5 is append-only, you add new
+          entries at the end; you do not rewrite what is already there.
+        </p>
+
+        <h3>Marking incorporation</h3>
+
+        <p>
+          When a persona, scenario, or journey is used in a plan, you do not
+          hand-edit the status. Post-skill detects the incorporation and proposes
+          an <code>INCORPORATED</code> marker via <code>AskUserQuestion</code>;
+          on confirmation, <code>apply_marker.py</code> writes it above the
+          entry's heading and appends a <code>## CHANGELOG</code> line. That is
+          the only write path for agents into this file.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> To keep research honest about what you do not
+            yet know, record gaps in the design intent's Extended
+            Metacommunication Template rather than fabricating a persona detail.
+            EMT question 1.1 explicitly asks "what do I <em>not</em> know about
+            you?" -- an empty &sect;5 or a sparse persona is a legitimate,
+            recorded state, not a defect to be papered over.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 7: Grounding the Metacommunication Message -->
+      <section data-diataxis="explanation" id="grounding-the-message">
+        <h2>Grounding the Metacommunication Message</h2>
+
+        <p>
+          The metacommunication message
+          (<a href="ch1-metacommunication-message.html">Chapter&nbsp;1</a>) is
+          the highest-authority artifact in the design layer. It is voiced in
+          first person: "Here is my understanding of who you are&hellip; I've
+          learned that what you want and need is&hellip;" Those two clauses --
+          <em>who you are</em> and <em>what I've learned you want or need</em> --
+          are claims about real users. The research artifacts are what keep them
+          honest.
+        </p>
+
+        <h3>From assumption to evidence</h3>
+
+        <p>
+          Without a research base, "who you are" is an assumption the designer
+          holds privately, and "what you want" is a guess. SEJA's message does
+          not float free of evidence: its "who you are" clause is anchored in the
+          three personas (<code>R-P-001</code> Ana, <code>R-P-002</code> Beto,
+          <code>R-P-003</code> Clara), and its "what you want or need to do"
+          clause is anchored in their goals (<code>G-001</code> through
+          <code>G-009</code>). The Extended Metacommunication Template makes the
+          linkage explicit -- its question 1.1 ("what do I know or don't know
+          about you") points directly at
+          <code>ux-research-results.md &sect;1&ndash;&sect;4</code>, and its
+          design section maps each goal to the feature designed to serve it.
+        </p>
+
+        <h3>The one-directional evidence flow</h3>
+
+        <p>
+          Evidence flows upward into the message and never the reverse. The
+          research file's Cross-Reference Map records each artifact's
+          relationship to design intent as <code>Feeds</code>: personas feed the
+          "who you are" understanding, problem scenarios feed the contexts of use
+          and the features that answer them, and discovered journeys feed the
+          designed journeys. If the designer changes the message, that is a
+          design act; it does not retroactively rewrite the observations that
+          grounded it. This is why the research file is authored by the human and
+          only marker-annotated by agents -- the evidence base must stay
+          independent of the design conclusions it supports, or it stops being
+          evidence.
+        </p>
+
+        <h3>Why the honest gap matters</h3>
+
+        <p>
+          The empty &sect;5 and the <code>pending</code> processing status are
+          not weaknesses in the message -- they are part of what the message
+          claims. SEJA's message addresses a designer who "is aware of what they
+          have learned about their system's users, and equally aware of what they
+          have not yet learned." A research file that records its own gaps is the
+          message practising what it preaches: the epistemic posture is visible
+          in the artifacts, not just asserted in prose. When a critique or a
+          product-topology view later surfaces a research-to-design gap (the
+          <code>R-PS-002</code> scenario), it is comparing the evidence base
+          against the design conclusions -- which only works because the two are
+          kept as separate, honest layers.
+        </p>
+      </section>
+
+      <!-- See also: curated cross-volume links -->
+      <nav aria-label="see also" class="see-also">
+        <h2>See Also</h2>
+        <ul>
+          <li>
+            <a href="ch1-metacommunication-message.html">Vol.&nbsp;2 Ch.&nbsp;1: The Metacommunication Message</a>
+            &mdash; the artifact these research findings ground.
+          </li>
+          <li>
+            <a href="../vol5/ch3-extended-metacommunication-template.html">Vol.&nbsp;5 Ch.&nbsp;3: The Extended Metacommunication Template</a>
+            &mdash; the template whose EMT questions structure this evidence base.
+          </li>
+        </ul>
+      </nav>
+
+    </article>
+  </main>
+
+  <!-- Chapter navigation: Ch.5 is last in Vol. 2 -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="ch4-marker-system.html">Previous: The Marker System</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

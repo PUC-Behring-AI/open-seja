@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="What SEJA is: an agent harness for Claude Code grounded in semiotic engineering — a governance layer that structures the lifecycle of AI-assisted software development around the designer's intent.">
+  <title>What SEJA Is — SEJA Documentation</title>
+  <!-- CSS depth: 2 (tracks/practitioner/index.html) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>What SEJA Is</h1>
+      <p>Your entry point to the Practitioner Track: what SEJA gives you, what it will not do, and where to go next.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#tracks">Tracks</a></li>
+        <li aria-current="page">Practitioner</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-explanation">explanation</span>
+          <span class="badge track-practitioner">Practitioner</span>
+        </p>
+
+        <section data-diataxis="explanation" aria-labelledby="what-seja-is">
+          <h2 id="what-seja-is">What SEJA is</h2>
+          <p>
+            SEJA is an <strong>agent harness for Claude Code</strong>, grounded in
+            semiotic engineering. It is <em>not</em> a framework, a library, or a
+            plugin. It is a <strong>governance layer</strong> that structures the
+            lifecycle of AI-assisted software development around your intent as the
+            designer.
+          </p>
+          <p>
+            When a project is governed by SEJA, it gains a stable design layer: a
+            metacommunication message that expresses who your users are and what they
+            need, a constitution of immutable principles, design-intent files that
+            record the target state, and as-coded files that track what was actually
+            built. The harness enforces the boundary between these layers so that
+            plans serve design intent, implementations serve plans, and critiques
+            evaluate against design intent — not against the AI's own heuristics.
+            Your intent stays authoritative from the first research question through
+            the final commit.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="three-things">
+          <h2 id="three-things">The three things SEJA gives you</h2>
+          <p>SEJA rests on three value pillars.</p>
+          <dl>
+            <dt>Governance</dt>
+            <dd>
+              A lifecycle of linked skills, enforced by <code>pre-skill</code> and
+              <code>post-skill</code> hooks that wrap every skill you run. A
+              <strong>constitution</strong> of immutable principles governs each
+              invocation, and a configurable <strong>council</strong> of review
+              perspectives evaluates your work. Throughout, your intent as the
+              designer is authoritative.
+            </dd>
+            <dt>Epistemic support</dt>
+            <dd>
+              SEJA surfaces what is <em>not</em> yet known, not only what has been
+              decided. Gap detection, heuristic labeling, explicit unknowns, and
+              pending-actions tracking of unincorporated learning all work to make
+              the boundary between the known and the unknown visible — rather than
+              silently omitting it.
+            </dd>
+            <dt>Lifecycle discipline</dt>
+            <dd>
+              A structured progression from research to reflection, with artifacts
+              linking each phase to the next. Plans serve design intent,
+              implementations serve plans, and critiques evaluate against design
+              intent. Nothing floats free of the phase before it.
+            </dd>
+          </dl>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="what-seja-does-not-do">
+          <h2 id="what-seja-does-not-do">What SEJA does NOT do</h2>
+          <p>Knowing the boundaries is as important as knowing the value. SEJA:</p>
+          <ul>
+            <li>does <strong>not</strong> replace your IDE;</li>
+            <li>does <strong>not</strong> auto-deploy;</li>
+            <li>does <strong>not</strong> make architectural decisions for you;</li>
+            <li>
+              does <strong>not</strong> generate design intent without genuine
+              designer engagement;
+            </li>
+            <li>
+              does <strong>not</strong> guarantee that your design intent is ethical
+              — it guarantees only that the implementation matches the intent you
+              expressed.
+            </li>
+          </ul>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="practitioner-phases">
+          <h2 id="practitioner-phases">Practitioner Track phases</h2>
+          <p>
+            The Practitioner Track walks you through SEJA in three phases, from first
+            install to advanced practice.
+          </p>
+          <dl>
+            <dt>Phase 1: Get Started <em>(coming soon)</em></dt>
+            <dd>
+              Installation and your first <code>/seja-setup</code> +
+              <code>/design</code> + <code>/plan</code> cycle.
+            </dd>
+            <dt>Phase 2: Work Effectively <em>(coming soon)</em></dt>
+            <dd>
+              The canonical lifecycle skills — the practical 80% you will use every
+              day.
+            </dd>
+            <dt>Phase 3: Go Deeper <em>(coming soon)</em></dt>
+            <dd>
+              Advanced modes, maintenance, and the enforcement layers underneath the
+              harness.
+            </dd>
+          </dl>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="other-tracks">
+          <h2 id="other-tracks">Other tracks</h2>
+          <p>
+            Two further tracks cross the same shared core:
+          </p>
+          <ul>
+            <li>
+              <a href="../architect/index.html">Architect Track</a> &mdash; the
+              structural view: topology, extension points, and maintenance.
+            </li>
+            <li>
+              <a href="../scholar/index.html">Scholar Track</a> &mdash; the
+              semiotic-engineering theory and what remains open.
+            </li>
+          </ul>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="../../core/concepts/lifecycle-pipeline.html">The Lifecycle Pipeline</a> — how every skill is wrapped by a pre-skill and post-skill pipeline, and how to choose which skill to run.</li>
+            <li><a href="../../index.html">Reading Map</a> — the full collection, routed by audience track.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="../../index.html#tracks">Tracks</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (tracks/practitioner/index.html) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

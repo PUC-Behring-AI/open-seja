@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="2">
+  <meta name="doc-chapter" content="4">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+
+  <title>The Marker System -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 2: The Design Layer</a></li>
+      <li>The Marker System</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>The Marker System</h1>
+
+      <p>
+        SEJA uses lifecycle markers to track the status of design-intent items
+        as they move from proposal through implementation to establishment.
+        Markers are the mechanism by which the agent records lifecycle state
+        changes in human-authored files without altering the designer's prose.
+        All marker writes go through a single script --
+        <code>apply_marker.py</code> -- which validates format, enforces
+        transition rules, and requires explicit human confirmation before
+        every write.
+      </p>
+
+      <section id="marker-types" data-diataxis="reference">
+        <h2>Marker Types</h2>
+
+        <p>
+          SEJA's marker system comprises five marker types organized in
+          three functional categories: status tracking (STATUS), research
+          absorption (INCORPORATED), structured-entry appending
+          (DECISION_APPEND, CHANGELOG_APPEND), and traceability
+          (REQ_TRACED_BY). Each type serves a distinct governance purpose
+          and follows a specific format.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Purpose</th>
+              <th>Format</th>
+              <th>Triggered By</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>STATUS</code></td>
+              <td>Tracks lifecycle state of design-intent items</td>
+              <td><code>&lt;!-- STATUS: &lt;value&gt; | &lt;plan-id&gt; | &lt;date&gt; --&gt;</code></td>
+              <td>Post-skill (agent proposes, human confirms)</td>
+            </tr>
+            <tr>
+              <td><code>INCORPORATED</code></td>
+              <td>Records absorption of research findings into design</td>
+              <td><code>&lt;!-- INCORPORATED: &lt;plan-id&gt; | &lt;date&gt; --&gt;</code></td>
+              <td>Post-skill after research findings are acted upon</td>
+            </tr>
+            <tr>
+              <td><code>DECISION_APPEND</code></td>
+              <td>Appends DDR-shaped decision entries to the Decisions section</td>
+              <td><code>### D-NNN: &lt;title&gt;</code> with Context, Decision, Consequences</td>
+              <td><code>/research</code> step 9b or <code>/design</code> Phase C</td>
+            </tr>
+            <tr>
+              <td><code>CHANGELOG_APPEND</code></td>
+              <td>Appends timestamped entries to the CHANGELOG section</td>
+              <td>Table row: <code>| &lt;date&gt; | &lt;action&gt; | &lt;source&gt; |</code></td>
+              <td>Post-skill after marker flips or design changes</td>
+            </tr>
+            <tr>
+              <td><code>REQ_TRACED_BY</code></td>
+              <td>Annotates REQ markers with traceability links to implementing plans</td>
+              <td><code>&lt;!-- REQ-TYPE-NNN | traced_by: &lt;value&gt; --&gt;</code></td>
+              <td>Post-skill after plan implementation traces to a REQ</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>STATUS: Lifecycle State Machine</h3>
+
+        <p>
+          The <code>STATUS</code> marker is an inline HTML comment placed
+          immediately before a section heading. It is invisible in rendered
+          Markdown but machine-parseable by agent tooling. The state machine
+          enforces a strict progression:
+        </p>
+
+        <pre><code>proposed  →  implemented  →  established  →  superseded</code></pre>
+
+        <p>
+          Each transition requires a plan ID and date. Regressions (such as
+          <code>established → implemented</code>) are rejected by the script.
+          A STATUS marker in context looks like this:
+        </p>
+
+        <pre><code>&lt;!-- STATUS: implemented | plan-000178 | 2026-04-02 --&gt;
+### Platform Purpose</code></pre>
+
+        <p>
+          Legacy uppercase markers (<code>STATUS: IMPLEMENTED</code>) from
+          pre-2.8.3 files are still recognized. When a Phase 3b promotion
+          flip targets a legacy marker, <code>apply_marker.py</code> replaces
+          the line in place rather than stacking a new marker above it.
+        </p>
+
+        <h3>ESTABLISHED: The Promotion Stamp</h3>
+
+        <p>
+          When a human confirms that an <code>implemented</code> item should
+          be promoted to <code>established</code>, two things happen: the
+          STATUS marker is flipped to <code>established</code>, and an
+          ESTABLISHED stamp is applied. The stamp records the promotion event:
+        </p>
+
+        <pre><code>&lt;!-- ESTABLISHED: plan-000178 | 2026-04-02 | v2.8.3 --&gt;</code></pre>
+
+        <p>
+          The version field (<code>vX.Y.Z</code>) is optional. Projects
+          without semantic versioning use the date alone.
+        </p>
+
+        <h3>INCORPORATED: Research Absorption</h3>
+
+        <p>
+          The <code>INCORPORATED</code> marker records that research findings
+          from a specific plan or research log have been absorbed into the
+          design-intent file. It is inserted before the heading of the section
+          that was informed by the research:
+        </p>
+
+        <pre><code>&lt;!-- INCORPORATED: plan-000268 | 2026-04-11 --&gt;
+### Entity Hierarchy</code></pre>
+
+        <h3>DECISION_APPEND and CHANGELOG_APPEND: Structured Entries</h3>
+
+        <p>
+          These two marker types do not modify existing lines -- they append
+          new structured content to designated sections.
+          <code>DECISION_APPEND</code> adds a DDR-shaped decision entry
+          (<code>### D-NNN: Title</code> with Context, Decision, Consequences
+          fields) to the <code>## Decisions</code> section. The D-NNN ID is
+          auto-assigned by scanning existing entries.
+          <code>CHANGELOG_APPEND</code> adds a timestamped row to the
+          <code>## CHANGELOG</code> table.
+        </p>
+      </section>
+
+      <p>
+        The reference above catalogues each marker type and its format. The
+        following section shows how to apply these markers in practice using
+        the <code>apply_marker.py</code> script.
+      </p>
+
+      <section id="using-apply-marker" data-diataxis="how-to">
+        <h2>Using apply_marker.py</h2>
+
+        <p>
+          <code>apply_marker.py</code> is the sole write path for files
+          classified as <code>Human (markers)</code>. Agents that need to
+          update a marker must invoke this script rather than using Edit or
+          Write on the file directly. The companion verifier
+          <code>check_human_markers_only.py</code> rejects any prose
+          mutations that bypass this path.
+        </p>
+
+        <h3>Command-Line Interface</h3>
+
+        <pre><code>python .claude/skills/scripts/apply_marker.py \
+    --file &lt;path&gt; \
+    --id &lt;entry-id&gt; \
+    --marker &lt;kind&gt; \
+    --value &lt;value&gt; \
+    [--plan &lt;plan-id&gt;] \
+    [--date &lt;YYYY-MM-DD&gt;] \
+    [--note &lt;text&gt;] \
+    [--dry-run]</code></pre>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Required</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--file</code></td>
+              <td>Yes</td>
+              <td>Path to the target <code>Human (markers)</code> file</td>
+            </tr>
+            <tr>
+              <td><code>--id</code></td>
+              <td>Yes</td>
+              <td>Entry ID or section heading to locate (e.g., <code>"Platform Purpose"</code> or <code>"D-001"</code>)</td>
+            </tr>
+            <tr>
+              <td><code>--marker</code></td>
+              <td>Yes</td>
+              <td>Marker kind: <code>STATUS</code>, <code>ESTABLISHED</code>, <code>INCORPORATED</code>, <code>DECISION_APPEND</code>, <code>CHANGELOG_APPEND</code>, or <code>REQ_TRACED_BY</code></td>
+            </tr>
+            <tr>
+              <td><code>--value</code></td>
+              <td>Conditional</td>
+              <td>Marker value (e.g., <code>implemented</code> for STATUS, entry text for DECISION_APPEND). Required for STATUS, CHANGELOG_APPEND, DECISION_APPEND, and REQ_TRACED_BY; ignored by stamp-kind markers (ESTABLISHED, INCORPORATED)</td>
+            </tr>
+            <tr>
+              <td><code>--plan</code></td>
+              <td>Depends</td>
+              <td>Plan ID (required for ESTABLISHED and INCORPORATED; recommended for STATUS)</td>
+            </tr>
+            <tr>
+              <td><code>--date</code></td>
+              <td>No</td>
+              <td>Date in <code>YYYY-MM-DD</code> format (defaults to today in UTC)</td>
+            </tr>
+            <tr>
+              <td><code>--note</code></td>
+              <td>No</td>
+              <td>Optional annotation text</td>
+            </tr>
+            <tr>
+              <td><code>--dry-run</code></td>
+              <td>No</td>
+              <td>Preview the change without writing to disk</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>The Confirmation Flow</h3>
+
+        <p>
+          Before invoking <code>apply_marker.py</code>, the agent must ask
+          the designer for confirmation using <code>AskUserQuestion</code>.
+          This is not optional -- it is the human-in-the-loop governance
+          check that ensures no lifecycle state change happens without
+          explicit designer approval. The flow is:
+        </p>
+
+        <ol>
+          <li>The agent identifies that a marker write is needed (e.g., post-skill detects a plan step was completed).</li>
+          <li>The agent presents the proposed change via <code>AskUserQuestion</code>: which file, which entry, which marker, which value.</li>
+          <li>The designer confirms or rejects.</li>
+          <li>On confirmation, the agent runs <code>apply_marker.py</code> with the agreed parameters.</li>
+        </ol>
+
+        <h3>Examples</h3>
+
+        <h4>Marking a section as implemented</h4>
+
+        <pre><code>python .claude/skills/scripts/apply_marker.py \
+    --file product-design/product-design-as-intended.md \
+    --id "Platform Purpose" \
+    --marker STATUS \
+    --value implemented \
+    --plan plan-000178</code></pre>
+
+        <p>
+          This inserts <code>&lt;!-- STATUS: implemented | plan-000178 |
+          2026-07-15 --&gt;</code> immediately before the
+          <code>### Platform Purpose</code> heading.
+        </p>
+
+        <h4>Recording research incorporation</h4>
+
+        <pre><code>python .claude/skills/scripts/apply_marker.py \
+    --file product-design/product-design-as-intended.md \
+    --id "Entity Hierarchy" \
+    --marker INCORPORATED \
+    --plan plan-000268</code></pre>
+
+        <h4>Appending a decision entry</h4>
+
+        <pre><code>python .claude/skills/scripts/apply_marker.py \
+    --file product-design/product-design-as-intended.md \
+    --id "_" \
+    --marker DECISION_APPEND \
+    --value "Use HTML-only output for product topology
+**Context**: Mermaid cannot support persona-filter or roadmap-lane views.
+**Decision**: Adopt HTML as the canonical topology deliverable.
+**Consequences**: No Mermaid dependency; requires custom rendering logic." \
+    --plan plan-000200</code></pre>
+
+        <p>
+          The <code>--id</code> parameter is ignored for
+          <code>DECISION_APPEND</code> -- the script auto-assigns the next
+          <code>D-NNN</code> ID by scanning existing entries in the
+          <code>## Decisions</code> section.
+        </p>
+
+        <h4>Previewing a change</h4>
+
+        <p>
+          Add <code>--dry-run</code> to any command to see what would be
+          written without modifying the file. The script prints the marker
+          line and target location, then exits without writing.
+        </p>
+      </section>
+
+      <p>
+        With the practical mechanics established, the following section
+        explains why markers are structured this way and what role they play
+        in SEJA's governance model.
+      </p>
+
+      <section id="markers-as-designed-signification" data-diataxis="explanation">
+        <h2>Markers as Designed Signification</h2>
+
+        <p>
+          Markers in SEJA are not arbitrary metadata tags. They are a
+          designed signification system -- a set of conventionalized
+          expression-content pairs where each marker type carries a specific,
+          governance-relevant meaning. This is a deliberate application of
+          the semiotic engineering concept of signification systems, where
+          signs are designed to convey particular meanings within a particular
+          context of use.
+        </p>
+
+        <p>
+          The <code>STATUS</code> marker signifies where a design-intent
+          item stands in its lifecycle: has it been proposed, built, confirmed
+          by the designer, or superseded? The <code>INCORPORATED</code>
+          marker signifies that external knowledge (research findings) has
+          been absorbed into the design layer. The <code>DECISION_APPEND</code>
+          marker signifies that a new design decision -- with its rationale,
+          consequences, and rejected alternatives -- has been formally
+          recorded.
+        </p>
+
+        <p>
+          The <code>Human (markers)</code> file classification enforces the
+          boundary between these structured signs and free-form prose. In a
+          file classified as <code>Human (markers)</code>, the designer
+          writes all narrative content -- the descriptions, rationale, and
+          design intent. The agent writes only lifecycle markers, and only
+          through <code>apply_marker.py</code>. This is constitution
+          principle T2 in action: the boundary preserves the distinction
+          between design intent (human-authored) and implementation state
+          (agent-maintained).
+        </p>
+
+        <p>
+          The practical consequence is that markers serve as an audit trail.
+          Every STATUS flip, every INCORPORATED stamp, every DECISION_APPEND
+          entry records which plan triggered it and when. A designer reviewing
+          <code>product-design-as-intended.md</code> can trace any lifecycle
+          change back to the plan that caused it. The signification is not
+          just labeling -- it is accountable record-keeping.
+        </p>
+
+        <p>
+          For the theoretical foundations of signification systems and their
+          role in SEJA's design, see
+          <a href="../foundations/software-as-communication.html#designers-deputy">Software as Designed Communication</a>.
+        </p>
+      </section>
+
+      <section id="common-mistakes" data-diataxis="how-to">
+        <h2>Common Mistakes</h2>
+
+        <dl>
+          <dt>Writing markers by hand instead of via apply_marker.py</dt>
+          <dd>
+            Manually typing a <code>&lt;!-- STATUS: implemented | ... --&gt;</code>
+            comment into a design-intent file bypasses format validation,
+            transition-rule enforcement, and the audit trail.
+            <code>check_human_markers_only.py</code> will flag the write as
+            a prose mutation during post-skill. Always use
+            <code>apply_marker.py</code> -- it validates the marker format
+            against allowed regular expressions, checks that the state
+            transition is permitted, and records the plan ID for traceability.
+          </dd>
+
+          <dt>Using STATUS markers on non-design files</dt>
+          <dd>
+            STATUS markers belong on entries within files registered in the
+            As-Intended / As-Coded Registry in
+            <code>product-design/conventions.md</code> -- specifically, the
+            as-intended files like
+            <code>product-design/product-design-as-intended.md</code>.
+            Applying STATUS markers to arbitrary Markdown files, plans, or
+            output artifacts has no governance effect: the marker tooling
+            does not track those files, and the promote workflow
+            (<code>/explain drift --promote</code>) will not find them.
+          </dd>
+
+          <dt>Confusing <code>implemented</code> with <code>established</code></dt>
+          <dd>
+            <code>implemented</code> means the item has been built -- a plan
+            executed it, and the code exists. <code>established</code> means
+            the designer has reviewed the implementation, confirmed it matches
+            intent, and promoted it via <code>/explain drift --promote</code>.
+            The distinction matters: an <code>implemented</code> item is
+            still subject to review and may be revised. An
+            <code>established</code> item is confirmed as the accepted
+            design-to-code mapping. Skipping the promotion step leaves the
+            design layer in a permanently provisional state.
+          </dd>
+
+          <dt>Skipping the AskUserQuestion confirmation</dt>
+          <dd>
+            Running <code>apply_marker.py</code> without first asking the
+            designer for confirmation violates the human-in-the-loop
+            governance model. The confirmation step is not ceremony -- it is
+            the moment where the designer exercises authority over what gets
+            recorded as the lifecycle state of their design intent. An agent
+            that writes markers autonomously is making governance decisions
+            on the designer's behalf, which undermines constitution
+            principle T2.
+          </dd>
+        </dl>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 2: The Design Layer</h2>
+    <ol>
+      <li>
+        <a href="metacommunication.html">The Metacommunication Message</a>
+      </li>
+      <li>
+        <a href="constitution-guide.html">The Constitution</a>
+      </li>
+      <li>
+        <a href="design-intent-files.html">Design Intent Files</a>
+      </li>
+      <li aria-current="page">
+        <a href="marker-system.html">The Marker System</a>
+        <ul>
+          <li><a href="#marker-types">Marker Types</a></li>
+          <li><a href="#using-apply-marker">Using apply_marker.py</a></li>
+          <li><a href="#markers-as-designed-signification">Markers as Designed Signification</a></li>
+          <li><a href="#common-mistakes">Common Mistakes</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="ux-research.html">UX Research Artifacts</a>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="design-intent-files.html">Previous: Design Intent Files</a>
+    <a href="ux-research.html">Next: UX Research Artifacts</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

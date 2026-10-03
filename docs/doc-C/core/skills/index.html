@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="Skills Core landing page: the how-to guides for every SEJA lifecycle skill — research, explain, design, plan, implement, critique, document, communicate, reflect, publish, seja-setup, onboard, pending, qa-log, and help.">
+  <title>Skills — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/skills category landing) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Skills</h1>
+      <p>The how-to guides &mdash; one page per lifecycle skill, from investigating a change through to shipping and reflecting on it.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li aria-current="page">Skills</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge core-skills">skills</span>
+          <span class="badge diataxis-howto">how-to</span>
+        </p>
+
+        <section aria-labelledby="understand-intend">
+          <h2 id="understand-intend">Understand and intend</h2>
+          <p>Investigate what you are about to change and fix the intent before you touch code.</p>
+          <dl>
+            <dt><a href="research.html">Research</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Answer questions about the codebase, architecture, or design decisions, logging each Q&amp;A pair &mdash; and, with <code>--inventory</code>, catalog codebase elements matching a pattern.</dd>
+
+            <dt><a href="explain.html">Explain</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Explain behavior, code, data model, architecture, or spec drift with visual diagrams and analogies; <code>/explain drift</code> reconciles design specs with the as-coded state.</dd>
+
+            <dt><a href="design.html">Design</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Define or update the project design &mdash; stack, conventions, domain model, conceptual design, and standards &mdash; when intent needs to change.</dd>
+
+            <dt><a href="plan.html">Plan</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Build a plan to add a feature, fix a bug, or refactor, breaking the work into structured steps; supports metacommunication framing for design-intent briefs.</dd>
+          </dl>
+        </section>
+
+        <section aria-labelledby="build-validate">
+          <h2 id="build-validate">Build and validate</h2>
+          <p>Execute the plan, put it through the quality gates, and produce the material that goes out with it.</p>
+          <dl>
+            <dt><a href="implement.html">Implement</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Execute a previously generated plan across auto, manual, and roadmap modes to add a feature, fix a bug, or refactor.</dd>
+
+            <dt><a href="critique.html">Critique</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Run the quality gates: validation, code review, smoke tests, preflight, and harness health, with stack filtering and a <code>--depth</code> override.</dd>
+
+            <dt><a href="document.html">Document</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Generate or update user and developer documentation from plan <code>Docs:</code> fields, auto-detection, or an explicit type selection.</dd>
+
+            <dt><a href="communicate.html">Communicate</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Generate stakeholder communication material tailored to a specific audience segment, in Markdown, HTML, or both.</dd>
+          </dl>
+        </section>
+
+        <section aria-labelledby="deliver-manage">
+          <h2 id="deliver-manage">Deliver and manage</h2>
+          <p>Ship the release, manage the harness and the team around it, and keep the workspace honest.</p>
+          <dl>
+            <dt><a href="reflect.html">Reflect</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Reflect on specific plans, research reports, or other artifacts &mdash; on the product built or the practice used &mdash; recording your words verbatim.</dd>
+
+            <dt><a href="publish.html">Publish</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Cut a tagged release and push it to the public SEJA repository via the automated publish pipeline, with a <code>--dry-run</code> preview.</dd>
+
+            <dt><a href="seja-setup.html">Seja-setup</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Manage the harness: install into a new or existing codebase, finalise an in-place download, create a companion workspace, bootstrap a demo, or upgrade harness files.</dd>
+
+            <dt><a href="onboard.html">Onboard</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Generate a tailored onboarding plan for a new team member based on their role family and expertise level.</dd>
+
+            <dt><a href="pending.html">Pending</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>List and address outstanding human actions from the pending ledger: verify implementations, flip status markers, run periodic curation, and manage deferred work.</dd>
+
+            <dt><a href="qa-log.html">Qa-log</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Log the entire current question-and-answer session into a file for future reference.</dd>
+
+            <dt><a href="help.html">Help</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Show contextual help, browse skills by category, or get details on a specific skill.</dd>
+          </dl>
+        </section>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="../../index.html#core">Core</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/skills category landing) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

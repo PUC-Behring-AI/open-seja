@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How to add a review perspective to the SEJA harness: the Essential/Standard/Deep tier system, the two-stage loading protocol, the perspective file itself, registration in the index and shortcut table, and regenerating the Essential summary.">
+  <title>Adding a Review Perspective &mdash; SEJA Documentation</title>
+  <!-- CSS depth: 2 (tracks/architect sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Adding a Review Perspective</h1>
+      <p>The tier system, the two-stage load, the file to write, and the three places it must be registered.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#tracks">Tracks</a></li>
+        <li><a href="index.html">Architect</a></li>
+        <li aria-current="page">Adding a Review Perspective</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge track-architect">Architect</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="what-a-perspective-is">
+          <h2 id="what-a-perspective-is">What you are adding</h2>
+          <p>
+            A review perspective is a named lens with a checklist behind it. The
+            harness ships sixteen &mdash; eleven engineering (security, performance,
+            database, API design, architecture, developer experience,
+            internationalization, testability, operations, compatibility, data
+            integrity and privacy) and five design (user experience, accessibility,
+            visual design, responsive design, microinteractions).
+          </p>
+          <p>
+            Together they replace ad-hoc "simulate a council of reviewers"
+            instructions with a structured, deterministic sweep: every applicable
+            perspective is evaluated and recorded as <strong>Adopted</strong>
+            (evaluated, concerns addressed), <strong>Deferred</strong> (evaluated,
+            not addressed, with stated reason and trade-offs), or <strong>N/A</strong>
+            (does not apply). Adding one means adding a lens that the existing sixteen
+            genuinely do not cover &mdash; not a re-cut of an existing one.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="the-tier-system">
+          <h2 id="the-tier-system">The tier system</h2>
+          <p>
+            Each perspective file is split into three tiers, and every question inside
+            carries a priority marker from <code>[P0]</code> (critical) to
+            <code>[P4]</code> (informational), sorted by priority within its tier.
+          </p>
+          <dl>
+            <dt>Essential &mdash; P0</dt>
+            <dd>
+              Critical, blocking questions. Always evaluated. Loaded for a
+              <code>standard</code> context budget or whenever the perspective appears
+              in the default shortlist.
+            </dd>
+            <dt>Standard &mdash; P1 to P2</dt>
+            <dd>
+              Questions for a thorough review. Loaded for a <code>heavy</code> context
+              budget, or when this perspective is the primary focus.
+            </dd>
+            <dt>Deep &mdash; P3 to P4</dt>
+            <dd>
+              Exhaustive analysis. Optional unless the perspective is the primary
+              focus of the review.
+            </dd>
+          </dl>
+          <p>
+            The tiering is what makes the perspective set affordable. Under time or
+            context pressure a reviewer works P0 and P1 first and the structure tells
+            it where to stop &mdash; so write your P0 questions as the ones whose "no"
+            answer should block a release, not merely inform it.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="two-stage-loading">
+          <h2 id="two-stage-loading">The two-stage loading protocol</h2>
+          <p>
+            No consumer bulk-loads all sixteen files. Instead:
+          </p>
+          <ol>
+            <li>
+              Load the compact <strong>index</strong> &mdash; tag, name, and scope for
+              each perspective, and nothing else.
+            </li>
+            <li>
+              Select four to six perspectives, either from the
+              <strong>Perspective Shortcuts by Plan Prefix</strong> table or manually
+              from the change's content.
+            </li>
+            <li>
+              Load <strong>only the selected</strong> perspective files, and within
+              each only the tiers the depth calls for.
+            </li>
+          </ol>
+          <p>
+            This is why the index entry you write matters as much as the checklist:
+            a scope line that does not name the concrete artifacts your perspective
+            applies to will not get your perspective selected, and an unselected
+            perspective is an unread one.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="writing-the-file">
+          <h2 id="writing-the-file">Writing the perspective file</h2>
+          <p>
+            Create <code>.claude/references/general/review-perspectives/&lt;tag&gt;.md</code>,
+            where <code>&lt;tag&gt;</code> is the lowercase form of the perspective's
+            short tag. The file opens with YAML frontmatter carrying two fields:
+          </p>
+          <dl>
+            <dt><code>designer_description</code></dt>
+            <dd>
+              First-person, designer-facing. States what the reviewer will watch for
+              when looking through this lens and what class of failure it catches.
+            </dd>
+            <dt><code>tier</code></dt>
+            <dd>
+              The perspective's own baseline tier, e.g. <code>Essential</code>.
+            </dd>
+          </dl>
+          <p>
+            The body is an <code>&lt;h1&gt;</code> naming the tag and full name,
+            followed by exactly three <code>## Essential</code>,
+            <code>## Standard</code>, and <code>## Deep</code> sections of
+            priority-marked bullet questions. Keep every entry a
+            <em>question</em>: the status vocabulary is an answer to a question, and a
+            bullet phrased as an assertion has nothing for a reviewer to answer.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="registering-it">
+          <h2 id="registering-it">Registering it in three places</h2>
+          <p>
+            The file alone is inert. A perspective becomes reachable only once it is
+            registered:
+          </p>
+          <ol>
+            <li>
+              <strong>The index</strong> &mdash;
+              <code>review-perspectives-index.md</code>. Add a row to the Engineering
+              or Design table with the tag, name, and scope. This is the table the
+              two-stage protocol reads at stage one.
+            </li>
+            <li>
+              <strong>The main reference</strong> &mdash;
+              <code>review-perspectives.md</code>. Add the tag to the corresponding
+              perspective table, linking the new file.
+            </li>
+            <li>
+              <strong>The shortcut table</strong> &mdash; the
+              <em>Perspective Shortcuts by Plan Prefix</em> section of the same file.
+              Add your tag to the prefix-and-scope rows where it should be selected by
+              default. A perspective absent from every shortcut row will only ever be
+              picked manually.
+            </li>
+          </ol>
+          <p>
+            Then regenerate the Essential summary. The condensed
+            <code>review-perspectives-essential-summary.md</code> is
+            <strong>generated, not hand-edited</strong> &mdash; it walks every
+            perspective file, extracts the Essential section, and writes the combined
+            P0 layer so a reviewer can load it as one reference instead of sixteen.
+            Run:
+          </p>
+          <pre><code>python .claude/skills/scripts/generate_essential_perspectives_summary.py</code></pre>
+          <p>
+            Skipping this step leaves a summary that silently omits your perspective's
+            P0 questions from every consumer that loads the condensed layer.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="conflict-rules">
+          <h2 id="conflict-rules">Where your perspective sits in a conflict</h2>
+          <p>
+            Perspectives regularly pull a review in opposite directions, so the
+            reference fixes the precedence rather than leaving it to the reviewer's
+            mood. Security wins by default unless the designer explicitly accepts the
+            risk. Accessibility is non-negotiable and is never traded against visual
+            design or performance. Every other trade-off must be
+            <em>documented</em> &mdash; both the chosen approach and the deferred
+            concern, with rationale &mdash; and genuinely unclear conflicts are put to
+            the designer rather than resolved silently.
+          </p>
+          <p>
+            When adding a perspective, decide up front whether it claims any
+            precedence. If it does not, say so; an unstated precedence claim surfaces
+            later as an inconsistent review.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="sourced-from">
+          <h2 id="sourced-from">Sourced from</h2>
+          <p>
+            This page was written from the harness files below. When any of them
+            changes, re-check this page against it &mdash; this list is the freshness
+            work-list for this chapter.
+          </p>
+          <ul>
+            <li><code>.claude/references/general/review-perspectives.md</code></li>
+            <li><code>.claude/references/general/review-perspectives-index.md</code></li>
+            <li><code>.claude/references/general/review-perspectives/dx.md</code> (file shape)</li>
+            <li><code>.claude/skills/scripts/generate_essential_perspectives_summary.py</code></li>
+            <li><code>.claude/agents/code-reviewer.md</code> (depth gating in practice)</li>
+          </ul>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="../../core/concepts/review-perspectives.html">Review Perspectives</a> &mdash; what the perspective system is and why it is shaped this way.</li>
+            <li><a href="../../core/reference/perspectives.html">Review Perspectives reference</a> &mdash; the current sixteen, tag by tag.</li>
+            <li><a href="modifying-enforcement-rules.html">Modifying Enforcement Rules</a> &mdash; the automated half of the same quality surface.</li>
+            <li><a href="index.html">Architect Track</a> &mdash; back to the track gate.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Architect Track</a>
+        <a href="../../core/reference/index.html">Reference</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (tracks/architect sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

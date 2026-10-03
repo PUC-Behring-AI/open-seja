@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="The layered enforcement that keeps SEJA governance honest: the immutable constitution, path-scoped constraints and section boundaries, the deferred-action pending ledger, and the guardrail scripts that check each layer at commit time.">
+  <title>Enforcement Layers — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/concepts sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Enforcement Layers</h1>
+      <p>How SEJA holds its rules in place: an immutable core, path-scoped constraints, a deferred-work ledger, and automated guardrails.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Concepts</a></li>
+        <li aria-current="page">Enforcement Layers</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-explanation">explanation</span>
+          <span class="badge core-concepts">concepts</span>
+        </p>
+
+        <section data-diataxis="explanation" aria-labelledby="defence-in-depth">
+          <h2 id="defence-in-depth">Governance in depth</h2>
+          <p>
+            SEJA does not rely on a single gate to keep an AI agent inside the
+            rules. It layers enforcement so that a lapse at one level is caught by
+            the next. The layers run from the most abstract and unchanging &mdash;
+            the constitution &mdash; down to concrete automated checks that either
+            pass or fail a commit. Each layer answers a different question:
+            <em>what may never change</em>, <em>who may write where</em>,
+            <em>what still needs a human</em>, and <em>did the last change break a
+            rule</em>. This page describes the four layers and how they compose.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="the-constitution">
+          <h2 id="the-constitution">Layer 1: the constitution (immutable)</h2>
+          <p>
+            At the top sits <code>product-design/constitution.md</code>, the
+            project's immutable principles. It is a pinned anchor: it must survive
+            any context compaction and may never be summarised or dropped. The
+            pre-skill <code>constitution</code> stage reads it and injects it into
+            every skill invocation, so its principles govern the rest of the work
+            unconditionally. Because it is loaded first and cannot be abbreviated,
+            an agent cannot quietly reason its way around a constitutional
+            commitment; the principle is always present in context.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="constraints-and-boundaries">
+          <h2 id="constraints-and-boundaries">Layer 2: constraints and section boundaries</h2>
+          <p>
+            Below the constitution are two reference files that spell out concrete
+            rules. <code>general/permissions.md</code> declares which actions an
+            agent may take without asking &mdash; read any project file, run
+            <code>git status</code> / <code>log</code> / <code>diff</code>, create
+            source files, append into the output directory &mdash; and which it may
+            never take: it must never use <code>Edit</code> or <code>Write</code>
+            on a file classified <em>Human (markers)</em>.
+            <code>general/constraints.md</code> adds the behavioural guardrails:
+            UTF-8 only, no invented data, no nondeterministic behaviour unless
+            asked, no placeholder implementations, and no silent feature creep in
+            auto or bypass mode.
+          </p>
+          <p>
+            These rules are <strong>path-scoped</strong>. A permission or
+            constraint applies to a file because of what that file is &mdash; its
+            maintainer classification, its directory, its registered section. Two
+            kinds of scoping matter most:
+          </p>
+          <dl>
+            <dt>Maintainer classification</dt>
+            <dd>
+              Human (markers) files may be touched only through
+              <code>apply_marker.py</code>; the classification, not a per-file
+              switch, is what forbids a direct edit.
+            </dd>
+            <dt>Section boundaries</dt>
+            <dd>
+              The as-coded file carries several H2 domain sections, and a skill
+              may write only to the section it owns. A section-boundary verifier
+              rejects a hunk that reaches across into a section the invocation had
+              no business editing.
+            </dd>
+          </dl>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="the-pending-ledger">
+          <h2 id="the-pending-ledger">Layer 3: the pending ledger (deferred-action tracking)</h2>
+          <p>
+            Not everything can be enforced synchronously. Some obligations must
+            wait for a human &mdash; verify that an implementation matches its
+            intent, run a manual test, publish a tag, flip a marker. The pending
+            ledger (<code>_output/pending.jsonl</code>, driven by
+            <code>pending.py</code>) is the layer that keeps those deferred actions
+            from being dropped on the floor. It is an append-only JSONL log: skills
+            and post-skill append records, and a last-write-wins reducer derives
+            the current state of each action.
+          </p>
+          <p>
+            Each entry has a type (for example <code>verify-as-coded</code>,
+            <code>test-implementation</code>, <code>update-documentation</code>, or
+            <code>implement</code>) and a lifecycle: <em>pending</em>,
+            <em>snoozed</em>, <em>done</em>, or <em>dismissed</em>. The reducer
+            forbids illegal transitions &mdash; a <em>dismissed</em> or
+            <em>done</em> action cannot silently return to <em>pending</em>. The
+            pre-skill <code>pending-check</code> stage surfaces overdue actions as
+            an informational banner at the start of the next invocation, so the
+            backlog stays visible without ever blocking work. A periodic-curation
+            pass ages out stale entries and dismisses orphans whose source plan has
+            been deleted or completed.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="guardrail-scripts">
+          <h2 id="guardrail-scripts">Layer 4: guardrail scripts (automated checks)</h2>
+          <p>
+            The bottom layer is the set of scripts that turn the rules above into
+            pass/fail checks at commit time. They are where enforcement stops being
+            a principle and becomes a gate.
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>Representative guardrail scripts and the layer they enforce.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Guardrail</th>
+                  <th scope="col">Enforces</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row"><code>apply_marker.py</code></th>
+                  <td>The sole write path for Human (markers) files; validates every marker line against an allowed regex and legal state transition before touching the file.</td>
+                </tr>
+                <tr>
+                  <th scope="row"><code>check_human_markers_only.py</code></th>
+                  <td>Rejects any non-marker prose mutation that slips into a Human (markers) file during the post-skill commit.</td>
+                </tr>
+                <tr>
+                  <th scope="row"><code>check_section_boundary_writes.py</code></th>
+                  <td>Rejects a change that writes outside the H2 section an invocation is allowed to edit.</td>
+                </tr>
+                <tr>
+                  <th scope="row"><code>run_all_checks.py</code></th>
+                  <td>The CI-independent orchestrator that discovers and runs every check script with unified exit codes.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Together the four layers give governance in depth: the constitution
+            states what is inviolable, constraints and boundaries scope who may
+            write where, the pending ledger tracks what a human still owes, and the
+            guardrail scripts verify that the last commit honoured all of it. No
+            single layer is trusted alone.
+          </p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="constitution.html">The Constitution</a> &mdash; the immutable principles the enforcement layers protect.</li>
+            <li><a href="marker-system.html">The Marker System</a> &mdash; the operational mechanics of the marker guardrail.</li>
+            <li><a href="sign-system.html">The Sign System</a> &mdash; the file classifications that give the constraints their scope.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Concepts</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/concepts sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="What the SEJA constitution is, why its principles take precedence over everything else, how pre-skill loads it on every invocation, and the trust boundaries it establishes.">
+  <title>The Constitution — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/concepts sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>The Constitution</h1>
+      <p>The highest-authority artifact, loaded before all others, that fixes the harness's trust boundaries.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Concepts</a></li>
+        <li aria-current="page">The Constitution</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-explanation">explanation</span>
+          <span class="badge core-concepts">concepts</span>
+        </p>
+
+        <section data-diataxis="explanation" aria-labelledby="what-the-constitution-is">
+          <h2 id="what-the-constitution-is">What the constitution is</h2>
+          <p>
+            The constitution (<code>product-design/constitution.md</code>) is the set
+            of a project's <strong>immutable principles</strong> &mdash; the
+            non-negotiable commitments that every skill and agent must observe. For
+            SEJA itself, those commitments span design authority, epistemic posture,
+            privacy, lifecycle discipline, artifact integrity, and authorship voice.
+            It is organised into Technical, Quality, Security, and Compliance
+            principles, each stated with its rationale.
+          </p>
+          <p>
+            The constitution is not a wish list or a style guide; it is the artifact
+            that other artifacts must not contradict. Its opening line states the
+            rule plainly: rules here take precedence over everything else. No plan or
+            implementation step may override a principle without an explicit,
+            designer-approved decision record.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="the-immutability-guarantee">
+          <h2 id="the-immutability-guarantee">The immutability guarantee</h2>
+          <p>
+            &ldquo;Immutable&rdquo; here means <em>immutable-by-default</em>, not
+            literally unwritable. The guarantee has two parts. First,
+            <strong>precedence</strong>: when any other reference, plan, or
+            instruction conflicts with the constitution, the constitution wins.
+            Design intent is authoritative, and the constitution and the
+            metacommunication message are the highest-authority artifacts in the
+            project.
+          </p>
+          <p>
+            Second, <strong>controlled amendment</strong>: the constitution can be
+            changed, but only through a deliberate governance act &mdash; the change
+            must be explicitly approved by the project lead and recorded in the
+            constitution's own changelog. It cannot be edited casually in the course
+            of ordinary work. Because the file is human-authored, agents read it but
+            do not rewrite it; they treat its principles as fixed constraints for the
+            duration of every invocation.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="how-it-is-loaded">
+          <h2 id="how-it-is-loaded">How it is loaded</h2>
+          <p>
+            Precedence is only meaningful if the principles are actually present in
+            the agent's context. The harness guarantees this structurally:
+            <strong>pre-skill reads and injects the constitution on every
+            invocation</strong>. It is the last stage of the pre-skill pipeline, and
+            conceptually it is loaded <em>first</em> in authority &mdash; before
+            conventions or any other reference file &mdash; so its rules frame
+            everything that follows.
+          </p>
+          <p>
+            The constitution is also a <strong>pinned anchor</strong>: it must
+            survive any context compaction. If a session's context is summarised or
+            truncated, the constitution must be re-injected verbatim and must never
+            be abbreviated. Dropping it would let an agent bypass the very governance
+            rules the harness exists to enforce, so it is treated as non-compactable
+            alongside the permission and constraint references and the active skill's
+            instructions.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="trust-boundaries">
+          <h2 id="trust-boundaries">The trust boundaries it establishes</h2>
+          <p>
+            The constitution's principles draw the harness's <em>trust
+            boundaries</em> &mdash; the lines an agent may not cross without explicit
+            human authorisation. Four are worth naming:
+          </p>
+          <ul>
+            <li>
+              <strong>Lifecycle discipline</strong> (T1). Every user-facing skill
+              starts with pre-skill and ends with post-skill; a skill may opt out of
+              non-critical stages but may never skip pre-skill entirely. Bypassing the
+              lifecycle defeats the governance model.
+            </li>
+            <li>
+              <strong>Design-intent integrity</strong> (T2, Q1). Human (markers) files
+              receive prose only from the designer; agents write only lifecycle
+              markers, through <code>apply_marker.py</code>, after confirmation. Design
+              intent is authoritative &mdash; no step may silently override it.
+            </li>
+            <li>
+              <strong>Artifact integrity</strong> (T3). Generated artifacts are
+              agent-maintained and never hand-edited, so the machine-readable record
+              cannot diverge from the harness's validation.
+            </li>
+            <li>
+              <strong>Privacy and hook integrity</strong> (S1, S2). Private content
+              must never reach the public mirror without explicit opt-in, and no step
+              may circumvent the pre-commit hook without a recorded, designer-approved
+              decision.
+            </li>
+          </ul>
+          <p>
+            These boundaries are enforced, not merely stated: the principles are
+            loaded into every agent context via pre-skill, and violations found during
+            <code>/critique</code> are classified as blocking &mdash; they must be
+            resolved before commit.
+          </p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="enforcement-layers.html">Enforcement Layers</a> &mdash; how the constitution's boundaries are enforced in practice.</li>
+            <li><a href="as-intended-as-coded.html">As-Intended and As-Coded</a> &mdash; the two-spec model that the authoritative-intent principle governs.</li>
+            <li><a href="sign-system.html">The Sign System</a> &mdash; the file classifications the constitution's integrity principles rest on.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Concepts</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/concepts sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="2">
+  <meta name="doc-chapter" content="1">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+
+  <title>The Metacommunication Message -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 2: The Design Layer</a></li>
+      <li>The Metacommunication Message</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>The Metacommunication Message</h1>
+
+      <p>
+        At the apex of the SEJA design layer sits a single artifact: your
+        <strong>metacommunication message</strong>. It is a first-person
+        statement, written by you the designer and addressed to the person
+        who will use what you build -- and, in a SEJA project, delivered
+        <em>through</em> the agent that builds it. Everything else in the
+        design layer -- the constitution, the design-intent files, the marker
+        system, the UX research artifacts -- exists to keep the software
+        accountable to this one message. This chapter explains what the
+        metacommunication message is and why it holds the highest authority,
+        walks you through writing one with the Extended Metacommunication
+        Template as <code>/design</code> actually presents it, states the
+        first-person phrasing rule and why it matters, and closes with a
+        worked example.
+      </p>
+
+      <!-- Section 1: What the metacommunication message is -->
+      <section data-diataxis="explanation" id="what-it-is">
+        <h2>What the Metacommunication Message Is</h2>
+
+        <p>
+          SEJA is grounded in <strong>Semiotic Engineering</strong>, a theory
+          of human-computer interaction developed by Clarisse Sieckenius de
+          Souza (<em>The Semiotic Engineering of Human-Computer Interaction</em>,
+          de Souza 2005). Its central claim reframes what a piece of software
+          <em>is</em>: not a tool that happens to have an interface, but a
+          <strong>one-shot message from the designer to the user</strong>.
+          Every screen, default, error text, and affordance is part of a single
+          communicative act in which you tell the user who you think they are,
+          what you have understood they want to do, and how you have designed
+          the system to help them do it. Because you are not present at
+          interaction time, this message must carry itself -- it speaks on your
+          behalf when you are not in the room.
+        </p>
+
+        <p>
+          The <strong>metacommunication message</strong> is the explicit,
+          distilled form of that designer-to-user message. Semiotic Engineering
+          summarizes its content as: <em>"Here is my understanding of who you
+          are, what I've learned you want or need to do, in which preferred
+          ways, and why. This is the system that I have therefore designed for
+          you, and this is the way you can or should use it in order to fulfill
+          a range of purposes that fall within this vision."</em> In most
+          software this message is <em>implicit</em> -- it is scattered across
+          the UI and never written down. SEJA's move is to make it
+          <strong>explicit</strong>: a structured artifact you author directly,
+          recorded in <code>product-design/product-design-as-intended.md</code>
+          (its global form lives in section 11, "Global Metacommunication
+          Vision").
+        </p>
+
+        <h3>Delivered Through the Agent</h3>
+
+        <p>
+          A SEJA project adds one twist to the classic picture. In ordinary
+          software the message travels from designer to user through the
+          finished interface. In a SEJA project it travels through a second
+          party first: the <strong>agent</strong> that plans and implements the
+          system reads your metacommunication message and is bound by it.
+          Making the message explicit is what lets it be loaded into every
+          agent context, validated against what was actually built, and cited
+          in the rationale of every plan. The agent becomes a faithful relay of
+          your intent rather than an author of intent in its own right.
+        </p>
+
+        <h3>Why It Sits at the Apex</h3>
+
+        <p>
+          The metacommunication message is the <strong>highest-authority
+          artifact</strong> in the design layer. Every other design and
+          implementation decision is ultimately accountable to it. This is not
+          a stylistic claim -- it is operational:
+        </p>
+
+        <ul>
+          <li>
+            <strong>It grounds the design-intent files.</strong> The
+            per-feature intentions and the guiding-question answers that fill
+            <code>product-design/product-design-as-intended.md</code> all trace
+            back to the global vision expressed in the message.
+          </li>
+          <li>
+            <strong>It is what drift is measured against.</strong> When
+            <code>/critique</code> or <code>/explain drift</code> compares
+            as-coded against as-intended, the metacommunication message is the
+            anchor: has the system drifted away from what you said you were
+            building for whom?
+          </li>
+          <li>
+            <strong>It is the top of the accountability chain.</strong> The
+            constitution (see <a href="ch2-constitution.html">Chapter 2</a>)
+            names the Designer/Agent boundary as SEJA's core governance
+            invariant precisely so that the metacommunication message stays
+            authoritative -- if the agent could freely overwrite design intent,
+            the message would cease to mean anything.
+          </li>
+        </ul>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> "Authoritative but not immutable." The apex
+            position does not mean the message is frozen. SEJA's epistemic
+            posture expects you to revisit it as your understanding of your
+            users evolves. What the apex position <em>does</em> mean is that no
+            plan or implementation may silently contradict it -- a change to the
+            message is a design act, made by you, not a side effect of coding.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 2: Writing one with the EMT -->
+      <section data-diataxis="how-to" id="writing-one">
+        <h2>Writing One: The Extended Metacommunication Template</h2>
+
+        <p>
+          You write your metacommunication message inside <code>/design</code>.
+          There are two moments where <code>/design</code> captures it, and a
+          deeper questionnaire -- the <strong>Extended Metacommunication
+          Template (EMT)</strong> -- that expands the short message into a
+          structured design rationale. This section walks through all three as
+          they actually appear in the skill.
+        </p>
+
+        <h3>Step 1: The short message (Section 0)</h3>
+
+        <p>
+          The very first thing <code>/design</code>'s questionnaire asks
+          (Section 0, <code>metacomm-message</code>, question 0.1) is your
+          metacommunication message -- an optional 1&ndash;3 sentence statement
+          from you (the designer) speaking directly to your future user. It is
+          asked first for a reason: an agent filling in the rest of the
+          questionnaire will <strong>extract</strong> your project name,
+          description, target user type, and primary use case from this answer,
+          then offer them as suggested defaults for later questions. Answering
+          it well up front reduces how much of the questionnaire you have to
+          fill from scratch.
+        </p>
+
+        <p>
+          The template's own worked example for question 0.1 reads:
+          <em>"I know you are a busy researcher who needs to track your
+          experiments across projects. Therefore, I have designed a lightweight
+          experiment tracking platform that lets you log runs, compare results,
+          and share findings with your team."</em>
+        </p>
+
+        <h3>Step 2: The fallback (Final Step)</h3>
+
+        <p>
+          Section 0 is optional. If you skip it -- and did not already supply a
+          message at invocation -- <code>/design</code> returns to it as the
+          <strong>Final Step</strong> of the questionnaire, after every other
+          section is answered. This is deliberate: by then the agent has enough
+          material to <em>compose a recommended message for you</em>, inferred
+          from your earlier answers, and present it. You then choose one of
+          three responses:
+        </p>
+
+        <dl>
+          <dt>Accept</dt>
+          <dd>
+            The message is recorded as-is. The agent appends a note recording
+            that it was generated by the design agent during the session, so
+            the provenance is never lost.
+          </dd>
+
+          <dt>Edit</dt>
+          <dd>
+            You modify the message; the agent records your edited version
+            verbatim. No generation note is appended -- once you touch it, it is
+            your words.
+          </dd>
+
+          <dt>Reject and skip</dt>
+          <dd>
+            No metacommunication message is recorded; the field is left blank.
+          </dd>
+        </dl>
+
+        <p>
+          If you supplied a message at invocation (in the initial prompt, in a
+          spec file, or via a <code>--framing metacomm</code> brief), the agent
+          reuses it verbatim as the Section 0.1 answer and skips the Final Step
+          entirely.
+        </p>
+
+        <h3>Step 3: Deepen it with the EMT guiding questions (Section 12)</h3>
+
+        <p>
+          The short message states the design vision; the <strong>Extended
+          Metacommunication Template</strong> makes you argue for it. The EMT
+          is a set of guiding questions organized by the four stages of the
+          design lifecycle, and its answers are recorded in section 12 of
+          <code>product-design/product-design-as-intended.md</code>. Its
+          defining feature is that it asks not only what you <em>know</em> but
+          what you <strong>do not yet know</strong> -- the epistemic humility
+          that runs through SEJA. The four stages are:
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Stage</th>
+              <th>Focus</th>
+              <th>Representative guiding questions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1. Analysis</td>
+              <td>Understanding needs; defining requirements</td>
+              <td>
+                What do I know or <em>not</em> know about you, and how? About
+                affected others? About the intended and other anticipated
+                contexts of use? What ethical questions does what I have
+                learned raise?
+              </td>
+            </tr>
+            <tr>
+              <td>2. Design</td>
+              <td>What I designed and why</td>
+              <td>
+                What have I designed for you? Which of your goals does it
+                support? In what contexts do I intend or accept you will use it?
+                How should you use it? For what purposes do I <em>not</em> want
+                you to use it? What ethical principles influenced my decisions?
+              </td>
+            </tr>
+            <tr>
+              <td>3. Prototyping, implementation &amp; formative evaluation</td>
+              <td>How the build supports the vision</td>
+              <td>
+                How have I built the system to support my design vision? What
+                have I built in to prevent undesirable uses and consequences,
+                and to identify and remedy unanticipated negative effects? What
+                ethical scenarios did I use to evaluate it?
+              </td>
+            </tr>
+            <tr>
+              <td>4. Continuous, post-deployment evaluation &amp; monitoring</td>
+              <td>Living with the system after release</td>
+              <td>
+                How will I keep learning about how you actually use the system,
+                and how will I fold that learning back into the design intent?
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          You do not have to answer every EMT question in one sitting, and the
+          "I don't yet know" answers are first-class -- leaving one honestly
+          unresolved is preferable to inventing a confident answer. The EMT is
+          covered in theoretical depth in Vol.5;
+          see <a href="../vol5/ch3-extended-metacommunication-template.html">Vol.&nbsp;5,
+          Chapter 3</a>.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> If your project already has design intent and
+            you only want to revisit the message, you do not need to re-run the
+            whole questionnaire. Invoke <code>/design update metacomm</code> --
+            <code>/design</code> jumps straight to the metacommunication update
+            flow and leaves your other sections untouched.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 3: The I/you phrasing rule -->
+      <section data-diataxis="explanation" id="i-you-phrasing">
+        <h2>The "I / You" Phrasing Rule</h2>
+
+        <p>
+          Every metacommunication message -- in templates, project files, plans,
+          briefs, per-feature logs, and EMT answers -- <strong>must</strong> use
+          first-person <em>"I"</em> for the designer and second-person
+          <em>"you"</em> for the user. This is a non-negotiable rule in the
+          harness. You never write "the designer", "the system", or "the user";
+          you never fall back on passive voice or the imperative mood.
+        </p>
+
+        <p>
+          The difference is not cosmetic. Compare:
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Do write (I / you)</th>
+              <th>Do not write</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                "I designed a postpone shortcut for you because I know you tend
+                to over-schedule."
+              </td>
+              <td>
+                "The designer provides a postpone shortcut." (third-person,
+                designer erased)
+              </td>
+            </tr>
+            <tr>
+              <td>
+                "I want you to be able to reschedule a task in one keystroke,
+                because I've learned you work under time pressure."
+              </td>
+              <td>
+                "Enforce privacy with minimal friction." (imperative; no
+                designer, no user, no <em>why</em>)
+              </td>
+            </tr>
+            <tr>
+              <td>
+                "I know you are a busy researcher, so I have designed a
+                lightweight tracker for you."
+              </td>
+              <td>
+                "The system tracks experiments for users." (passive; the
+                communicative act disappears)
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Why the rule matters: Semiotic Engineering treats the designer as a
+          <strong>communicator</strong> who is personally present in the
+          artifact. The "I / you" phrasing keeps a live person on both ends of
+          the message -- an "I" who takes responsibility for the design and a
+          "you" whose goals it answers to. Third-person and passive voice quietly
+          delete one or both. "The system does X" hides the fact that
+          <em>you</em> decided X; the imperative "do X" gives an instruction
+          with no reason and no addressee. Because SEJA's whole value depends on
+          design intent being authored by a named human and answerable to a
+          named user, the harness enforces the grammar that keeps both visible.
+        </p>
+
+        <p>
+          A companion constraint travels with the phrasing rule: the
+          <strong>verbatim rule</strong>. When you provide a metacommunication
+          message as input, the agent must record it <em>exactly as written</em>,
+          without summarization or editing. Your precise wording carries
+          intentional nuance, and paraphrasing distorts design intent. Between
+          the two rules, the message stays yours: your grammar, your words.
+        </p>
+      </section>
+
+      <!-- Section 4: Worked example -->
+      <section data-diataxis="reference" id="worked-example">
+        <h2>A Worked Example</h2>
+
+        <p>
+          The following is an <strong>illustrative example</strong> for a small
+          hypothetical project -- a neighbourhood tool-lending library app. It is
+          not a real SEJA project; it exists only to show the shape of a short
+          "I want you to&hellip;" message that obeys the phrasing rule.
+        </p>
+
+        <aside>
+          <p>
+            <strong>Example metacommunication message &mdash; "Borrow Bin"
+            (hypothetical)</strong>
+          </p>
+          <p>
+            I know you are a neighbour who owns a few tools you rarely use and
+            occasionally needs one you don't own, and that you'd rather lend to
+            people nearby than let things gather dust. I want you to be able to
+            list a tool in under a minute, find a tool someone near you is
+            offering, and arrange a hand-off without exchanging phone numbers or
+            money &mdash; so I have designed Borrow Bin to keep every listing
+            local, every request one tap, and every lender's address hidden
+            until you both agree to meet. I don't yet know how you prefer to
+            handle a tool that comes back broken, so for now I've left that to a
+            simple message between you and the borrower rather than pretending I
+            have a fair rule.
+          </p>
+        </aside>
+
+        <p>
+          Notice what the example does. It opens with <em>who you are</em> ("I
+          know you are a neighbour who&hellip;"), states <em>what I want you to
+          do</em> in concrete terms ("list a tool in under a minute&hellip;"),
+          says <em>what I therefore designed and why</em> ("so I have designed
+          Borrow Bin to&hellip;"), and -- in the SEJA spirit -- names one thing
+          <em>I don't yet know</em> rather than papering over it. Every clause
+          keeps an "I" and a "you" in view; there is no "the system", no passive
+          voice, no bare imperative.
+        </p>
+
+        <p>
+          A message this size is enough to seed Section 0 of
+          <code>/design</code>: an agent could extract the project name ("Borrow
+          Bin"), a description (a local tool-lending app), the target user (a
+          neighbour with tools to share), and the primary use case (listing and
+          borrowing tools locally) as suggested defaults for the rest of the
+          questionnaire.
+        </p>
+      </section>
+
+      <!-- See-also cross-volume links -->
+      <nav aria-label="see also" class="see-also">
+        <h2>See Also</h2>
+        <ul>
+          <li>
+            <a href="../vol5/ch1-software-as-designed-communication.html">Vol.&nbsp;5,
+            Ch.&nbsp;1: Software as Designed Communication</a> &mdash; the
+            Semiotic Engineering theory behind treating software as a
+            designer-to-user message.
+          </li>
+          <li>
+            <a href="../vol5/ch3-extended-metacommunication-template.html">Vol.&nbsp;5,
+            Ch.&nbsp;3: The Extended Metacommunication Template</a> &mdash; the
+            EMT guiding questions in theoretical depth.
+          </li>
+          <li>
+            <a href="ch2-constitution.html">Vol.&nbsp;2, Ch.&nbsp;2: The
+            Constitution</a> &mdash; how the Designer/Agent boundary keeps the
+            metacommunication message authoritative.
+          </li>
+          <li>
+            <a href="ch3-design-intent-files.html">Vol.&nbsp;2, Ch.&nbsp;3: The
+            Design-Intent Files</a> &mdash; where the message and its EMT answers
+            are recorded.
+          </li>
+        </ul>
+      </nav>
+
+    </article>
+  </main>
+
+  <!-- Chapter navigation: Ch.1 omits Previous -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="ch2-constitution.html">Next: The Constitution</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

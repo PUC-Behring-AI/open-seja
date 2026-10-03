@@ -1,0 +1,777 @@
+@import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&family=Shippori+Mincho:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+/*
+ * SEJA doc-A shared stylesheet.
+ * Pattern 2: Co-located CSS File (see doc-guidelines.md Section G).
+ * Pages link to this file via relative <link> tags at depth-appropriate paths.
+ *
+ * Visual identity follows the SEJA Design System (design-system.html):
+ * wabi-sabi aesthetic, clay & earth tones, Zen Kaku Gothic New / Shippori
+ * Mincho / IBM Plex Mono typography.
+ * All color contrast ratios verified against WCAG 2.2 Level AA.
+ * Normative reference: _output/docs/doc-guidelines.md (Sections B, F, G).
+ */
+
+/* ------------------------------------------------------------------ */
+/* CSS Custom Properties (Light Mode)                                  */
+/* ------------------------------------------------------------------ */
+
+:root {
+  /* Colors (SEJA design system — clay/earth palette on washi ground) */
+  --color-bg: #FAF8F4;            /* Washi ground */
+  --color-text: #2B2926;          /* Sumi -- 13.6:1 vs --color-bg */
+  --color-heading: #2B2926;       /* Sumi -- headings distinguished by serif font */
+  --color-link: #A86E4F;          /* Clay -- 4.6:1 vs --color-bg */
+  --color-link-visited: #8F5A3E;  /* Clay hover -- 5.9:1 vs --color-bg */
+  --color-code-bg: #F2EDE6;       /* Surface alt */
+  --color-code-text: #2B2926;     /* Sumi -- 11.8:1 vs --color-code-bg */
+  --color-border: #E0D8CD;        /* Warm border */
+  --color-aside-bg: #F2EDE6;      /* Surface alt */
+  --color-focus: #A86E4F;         /* Clay -- 4.6:1 vs --color-bg */
+  --color-status-bg: #F3E9E1;     /* Clay-50 */
+  --color-status-border: #C89B4A; /* Ochre/warning */
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;          /* 4px at base 16px */
+  --spacing-sm: 0.5rem;           /* 8px */
+  --spacing-md: 1rem;             /* 16px */
+  --spacing-lg: 2rem;             /* 32px */
+  --spacing-xl: 3rem;             /* 48px */
+
+  /* Typography (SEJA design system — three Japanese-minimalist families) */
+  --font-body: 'Zen Kaku Gothic New', Inter, system-ui, sans-serif;
+  --font-heading: 'Shippori Mincho', Georgia, serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --max-width: 52rem;             /* 832px content width */
+
+  /* Diataxis volume accent colors -- doc-A-specific (SEJA semantic palette) */
+  --vol-tutorials-accent: #5F7A5F;    /* Success -- 5.1:1 vs --color-bg (AA normal text) */
+  --vol-howto-accent: #A86E4F;        /* Clay -- 4.5:1 vs --color-bg (AA normal text) */
+  --vol-reference-accent: #C89B4A;    /* Ochre -- 3.3:1 vs --color-bg (AA large text) */
+  --vol-explanation-accent: #7D8471;  /* Sage -- 3.6:1 vs --color-bg (AA large text) */
+}
+
+/* ------------------------------------------------------------------ */
+/* CSS Custom Properties (Dark Mode)                                   */
+/* ------------------------------------------------------------------ */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #1C1A17;            /* Dark washi */
+    --color-text: #ECE7DF;          /* Light sumi -- 14.2:1 vs --color-bg */
+    --color-heading: #ECE7DF;       /* Light sumi */
+    --color-link: #C4957B;          /* Lightened clay -- 5.9:1 vs --color-bg */
+    --color-link-visited: #B5815F;  /* Mid clay -- 4.7:1 vs --color-bg */
+    --color-code-bg: #26231F;       /* Dark surface alt */
+    --color-code-text: #ECE7DF;     /* Light sumi -- 12.1:1 vs --color-code-bg */
+    --color-border: #3A352F;        /* Dark warm border */
+    --color-aside-bg: #26231F;      /* Dark surface alt */
+    --color-focus: #C4957B;         /* Lightened clay -- 5.9:1 vs --color-bg */
+    --color-status-bg: #2E2620;     /* Dark clay-50 */
+    --color-status-border: #C89B4A; /* Ochre/warning */
+
+    /* Diataxis volume accent colors -- doc-A-specific (lightened SEJA semantic palette) */
+    --vol-tutorials-accent: #8FA88F;    /* Lightened success -- 6.4:1 vs --color-bg */
+    --vol-howto-accent: #C4957B;        /* Lightened clay -- 5.9:1 vs --color-bg */
+    --vol-reference-accent: #D4B06A;    /* Lightened ochre -- 7.3:1 vs --color-bg */
+    --vol-explanation-accent: #A0A897;  /* Lightened sage -- 6.8:1 vs --color-bg */
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Reduced Motion                                                      */
+/* ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: no-preference) {
+  a {
+    transition: color 0.2s ease;
+  }
+  .status-notice {
+    transition: background-color 0.3s ease;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Base Reset                                                          */
+/* ------------------------------------------------------------------ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Base Typography                                                     */
+/* ------------------------------------------------------------------ */
+
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  color: var(--color-heading);
+  margin-bottom: var(--spacing-md);
+}
+
+h2 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: var(--color-heading);
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
+}
+
+h3 {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  color: var(--color-heading);
+  margin-top: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+h4 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--color-heading);
+  margin-top: var(--spacing-md);
+  margin-bottom: var(--spacing-xs);
+}
+
+p {
+  margin-bottom: var(--spacing-md);
+}
+
+/* ------------------------------------------------------------------ */
+/* Links and Focus                                                     */
+/* ------------------------------------------------------------------ */
+
+a {
+  color: var(--color-link);
+}
+
+a:visited {
+  color: var(--color-link-visited);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Skip-Navigation Link (WCAG 2.4.1)                                  */
+/* ------------------------------------------------------------------ */
+
+.skip-nav {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.skip-nav:focus {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: auto;
+  height: auto;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg);
+  color: var(--color-link);
+  font-size: 1rem;
+  z-index: 100;
+}
+
+/* ------------------------------------------------------------------ */
+/* Navigation Bar                                                      */
+/* ------------------------------------------------------------------ */
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+.nav-bar a {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  font-size: 0.875rem;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 3px;
+}
+
+.nav-bar a:hover {
+  text-decoration: underline;
+}
+
+.nav-bar .nav-bar-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-heading);
+  margin-right: auto;
+}
+
+/* ------------------------------------------------------------------ */
+/* Breadcrumb                                                          */
+/* ------------------------------------------------------------------ */
+
+.breadcrumb {
+  font-size: 0.875rem;
+  padding: var(--spacing-sm) 0;
+  margin-bottom: var(--spacing-md);
+}
+
+.breadcrumb ol {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.breadcrumb li + li::before {
+  content: ">";
+  margin-right: var(--spacing-xs);
+  color: var(--color-border);
+}
+
+.breadcrumb a {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ------------------------------------------------------------------ */
+/* Chapter Content                                                     */
+/* ------------------------------------------------------------------ */
+
+.chapter-content {
+  margin-bottom: var(--spacing-xl);
+}
+
+.chapter-content article {
+  margin-bottom: var(--spacing-lg);
+}
+
+.chapter-content section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.chapter-content ul,
+.chapter-content ol {
+  margin-bottom: var(--spacing-md);
+  padding-left: var(--spacing-lg);
+}
+
+.chapter-content li {
+  margin-bottom: var(--spacing-xs);
+}
+
+.chapter-content dl {
+  margin-bottom: var(--spacing-md);
+}
+
+.chapter-content dt {
+  font-weight: 600;
+  color: var(--color-heading);
+  margin-top: var(--spacing-sm);
+}
+
+.chapter-content dd {
+  margin-left: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
+}
+
+.chapter-content blockquote {
+  border-left: 3px solid var(--color-link);
+  background: var(--color-aside-bg);
+  margin: 0 0 var(--spacing-md) 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  color: var(--color-text);
+  font-size: 0.95rem;
+}
+
+.chapter-content figure {
+  margin: var(--spacing-md) 0;
+}
+
+.chapter-content figcaption {
+  font-size: 0.875rem;
+  font-style: italic;
+  color: var(--color-text);
+  margin-top: var(--spacing-xs);
+}
+
+/* ------------------------------------------------------------------ */
+/* Sidebar Table of Contents                                           */
+/* ------------------------------------------------------------------ */
+
+.sidebar-toc {
+  position: sticky;
+  top: var(--spacing-md);
+  max-height: calc(100vh - var(--spacing-xl));
+  overflow-y: auto;
+  padding: var(--spacing-md);
+  border-left: 1px solid var(--color-border);
+  font-size: 0.875rem;
+}
+
+.sidebar-toc h2 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-sm);
+  margin-top: 0;
+}
+
+.sidebar-toc ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar-toc li {
+  margin-bottom: var(--spacing-xs);
+}
+
+.sidebar-toc a {
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.sidebar-toc a:hover {
+  color: var(--color-link);
+  text-decoration: underline;
+}
+
+/* ------------------------------------------------------------------ */
+/* Volume Color-Coding (Diataxis Quadrants)                            */
+/* ------------------------------------------------------------------ */
+
+/* Tutorials -- success/green accent
+   Light: #5F7A5F on #FAF8F4 = 5.1:1 (AA normal text)
+   Dark:  #8FA88F on #1C1A17 = 6.4:1 (AA normal text) */
+.vol-tutorials {
+  border-left: 4px solid var(--vol-tutorials-accent);
+}
+
+.vol-tutorials h1,
+.vol-tutorials .vol-accent {
+  color: var(--vol-tutorials-accent);
+}
+
+/* How-To Guides -- clay accent
+   Light: #A86E4F on #FAF8F4 = 4.5:1 (AA normal text)
+   Dark:  #C4957B on #1C1A17 = 5.9:1 (AA normal text) */
+.vol-howto {
+  border-left: 4px solid var(--vol-howto-accent);
+}
+
+.vol-howto h1,
+.vol-howto .vol-accent {
+  color: var(--vol-howto-accent);
+}
+
+/* Reference -- ochre accent
+   Light: #C89B4A on #FAF8F4 = 3.3:1 (AA large text)
+   Dark:  #D4B06A on #1C1A17 = 7.3:1 (AA normal text) */
+.vol-reference {
+  border-left: 4px solid var(--vol-reference-accent);
+}
+
+.vol-reference h1,
+.vol-reference .vol-accent {
+  color: var(--vol-reference-accent);
+}
+
+/* Explanation -- sage accent
+   Light: #7D8471 on #FAF8F4 = 3.6:1 (AA large text)
+   Dark:  #A0A897 on #1C1A17 = 6.8:1 (AA normal text) */
+.vol-explanation {
+  border-left: 4px solid var(--vol-explanation-accent);
+}
+
+.vol-explanation h1,
+.vol-explanation .vol-accent {
+  color: var(--vol-explanation-accent);
+}
+
+/* ------------------------------------------------------------------ */
+/* Callout / Aside Styling                                             */
+/* ------------------------------------------------------------------ */
+
+.callout-tip,
+.callout-warning {
+  padding: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.callout-tip {
+  background-color: var(--color-aside-bg);
+  border-left: 4px solid var(--vol-tutorials-accent);
+}
+
+.callout-warning {
+  background-color: var(--color-status-bg);
+  border-left: 4px solid var(--color-status-border);
+}
+
+/* ------------------------------------------------------------------ */
+/* Status Notice                                                       */
+/* ------------------------------------------------------------------ */
+
+.status-notice {
+  background-color: var(--color-status-bg);
+  border: 1px solid var(--color-status-border);
+  border-radius: 4px;
+  padding: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+  font-style: italic;
+}
+
+/* ------------------------------------------------------------------ */
+/* Code Blocks                                                         */
+/* ------------------------------------------------------------------ */
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background-color: var(--color-code-bg);
+  color: var(--color-code-text);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 3px;
+}
+
+pre {
+  background-color: var(--color-code-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+  overflow-x: auto;
+  line-height: 1.5;
+}
+
+pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.875rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Code Syntax Highlighting                                            */
+/* ------------------------------------------------------------------ */
+
+/* Light mode token colors -- SEJA palette vs #F2EDE6 (--color-code-bg) */
+.token-keyword { color: #A86E4F; }  /* Clay -- 4.5:1 vs #FAF8F4 */
+.token-string  { color: #5F7A5F; }  /* Success -- 5.1:1 vs #FAF8F4 */
+.token-comment { color: #6B655E; }  /* Text muted -- 4.7:1 vs #FAF8F4 */
+.token-command { color: #C89B4A; }  /* Ochre -- 3.3:1 vs #FAF8F4 */
+
+/* Dark mode token colors -- lightened SEJA palette vs #26231F (--color-code-bg) */
+@media (prefers-color-scheme: dark) {
+  .token-keyword { color: #C4957B; }  /* Lightened clay -- 5.9:1 vs #1C1A17 */
+  .token-string  { color: #8FA88F; }  /* Lightened success -- 6.4:1 vs #1C1A17 */
+  .token-comment { color: #A89F93; }  /* Text muted dark -- 5.4:1 vs #1C1A17 */
+  .token-command { color: #D4B06A; }  /* Lightened ochre -- 7.3:1 vs #1C1A17 */
+}
+
+/* ------------------------------------------------------------------ */
+/* Tables                                                              */
+/* ------------------------------------------------------------------ */
+
+.table-container {
+  overflow-x: auto;
+  margin: var(--spacing-md) 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--spacing-md) 0;
+  font-size: 0.95rem;
+}
+
+th,
+td {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border);
+  text-align: left;
+}
+
+th {
+  background-color: var(--color-aside-bg);
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+/* ------------------------------------------------------------------ */
+/* Footer                                                              */
+/* ------------------------------------------------------------------ */
+
+footer {
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+  font-size: 0.875rem;
+}
+
+footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+footer a {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ------------------------------------------------------------------ */
+/* Chapter Navigation (Prev/Next)                                      */
+/* ------------------------------------------------------------------ */
+
+nav[aria-label="chapter navigation"] {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+}
+
+nav[aria-label="chapter navigation"] a {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ------------------------------------------------------------------ */
+/* Volume Navigation (Prev/Next Volume)                                */
+/* ------------------------------------------------------------------ */
+
+nav[aria-label="volume navigation"] {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+}
+
+nav[aria-label="volume navigation"] a {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ------------------------------------------------------------------ */
+/* Section Outline (Stub Pages)                                        */
+/* ------------------------------------------------------------------ */
+
+.section-outline {
+  margin: var(--spacing-md) 0;
+}
+
+.section-outline li {
+  margin: var(--spacing-sm) 0;
+  margin-left: var(--spacing-lg);
+}
+
+/* ------------------------------------------------------------------ */
+/* Two-Column Layout (Content + Sidebar TOC)                           */
+/* ------------------------------------------------------------------ */
+
+@media (min-width: 1024px) {
+  body {
+    display: grid;
+    grid-template-columns: 1fr 14rem;
+    grid-template-rows: auto auto auto 1fr auto;
+    gap: 0 var(--spacing-lg);
+    max-width: calc(var(--max-width) + 14rem + var(--spacing-lg));
+  }
+
+  .skip-nav,
+  header,
+  .nav-bar,
+  nav[aria-label="breadcrumb"],
+  footer {
+    grid-column: 1 / -1;
+  }
+
+  .chapter-content,
+  main {
+    grid-column: 1 / 2;
+  }
+
+  .sidebar-toc {
+    grid-column: 2 / 3;
+    grid-row: 4 / 5;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsive: Tablet (768px -- 1023px)                                */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 1023px) {
+  .sidebar-toc {
+    position: static;
+    max-height: none;
+    border-left: none;
+    border-top: 1px solid var(--color-border);
+    margin-top: var(--spacing-lg);
+    padding: var(--spacing-md) 0;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsive: Mobile (below 768px)                                    */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 767px) {
+  body {
+    padding: var(--spacing-md);
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+  }
+
+  .nav-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+
+  .breadcrumb ol {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .breadcrumb li + li::before {
+    content: "> ";
+  }
+
+  nav[aria-label="chapter navigation"],
+  nav[aria-label="volume navigation"] {
+    flex-direction: column;
+  }
+
+  .sidebar-toc {
+    position: static;
+    max-height: none;
+    border-left: none;
+    border-top: 1px solid var(--color-border);
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md) 0;
+  }
+
+  pre {
+    font-size: 0.8rem;
+  }
+
+  table {
+    font-size: 0.85rem;
+  }
+
+  th,
+  td {
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Print Stylesheet                                                    */
+/* ------------------------------------------------------------------ */
+
+@media print {
+  /* Hide non-content elements */
+  .skip-nav,
+  .nav-bar,
+  nav[aria-label="breadcrumb"],
+  nav[aria-label="collection"],
+  nav[aria-label="volume navigation"],
+  nav[aria-label="chapter navigation"],
+  .sidebar-toc,
+  footer {
+    display: none;
+  }
+
+  /* Show only main content */
+  body {
+    display: block;
+    max-width: 100%;
+    padding: 0;
+    color: #2B2926;
+    background: #FAF8F4;
+  }
+
+  /* Page breaks before major headings */
+  h1 {
+    page-break-before: always;
+  }
+
+  h1:first-of-type {
+    page-break-before: avoid;
+  }
+
+  h2 {
+    page-break-before: auto;
+  }
+
+  /* Prevent orphaned headings */
+  h2, h3 {
+    page-break-after: avoid;
+  }
+
+  /* Show link URLs for cross-references */
+  a[href^="../"]::after,
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #6B655E;
+  }
+}

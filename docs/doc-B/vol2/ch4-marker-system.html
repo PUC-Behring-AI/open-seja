@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="2">
+  <meta name="doc-chapter" content="4">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+
+  <title>The Marker System -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 2: The Design Layer</a></li>
+      <li>The Marker System</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>The Marker System</h1>
+
+      <p>
+        A design-intent file is a shared document. The designer writes prose
+        into it; the agent needs to record, later, that a given item was built,
+        promoted, or superseded. Those two hands must never collide. The marker
+        system is how SEJA keeps them separate: a small vocabulary of
+        fixed-format HTML comments that the agent may write into otherwise
+        human-owned files, applied through a single controlled tool
+        (<code>apply_marker.py</code>) and verified by a companion checker. This
+        chapter documents the marker types, the tool that applies them, the
+        classification scheme that decides who may touch which file, and the
+        deeper reason the whole arrangement is a designed <em>signification
+        system</em> rather than an ad-hoc convention.
+      </p>
+
+      <!-- Section 1: Marker Types (reference) -->
+      <section data-diataxis="reference" id="marker-types">
+        <h2>Marker Types</h2>
+
+        <p>
+          SEJA defines six marker kinds. Three are lifecycle stamps that live
+          immediately above a heading or entry (<code>STATUS</code>,
+          <code>ESTABLISHED</code>, <code>INCORPORATED</code>); two are append
+          operations that add a new line or entry to a dedicated section
+          (<code>CHANGELOG_APPEND</code>, <code>DECISION_APPEND</code>); and one
+          annotates an existing requirement marker in place with the plan that
+          traced it (<code>REQ_TRACED_BY</code>). Every
+          one of them is a machine-parseable HTML comment or structured line --
+          invisible in rendered Markdown, but readable by the harness tooling.
+          The canonical definitions live in
+          <code>.claude/references/general/shared-definitions.md</code>; the
+          allowed values and regexes are enforced by
+          <code>human_markers_registry.ALLOWED_MARKERS</code>.
+        </p>
+
+        <h3>STATUS</h3>
+
+        <p>
+          The <code>STATUS</code> marker tracks where an as-intended item sits
+          in its lifecycle. It is an HTML comment placed on the line
+          immediately before the section heading (or decision entry) it
+          governs. The current scheme (SEJA 2.8.0+) uses lowercase values
+          driven by a state machine:
+        </p>
+
+        <pre><code>&lt;!-- STATUS: proposed | plan-NNNNNN | YYYY-MM-DD --&gt;
+### Section Title</code></pre>
+
+        <p>
+          The allowed values are <code>proposed</code>,
+          <code>implemented</code>, <code>established</code>, and
+          <code>superseded</code>. Transitions are validated -- the five
+          legal transitions are <code>proposed &rarr; implemented</code>,
+          <code>proposed &rarr; superseded</code>,
+          <code>implemented &rarr; established</code>,
+          <code>implemented &rarr; superseded</code>, and
+          <code>established &rarr; superseded</code> (the two
+          <code>&rarr; superseded</code> shortcuts cover early abandonment).
+          Regression
+          (for example <code>established &rarr; implemented</code>) is
+          rejected. The plan ID and date are optional for the initial
+          <code>proposed</code> state and required thereafter. A legacy
+          uppercase <code>STATUS: IMPLEMENTED</code> marker (pre-2.8.0) remains
+          valid; the tool normalizes it to <code>implemented</code> so that a
+          promotion <em>replaces</em> the legacy line rather than stacking a new
+          marker above it.
+        </p>
+
+        <h3>ESTABLISHED</h3>
+
+        <p>
+          The <code>ESTABLISHED</code> stamp records that a human has confirmed
+          the promotion of an implemented item -- an audit record that the
+          designer, not the agent, owns the decision to establish. It carries a
+          required plan ID and a date, with an optional semantic version:
+        </p>
+
+        <pre><code>&lt;!-- ESTABLISHED: plan-NNNNNN | YYYY-MM-DD | vX.Y.Z --&gt;</code></pre>
+
+        <p>
+          Projects without semver use the date-only form
+          (<code>&lt;!-- ESTABLISHED: plan-000178 | 2026-04-02 --&gt;</code>).
+          An <code>ESTABLISHED</code> stamp, once written, must never be
+          removed or altered by an agent -- it is a permanent audit trace.
+        </p>
+
+        <h3>INCORPORATED</h3>
+
+        <p>
+          The <code>INCORPORATED</code> stamp records that an item's content
+          has been absorbed into a downstream artifact by a specific plan. Like
+          <code>ESTABLISHED</code>, it is a stamp kind: it requires a plan ID,
+          accepts an optional <code>--date</code> argument (the emitted marker
+          always carries a date), and is inserted above the target heading
+          rather than replacing an existing marker.
+        </p>
+
+        <pre><code>&lt;!-- INCORPORATED: plan-NNNNNN | YYYY-MM-DD --&gt;</code></pre>
+
+        <h3>CHANGELOG_APPEND</h3>
+
+        <p>
+          <code>CHANGELOG_APPEND</code> adds a single audit line to the file's
+          <code>## CHANGELOG</code> section. The action value must be one of
+          <code>added</code>, <code>revised</code>, <code>revoked</code>, or
+          <code>superseded</code>, and a note is required. The appended line has
+          the shape:
+        </p>
+
+        <pre><code>YYYY-MM-DD | &lt;entry-id&gt; | &lt;action&gt; | &lt;plan-id or -&gt; | &lt;note&gt;</code></pre>
+
+        <p>
+          If no plan ID is supplied, the plan token defaults to <code>-</code>.
+          The line is appended after the last non-empty line of the
+          <code>## CHANGELOG</code> section, leaving all surrounding prose
+          untouched.
+        </p>
+
+        <h3>DECISION_APPEND</h3>
+
+        <p>
+          <code>DECISION_APPEND</code> adds a new DDR-shaped decision entry to
+          the <code>## Decisions</code> section of the design-intent file. The
+          <code>--id</code> argument is ignored for this marker: the next
+          <code>D-NNN</code> identifier is auto-assigned by scanning existing
+          <code>### D-NNN:</code> headings within the <code>## Decisions</code>
+          section. The <code>--value</code> carries the full entry text -- its
+          first line becomes the decision title and the remainder becomes the
+          body (Context, Decision, Consequences). An optional
+          <code>--note</code> appends a source attribution line. The
+          <code>D-NNN</code> namespace is orthogonal to the
+          <code>REQ-TYPE-NNN</code> taxonomy; the two are never intermixed.
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Marker</th>
+              <th>Kind</th>
+              <th>Requires plan</th>
+              <th>Requires value</th>
+              <th>Effect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>STATUS</code></td>
+              <td>Stamp (replaces)</td>
+              <td>Optional (required after <code>proposed</code>)</td>
+              <td>Yes</td>
+              <td>Sets lifecycle state above a heading; validated transitions</td>
+            </tr>
+            <tr>
+              <td><code>ESTABLISHED</code></td>
+              <td>Stamp (inserts)</td>
+              <td>Yes</td>
+              <td>No</td>
+              <td>Audit record of human-confirmed promotion</td>
+            </tr>
+            <tr>
+              <td><code>INCORPORATED</code></td>
+              <td>Stamp (inserts)</td>
+              <td>Yes</td>
+              <td>No</td>
+              <td>Records absorption of an item by a plan</td>
+            </tr>
+            <tr>
+              <td><code>CHANGELOG_APPEND</code></td>
+              <td>Append line</td>
+              <td>Optional</td>
+              <td>Yes (action)</td>
+              <td>Adds an audit line to <code>## CHANGELOG</code></td>
+            </tr>
+            <tr>
+              <td><code>DECISION_APPEND</code></td>
+              <td>Append entry</td>
+              <td>Optional</td>
+              <td>Yes (entry text)</td>
+              <td>Adds a <code>### D-NNN:</code> entry to <code>## Decisions</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> Agents may read markers and propose new
+            <code>implemented</code> STATUS markers (via
+            <code>AskUserQuestion</code> during post-skill). Agents must never
+            remove or alter an existing <code>ESTABLISHED</code> stamp or an
+            established/implemented marker on their own -- these are audit
+            records, and the designer owns the promotion decision.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 2: Using apply_marker.py (how-to) -->
+      <section data-diataxis="how-to" id="applying-markers">
+        <h2>Applying Markers with apply_marker.py</h2>
+
+        <p>
+          <code>apply_marker.py</code> is the sole write path for Human
+          (markers) files. When the agent needs to update a lifecycle marker,
+          it must go through this script rather than using <code>Edit</code> or
+          <code>Write</code> on the file directly. The script rewrites the exact
+          marker line and leaves every other word untouched; the companion
+          verifier <code>check_human_markers_only.py</code> rejects any prose
+          mutation that slips past it.
+        </p>
+
+        <h3>General invocation</h3>
+
+        <p>
+          The script lives at
+          <code>.claude/skills/scripts/apply_marker.py</code>. Its general form
+          is:
+        </p>
+
+        <pre><code>python .claude/skills/scripts/apply_marker.py \
+    --file &lt;path&gt; --id &lt;entry-id&gt; --marker &lt;kind&gt; --value &lt;value&gt; \
+    [--plan &lt;plan-id&gt;] [--date YYYY-MM-DD] [--note &lt;text&gt;] [--dry-run]</code></pre>
+
+        <p>
+          The arguments are:
+        </p>
+
+        <dl>
+          <dt><code>--file</code> (required)</dt>
+          <dd>
+            The target file, repo-relative. It must resolve to a file that is
+            classified as Human (markers); the script refuses to write
+            otherwise.
+          </dd>
+
+          <dt><code>--id</code> (required)</dt>
+          <dd>
+            The entry ID whose heading the marker attaches to (for example a
+            requirement ID or a <code>D-NNN</code> decision ID). Ignored for
+            <code>DECISION_APPEND</code>, which auto-assigns the next ID.
+          </dd>
+
+          <dt><code>--marker</code> (required)</dt>
+          <dd>
+            The marker kind. One of <code>STATUS</code>,
+            <code>ESTABLISHED</code>, <code>INCORPORATED</code>,
+            <code>CHANGELOG_APPEND</code>, <code>DECISION_APPEND</code>, or
+            <code>REQ_TRACED_BY</code>
+            (the choices are drawn from the registry of allowed markers).
+          </dd>
+
+          <dt><code>--value</code></dt>
+          <dd>
+            The marker value. Required for <code>STATUS</code>,
+            <code>CHANGELOG_APPEND</code>, and <code>DECISION_APPEND</code>;
+            ignored by the stamp kinds <code>ESTABLISHED</code> and
+            <code>INCORPORATED</code>.
+          </dd>
+
+          <dt><code>--plan</code></dt>
+          <dd>
+            The plan ID. Accepts the fully-qualified form
+            <code>plan-NNNNNN</code>, a bare 6-digit ID (auto-prefixed with
+            <code>plan-</code>), or the literal <code>manual</code> for
+            human-initiated changes outside the plan workflow.
+          </dd>
+
+          <dt><code>--date</code></dt>
+          <dd>
+            Overrides the date (<code>YYYY-MM-DD</code>). Defaults to today's
+            UTC date.
+          </dd>
+
+          <dt><code>--note</code></dt>
+          <dd>
+            The changelog note text. Required for
+            <code>CHANGELOG_APPEND</code>; optional source attribution for
+            <code>DECISION_APPEND</code>.
+          </dd>
+
+          <dt><code>--dry-run</code></dt>
+          <dd>
+            Prints a unified diff of the intended change without writing the
+            file. Always the safe first step.
+          </dd>
+        </dl>
+
+        <h3>Example: flip a STATUS marker to implemented</h3>
+
+        <p>
+          Preview the change first, then apply it:
+        </p>
+
+        <pre><code>python .claude/skills/scripts/apply_marker.py \
+    --file product-design/product-design-as-intended.md \
+    --id D-001 --marker STATUS --value implemented \
+    --plan plan-000178 --dry-run</code></pre>
+
+        <p>
+          On success (exit code 0) the script prints, for example,
+          <code>applied STATUS=implemented to product-design/product-design-as-intended.md:42</code>.
+          Drop <code>--dry-run</code> to write the change.
+        </p>
+
+        <h3>Example: stamp ESTABLISHED on promotion</h3>
+
+        <pre><code>python .claude/skills/scripts/apply_marker.py \
+    --file product-design/product-design-as-intended.md \
+    --id D-001 --marker ESTABLISHED --plan plan-000178</code></pre>
+
+        <p>
+          The stamp kinds take no <code>--value</code> but require
+          <code>--plan</code>; omitting the plan fails with a validation error.
+        </p>
+
+        <h3>Example: append a CHANGELOG line</h3>
+
+        <pre><code>python .claude/skills/scripts/apply_marker.py \
+    --file product-design/product-design-as-intended.md \
+    --id D-001 --marker CHANGELOG_APPEND --value revised \
+    --plan plan-000178 --note "Reworded consequences after review"</code></pre>
+
+        <h3>Exit codes</h3>
+
+        <p>
+          The script returns <code>0</code> on success, <code>1</code> on
+          validation failure (unknown marker, disallowed transition,
+          unregistered file, missing required argument), and <code>2</code> on a
+          runtime error (for example an unreadable or unwritable file). A
+          disallowed STATUS transition, a missing <code>## Decisions</code> or
+          <code>## CHANGELOG</code> section, or an ambiguous entry ID all
+          surface as validation failures with a clear message.
+        </p>
+      </section>
+
+      <!-- Section 3: Markers as a Signification System (explanation) -->
+      <section data-diataxis="explanation" id="signification-system">
+        <h2>Markers as a Designed Signification System</h2>
+
+        <p>
+          It is tempting to read the marker system as mere bookkeeping -- a set
+          of HTML comments that some scripts happen to parse. But look at what
+          it actually is: a small, closed vocabulary of expressions
+          (<code>STATUS</code>, <code>ESTABLISHED</code>,
+          <code>INCORPORATED</code>, and the two append operations), each paired
+          with a precise content (a lifecycle state, an audit fact, a decision),
+          and each governed by rules about who may produce it and how it may
+          change. That is the definition of a <strong>signification system</strong>:
+          a conventionalized set of expression-content pairs. The marker
+          vocabulary is a designed code, and every marker written into a file is
+          a sign.
+        </p>
+
+        <p>
+          The design choices are not incidental. The lowercase state machine
+          (<code>proposed &rarr; implemented &rarr; established &rarr; superseded</code>)
+          encodes a <em>grammar</em> for the code: not every expression may
+          follow every other. The refusal to let an agent regress or overwrite
+          an <code>ESTABLISHED</code> stamp is a rule about who holds authorship
+          of which signs -- the designer signs off on establishment; the agent
+          may only propose. And the fact that markers are HTML comments,
+          invisible in the rendered document, means the same file carries two
+          layers of communication at once: the prose the designer writes for a
+          human reader, and the marker layer the agent reads and writes for the
+          tooling. The file is a single surface with two audiences.
+        </p>
+
+        <p>
+          This is why the marker system belongs in the design layer and not
+          merely in the toolchain. It is the mechanism by which design intent
+          stays legible over time: a reader (human or agent) can look at any
+          entry and read, from its marker, exactly how far it has travelled from
+          proposal to established fact, and which plan carried it there. The
+          markers make the lifecycle of intent <em>communicable</em> -- readable
+          as a message, not reconstructed by guesswork.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> For the full semiotic-engineering account of
+            why a conventionalized expression-content code is a sign system --
+            and how communicability lets a reader recover intent from such
+            signs -- see
+            <a href="../vol5/ch2-sign-systems-and-communicability.html">Vol.
+            5, Ch. 2: Sign Systems and Communicability</a>.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 4: File Maintainer Classification (reference) -->
+      <section data-diataxis="reference" id="maintainer-classification">
+        <h2>File Maintainer Classification</h2>
+
+        <p>
+          The marker system exists because some files are owned by humans but
+          must still carry agent-written state. The File Maintainer
+          Classification is the four-value scheme that decides, per file, who
+          may write what. It is applied to reference files in
+          <code>product-design/</code> and surfaced as the "Maintained by"
+          column of the Key Files table in
+          <code>product-design/conventions.md</code>. The pivotal value for this
+          chapter is <strong>Human (markers)</strong>: human-authored prose
+          that the agent may annotate only through the fixed-format markers
+          described above, and only via <code>apply_marker.py</code>.
+        </p>
+
+        <div class="table-container">
+          <table class="ref-table">
+            <thead>
+              <tr>
+                <th>Value</th>
+                <th>Meaning</th>
+                <th>Agent rule</th>
+                <th>Enforcement</th>
+                <th>Example file</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Human</strong></td>
+                <td>Authored and updated exclusively by humans.</td>
+                <td>Agents must not write. May read and propose changes via <code>AskUserQuestion</code>.</td>
+                <td>Convention; agent self-restraint.</td>
+                <td><code>constitution.md</code></td>
+              </tr>
+              <tr>
+                <td><strong>Human (markers)</strong></td>
+                <td>Human-authored prose; agent may write fixed-format structured markers only (STATUS flags, ESTABLISHED / INCORPORATED stamps, CHANGELOG / DECISION appends).</td>
+                <td>Agents write only via <code>apply_marker.py</code> after explicit <code>AskUserQuestion</code> confirmation in the same turn. Never prose, never text outside the allowed marker patterns.</td>
+                <td><code>check_human_markers_only.py</code> during post-skill step 6c.</td>
+                <td><code>product-design-as-intended.md</code>, <code>ux-research-results.md</code></td>
+              </tr>
+              <tr>
+                <td><strong>Agent</strong></td>
+                <td>Auto-maintained by agents and skills (e.g., via post-skill).</td>
+                <td>Agents read and write freely. Humans typically do not edit directly.</td>
+                <td>Section-boundary checks where applicable.</td>
+                <td><code>product-design-as-coded.md</code></td>
+              </tr>
+              <tr>
+                <td><strong>Human / Agent</strong></td>
+                <td>Seeded by an agent (e.g., <code>/design</code>), then human-owned; both may update. Also applies to harness source files.</td>
+                <td>Agents may write per the file's own rules; humans are primary curators after seeding.</td>
+                <td>Per-file rules.</td>
+                <td><code>conventions.md</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          The classification is what makes the marker system enforceable rather
+          than merely advisory. <code>apply_marker.py</code> checks the target
+          file against the Human (markers) allowlist before it does anything
+          else -- a write to any file not on that list is refused outright. This
+          closes the loop: only registered files accept markers, and those files
+          accept <em>only</em> markers.
+        </p>
+      </section>
+
+      <!-- Section 5: Common Mistakes (how-to) -->
+      <section data-diataxis="how-to" id="common-mistakes">
+        <h2>Common Mistakes</h2>
+
+        <aside class="callout-warning">
+          <p>
+            <strong>Warning: hand-editing Human (markers) files.</strong> The
+            most common mistake is having the agent open a Human (markers) file
+            -- such as <code>product-design/product-design-as-intended.md</code>
+            or <code>product-design/ux-research-results.md</code> -- and write
+            or flip a marker with <code>Edit</code> or <code>Write</code>
+            directly, instead of going through
+            <code>apply_marker.py</code>.
+          </p>
+          <p>
+            <strong>Consequence:</strong> a direct edit bypasses the state-machine
+            validation (it can stack a duplicate marker, write a disallowed
+            transition, or silently corrupt the prose around the heading).
+            Post-skill step 6c runs <code>check_human_markers_only.py</code> on
+            the staged changes and catches the prose mutation, recommending that
+            the commit be aborted; if the commit proceeds anyway, the pre-commit
+            hook may also flag it.
+          </p>
+          <p>
+            <strong>Avoidance:</strong> always route marker writes through
+            <code>apply_marker.py</code>, and preview with <code>--dry-run</code>
+            first. The script is the only hand allowed to touch these files: it
+            rewrites the exact marker line, validates the transition, and leaves
+            every other word untouched.
+          </p>
+        </aside>
+
+        <p>
+          Two related pitfalls: forgetting that <code>ESTABLISHED</code> and
+          <code>INCORPORATED</code> are stamp kinds that require
+          <code>--plan</code> but ignore <code>--value</code>; and forgetting
+          that <code>CHANGELOG_APPEND</code> requires <code>--note</code>.
+          Both surface as clean validation failures (exit code 1) rather than
+          silent corruption -- another reason to prefer the tool over a hand
+          edit.
+        </p>
+      </section>
+
+      <!-- See-also cross-references -->
+      <nav aria-label="see also" class="see-also">
+        <p>
+          <strong>See also:</strong>
+          <a href="ch3-design-intent-files.html">Ch. 3: Design Intent Files</a>
+          (the as-intended and as-coded files these markers annotate) &middot;
+          <a href="../vol3/ch1-lifecycle-pipeline.html#post-skill-steps">Vol. 3,
+          Ch. 1: The Lifecycle Pipeline</a> (post-skill step 6c, where the
+          human-markers verifier runs) &middot;
+          <a href="../vol5/ch2-sign-systems-and-communicability.html">Vol.
+          5, Ch. 2: Sign Systems and Communicability</a> (the semiotic theory
+          behind the marker code).
+        </p>
+      </nav>
+
+    </article>
+  </main>
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="ch3-design-intent-files.html">Previous: Design Intent Files</a>
+    <a href="ch5-ux-research-artifacts.html">Next: UX Research Artifacts</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

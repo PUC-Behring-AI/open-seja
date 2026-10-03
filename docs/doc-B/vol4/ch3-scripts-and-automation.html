@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="4">
+  <meta name="doc-chapter" content="3">
+  <meta name="doc-phase" content="3">
+  <meta name="doc-status" content="draft">
+
+  <title>Scripts and Automation -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 4: The Output and Governance Layer</a></li>
+      <li>Scripts and Automation</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>Scripts and Automation</h1>
+
+      <p>
+        The SEJA harness ships roughly 76 helper scripts. Most are shared
+        utilities in <code>.claude/skills/scripts/</code>; some are
+        skill-owned and co-located next to the <code>SKILL.md</code> that
+        uses them (for example, <code>generate_decision_digest.py</code>
+        lives in <code>.claude/skills/post-skill/</code> and
+        <code>check_docs.py</code> in <code>.claude/skills/critique/</code>);
+        and a handful of private-only tools live under
+        <code>.claude/skills/scripts/priv/</code>. This chapter documents the
+        most important user-facing scripts and their command-line interfaces,
+        explains how to run the validation suite, and shows how to extend it
+        with a new check.
+      </p>
+
+      <p>
+        Every command-line interface below was verified against the actual
+        script (its <code>argparse</code> setup and <code>--help</code>
+        output). Where a script exposes subcommands, the subcommands are
+        named explicitly.
+      </p>
+
+      <!-- Section 1: Validation and orchestration scripts -->
+      <section data-diataxis="reference" id="validation-scripts">
+        <h2>Validation and Orchestration Scripts</h2>
+
+        <p>
+          These scripts run the harness's checks -- either as an orchestrated
+          suite or as focused validators. They are invoked by
+          <code>/critique</code>, by post-skill safety gates, and by the
+          pre-commit hook.
+        </p>
+
+        <h3><code>run_all_checks.py</code></h3>
+
+        <p>
+          The CI-independent validation orchestrator. It discovers every
+          <code>check_*.py</code> script (see
+          <a href="#extending-suite">Extending the Validation Suite</a>),
+          runs each in a subprocess, and rolls the results into a single
+          pass/fail verdict with a per-check summary table. Exit codes:
+          <code>0</code> = all pass, <code>1</code> = one or more failed,
+          <code>2</code> = orchestrator error.
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Flag</th>
+              <th>Effect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--root ROOT</code></td>
+              <td>Repository root directory (default: auto-detected)</td>
+            </tr>
+            <tr>
+              <td><code>--junit PATH</code></td>
+              <td>Write a JUnit XML report to <code>PATH</code> (for CI pipelines)</td>
+            </tr>
+            <tr>
+              <td><code>--filter STACK</code></td>
+              <td>Only run checks matching a stack keyword (e.g. <code>flask</code>, <code>react</code>), via <code>check_plugin_registry.json</code></td>
+            </tr>
+            <tr>
+              <td><code>--verbose</code></td>
+              <td>Stream child stdout/stderr to the console instead of capturing it</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3><code>run_preflight_fast.py</code></h3>
+
+        <p>
+          The lighter-weight fast preflight gate. It runs a battery of quick
+          checks (including call-graph freshness validation) suitable for git
+          hooks and quick local validation. Post-skill step 6b runs it
+          advisory; the pre-commit hook runs it as a hard gate.
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Flag</th>
+              <th>Effect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--ci</code></td>
+              <td>Also run the framework unit tests (heavier; for CI use)</td>
+            </tr>
+            <tr>
+              <td><code>--verbose</code></td>
+              <td>Show detailed output from each check</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3><code>check_no_private_leaks.py</code></h3>
+
+        <p>
+          A private-only tool
+          (<code>.claude/skills/scripts/priv/check_no_private_leaks.py</code>)
+          that verifies no private content leaks to the public repository. It
+          is the pre-commit leak gate and is also used before publishing.
+          Exactly one of these mutually exclusive modes may be given:
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Flag</th>
+              <th>Effect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>(no args)</td>
+              <td>Scan authored prose in <code>seja-public/</code> (<code>docs/</code> and top-level <code>*.md</code>) for residual priv-only markers and known private-only patterns</td>
+            </tr>
+            <tr>
+              <td><code>--files PATH [PATH ...]</code></td>
+              <td>Check specific source <code>.md</code> files pre-sync: apply the strip logic, then flag surviving fingerprints</td>
+            </tr>
+            <tr>
+              <td><code>--staged</code></td>
+              <td>Check the staged <code>.md</code> subset (auto-discovered via git) -- the pre-commit gate</td>
+            </tr>
+            <tr>
+              <td><code>--candidate DIR</code></td>
+              <td>Scan a publish-workspace candidate's <code>.claude/</code> for leaked private content</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3><code>check_docs.py</code></h3>
+
+        <p>
+          A plugin-based documentation consistency checker
+          (<code>.claude/skills/critique/check_docs.py</code>) with six
+          scanners: harness integrity, path liveness, env vars, command
+          refs, terminology, and structural-completeness. Invoked by
+          <code>/critique</code>.
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Flag</th>
+              <th>Effect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--root ROOT</code></td>
+              <td>Repository root</td>
+            </tr>
+            <tr>
+              <td><code>--plugins PLUGINS</code></td>
+              <td>Comma-separated plugin (scanner) names to run</td>
+            </tr>
+            <tr>
+              <td><code>--filter {error,warning,info}</code></td>
+              <td>Minimum severity to report</td>
+            </tr>
+            <tr>
+              <td><code>--verbose</code></td>
+              <td>Show extra detail</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 2: Index generators -->
+      <section data-diataxis="reference" id="index-generators">
+        <h2>Index Generators</h2>
+
+        <p>
+          These scripts regenerate the derived indexes and reference
+          artifacts that keep the workspace navigable. Most are run by
+          post-skill step 7 after each skill invocation.
+        </p>
+
+        <h3><code>generate_macro_index.py</code></h3>
+
+        <p>
+          Regenerates the output directory's <code>INDEX.md</code> -- the
+          unified artifact index listing every artifact with its metadata.
+          Run at post-skill step 7b.
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Flag</th>
+              <th>Effect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--finalize ID</code></td>
+              <td>Replace the <code>RESERVED</code> row for <code>ID</code> with the actual artifact metadata</td>
+            </tr>
+            <tr>
+              <td><code>--status {DONE,OPEN}</code></td>
+              <td>Status to assign when finalizing (default: <code>DONE</code>)</td>
+            </tr>
+            <tr>
+              <td><code>--verbose</code>, <code>-v</code></td>
+              <td>Show each file being processed</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3><code>generate_briefs_index.py</code></h3>
+
+        <p>
+          Generates a lightweight briefs index for fast scanning, loaded by
+          pre-skill budget-eval at the <code>standard</code> tier so the
+          agent gets a compact summary rather than the full briefs file. Run
+          at post-skill step 7a. The only flag is <code>--verbose</code> /
+          <code>-v</code> (show each entry being processed).
+        </p>
+
+        <h3><code>generate_call_graph.py</code></h3>
+
+        <p>
+          A private-only tool
+          (<code>.claude/skills/scripts/priv/generate_call_graph.py</code>)
+          that statically parses <code>SKILL.md</code>, agent
+          <code>.md</code>, and script files to build the harness call graph.
+          It emits <code>call-graph.json</code> plus Mermaid and interactive
+          Cytoscape.js viewers.
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Flag</th>
+              <th>Effect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--check</code></td>
+              <td>Verify on-disk output matches the generator and all edges resolve; exit 1 on drift or unresolved references (wired into <code>run_preflight_fast.py</code>)</td>
+            </tr>
+            <tr>
+              <td><code>--strict</code></td>
+              <td>In <code>--check</code> mode, also fail on suspicious references in the warnings list</td>
+            </tr>
+            <tr>
+              <td><code>--fixed-date FIXED_DATE</code></td>
+              <td>Pin the generated timestamp (ISO8601) for deterministic output</td>
+            </tr>
+            <tr>
+              <td><code>--refresh-sri</code></td>
+              <td>Fetch each CDN asset, compute its sha384 SRI hash, and rewrite the template's <code>integrity=</code> values (requires network)</td>
+            </tr>
+            <tr>
+              <td><code>--verbose</code></td>
+              <td>Log every parsed edge, ref-load, and unresolved reference</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3><code>generate_spo.py</code></h3>
+
+        <p>
+          A private-only tool
+          (<code>.claude/skills/scripts/priv/generate_spo.py</code>) that
+          generates the Structured Product Overview HTML from
+          <code>product-overview.yaml</code> (project mode) or
+          <code>call-graph.json</code> (harness mode). Invoked by
+          <code>/document --type spo</code>.
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Flag</th>
+              <th>Effect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--project</code></td>
+              <td>Project mode (default) -- render from <code>product-overview.yaml</code></td>
+            </tr>
+            <tr>
+              <td><code>--harness</code></td>
+              <td>Harness mode -- render from <code>call-graph.json</code></td>
+            </tr>
+            <tr>
+              <td><code>--check</code></td>
+              <td>Exit 0 if the output is fresh, 1 if stale</td>
+            </tr>
+            <tr>
+              <td><code>--drift</code></td>
+              <td>Start with the drift overlay enabled (dims non-<code>done</code> cards)</td>
+            </tr>
+            <tr>
+              <td><code>--strip-internal</code></td>
+              <td>Remove internal fields (owner, tracker, req/decision/journey IDs) from embedded JSON for external sharing</td>
+            </tr>
+            <tr>
+              <td><code>--output PATH</code></td>
+              <td>Override the output file path</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3><code>generate_decision_digest.py</code></h3>
+
+        <p>
+          A post-skill-owned script
+          (<code>.claude/skills/post-skill/generate_decision_digest.py</code>)
+          that generates a machine-readable decision digest
+          (<code>_output/decision-digest.jsonl</code>) from
+          <code>D-NNN</code> entries and advisory HIGH/MEDIUM
+          recommendations. Invoked conditionally at post-skill step 7d. The
+          only flag is <code>--verbose</code> / <code>-v</code> (show each
+          entry being processed).
+        </p>
+      </section>
+
+      <!-- Section 3: Markers, state, and ledger scripts -->
+      <section data-diataxis="reference" id="markers-state-ledger">
+        <h2>Markers, State, and Ledger Scripts</h2>
+
+        <p>
+          These scripts manage the harness's persistent state: lifecycle
+          markers on Human (markers) files, the pending-actions ledger, the
+          conversation trace, artifact IDs, and brief text handed between
+          pre-skill and post-skill.
+        </p>
+
+        <h3><code>apply_marker.py</code></h3>
+
+        <p>
+          The <strong>sole write path</strong> for Human (markers) files.
+          The agent may write only lifecycle markers to these files -- never
+          prose -- and this script applies them. Required flags:
+          <code>--file</code>, <code>--id</code>, and <code>--marker</code>.
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Flag</th>
+              <th>Effect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--file FILE</code></td>
+              <td>Target file (repo-relative). Required.</td>
+            </tr>
+            <tr>
+              <td><code>--id ENTRY_ID</code></td>
+              <td>Entry id, e.g. <code>R-P-001</code>. Required.</td>
+            </tr>
+            <tr>
+              <td><code>--marker {CHANGELOG_APPEND,DECISION_APPEND,ESTABLISHED,INCORPORATED,REQ_TRACED_BY,STATUS}</code></td>
+              <td>Marker kind. Required.</td>
+            </tr>
+            <tr>
+              <td><code>--value VALUE</code></td>
+              <td>Marker value (e.g. <code>implemented</code> or <code>added</code>). Required for <code>STATUS</code> and <code>CHANGELOG_APPEND</code>; ignored by the stamp-kind <code>ESTABLISHED</code> / <code>INCORPORATED</code></td>
+            </tr>
+            <tr>
+              <td><code>--plan PLAN</code></td>
+              <td>Plan id (accepts <code>plan-NNNNNN</code> or a bare 6-digit id)</td>
+            </tr>
+            <tr>
+              <td><code>--date DATE</code>, <code>--note NOTE</code></td>
+              <td>Override date (<code>YYYY-MM-DD</code>); CHANGELOG note text</td>
+            </tr>
+            <tr>
+              <td><code>--dry-run</code></td>
+              <td>Print the diff without writing</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3><code>pending.py</code></h3>
+
+        <p>
+          The pending-actions ledger CLI, backing the <code>/pending</code>
+          skill and pre-skill's pending-check stage. It is subcommand-based:
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Subcommand</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>add</code></td>
+              <td>Add a new pending action</td>
+            </tr>
+            <tr>
+              <td><code>done</code></td>
+              <td>Mark an action as done</td>
+            </tr>
+            <tr>
+              <td><code>snooze</code></td>
+              <td>Snooze an action until a date</td>
+            </tr>
+            <tr>
+              <td><code>dismiss</code></td>
+              <td>Dismiss an action</td>
+            </tr>
+            <tr>
+              <td><code>list</code> / <code>due</code></td>
+              <td>List all actions, or only those that are due</td>
+            </tr>
+            <tr>
+              <td><code>cleanup</code></td>
+              <td>Auto-dismiss aged items</td>
+            </tr>
+            <tr>
+              <td><code>periodic-check</code></td>
+              <td>Create periodic entries</td>
+            </tr>
+            <tr>
+              <td><code>status</code></td>
+              <td>Composite status view (used by pre-skill; supports <code>--overdue-days</code> and <code>--format banner</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3><code>conversation_trace.py</code></h3>
+
+        <p>
+          Manages the conversation trace log
+          (<code>_output/conversation-trace.jsonl</code>) that records
+          non-skill user-agent exchanges. Subcommands:
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Subcommand</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>append</code></td>
+              <td>Append a new utterance entry (<code>--session-id</code>, <code>--emitter</code>, <code>--message</code>, <code>--type</code>, <code>--preceding-evt-id</code>, optional <code>--topic-tags</code>, <code>--confirm</code>). Exit 2 signals masking was applied</td>
+            </tr>
+            <tr>
+              <td><code>backfill-skill</code></td>
+              <td>Set <code>led_to_skill</code> on an existing entry (called by pre-skill brief-log)</td>
+            </tr>
+            <tr>
+              <td><code>last-evt-id</code></td>
+              <td>Print the last <code>evt_id</code> for a session</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3><code>reserve_id.py</code></h3>
+
+        <p>
+          Reserves the next artifact ID in <code>INDEX.md</code>, writing a
+          <code>RESERVED</code> row that <code>generate_macro_index.py
+          --finalize</code> later fills in. Required flags:
+          <code>--type</code> (artifact type, e.g. <code>research</code>,
+          <code>plan</code>) and <code>--title</code>. Optional:
+          <code>--dry-run</code> (print the next ID without writing) and
+          <code>--output-dir</code> (override <code>OUTPUT_DIR</code>).
+        </p>
+
+        <h3><code>brief_state.py</code></h3>
+
+        <p>
+          Persists and retrieves brief text between the pre-skill and
+          post-skill phases, so the brief the user gave a skill survives
+          across the two lifecycle hooks. Two subcommands:
+          <code>save</code> (save brief text to the state file) and
+          <code>load</code> (load the brief text and delete the state file).
+        </p>
+      </section>
+
+      <!-- Section 4: The config module -->
+      <section data-diataxis="reference" id="config-module">
+        <h2>The Configuration Module</h2>
+
+        <h3><code>project_config.py</code></h3>
+
+        <p>
+          Not a command-line tool but a <strong>library module</strong>
+          imported by nearly every other script. It parses
+          <code>product-design/conventions.md</code> (falling back to
+          <code>template/conventions.md</code> when the project file is
+          absent) and exposes project-specific paths and settings through a
+          small API:
+        </p>
+
+        <pre><code><span class="token-keyword">from</span> project_config <span class="token-keyword">import</span> REPO_ROOT, get, get_path, get_list
+
+backend_dir = get_path(<span class="token-string">"BACKEND_DIR"</span>)
+subpackages = get_list(<span class="token-string">"BACKEND_SUBPACKAGES"</span>, [<span class="token-string">"api"</span>, <span class="token-string">"models"</span>, <span class="token-string">"services"</span>])</code></pre>
+
+        <p>
+          <code>REPO_ROOT</code> is the auto-detected repository root;
+          <code>get</code> / <code>get_path</code> / <code>get_list</code>
+          read scalar, path, and list-valued conventions respectively, each
+          accepting a default. Centralizing convention parsing here means a
+          single change to <code>conventions.md</code> reconfigures every
+          script at once -- the scripts never hard-code project paths.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> Because <code>project_config.py</code> is a
+            shared import, a new check script gains project-aware paths for
+            free simply by importing from it -- no per-script configuration
+            is needed. This is what makes the discovery convention in the
+            next section low-friction.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 5: Running the check suite -->
+      <section data-diataxis="how-to" id="running-check-suite">
+        <h2>Running the Check Suite</h2>
+
+        <p>
+          The harness offers two entry points for validation: the full
+          orchestrator (<code>run_all_checks.py</code>) and the fast preflight
+          gate (<code>run_preflight_fast.py</code>). Both are CI-independent
+          -- they run identically on a developer's machine and in a CI
+          pipeline.
+        </p>
+
+        <h3>Run every check with the orchestrator</h3>
+
+        <p>
+          From the repository root, run the orchestrator. It discovers and
+          runs every check, prints a per-check summary table, and exits
+          <code>0</code> only if all checks pass:
+        </p>
+
+        <pre><code><span class="token-comment"># Run all checks from the repo root</span>
+<span class="token-command">python</span> .claude/skills/scripts/run_all_checks.py --root .</code></pre>
+
+        <p>
+          For CI pipelines, add <code>--junit</code> to emit a JUnit XML
+          report your CI system can parse, and <code>--filter</code> to run
+          only the checks relevant to your stack:
+        </p>
+
+        <pre><code><span class="token-comment"># Emit a JUnit XML report for CI</span>
+<span class="token-command">python</span> .claude/skills/scripts/run_all_checks.py --root . --junit results.xml
+
+<span class="token-comment"># Only run checks tagged for the flask backend</span>
+<span class="token-command">python</span> .claude/skills/scripts/run_all_checks.py --root . --filter flask
+
+<span class="token-comment"># Stream each check's output instead of capturing it</span>
+<span class="token-command">python</span> .claude/skills/scripts/run_all_checks.py --root . --verbose</code></pre>
+
+        <h3>Run the fast preflight gate</h3>
+
+        <p>
+          For a quick local check before committing (and for git hooks), use
+          the fast preflight gate. It is a subset tuned for speed:
+        </p>
+
+        <pre><code><span class="token-comment"># Fast preflight -- the git-hook / quick-local gate</span>
+<span class="token-command">python</span> .claude/skills/scripts/run_preflight_fast.py
+
+<span class="token-comment"># Also run framework unit tests (heavier; for CI)</span>
+<span class="token-command">python</span> .claude/skills/scripts/run_preflight_fast.py --ci
+
+<span class="token-comment"># Show detailed output from each check</span>
+<span class="token-command">python</span> .claude/skills/scripts/run_preflight_fast.py --verbose</code></pre>
+
+        <p>
+          Use <code>run_preflight_fast.py</code> for the tight edit-commit
+          loop and <code>run_all_checks.py</code> for full-coverage sweeps
+          (release preparation, CI, or when you want the JUnit report). Both
+          honour the same exit-code convention: <code>0</code> means clean.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> You do not usually run these scripts by
+            hand. <code>run_preflight_fast.py</code> is wired into post-skill
+            step 6b and the pre-commit hook, and <code>run_all_checks.py</code>
+            is invoked by <code>/critique validate</code>. Run them manually
+            when you want to validate outside the lifecycle -- for example,
+            while iterating on a check script itself.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 6: Extending the validation suite -->
+      <section data-diataxis="how-to" id="extending-suite">
+        <h2>Extending the Validation Suite</h2>
+
+        <p>
+          Adding a new check to the suite requires no registration step and
+          no edit to the orchestrator. <code>run_all_checks.py</code>
+          discovers checks <strong>by filename convention</strong>: any file
+          named <code>check_*.py</code> in the scripts directory or in a
+          co-located skill subdirectory is picked up automatically.
+        </p>
+
+        <h3>How discovery works</h3>
+
+        <p>
+          The orchestrator's <code>discover_scripts()</code> globs
+          <code>check_*.py</code> in <code>.claude/skills/scripts/</code>,
+          then extends that list by globbing <code>check_*.py</code> in every
+          sibling skill directory (each <code>.claude/skills/&lt;name&gt;/</code>
+          except <code>scripts</code> itself). The combined set is
+          deduplicated and sorted, then each script is run as a subprocess
+          with <code>PASS</code> mapped to exit code <code>0</code> and any
+          non-zero exit to <code>FAIL</code>.
+        </p>
+
+        <h3>Add a new check</h3>
+
+        <p>
+          To add a check, follow the convention:
+        </p>
+
+        <ol>
+          <li>Create a file named <code>check_&lt;something&gt;.py</code> in
+          <code>.claude/skills/scripts/</code> (a shared check) or in the
+          owning skill's directory (a skill-scoped check).</li>
+          <li>Make it a self-contained, runnable script: read the paths it
+          needs from <code>project_config.py</code>, do its validation, and
+          <code>sys.exit(0)</code> on success or a non-zero code on failure.
+          Print human-readable failure details to stdout/stderr -- the
+          orchestrator surfaces them in the summary and the JUnit report.</li>
+          <li>Keep it under the 120-second per-check timeout the orchestrator
+          enforces; a check that times out is reported as <code>ERROR</code>
+          (exit code <code>2</code> from the orchestrator).</li>
+        </ol>
+
+        <p>
+          That is all that is required for the check to run in
+          <code>run_all_checks.py</code>. Registration in
+          <code>check_plugin_registry.json</code> is
+          <strong>optional</strong> -- it is only needed if you want the
+          check to participate in <code>--filter STACK</code> matching. A
+          registry entry declares the check's name, its
+          <code>stack</code> (backend / frontend keywords, or
+          <code>any</code>), scope, and whether it is critical:
+        </p>
+
+        <pre><code><span class="token-comment">// check_plugin_registry.json entry</span>
+{
+  <span class="token-string">"script"</span>: <span class="token-string">"check_my_new_rule.py"</span>,
+  <span class="token-string">"name"</span>: <span class="token-string">"My New Rule"</span>,
+  <span class="token-string">"stack"</span>: { <span class="token-string">"backend"</span>: [<span class="token-string">"flask"</span>], <span class="token-string">"frontend"</span>: [] },
+  <span class="token-string">"scope"</span>: <span class="token-string">"api"</span>,
+  <span class="token-string">"critical"</span>: <span class="token-keyword">true</span>
+}</code></pre>
+
+        <p>
+          A check not present in the registry is included by default (it runs
+          on every unfiltered invocation) and only skipped when a
+          <code>--filter</code> keyword is given that its (absent) registry
+          entry cannot match. A registered check matches the filter when the
+          keyword appears in any of its stack values, or when its stack lists
+          <code>any</code>.
+        </p>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="ch2-enforcement-architecture.html">Previous: Enforcement Architecture</a>
+    <a href="ch4-maintenance-and-drift.html">Next: Maintenance and Drift</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

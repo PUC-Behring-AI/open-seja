@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="The 2x2 of SEJA installation profiles: greenfield vs brownfield along one axis, collocated (embedded) vs companion workspace along the other, and how /seja-setup routes each combination.">
+  <title>The Installation Profile Matrix — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/concepts sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>The Installation Profile Matrix</h1>
+      <p>Greenfield or brownfield, collocated or workspace: the two axes that decide how SEJA installs into a project.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Concepts</a></li>
+        <li aria-current="page">The Installation Profile Matrix</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-explanation">explanation</span>
+          <span class="badge core-concepts">concepts</span>
+        </p>
+
+        <section data-diataxis="explanation" aria-labelledby="two-axes">
+          <h2 id="two-axes">Two axes, four profiles</h2>
+          <p>
+            How SEJA installs into a project is decided by two independent
+            questions. First: is there an existing codebase to install into
+            (<strong>brownfield</strong>) or is this a fresh start
+            (<strong>greenfield</strong>)? Second: should the harness live
+            <em>inside</em> the codebase (<strong>collocated</strong>, or embedded)
+            or in a <em>separate</em> directory alongside it (<strong>companion
+            workspace</strong>)? The two axes give a 2&times;2 matrix of
+            installation profiles, and <code>/seja-setup</code> routes each
+            combination to the right flow.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="greenfield-brownfield">
+          <h2 id="greenfield-brownfield">Axis 1: greenfield vs brownfield</h2>
+          <p>
+            The greenfield / brownfield axis is about what already exists at the
+            target. On a <strong>greenfield</strong> target there is no source code
+            yet: <code>/seja-setup</code> creates the directory structure, runs the
+            Section 1 basic-definitions questionnaire to populate
+            <code>conventions.md</code>, and scaffolds a stack skeleton from the
+            answers. On a <strong>brownfield</strong> target an existing codebase is
+            present, so setup first scans the dependency files
+            (<code>package.json</code>, <code>requirements.txt</code>,
+            <code>pyproject.toml</code>, and the like) to <em>pre-fill</em> the
+            questionnaire: each detected framework is presented as a confirmation
+            prompt (&ldquo;I detected flask; correct?&rdquo;) rather than an
+            open-ended entry. The two paths converge on the same populated
+            <code>conventions.md</code>; brownfield simply starts from detected
+            values.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="collocated-workspace">
+          <h2 id="collocated-workspace">Axis 2: collocated vs companion workspace</h2>
+          <p>
+            The collocated / workspace axis is about <em>where the harness lives</em>
+            relative to the code. In the <strong>collocated</strong> (embedded)
+            profile, <code>.claude/</code> and <code>product-design/</code> sit in
+            the codebase's own root and share its git history &mdash; the simplest
+            layout, well suited to greenfield projects and to teams comfortable with
+            the harness in-tree. In the <strong>companion workspace</strong>
+            profile, the harness lives in its own directory, its own git repo, with
+            version-controlled design history kept separate from the codebase; a
+            launcher script invokes <code>claude --add-dir &lt;codebase-dir&gt;</code>
+            so the agent can still read and write the code. The workspace profile
+            keeps SEJA's design history out of an existing project's repo, which is
+            often the deciding factor for brownfield installs.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="the-matrix">
+          <h2 id="the-matrix">The 2×2 matrix</h2>
+          <p>
+            Reading the two axes together gives four profiles. The cells describe
+            how <code>/seja-setup</code> behaves for each combination.
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>Installation profiles by field state and harness placement.</caption>
+              <thead>
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col">Collocated (embedded)</th>
+                  <th scope="col">Companion workspace</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Greenfield</th>
+                  <td>Create the target, run the questionnaire, scaffold the stack, and commit &mdash; harness in-tree.</td>
+                  <td>Create separate workspace and codebase subdirs, <code>git init</code> each, redirect harness files to the workspace, and generate a launcher.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Brownfield</th>
+                  <td>Auto-detect the stack to pre-fill the questionnaire, then embed <code>.claude/</code> in the existing codebase root.</td>
+                  <td>Detect any embedded harness files, offer to migrate them to a new workspace dir, <code>git init</code> the workspace, and generate a launcher.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            <code>/seja-setup</code> resolves the profile by inspecting the target
+            (via its state-detection step) and, when the layout is ambiguous, by
+            asking &mdash; for an existing codebase it prompts &ldquo;Embed SEJA in
+            this codebase or create a separate workspace?&rdquo; The same install
+            engine handles all four cells; the profile only decides which
+            directories are created, whether stack detection pre-fills the
+            questionnaire, and where the harness files land.
+          </p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="lifecycle-pipeline.html">The Lifecycle Pipeline</a> &mdash; where /seja-setup hands off to /design on the first iteration.</li>
+            <li><a href="as-intended-as-coded.html">As-Intended and As-Coded</a> &mdash; the design and implementation files setup scaffolds and design populates.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Concepts</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/concepts sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

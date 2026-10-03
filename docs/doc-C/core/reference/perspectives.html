@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="reference">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="Exhaustive catalog of the sixteen SEJA review perspectives — eleven engineering and five design lenses — with tag, scope, and the Essential/Standard/Deep tiers, plus the two-stage loading protocol and conflict-resolution rules.">
+  <title>Review Perspectives — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/reference sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Review Perspectives</h1>
+      <p>The exhaustive catalog of the sixteen engineering and design lenses used to review plans, diffs, and decisions.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Reference</a></li>
+        <li aria-current="page">Review Perspectives</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-reference">reference</span>
+          <span class="badge core-reference">reference</span>
+        </p>
+
+        <section data-diataxis="reference" aria-labelledby="overview">
+          <h2 id="overview">Overview</h2>
+          <p>
+            SEJA reviews changes against a fixed set of <strong>sixteen domain
+            perspectives</strong> — eleven engineering lenses and five design
+            lenses. Each perspective is a checklist of priority-classified
+            questions that gives structured, deterministic coverage across
+            security, performance, architecture, accessibility, and the rest,
+            replacing ad-hoc "simulate a council" instructions. The
+            <code>/plan</code> and <code>/critique review</code> skills evaluate a
+            change against each applicable perspective and record its
+            <strong>status</strong>: <em>Adopted</em> (evaluated; concerns
+            addressed), <em>Deferred</em> (evaluated; not addressed — with a
+            stated rationale), or <em>N/A</em> (does not apply).
+          </p>
+          <aside class="callout-tip">
+            <strong>Boundary note.</strong> This page is the <em>exhaustive
+            catalog</em> — every perspective, its tag, scope, and tiers, plus the
+            loading protocol and conflict rules you consult while a review is
+            running. The conceptual overview of <em>why</em> perspective-based
+            review exists and how it replaces council simulation lives in the
+            Concepts sibling
+            <a href="../concepts/review-perspectives.html">Review Perspectives</a>.
+            Read that page for the mental model; consult this one to look up a
+            specific lens.
+          </aside>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="tiers">
+          <h2 id="tiers">The Essential / Standard / Deep tiers</h2>
+          <p>
+            Every perspective file organizes its questions into three tiers, and
+            each perspective offers all three. The tier controls <em>how many</em>
+            of a perspective's questions are evaluated, matching review depth to
+            the context budget:
+          </p>
+          <ul>
+            <li>
+              <strong>Essential</strong> — the <code>[P0]</code> critical, blocking
+              questions. Always evaluated; loaded for a <code>standard</code>
+              context budget or when the perspective is on the default shortlist.
+            </li>
+            <li>
+              <strong>Standard</strong> — the <code>[P1]</code>–<code>[P2]</code>
+              questions for a thorough review; loaded for a <code>heavy</code>
+              context budget or when the perspective is a primary focus.
+            </li>
+            <li>
+              <strong>Deep</strong> — the <code>[P3]</code>–<code>[P4]</code>
+              exhaustive-analysis questions; optional unless the perspective is the
+              primary focus of the review.
+            </li>
+          </ul>
+          <p>
+            Questions are priority-classified <code>[P0]</code> (critical) through
+            <code>[P4]</code> (informational) and sorted by priority; under
+            time or context pressure, focus on <code>P0</code>–<code>P1</code>
+            first.
+          </p>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="engineering-perspectives">
+          <h2 id="engineering-perspectives">Engineering perspectives (11)</h2>
+          <p>
+            The eleven engineering lenses cover the code-and-systems concerns of a
+            change. Each row names the file under
+            <code>general/review-perspectives/</code> to load once selected.
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>The eleven engineering review perspectives.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Tag</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Scope</th>
+                  <th scope="col">Tiers</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">SEC</th>
+                  <td>Security</td>
+                  <td>Auth, input validation, secrets management, dependency vulnerabilities</td>
+                  <td>Essential / Standard / Deep</td>
+                </tr>
+                <tr>
+                  <th scope="row">PERF</th>
+                  <td>Performance</td>
+                  <td>N+1 queries, unbounded loops, indexes, caching, bundle size</td>
+                  <td>Essential / Standard / Deep</td>
+                </tr>
+                <tr>
+                  <th scope="row">DB</th>
+                  <td>Database</td>
+                  <td>Schema migrations, backward compatibility, idempotency, constraints</td>
+                  <td>Essential / Standard / Deep</td>
+                </tr>
+                <tr>
+                  <th scope="row">API</th>
+                  <td>API Design</td>
+                  <td>RESTful conventions, route consistency, request/response contracts</td>
+                  <td>Essential / Standard / Deep</td>
+                </tr>
+                <tr>
+                  <th scope="row">ARCH</th>
+                  <td>Architecture</td>
+                  <td>Layer boundaries, separation of concerns, dependency direction</td>
+                  <td>Essential / Standard / Deep</td>
+                </tr>
+                <tr>
+                  <th scope="row">DX</th>
+                  <td>Developer Experience</td>
+                  <td>Readability, conventions, documentation, error messages</td>
+                  <td>Essential / Standard / Deep</td>
+                </tr>
+                <tr>
+                  <th scope="row">I18N</th>
+                  <td>Internationalization</td>
+                  <td>i18n keys, locale support, pluralization, RTL, date/number formats</td>
+                  <td>Essential / Standard / Deep</td>
+                </tr>
+                <tr>
+                  <th scope="row">TEST</th>
+                  <td>Testability</td>
+                  <td>Test coverage, new test needs, mocking strategy, test isolation</td>
+                  <td>Essential / Standard / Deep</td>
+                </tr>
+                <tr>
+                  <th scope="row">OPS</th>
+                  <td>Operations / DevOps</td>
+                  <td>Environment parity, logging, monitoring, deployment, config management</td>
+                  <td>Essential / Standard / Deep</td>
+                </tr>
+                <tr>
+                  <th scope="row">COMPAT</th>
+                  <td>Compatibility</td>
+                  <td>API contract stability, schema evolution, browser/version support</td>
+                  <td>Essential / Standard / Deep</td>
+                </tr>
+                <tr>
+                  <th scope="row">DATA</th>
+                  <td>Data Integrity &amp; Privacy</td>
+                  <td>PII handling, GDPR compliance, validation, audit trails</td>
+                  <td>Essential / Standard / Deep</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="design-perspectives">
+          <h2 id="design-perspectives">Design perspectives (5)</h2>
+          <p>
+            The five design lenses cover the human-facing concerns of a change.
+            <strong>Accessibility (A11Y) is non-negotiable</strong> — see the
+            conflict rules below.
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>The five design review perspectives.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Tag</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Scope</th>
+                  <th scope="col">Tiers</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">UX</th>
+                  <td>User Experience</td>
+                  <td>User flows, feedback, error handling, navigation, discoverability</td>
+                  <td>Essential / Standard / Deep</td>
+                </tr>
+                <tr>
+                  <th scope="row">A11Y</th>
+                  <td>Accessibility</td>
+                  <td>WCAG AAA, contrast, keyboard nav, screen readers, focus management</td>
+                  <td>Essential / Standard / Deep</td>
+                </tr>
+                <tr>
+                  <th scope="row">VIS</th>
+                  <td>Visual Design</td>
+                  <td>Design system consistency, CSS conventions, spacing, typography</td>
+                  <td>Essential / Standard / Deep</td>
+                </tr>
+                <tr>
+                  <th scope="row">RESP</th>
+                  <td>Responsive Design</td>
+                  <td>Mobile/tablet/desktop breakpoints, fluid layouts, touch targets</td>
+                  <td>Essential / Standard / Deep</td>
+                </tr>
+                <tr>
+                  <th scope="row">MICRO</th>
+                  <td>Microinteractions</td>
+                  <td>Hover/focus/active states, transitions, loading indicators, animations</td>
+                  <td>Essential / Standard / Deep</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Sixteen perspectives in total: eleven engineering plus five design.
+          </p>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="loading-protocol">
+          <h2 id="loading-protocol">Two-stage loading protocol</h2>
+          <p>
+            To avoid bulk-loading all sixteen perspective files into context, the
+            review skills follow a two-stage protocol:
+          </p>
+          <ol>
+            <li>
+              <strong>Load the index.</strong> Read
+              <code>general/review-perspectives-index.md</code> (under 600 tokens) —
+              the compact tag/name/scope table for all sixteen lenses.
+            </li>
+            <li>
+              <strong>Select 4–6 perspectives.</strong> Choose them via the
+              <em>Perspective Shortcuts by Plan Prefix</em> table (default
+              shortlists keyed on the plan prefix and scope, e.g.
+              <code>FEATURE-B</code> → SEC, DB, API, ARCH, TEST, PERF), or manually
+              by change content. Add up to two extra perspectives if the plan
+              content warrants it.
+            </li>
+            <li>
+              <strong>Load only the selected files.</strong> Read just the chosen
+              <code>review-perspectives/&lt;tag&gt;.md</code> files.
+            </li>
+          </ol>
+          <p>
+            <code>/plan</code> and <code>/critique review</code> both follow this
+            protocol — unless the review depth is <strong>Deep</strong> and all
+            sixteen perspectives are genuinely needed.
+          </p>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="conflict-resolution">
+          <h2 id="conflict-resolution">Resolving perspective conflicts</h2>
+          <p>
+            When two perspectives pull a review in opposite directions (for
+            example PERF vs. SEC), remark the conflict and resolve it with these
+            rules:
+          </p>
+          <ol>
+            <li>
+              <strong>SEC wins by default</strong> — unless the user explicitly
+              accepts the risk.
+            </li>
+            <li>
+              <strong>A11Y is non-negotiable</strong> — never traded against visual
+              design or performance.
+            </li>
+            <li>
+              <strong>Document the trade-off</strong> — record both the chosen
+              approach and the deferred concern, with rationale.
+            </li>
+            <li>
+              <strong>Ask when unclear</strong> — for non-default conflicts (e.g.
+              PERF vs. DX), ask the user.
+            </li>
+          </ol>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="../concepts/review-perspectives.html">Review Perspectives</a> &mdash; the conceptual overview that this exhaustive catalog complements.</li>
+            <li><a href="agents-catalog.html">Agents Catalog</a> &mdash; the evaluator agents (code-reviewer, plan-reviewer) that apply these lenses.</li>
+            <li><a href="../operations/quality-gates.html">Quality Gates</a> &mdash; how perspective reviews fit into the validation gates before communicating a change.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Reference</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/reference sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

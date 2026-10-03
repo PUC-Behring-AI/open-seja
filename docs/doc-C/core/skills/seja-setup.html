@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How-to guide for the /seja-setup skill: the single entry point for installing, finalising, workspacing, demoing, and upgrading the SEJA harness in a project.">
+  <title>/seja-setup — SEJA Documentation</title>
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>/seja-setup</h1>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Skills</a></li>
+        <li aria-current="page">/seja-setup</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge core-skills">skills</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="what-it-does">
+          <h2 id="what-it-does">What it does</h2>
+          <p><code>/seja-setup</code> is the single entry point for every harness-state transition in a project. It manages five modes: <strong>install</strong> (copy the harness into a new or existing project directory), <strong>finalise in place</strong> (<code>--here</code>, when SEJA was cloned directly into your project folder), <strong>companion workspace</strong> (<code>--workspace</code>, a separate design workspace alongside an existing codebase), <strong>demo</strong> (<code>--demo</code>, the pre-configured TaskFlow project), and <strong>upgrade</strong> (<code>--upgrade</code>, refresh harness files to the latest release).</p>
+          <p>With no arguments, it first inspects the current directory via <code>detect_setup_state.py</code> and routes to the right action. State detection recognises <code>no-harness</code>, <code>fresh-download</code>, <code>partial-init</code>, <code>finalised</code>, plus a <code>dev-repo-refuse</code> guard that hard-refuses to run inside a SEJA development repository. On a fresh install it scaffolds a bootable skeleton in one invocation: it populates <code>product-design/conventions.md</code> from a basic-definitions questionnaire, scaffolds a stack-dependent <code>CLAUDE.md</code>, writes stack-flavoured files into <code>.claude/rules/</code>, and adds smoke-test infrastructure when a backend is present. Four stack-presence modes &mdash; full-stack, API-only, frontend-only, and CLI / library &mdash; determine exactly what gets scaffolded.</p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="when-to-run">
+          <h2 id="when-to-run">When to run it</h2>
+          <p>Run <code>/seja-setup</code> every time you touch SEJA&rsquo;s state in a project: the first install, an in-place finalisation, companion-workspace creation, a demo bootstrap, or a later harness upgrade. After the first iteration you rarely run it again unless you are upgrading.</p>
+          <p>Reach for <code>/seja-setup &lt;target&gt;</code> to install into a new or existing directory, <code>/seja-setup --here</code> when you cloned SEJA straight into your project folder, <code>/seja-setup &lt;target&gt; --workspace</code> to work alongside an existing codebase, <code>/seja-setup &lt;target&gt; --demo</code> for the guided TaskFlow tour, and <code>/seja-setup --upgrade</code> (optionally <code>--version &lt;tag&gt;</code> or <code>--dry-run</code>) to refresh harness files without touching project-specific data.</p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="how-it-fits">
+          <h2 id="how-it-fits">How it fits the lifecycle</h2>
+          <p><code>/seja-setup</code> sits at the very front of the lifecycle: on the first iteration it hands off to <code>/design</code> to configure the project before the canonical path &mdash; <code>/research</code> &rarr; <code>/design</code> | <code>/plan</code> &rarr; <code>/implement</code> &rarr; <code>/critique</code> &rarr; <code>/document</code> | <code>/communicate</code> &rarr; <code>/reflect</code> &mdash; comes into play. Every install ends with a handoff message directing you to run <code>/design</code> to define entities, permissions, metacommunication, personas, and standards.</p>
+          <p>After an <code>--upgrade</code>, the natural next steps are <code>/critique health</code> to verify harness integrity and then <code>/explain drift</code> to catch changed conventions. The source repository is not a runtime dependency &mdash; once setup completes, all skills, rules, agents, and references live inside your project, and you work from the project rather than the source.</p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="../operations/installation.html">Installation</a> &mdash; the operational walkthrough of installing the harness.</li>
+            <li><a href="../operations/upgrade.html">Upgrade</a> &mdash; how the upgrade flow preserves project-specific files.</li>
+            <li><a href="../concepts/profile-x-pattern.html">Profile-x pattern</a> &mdash; the stack-presence scaffolding modes this skill applies.</li>
+            <li><a href="design.html">/design</a> &mdash; the step that follows a fresh install.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Skills</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="reference">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="Static topology summary of the SEJA harness call graph — 224 typed nodes and 496 typed edges — with node-type and edge-type count tables and a prose walk of the lifecycle path and delegation patterns.">
+  <title>Call Graph — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/reference sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Call Graph</h1>
+      <p>A static topology summary of how SEJA's skills, agents, scripts, rules, and references reference and invoke one another.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Reference</a></li>
+        <li aria-current="page">Call Graph</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-reference">reference</span>
+          <span class="badge core-reference">reference</span>
+        </p>
+
+        <section data-diataxis="reference" aria-labelledby="overview">
+          <h2 id="overview">Overview</h2>
+          <p>
+            The SEJA harness is a directed graph of components that reference and
+            invoke one another. A static analyzer walks every
+            <code>SKILL.md</code>, agent prompt, and helper script to discover the
+            typed nodes (skills, agents, scripts, rules, and the three reference
+            families) and the typed edges between them. The snapshot summarized
+            here contains <strong>224 nodes</strong> and <strong>496 edges</strong>.
+          </p>
+          <p>
+            This page is a <em>self-contained</em> summary: the counts below were
+            aggregated directly from the topology data and hand-written into the
+            static tables. There is no runtime fetch and no live viewer — for the
+            interactive skill-relationship view, see the
+            <a href="skill-map.html">Skill Map</a> sibling.
+          </p>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="node-types">
+          <h2 id="node-types">Node types</h2>
+          <p>
+            Every node carries one of seven types. The three reference families —
+            general, template, and project — are the shared knowledge base; skills,
+            agents, and scripts are the executable surface; rules are the
+            path-scoped auto-loaded guidance files.
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>The seven node classes and their counts (224 nodes total).</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Node type</th>
+                  <th scope="col">Count</th>
+                  <th scope="col">What it is</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">script</th>
+                  <td>82</td>
+                  <td>Helper scripts (validation checks, index generators, converters) invoked by skills and hooks.</td>
+                </tr>
+                <tr>
+                  <th scope="row">ref-template</th>
+                  <td>50</td>
+                  <td>Template references used by <code>/design</code> to generate project-specific files.</td>
+                </tr>
+                <tr>
+                  <th scope="row">ref-general</th>
+                  <td>46</td>
+                  <td>Agent-agnostic shared references (conventions, perspectives, skill graph, standards).</td>
+                </tr>
+                <tr>
+                  <th scope="row">skill</th>
+                  <td>17</td>
+                  <td>Skills — 15 user-facing plus the two internal lifecycle hooks (pre-skill, post-skill).</td>
+                </tr>
+                <tr>
+                  <th scope="row">agent</th>
+                  <td>16</td>
+                  <td>Subagent prompts — 9 evaluators and 7 generators, invoked by thin-skill wrappers.</td>
+                </tr>
+                <tr>
+                  <th scope="row">rule</th>
+                  <td>7</td>
+                  <td>Path-scoped rule files auto-loaded when Claude edits matching files.</td>
+                </tr>
+                <tr>
+                  <th scope="row">ref-project</th>
+                  <td>6</td>
+                  <td>Project-specific references generated per project by <code>/design</code>.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="edge-types">
+          <h2 id="edge-types">Edge types</h2>
+          <p>
+            Every edge carries one of ten relationship types. Some describe
+            control flow (a skill <em>invokes</em> a script, <em>delegates</em> to
+            an agent, or <em>orchestrates</em> a lifecycle hook); others describe
+            reference loading (<em>eager-load</em>, <em>lazy-load</em>,
+            <em>auto-loads</em>, <em>dynamic-load</em>, <em>reads</em>) or module
+            structure (<em>imports</em>); <em>suggests</em> captures the
+            next-step skill-graph affordances.
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>The ten edge types and their counts (496 edges total).</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Edge type</th>
+                  <th scope="col">Count</th>
+                  <th scope="col">Meaning</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">reads</th>
+                  <td>121</td>
+                  <td>A component reads a reference or data file at run time.</td>
+                </tr>
+                <tr>
+                  <th scope="row">dynamic-load</th>
+                  <td>102</td>
+                  <td>A reference or file loaded on demand during execution.</td>
+                </tr>
+                <tr>
+                  <th scope="row">imports</th>
+                  <td>70</td>
+                  <td>A script imports another Python module.</td>
+                </tr>
+                <tr>
+                  <th scope="row">invokes</th>
+                  <td>66</td>
+                  <td>A skill or hook invokes a helper script.</td>
+                </tr>
+                <tr>
+                  <th scope="row">lazy-load</th>
+                  <td>38</td>
+                  <td>A demand-pull reference listed for on-demand injection.</td>
+                </tr>
+                <tr>
+                  <th scope="row">suggests</th>
+                  <td>33</td>
+                  <td>A next-step skill affordance drawn from the skill graph.</td>
+                </tr>
+                <tr>
+                  <th scope="row">delegates</th>
+                  <td>18</td>
+                  <td>A skill delegates work to a subagent.</td>
+                </tr>
+                <tr>
+                  <th scope="row">auto-loads</th>
+                  <td>17</td>
+                  <td>A path-scoped rule auto-loads when matching files are edited.</td>
+                </tr>
+                <tr>
+                  <th scope="row">orchestrates</th>
+                  <td>17</td>
+                  <td>A skill orchestrates a lifecycle hook (pre-skill / post-skill).</td>
+                </tr>
+                <tr>
+                  <th scope="row">eager-load</th>
+                  <td>14</td>
+                  <td>A mandatory reference injected up front by <code>ref-load</code>.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="lifecycle-and-delegation">
+          <h2 id="lifecycle-and-delegation">Lifecycle path and delegation patterns</h2>
+          <p>
+            Reading the graph along the lifecycle path shows a consistent shape.
+            The canonical path runs
+            <code>/research</code> (or <code>/explain</code>) →
+            <code>/design</code> | <code>/plan</code> → <code>/implement</code> →
+            <code>/critique</code> → <code>/document</code> |
+            <code>/communicate</code> → <code>/reflect</code>. Most user-facing
+            skills <em>orchestrate</em> the two internal hooks — <code>/pre-skill</code>
+            at entry and <code>/post-skill</code> at exit — which is why the
+            <code>orchestrates</code> edges (17) cluster on those two hook nodes.
+            The hooks in turn <em>invoke</em> the largest fan-out of scripts:
+            <code>/post-skill</code> alone drives ten script invocations (brief
+            marking, index regeneration, decision digest, preflight, commit-scope
+            verification, telemetry), the single densest node in the control-flow
+            layer.
+          </p>
+          <p>
+            Delegation follows a clean split between <em>evaluator</em> and
+            <em>generator</em> agents. <code>/critique</code> is the heaviest
+            delegator — it hands off to seven evaluator agents (code-reviewer,
+            harness-health-evaluator, migration-validator, semiotic-inspector,
+            standards-checker, test-plan-generator, test-runner) — while generator
+            skills such as <code>/document</code>, <code>/communicate</code>,
+            <code>/onboard</code>, and <code>/explain</code> each delegate to a
+            single matching generator agent. <code>/research</code> delegates to
+            the council-debate and research-reviewer evaluators. This is why the
+            18 <code>delegates</code> edges concentrate on a handful of
+            orchestrating skills rather than spreading evenly.
+          </p>
+          <p>
+            The reference layer dominates by volume. Combined,
+            <code>reads</code> (121), <code>dynamic-load</code> (102),
+            <code>lazy-load</code> (38), <code>auto-loads</code> (17), and
+            <code>eager-load</code> (14) account for the majority of all edges —
+            reflecting that most of the harness's connectivity is knowledge
+            wiring (which reference a component consults) rather than direct
+            control flow. The <code>imports</code> edges (70) capture the Python
+            module graph beneath the scripts, and <code>suggests</code> (33)
+            encodes the next-step affordances that let one completed skill point
+            the user at the appropriate follow-up.
+          </p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="skill-map.html">Skill Map</a> &mdash; the skill-to-skill and skill-to-agent relationships extracted from the same topology data.</li>
+            <li><a href="skills-catalog.html">Skills Catalog</a> &mdash; the seventeen skill nodes as a lookup, with context budgets and lifecycle roles.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Reference</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/reference sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

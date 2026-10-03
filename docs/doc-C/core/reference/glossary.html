@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="reference">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="Terminology reference for SEJA: harness actors, Semiotic Engineering concepts, theoretical foundations, and notation conventions, as a readable HTML table.">
+  <title>Glossary — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/reference sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Glossary</h1>
+      <p>Canonical definitions for SEJA's actors, Semiotic Engineering concepts, theoretical foundations, and notation conventions.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Reference</a></li>
+        <li aria-current="page">Glossary</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-reference">reference</span>
+          <span class="badge core-reference">reference</span>
+        </p>
+
+        <section data-diataxis="reference" aria-labelledby="overview">
+          <h2 id="overview">Overview</h2>
+          <p>
+            This glossary holds the canonical wording for the terms SEJA uses to
+            describe itself and the actors it governs. The source of truth is
+            <code>.claude/references/general/shared-definitions.md</code>; when the
+            same term appears in a skill, agent, plan, or reference file it should
+            mean exactly what it means here. The tables below are fully readable
+            with JavaScript disabled — the in-page filter and table of contents are
+            progressive enhancement layered on by <code>nav.js</code>, never a hard
+            dependency for reading a definition.
+          </p>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="terminology">
+          <h2 id="terminology">Terminology</h2>
+          <p>
+            Core terms for how SEJA describes itself and the actors it governs.
+            Every skill, agent, plan, and reference file should use these terms
+            consistently.
+          </p>
+          <table>
+            <caption>SEJA actor and category terminology.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Term</th>
+                <th scope="col">Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">harness</th>
+                <td>SEJA's category: the governance layer that constrains and shapes the model's behavior through skills, rules, references, agents, and lifecycle hooks. An agent harness is not a programming framework — it does not provide libraries, base classes, or runtime abstractions. It provides governance, constraints, and lifecycle management. The primary compound is "SEJA is an agent harness grounded in semiotic engineering."</td>
+              </tr>
+              <tr>
+                <th scope="row">the agent</th>
+                <td>Claude — the LLM and CLI tool. Refers to the model's raw capabilities: generating code, answering questions, using tools. When a sentence describes behavior that exists without SEJA governance, use "the agent." Example: "The agent can generate code, but without governance it skips planning and review."</td>
+              </tr>
+              <tr>
+                <th scope="row">the harnessed agent</th>
+                <td>The composite of Claude operating within the SEJA harness. When the harness shapes the agent's behavior — reading the constitution, following lifecycle skills, applying review perspectives, consulting design intent before coding — the result is the harnessed agent. Use this term when SEJA's contribution to the behavior should be visible.</td>
+              </tr>
+              <tr>
+                <th scope="row">subagent</th>
+                <td>A specialized agent delegated to by the main agent via the Agent tool. Subagents run in isolated context windows with focused prompts (e.g., <code>code-reviewer</code>, <code>document-generator</code>, <code>harness-health-evaluator</code>). See <code>.claude/agents/</code> for the full inventory.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="semiotic-engineering">
+          <h2 id="semiotic-engineering">Semiotic Engineering concepts</h2>
+          <table>
+            <caption>Semiotic Engineering concepts as applied in SEJA.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Term</th>
+                <th scope="col">Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">metacommunication message</th>
+                <td>A designer-to-user message conveyed throughout the system and UI. Semiotic Engineering summarizes it as: "Here is my understanding of who you are, what I've learned you want or need to do, in which preferred ways, and why. This is the system that I have therefore designed for you, and this is the way you can or should use it in order to fulfill a range of purposes that fall within this vision."</td>
+              </tr>
+              <tr>
+                <th scope="row">phrasing rule (non-negotiable)</th>
+                <td>All metacommunication messages — in templates, project files, plans, briefs, per-feature logs, and EMT answers — must use first-person "I" for the designer and second-person "you" for the user. Never use "the designer", "the system", "the user" (third-person), passive voice, or imperative mood. Example: write "I designed a postpone shortcut for you because I know you tend to over-schedule" — not "The designer provides a postpone shortcut."</td>
+              </tr>
+              <tr>
+                <th scope="row">verbatim rule</th>
+                <td>When a user provides a metacommunication message as input (during <code>/design</code>, in a spec, in <code>product-design-as-intended.md</code>, or as a <code>--framing metacomm</code> brief), the agent must record it exactly as written, without summarization or editing. The designer's precise wording carries intentional nuance; paraphrasing distorts design intent.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="theoretical-foundations">
+          <h2 id="theoretical-foundations">Theoretical Foundations</h2>
+          <p>
+            SEJA is grounded in Semiotic Engineering (SemEng), a theory of HCI that
+            treats human-computer interaction as computer-mediated human
+            communication. The table maps SEJA concepts to their SemEng origins for
+            intellectual traceability — skills and agents do not require users to
+            know SemEng terminology.
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>SEJA concepts and their Semiotic Engineering origins.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">SEJA Concept</th>
+                  <th scope="col">SemEng Origin</th>
+                  <th scope="col">Source</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Metacommunication files</th>
+                  <td>Metacommunication template — abstract designer-to-user message</td>
+                  <td>[SemEng-2005, Ch. 1 &amp; 3]</td>
+                </tr>
+                <tr>
+                  <th scope="row">First-person "I/you" phrasing rule</th>
+                  <td>Designer's personal engagement — designers as communicators</td>
+                  <td>[SemEng-2005, Ch. 3 p.84]</td>
+                </tr>
+                <tr>
+                  <th scope="row">Extended Metacommunication Template (EMT)</th>
+                  <td>EMT with guiding questions per lifecycle stage (Analysis, Design, Prototype, Evaluation)</td>
+                  <td>[EMT-Ethics-2021, pp.365-368]</td>
+                </tr>
+                <tr>
+                  <th scope="row">Spec-drift detection (as-coded vs. as-intended)</th>
+                  <td>Communicability monitoring — tracking design-intent transmission</td>
+                  <td>[SemEng-2005, Ch. 4; SemEng-Methods-2009]</td>
+                </tr>
+                <tr>
+                  <th scope="row">Constitution (immutable principles)</th>
+                  <td>Value inscription governance — making implicit values explicit</td>
+                  <td>[SemEng-2005, Ch. 1 pp.9-10]</td>
+                </tr>
+                <tr>
+                  <th scope="row">Design → plan → implement → check pipeline</th>
+                  <td>Meaning propagation — conception-to-code transforms</td>
+                  <td>[SigniFYI-2016]</td>
+                </tr>
+                <tr>
+                  <th scope="row">Review perspectives (16 lenses)</th>
+                  <td>Communicability evaluation — segmented multi-viewpoint analysis</td>
+                  <td>[SemEng-2005, Ch. 4; SemEng-Methods-2009]</td>
+                </tr>
+                <tr>
+                  <th scope="row">Council-debate agent</th>
+                  <td>Formalized abductive reasoning with multiple perspectives</td>
+                  <td>[SemEng-2005, Ch. 2 on abduction]</td>
+                </tr>
+                <tr>
+                  <th scope="row">Pre/post-skill pipelines</th>
+                  <td>Reflection in/on action — structured reflection around each action</td>
+                  <td>[SemEng-2005, Ch. 1, citing Schön 1983]</td>
+                </tr>
+                <tr>
+                  <th scope="row">Behavior-evolution reconstruction</th>
+                  <td>Reflection on practice — surfacing tacit understandings</td>
+                  <td>[SemEng-2005, Ch. 1, citing Schön 1983]</td>
+                </tr>
+                <tr>
+                  <th scope="row">Role families (BLD/SHP/GRD) + expertise levels (L1-L3)</th>
+                  <td>Multi-audience metacommunication — segmenting the "you"</td>
+                  <td>[SemEng-2005, Ch. 3 &amp; 6]</td>
+                </tr>
+                <tr>
+                  <th scope="row"><code>_output/</code> infrastructure (INDEX, briefs, plans)</th>
+                  <td>SigniFYIng Traces — capture/access infrastructure</td>
+                  <td>[SigniFYI-2016]</td>
+                </tr>
+                <tr>
+                  <th scope="row"><code>conventions.md</code> (project signification system)</th>
+                  <td>Signification systems — conventionalized expression-content pairs</td>
+                  <td>[SemEng-2005, Ch. 2, citing Eco 1976]</td>
+                </tr>
+                <tr>
+                  <th scope="row">Communicability review questions (UX/DX perspectives)</th>
+                  <td>CEM 13 communicability utterances</td>
+                  <td>[SemEng-2005, Ch. 4 pp.123-138]</td>
+                </tr>
+                <tr>
+                  <th scope="row">Sign classification lens (UX perspective)</th>
+                  <td>Three classes of interface signs (static, dynamic, metalinguistic)</td>
+                  <td>[SemEng-2005, Ch. 4; SemEng-Methods-2009]</td>
+                </tr>
+                <tr>
+                  <th scope="row">CDN review questions (API/ARCH perspectives)</th>
+                  <td>Cognitive Dimensions of Notations — 14 dimensions</td>
+                  <td>[SigniFYI-2016, citing Green &amp; Petre]</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="notation-conventions">
+          <h2 id="notation-conventions">Notation Conventions</h2>
+          <table>
+            <caption>Notation and identifier conventions used across SEJA reference files.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Notation</th>
+                <th scope="col">Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row"><code>standards.md § Backend &gt; 6</code></th>
+                <td>Standards-section notation. <code>§ &lt;Domain&gt;</code> identifies the H2 section (Backend, Frontend, Testing, i18n for <code>standards.md</code>; UX patterns, Graphic / visual design for <code>design-standards.md</code>) and <code>&gt; N</code> identifies the H3 subsection whose heading begins with <code>N.</code>. Original pre-2.8.1 numbers are preserved, so <code>backend-standards §6</code> maps to <code>standards.md § Backend &gt; 6</code> by direct substitution.</td>
+              </tr>
+              <tr>
+                <th scope="row"><code>&lt;!-- STATUS: … --&gt;</code></th>
+                <td>Inline lifecycle marker placed immediately before a section heading — invisible in rendered Markdown, machine-parseable by agent tooling. Current scheme is a lowercase multi-value marker with the state machine <code>proposed → implemented → established → superseded</code>; the legacy uppercase <code>STATUS: IMPLEMENTED</code> remains valid.</td>
+              </tr>
+              <tr>
+                <th scope="row"><code>ESTABLISHED:</code></th>
+                <td>Promotion stamp: <code>&lt;!-- ESTABLISHED: plan-NNNNNN | YYYY-MM-DD | vX.Y.Z --&gt;</code>. Applied when a human confirms promotion of an IMPLEMENTED item. The <code>vX.Y.Z</code> field is optional (date-only for projects without semver).</td>
+              </tr>
+              <tr>
+                <th scope="row"><code>REQ-TYPE-NNN</code></th>
+                <td>Stable, machine-parseable requirement identifier placed as an HTML comment before the heading, row, or bullet it traces. Type prefixes include ENT, PERM, VAL, UX, MC, JM, I18N, DELTA. NNN is a zero-padded 3-digit counter per type. Security-classified types (PERM, VAL) are blocking at preflight; the rest are advisory.</td>
+              </tr>
+              <tr>
+                <th scope="row"><code>D-NNN</code></th>
+                <td>Design-intent Decision entry identifier (DDR shape) under <code>product-design-as-intended.md § Decisions</code>. Orthogonal to <code>REQ-TYPE-NNN</code> — a separate taxonomy, never intermixed. Never write <code>REQ-D-NNN</code> collisions.</td>
+              </tr>
+              <tr>
+                <th scope="row"><code>advis*</code> (two senses)</th>
+                <td>Sense A — the artifact type <code>/research</code> produces (formerly <code>/advise</code>); new writes use <code>research</code>. Sense B — the engineering adjective meaning non-blocking / informational (unchanged). When you encounter <code>advis*</code>, ask: artifact type or severity?</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="agents-catalog.html">Agents Catalog</a> &mdash; the subagents referenced under the "subagent" definition.</li>
+            <li><a href="skills-catalog.html">Skills Catalog</a> &mdash; the skills whose lifecycle these terms describe.</li>
+            <li><a href="../concepts/sign-system.html">The Sign System</a> &mdash; how the signification-system concept shapes SEJA's interface signs.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Reference</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/reference sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

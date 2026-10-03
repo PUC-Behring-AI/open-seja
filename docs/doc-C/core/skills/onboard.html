@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How-to guide for the /onboard skill: generate a tailored onboarding plan for a new team member based on their role family and expertise level.">
+  <title>/onboard — SEJA Documentation</title>
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>/onboard</h1>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Skills</a></li>
+        <li aria-current="page">/onboard</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge core-skills">skills</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="what-it-does">
+          <h2 id="what-it-does">What it does</h2>
+          <p><code>/onboard</code> generates a personalised onboarding plan for a new team member &mdash; what to learn, in what order, and where to find things &mdash; based on their role family and expertise level. Three role families are supported: <strong>Builder</strong> (BLD &mdash; engineers, DevOps, infra), <strong>Shaper</strong> (SHP &mdash; product designers, PMs, UX researchers, analysts), and <strong>Guardian</strong> (GRD &mdash; QA, security, tech leads, engineering managers). Role families may be combined. Three expertise levels tailor the depth: <strong>L1 Contributor</strong> (new to the role or project), <strong>L2 Expert</strong> (experienced practitioner needing trade-off context), and <strong>L3 Leader</strong> (technical leader or architect).</p>
+          <p>Output is written to a date-stamped folder under <code>_output/onboarding-plans/</code> in Markdown, HTML, or both (the <code>--format</code> flag; default is both). Batch flags &mdash; <code>--all</code> (all nine role&times;level combinations), <code>--all-levels &lt;role&gt;</code>, <code>--all-roles &lt;level&gt;</code>, and <code>--batch</code> &mdash; generate multiple plans in parallel. An optional <code>--area</code> focuses the plan on a domain such as backend, frontend, or auth.</p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="when-to-run">
+          <h2 id="when-to-run">When to run it</h2>
+          <p>Run <code>/onboard</code> when a new team member is joining and you want a structured, role-appropriate onboarding experience rather than ad-hoc knowledge transfer. It is equally useful when <em>you</em> are the newcomer and want a clear learning path into the project and the toolkit.</p>
+          <p>It is not for stakeholder updates (use <code>/communicate</code>) or API and architecture documentation (use <code>/document</code>). If arguments are missing and you are not in batch mode, the skill asks for the role family and expertise level interactively.</p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="how-it-fits">
+          <h2 id="how-it-fits">How it fits the lifecycle</h2>
+          <p><code>/onboard</code> sits on the communication side of the canonical path &mdash; <code>/research</code> &rarr; <code>/design</code> | <code>/plan</code> &rarr; <code>/implement</code> &rarr; <code>/critique</code> &rarr; <code>/document</code> | <code>/communicate</code> &rarr; <code>/reflect</code>. Where <code>/communicate</code> produces stakeholder updates and <code>/document</code> produces system reference, <code>/onboard</code> produces role-tailored ramp-up material for people entering the project.</p>
+          <p>It draws on the project&rsquo;s as-coded design and conventions to ground the plan in the real system, so it is most useful once a project has taken shape. A natural companion is <code>/communicate</code> when you also need stakeholder material for the same audience.</p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="../operations/team-and-stakeholders.html">Team and stakeholders</a> &mdash; who the harness&rsquo;s audience-routed skills serve.</li>
+            <li><a href="communicate.html">/communicate</a> &mdash; generate stakeholder material for a specific audience.</li>
+            <li><a href="document.html">/document</a> &mdash; produce system-facing reference documentation.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Skills</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

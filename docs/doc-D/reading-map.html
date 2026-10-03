@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="how-to">
+  <meta name="doc-volume" content="1">
+  <meta name="doc-chapter" content="3">
+  <meta name="doc-phase" content="1">
+  <meta name="doc-status" content="draft">
+
+  <title>Reading Map -- SEJA Documentation</title>
+
+    <!-- CSS depth: 0 -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="index.html">Collection</a></li>
+      <li>Reading Map</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>Reading Map</h1>
+
+      <section id="purpose" data-diataxis="how-to">
+        <p>
+          This page helps you find the right content for your role and your
+          immediate question. Instead of reading the entire collection
+          linearly, use the decision tree below to identify your audience
+          profile, then follow the recommended path to the volumes and
+          chapters that match your goals.
+        </p>
+        <p>
+          The Reading Map also serves as Chapter 3 of
+          <a href="onboarding/index.html">Vol. 1: Onboarding and Orientation</a>.
+        </p>
+      </section>
+
+      <section id="audiences" data-diataxis="reference">
+        <h2>Audience Profiles</h2>
+
+        <dl>
+          <dt id="audience-new-user">A. New User</dt>
+          <dd>
+            You have never used SEJA before. You want to understand what the
+            harness is, install it, and run your first project.
+          </dd>
+
+          <dt id="audience-experienced-user">B. Experienced User</dt>
+          <dd>
+            You have a working SEJA project. You want task-oriented guidance
+            on specific skills, the lifecycle pipeline, or day-to-day
+            operations.
+          </dd>
+
+          <dt id="audience-advanced-user">C. Advanced User / Contributor</dt>
+          <dd>
+            You want to extend, customize, or contribute to SEJA. You need
+            to understand the enforcement architecture, scripting
+            internals, and release process.
+          </dd>
+
+          <dt id="audience-researcher">D. Academic / Researcher</dt>
+          <dd>
+            You are interested in the semiotic engineering foundations, the
+            metacommunication theory, or the epistemic thesis behind the
+            harness design.
+          </dd>
+
+          <dt id="audience-agent">E. AI Agent Reader</dt>
+          <dd>
+            You are an AI agent processing the harness documentation
+            programmatically. You need to understand the sign system, the
+            marker conventions, and how to read the harness as a
+            metacommunication message.
+          </dd>
+        </dl>
+      </section>
+
+      <section id="questions" data-diataxis="reference">
+        <h2>Question Types</h2>
+
+        <dl>
+          <dt>Q1. How do I get started?</dt>
+          <dd>Installation, first project, initial orientation.</dd>
+
+          <dt>Q2. How do I use skill X?</dt>
+          <dd>Task-oriented guidance for specific skills and workflows.</dd>
+
+          <dt>Q3. How does the harness work internally?</dt>
+          <dd>Architecture, enforcement, scripts, and governance.</dd>
+
+          <dt>Q4. What is the theory behind this?</dt>
+          <dd>Semiotic engineering foundations, metacommunication, epistemic design.</dd>
+
+          <dt>Q5. How do I extend or customize?</dt>
+          <dd>Contributing, adding skills, modifying governance, release process.</dd>
+        </dl>
+      </section>
+
+      <section id="decision-tree-visual" data-diataxis="how-to">
+        <h2>Decision Tree</h2>
+
+        <p>
+          Start at the top. Pick your audience profile (A--E), then follow
+          the branch for your question (Q1--Q5) to find the recommended
+          volume and chapter.
+        </p>
+
+        <figure>
+          <pre class="decision-tree" role="img" aria-label="Reading Map decision tree. Five audience profiles (A through E) each branch into five question types (Q1 through Q5), leading to specific volume and chapter recommendations.">
+                          +------------------+
+                          |  Who are you?    |
+                          +--------+---------+
+                                   |
+          +----------+----------+--+--+----------+----------+
+          |          |          |     |          |          |
+         [A]       [B]       [C]   [D]       [E]
+      New User  Experienced Advanced Academic  AI Agent
+                   User     / Contrib Researcher Reader
+          |          |          |     |          |
+     What is your question?    |     |          |
+          |          |          |     |          |
+  +---+---+---+  +--+--+--+  ...   ...        ...
+  |   |   |   |  |  |  |  |
+ Q1  Q2  Q3  Q4 Q1 Q2 Q3 Q4
+  |   |   |   |  |  |  |  |
+  v   v   v   v  v  v  v  v
+
+  A+Q1: Vol.1 Onboarding      B+Q1: Vol.1 Quickstart
+        what-seja-is.html            quickstart.html
+        quickstart.html              (then Vol.3)
+
+  A+Q2: Vol.3 Execution        B+Q2: Vol.3 Execution
+        lifecycle-pipeline           skills-in-depth
+        skills-in-depth              plans-and-implementation
+
+  A+Q3: Vol.1 What SEJA Is     B+Q3: Vol.4 Governance
+        (high-level only)            enforcement-architecture
+                                     scripts-and-automation
+
+  A+Q4: Vol.5 Foundations       B+Q4: Vol.2 Design Layer
+        software-as-communication    metacommunication
+        (gentle intro)               constitution-guide
+
+  A+Q5: Vol.1 Quickstart       B+Q5: Vol.4 Governance
+        (setup for later             maintenance-and-drift
+         customization)              release-and-publishing
+
+  C+Q1: Vol.1 Quickstart       D+Q1: Vol.5 Foundations
+        (brief refresher)           software-as-communication
+                                     sign-systems
+
+  C+Q2: Vol.3 Execution        D+Q2: Vol.2 Design Layer
+        subagent-delegation          metacommunication
+        quality-and-critique         design-intent-files
+
+  C+Q3: Vol.4 Governance       D+Q3: Vol.4 Governance
+        enforcement-architecture     enforcement-architecture
+        scripts-and-automation       (structural analysis)
+
+  C+Q4: Vol.2 Design Layer     D+Q4: Vol.5 Foundations
+        marker-system                extended-metacommunication
+        ux-research                  reflective-practice
+                                     abduction-plural-readings
+                                     governable-epistemic
+
+  C+Q5: Vol.4 Governance       D+Q5: Vol.2 Design Layer
+        release-and-publishing       ux-research
+        maintenance-and-drift        marker-system
+
+  E+Q1: Vol.5 Foundations       E+Q4: Vol.5 Foundations
+        agent-reads-harness          extended-metacommunication
+        sign-systems                 governable-epistemic
+
+  E+Q2: Vol.3 Execution        E+Q5: Vol.4 Governance
+        lifecycle-pipeline           scripts-and-automation
+        skills-in-depth              enforcement-architecture
+
+  E+Q3: Vol.2 Design Layer
+        marker-system
+        design-intent-files
+</pre>
+          <figcaption>
+            Decision tree: audience profile crossed with question type.
+            Each leaf points to one or more chapters. See the lookup table
+            below for the complete mapping with direct links.
+          </figcaption>
+        </figure>
+      </section>
+
+      <section id="lookup-table" data-diataxis="reference">
+        <h2>Flat Lookup Table</h2>
+
+        <p>
+          The table below provides the same routing as the decision tree in
+          a flat, searchable format. Each row maps an audience-question
+          combination to specific chapters with direct links.
+        </p>
+
+        <table class="lookup-table">
+          <thead>
+            <tr>
+              <th scope="col">Audience</th>
+              <th scope="col">Question</th>
+              <th scope="col">Start Here</th>
+              <th scope="col">Then Read</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <!-- A. New User -->
+            <tr>
+              <th scope="row" rowspan="5">A. New User</th>
+              <td>Q1. Get started</td>
+              <td><a href="onboarding/what-seja-is.html">What SEJA Is</a></td>
+              <td><a href="onboarding/quickstart.html">Quickstart</a></td>
+            </tr>
+            <tr>
+              <td>Q2. Use skill X</td>
+              <td><a href="execution-layer/lifecycle-pipeline.html">Lifecycle Pipeline</a></td>
+              <td><a href="execution-layer/skills-in-depth.html">Skills in Depth</a></td>
+            </tr>
+            <tr>
+              <td>Q3. How it works</td>
+              <td><a href="onboarding/what-seja-is.html">What SEJA Is</a></td>
+              <td><a href="design-layer/metacommunication.html">Metacommunication</a></td>
+            </tr>
+            <tr>
+              <td>Q4. Theory</td>
+              <td><a href="foundations/software-as-communication.html">Software as Designed Communication</a></td>
+              <td><a href="foundations/sign-systems.html">Sign Systems</a></td>
+            </tr>
+            <tr>
+              <td>Q5. Extend</td>
+              <td><a href="onboarding/quickstart.html">Quickstart</a></td>
+              <td><a href="governance-layer/maintenance-and-drift.html">Maintenance and Drift</a></td>
+            </tr>
+
+            <!-- B. Experienced User -->
+            <tr>
+              <th scope="row" rowspan="5">B. Experienced User</th>
+              <td>Q1. Get started</td>
+              <td><a href="onboarding/quickstart.html">Quickstart</a></td>
+              <td><a href="execution-layer/lifecycle-pipeline.html">Lifecycle Pipeline</a></td>
+            </tr>
+            <tr>
+              <td>Q2. Use skill X</td>
+              <td><a href="execution-layer/skills-in-depth.html">Skills in Depth</a></td>
+              <td><a href="execution-layer/plans-and-implementation.html">Plans and Implementation</a></td>
+            </tr>
+            <tr>
+              <td>Q3. How it works</td>
+              <td><a href="governance-layer/enforcement-architecture.html">Enforcement Architecture</a></td>
+              <td><a href="governance-layer/scripts-and-automation.html">Scripts and Automation</a></td>
+            </tr>
+            <tr>
+              <td>Q4. Theory</td>
+              <td><a href="design-layer/metacommunication.html">Metacommunication</a></td>
+              <td><a href="design-layer/constitution-guide.html">Constitution Guide</a></td>
+            </tr>
+            <tr>
+              <td>Q5. Extend</td>
+              <td><a href="governance-layer/maintenance-and-drift.html">Maintenance and Drift</a></td>
+              <td><a href="governance-layer/release-and-publishing.html">Release and Publishing</a></td>
+            </tr>
+
+            <!-- C. Advanced User / Contributor -->
+            <tr>
+              <th scope="row" rowspan="5">C. Advanced / Contributor</th>
+              <td>Q1. Get started</td>
+              <td><a href="onboarding/quickstart.html">Quickstart</a></td>
+              <td><a href="governance-layer/enforcement-architecture.html">Enforcement Architecture</a></td>
+            </tr>
+            <tr>
+              <td>Q2. Use skill X</td>
+              <td><a href="execution-layer/subagent-delegation.html">Subagent Delegation</a></td>
+              <td><a href="execution-layer/quality-and-critique.html">Quality and Critique</a></td>
+            </tr>
+            <tr>
+              <td>Q3. How it works</td>
+              <td><a href="governance-layer/enforcement-architecture.html">Enforcement Architecture</a></td>
+              <td><a href="governance-layer/scripts-and-automation.html">Scripts and Automation</a></td>
+            </tr>
+            <tr>
+              <td>Q4. Theory</td>
+              <td><a href="design-layer/marker-system.html">Marker System</a></td>
+              <td><a href="design-layer/ux-research.html">UX Research</a></td>
+            </tr>
+            <tr>
+              <td>Q5. Extend</td>
+              <td><a href="governance-layer/release-and-publishing.html">Release and Publishing</a></td>
+              <td><a href="governance-layer/maintenance-and-drift.html">Maintenance and Drift</a></td>
+            </tr>
+
+            <!-- D. Academic / Researcher -->
+            <tr>
+              <th scope="row" rowspan="5">D. Academic / Researcher</th>
+              <td>Q1. Get started</td>
+              <td><a href="foundations/software-as-communication.html">Software as Designed Communication</a></td>
+              <td><a href="foundations/sign-systems.html">Sign Systems</a></td>
+            </tr>
+            <tr>
+              <td>Q2. Use skill X</td>
+              <td><a href="design-layer/metacommunication.html">Metacommunication</a></td>
+              <td><a href="design-layer/design-intent-files.html">Design Intent Files</a></td>
+            </tr>
+            <tr>
+              <td>Q3. How it works</td>
+              <td><a href="governance-layer/enforcement-architecture.html">Enforcement Architecture</a></td>
+              <td><a href="foundations/governable-epistemic.html">Governable Epistemic</a></td>
+            </tr>
+            <tr>
+              <td>Q4. Theory</td>
+              <td><a href="foundations/extended-metacommunication.html">Extended Metacommunication</a></td>
+              <td><a href="foundations/reflective-practice.html">Reflective Practice</a>,
+                <a href="foundations/abduction-plural-readings.html">Abduction and Plural Readings</a>,
+                <a href="foundations/governable-epistemic.html">Governable Epistemic</a></td>
+            </tr>
+            <tr>
+              <td>Q5. Extend</td>
+              <td><a href="design-layer/ux-research.html">UX Research</a></td>
+              <td><a href="design-layer/marker-system.html">Marker System</a></td>
+            </tr>
+
+            <!-- E. AI Agent Reader -->
+            <tr>
+              <th scope="row" rowspan="5">E. AI Agent Reader</th>
+              <td>Q1. Get started</td>
+              <td><a href="foundations/agent-reads-harness.html">Agent Reads Harness</a></td>
+              <td><a href="foundations/sign-systems.html">Sign Systems</a></td>
+            </tr>
+            <tr>
+              <td>Q2. Use skill X</td>
+              <td><a href="execution-layer/lifecycle-pipeline.html">Lifecycle Pipeline</a></td>
+              <td><a href="execution-layer/skills-in-depth.html">Skills in Depth</a></td>
+            </tr>
+            <tr>
+              <td>Q3. How it works</td>
+              <td><a href="design-layer/marker-system.html">Marker System</a></td>
+              <td><a href="design-layer/design-intent-files.html">Design Intent Files</a></td>
+            </tr>
+            <tr>
+              <td>Q4. Theory</td>
+              <td><a href="foundations/extended-metacommunication.html">Extended Metacommunication</a></td>
+              <td><a href="foundations/governable-epistemic.html">Governable Epistemic</a></td>
+            </tr>
+            <tr>
+              <td>Q5. Extend</td>
+              <td><a href="governance-layer/scripts-and-automation.html">Scripts and Automation</a></td>
+              <td><a href="governance-layer/enforcement-architecture.html">Enforcement Architecture</a></td>
+            </tr>
+
+          </tbody>
+        </table>
+      </section>
+
+      <section id="reading-paths" data-diataxis="how-to">
+        <h2>Recommended Reading Paths</h2>
+
+        <p>
+          If you prefer a guided sequence rather than individual chapter
+          lookups, these curated paths give you a coherent reading order
+          for each audience profile.
+        </p>
+
+        <ul class="audience-cards">
+
+          <li class="audience-card">
+            <h3>A. New User Path</h3>
+            <p>From zero to working project, then understanding why it works.</p>
+            <ol>
+              <li><a href="onboarding/what-seja-is.html">What SEJA Is</a> -- understand the big picture</li>
+              <li><a href="onboarding/quickstart.html">Quickstart</a> -- install and run your first project</li>
+              <li><a href="execution-layer/lifecycle-pipeline.html">Lifecycle Pipeline</a> -- learn the canonical skill sequence</li>
+              <li><a href="execution-layer/skills-in-depth.html">Skills in Depth</a> -- explore individual skills</li>
+              <li><a href="foundations/software-as-communication.html">Software as Designed Communication</a> -- optional theory grounding</li>
+            </ol>
+          </li>
+
+          <li class="audience-card">
+            <h3>B. Experienced User Path</h3>
+            <p>Deepen your day-to-day practice and understand the design behind it.</p>
+            <ol>
+              <li><a href="execution-layer/skills-in-depth.html">Skills in Depth</a> -- master specific skills</li>
+              <li><a href="execution-layer/plans-and-implementation.html">Plans and Implementation</a> -- plan-driven development</li>
+              <li><a href="execution-layer/quality-and-critique.html">Quality and Critique</a> -- validation and review</li>
+              <li><a href="design-layer/metacommunication.html">Metacommunication</a> -- why the harness communicates this way</li>
+              <li><a href="governance-layer/maintenance-and-drift.html">Maintenance and Drift</a> -- keeping your project healthy</li>
+            </ol>
+          </li>
+
+          <li class="audience-card">
+            <h3>C. Advanced User / Contributor Path</h3>
+            <p>Understand the internals so you can extend and contribute.</p>
+            <ol>
+              <li><a href="governance-layer/enforcement-architecture.html">Enforcement Architecture</a> -- how rules are enforced</li>
+              <li><a href="governance-layer/scripts-and-automation.html">Scripts and Automation</a> -- the helper script ecosystem</li>
+              <li><a href="execution-layer/subagent-delegation.html">Subagent Delegation</a> -- agent orchestration patterns</li>
+              <li><a href="design-layer/marker-system.html">Marker System</a> -- the lifecycle marker convention</li>
+              <li><a href="governance-layer/release-and-publishing.html">Release and Publishing</a> -- the release pipeline</li>
+            </ol>
+          </li>
+
+          <li class="audience-card">
+            <h3>D. Academic / Researcher Path</h3>
+            <p>Explore the theoretical foundations and research connections.</p>
+            <ol>
+              <li><a href="foundations/software-as-communication.html">Software as Designed Communication</a> -- the semiotic engineering premise</li>
+              <li><a href="foundations/sign-systems.html">Sign Systems</a> -- signs, classes, and interpretants</li>
+              <li><a href="foundations/extended-metacommunication.html">Extended Metacommunication</a> -- extending the theory to AI agents</li>
+              <li><a href="foundations/reflective-practice.html">Reflective Practice</a> -- reflection-in-action for harness design</li>
+              <li><a href="foundations/abduction-plural-readings.html">Abduction and Plural Readings</a> -- abductive reasoning in design</li>
+              <li><a href="foundations/governable-epistemic.html">Governable Epistemic</a> -- the governance thesis</li>
+            </ol>
+          </li>
+
+          <li class="audience-card">
+            <h3>E. AI Agent Reader Path</h3>
+            <p>Understand the harness as a sign system you can read and act on.</p>
+            <ol>
+              <li><a href="foundations/agent-reads-harness.html">Agent Reads Harness</a> -- how an AI agent interprets SEJA</li>
+              <li><a href="foundations/sign-systems.html">Sign Systems</a> -- the sign classes you will encounter</li>
+              <li><a href="design-layer/marker-system.html">Marker System</a> -- machine-readable markers and their semantics</li>
+              <li><a href="execution-layer/lifecycle-pipeline.html">Lifecycle Pipeline</a> -- the skill execution sequence</li>
+              <li><a href="governance-layer/enforcement-architecture.html">Enforcement Architecture</a> -- constraints that govern agent behavior</li>
+            </ol>
+          </li>
+
+        </ul>
+      </section>
+
+      <section id="volume-overview" data-diataxis="reference">
+        <h2>Volume and Chapter Reference</h2>
+
+        <p>
+          For reference, here is the complete chapter inventory organized by
+          volume. Use this when you know which volume you need but want to
+          see all available chapters at a glance.
+        </p>
+
+        <h3>Vol. 1: Onboarding and Orientation</h3>
+        <ol>
+          <li><a href="onboarding/what-seja-is.html">What SEJA Is</a></li>
+          <li><a href="onboarding/quickstart.html">Quickstart</a></li>
+          <li>Reading Map (this page)</li>
+          <li><a href="onboarding/glossary.html">Glossary</a></li>
+        </ol>
+
+        <h3>Vol. 2: The Design Layer</h3>
+        <ol>
+          <li><a href="design-layer/metacommunication.html">Metacommunication</a></li>
+          <li><a href="design-layer/constitution-guide.html">Constitution Guide</a></li>
+          <li><a href="design-layer/design-intent-files.html">Design Intent Files</a></li>
+          <li><a href="design-layer/marker-system.html">Marker System</a></li>
+          <li><a href="design-layer/ux-research.html">UX Research</a></li>
+        </ol>
+
+        <h3>Vol. 3: The Execution Layer</h3>
+        <ol>
+          <li><a href="execution-layer/lifecycle-pipeline.html">Lifecycle Pipeline</a></li>
+          <li><a href="execution-layer/skills-in-depth.html">Skills in Depth</a></li>
+          <li><a href="execution-layer/subagent-delegation.html">Subagent Delegation</a></li>
+          <li><a href="execution-layer/plans-and-implementation.html">Plans and Implementation</a></li>
+          <li><a href="execution-layer/quality-and-critique.html">Quality and Critique</a></li>
+        </ol>
+
+        <h3>Vol. 4: The Output and Governance Layer</h3>
+        <ol>
+          <li><a href="governance-layer/output-artifacts.html">Output Artifacts</a></li>
+          <li><a href="governance-layer/enforcement-architecture.html">Enforcement Architecture</a></li>
+          <li><a href="governance-layer/scripts-and-automation.html">Scripts and Automation</a></li>
+          <li><a href="governance-layer/maintenance-and-drift.html">Maintenance and Drift</a></li>
+          <li><a href="governance-layer/release-and-publishing.html">Release and Publishing</a></li>
+        </ol>
+
+        <h3>Vol. 5: Foundations and Philosophy</h3>
+        <ol>
+          <li><a href="foundations/software-as-communication.html">Software as Designed Communication</a></li>
+          <li><a href="foundations/sign-systems.html">Sign Systems</a></li>
+          <li><a href="foundations/extended-metacommunication.html">Extended Metacommunication</a></li>
+          <li><a href="foundations/reflective-practice.html">Reflective Practice</a></li>
+          <li><a href="foundations/abduction-plural-readings.html">Abduction and Plural Readings</a></li>
+          <li><a href="foundations/governable-epistemic.html">Governable Epistemic</a></li>
+          <li><a href="foundations/agent-reads-harness.html">Agent Reads Harness</a></li>
+        </ol>
+      </section>
+
+      <section id="how-to-use" data-diataxis="explanation">
+        <h2>How to Use This Map</h2>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> You do not need to read every chapter.
+            Pick the audience profile that fits you best, start with the
+            "Start Here" column in the lookup table, and follow the "Then
+            Read" links as your needs evolve. The
+            <a href="onboarding/glossary.html">Glossary</a> is available
+            as a reference at any point in your reading.
+          </p>
+        </aside>
+
+        <p>
+          The decision tree and lookup table present the same information in
+          two formats: the tree gives a visual overview of how audiences and
+          questions branch, while the table provides a direct link for each
+          combination. If you are unsure which audience profile fits you,
+          start with the New User path -- it provides the broadest
+          foundation.
+        </p>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 1: Onboarding and Orientation</h2>
+    <ol>
+      <li>
+        <a href="onboarding/what-seja-is.html">What SEJA Is (and Is Not)</a>
+      </li>
+      <li>
+        <a href="onboarding/quickstart.html">Quickstart</a>
+      </li>
+      <li aria-current="page">
+        <a href="reading-map.html">Reading Map</a>
+        <ul>
+          <li><a href="#audiences">Audience Profiles</a></li>
+          <li><a href="#questions">Question Types</a></li>
+          <li><a href="#decision-tree-visual">Decision Tree</a></li>
+          <li><a href="#lookup-table">Flat Lookup Table</a></li>
+          <li><a href="#reading-paths">Recommended Reading Paths</a></li>
+          <li><a href="#volume-overview">Volume and Chapter Reference</a></li>
+          <li><a href="#how-to-use">How to Use This Map</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="onboarding/glossary.html">Glossary and Shared Definitions</a>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="index.html">Collection Index</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

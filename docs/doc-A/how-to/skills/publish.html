@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="how-to">
+  <meta name="doc-volume" content="How-To Guides">
+  <meta name="doc-chapter" content="How to Publish a Release">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>How to Publish a Release -- SEJA Documentation</title>
+
+  <!-- CSS depth: 2 (sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../../index.html">Home</a>
+    <a href="../../tutorials/index.html">Tutorials</a>
+    <a href="../index.html">How-To Guides</a>
+    <a href="../../reference/index.html">Reference</a>
+    <a href="../../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../../index.html">Home</a></li>
+      <li><a href="../index.html">How-To Guides</a></li>
+      <li><a href="index.html">Skill-by-Skill Guides</a></li>
+      <li>How to Publish a Release</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-howto">
+    <article>
+      <p class="vol-accent"><strong>how-to</strong></p>
+
+      <h1>How to Publish a Release</h1>
+
+      <p>
+        Goal: cut a tagged release and push it to the public SEJA repository in one
+        step. The <code>/publish</code> skill wraps the full release pipeline:
+        preflight checks, tag creation, cloning the public repo, syncing harness
+        files, running smoke tests, committing, pushing, and closing the pending
+        <code>PUBLISH:</code> entry. It supports version inference from
+        <code>CHANGELOG.md</code> or an explicit version argument.
+      </p>
+
+      <aside class="callout-warning">
+        <p>
+          <strong>Maintainer workflow.</strong> <code>/publish</code> is for
+          harness maintainers cutting a public release. It is not part of the
+          feature-development lifecycle and does not apply to consumer projects
+          using the harness.
+        </p>
+      </aside>
+
+      <section id="when-to-use">
+        <h2>When to Use</h2>
+        <ul>
+          <li>You are ready to cut a public release of the harness.</li>
+          <li>You want a preview of the exact command sequence before a live run (use <code>--dry-run</code>).</li>
+        </ul>
+        <aside class="callout-tip">
+          <p>
+            <strong>Not for</strong> internal harness iteration (just commit
+            normally), changelog authoring (edit <code>seja-public/CHANGELOG.md</code>
+            directly), or harness upgrades in consumer projects (use
+            <code>/seja-setup --upgrade</code>).
+          </p>
+        </aside>
+      </section>
+
+      <section id="required-inputs">
+        <h2>Required Inputs</h2>
+        <ul>
+          <li>An optional version, e.g. <code>/publish v0.3.0</code>. Omit it to infer the next version from <code>CHANGELOG.md</code> and git tags.</li>
+          <li>Prerequisites: <code>seja-public/CHANGELOG.md</code> has content under <code>## Unreleased</code>, the working tree is clean, and the remote is reachable.</li>
+        </ul>
+      </section>
+
+      <section id="step-by-step">
+        <h2>Step by Step</h2>
+
+        <ol>
+          <li>
+            <strong>Prepare the changelog and working tree.</strong> Ensure
+            <code>seja-public/CHANGELOG.md</code> has content under
+            <code>## Unreleased</code> and commit any outstanding work so the tree is
+            clean.
+          </li>
+          <li>
+            <strong>Optionally run a quality gate.</strong> Run
+            <code>/critique preflight</code> beforehand for a go / no-go verdict.
+          </li>
+          <li>
+            <strong>Choose how to run.</strong>
+            <ul>
+              <li><strong>Dry run (<code>--dry-run</code>)</strong> -- Recommended when you want to verify the pipeline before a live push. NOT recommended as the final step -- it executes nothing destructive.</li>
+              <li><strong>Explicit version (<code>/publish v0.3.0</code>)</strong> -- Recommended when you know the exact version to cut.</li>
+              <li><strong>Inferred version (<code>/publish</code>)</strong> -- Recommended when you want the skill to propose the next version from the changelog and tags, then confirm with you.</li>
+              <li><strong>Non-interactive (<code>--yes</code>)</strong> -- Recommended for scripted releases where you accept all prompts. NOT recommended for a first release or when you want to review each step.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Run the skill.</strong> It runs preflight, cuts the tag, clones
+            the public repo, syncs harness files (stripping private content), runs
+            smoke tests, commits, and pushes.
+            <br><em>Expected output:</em> a tagged release pushed to the public
+            repository and the pending <code>PUBLISH:</code> entry closed.
+          </li>
+        </ol>
+      </section>
+
+      <section id="expected-outputs">
+        <h2>Expected Outputs</h2>
+        <ul>
+          <li>A new tag and a commit pushed to the public SEJA repository.</li>
+          <li>Private-only content stripped from the published copy by the sync pipeline.</li>
+          <li>The pending <code>PUBLISH:</code> ledger entry closed.</li>
+        </ul>
+      </section>
+
+      <section id="common-mistakes">
+        <h2>Common Mistakes</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th scope="col">Mistake</th><th scope="col">Better approach</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Publishing with a dirty working tree.</td>
+                <td>Commit or stash first. The pipeline expects a clean tree.</td>
+              </tr>
+              <tr>
+                <td>Forgetting to fill <code>## Unreleased</code> in the public changelog.</td>
+                <td>Author <code>seja-public/CHANGELOG.md</code> before publishing; version inference reads it.</td>
+              </tr>
+              <tr>
+                <td>Using <code>/publish</code> to upgrade a consumer project.</td>
+                <td>Consumer upgrades use <code>/seja-setup --upgrade</code>. <code>/publish</code> cuts the public release.</td>
+              </tr>
+              <tr>
+                <td>Skipping <code>--dry-run</code> on an unfamiliar release.</td>
+                <td>Preview the pipeline first; <code>--dry-run</code> shows the exact sequence with no destructive action.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="cross-references">
+        <h2>Cross-References</h2>
+        <ul>
+          <li><a href="../governance.html">Governance Operations</a> (Ch. 3) -- the priv/public sync pipeline and preflight in context.</li>
+          <li><a href="critique.html">How to Critique Quality</a> -- run <code>/critique preflight</code> before publishing.</li>
+          <li><a href="seja-setup.html">How to Set Up the Harness</a> -- consumer-side upgrades with <code>--upgrade</code>.</li>
+          <li><a href="../../reference/scripts-reference.html">Scripts Reference</a> (Vol. 3) -- the publish and sync scripts.</li>
+        </ul>
+      </section>
+
+    </article>
+
+    <nav aria-label="chapter navigation">
+      <a href="onboard.html">Back: How to Onboard a Team Member</a>
+      <a href="seja-setup.html">Next: How to Set Up the Harness</a>
+    </nav>
+
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../../reference/scripts-reference.html">Scripts Reference</a> -- the publish-pipeline and priv/public sync scripts.</li>
+        <li><a href="../../explanation/design-decisions.html">Design Decisions and Trade-offs</a> -- why publishing is a single guarded pipeline rather than manual steps.</li>
+      </ul>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#when-to-use">When to Use</a></li>
+      <li><a href="#required-inputs">Required Inputs</a></li>
+      <li><a href="#step-by-step">Step by Step</a></li>
+      <li><a href="#expected-outputs">Expected Outputs</a></li>
+      <li><a href="#common-mistakes">Common Mistakes</a></li>
+      <li><a href="#cross-references">Cross-References</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../../index.html">Collection Index</a>
+      <a href="../../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T20:50:00Z</p>
+  </footer>
+
+</body>
+</html>

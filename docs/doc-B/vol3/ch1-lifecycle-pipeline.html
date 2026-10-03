@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="3">
+  <meta name="doc-chapter" content="1">
+  <meta name="doc-phase" content="1">
+  <meta name="doc-status" content="draft">
+
+  <title>The Lifecycle Pipeline -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 3: The Execution Layer</a></li>
+      <li>The Lifecycle Pipeline</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>The Lifecycle Pipeline</h1>
+
+      <p>
+        Every SEJA skill invocation follows a three-phase pipeline:
+        <strong>pre-skill</strong> (6 stages that load context and log the
+        brief), <strong>skill execution</strong> (the skill's own work), and
+        <strong>post-skill</strong> (13 steps that commit artifacts, update
+        indexes, and flush telemetry). This chapter documents the pipeline
+        end-to-end: the canonical ordering of skills, the internal mechanics
+        of each lifecycle phase, the enforcement mechanisms that make the
+        pipeline mandatory, and the variations that adapt it to different
+        task shapes.
+      </p>
+
+      <!-- Section 1: The Canonical Path -->
+      <section data-diataxis="reference" id="canonical-path">
+        <h2>The Canonical Path</h2>
+
+        <p>
+          The lifecycle defines a recommended ordering for skill invocations.
+          This ordering is not arbitrary -- it mirrors the natural sequence of
+          software development activities, ensuring that each skill has the
+          context it needs from the skills that preceded it.
+        </p>
+
+        <h3>The Ordered Sequence</h3>
+
+        <p>
+          The canonical path, as declared in <code>CLAUDE.md</code>, is:
+        </p>
+
+        <pre><code><span class="token-command">/research</span> <span class="token-comment">(or /explain)</span>
+  > <span class="token-command">/design</span> | <span class="token-command">/plan</span>
+    > <span class="token-command">/implement</span>
+      > <span class="token-command">/critique</span>
+        > <span class="token-command">/document</span> | <span class="token-command">/communicate</span>
+          > <span class="token-command">/reflect</span></code></pre>
+
+        <p>
+          Each arrow represents a dependency: <code>/plan</code> needs the
+          understanding that <code>/research</code> produces;
+          <code>/implement</code> needs a plan to execute;
+          <code>/critique</code> needs implementation artifacts to evaluate.
+          The rule is: <strong>validate before you communicate</strong> -- a
+          critique must precede documentation or stakeholder communication so
+          that what you share has been checked against design intent.
+        </p>
+
+        <h3>First Iteration vs. Subsequent Iterations</h3>
+
+        <p>
+          On the first iteration of a new project, the path begins with
+          <code>/seja-setup</code>, which hands off to <code>/design</code>
+          to configure project-specific files (conventions, constitution,
+          design intent). From iteration 2 onward, the path starts with
+          <code>/research</code> (or <code>/explain</code>) to investigate
+          what you are about to change. The investigation step branches:
+        </p>
+
+        <ul>
+          <li>Into <code>/design</code> when the designer's intent needs to
+          change (new feature direction, revised domain model, updated
+          metacommunication message).</li>
+          <li>Into <code>/plan</code> when the intent is stable and the work
+          is an implementation of existing design.</li>
+        </ul>
+
+        <h3>When to Deviate</h3>
+
+        <p>
+          The canonical path is a recommendation, not a strait-jacket.
+          Legitimate deviations include:
+        </p>
+
+        <dl>
+          <dt>Skipping <code>/research</code> for trivial changes</dt>
+          <dd>
+            A one-line bug fix or typo correction does not require a research
+            phase. The designer may go directly to <code>/plan</code> (even
+            with <code>--light</code> for a lightweight proposal).
+          </dd>
+
+          <dt>Repeating <code>/critique</code> after rework</dt>
+          <dd>
+            If a critique surfaces issues that require implementation changes,
+            the path loops back: <code>/implement</code> (rework) followed
+            by <code>/critique</code> again. This loop may repeat until the
+            critique passes.
+          </dd>
+
+          <dt>Running <code>/explain drift</code> as an alignment workflow</dt>
+          <dd>
+            The <code>/explain drift</code> mode reconciles design specs with
+            as-coded state. It can be invoked at any point when spec drift is
+            suspected, without following the full canonical sequence.
+          </dd>
+
+          <dt>Parallel <code>/document</code> and <code>/communicate</code></dt>
+          <dd>
+            These two skills address different audiences (developers vs.
+            stakeholders) and can run in either order or in parallel, as long
+            as both follow a successful <code>/critique</code>.
+          </dd>
+        </dl>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The skill graph in
+            <code>.claude/references/general/skill-graph.md</code> encodes
+            the valid transitions. Post-skill step 12 reads this file to
+            suggest contextually appropriate next skills after each
+            invocation.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 2: Pre-Skill Stages -->
+      <section data-diataxis="reference" id="pre-skill-stages">
+        <h2>Pre-Skill Stages</h2>
+
+        <p>
+          Pre-skill is the first phase of every skill invocation. It runs 6
+          stages in a fixed order, loading the context that the skill needs
+          to operate under governance. Three stages are
+          <strong>critical</strong> (they always run and cannot be skipped);
+          three are <strong>non-critical</strong> (they are error-isolated
+          and can be skipped via the calling skill's
+          <code>metadata.skip_stages</code> YAML field). If a non-critical
+          stage fails, pre-skill logs a warning and continues to the next
+          stage.
+        </p>
+
+        <p>
+          The pre-skill pipeline is defined in
+          <code>.claude/skills/pre-skill/SKILL.md</code>.
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Stage</th>
+              <th>Critical</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>help</td>
+              <td>No</td>
+              <td>Intercept <code>--help</code> flag; display quickguide and stop</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>brief-log</td>
+              <td>Yes</td>
+              <td>Log a STARTED entry to the briefs file</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>budget-eval</td>
+              <td>Yes</td>
+              <td>Determine context budget tier and load briefs accordingly</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>pending-check</td>
+              <td>No</td>
+              <td>Surface overdue pending actions (informational only)</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>ref-load</td>
+              <td>Yes</td>
+              <td>Load reference files (conventions, permissions, constraints, skill-specific refs)</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>constitution</td>
+              <td>No</td>
+              <td>Load the project constitution (immutable design principles)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Stage 1: help</h3>
+
+        <p>
+          Before any other processing, pre-skill checks whether the calling
+          skill's arguments contain <code>--help</code>. If so, it reads and
+          displays <code>SKILL-quickguide.md</code> from the skill's
+          directory (falling back to the <code>description</code> field in
+          the skill's YAML frontmatter if no quickguide exists). Pre-skill
+          then <strong>stops</strong> -- no further stages run, and the
+          calling skill does not execute. This allows any skill invocation to
+          double as a help query: <code>/plan --help</code>,
+          <code>/critique --help</code>, etc.
+        </p>
+
+        <h3>Stage 2: brief-log <span class="critical-badge">Critical</span></h3>
+
+        <p>
+          The brief-log stage creates a timestamped STARTED entry in the
+          project's briefs file. The entry records the skill name and the
+          user's brief (what they asked the skill to do). Format:
+        </p>
+
+        <pre><code><span class="token-keyword">STARTED</span> | <span class="token-string">2026-03-19 21:00 UTC</span> | <span class="token-command">plan</span> | Add user profile page</code></pre>
+
+        <p>
+          The timestamp comes from <code>date -u</code>, never estimated.
+          The entry is written immediately (before continuing to later
+          stages) so that if the system crashes, the briefs file records
+          that a skill invocation was attempted. Post-skill later prepends
+          <code>DONE</code> to mark completion.
+        </p>
+
+        <p>
+          After logging the brief, pre-skill also performs
+          <strong>conversation trace linkage</strong>: it calls
+          <code>conversation_trace.py backfill-skill</code> to annotate the
+          most recent conversation trace entry with the skill invocation
+          that followed it. This links non-skill Q&A exchanges to the skill
+          they led to.
+        </p>
+
+        <h3>Stage 3: budget-eval <span class="critical-badge">Critical</span></h3>
+
+        <p>
+          Budget evaluation determines how much context to load for this
+          skill invocation. Each skill declares a
+          <code>context_budget</code> tier in its YAML frontmatter --
+          <code>light</code>, <code>standard</code> (default), or
+          <code>heavy</code>. The tier controls what is loaded:
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Loads</th>
+              <th>Then</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>light</code></td>
+              <td>Skips all briefs and reference files (brief-log only)</td>
+              <td>Skip ref-load and constitution stages</td>
+            </tr>
+            <tr>
+              <td><code>standard</code></td>
+              <td>Briefs index (compact summary, not full file)</td>
+              <td>Proceed to orphan detection, then ref-load</td>
+            </tr>
+            <tr>
+              <td><code>heavy</code></td>
+              <td>Full briefs file with recency windowing (first 50 entries); also plan index</td>
+              <td>Proceed to orphan detection and compaction warning, then ref-load</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Budget-eval contains two sub-steps, which correspond to legacy
+          stage IDs still recognized by <code>skip_stages</code>:
+        </p>
+
+        <dl>
+          <dt>Orphan detection (legacy ID: <code>orphan-check</code>)</dt>
+          <dd>
+            Scans for STARTED entries with no matching DONE. Warns the user
+            about potential crashed sessions and lists the 5 most recent
+            orphaned entries. Runs on <code>standard</code> and
+            <code>heavy</code> tiers.
+          </dd>
+
+          <dt>Compaction warning (legacy ID: <code>compaction-check</code>)</dt>
+          <dd>
+            Counts skill invocations in the last 2 hours. If the count
+            exceeds the threshold (default: 8), warns that context may be
+            getting heavy and suggests starting a fresh conversation. Runs
+            on <code>heavy</code> tier only. Advisory, never blocking.
+          </dd>
+        </dl>
+
+        <h3>Stage 4: pending-check</h3>
+
+        <p>
+          Runs <code>pending.py status --overdue-days 14 --format banner</code>
+          and prints any output verbatim. This surfaces overdue pending
+          actions (unverified implementations, unflipped markers, deferred
+          documentation) so the user is aware of outstanding work. The stage
+          is purely informational -- it never blocks skill execution.
+        </p>
+
+        <h3>Stage 5: ref-load <span class="critical-badge">Critical</span></h3>
+
+        <p>
+          Reference loading injects the files that the skill needs to
+          operate under governance. Three files are <strong>always</strong>
+          loaded regardless of the skill:
+        </p>
+
+        <ul>
+          <li><code>product-design/conventions.md</code> (or the template
+          fallback) -- project paths, naming conventions, registry</li>
+          <li><code>.claude/references/general/permissions.md</code> --
+          what the agent may and may not do</li>
+          <li><code>.claude/references/general/constraints.md</code> --
+          harness-wide constraints and decision-point rationale
+          conventions</li>
+        </ul>
+
+        <p>
+          Beyond the mandatory files, ref-load operates in one of two modes
+          depending on whether the calling skill declares
+          <code>eager_references</code> in its YAML frontmatter:
+        </p>
+
+        <dl>
+          <dt>Mode 1: Eager-only (no <code>eager_references</code> field)</dt>
+          <dd>
+            All files listed in <code>metadata.references</code> are read
+            and injected into context immediately. This is the legacy
+            behavior -- simple but potentially heavy for skills with many
+            references.
+          </dd>
+
+          <dt>Mode 2: Demand-pull (<code>eager_references</code> present)</dt>
+          <dd>
+            Files in <code>eager_references</code> are loaded immediately.
+            Files in <code>metadata.references</code> that are not in
+            <code>eager_references</code> become lazy -- they are listed in
+            an "Available references" block with trigger hints (e.g., "when
+            reviewing security concerns") but not read until the skill
+            actually needs them. This keeps context lean for skills that
+            have many references but only use a subset per invocation.
+          </dd>
+        </dl>
+
+        <h3>Stage 6: constitution</h3>
+
+        <p>
+          Reads and injects <code>product-design/constitution.md</code>,
+          the project's immutable design principles. The constitution is
+          the highest-authority reference file -- no plan or implementation
+          step may contradict it without a recorded decision. If the file
+          does not exist (e.g., in projects that predate the constitution
+          feature), the stage skips silently.
+        </p>
+      </section>
+
+      <!-- Section 3: Post-Skill Steps -->
+      <section data-diataxis="reference" id="post-skill-steps">
+        <h2>Post-Skill Steps</h2>
+
+        <p>
+          Post-skill runs after every skill completes. Its 13 steps handle
+          artifact finalization, as-coded alignment, quality assurance
+          logging, index regeneration, and git commit. The step numbering
+          uses sub-labels (1b, 2b, 2c, 2d, 6b, 6c, 7e, 8b) for steps added
+          after the original design -- these are not optional variants but
+          full steps in the pipeline.
+        </p>
+
+        <p>
+          The post-skill pipeline is defined in
+          <code>.claude/skills/post-skill/SKILL.md</code> with static
+          schemas in <code>.claude/skills/post-skill/SKILL-reference.md</code>.
+        </p>
+
+        <h3>Step 0: Checkpoint Recovery</h3>
+
+        <p>
+          If a <code>.post-skill-checkpoint</code> file exists in the
+          output directory, post-skill reads it to determine where a
+          previous run was interrupted. The checkpoint format is
+          <code>&lt;step&gt; | &lt;datetime&gt; | &lt;skill-id&gt;</code>.
+          If the skill ID matches the current invocation, post-skill
+          resumes from the step <em>after</em> the checkpointed one. If
+          the skill ID does not match (stale checkpoint from a different
+          skill), the file is deleted and post-skill starts from the
+          beginning. Each major step writes a checkpoint before proceeding,
+          so the pipeline is resilient to crashes at any point.
+        </p>
+
+        <h3>Step 1: Brief DONE</h3>
+
+        <p>
+          Marks the STARTED entry (written by pre-skill stage 2) as DONE by
+          running <code>mark_brief_done.py</code>. The DONE entry includes
+          the completion timestamp and, when applicable, the plan ID. This
+          closes the brief's lifecycle -- any STARTED entry without a
+          matching DONE is flagged as an orphan by subsequent pre-skill
+          orphan detection.
+        </p>
+
+        <h3>Step 1b: Telemetry Recording</h3>
+
+        <p>
+          Prepares a telemetry record in memory. The record captures skill
+          name, ID, duration, outcome, brief text, context budget tier, Q&A
+          interaction type, and decision points. Three fields
+          (<code>git_commit_sha</code>, <code>files_changed</code>,
+          <code>parent_skill</code>) are left null at this point -- they
+          depend on the commit at step 8 and are filled at step 8b.
+        </p>
+
+        <h3>Step 2: As-Coded Alignment</h3>
+
+        <p>
+          Runs only when the parent skill is <code>/implement</code>
+          (skipped for <code>/plan</code>, which has no code yet). Updates
+          the project's as-coded state in
+          <code>product-design/product-design-as-coded.md</code> to reflect
+          what was actually implemented. This step has multiple sub-phases:
+        </p>
+
+        <dl>
+          <dt>2a. Conceptual design update</dt>
+          <dd>
+            Incrementally edits the <code>## Conceptual Design</code>
+            section: adds new entities, updates modified ones, removes
+            deleted ones. Uses anchor-based <code>Edit</code> on H3
+            subsections. Appends a changelog entry to
+            <code>product-design-changelog.md</code>.
+          </dd>
+
+          <dt>2b. Documentation auto-run</dt>
+          <dd>
+            Collects non-N/A <code>Docs:</code> fields from the plan. If
+            any are found, presents an <code>AskUserQuestion</code>:
+            "Auto-run now" (run <code>/document</code> immediately) or
+            "Skip" (defer to the pending ledger). The
+            <code>--skip-docs</code> flag on the parent
+            <code>/implement</code> invocation bypasses this prompt
+            entirely.
+          </dd>
+
+          <dt>2c. Metacommunication update</dt>
+          <dd>
+            If the plan carried metacommunication framing, updates the
+            <code>## Metacommunication</code> section with implementation
+            status, designer intent, and changelog entries. All text uses
+            first-person ("I" for designer, "you" for user).
+          </dd>
+
+          <dt>2d. Journey maps update</dt>
+          <dd>
+            Cross-references implemented features against designed
+            journeys (<code>JM-TB-NNN</code>) and discovered journeys
+            (<code>JM-E-NNN</code>). Updates status and delta from
+            as-intended.
+          </dd>
+
+          <dt>2e. DONE marker proposal</dt>
+          <dd>
+            Scans as-intended files for items that appear to have been
+            implemented by this plan. Presents three options: Apply now
+            (flip STATUS markers immediately), Defer (add to pending
+            ledger), or Skip.
+          </dd>
+
+          <dt>2g. Pending action creation</dt>
+          <dd>
+            Files pending actions based on plan metadata: verify-as-coded
+            (when many files changed), test-implementation (when the plan
+            has a test plan), update-documentation (when docs were
+            skipped). Also closes the implement pending entry filed at
+            <code>/plan</code> completion.
+          </dd>
+        </dl>
+
+        <h3>Step 2c: Design Intent Curation Reminder</h3>
+
+        <p>
+          Informational only -- outputs a reminder that design intent from
+          the plan has been implemented and suggests promoting items to
+          established status via <code>/explain drift --promote</code>.
+          Post-skill does <strong>not</strong> perform the promotion itself
+          (the designer owns every word of Decision entries).
+        </p>
+
+        <h3>Step 2d: Eager Implement Entry</h3>
+
+        <p>
+          Runs only when the parent skill is <code>/plan</code>. Files an
+          <code>implement</code> pending entry so the user is reminded to
+          execute the plan later. Uses <code>--if-absent</code> for
+          idempotency under checkpoint recovery.
+        </p>
+
+        <h3>Step 3: QA Log</h3>
+
+        <p>
+          Captures the Q&A exchanges from the skill session. Three
+          branches, evaluated in order:
+        </p>
+
+        <dl>
+          <dt>Branch A: Skip</dt>
+          <dd>
+            If the parent passed <code>skip_qa_log: true</code>. Currently
+            only <code>/research</code> uses this (its transcript is the
+            artifact itself).
+          </dd>
+
+          <dt>Branch B: Inline in artifact</dt>
+          <dd>
+            For plan, implement, roadmap, and critique artifacts: Q&A is
+            appended directly to the artifact file under a
+            <code>## Q&A Log</code> section with numbered
+            <code>### Q1</code> / <code>### A1</code> entries.
+          </dd>
+
+          <dt>Branch C: Companion file</dt>
+          <dd>
+            For all other artifact types: creates a sibling file
+            (e.g., <code>advisory-000012-qa-token-rotation.md</code>)
+            collocated with the parent artifact.
+          </dd>
+        </dl>
+
+        <h3>Steps 4-6: Commit Preparation</h3>
+
+        <dl>
+          <dt>Step 4: Commit message</dt>
+          <dd>
+            Creates an appropriate commit message including the skill
+            name and artifact ID.
+          </dd>
+
+          <dt>Step 5: Git-state safety check</dt>
+          <dd>
+            Verifies no rebase is in progress, no unmerged conflicts
+            exist, and HEAD is not detached. If on
+            <code>main</code>/<code>master</code>, warns and asks for
+            confirmation. If any blocker is detected, outputs the commit
+            message for manual use.
+          </dd>
+
+          <dt>Step 6: Commit scope verification</dt>
+          <dd>
+            Runs <code>verify_commit_scope.py</code> to check staged files
+            against expected paths for this skill type. Unexpected
+            pre-staged files trigger a warning and manual commit fallback.
+          </dd>
+        </dl>
+
+        <h3>Steps 6b-6c: Safety Gates</h3>
+
+        <dl>
+          <dt>Step 6b: Fast preflight gate</dt>
+          <dd>
+            Runs <code>run_preflight_fast.py</code>. Exit 0 proceeds
+            silently; non-zero displays failures but is advisory (the
+            pre-commit hook is the hard gate).
+          </dd>
+
+          <dt>Step 6c: Human markers verifier</dt>
+          <dd>
+            Runs <code>check_human_markers_only.py --staged</code>.
+            Detects unauthorized prose mutations in Human (markers) files.
+            Violations prompt an abort/proceed decision; the default
+            recommendation is to abort (unauthorized edits should go
+            through <code>apply_marker.py</code>).
+          </dd>
+        </dl>
+
+        <h3>Step 7: Index Regeneration</h3>
+
+        <p>
+          Refreshes all project indexes to reflect the new artifacts:
+        </p>
+
+        <dl>
+          <dt>7a. Briefs index</dt>
+          <dd>
+            <code>generate_briefs_index.py</code> -- compact index of
+            briefs for efficient pre-skill loading.
+          </dd>
+
+          <dt>7b. Macro index</dt>
+          <dd>
+            <code>generate_macro_index.py</code> -- the output directory's
+            <code>INDEX.md</code> with all artifacts.
+          </dd>
+
+          <dt>7c. Cross-reference update</dt>
+          <dd>
+            <code>update_cross_refs.py</code> -- reads the produced
+            artifact's <code>source:</code> header and updates the
+            <code>spawned:</code> field on the source artifact.
+          </dd>
+
+          <dt>7d. Decision digest</dt>
+          <dd>
+            <code>generate_decision_digest.py</code> -- regenerates the
+            decision digest when <code>/research</code> produced
+            HIGH/MEDIUM recommendations or a plan applied
+            <code>DECISION_APPEND</code> markers.
+          </dd>
+        </dl>
+
+        <p>
+          After index regeneration, post-skill captures the current HEAD
+          SHA as <code>&lt;pre-commit-sha&gt;</code> for comparison at step
+          8b.
+        </p>
+
+        <h3>Step 7e: Deferred-Artifact Generation</h3>
+
+        <p>
+          Runs only for <code>/implement</code> parent skills. Generates
+          artifacts that depend on the completed implementation:
+        </p>
+
+        <dl>
+          <dt>Manual Actions section</dt>
+          <dd>
+            If any plan step requires manual operator action after
+            deployment (database migration, environment variable, service
+            restart), maintains a <code>## Manual Actions</code> section
+            in the plan file.
+          </dd>
+
+          <dt><code>deploy.html</code></dt>
+          <dd>
+            Scans plan steps for non-N/A <code>Deploy:</code> fields. If
+            found, generates or updates
+            <code>_output/docs/deploy.html</code> -- a self-contained
+            deployment guide with Docker, Linux, and Windows sections,
+            a highlighted "Changed in plan" banner, and a reverse-
+            chronological change history.
+          </dd>
+        </dl>
+
+        <h3>Step 8: Commit</h3>
+
+        <p>
+          Stages all affected files (artifacts, regenerated indexes,
+          as-coded updates, deferred artifacts) and commits using the
+          message from step 4. Writes a final checkpoint, then deletes
+          the checkpoint file on success -- the pipeline has completed.
+        </p>
+
+        <h3>Step 8b: Telemetry Flush</h3>
+
+        <p>
+          Enriches the step 1b telemetry record with commit-dependent
+          fields (<code>git_commit_sha</code>,
+          <code>files_changed</code>, <code>parent_skill</code>) and
+          writes it via <code>build_telemetry.py</code>. The telemetry
+          record is committed as a <strong>separate trailing commit</strong>
+          (e.g., <code>telemetry: plan 000042</code>) to avoid
+          amend-after-push divergence. If step 8 produced no commit
+          (HEAD unchanged), the telemetry record is dropped.
+        </p>
+
+        <h3>Steps 9-12: Wrap-Up</h3>
+
+        <dl>
+          <dt>Step 9: Surprise output</dt>
+          <dd>
+            Reports any unexpected events during skill execution, their
+            resolution, and status (resolved or pending).
+          </dd>
+
+          <dt>Step 10: Artifact link</dt>
+          <dd>
+            Outputs a link to the generated artifact file within the
+            output directory.
+          </dd>
+
+          <dt>Step 11: Completion banner</dt>
+          <dd>
+            Emits the standardized completion banner:
+            <code>--- SKILL COMPLETE: &lt;skill&gt; &lt;type&gt;
+            &lt;id&gt; ---</code>.
+          </dd>
+
+          <dt>Step 12: Contextual next-step suggestions</dt>
+          <dd>
+            Reads <code>skill-graph.md</code> to look up valid transitions
+            from the completed skill. Presents at most 3 suggestions (plus
+            "End"), each with a reason from the graph and a note on when
+            the suggestion would be wrong. Suppresses suggestions for
+            checks already run (6b/6c), documentation already offered
+            (2b), and low-value reflections (CHORE/DOCUMENT briefs).
+          </dd>
+        </dl>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> Post-skill also supports a
+            <code>--deferred</code> mode for roadmap parallel-wave
+            execution. In deferred mode, the orchestrator handles
+            wave-level briefs, QA, and commits; post-skill runs only the
+            per-plan state alignment steps (0, 1b, 2, 2c, 7, 2g, 8b).
+            See <a href="ch2-skills-in-depth.html#skill-implement">Skills In
+            Depth</a> for the roadmap orchestration model.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 4: Enforcement Mechanisms -->
+      <section data-diataxis="explanation" id="enforcement-mechanisms">
+        <h2>Enforcement Mechanisms</h2>
+
+        <p>
+          The lifecycle pipeline is not merely documented -- it is enforced
+          through four complementary mechanisms. Together, they form a
+          defense-in-depth strategy: if one mechanism is bypassed (or
+          the agent fails to follow a rule), another catches the
+          violation before it reaches the repository.
+        </p>
+
+        <h3>CLAUDE.md Rules</h3>
+
+        <p>
+          The project's <code>CLAUDE.md</code> file is the primary
+          governance mechanism. Claude Code reads this file at the start
+          of every conversation, making its rules the baseline context for
+          all agent behavior. <code>CLAUDE.md</code> declares:
+        </p>
+
+        <ul>
+          <li>The canonical lifecycle path and its skill ordering</li>
+          <li>The conversation trace logging protocol (for non-skill
+          exchanges)</li>
+          <li>Key workflows and their entry points</li>
+          <li>Global rules (private repositories, no hand-syncing of
+          public harness files)</li>
+        </ul>
+
+        <p>
+          Because <code>CLAUDE.md</code> is injected into the agent's
+          context window, its rules are effectively instructions that the
+          model follows. This is a soft enforcement mechanism -- it
+          depends on the model's instruction-following capability rather
+          than code-level constraints. The harder mechanisms below
+          compensate.
+        </p>
+
+        <h3>Pre-Commit Hooks</h3>
+
+        <p>
+          The pre-commit hook in <code>.githooks/pre-commit</code>
+          (installed via <code>bash .githooks/install.sh</code>) runs
+          automatically on every <code>git commit</code>. It executes
+          fast preflight checks and the pre-sync leak gate
+          (<code>check_no_private_leaks.py --staged</code>). The hook
+          is a hard gate: if any check fails, the commit is rejected.
+          This catches violations that the agent's instruction-following
+          missed -- for example, staging a file with private-only content
+          that should not be committed.
+        </p>
+
+        <h3>Validation Scripts</h3>
+
+        <p>
+          The harness includes a suite of validation scripts in
+          <code>.claude/skills/scripts/</code> that enforce specific
+          constraints:
+        </p>
+
+        <dl>
+          <dt><code>verify_commit_scope.py</code></dt>
+          <dd>
+            Post-skill step 6. Checks that staged files match expected
+            paths for the skill type. Flags unexpected files that may
+            have been staged by accident.
+          </dd>
+
+          <dt><code>run_preflight_fast.py</code></dt>
+          <dd>
+            Post-skill step 6b. Runs a battery of fast checks including
+            call-graph freshness validation. Advisory at post-skill
+            time, but the pre-commit hook is the hard gate.
+          </dd>
+
+          <dt><code>check_human_markers_only.py</code></dt>
+          <dd>
+            Post-skill step 6c. Detects prose mutations in Human
+            (markers) files -- files where the agent may write only
+            lifecycle markers (STATUS, ESTABLISHED, INCORPORATED), never
+            prose content.
+          </dd>
+
+          <dt><code>run_all_checks.py</code></dt>
+          <dd>
+            CI-independent validation orchestrator. Discovers and runs
+            all check scripts with unified exit codes and JUnit XML
+            output. Invoked by <code>/critique validate</code> and by
+            CI workflows.
+          </dd>
+
+          <dt><code>check_section_boundary_writes.py</code></dt>
+          <dd>
+            Enforces that agent edits to
+            <code>product-design-as-coded.md</code> stay within the
+            correct H2 section boundary. Prevents a conceptual design
+            edit from accidentally modifying the metacommunication
+            section, for example.
+          </dd>
+        </dl>
+
+        <h3>Constitution Loading</h3>
+
+        <p>
+          The project constitution (<code>product-design/constitution.md</code>)
+          contains immutable design principles that no plan or
+          implementation step may contradict. Pre-skill stage 6 loads
+          this file into the agent's context for every skill invocation
+          (at <code>standard</code> and <code>heavy</code> budget tiers).
+          Generator subagents also receive the constitution as part of
+          their prompt, extending trust boundary enforcement to delegated
+          work. The constitution is not a suggestion -- it is a hard
+          constraint. <code>/critique health</code> validates that the
+          file exists (Check 7), and its absence is flagged as a health
+          issue for new projects.
+        </p>
+      </section>
+
+      <!-- Section 5: Lifecycle Variations -->
+      <section data-diataxis="explanation" id="lifecycle-variations">
+        <h2>Lifecycle Variations</h2>
+
+        <p>
+          The canonical path assumes a feature-development workflow, but
+          not all tasks are feature development. The lifecycle adapts to
+          three common variations by adjusting which steps run and which
+          are skipped.
+        </p>
+
+        <h3>Bug Fixes</h3>
+
+        <p>
+          A bug fix typically starts from <code>/research</code> (to
+          understand the root cause) or skips directly to
+          <code>/plan</code> when the cause is already known. The plan
+          carries a <code>FIX</code> prefix rather than
+          <code>FEATURE</code>. The key lifecycle differences:
+        </p>
+
+        <ul>
+          <li><code>/research</code> may be skipped for obvious bugs
+          (one-liner fixes, typo corrections).</li>
+          <li><code>/plan --light</code> is appropriate for small fixes
+          that do not warrant a full plan.</li>
+          <li>Post-skill step 2b (documentation auto-run) triggers only
+          when the plan has non-N/A <code>Docs:</code> fields -- most
+          bug fixes do not, so documentation is skipped automatically.</li>
+          <li>Post-skill step 2e (DONE marker proposal) is unlikely to
+          fire because bug fixes rarely implement new as-intended items.</li>
+        </ul>
+
+        <h3>Documentation-Only Tasks</h3>
+
+        <p>
+          When the task is purely documentation (updating a README,
+          writing a new guide, refreshing API docs), the plan carries a
+          <code>DOCUMENT</code> prefix. The lifecycle contracts:
+        </p>
+
+        <ul>
+          <li><code>/design</code> is skipped (no intent change).</li>
+          <li><code>/implement</code> executes the plan as usual, but
+          the implementation is prose, not code.</li>
+          <li>Post-skill step 2 (as-coded alignment) is skipped because
+          the parent skill is <code>/implement</code> but the plan prefix
+          signals no conceptual-model change.</li>
+          <li>Post-skill step 12 suppresses <code>/reflect</code> as a
+          next-step suggestion (low-value reflection target for DOCUMENT
+          briefs).</li>
+        </ul>
+
+        <h3>Refactoring</h3>
+
+        <p>
+          Refactoring preserves external behavior while restructuring
+          internal code. The plan carries a <code>CHORE</code> prefix.
+          The lifecycle adapts:
+        </p>
+
+        <ul>
+          <li><code>/research</code> or <code>/explain</code> is
+          important to understand the current architecture before
+          restructuring.</li>
+          <li><code>/critique</code> after implementation focuses on
+          whether the refactoring preserved behavior (regression risk)
+          rather than design-intent alignment.</li>
+          <li>Post-skill step 2b (documentation auto-run) may or may
+          not trigger depending on whether the refactoring changed
+          user-facing behavior or API surfaces.</li>
+          <li>Post-skill step 12 suppresses <code>/reflect</code>
+          (low-value for CHORE briefs).</li>
+        </ul>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The plan prefix (<code>FEATURE</code>,
+            <code>FIX</code>, <code>CHORE</code>, <code>DOCUMENT</code>,
+            <code>REDESIGN</code>) is the primary signal that controls
+            lifecycle variation. The prefix is set at
+            <code>/plan</code> time and propagates through
+            <code>/implement</code> and post-skill automatically. See
+            <a href="ch2-skills-in-depth.html#skill-plan">Skills In
+            Depth</a> for the full prefix taxonomy.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 6: Conversation Trace Integration -->
+      <section data-diataxis="reference" id="conversation-trace">
+        <h2>Conversation Trace Integration</h2>
+
+        <p>
+          Not all user-agent exchanges happen inside skill invocations.
+          The user might ask a question, discuss an approach, or give an
+          instruction outside any <code>/skill</code> call. These
+          non-skill exchanges are captured by the
+          <strong>conversation trace</strong> -- a JSONL file at
+          <code>_output/conversation-trace.jsonl</code> that records
+          every utterance in the session.
+        </p>
+
+        <h3>The Logging Protocol</h3>
+
+        <p>
+          After responding to any user message that is not within an
+          active skill invocation, the agent logs two entries to the
+          conversation trace:
+        </p>
+
+        <ol>
+          <li><strong>Get preceding event ID</strong>: call
+          <code>conversation_trace.py last-evt-id</code> to find the
+          most recent entry for this session.</li>
+          <li><strong>Log user utterance</strong>: call
+          <code>conversation_trace.py append</code> with
+          <code>--emitter user</code>, the user's message, and an
+          inferred type (<code>question</code>, <code>answer</code>, or
+          <code>instruction</code>).</li>
+          <li><strong>Log agent response</strong>: call
+          <code>conversation_trace.py append</code> with
+          <code>--emitter claude</code>, a 1-2 sentence summary of the
+          response, and optional <code>--topic-tags</code>.</li>
+        </ol>
+
+        <h3>Entry Schema</h3>
+
+        <p>
+          Each conversation trace entry is a JSON object with these
+          fields:
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>timestamp</code></td>
+              <td>ISO 8601</td>
+              <td>UTC timestamp of the entry</td>
+            </tr>
+            <tr>
+              <td><code>session_id</code></td>
+              <td>string</td>
+              <td><code>CLAUDE_SESSION_ID</code> env var value</td>
+            </tr>
+            <tr>
+              <td><code>evt_id</code></td>
+              <td>string</td>
+              <td>Sequential event ID (<code>qa-NNNNNN</code>)</td>
+            </tr>
+            <tr>
+              <td><code>preceding_evt_id</code></td>
+              <td>string</td>
+              <td>evt_id of the preceding entry (or <code>"null"</code>)</td>
+            </tr>
+            <tr>
+              <td><code>emitter</code></td>
+              <td>string</td>
+              <td><code>"user"</code> or <code>"claude"</code></td>
+            </tr>
+            <tr>
+              <td><code>message</code></td>
+              <td>string</td>
+              <td>Utterance text (may contain <code>[MASKED:...]</code> replacements)</td>
+            </tr>
+            <tr>
+              <td><code>type</code></td>
+              <td>string</td>
+              <td><code>"question"</code>, <code>"answer"</code>, or <code>"instruction"</code></td>
+            </tr>
+            <tr>
+              <td><code>led_to_skill</code></td>
+              <td>string | null</td>
+              <td>Skill invocation that followed this entry (backfilled by pre-skill)</td>
+            </tr>
+            <tr>
+              <td><code>topic_tags</code></td>
+              <td>string[] | null</td>
+              <td>0-3 short topic tags</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Linkage to Skills</h3>
+
+        <p>
+          When a user's non-skill question leads to a skill invocation
+          (e.g., asking "How should we handle auth?" followed by
+          <code>/plan add-token-rotation</code>), pre-skill stage 2
+          (brief-log) backfills the <code>led_to_skill</code> field on
+          the most recent conversation trace entry. This creates a
+          traceable chain: the question that motivated the skill
+          invocation is linked to the skill that addressed it.
+        </p>
+
+        <h3>Sensitivity Masking</h3>
+
+        <p>
+          The <code>conversation_trace.py append</code> command may apply
+          sensitivity masking to messages, replacing sensitive content
+          with <code>[MASKED:&lt;pattern-name&gt;]</code> tokens. If
+          masking is applied (exit code 2), the agent shows the masked
+          message to the user and asks for confirmation before
+          persisting. This prevents accidental logging of credentials,
+          API keys, or other sensitive data.
+        </p>
+      </section>
+
+      <!-- Section 7: Common Mistakes -->
+      <section data-diataxis="how-to" id="common-mistakes">
+        <h2>Common Mistakes</h2>
+
+        <p>
+          The following mistakes are frequently encountered when working
+          with the SEJA lifecycle. Each entry describes the mistake, its
+          consequence, and how to avoid it.
+        </p>
+
+        <dl>
+          <dt>Skipping lifecycle steps</dt>
+          <dd>
+            <strong>Mistake:</strong> Jumping from <code>/research</code>
+            directly to <code>/implement</code>, skipping
+            <code>/plan</code>. Or implementing without running
+            <code>/critique</code> afterward.
+            <br>
+            <strong>Consequence:</strong> Implementation proceeds without a
+            recorded plan, making it impossible to trace design decisions
+            back to their rationale. Without critique, design-intent drift
+            goes undetected until much later.
+            <br>
+            <strong>Avoidance:</strong> Follow the canonical path. If you
+            believe a step is unnecessary for a particular task, use the
+            appropriate shortcut (<code>/plan --light</code> for small
+            changes) rather than skipping the step entirely.
+          </dd>
+
+          <dt>Confusing pre-skill with post-skill</dt>
+          <dd>
+            <strong>Mistake:</strong> Expecting pre-skill to commit
+            artifacts, or expecting post-skill to load reference files.
+            <br>
+            <strong>Consequence:</strong> Debugging incorrect lifecycle
+            behavior by looking in the wrong pipeline phase.
+            <br>
+            <strong>Avoidance:</strong> Remember the separation of
+            concerns: pre-skill <em>loads context</em> (references,
+            constitution, briefs); post-skill <em>finalizes output</em>
+            (commits, indexes, telemetry). The skill itself does the
+            actual work in between.
+          </dd>
+
+          <dt>Running <code>/implement</code> without a plan</dt>
+          <dd>
+            <strong>Mistake:</strong> Invoking <code>/implement</code>
+            without a corresponding plan file in
+            <code>_output/plans/</code>.
+            <br>
+            <strong>Consequence:</strong> The implementation has no
+            recorded scope, no step-by-step breakdown, and no
+            <code>Docs:</code> or <code>Deploy:</code> metadata for
+            post-skill to act on. As-coded alignment (step 2) has no
+            plan to read from. Post-skill's documentation auto-run and
+            deferred-artifact generation have nothing to process.
+            <br>
+            <strong>Avoidance:</strong> Always run <code>/plan</code>
+            first. For trivial changes, use <code>/plan --light</code>
+            to produce a lightweight proposal. The
+            <code>CLAUDE.md</code> rules instruct the agent to check for
+            an existing plan before implementing.
+          </dd>
+
+          <dt>Forgetting to commit</dt>
+          <dd>
+            <strong>Mistake:</strong> Manually interrupting post-skill
+            before step 8, leaving artifacts uncommitted.
+            <br>
+            <strong>Consequence:</strong> Work is done but not persisted
+            in version control. The briefs file shows DONE but the
+            artifacts exist only in the working tree. A subsequent skill
+            invocation may overwrite or conflict with the uncommitted
+            changes.
+            <br>
+            <strong>Avoidance:</strong> Let post-skill run to completion.
+            If you must interrupt, use the checkpoint recovery mechanism
+            (step 0) -- re-invoking post-skill with the same skill ID
+            resumes from where it left off. If you have already
+            interrupted past the point of recovery, stage and commit
+            manually using the commit message that post-skill prepared at
+            step 4.
+          </dd>
+
+          <dt>Editing Human (markers) files directly</dt>
+          <dd>
+            <strong>Mistake:</strong> Having the agent write prose content
+            into files classified as <code>Human (markers)</code>, such
+            as <code>product-design-as-intended.md</code> or
+            <code>ux-research-results.md</code>.
+            <br>
+            <strong>Consequence:</strong> Post-skill step 6c
+            (<code>check_human_markers_only.py</code>) catches the
+            violation and recommends aborting the commit. If the commit
+            proceeds anyway, the pre-commit hook may also flag it.
+            <br>
+            <strong>Avoidance:</strong> Use
+            <code>apply_marker.py</code> for all writes to Human
+            (markers) files. This script supports STATUS,
+            ESTABLISHED, INCORPORATED, CHANGELOG_APPEND,
+            DECISION_APPEND, and REQ_TRACED_BY marker types -- the only
+            write operations permitted on these files.
+          </dd>
+        </dl>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Chapter navigation: Ch.1 omits Previous -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="ch2-skills-in-depth.html">Next: Skills In Depth</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

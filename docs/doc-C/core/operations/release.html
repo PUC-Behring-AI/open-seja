@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How SEJA releases work: the vMAJOR.MINOR.PATCH tag convention, the unified version namespace, manual batched cadence, the /publish skill, the forward-fix hotfix policy, and the A2 manual-sync model.">
+  <title>Release — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/operations sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Release</h1>
+      <p>Cut a tagged release and distribute it with the <code>/publish</code> skill.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Operations</a></li>
+        <li aria-current="page">Release</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge core-operations">operations</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="overview">
+          <h2 id="overview">Overview</h2>
+          <p>
+            A release is a tagged snapshot of the harness, cut manually when a
+            coherent batch of changes is ready and then distributed to consumers. The
+            <code>/publish</code> skill runs the whole pipeline in one step. This
+            page covers the tag convention, the unified version namespace, the
+            cadence and hotfix policy, and the A2 manual-sync distribution model.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="tag-convention">
+          <h2 id="tag-convention">Tag convention</h2>
+          <p>
+            Tags follow <code>vMAJOR.MINOR.PATCH</code> (SemVer), always prefixed
+            with <code>v</code>. Any core-team member can cut a tag. SemVer allows
+            gaps in the sequence, so consecutive published versions need not be
+            numerically adjacent.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="unified-namespace">
+          <h2 id="unified-namespace">Unified version namespace</h2>
+          <p>
+            There is one version, one CHANGELOG entry, and one tag per release — no
+            dual internal/public versioning. The harness
+            <code>CHANGELOG.md</code> uses a single heading per release (e.g.
+            <code>## [2.14.0]</code>), and the same version number applies to the
+            distributed mirror. This policy supersedes the earlier decoupled
+            arrangement that maintained separate internal and public version
+            streams; historical dual entries are preserved as-is for the record.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="cadence">
+          <h2 id="cadence">Cadence</h2>
+          <p>
+            Releases are manual: a core-team member cuts a tag when a coherent batch
+            of changes is ready. Smaller changes are batched together, targeting at
+            most about one release per week. A pending-ledger entry filed at tag-cut
+            is surfaced by the pre-skill lifecycle hook on every skill invocation;
+            if a publish entry stays unresolved for more than three days, the
+            reminder escalates. This is the mechanism that keeps manual distribution
+            from drifting into "cut a tag and forget."
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="publish-skill">
+          <h2 id="publish-skill">The <code>/publish</code> skill</h2>
+          <p>
+            <code>/publish [version]</code> executes the full release pipeline:
+            preflight, cut the tag, clone the distribution mirror, copy authored
+            prose, sync the harness, run smoke tests, commit, and push — then close
+            the pending publish entry. Its arguments:
+          </p>
+          <ul>
+            <li><code>[version]</code> — the tag to publish (<code>vMAJOR.MINOR.PATCH</code>). When omitted, the pipeline infers the next tag from the CHANGELOG and git tags and prompts for confirmation.</li>
+            <li><code>--dry-run</code> — preview the full command sequence without executing any destructive action.</li>
+            <li><code>--yes</code> — non-interactive mode: accept all defaults at confirmation prompts.</li>
+          </ul>
+          <p>
+            When the resolved version has no matching harness-changelog entry, the
+            skill generates one before proceeding. On success it reports the
+            published version and confirms the pending entry was closed; on failure
+            it relays the pipeline's own recovery guidance rather than retrying
+            automatically.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="hotfix-policy">
+          <h2 id="hotfix-policy">Hotfix policy</h2>
+          <p>
+            The default rule is forward-fix on <code>main</code>: land the fix and
+            tag the next patch version. A dedicated release branch is deferred until
+            a real hotfix case arises — if a consumer is actively blocked on an older
+            version, the team revisits and decides per case whether a
+            <code>release/&lt;minor&gt;.x</code> branch is warranted.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="a2-model">
+          <h2 id="a2-model">The A2 manual-sync model</h2>
+          <p>
+            Distribution follows the A2 manual-sync model: releases are pushed to the
+            public mirror deliberately, by running <code>/publish</code>, rather than
+            on an automatic trigger. An automated CI workflow exists as a dormant
+            fallback (dispatch-only), but the everyday path is the manual pipeline
+            guarded by the pending-ledger reminder. A monthly consumer-path
+            dogfooding ritual, run in a scratch consumer repo, exercises install and
+            upgrade against a tagged release to surface experiential drift that
+            smoke tests cannot catch.
+          </p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="upgrade.html">Upgrading SEJA</a> &mdash; how consumers pull a tagged release into their workspace.</li>
+            <li><a href="ci-integration.html">CI Integration</a> &mdash; the smoke tests and checks the publish pipeline runs before pushing.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Operations</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/operations sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

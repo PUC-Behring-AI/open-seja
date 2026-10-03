@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="4">
+  <meta name="doc-chapter" content="5">
+  <meta name="doc-phase" content="3">
+  <meta name="doc-status" content="draft">
+
+  <title>Release and Publishing -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 4: The Output and Governance Layer</a></li>
+      <li>Release and Publishing</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>Release and Publishing</h1>
+
+      <p>
+        SEJA is developed in a private repository and distributed through a
+        separate public mirror. Publishing is the one-way process that turns a
+        coherent batch of private work into a tagged public release: a
+        maintainer records the changes in a changelog, cuts a version tag,
+        regenerates the public tree from the private source, runs a smoke gate,
+        and pushes. This chapter documents that pipeline end-to-end -- the
+        <code>/publish</code> workflow as a step-by-step procedure, the tag
+        naming and cadence conventions, and the ephemeral publish workspace that
+        makes the private-to-public sync safe by construction.
+      </p>
+
+      <!-- Section 1: The /publish pipeline (how-to) -->
+      <section data-diataxis="how-to" id="publish-pipeline">
+        <h2>The /publish Pipeline</h2>
+
+        <p>
+          The <code>/publish</code> skill is a thin wrapper around the
+          <code>tools/publish.py</code> orchestrator. The skill handles version
+          resolution and the preflight decision, then hands off to the script,
+          which runs the full release lifecycle: preflight, cut tag, clone the
+          public repo into an ephemeral workspace, copy authored prose,
+          regenerate the harness tree, smoke test, commit, and push. This
+          section walks through a release from an unreleased changelog entry to
+          a pushed tag.
+        </p>
+
+        <aside class="callout-warning">
+          <p>
+            <strong>Maintainers only.</strong> Publishing is a core-team
+            activity. If you consume SEJA in your own project via
+            <code>/seja-setup</code> (install and <code>--upgrade</code>), you
+            do not run this pipeline -- you simply upgrade to a tagged release.
+          </p>
+        </aside>
+
+        <h3>Step 1: Record the change in the changelog</h3>
+
+        <p>
+          Before publishing, the changes to ship must be described in the
+          public changelog's <code>Unreleased</code> section. This is the
+          human-authored record of what the release contains. The publish
+          preflight also checks that a harness changelog entry exists for the
+          target version; if it is missing, the pipeline can auto-generate one
+          from git history before continuing.
+        </p>
+
+        <h3>Step 2: Preview with --dry-run</h3>
+
+        <p>
+          Always preview first. A dry run prints the full command sequence and
+          the inferred version without executing any destructive action (no tag,
+          no push):
+        </p>
+
+        <pre><code><span class="token-command">/publish</span> --dry-run</code></pre>
+
+        <p>
+          Under the hood this constructs a call to the orchestrator with the
+          dry-run flag:
+        </p>
+
+        <pre><code><span class="token-comment"># Preview only -- no tag is cut, nothing is pushed</span>
+<span class="token-command">python</span> tools/publish.py --dry-run</code></pre>
+
+        <h3>Step 3: Resolve the version</h3>
+
+        <p>
+          If you pass a version, it is used verbatim. If you omit it,
+          <code>publish.py</code> infers the next tag from the changelog and the
+          existing git tags, then asks you to confirm. The inference heuristic
+          reads the changelog bump hint:
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Changelog signal</th>
+              <th>Version bump</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Breaking</code> changes present</td>
+              <td>Major</td>
+            </tr>
+            <tr>
+              <td><code>Added</code> (new features)</td>
+              <td>Minor</td>
+            </tr>
+            <tr>
+              <td>Otherwise (fixes, chores)</td>
+              <td>Patch</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          To let the heuristic decide, run <code>/publish</code> with no
+          version and accept the inferred tag. To override it, pass the tag
+          explicitly:
+        </p>
+
+        <pre><code><span class="token-comment"># Let publish.py infer the next version from CHANGELOG.md + tags</span>
+<span class="token-command">/publish</span>
+
+<span class="token-comment"># Or specify the exact tag</span>
+<span class="token-command">/publish</span> <span class="token-string">v0.3.0</span></code></pre>
+
+        <h3>Step 4: Clear the preflight gate</h3>
+
+        <p>
+          The pipeline runs a preflight check that returns a JSON list of
+          issues, each with a severity and (where available) a fix command.
+          Errors indicate the release will likely fail or produce a bad
+          artifact; warnings are advisory. Address any errors before
+          continuing. If only warnings remain, you may consciously proceed.
+        </p>
+
+        <pre><code><span class="token-comment"># Run preflight in isolation to inspect issues</span>
+<span class="token-command">python</span> tools/publish.py --preflight-only --json <span class="token-string">v0.3.0</span></code></pre>
+
+        <h3>Step 5: Execute the release</h3>
+
+        <p>
+          Once the version is resolved and preflight is clean (or its remaining
+          warnings are accepted), run the release for real. The orchestrator
+          performs the destructive steps in order:
+        </p>
+
+        <ol>
+          <li><strong>Cut the tag</strong> via <code>cut_tag.py</code> -- creates
+          an annotated <code>vMAJOR.MINOR.PATCH</code> tag and files a
+          <code>PUBLISH:</code> entry in the pending ledger. The two actions are
+          coupled: if either fails, the other is rolled back.</li>
+          <li><strong>Clone the public repo</strong> into an ephemeral publish
+          workspace.</li>
+          <li><strong>Copy authored prose</strong> (changelog, README,
+          consumer-facing docs) from the public-authored sources.</li>
+          <li><strong>Regenerate the harness</strong> tree via
+          <code>sync_to_public.py</code>, which strips private-only sections and
+          excludes private-only directories.</li>
+          <li><strong>Smoke test</strong> the candidate via
+          <code>pre_publish_smoke.py</code> as a pre-push gate.</li>
+          <li><strong>Commit and push</strong> the release to the public
+          <code>seja</code> repository, then close the <code>PUBLISH:</code>
+          pending entry.</li>
+        </ol>
+
+        <pre><code><span class="token-comment"># Full release -- cuts the tag and pushes the public mirror</span>
+<span class="token-command">python</span> tools/publish.py <span class="token-string">v0.3.0</span>
+
+<span class="token-comment"># Non-interactive: accept all confirmation defaults</span>
+<span class="token-command">python</span> tools/publish.py <span class="token-string">v0.3.0</span> --yes</code></pre>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The pre-commit hook enforces a leak gate
+            (<code>check_no_private_leaks.py --staged</code>) on every commit,
+            independently of the publish pipeline. Even if a private-only detail
+            slipped past the sync step, the leak gate is a hard barrier that
+            rejects the commit before it can reach the public repository. Install
+            the hook once per clone with
+            <code>bash .githooks/install.sh</code>.
+          </p>
+        </aside>
+
+        <h3>Step 6: Report and resolve</h3>
+
+        <p>
+          On success the pipeline reports the published version and confirms the
+          <code>PUBLISH:</code> pending entry was closed. On failure it relays
+          the error and the script's recovery guidance -- do not retry blindly;
+          the script's recovery instructions are authoritative.
+        </p>
+      </section>
+
+      <!-- Section 2: Tag conventions (reference) -->
+      <section data-diataxis="reference" id="tag-conventions">
+        <h2>Tag Conventions</h2>
+
+        <p>
+          Releases are named with a single unified version namespace: one
+          version, one changelog entry, one tag. The conventions below are the
+          authoritative reference; the canonical source is
+          <code>tools/release-process.md</code>.
+        </p>
+
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Convention</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Format</td>
+              <td><code>vMAJOR.MINOR.PATCH</code> (SemVer), always prefixed
+              with <code>v</code></td>
+            </tr>
+            <tr>
+              <td>Starting version</td>
+              <td><code>v0.1.0</code> -- the leading <code>0.</code> signals the
+              harness contract is still evolving</td>
+            </tr>
+            <tr>
+              <td>Who cuts tags</td>
+              <td>Any core-team member</td>
+            </tr>
+            <tr>
+              <td>Cadence</td>
+              <td>Manual, when a coherent batch is ready; target at most about
+              one release per week, batching smaller changes together</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Version namespace</h3>
+
+        <p>
+          A unified policy governs versioning: the harness changelog uses one
+          heading per release (for example <code>## [2.14.0]</code>), and the
+          public changelog uses the same version number. Because SemVer allows
+          gaps, the public repository can jump forward to the internal version;
+          a gap note above the affected entry explains the jump for consumers.
+        </p>
+
+        <h3>Hotfix policy</h3>
+
+        <p>
+          Hotfix branching is deferred until the first hotfix case arises. The
+          default rule is to forward-fix on <code>main</code> and tag the next
+          patch version. If a consumer is actively blocked on an older version,
+          the team revisits per-case whether a <code>release/&lt;minor&gt;.x</code>
+          branch is warranted.
+        </p>
+      </section>
+
+      <!-- Section 3: The ephemeral publish workspace (explanation) -->
+      <section data-diataxis="explanation" id="ephemeral-workspace">
+        <h2>The Ephemeral Publish Workspace</h2>
+
+        <p>
+          The most important idea in SEJA's release model is that the public
+          harness tree is <strong>never stored on disk</strong> in the private
+          repository. There is no checked-in copy of the public
+          <code>.claude/</code> to hand-edit. Instead, the public tree is
+          generated on demand, into a temporary workspace, only during a
+          publish -- and discarded afterward. Understanding why this design was
+          chosen explains most of the project's authoring rules.
+        </p>
+
+        <h3>One source, one direction</h3>
+
+        <p>
+          The private repository is the single source of truth for the harness.
+          Maintainers edit only two things: <code>.claude/</code> (the harness
+          itself) and <code>product-design/</code> (project configuration).
+          Public-only prose -- the changelog, README, and consumer docs -- is
+          authored directly in the public-authored sources. Everything else in
+          the public repository is derived, never original.
+        </p>
+
+        <p>
+          The sync flows in exactly one direction: private to public. During a
+          publish, <code>sync_to_public.py</code> reads the private
+          <code>.claude/</code>, strips private-only sections (the parts marked
+          off in each file), excludes private-only directories, and writes the
+          sanitized result into the ephemeral workspace. Nothing flows back from
+          public to private.
+        </p>
+
+        <pre><code><span class="token-comment"># Conceptual data flow during a publish</span>
+<span class="token-keyword">seja-priv/.claude/</span>  <span class="token-comment"># source of truth (edited here)</span>
+    <span class="token-comment"># |  sync_to_public.py: strip priv-only sections, exclude priv dirs</span>
+    <span class="token-comment"># v  (one-way, generated on demand)</span>
+<span class="token-keyword">ephemeral workspace/.claude/</span>  <span class="token-comment"># built during publish, then discarded</span>
+    <span class="token-comment"># |  commit + push</span>
+    <span class="token-comment"># v</span>
+<span class="token-keyword">public seja repository</span></code></pre>
+
+        <h3>Why generated and not stored</h3>
+
+        <p>
+          SEJA is not open-sourced, and the public face must show only polished
+          evolution -- not the private iteration history. Two designs were
+          considered. Storing a checked-in public copy would mean two trees to
+          keep in sync by hand, an endless source of drift and accidental
+          leaks. Full automation was rejected for a small-team cadence because
+          it would either leak private history or demand heavy sanitization
+          tooling. The chosen model -- generate ephemerally, publish manually --
+          keeps privacy correct by construction: there is simply no persistent
+          public tree to leak from, because it does not exist between releases.
+        </p>
+
+        <aside class="callout-warning">
+          <p>
+            <strong>Do not recreate the public tree on disk.</strong> A common
+            mistake is to try to hand-sync a
+            <code>seja-public/.claude/</code> directory. That directory does not
+            exist on disk and must not be recreated -- it is generated
+            ephemerally by the publish pipeline into a temporary clone. Editing
+            it by hand would defeat the one-way sync model. Edit only
+            <code>.claude/</code> and <code>product-design/</code> in the
+            private repository.
+          </p>
+        </aside>
+
+        <h3>Release discipline and the sync runbook</h3>
+
+        <p>
+          Because the release path is manual, the harness has a built-in
+          safeguard against "cut tag and forget." When
+          <code>cut_tag.py</code> cuts a tag, it files a <code>PUBLISH:</code>
+          entry in the pending ledger. The pre-skill lifecycle hook's
+          pending-check stage surfaces that entry on every skill invocation, and
+          if it stays unresolved for more than three days the reminder escalates
+          to the top of the output with stronger wording. The ledger entry is
+          the forcing function that keeps the manual path reliable -- it remains
+          until the maintainer completes the sync or explicitly dismisses it.
+        </p>
+
+        <p>
+          The <code>/publish</code> pipeline automates what was historically a
+          manual runbook. That runbook's seven steps are still a useful mental
+          model of what the pipeline does on your behalf:
+        </p>
+
+        <ol class="step-list">
+          <li>Update the public changelog's <code>Unreleased</code> section
+          with the changes to publish.</li>
+          <li>Cut the tag via <code>cut_tag.py</code>, which creates the
+          annotated tag and files the <code>PUBLISH:</code> ledger entry.</li>
+          <li>Regenerate the public tree via <code>sync_to_public.py</code>
+          (strip private-only sections, exclude private-only directories).</li>
+          <li>Run <code>pre_publish_smoke.py</code> as the pre-push gate.</li>
+          <li>Inspect the diff against the last published state.</li>
+          <li>Push to the public <code>seja</code> repository.</li>
+          <li>Resolve the <code>PUBLISH:</code> pending ledger entry.</li>
+        </ol>
+
+        <p>
+          A monthly consumer-path dogfooding ritual runs in a scratch consumer
+          repository (never in the private repo). It exercises
+          <code>/seja-setup</code> (install and <code>--upgrade</code>) against a
+          tagged release to surface experiential drift -- misleading prompts,
+          stale how-to instructions, broken cross-links -- that CI smoke tests
+          cannot catch.
+        </p>
+
+        <aside class="see-also">
+          <p>
+            <strong>See also:</strong> the consumer-facing
+            <code>docs/reference/release-process.md</code> summarizes the A2
+            manual-sync model, the tag convention, and the sync-runbook steps
+            for harness contributors. Related governance material lives in
+            <a href="ch2-enforcement-architecture.html">Enforcement
+            Architecture</a> (the priv/public boundary and leak prevention) and
+            <a href="ch4-maintenance-and-drift.html">Maintenance and Drift</a>
+            (freshness policies and periodic triggers).
+          </p>
+        </aside>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Chapter navigation: Ch.5 is the last chapter -- omits Next -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="ch4-maintenance-and-drift.html">Previous: Maintenance and Drift</a>
+    <span></span>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

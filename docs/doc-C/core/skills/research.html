@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How-to guide for the /research skill: answer questions about the codebase, architecture, or design decisions, logging each Q&amp;A pair, or catalog codebase elements with --inventory.">
+  <title>/research — SEJA Documentation</title>
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>/research</h1>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Skills</a></li>
+        <li aria-current="page">/research</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge core-skills">skills</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="what-it-does">
+          <h2 id="what-it-does">What it does</h2>
+          <p><code>/research</code> answers questions about the project &mdash; architecture, design decisions, trade-offs. The agent researches your codebase, analyzes the question from multiple perspectives, and gives you actionable recommendations at HIGH, MEDIUM, or LOW priority.</p>
+          <p>It runs in two modes. In the default <strong>research</strong> mode it produces a structured report with perspective analysis and a recommendations summary; if it detects design decisions in the Q&amp;A, it offers a decision-extract proposal flow &mdash; create a structured D-NNN entry now, defer it to the pending ledger, or skip. Two to five topic tags are derived automatically, and follow-up Q&amp;A continues within the same session. The <code>--deep</code> flag activates a structured expert council debate for high-stakes decisions. In <strong>inventory</strong> mode (<code>--inventory &lt;pattern&gt;</code>), it scans the codebase and produces a structured catalog of all elements matching a pattern, such as every API endpoint or every form component.</p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="when-to-run">
+          <h2 id="when-to-run">When to run it</h2>
+          <p>Run <code>/research</code> when you need guidance on a design decision, want to understand trade-offs, or are unsure about the best approach. Use <code>--inventory</code> when you need an overview of what exists in the codebase, and <code>--deep</code> for high-stakes decisions that benefit from structured multi-perspective debate.</p>
+          <p>From iteration 2 onward, <code>/research</code> is the usual lifecycle entry point: you ask your question here, and depending on what surfaces you move into <code>/design</code> when intent needs to change or into <code>/plan</code> when intent is set and you need a build plan.</p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="how-it-fits">
+          <h2 id="how-it-fits">How it fits the lifecycle</h2>
+          <p>The canonical path is <code>/research</code> &rarr; <code>/design</code> | <code>/plan</code> &rarr; <code>/implement</code> &rarr; <code>/critique</code> &rarr; <code>/document</code> | <code>/communicate</code> &rarr; <code>/reflect</code>. <code>/research</code> (alongside <code>/explain</code>) sits at the head of that path &mdash; the investigation step you run to understand what you are about to change.</p>
+          <p>From here you branch forward: <code>/plan</code> turns recommendations into an actionable build plan (pass the research ID so the plan records its source), <code>/plan --roadmap</code> builds a full product roadmap, and <code>/design</code> takes over when research surfaces that intent itself must change first. After an <code>--inventory</code> run, <code>/explain</code> gives a deeper explanation of any catalogued item.</p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="../concepts/lifecycle-pipeline.html">Lifecycle pipeline</a> &mdash; where /research sits on the canonical path.</li>
+            <li><a href="explain.html">/explain</a> &mdash; the other lifecycle entry point, for explaining how something works.</li>
+            <li><a href="design.html">/design</a> &mdash; when research surfaces that intent must change first.</li>
+            <li><a href="plan.html">/plan</a> &mdash; turn recommendations into a build plan.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Skills</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

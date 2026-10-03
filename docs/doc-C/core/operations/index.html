@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="Operations Core landing page: task-oriented procedures for running the SEJA harness — installation, upgrade, planning and executing, quality gates, CI integration, release, and team/stakeholder material.">
+  <title>Operations — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/operations category landing) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Operations</h1>
+      <p>Task-oriented procedures &mdash; how to set up, run, and ship with the SEJA harness.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li aria-current="page">Operations</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge core-operations">operations</span>
+          <span class="badge diataxis-howto">how-to</span>
+        </p>
+
+        <section aria-labelledby="pages">
+          <h2 id="pages">Pages in this category</h2>
+          <p>Seven how-to guides. Each is a self-contained procedure; start with whichever task you have in front of you.</p>
+          <dl>
+            <dt><a href="installation.html">Installing SEJA</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Install across all four modes &mdash; greenfield or brownfield, collocated or companion workspace &mdash; with a decision tree, version pinning, and setup-state detection.</dd>
+
+            <dt><a href="upgrade.html">Upgrading SEJA</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Upgrade an install to a newer release: the <code>--upgrade</code> flag, <code>--version</code> pinning, <code>--dry-run</code> preview, baseline tracking, and the file-preservation guarantee.</dd>
+
+            <dt><a href="plan-and-execute.html">Planning and Executing</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Plan and execute work: the <code>/plan</code> modes and plan format, the structured step anatomy, and <code>/implement</code> across auto, manual, and roadmap modes.</dd>
+
+            <dt><a href="quality-gates.html">Quality Gates</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Run the quality gates: the ten <code>/critique</code> modes, stack filtering via <code>conventions.md</code>, the <code>--depth</code> override, and the preflight checkpoint pattern.</dd>
+
+            <dt><a href="ci-integration.html">CI Integration</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Wire validation into CI/CD: the <code>run_preflight_fast.py</code> fast gate, the pre-commit hook and its installer, and the <code>run_all_checks.py</code> orchestrator with JUnit XML.</dd>
+
+            <dt><a href="release.html">Release</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>How releases work: the tag convention, the unified version namespace, manual batched cadence, the <code>/publish</code> skill, the forward-fix hotfix policy, and the A2 sync model.</dd>
+
+            <dt><a href="team-and-stakeholders.html">Team and Stakeholders</a> <span class="badge diataxis-howto">how-to</span></dt>
+            <dd>Generate stakeholder communication and onboarding material: the <code>/communicate</code> audience segments and the <code>/onboard</code> role&times;level matrix, plus their batch modes.</dd>
+          </dl>
+        </section>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="../../index.html#core">Core</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/operations category landing) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

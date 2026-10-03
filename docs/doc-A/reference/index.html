@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="reference">
+  <meta name="doc-volume" content="Reference">
+  <meta name="doc-chapter" content="Volume Index">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>Reference Volume Index -- SEJA Documentation</title>
+
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="../how-to/index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li>Reference</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-reference">
+    <article>
+      <p class="vol-accent"><strong>reference</strong></p>
+
+      <h1>Volume 3: Reference -- "Look Up SEJA"</h1>
+
+      <p>
+        Exhaustive specification of every SEJA component: skills, subagents,
+        scripts, reference files, pipelines, file formats, and configuration
+        variables. Each chapter provides tabular, parameter-level detail designed
+        for lookup rather than sequential reading.
+      </p>
+
+      <section id="chapters">
+        <h2>Chapters</h2>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Chapter</th>
+                <th>Contents</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td><a href="skills-reference.html">Skills Reference</a></td>
+                <td>All 17 skills (15 user-facing + 2 internal). Per-skill tables with arguments, modes, exit behavior, subagent delegations, and context budget tiers.</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td><a href="subagent-reference.html">Subagent Reference</a></td>
+                <td>All 16 subagent prompts: 9 evaluators and 7 generators. Per-agent tables with inputs, outputs, trust boundaries, and invoking skills.</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td><a href="scripts-reference.html">Scripts Reference</a></td>
+                <td>All helper scripts organized by location (shared utilities vs. skill-owned) and by function (validation, generation, lifecycle management, migration).</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td><a href="reference-files-catalog.html">Reference Files Catalog</a></td>
+                <td>Complete inventory of reference files across three groups: general (50 files), template (50 files), and project-specific. Load mechanisms, consumer skills, and maintainer classification.</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td><a href="pipeline-reference.html">Pipeline Reference</a></td>
+                <td>Pre-skill pipeline (6 stages) and post-skill pipeline (13+ steps). Stage-level detail: criticality, skip conditions, inputs, outputs, error handling.</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td><a href="file-format-reference.html">File Format Reference</a></td>
+                <td>Every file format used in SEJA: YAML frontmatter schemas, JSONL record formats, Markdown structures, plan/advisory/roadmap/brief conventions.</td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td><a href="configuration-reference.html">Configuration Reference</a></td>
+                <td>All configuration variables from conventions.md, constitution.md, and settings.json. Directory structure variables, key file variables, periodic trigger thresholds, and Claude Code hook configuration.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="how-to-use">
+        <h2>How to Use This Volume</h2>
+
+        <p>
+          This volume is structured for lookup, not sequential reading. Start
+          from the chapter that matches what you need to find:
+        </p>
+
+        <ul>
+          <li><strong>What arguments does a skill accept?</strong> → <a href="skills-reference.html">Ch. 1: Skills Reference</a></li>
+          <li><strong>What does an agent expect as input?</strong> → <a href="subagent-reference.html">Ch. 2: Subagent Reference</a></li>
+          <li><strong>What does a script do and how do I call it?</strong> → <a href="scripts-reference.html">Ch. 3: Scripts Reference</a></li>
+          <li><strong>Where is a reference file and who uses it?</strong> → <a href="reference-files-catalog.html">Ch. 4: Reference Files Catalog</a></li>
+          <li><strong>What happens during pre-skill or post-skill?</strong> → <a href="pipeline-reference.html">Ch. 5: Pipeline Reference</a></li>
+          <li><strong>What fields go in a plan header?</strong> → <a href="file-format-reference.html">Ch. 6: File Format Reference</a></li>
+          <li><strong>What variables can I set in conventions.md?</strong> → <a href="configuration-reference.html">Ch. 7: Configuration Reference</a></li>
+        </ul>
+      </section>
+
+      <section id="cross-references">
+        <h2>Cross-References to Other Volumes</h2>
+
+        <ul>
+          <li><a href="../tutorials/index.html">Vol. 1: Tutorials</a> -- step-by-step learning paths that reference these specifications</li>
+          <li><a href="../how-to/index.html">Vol. 2: How-To Guides</a> -- task-oriented guides that apply these reference details</li>
+          <li><a href="../explanation/index.html">Vol. 4: Explanation</a> -- conceptual background on why these components are designed as they are</li>
+        </ul>
+      </section>
+
+    </article>
+
+    <!-- Volume navigation (prev/next volume) -->
+    <nav aria-label="volume navigation">
+      <a href="../how-to/index.html">Previous: Vol. 2 -- How-To Guides</a>
+      <a href="../explanation/index.html">Next: Vol. 4 -- Explanation</a>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#chapters">Chapters</a></li>
+      <li><a href="#how-to-use">How to Use This Volume</a></li>
+      <li><a href="#cross-references">Cross-References</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T16:40:00Z</p>
+  </footer>
+
+</body>
+</html>

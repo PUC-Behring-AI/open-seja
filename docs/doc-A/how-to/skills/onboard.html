@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="how-to">
+  <meta name="doc-volume" content="How-To Guides">
+  <meta name="doc-chapter" content="How to Onboard a Team Member">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>How to Onboard a Team Member -- SEJA Documentation</title>
+
+  <!-- CSS depth: 2 (sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../../index.html">Home</a>
+    <a href="../../tutorials/index.html">Tutorials</a>
+    <a href="../index.html">How-To Guides</a>
+    <a href="../../reference/index.html">Reference</a>
+    <a href="../../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../../index.html">Home</a></li>
+      <li><a href="../index.html">How-To Guides</a></li>
+      <li><a href="index.html">Skill-by-Skill Guides</a></li>
+      <li>How to Onboard a Team Member</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-howto">
+    <article>
+      <p class="vol-accent"><strong>how-to</strong></p>
+
+      <h1>How to Onboard a Team Member</h1>
+
+      <p>
+        Goal: produce a personalized onboarding plan -- what to learn, in what
+        order, and where to find things -- tailored to a role and experience level.
+        The <code>/onboard</code> skill covers three role families and three
+        expertise levels. Use it to onboard a new teammate, or yourself if you are
+        new to the toolkit or the project.
+      </p>
+
+      <section id="when-to-use">
+        <h2>When to Use</h2>
+        <ul>
+          <li>A new team member is joining and you want a structured, role-appropriate onboarding experience.</li>
+          <li>You are the newcomer and want a clear learning path into the project and the toolkit.</li>
+          <li>You want to generate plans for several roles or levels at once (batch modes).</li>
+        </ul>
+        <aside class="callout-tip">
+          <p>
+            <strong>Not for</strong> stakeholder updates (use
+            <code>/communicate</code>) or API/architecture documentation (use
+            <code>/document</code>).
+          </p>
+        </aside>
+      </section>
+
+      <section id="required-inputs">
+        <h2>Required Inputs</h2>
+        <ul>
+          <li>A role family and expertise level, e.g. <code>/onboard shaper L2 Alice --area frontend</code>.</li>
+          <li>Optionally a name and focus area.</li>
+          <li>For batch generation, a batch selector (<code>--all</code>, <code>--all-levels &lt;role&gt;</code>, <code>--all-roles &lt;level&gt;</code>, or <code>--batch "&lt;spec-list&gt;"</code>).</li>
+        </ul>
+      </section>
+
+      <section id="step-by-step">
+        <h2>Step by Step</h2>
+
+        <ol>
+          <li>
+            <strong>Choose a role family.</strong>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr><th scope="col">Role family</th><th scope="col">Aliases</th><th scope="col">Focus</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Builder</td><td><code>builder</code>, <code>BLD</code></td><td>Engineers -- code, architecture, testing</td></tr>
+                  <tr><td>Shaper</td><td><code>shaper</code>, <code>SHP</code></td><td>Designers, PMs -- product, UX, strategy</td></tr>
+                  <tr><td>Guardian</td><td><code>guardian</code>, <code>GRD</code></td><td>QA, security, ops -- quality, reliability</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </li>
+          <li>
+            <strong>Choose an expertise level.</strong> <code>L1</code>
+            (contributor / new to the role or project), <code>L2</code> (expert /
+            experienced practitioner), or <code>L3</code> (leader / technical lead
+            or architect).
+          </li>
+          <li>
+            <strong>Decide single or batch.</strong>
+            <ul>
+              <li><strong>Single plan</strong> -- Recommended when you are onboarding one specific person. NOT recommended when you want a library of plans for a whole team.</li>
+              <li><strong>Batch (<code>--all</code>, <code>--all-levels</code>, <code>--all-roles</code>, <code>--batch</code>)</strong> -- Recommended when you want plans for several role-level combinations generated in parallel.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Run the skill.</strong> Output artifacts carry the
+            <code>onboarding-NNN</code> prefix and land in
+            <code>_output/onboarding-plans/</code>. By default both Markdown and HTML
+            are generated; restrict with <code>--format md</code>.
+            <br><em>Expected output:</em> a role- and level-appropriate onboarding
+            plan (for example a 30-60-90 day plan) tailored to the focus area.
+          </li>
+        </ol>
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip.</strong> Per-role learning paths, reading lists, and
+            milestone checkpoints live in the onboarding reference files under
+            <code>.claude/references/general/onboarding/</code>. Edit those files to
+            change what each role learns.
+          </p>
+        </aside>
+      </section>
+
+      <section id="expected-outputs">
+        <h2>Expected Outputs</h2>
+        <ul>
+          <li>One or more <code>onboarding-&lt;id&gt;-*</code> plans in <code>_output/onboarding-plans/</code>.</li>
+          <li>Markdown and/or HTML per the <code>--format</code> setting.</li>
+          <li>In batch mode, multiple plans generated in parallel (for example all nine role-level combinations with <code>--all</code>).</li>
+        </ul>
+      </section>
+
+      <section id="common-mistakes">
+        <h2>Common Mistakes</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th scope="col">Mistake</th><th scope="col">Better approach</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Using <code>/onboard</code> to produce stakeholder messaging.</td>
+                <td>Audience messaging is <code>/communicate</code>; onboarding produces a personalized learning plan.</td>
+              </tr>
+              <tr>
+                <td>Onboarding at the wrong level.</td>
+                <td>Match the level to the person: <code>L1</code> for newcomers, <code>L2</code> for experienced practitioners, <code>L3</code> for leaders.</td>
+              </tr>
+              <tr>
+                <td>Omitting the focus area for a specialized role.</td>
+                <td>Pass <code>--area &lt;focus-area&gt;</code> so the plan targets the right part of the codebase.</td>
+              </tr>
+              <tr>
+                <td>Hand-writing many similar plans one at a time.</td>
+                <td>Use a batch selector (<code>--all-roles</code>, <code>--all-levels</code>, or <code>--batch</code>) to generate them in parallel.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="cross-references">
+        <h2>Cross-References</h2>
+        <ul>
+          <li><a href="communicate.html">How to Communicate to an Audience</a> -- generate stakeholder material as well.</li>
+          <li><a href="document.html">How to Generate Documentation</a> -- for API and architecture documentation.</li>
+          <li><a href="../../reference/reference-files-catalog.html">Reference Files Catalog</a> (Vol. 3) -- the onboarding role and level reference files.</li>
+        </ul>
+      </section>
+
+    </article>
+
+    <nav aria-label="chapter navigation">
+      <a href="qa-log.html">Back: How to Log a Q&amp;A Session</a>
+      <a href="publish.html">Next: How to Publish a Release</a>
+    </nav>
+
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../../reference/skills-reference.html">Skills Reference</a> -- role families, expertise levels, and batch selectors for <code>/onboard</code>.</li>
+        <li><a href="../../explanation/reflective-practice.html">Reflective Practice</a> -- why onboarding is framed as a learning path, not a checklist.</li>
+      </ul>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#when-to-use">When to Use</a></li>
+      <li><a href="#required-inputs">Required Inputs</a></li>
+      <li><a href="#step-by-step">Step by Step</a></li>
+      <li><a href="#expected-outputs">Expected Outputs</a></li>
+      <li><a href="#common-mistakes">Common Mistakes</a></li>
+      <li><a href="#cross-references">Cross-References</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../../index.html">Collection Index</a>
+      <a href="../../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T20:50:00Z</p>
+  </footer>
+
+</body>
+</html>

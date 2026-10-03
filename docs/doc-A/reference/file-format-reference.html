@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="reference">
+  <meta name="doc-volume" content="Reference">
+  <meta name="doc-chapter" content="File Format Reference">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>File Format Reference -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="../how-to/index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Reference</a></li>
+      <li>File Format Reference</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-reference">
+    <article>
+      <p class="vol-accent"><strong>reference</strong></p>
+
+      <h1>File Format Reference</h1>
+
+      <p>
+        Exhaustive specification of every file format used by the SEJA harness:
+        YAML frontmatter schemas, lifecycle marker syntax, JSONL trace formats,
+        plan file structure, brief log format, report header conventions, roadmap
+        files, file maintainer classification, and versioning files.
+      </p>
+
+      <!-- ============================================================ -->
+      <!-- 1. YAML Frontmatter Schemas                                   -->
+      <!-- ============================================================ -->
+
+      <section id="yaml-frontmatter-schemas">
+        <h2>YAML Frontmatter Schemas</h2>
+
+        <section id="skill-md-frontmatter">
+          <h3>SKILL.md Frontmatter</h3>
+
+          <p>
+            Every skill definition file (<code>.claude/skills/&lt;name&gt;/SKILL.md</code>)
+            begins with a YAML frontmatter block delimited by <code>---</code>. The schema
+            follows the <code>agentskills.io</code> portable spec with SEJA-specific extensions
+            under the <code>metadata</code> namespace.
+          </p>
+
+          <h4>Core Fields (agentskills.io)</h4>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Required</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>name</code></td>
+                  <td>Yes</td>
+                  <td>string (1--64 chars, lowercase alphanumeric + hyphens)</td>
+                  <td>Unique skill identifier. Must match the directory name.</td>
+                </tr>
+                <tr>
+                  <td><code>description</code></td>
+                  <td>Yes</td>
+                  <td>string (1--1024 chars)</td>
+                  <td>Human-readable purpose statement.</td>
+                </tr>
+                <tr>
+                  <td><code>argument-hint</code></td>
+                  <td>No</td>
+                  <td>string</td>
+                  <td>Usage pattern for arguments (shown in <code>/help</code>).</td>
+                </tr>
+                <tr>
+                  <td><code>user-invocable</code></td>
+                  <td>No</td>
+                  <td>boolean</td>
+                  <td>Whether the user can invoke directly. Default: <code>true</code>. Set to <code>false</code> for internal hooks (pre-skill, post-skill).</td>
+                </tr>
+                <tr>
+                  <td><code>compatibility</code></td>
+                  <td>No</td>
+                  <td>string (&lt;=500 chars)</td>
+                  <td>Runtime compatibility note (e.g., "Designed for Claude Code with the SEJA harness").</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>SEJA Extension Fields (metadata namespace)</h4>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Required</th>
+                  <th>Type</th>
+                  <th>Default</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>metadata.last-updated</code></td>
+                  <td>No</td>
+                  <td>datetime</td>
+                  <td>--</td>
+                  <td>Last modification timestamp (YYYY-MM-DD HH:MM UTC).</td>
+                </tr>
+                <tr>
+                  <td><code>metadata.version</code></td>
+                  <td>No</td>
+                  <td>semver string</td>
+                  <td>--</td>
+                  <td>Skill version (e.g., <code>1.2.0</code>).</td>
+                </tr>
+                <tr>
+                  <td><code>metadata.category</code></td>
+                  <td>No</td>
+                  <td>enum</td>
+                  <td>--</td>
+                  <td>Skill category. Values: <code>utility</code>, <code>analysis</code>, <code>planning</code>, <code>internal</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>metadata.context_budget</code></td>
+                  <td>No</td>
+                  <td>enum</td>
+                  <td><code>standard</code></td>
+                  <td>Context budget tier controlling how much is loaded at pre-skill. Values: <code>light</code> (skips refs), <code>standard</code> (briefs index + refs), <code>heavy</code> (full briefs + plan index + refs).</td>
+                </tr>
+                <tr>
+                  <td><code>metadata.references</code></td>
+                  <td>No</td>
+                  <td>list of strings</td>
+                  <td><code>[]</code></td>
+                  <td>Reference files to load during pre-skill. Paths resolved via routing table (<code>general/</code> -> <code>.claude/references/general/</code>, <code>template/</code> -> <code>.claude/references/template/</code>).</td>
+                </tr>
+                <tr>
+                  <td><code>metadata.eager_references</code></td>
+                  <td>No</td>
+                  <td>list of strings</td>
+                  <td>--</td>
+                  <td>References loaded immediately (demand-pull mode). When present, entries in <code>references</code> not in this list become lazy-loaded on demand.</td>
+                </tr>
+                <tr>
+                  <td><code>metadata.skip_stages</code></td>
+                  <td>No</td>
+                  <td>list of strings</td>
+                  <td><code>[]</code></td>
+                  <td>Pre-skill stages to skip. Valid IDs: <code>pending-check</code>, <code>orphan-check</code>, <code>compaction-check</code>, <code>constitution</code>. Only non-critical stages may be skipped.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>Example</h4>
+
+<pre><code><span class="token-comment">---</span>
+<span class="token-keyword">name</span>: research
+<span class="token-keyword">description</span>: <span class="token-string">"Answer questions about the codebase."</span>
+<span class="token-keyword">argument-hint</span>: <span class="token-string">"&lt;question&gt; [--inventory &lt;pattern&gt;] [--deep]"</span>
+<span class="token-keyword">user-invocable</span>: true
+<span class="token-keyword">compatibility</span>: <span class="token-string">"Designed for Claude Code with the SEJA harness"</span>
+<span class="token-keyword">metadata</span>:
+  <span class="token-keyword">version</span>: 1.2.0
+  <span class="token-keyword">category</span>: analysis
+  <span class="token-keyword">context_budget</span>: standard
+  <span class="token-keyword">references</span>:
+    - general/shared-definitions.md
+    - general/report-conventions.md
+<span class="token-comment">---</span></code></pre>
+        </section>
+
+        <section id="reference-file-frontmatter">
+          <h3>Reference File Frontmatter</h3>
+
+          <p>
+            All reference files in <code>.claude/references/</code> begin with a YAML
+            frontmatter block containing a single required field.
+          </p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Required</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>designer_description</code></td>
+                <td>Yes</td>
+                <td>string</td>
+                <td>First-person description of the file's purpose, written from the file's perspective (e.g., "When a skill uses a harness-wide concept, I'm the reference that holds the canonical definitions..."). Must not be compressed or summarized by agents.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h4>Example</h4>
+
+<pre><code><span class="token-comment">---</span>
+<span class="token-keyword">designer_description</span>: <span class="token-string">"When a skill produces a report file under your
+  output directory, I'm the reference that codifies the shared header
+  fields, the artifact-immutability rule, and the ASCII-only character
+  restrictions."</span>
+<span class="token-comment">---</span></code></pre>
+        </section>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 2. Lifecycle Markers                                          -->
+      <!-- ============================================================ -->
+
+      <section id="lifecycle-markers">
+        <h2>Lifecycle Markers</h2>
+
+        <p>
+          Inline markers track the lifecycle of as-intended items across registered
+          as-intended files (declared in <code>conventions.md</code> As-Intended / As-Coded
+          Registry). Agents may read markers and propose new ones via
+          <code>AskUserQuestion</code> in post-skill. Agents must never remove or alter
+          existing markers -- these are audit records.
+        </p>
+
+        <section id="status-marker">
+          <h3>STATUS Marker (Prose Sections)</h3>
+
+          <p>
+            An inline HTML comment placed immediately before the section heading.
+            Invisible in rendered Markdown, machine-parseable by agent tooling.
+          </p>
+
+          <h4>Legacy Format (pre-2.8.0)</h4>
+
+<pre><code><span class="token-comment">&lt;!-- STATUS: IMPLEMENTED | plan-NNNNNN | YYYY-MM-DD --&gt;</span>
+### Section Title</code></pre>
+
+          <p>
+            Single uppercase <code>IMPLEMENTED</code>, typically paired with a later
+            <code>ESTABLISHED</code> stamp on promotion. A legacy marker without a plan
+            ID is valid for items implemented outside the plan workflow.
+          </p>
+
+          <h4>Current Format (2.8.0+)</h4>
+
+<pre><code><span class="token-comment">&lt;!-- STATUS: proposed | plan-NNNNNN | YYYY-MM-DD --&gt;</span>
+### Section Title</code></pre>
+
+          <p>
+            Lowercase multi-value marker with a state machine governing allowed
+            transitions. Used by <code>apply_marker.py</code> and enforced by
+            <code>check_human_markers_only.py</code> for Human (markers) files.
+          </p>
+
+          <h4>State Machine</h4>
+
+          <table>
+            <thead>
+              <tr>
+                <th>From State</th>
+                <th>To State</th>
+                <th>Valid</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>proposed</code></td>
+                <td><code>implemented</code></td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td><code>implemented</code></td>
+                <td><code>established</code></td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td><code>established</code></td>
+                <td><code>superseded</code></td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td><code>established</code></td>
+                <td><code>implemented</code></td>
+                <td>No (regression)</td>
+              </tr>
+              <tr>
+                <td><code>implemented</code></td>
+                <td><code>proposed</code></td>
+                <td>No (regression)</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p>
+            Plan ID and date are optional for <code>proposed</code> (initial state)
+            and required after. Uppercase <code>STATUS: IMPLEMENTED</code> markers
+            remain valid; the widened regex detects legacy markers so a Phase 3b flip
+            replaces rather than stacks.
+          </p>
+        </section>
+
+        <section id="established-stamp">
+          <h3>ESTABLISHED Stamp</h3>
+
+          <p>
+            Applied when a human confirms promotion of an implemented item via
+            <code>/explain drift --promote</code> or manual curation.
+          </p>
+
+<pre><code><span class="token-comment">&lt;!-- ESTABLISHED: plan-NNNNNN | YYYY-MM-DD | vX.Y.Z --&gt;</span></code></pre>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Required</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>plan-NNNNNN</td>
+                <td>Yes</td>
+                <td>Plan that implemented the item.</td>
+              </tr>
+              <tr>
+                <td>YYYY-MM-DD</td>
+                <td>Yes</td>
+                <td>Date of promotion.</td>
+              </tr>
+              <tr>
+                <td>vX.Y.Z</td>
+                <td>No</td>
+                <td>Version at promotion time. Projects without semver use date only.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="implemented-marker-table-rows">
+          <h3>IMPLEMENTED Marker (Table Rows)</h3>
+
+          <p>
+            For structured tables (e.g., journey map steps), a Status column carries
+            the implementation state:
+          </p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Status Value</th>
+                <th>Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>DONE (plan-NNNNNN, YYYY-MM-DD)</code></td>
+                <td>Implemented by the referenced plan on the given date.</td>
+              </tr>
+              <tr>
+                <td><code>-</code></td>
+                <td>Not yet implemented.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="decision-append-marker">
+          <h3>DECISION_APPEND Marker</h3>
+
+          <p>
+            Appends new decision entries with auto-assigned <code>D-NNN</code> IDs to
+            the <code>## Decisions</code> section of
+            <code>product-design/product-design-as-intended.md</code>.
+            Written exclusively via <code>apply_marker.py --marker DECISION_APPEND</code>.
+          </p>
+
+          <h4>Decision Entry Shape (DDR)</h4>
+
+<pre><code><span class="token-comment">&lt;!-- STATUS: proposed | plan-NNNNNN | YYYY-MM-DD --&gt;</span>
+### D-001: Use PostgreSQL as primary datastore
+
+<span class="token-keyword">**Context**</span>: ...
+<span class="token-keyword">**Decision**</span>: ...
+<span class="token-keyword">**Consequences**</span>: ...</code></pre>
+
+          <p>
+            The <code>D-NNN</code> namespace is orthogonal to <code>REQ-TYPE-NNN</code>
+            -- separate taxonomies, never intermixed.
+          </p>
+        </section>
+
+        <section id="changelog-append-marker">
+          <h3>CHANGELOG_APPEND Marker</h3>
+
+          <p>
+            Appends versioned entries to changelog sections in Human (markers) files.
+            Written via <code>apply_marker.py --marker CHANGELOG_APPEND</code>.
+          </p>
+        </section>
+
+        <section id="incorporated-marker">
+          <h3>INCORPORATED Marker</h3>
+
+          <p>
+            Marks research findings that have been incorporated into design intent.
+            Written via <code>apply_marker.py --marker INCORPORATED</code>.
+          </p>
+        </section>
+
+        <section id="requirement-id-convention">
+          <h3>Requirement ID Convention</h3>
+
+          <p>
+            Stable, machine-parseable identifiers for design-intent requirements,
+            enabling spec-to-plan traceability. Each marker is an HTML comment placed
+            immediately before the heading, table row, or bullet.
+          </p>
+
+          <h4>Format</h4>
+
+<pre><code><span class="token-comment">&lt;!-- REQ-TYPE-NNN --&gt;</span></code></pre>
+
+          <h4>Type Prefix Taxonomy</h4>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Type Prefix</th>
+                  <th>Design-Intent Section</th>
+                  <th>Classification</th>
+                  <th>Enforcement</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>ENT</code></td>
+                  <td>2. Entity Hierarchy</td>
+                  <td>technical</td>
+                  <td>advisory</td>
+                </tr>
+                <tr>
+                  <td><code>PERM</code></td>
+                  <td>4. Permission Model</td>
+                  <td>security</td>
+                  <td>blocking at preflight</td>
+                </tr>
+                <tr>
+                  <td><code>VAL</code></td>
+                  <td>10. Validation Constants</td>
+                  <td>security</td>
+                  <td>blocking at preflight</td>
+                </tr>
+                <tr>
+                  <td><code>UX</code></td>
+                  <td>8. UX Patterns</td>
+                  <td>ux</td>
+                  <td>advisory</td>
+                </tr>
+                <tr>
+                  <td><code>MC</code></td>
+                  <td>14. Per-Feature Metacomm</td>
+                  <td>ux</td>
+                  <td>advisory</td>
+                </tr>
+                <tr>
+                  <td><code>JM</code></td>
+                  <td>15. Designed User Journeys</td>
+                  <td>ux</td>
+                  <td>advisory</td>
+                </tr>
+                <tr>
+                  <td><code>I18N</code></td>
+                  <td>7. Localization</td>
+                  <td>cross-cutting</td>
+                  <td>advisory</td>
+                </tr>
+                <tr>
+                  <td><code>DELTA</code></td>
+                  <td>16--17. Deltas</td>
+                  <td>technical</td>
+                  <td>advisory</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>
+            Security-classified requirements (<code>PERM</code>, <code>VAL</code>) must be
+            traced by a plan step in the same wave. Advisory-classified requirements produce
+            warnings but do not block. Plan steps declare satisfied requirements via the
+            <code>Traces</code> metadata field. Coverage is verified by
+            <code>check_plan_coverage.py</code>.
+          </p>
+        </section>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 3. JSONL Trace Formats                                        -->
+      <!-- ============================================================ -->
+
+      <section id="jsonl-trace-formats">
+        <h2>JSONL Trace Formats</h2>
+
+        <section id="conversation-trace-jsonl">
+          <h3>conversation-trace.jsonl</h3>
+
+          <p>
+            Append-only conversation log stored at
+            <code>${OUTPUT_DIR}/conversation-trace.jsonl</code>. Each line is a JSON
+            object representing one exchange event. Managed by
+            <code>conversation_trace.py</code>.
+          </p>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>evt_id</code></td>
+                  <td>string</td>
+                  <td>Yes</td>
+                  <td>Unique event identifier (auto-generated).</td>
+                </tr>
+                <tr>
+                  <td><code>session_id</code></td>
+                  <td>string</td>
+                  <td>Yes</td>
+                  <td>Claude session ID from <code>CLAUDE_SESSION_ID</code> env var.</td>
+                </tr>
+                <tr>
+                  <td><code>timestamp</code></td>
+                  <td>ISO 8601</td>
+                  <td>Yes</td>
+                  <td>Event timestamp in UTC.</td>
+                </tr>
+                <tr>
+                  <td><code>emitter</code></td>
+                  <td>enum</td>
+                  <td>Yes</td>
+                  <td>Who produced the message. Values: <code>user</code>, <code>claude</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>message</code></td>
+                  <td>string</td>
+                  <td>Yes</td>
+                  <td>Content of the exchange (user utterance or 1--2 sentence agent summary).</td>
+                </tr>
+                <tr>
+                  <td><code>type</code></td>
+                  <td>enum</td>
+                  <td>Yes</td>
+                  <td>Message classification. Values: <code>question</code>, <code>answer</code>, <code>instruction</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>preceding_evt_id</code></td>
+                  <td>string</td>
+                  <td>Yes</td>
+                  <td>Previous event in sequence (<code>"null"</code> for first event).</td>
+                </tr>
+                <tr>
+                  <td><code>topic_tags</code></td>
+                  <td>list of strings</td>
+                  <td>No</td>
+                  <td>1--3 short topic tags (agent responses only).</td>
+                </tr>
+                <tr>
+                  <td><code>skill_id</code></td>
+                  <td>string</td>
+                  <td>No</td>
+                  <td>Linked skill invocation (backfilled by pre-skill).</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="decision-digest-jsonl">
+          <h3>decision-digest.jsonl</h3>
+
+          <p>
+            Machine-readable index of <code>D-NNN</code> decision entries from
+            <code>product-design-as-intended.md</code> and HIGH/MEDIUM recommendations
+            from research logs. Stored at <code>${OUTPUT_DIR}/decision-digest.jsonl</code>.
+            Generated by <code>generate_decision_digest.py</code>, invoked conditionally by
+            post-skill step 7d.
+          </p>
+        </section>
+
+        <section id="telemetry-jsonl">
+          <h3>telemetry.jsonl</h3>
+
+          <p>
+            Append-only skill execution telemetry stored at
+            <code>${OUTPUT_DIR}/telemetry.jsonl</code>. Each line is a JSON object
+            recording one skill invocation. Prepared at post-skill step 1b, flushed
+            at step 8b.
+          </p>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>skill</code></td>
+                  <td>string</td>
+                  <td>Yes</td>
+                  <td>Name of the executed skill.</td>
+                </tr>
+                <tr>
+                  <td><code>id</code></td>
+                  <td>string</td>
+                  <td>Yes</td>
+                  <td>Artifact ID (e.g., <code>plan-000123</code>).</td>
+                </tr>
+                <tr>
+                  <td><code>outcome</code></td>
+                  <td>enum</td>
+                  <td>Yes</td>
+                  <td>Skill outcome (e.g., <code>success</code>, <code>partial</code>, <code>failed</code>).</td>
+                </tr>
+                <tr>
+                  <td><code>timestamp</code></td>
+                  <td>ISO 8601</td>
+                  <td>Yes</td>
+                  <td>Completion timestamp in UTC.</td>
+                </tr>
+                <tr>
+                  <td><code>duration_seconds</code></td>
+                  <td>number</td>
+                  <td>Yes</td>
+                  <td>Total execution duration in seconds.</td>
+                </tr>
+                <tr>
+                  <td><code>git_commit_sha</code></td>
+                  <td>string</td>
+                  <td>No</td>
+                  <td>Commit SHA from step 8 (null if commit skipped).</td>
+                </tr>
+                <tr>
+                  <td><code>files_changed</code></td>
+                  <td>number</td>
+                  <td>No</td>
+                  <td>Number of files in the commit (null if commit skipped).</td>
+                </tr>
+                <tr>
+                  <td><code>parent_skill</code></td>
+                  <td>string</td>
+                  <td>No</td>
+                  <td>Name of the calling skill (null if top-level).</td>
+                </tr>
+                <tr>
+                  <td><code>session_id</code></td>
+                  <td>string</td>
+                  <td>No</td>
+                  <td>Claude session ID from <code>CLAUDE_SESSION_ID</code> env var.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 4. Plan File Structure                                        -->
+      <!-- ============================================================ -->
+
+      <section id="plan-file-structure">
+        <h2>Plan File Structure</h2>
+
+        <section id="plan-header-format">
+          <h3>Header Format</h3>
+
+<pre><code># Plan NNNNNN | PREFIX-SCOPE | YYYY-MM-DD HH:MM | Short Title | Review: depth</code></pre>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Component</th>
+                  <th>Format</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>NNNNNN</td>
+                  <td>6-digit zero-padded</td>
+                  <td>Globally unique plan ID, reserved via <code>reserve_id.py</code>.</td>
+                </tr>
+                <tr>
+                  <td>PREFIX</td>
+                  <td>FEATURE | REDESIGN | FIX | REFACTOR | DOCUMENT | TEST | CHORE</td>
+                  <td>Change type classification.</td>
+                </tr>
+                <tr>
+                  <td>SCOPE</td>
+                  <td>-B | -F | -X | -O</td>
+                  <td>Backend, Frontend, Cross-cutting, or Other.</td>
+                </tr>
+                <tr>
+                  <td>YYYY-MM-DD HH:MM</td>
+                  <td>UTC datetime</td>
+                  <td>Plan creation timestamp.</td>
+                </tr>
+                <tr>
+                  <td>Short Title</td>
+                  <td>free text</td>
+                  <td>Brief descriptive title.</td>
+                </tr>
+                <tr>
+                  <td>Review: depth</td>
+                  <td>light | standard | deep</td>
+                  <td>Review depth applied during plan generation.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="plan-sections">
+          <h3>Plan Sections (in order)</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Section</th>
+                <th>Required</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td><code>## Designer's Metacommunication Message</code></td>
+                <td>Yes</td>
+                <td>First-person I/you designer statement of intent.</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td><code>## User Brief</code></td>
+                <td>Yes</td>
+                <td>Verbatim user request.</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td><code>## Agent Interpretation</code></td>
+                <td>Yes</td>
+                <td>Structured: Problem, Approach, Alternatives rejected.</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td><code>## Metacomm Intention</code></td>
+                <td>No</td>
+                <td>Summary + Source (present when <code>--framing metacomm</code> was used).</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td><code>## Best Practices</code></td>
+                <td>Yes</td>
+                <td>Key practices and constraints for this plan.</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td><code>## Design Decisions</code></td>
+                <td>Yes</td>
+                <td>User-visible impact and trade-offs accepted.</td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td><code>## Steps</code></td>
+                <td>Yes</td>
+                <td>Numbered steps, each following the plan step template.</td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td><code>## Review Log</code></td>
+                <td>Yes</td>
+                <td>Phase 1 perspective triage table + Phase 2 deep-dives + execution metrics.</td>
+              </tr>
+              <tr>
+                <td>9</td>
+                <td><code>## Outcomes</code></td>
+                <td>Yes</td>
+                <td>Expected deliverables and artifact list.</td>
+              </tr>
+              <tr>
+                <td>10</td>
+                <td><code>## Smoke</code></td>
+                <td>Yes</td>
+                <td><code>true</code> or <code>false</code> -- whether smoke testing is warranted.</td>
+              </tr>
+              <tr>
+                <td>11</td>
+                <td><code>## Q&amp;A Log</code></td>
+                <td>No</td>
+                <td>Appended by post-skill step 3 (Branch B). Uses <code>### Q&lt;n&gt;</code> / <code>### A&lt;n&gt;</code> format.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 5. Plan Step Format                                           -->
+      <!-- ============================================================ -->
+
+      <section id="plan-step-format">
+        <h2>Plan Step Format</h2>
+
+        <p>
+          Each step within <code>## Steps</code> must be self-contained -- executable
+          by a subagent with no shared context from prior steps. The canonical shape
+          is defined in <code>.claude/references/template/plan-step.md</code>.
+        </p>
+
+        <h3>Canonical Shape</h3>
+
+<pre><code>### Step N: &lt;short imperative title&gt;
+&lt;Self-contained description of what to do.&gt;
+- <span class="token-keyword">**Files**</span>: &lt;path&gt; (create|modify|delete), ...
+- <span class="token-keyword">**References**</span>: &lt;reference-name&gt;, ...
+- <span class="token-keyword">**Depends on**</span>: Step N, Step M
+- <span class="token-keyword">**Interface**</span>: &lt;public surface&gt; | N/A
+- <span class="token-keyword">**Verify**</span>: &lt;success condition&gt;
+- <span class="token-keyword">**Tests**</span>: &lt;test description&gt; | N/A
+- <span class="token-keyword">**Docs**</span>: &lt;documentation changes&gt;
+- <span class="token-keyword">**Deploy**</span>: &lt;deployment config changes&gt;
+- <span class="token-keyword">**Traces**</span>: REQ-xxx, REQ-yyy
+- [ ] Done</code></pre>
+
+        <h3>Metadata Fields</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Required</th>
+                <th>When to Include</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Files</code></td>
+                <td>Yes</td>
+                <td>Always</td>
+                <td>Every path the step reads, creates, modifies, or deletes. Annotated with <code>(create|modify|delete)</code>.</td>
+              </tr>
+              <tr>
+                <td><code>References</code></td>
+                <td>Yes</td>
+                <td>Always</td>
+                <td>Only <code>product-design/</code> files relevant to this step.</td>
+              </tr>
+              <tr>
+                <td><code>Depends on</code></td>
+                <td>No</td>
+                <td>When output from prior steps is needed</td>
+                <td>Step numbers whose output this step requires. Omit for independent steps.</td>
+              </tr>
+              <tr>
+                <td><code>Interface</code></td>
+                <td>Yes</td>
+                <td>Always (N/A if leaf step)</td>
+                <td>Expected public surface for downstream consumers within the plan.</td>
+              </tr>
+              <tr>
+                <td><code>Verify</code></td>
+                <td>Yes</td>
+                <td>Always</td>
+                <td>Concrete, testable success condition. Prefer automated checks.</td>
+              </tr>
+              <tr>
+                <td><code>Tests</code></td>
+                <td>Yes</td>
+                <td>Always (N/A for doc/config steps)</td>
+                <td>Required for FEATURE/FIX/REFACTOR steps with source code changes.</td>
+              </tr>
+              <tr>
+                <td><code>Docs</code></td>
+                <td>No</td>
+                <td>FEATURE/REDESIGN with user-facing code</td>
+                <td>What documentation to create or update. Omit when N/A.</td>
+              </tr>
+              <tr>
+                <td><code>Deploy</code></td>
+                <td>No</td>
+                <td>When deployment config changes</td>
+                <td>New env vars, ports, services, Docker/server config. Omit when N/A.</td>
+              </tr>
+              <tr>
+                <td><code>Traces</code></td>
+                <td>No</td>
+                <td>When implementing design requirements</td>
+                <td>Comma-separated REQ IDs from <code>product-design-as-intended.md</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Decomposition Guidelines</h3>
+
+        <ul>
+          <li>Each step must be completable in one subagent context window (rule of thumb: touches &lt;=5 files).</li>
+          <li>Dependencies must flow forward (Step 2 depends on Step 1, not the reverse).</li>
+          <li>The step description must include enough context to make sense in isolation.</li>
+        </ul>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 6. Brief Log Format                                           -->
+      <!-- ============================================================ -->
+
+      <section id="brief-log-format">
+        <h2>Brief Log Format</h2>
+
+        <p>
+          The briefs log (<code>${OUTPUT_DIR}/briefs.md</code>) records every skill
+          invocation. Newest entries appear first (prepended by pre-skill, completed
+          by post-skill).
+        </p>
+
+        <h3>STARTED Entry</h3>
+
+<pre><code>STARTED | YYYY-MM-DD HH:MM UTC | skill-name | brief text</code></pre>
+
+        <h3>DONE Entry</h3>
+
+<pre><code>DONE | YYYY-MM-DD HH:MM UTC | STARTED | YYYY-MM-DD HH:MM UTC | skill-name | brief text | PLAN | plan-id</code></pre>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>STARTED</code> / <code>DONE</code></td>
+              <td>Entry status marker.</td>
+            </tr>
+            <tr>
+              <td><code>YYYY-MM-DD HH:MM UTC</code></td>
+              <td>Timestamp obtained via <code>date -u +"%Y-%m-%d %H:%M UTC"</code>.</td>
+            </tr>
+            <tr>
+              <td><code>skill-name</code></td>
+              <td>Name of the invoked skill.</td>
+            </tr>
+            <tr>
+              <td><code>brief text</code></td>
+              <td>Verbatim user brief (or <code>ERROR: ...</code> summary for error logs).</td>
+            </tr>
+            <tr>
+              <td><code>PLAN | plan-id</code></td>
+              <td>Appended by post-skill when the skill produced a plan artifact.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 7. Report Header Convention                                   -->
+      <!-- ============================================================ -->
+
+      <section id="report-header-convention">
+        <h2>Report Header Convention</h2>
+
+        <p>
+          When a skill produces a report file in <code>${OUTPUT_DIR}</code>, the
+          following header conventions apply. Defined in
+          <code>.claude/references/general/report-conventions.md</code>.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Format</th>
+                <th>Required</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>id</code></td>
+                <td>6-digit zero-padded</td>
+                <td>Yes</td>
+                <td>Globally unique, reserved via <code>reserve_id.py</code>.</td>
+              </tr>
+              <tr>
+                <td><code>datetime</code></td>
+                <td>YYYY-MM-DD HH:MM UTC</td>
+                <td>Yes</td>
+                <td>Creation timestamp.</td>
+              </tr>
+              <tr>
+                <td><code>prefix</code></td>
+                <td>FEATURE | REDESIGN | FIX | REFACTOR | DOCUMENT | TEST | CHORE</td>
+                <td>When applicable</td>
+                <td>Change type classification.</td>
+              </tr>
+              <tr>
+                <td><code>scope</code></td>
+                <td>-B | -F | -X | -O</td>
+                <td>When applicable</td>
+                <td>Backend, Frontend, Cross-cutting, or Other.</td>
+              </tr>
+              <tr>
+                <td><code>short title</code></td>
+                <td>free text</td>
+                <td>Yes</td>
+                <td>Brief descriptive title (truncated for filenames).</td>
+              </tr>
+              <tr>
+                <td><code>source</code></td>
+                <td><code>source: &lt;type&gt;-&lt;id&gt; -- &lt;motivation&gt;</code></td>
+                <td>No</td>
+                <td>Artifact that triggered this one; motivation under 80 chars.</td>
+              </tr>
+              <tr>
+                <td><code>spawned</code></td>
+                <td><code>spawned: &lt;type&gt;-&lt;id&gt;[, ...]</code></td>
+                <td>No</td>
+                <td>Artifacts created from this one (updated by post-skill).</td>
+              </tr>
+              <tr>
+                <td><code>tags</code></td>
+                <td>lowercase kebab-case, comma-separated</td>
+                <td>No</td>
+                <td>Topic discovery tags (research reports only). 2--5 tags.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Additional Conventions</h3>
+
+        <ul>
+          <li>All report filenames must be lowercase.</li>
+          <li>All files must be saved as UTF-8 without BOM.</li>
+          <li>No ANSI escape sequences, no typographic characters (em-dashes, curly quotes). Use ASCII equivalents.</li>
+          <li>Existing artifacts in <code>${OUTPUT_DIR}</code> are immutable design history -- never retroactively modify for format changes.</li>
+        </ul>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 8. Roadmap File Format                                        -->
+      <!-- ============================================================ -->
+
+      <section id="roadmap-file-format">
+        <h2>Roadmap File Format</h2>
+
+        <h3>Header Format</h3>
+
+<pre><code># Roadmap NNNNNN | YYYY-MM-DD HH:MM | Short Title</code></pre>
+
+        <h3>Sections</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Section</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>## Plans</code></td>
+              <td>Table of plans in the roadmap with IDs, titles, dependencies, and wave assignments.</td>
+            </tr>
+            <tr>
+              <td><code>## Dependencies</code></td>
+              <td>Dependency graph between plans (which plans must complete before others).</td>
+            </tr>
+            <tr>
+              <td><code>## Timeline</code></td>
+              <td>Wave-based execution timeline with estimated durations.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Roadmaps are generated by <code>/plan --roadmap</code> and stored at
+          <code>${OUTPUT_DIR}/roadmaps/roadmap-NNNNNN-&lt;slug&gt;.md</code>.
+        </p>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 9. File Maintainer Classification                             -->
+      <!-- ============================================================ -->
+
+      <section id="file-maintainer-classification">
+        <h2>File Maintainer Classification</h2>
+
+        <p>
+          Four-value scheme applied to all reference files, principally those in
+          <code>product-design/</code>. Used as the "Maintained by" column in
+          <code>conventions.md</code> Key Files table.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Value</th>
+              <th>Meaning</th>
+              <th>Agent Rule</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Human</strong></td>
+              <td>Authored and updated exclusively by humans.</td>
+              <td>Agents must NOT write. May read and propose changes via <code>AskUserQuestion</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Human (markers)</strong></td>
+              <td>Human-authored prose; agent may write fixed-format structured markers only (STATUS flags, INCORPORATED stamps, CHANGELOG append lines).</td>
+              <td>Agents write only via <code>apply_marker.py</code> after explicit <code>AskUserQuestion</code> confirmation. Never write prose or modify text outside allowed marker patterns. Enforced by <code>check_human_markers_only.py</code> at post-skill step 6c.</td>
+            </tr>
+            <tr>
+              <td><strong>Agent</strong></td>
+              <td>Auto-maintained by agents and skills (e.g., via post-skill).</td>
+              <td>Agents read/write. Humans typically do not edit directly.</td>
+            </tr>
+            <tr>
+              <td><strong>Human / Agent</strong></td>
+              <td>Seeded by an agent (e.g., <code>/design</code>), then human-owned; both may update. Also applies to harness source files.</td>
+              <td>Agents may write per file's own rules. Humans are primary curators after seeding.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 10. Versioning Files                                          -->
+      <!-- ============================================================ -->
+
+      <section id="versioning-files">
+        <h2>Versioning Files</h2>
+
+        <p>
+          SEJA uses three version-bearing files with distinct purposes.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>File</th>
+              <th>Location</th>
+              <th>Purpose</th>
+              <th>Maintained by</th>
+              <th>When to Update</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>.claude/skills/VERSION</code></td>
+              <td>Harness source</td>
+              <td>Authoritative harness version (semver).</td>
+              <td>Manual (developer)</td>
+              <td>Bump every release.</td>
+            </tr>
+            <tr>
+              <td><code>.claude/CHANGELOG.md</code></td>
+              <td>Harness source</td>
+              <td>Human-readable release history.</td>
+              <td>Manual (developer)</td>
+              <td>Add <code>## [x.y.z]</code> heading matching VERSION every release.</td>
+            </tr>
+            <tr>
+              <td><code>.seja-version</code></td>
+              <td>Project root</td>
+              <td>Per-project migration watermark.</td>
+              <td>Automated (<code>run_migrations.py</code>, <code>/seja-setup --upgrade</code>)</td>
+              <td>Written automatically; records the version a project was last migrated to.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          <code>.claude/skills/VERSION</code> tracks what the harness IS;
+          <code>.seja-version</code> tracks what a project has been UPGRADED TO.
+          Validation: <code>check_version_changelog_sync.py</code> keeps VERSION and
+          CHANGELOG in sync. Use <code>bump_version.py</code> to update all three
+          files atomically.
+        </p>
+      </section>
+
+      <!-- See also: cross-volume related chapters -->
+      <nav aria-label="see also" class="see-also">
+        <h2>See also</h2>
+        <ul>
+          <li><a href="../how-to/design-intent.html">Design-Intent Maintenance</a> -- how to author the frontmatter and marker-bearing files these schemas govern</li>
+          <li><a href="../explanation/agent-as-reader.html">The Agent Reads SEJA</a> -- why these formats are shaped for the agent to parse as a reader</li>
+        </ul>
+      </nav>
+
+    </article>
+
+    <!-- Sequential chapter navigation -->
+    <nav aria-label="chapter navigation">
+      <a href="pipeline-reference.html">Previous: Pipeline Reference</a>
+      <a href="configuration-reference.html">Next: Configuration Reference</a>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#yaml-frontmatter-schemas">YAML Frontmatter Schemas</a></li>
+      <li><a href="#skill-md-frontmatter">SKILL.md Frontmatter</a></li>
+      <li><a href="#reference-file-frontmatter">Reference File Frontmatter</a></li>
+      <li><a href="#lifecycle-markers">Lifecycle Markers</a></li>
+      <li><a href="#status-marker">STATUS Marker</a></li>
+      <li><a href="#established-stamp">ESTABLISHED Stamp</a></li>
+      <li><a href="#implemented-marker-table-rows">IMPLEMENTED Marker (Tables)</a></li>
+      <li><a href="#decision-append-marker">DECISION_APPEND</a></li>
+      <li><a href="#changelog-append-marker">CHANGELOG_APPEND</a></li>
+      <li><a href="#incorporated-marker">INCORPORATED</a></li>
+      <li><a href="#requirement-id-convention">Requirement ID Convention</a></li>
+      <li><a href="#jsonl-trace-formats">JSONL Trace Formats</a></li>
+      <li><a href="#conversation-trace-jsonl">conversation-trace.jsonl</a></li>
+      <li><a href="#decision-digest-jsonl">decision-digest.jsonl</a></li>
+      <li><a href="#telemetry-jsonl">telemetry.jsonl</a></li>
+      <li><a href="#plan-file-structure">Plan File Structure</a></li>
+      <li><a href="#plan-step-format">Plan Step Format</a></li>
+      <li><a href="#brief-log-format">Brief Log Format</a></li>
+      <li><a href="#report-header-convention">Report Header Convention</a></li>
+      <li><a href="#roadmap-file-format">Roadmap File Format</a></li>
+      <li><a href="#file-maintainer-classification">File Maintainer Classification</a></li>
+      <li><a href="#versioning-files">Versioning Files</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T16:30:00Z</p>
+  </footer>
+
+</body>
+</html>

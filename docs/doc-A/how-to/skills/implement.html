@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="how-to">
+  <meta name="doc-volume" content="How-To Guides">
+  <meta name="doc-chapter" content="How to Implement a Plan">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>How to Implement a Plan -- SEJA Documentation</title>
+
+  <!-- CSS depth: 2 (sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../../index.html">Home</a>
+    <a href="../../tutorials/index.html">Tutorials</a>
+    <a href="../index.html">How-To Guides</a>
+    <a href="../../reference/index.html">Reference</a>
+    <a href="../../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../../index.html">Home</a></li>
+      <li><a href="../index.html">How-To Guides</a></li>
+      <li><a href="index.html">Skill-by-Skill Guides</a></li>
+      <li>How to Implement a Plan</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-howto">
+    <article>
+      <p class="vol-accent"><strong>how-to</strong></p>
+
+      <h1>How to Implement a Plan</h1>
+
+      <p>
+        Goal: carry out an approved plan, one step at a time, with a rollback
+        branch and an end-of-run quality gate. The <code>/implement</code> skill
+        runs a plan created by <code>/plan</code>. It has three execution modes:
+        <strong>auto</strong> (default, each step in a fresh subagent),
+        <strong>manual</strong> (<code>--manual</code>, sequential with per-step
+        confirmation), and <strong>roadmap</strong> (<code>--roadmap</code>, all
+        plans in a roadmap wave by wave).
+      </p>
+
+      <section id="when-to-use">
+        <h2>When to Use</h2>
+        <ul>
+          <li>You have reviewed a plan and are ready to have the agent carry it out.</li>
+          <li>You want each step isolated in a fresh subagent to resist context degradation (auto mode, best for plans over six steps).</li>
+          <li>You want per-step confirmation on a small plan (use <code>--manual</code>).</li>
+          <li>You want to execute an entire roadmap wave by wave (use <code>--roadmap &lt;id&gt;</code>).</li>
+        </ul>
+      </section>
+
+      <section id="required-inputs">
+        <h2>Required Inputs</h2>
+        <ul>
+          <li>A plan ID, e.g. <code>/implement 000042</code>. The ID must resolve via <code>_output/INDEX.md</code>.</li>
+          <li>For roadmap mode, a roadmap ID, e.g. <code>/implement --roadmap 000316</code>.</li>
+          <li>A clean working tree for the files the plan touches (the skill pauses if an affected file has uncommitted changes).</li>
+        </ul>
+      </section>
+
+      <section id="step-by-step">
+        <h2>Step by Step</h2>
+
+        <ol>
+          <li>
+            <strong>Pick an execution mode.</strong>
+            <ul>
+              <li><strong>Auto (default)</strong> -- Recommended for most plans, especially those with more than six steps where context degradation is a risk. NOT recommended when you need to confirm each step by hand.</li>
+              <li><strong>Manual (<code>--manual</code>)</strong> -- Recommended for small plans (six steps or fewer) or when per-step confirmation adds value. NOT recommended for large plans where holding all context in one window degrades quality.</li>
+              <li><strong>Roadmap (<code>--roadmap &lt;id&gt;</code>)</strong> -- Recommended when executing every plan in a roadmap without triggering each one. NOT recommended for a single standalone plan.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Run the skill.</strong> It creates a rollback branch
+            (<code>pre-plan-&lt;id&gt;</code>) before making changes, then executes.
+            <br><em>Expected output:</em> per-iteration progress reports; a
+            <code>plan-&lt;id&gt;-progress.md</code> file capturing cross-step
+            learnings; commits per step.
+          </li>
+          <li>
+            <strong>Let the quality gate run.</strong> Unless you pass
+            <code>--skip-checks</code>, a Quality Gate runs at the end: validation,
+            code review, tests, and smoke tests if the plan's <code>smoke</code>
+            field is set. Auto mode adds a bounded generator-critic loop (max two
+            retries) for critical review findings.
+            <br><em>Expected output:</em> a pass/fail verdict; critical issues fixed
+            or logged as unresolved.
+          </li>
+          <li>
+            <strong>Handle documentation.</strong> For qualifying plans, post-skill
+            offers automatic documentation generation. Pass <code>--skip-docs</code>
+            to suppress the prompt (it files an <code>update-documentation</code>
+            pending entry instead).
+          </li>
+        </ol>
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip.</strong> Auto mode follows a TDD red-green cycle for steps
+            with an explicit <code>Tests:</code> field -- write the failing test
+            first, then implement until it passes. Manual mode keeps test-after
+            ordering because your presence is the quality checkpoint.
+          </p>
+        </aside>
+      </section>
+
+      <section id="expected-outputs">
+        <h2>Expected Outputs</h2>
+        <ul>
+          <li>A rollback branch <code>pre-plan-&lt;id&gt;</code> (undo with <code>git checkout pre-plan-&lt;id&gt;</code>).</li>
+          <li>The plan file marked <code># DONE</code>, with per-step checkboxes updated and an aggregated summary appended.</li>
+          <li>A Quality Gate report (unless <code>--skip-checks</code>).</li>
+          <li>In roadmap mode, per-wave rollback branches and each plan's roadmap Status flipped to <code>done</code>.</li>
+        </ul>
+      </section>
+
+      <section id="common-mistakes">
+        <h2>Common Mistakes</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th scope="col">Mistake</th><th scope="col">Better approach</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Implementing a plan you have not read.</td>
+                <td>Review the plan with <code>/plan</code> first. <code>/implement</code> executes; it does not re-decide the approach.</td>
+              </tr>
+              <tr>
+                <td>Running auto mode on a plan with uncommitted changes in its files.</td>
+                <td>Commit or stash first. The skill pauses on dirty affected files to protect your work.</td>
+              </tr>
+              <tr>
+                <td>Using <code>--skip-checks</code> routinely to "go faster".</td>
+                <td>The Quality Gate is where correctness and security findings surface. Skip it only for a deliberate reason.</td>
+              </tr>
+              <tr>
+                <td>Forgetting the rollback branch exists after a bad run.</td>
+                <td>Undo with <code>git checkout pre-plan-&lt;id&gt;</code> (or <code>pre-roadmap-&lt;id&gt;</code> / <code>pre-wave-&lt;N&gt;-&lt;id&gt;</code> in roadmap mode).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="cross-references">
+        <h2>Cross-References</h2>
+        <ul>
+          <li><a href="plan.html">How to Make a Plan</a> -- create the plan first.</li>
+          <li><a href="critique.html">How to Critique Quality</a> -- run standalone quality checks.</li>
+          <li><a href="document.html">How to Generate Documentation</a> -- document what you built.</li>
+          <li><a href="../../reference/pipeline-reference.html">Pipeline Reference</a> (Vol. 3) -- the pre-skill and post-skill lifecycle around every invocation.</li>
+        </ul>
+      </section>
+
+    </article>
+
+    <nav aria-label="chapter navigation">
+      <a href="plan.html">Back: How to Make a Plan</a>
+      <a href="critique.html">Next: How to Critique Quality</a>
+    </nav>
+
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../../reference/pipeline-reference.html">Pipeline Reference</a> -- the pre-skill and post-skill lifecycle wrapped around every execution.</li>
+        <li><a href="../../tutorials/lifecycle-in-one-feature.html">The Lifecycle in One Feature</a> -- a plan carried through implementation end to end.</li>
+      </ul>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#when-to-use">When to Use</a></li>
+      <li><a href="#required-inputs">Required Inputs</a></li>
+      <li><a href="#step-by-step">Step by Step</a></li>
+      <li><a href="#expected-outputs">Expected Outputs</a></li>
+      <li><a href="#common-mistakes">Common Mistakes</a></li>
+      <li><a href="#cross-references">Cross-References</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../../index.html">Collection Index</a>
+      <a href="../../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T20:50:00Z</p>
+  </footer>
+
+</body>
+</html>

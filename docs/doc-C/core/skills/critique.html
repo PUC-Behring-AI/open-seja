@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How-to guide for the /critique skill: the unified quality gate for validation, code review, smoke tests, preflight, harness health, and more.">
+  <title>/critique — SEJA Documentation</title>
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>/critique</h1>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Skills</a></li>
+        <li aria-current="page">/critique</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge core-skills">skills</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="what-it-does">
+          <h2 id="what-it-does">What it does</h2>
+          <p><code>/critique</code> is the unified quality gate &mdash; one skill for every &ldquo;is it OK?&rdquo; question. It runs one of ten modes, one at a time: <strong>validate</strong> (project validation scripts), <strong>review</strong> (structured code review against quality perspectives), <strong>smoke</strong> (runtime smoke tests against API endpoints or UI pages), <strong>preflight</strong> (combined validate + review as a pre-merge checkpoint), <strong>health</strong> (harness self-diagnosis across nine built-in checks), <strong>test-plan</strong> (a structured manual test plan from a brief or recent plans), <strong>docs</strong> (documentation consistency scanners), <strong>freshness</strong> (git ahead/behind check for configured repos), <strong>telemetry</strong> (usage analytics from telemetry data), and <strong>semiotic-inspection</strong> (a Semiotic Inspection Method evaluation of interface communicability).</p>
+          <p>The skill is the user-facing orchestrator; the heavy lifting is delegated to evaluator agents and check scripts. The global <code>--depth &lt;light|standard|deep&gt;</code> flag overrides review depth for the <code>review</code> and <code>preflight</code> modes.</p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="when-to-run">
+          <h2 id="when-to-run">When to run it</h2>
+          <p>Run <code>/critique</code> before committing, after making changes, or whenever you want to verify code quality, project health, harness integrity, documentation consistency, git freshness, usage patterns, or interface communicability. Modes are mutually exclusive, and exactly one is required &mdash; if you invoke <code>/critique</code> with no mode, it asks which one to run.</p>
+          <p>Reach for <code>preflight</code> as the go/no-go checkpoint just before a merge, <code>review</code> for a targeted look at staged changes or a directory, <code>health</code> for harness diagnostics, and <code>test-plan</code> when you need structured QA scenarios to walk through by hand.</p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="how-it-fits">
+          <h2 id="how-it-fits">How it fits the lifecycle</h2>
+          <p>On the canonical path &mdash; <code>/research</code> &rarr; <code>/design</code> | <code>/plan</code> &rarr; <code>/implement</code> &rarr; <code>/critique</code> &rarr; <code>/document</code> | <code>/communicate</code> &rarr; <code>/reflect</code> &mdash; <code>/critique</code> is the validation stage: you validate before you communicate. It typically follows <code>/implement</code>, confirming the change is sound before the work is documented or shared.</p>
+          <p>Depending on what a mode finds, the natural next step branches: <code>/plan</code> to fix findings, <code>/critique review</code> for a deeper pass, <code>/pending</code> for outstanding actions, or <code>/reflect</code> on a clean run. <code>/critique</code> and <code>/pending</code> are intentionally separate &mdash; <code>/critique</code> is heavy-budget and produces diagnostic reports, while <code>/pending</code> drives interactive ledger curation.</p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="../operations/quality-gates.html">Quality gates</a> &mdash; the operational view of where /critique enforces quality.</li>
+            <li><a href="../concepts/review-perspectives.html">Review perspectives</a> &mdash; the perspectives a code review evaluates against.</li>
+            <li><a href="implement.html">/implement</a> &mdash; the step that usually precedes a critique.</li>
+            <li><a href="reflect.html">/reflect</a> &mdash; step back on a clean pass.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Skills</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

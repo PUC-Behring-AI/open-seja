@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="tutorial">
+  <meta name="doc-volume" content="Tutorials">
+  <meta name="doc-chapter" content="The Lifecycle in One Feature">
+  <meta name="doc-phase" content="stable">
+  <meta name="doc-status" content="published">
+
+  <title>The Lifecycle in One Feature -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element (WCAG 2.4.1) -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Volume navigation bar -->
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="../how-to/index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Tutorials</a></li>
+      <li>The Lifecycle in One Feature</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content area -->
+  <main id="main-content" class="chapter-content vol-tutorials">
+    <article>
+      <!-- Diataxis type badge -->
+      <p class="vol-accent"><strong>tutorial</strong></p>
+
+      <h1>The Lifecycle in One Feature</h1>
+
+      <p>
+        This tutorial walks you through the complete SEJA development lifecycle
+        by adding a single feature to the to-do app from
+        <a href="first-project.html">Chapter 1</a>. You will use five skills
+        in sequence -- <code>/research</code>, <code>/plan</code>,
+        <code>/implement</code>, <code>/critique</code>, and
+        <code>/document</code> -- to add a "priority" field to tasks. By the
+        end, you will understand the shape of every development cycle in SEJA.
+      </p>
+
+      <!-- Prerequisites -->
+      <section id="prerequisites">
+        <h2>Prerequisites</h2>
+
+        <ul>
+          <li>A working SEJA project (complete <a href="first-project.html">Chapter 1</a> first)</li>
+          <li>The to-do app project (<code>my-todo-app</code>) open in your terminal</li>
+        </ul>
+      </section>
+
+      <!-- The feature -->
+      <section id="the-feature">
+        <h2>The Feature: Task Priority</h2>
+
+        <p>
+          You want users to assign a priority level (high, medium, low) to each
+          task, so they can sort and filter tasks by urgency. This is a typical
+          small feature that touches the data model, the CLI interface, and the
+          display logic.
+        </p>
+      </section>
+
+      <!-- Stage 1: Research -->
+      <section id="stage-1-research">
+        <h2>Stage 1: Research</h2>
+
+        <p>
+          Every change after the initial setup begins with research. You ask a
+          question, and the agent investigates your codebase before recommending
+          an approach. Run:
+        </p>
+
+        <pre><code><span class="token-command">/research</span> How should I add a priority field to tasks? Should it be an enum or a free-text field?</code></pre>
+
+        <h3>Expected output</h3>
+
+        <p>
+          The agent produces a structured report. It reads your
+          <code>product-design/product-design-as-intended.md</code> to understand
+          the existing Task entity, scans your codebase for the current data model,
+          and evaluates the question from multiple perspectives:
+        </p>
+
+        <ul>
+          <li><strong>Architecture perspective</strong>: An enum is safer -- it constrains values and makes sorting deterministic.</li>
+          <li><strong>UX perspective</strong>: Three fixed levels (high, medium, low) are more discoverable than free text.</li>
+          <li><strong>DX perspective</strong>: An enum integrates naturally with SQLite as an integer column with a CHECK constraint.</li>
+        </ul>
+
+        <p>
+          The report concludes with a recommendation (use an enum with three
+          levels) and offers to continue the conversation if you have follow-up
+          questions.
+        </p>
+
+        <aside class="callout-tip">
+          <h3>What just happened?</h3>
+          <p>
+            The <code>/research</code> skill is the investigation entry point for
+            every iteration-2+ change. Before you touch any code or plan, you ask
+            your question here. The agent does not just answer from general
+            knowledge -- it reads your project's design intent, scans your codebase,
+            and grounds its recommendation in your specific context. The
+            multi-perspective analysis ensures you consider trade-offs you might
+            have missed.
+          </p>
+          <p>
+            Research also serves as a routing decision: if the answer reveals that
+            your design intent needs to change, you branch into <code>/design</code>.
+            If the intent is stable and you just need to build, you branch into
+            <code>/plan</code>. In this case, the intent is stable (you are adding
+            a field, not changing the product direction), so you proceed to planning.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Stage 2: Plan -->
+      <section id="stage-2-plan">
+        <h2>Stage 2: Plan</h2>
+
+        <p>
+          With the research recommendation in hand, create a build plan:
+        </p>
+
+        <pre><code><span class="token-command">/plan</span> Add a priority field (high/medium/low enum) to tasks so users can sort by urgency</code></pre>
+
+        <h3>Expected output</h3>
+
+        <p>
+          The agent produces a numbered plan with steps like:
+        </p>
+
+        <ol>
+          <li>
+            <strong>Add priority column to the database</strong> -- Alter the
+            <code>tasks</code> table to add a <code>priority</code> integer column
+            with a CHECK constraint (1=high, 2=medium, 3=low). Default: 3 (low).
+          </li>
+          <li>
+            <strong>Update the Task model</strong> -- Add a <code>priority</code>
+            attribute to the Task class with validation.
+          </li>
+          <li>
+            <strong>Update the CLI commands</strong> -- Add a <code>--priority</code>
+            flag to <code>todo add</code> and a sort option to <code>todo list</code>.
+          </li>
+          <li>
+            <strong>Add tests</strong> -- Write pytest tests for priority
+            assignment, default values, and sort order.
+          </li>
+        </ol>
+
+        <p>
+          Each step lists the files to create or modify, verification criteria,
+          and dependencies on other steps. The plan also includes a review log
+          showing which quality perspectives were evaluated.
+        </p>
+
+        <aside class="callout-tip">
+          <h3>What just happened?</h3>
+          <p>
+            The <code>/plan</code> skill read your design intent and the research
+            recommendation, then decomposed the feature into concrete, ordered
+            steps. Each step is self-contained: it names the files involved, states
+            what to verify when done, and declares its dependencies. This plan is
+            an artifact you can review, discuss, and revise before any code is
+            written.
+          </p>
+          <p>
+            The plan also went through a quality review. Depending on the
+            complexity of the change, the review evaluates up to 16 quality
+            perspectives (security, performance, accessibility, architecture, and
+            more). The plan file is saved under <code>_output/plans/</code> with a
+            unique numeric ID.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Stage 3: Implement -->
+      <section id="stage-3-implement">
+        <h2>Stage 3: Implement</h2>
+
+        <p>
+          Review the plan. If it looks right, execute it:
+        </p>
+
+        <pre><code><span class="token-command">/implement</span> 000042</code></pre>
+
+        <p>
+          Replace <code>000042</code> with the actual plan ID that
+          <code>/plan</code> assigned. The agent creates a rollback branch, then
+          executes each step in sequence.
+        </p>
+
+        <h3>Expected output</h3>
+
+        <p>
+          For each step, you will see:
+        </p>
+
+        <ul>
+          <li>A message indicating which step is being executed</li>
+          <li>The files being created or modified</li>
+          <li>Verification output confirming the step succeeded</li>
+        </ul>
+
+        <p>
+          After all steps complete, the agent runs a Quality Gate -- a combined
+          validation pass, code review, and test run. If all checks pass, you
+          see a summary of what was built.
+        </p>
+
+        <aside class="callout-tip">
+          <h3>What just happened?</h3>
+          <p>
+            The <code>/implement</code> skill executed your plan step by step.
+            In auto mode (the default), each step runs in a fresh subagent with
+            isolated context. This isolation prevents early steps from consuming
+            the context window that later steps need. The agent also created a
+            rollback branch before starting, so you can revert cleanly if anything
+            goes wrong.
+          </p>
+          <p>
+            The Quality Gate at the end is a built-in checkpoint. It runs the same
+            checks that <code>/critique</code> would run, ensuring the
+            implementation meets your project's standards before you move on.
+            For steps with explicit test specifications, the agent follows a
+            test-first cycle: write the failing test, then implement until it
+            passes.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Stage 4: Critique -->
+      <section id="stage-4-critique">
+        <h2>Stage 4: Critique</h2>
+
+        <p>
+          The Quality Gate ran automatically, but you can also run a standalone
+          review for deeper analysis:
+        </p>
+
+        <pre><code><span class="token-command">/critique</span> review</code></pre>
+
+        <h3>Expected output</h3>
+
+        <p>
+          The agent reviews your recent changes against quality perspectives
+          appropriate to the change complexity. For a standard feature like
+          this, it evaluates perspectives such as:
+        </p>
+
+        <ul>
+          <li><strong>Security</strong>: Are inputs validated? Can the priority value be spoofed?</li>
+          <li><strong>Accessibility</strong>: Is the priority displayed in a way that does not rely on color alone?</li>
+          <li><strong>Architecture</strong>: Does the priority enum follow the existing patterns?</li>
+          <li><strong>DX</strong>: Is the code readable and well-documented?</li>
+        </ul>
+
+        <p>
+          Each finding is classified as Adopted (you should fix this), Deferred
+          (noted but not blocking), or N/A (not applicable). The critique creates
+          a log file under <code>_output/critique-logs/</code>.
+        </p>
+
+        <aside class="callout-tip">
+          <h3>What just happened?</h3>
+          <p>
+            The <code>/critique</code> skill is the validation gate. Its
+            deliberate placement <em>before</em> documentation ensures you never
+            document something that fails its own checks. The harness enforces
+            this ordering: validate before you communicate. If the critique
+            surfaces findings that need fixing, you would loop back to
+            <code>/plan</code> to address them. In this case, the implementation
+            is clean, so you proceed to documentation.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Stage 5: Document -->
+      <section id="stage-5-document">
+        <h2>Stage 5: Document</h2>
+
+        <p>
+          Record what changed:
+        </p>
+
+        <pre><code><span class="token-command">/document</span> --auto-detect</code></pre>
+
+        <h3>Expected output</h3>
+
+        <p>
+          The agent scans recent git changes and detects that you added a new
+          model attribute, modified CLI commands, and added tests. Based on
+          these heuristic patterns, it generates or updates the appropriate
+          documentation: a README update describing the priority feature, and
+          a changelog entry summarizing the change.
+        </p>
+
+        <aside class="callout-tip">
+          <h3>What just happened?</h3>
+          <p>
+            The <code>/document</code> skill generates documentation from your
+            actual code changes, not from your memory of what you changed. The
+            <code>--auto-detect</code> mode scans git history using six heuristic
+            patterns (new API routes, changed models, new UI components, config
+            changes, architectural shifts, breaking changes) and generates the
+            documentation types that match. This ensures documentation stays
+            synchronized with the codebase.
+          </p>
+        </aside>
+      </section>
+
+      <!-- The lifecycle diagram -->
+      <section id="the-lifecycle-shape">
+        <h2>The Lifecycle Shape</h2>
+
+        <p>
+          You have now walked through the complete development lifecycle. Every
+          feature, bug fix, and improvement follows this same path:
+        </p>
+
+        <pre aria-label="ASCII diagram of the SEJA lifecycle: research, plan, implement, critique, document, reflect"><code><span class="token-comment"># The SEJA lifecycle -- every change follows this shape</span>
+
+/research    <span class="token-comment"># 1. Investigate: ask questions, get recommendations</span>
+     |
+     v
+/plan        <span class="token-comment"># 2. Plan: decompose into steps with verification</span>
+     |
+     v
+/implement   <span class="token-comment"># 3. Build: execute the plan step by step</span>
+     |
+     v
+/critique    <span class="token-comment"># 4. Validate: review against quality perspectives</span>
+     |
+     v
+/document    <span class="token-comment"># 5. Record: generate documentation from changes</span>
+     |
+     v
+/reflect     <span class="token-comment"># 6. Learn: surface patterns and close the cycle</span></code></pre>
+
+        <p>
+          The sixth step, <code>/reflect</code>, was not covered in this tutorial
+          because it works best when you have completed several cycles and have
+          patterns to reflect on. See the
+          <a href="../how-to/skills/reflect.html">How to Reflect on Your Practice</a>
+          guide for the full walkthrough. As you use SEJA, the reflection step
+          becomes the cycle-closing mechanism that turns a sequence of commands
+          into learning you can reuse.
+        </p>
+
+        <p>
+          When research reveals that your design intent needs to change (not
+          just the code), you branch from <code>/research</code> into
+          <code>/design</code> instead of <code>/plan</code>. The lifecycle
+          accommodates both paths.
+        </p>
+      </section>
+
+      <!-- Summary -->
+      <section id="summary">
+        <h2>Summary</h2>
+
+        <p>In this tutorial, you:</p>
+
+        <ol>
+          <li>Used <code>/research</code> to investigate how to add the priority field</li>
+          <li>Used <code>/plan</code> to decompose the feature into concrete steps</li>
+          <li>Used <code>/implement</code> to execute the plan with automatic quality checks</li>
+          <li>Used <code>/critique</code> to validate the implementation against quality perspectives</li>
+          <li>Used <code>/document</code> to generate documentation from actual code changes</li>
+        </ol>
+
+        <p>
+          This five-stage lifecycle (plus reflection) is the pattern for every
+          change you make in a SEJA project. The next tutorial explores the
+          metacommunication message -- the design-intent statement you wrote in
+          <a href="first-project.html">Chapter 1</a> -- in more depth.
+        </p>
+      </section>
+
+    </article>
+
+    <!-- Sequential chapter navigation -->
+    <nav aria-label="chapter navigation">
+      <a href="first-project.html">Previous: Your First SEJA Project</a>
+      <a href="first-metacommunication.html">Next: Writing Your First Metacommunication Message</a>
+    </nav>
+
+    <!-- Cross-volume related chapters -->
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../how-to/skills/index.html">Skill-by-Skill Guides</a> -- goal-first instructions for each lifecycle skill you ran here</li>
+        <li><a href="../reference/skills-reference.html">Skills Reference</a> -- the full specification of every skill's inputs, outputs, and options</li>
+        <li><a href="../reference/pipeline-reference.html">Pipeline Reference</a> -- the stage-by-stage specification of the lifecycle you walked through</li>
+      </ul>
+    </nav>
+  </main>
+
+  <!-- Sidebar table of contents -->
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#prerequisites">Prerequisites</a></li>
+      <li><a href="#the-feature">The Feature: Task Priority</a></li>
+      <li><a href="#stage-1-research">Stage 1: Research</a></li>
+      <li><a href="#stage-2-plan">Stage 2: Plan</a></li>
+      <li><a href="#stage-3-implement">Stage 3: Implement</a></li>
+      <li><a href="#stage-4-critique">Stage 4: Critique</a></li>
+      <li><a href="#stage-5-document">Stage 5: Document</a></li>
+      <li><a href="#the-lifecycle-shape">The Lifecycle Shape</a></li>
+      <li><a href="#summary">Summary</a></li>
+    </ul>
+  </aside>
+
+  <!-- Footer -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T12:00:00Z</p>
+  </footer>
+
+</body>
+</html>
