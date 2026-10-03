@@ -43,7 +43,7 @@ This mode is the reference prose -- other modes delta off of its shape. Steps 1,
    - *review log*: if applicable.
    - *outcomes*: expected outcomes.
    - *smoke*: `true` if any step creates or modifies API route files or frontend page/component files; `false` otherwise. Consumed by `/implement` to decide whether to run `/critique smoke api`.
-   - *reflection* (optional, appended post-execution): a `## Reflection` section of dated bullets appended by post-skill's reflection loop (step 11b). Absent by default; the section may be created on first use.
+   - *reflection* (optional, appended post-execution): a `## Reflection` section of dated bullets appended by `/implement` at wrap-up from the per-step notes (`step_notes.py reflect-bullet`). Absent by default; the section may be created on first use.
 
 4. Save the plan. If not overwriting, proceed without asking for authorization.
 
