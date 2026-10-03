@@ -733,6 +733,13 @@ Registrado em D-002 o que o release faz enquanto a hipótese está em teste.
 **Consequences**: Q-008 fechada por testemunho do autor do desenho. `/document` e `/communicate` continuam depois de `/critique`; o "documentar" interno a BUILD é a voz do agente (nota do post-skill, as-coded), não artefato para leitor. Ver seção 2.1.
 **Rejected Alternatives**: tratar o Agent WF como ciclo reduzido sem `/critique` -- colide com o único invariante rígido do harness.
 
+### D-002: O release apresenta PLAN -> BUILD -> REFLECT como caminho de entrada, condicionado ao portão determinístico (H-008)
+
+**Context**: D-001 leu o ciclo curto como grão grosso de P-005. O release precisa dizer sob que condição o oferece a quem instala, enquanto H-008 não foi medida.
+**Decision**: O caminho de entrada documentado é PLAN -> BUILD -> REFLECT. Dentro de BUILD, o `/implement` roda o portão determinístico por passo quando o projeto o instalou; o `/critique` do fim de BUILD continua obrigatório e seus achados críticos são cruzados com os passos que tiveram PASS (taxa de escape de H-008). `/critique` antes de `/document` e `/communicate` não muda (P-005). O `/plan` oferece ao fim o `/communicate` do plano e o `/implement` oferece no wrap-up o `/explain drift` com o as-coded regenerado; nenhum dos dois é obrigatório, e o `/reflect` registra quando não foram medidos. O ciclo exige as-intended: o `/seja-setup` entrega ao `/design`, e o `/plan` recusa partir sem `product-design-as-intended.md`.
+**Consequences**: Projetos sem portão instalado ficam fora da medida de H-008; neles o `/critique` dentro de BUILD continua sendo a primeira validação, como em 2.1 e D-001. O primeiro ciclo real com portão gera a primeira medida, contra limiares fixados antes dele. A medida de escapes de intenção só existe nos ciclos em que o designer aceitou a deriva; a taxa de aceitação dos espelhos é ela própria registrada.
+**Rejected Alternatives**: apresentar o ciclo curto sem condição; tornar o portão obrigatório na instalação; espelhos obrigatórios (um agente gerador por plano, contra H-003); modo degradado sem as-intended (a deriva não teria referência).
+
 ## Referências
 
 Herdadas de `docs/foundations.md`, que é o primer em prosa desta mesma fundamentação:
