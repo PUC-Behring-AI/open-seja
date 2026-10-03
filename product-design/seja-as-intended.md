@@ -448,6 +448,162 @@ orquestrador não é o ponto de variação certo.
 
 ---
 
+## 2. De AI-assisted a AI-Native: a hipótese
+
+A literatura sobre desenvolvimento assistido por IA investiga majoritariamente a
+comunicação humano -> IA: como o desenvolvedor instrui, corrige e restringe o modelo.
+A pergunta de pesquisa que este documento serve aponta na direção inversa: **como o
+sistema comunica ao humano as intenções que realizou, e se essa comunicação é
+reconstruível por quem a recebe.** É P-003 (a mão de volta) e H-001 (o receptor não é
+único) ditas como pergunta -- e é o que a engenharia semiótica chama de
+comunicabilidade, aplicada ao preposto generativo de P-002.
+
+A hipótese de trabalho é que o ciclo de desenvolvimento se reorganiza em três fases --
+PLAN, BUILD, REFLECT -- atravessadas por uma faixa de retorno contínua. Esta seção
+lê cada elemento contra a seção 1: o que já estava lá, o que se refina, o que é novo.
+Os termos *AI-assisted* e *AI-native* seguem Hassan et al. (2026), que os usam para
+nomear SE 2.0 e SE 3.0.
+
+### 2.1 Três fases como grão grosso do caminho canônico
+
+PLAN, BUILD e REFLECT não são um ciclo novo; são o caminho canônico de P-005 em grão
+mais grosso:
+
+| Fase | Skills de P-005 | O que a fase materializa |
+|---|---|---|
+| **PLAN** | `/research` ou `/explain` > `/design` ou `/plan` | intenção e design. A intenção não nasce pronta: prototipar -> observar -> ajustar, antes de travar o design |
+| **BUILD** | `/implement`, com `/critique` **dentro** | o incremento, a partir da intenção registrada; refinar e refatorar são parte da fase, não uma fase depois |
+| **REFLECT** | `/reflect` | o que o episódio ensinou, antes do próximo começar |
+
+Duas precisões que evitam contradição com P-005. Primeira: `/critique` não desaparece --
+ele vive dentro de BUILD, e o portão "validar antes de comunicar" permanece. Segunda: o
+"documentar" que acontece dentro de BUILD é a nota de reflexão-sobre-a-ação do post-skill
+e a regeneração do as-coded (voz do agente); não é `/document`, que produz artefato
+para leitor e continua vindo depois de `/critique`.
+
+Isto responde Q-008: o `Agent WF` de quatro itens da Figura 2 era este grão grosso, não
+uma proposta de ciclo sem validação. Registrado em D-001.
+
+### 2.2 A faixa transversal EXPLAIN / COMMUNICATE
+
+Atravessando as três fases corre uma faixa de retorno, e ela não é uma coisa só:
+
+- **EXPLAIN** é o retorno IA -> humano: o que o preposto entendeu e construiu, no registro
+  que o receptor decodifica (P-003). O instrumento é a deriva (H-002, item 3): a
+  comparação contínua entre as-coded e as-intended. Mas a deriva é o instrumento, não o
+  EXPLAIN -- o EXPLAIN é o retorno cuja *surpresa* dispara o REFLECT.
+- **COMMUNICATE** é entre pessoas, mesmo quando mediado por IA: o que o time diz ao
+  cliente, ao revisor, ao próximo desenvolvedor.
+
+Duas distinções mantêm a faixa coerente com o que a seção 1 já fixou:
+
+1. **Contínuo para EXPLAIN, gated para COMMUNICATE.** A faixa é contínua para o retorno
+   IA -> humano, que não sai do envelope, e para a *preparação* de COMMUNICATE. Cada
+   emissão pessoa -> pessoa continua passando por `/critique` (P-005). É uma posição
+   semiótica, não de processo: uma mensagem entregue sem validação é o preposto falando
+   sem saber se o que diz é verdade.
+2. **EXPLAIN-deriva é agnóstico de audiência; EXPLAIN-retradução não.** A comparação
+   as-coded x as-intended roda sempre e custa pouco. O registro em que o resultado é
+   devolvido depende da posição do humano na escala citizen <-> power (H-003):
+   obrigatório num polo, eletivo no outro.
+
+A faixa é uma resposta *candidata* a Q-004 (etapa do post-skill que compara e devolve).
+Q-004 permanece aberta até o mecanismo rodar. Abre Q-011.
+
+### 2.3 A seta REDESIGN: deriva como detecção precoce
+
+Quando o EXPLAIN surpreende -- o que voltou não é o que se pretendia -- a seta REDESIGN
+volta da faixa ao PLAN. Isto já existe em H-002 (deriva como cidadã de primeira classe,
+reconciliada por `/explain drift`). O que a seta muda é o **gatilho**: hoje a deriva é
+periódica (verificação a cada 14 dias) e eletiva; detecção precoce pede que ela dispare
+por evento, ao fim de cada `/implement`. Esta é a consequência verificável desta
+subseção -- e é estado intencional, não atual.
+
+### 2.4 As-conceived / as-intended / as-coded: duas lacunas
+
+<!-- H-005 -->
+**H-005 (hipótese) -- Há três estados da intenção, não dois, e só a segunda lacuna
+entre eles é verificável por máquina.**
+
+O par de 1.2.2 (as-intended / as-coded, dois arquivos em tensão) esconde um terceiro
+termo. Há o que o designer **concebeu** (na cabeça, sem artefato), o que ele
+**registrou** (`product-design-as-intended.md`, planos, briefs -- o as-intended, que
+continua sendo o arquivo) e o que **existe** (as-coded). Isso dá duas lacunas:
+
+| Lacuna | Entre | Verificável por máquina? | Como aparece |
+|---|---|---|---|
+| 1 | as-conceived -> as-intended | não | o registro não diz o que se queria; várias realizações cabem no mesmo texto (subespecificação; ver Q-007) |
+| 2 | as-intended -> as-coded | sim (`/explain drift`, `check_plan_coverage`) | a implementação diverge do registro |
+
+A lacuna 1 não é verificável, mas é **elicitável**: a surpresa no EXPLAIN (2.2) é a
+lacuna 1 detectada através de artefatos da lacuna 2 -- o código voltou fiel ao registro
+e ainda assim não era o que se queria. O microloop de PLAN (prototipar -> observar ->
+ajustar) é a sonda humana da mesma lacuna, antes de travar o design.
+
+O que a confirmaria: `/explain drift` produzindo, com alguma frequência, propostas de
+`/design` (mudar o registro) e não só de `/plan` (mudar o código). O que a refutaria:
+toda deriva tratada como bug de código e nunca como bug de expressão -- as surpresas no
+EXPLAIN nunca resultando em mudança do as-intended.
+
+Nota de nomenclatura: o termo "as-conceived" para o estado tácito é escolha deste
+documento; formulações anteriores usaram outro nome para o termo do meio. O arquivo
+as-intended mantém o sentido que tem em 1.2.2 e H-002.
+
+### 2.5 Governança, proveniência, rastreabilidade
+
+A terceira perna da hipótese -- quem altera o quê, de onde veio cada item, cada decisão
+ligada à sua intenção -- não acrescenta princípio novo. É P-004 (o sistema de marcadores
+e as quatro classificações de autoria dizem de quem é a voz em cada arquivo) e H-002
+(IDs estáveis endereçáveis; passos de plano declarando que requisito satisfazem). O que
+a hipótese faz é nomeá-la como condição: sem rastreabilidade, o EXPLAIN de 2.2 não sabe
+*a que intenção* cada trecho responde, e a retradução vira opinião. Q-007 (de quem é a
+voz quando duas vias de autoria escrevem no mesmo texto) continua sendo a questão
+aberta desta perna.
+
+### 2.6 Os três registros de Schön relidos nas três fases
+
+A seção 1.2.4 localizou os três registros de Schön em andaimes concretos. A hipótese os
+relê sobre o desenho das três fases:
+
+| Registro | Onde vive no desenho | Andaime |
+|---|---|---|
+| **Reflexão-na-ação** | a faixa EXPLAIN / COMMUNICATE, e os microloops dentro de PLAN (prototipar -> observar -> ajustar) e BUILD (testar -> validar -> refinar -> refatorar) | a justificativa das `AskUserQuestion`; o `/critique` dentro do `/implement`; a comparação contínua da faixa |
+| **Reflexão-sobre-a-ação** | o painel REFLECT, depois do episódio | a nota do post-skill; `/reflect` com lente *produto* |
+| **Reflexão-sobre-a-prática** | o harness que evolui (2.7) | `/reflect` com lente *prática*, alimentando as skills |
+
+Isto refina 1.2.4 em dois pontos: a reflexão-na-ação deixa de ser só a justificativa
+da `AskUserQuestion` e passa a incluir os microloops de PLAN e BUILD; e o `/reflect`
+se desdobra pelas duas lentes que a skill já oferece.
+
+### 2.7 O harness que evolui da reflexão do time
+
+<!-- H-006 -->
+**H-006 (hipótese) -- As skills e regras do harness podem evoluir a partir dos
+registros de reflexão-sobre-a-prática do time, e não apenas de traces de execução do
+agente.**
+
+Hoje nenhuma skill lê os registros de `/reflect` como entrada: `/reflect` escreve, o
+post-skill indexa, e nada consome. A hipótese está, portanto, não refutada por ausência
+de mecanismo -- o que é diferente de confirmada.
+
+A referência mais próxima é o WikiSkill (Tang et al., 2026), que co-evolui
+skills reutilizáveis de agente com uma base de conhecimento persistente em três camadas
+de escrita: traces de execução imutáveis; um wiki de padrões que acumula e nunca reseta;
+skills com atualizações reversíveis. As três camadas mapeiam sobre o SEJA: `_output/`
+(imutável, por convenção de artefato), `product-design/` (acumula, `Human (markers)`)
+e `.claude/skills` (reversível). O contraste é o que importa: lá, quem propõe e quem
+mantém são agentes, e a fonte é a experiência do agente; aqui a fonte são palavras
+humanas registradas literalmente, e a mudança de skill passa por autoria humana. É o
+mesmo eixo da pergunta de pesquisa desta seção -- humano -> IA no WikiSkill, IA -> humano
+aqui -- aplicado ao próprio harness.
+
+O que a confirmaria: uma mudança de skill cujo plano cita um registro de reflexão como
+origem (rastreabilidade de P-004). O que a refutaria: reflexões acumuladas sem nenhum
+plano que as cite -- a crítica de Eraut (1994) a andaimes que viram ritual, já
+registrada em H-002. Abre Q-013.
+
+---
+
 ## Questões abertas
 
 | ID | Questão | Bloqueia |
@@ -459,9 +615,12 @@ orquestrador não é o ponto de variação certo.
 | `Q-005` | Este documento fica em pt-BR ou é traduzido para en-US junto com `docs/`? O SEJA é publicado publicamente. | publicação |
 | `Q-006` | Relação entre este documento e o `product-design-as-intended.md` no formato §0-§17 do template -- ver nota abaixo. | estrutura |
 | `Q-007` | Duas vias de autoria escrevem no mesmo `</>` (Figura 1). De quem é a voz que o leitor do código está lendo? O harness precisa distinguir trecho de autoria humana de trecho de autoria do preposto? | `P-002a` |
-| `Q-008` | O `Agent WF` da Figura 2 lista **Research → Plan → Implement → Reflect** -- um ciclo **reduzido**, sem `/design`, `/critique`, `/document` e `/communicate`. É simplificação do desenho, ou é uma proposta deliberada de ciclo mais curto para o agente de workflow? Se for deliberada, colide com `P-005` (validar antes de comunicar). | `P-005`, `H-004` |
+| `Q-008` | O `Agent WF` da Figura 2 lista **Research → Plan → Implement → Reflect** -- um ciclo **reduzido**, sem `/design`, `/critique`, `/document` e `/communicate`. É simplificação do desenho, ou é uma proposta deliberada de ciclo mais curto para o agente de workflow? Se for deliberada, colide com `P-005` (validar antes de comunicar). **Fechada por D-001 (2026-09-18).** | `P-005`, `H-004` |
 | `Q-009` | "Orquestrador" aparece **duas vezes** na Figura 2: dentro da lista do `Agent WF` e de novo, solto, fora da caixa. São dois níveis de orquestração (um por-workflow e um global), ou é repetição de ênfase? | `H-004` |
 | `Q-010` | O círculo com figura no alto à esquerda da Figura 1, alimentado por um humano e ligado ao `</>`, não foi identificado com segurança. O que representa? | leitura da Figura 1 |
+| `Q-011` | Como a faixa contínua de EXPLAIN (2.2) respeita o portão de P-005 sem virar ritual -- o que é "preparar" um COMMUNICATE sem emiti-lo? | 2.2, Q-004 |
+| `Q-012` | O `semiotic-inspector` avalia signos de interface via SIM. Avaliar a retradução (se a mensagem IA -> humano é reconstruível pelo receptor) pede um modo novo. Qual método -- CEM adaptado? | pergunta de pesquisa da seção 2 |
+| `Q-013` | Qual skill consome os registros de `/reflect` como entrada, e com que regra de escrita sobre `.claude/skills` (reversível? proposta + confirmação humana?) | H-006 |
 
 > **Nota sobre `Q-003`.** Esta questão está **deliberadamente sustentada em aberto**, e
 > não meramente sem resposta. A razão é de dependência: não se decide *como detectar* a
@@ -480,6 +639,12 @@ orquestrador não é o ponto de variação certo.
 > `§3 Domain-Specific Concepts`, e as hipóteses migram para `## Decisions`.
 
 ---
+
+## Decisions
+
+> Decisões registradas por `apply_marker.py --marker DECISION_APPEND` (formato DDR:
+> Context / Decision / Consequences / Rejected Alternatives). Uma decisão fecha ou
+> reencaminha uma questão aberta; hipóteses não entram aqui até serem decididas.
 
 ## Referências
 
@@ -503,6 +668,15 @@ Herdadas de `docs/foundations.md`, que é o primer em prosa desta mesma fundamen
   Press. Contra-leitura sobre os limites de andaimes de reflexão.
 - Eco, U. (1976). *A Theory of Semiotics*. Sistema de significação vs. processo de
   comunicação.
+- Hassan, A.E., Oliva, G.A., Lin, D., Chen, B. e Jiang, Z.M. (2026). "Towards AI-Native
+  Software Engineering (SE 3.0): A Vision and a Challenge Roadmap." *ACM Transactions on
+  Software Engineering and Methodology*. DOI 10.1145/3807901 (online em 21 ago. 2026;
+  preprint arXiv:2410.06107, 2024). Origem dos termos AI-assisted (SE 2.0) e AI-native
+  (SE 3.0) do título da seção 2.
+- Tang, L., Rashtchian, C., Ferng, C.-S., Tomkins, A., Juan, D.-C. e Vu, T. (2026).
+  "WikiSkill: Compiling Agent Experience into Persistent Knowledge for Skill Evolution."
+  arXiv:2608.27454. Contraste de H-006: três camadas de escrita (traces imutáveis, wiki
+  que acumula, skills reversíveis), com a experiência do agente como fonte.
 - Abrahão, ... -- **`Q-001`, a completar.**
 
 ---
@@ -605,3 +779,12 @@ ausência não é cosmética. Registrada em `Q-008`.
 2026-08-26 | § 1 | added | - | Seção 1 (Princípios da engenharia semiótica) redigida a partir das notas da conversa com o Anax; P-001..P-007 registrados, H-001..H-004 registradas como hipóteses abdutivas, Q-001..Q-006 abertas
 2026-08-26 | Q-003 | held-open | - | detecção da posição na escala sustentada deliberadamente em aberto: depende de Q-002 (granularidade da escala), que precede
 2026-08-26 | Apêndice B | added | - | desenhos de origem (design do software project e design do harness) incorporados; P-002a acrescentado a partir da Figura 1 (duas vias de autoria sobre o código); Q-007..Q-010 abertas
+2026-09-18 | § 2 | added | - | Seção 2 (De AI-assisted a AI-Native: a hipótese) redigida: três fases como grão grosso de P-005, faixa EXPLAIN/COMMUNICATE, seta REDESIGN, trio as-conceived/as-intended/as-coded, governança como condição, Schön relido nas fases, harness que evolui da reflexão do time
+2026-09-18 | H-005 | added | - | três estados da intenção (as-conceived / as-intended / as-coded) e duas lacunas; só a segunda é verificável por máquina, a primeira é elicitável via P-003
+2026-09-18 | H-006 | added | - | skills e regras do harness evoluindo a partir dos registros de /reflect; WikiSkill (Tang et al., 2026) como referência e contraste
+2026-09-18 | Q-011..Q-013 | added | - | faixa contínua vs portão de P-005; método para avaliar a retradução; skill que consome os registros de /reflect
+2026-09-18 | Q-008 | answered | plan-000005 | fechada por D-001: o Agent WF de quatro itens da Figura 2 é o grão grosso do caminho canônico, não um ciclo sem validação
+2026-09-18 | Q-004 | candidate | - | a faixa de 2.2 (etapa do post-skill que compara e devolve) é resposta candidata; segue aberta até o mecanismo rodar
+2026-09-18 | Q-006 | partial | - | seção ## Decisions criada neste arquivo independentemente da fusão com o template; D-NNN daqui ficam fora do decision digest e CHANGELOG_APPEND não aceita os IDs deste arquivo até o registro As-Intended/As-Coded e o regex do harness os conhecerem; Q-006 segue aberta só na fusão
+2026-09-18 | 1.2.4 | refined | - | reflexão-na-ação passa a incluir os microloops de PLAN e BUILD; /reflect se desdobra pelas lentes produto (sobre-a-ação) e prática (sobre-a-prática) -- ver 2.6
+2026-09-18 | H-007 | renumbered | plan-000004 | a hipótese que o plan-000004 (SEJA como serviço) propõe registrar passa a ser H-007, e a próxima questão aberta é Q-014
