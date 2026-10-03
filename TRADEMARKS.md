@@ -14,11 +14,8 @@ For brand permissions, contact: simonedjb@gmail.com
 
 ## Permission for the open-seja name
 
-<!-- PENDING: date and wording await the trademark holder's written approval.
-     Do not publish until this comment is removed and the text below is confirmed by her. -->
-
-The name `open-seja` is used with the permission of Simone Diniz Junqueira Barbosa, granted to
-PUC-Behring-AI on <date pending>, for this public repository and the npm package `open-seja` only.
+The name `open-seja` is used with the permission of Simone Diniz Junqueira Barbosa, given to the
+open-seja maintainers (PUC-Behring-AI) for this public repository and the npm package `open-seja` only.
 
 - The permission does not extend to forks of this repository or to any other derivative.
 - It does not imply endorsement, certification, partnership, or affiliation.
