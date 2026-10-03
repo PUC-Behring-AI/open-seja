@@ -1,0 +1,4 @@
+    pkg.mod.x_plain__mutmut_1: killed
+    pkg.mod.x_plain__mutmut_2: survived
+    pkg.mod.xǁKǁmeth__mutmut_3: survived
+    pkg.mod.x_other__mutmut_1: timeout

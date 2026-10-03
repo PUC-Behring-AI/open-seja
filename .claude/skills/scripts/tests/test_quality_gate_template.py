@@ -1,6 +1,9 @@
 """Tests for the quality-gate template core (gate.py, stdlib only)."""
+import datetime
 import importlib.util
 import json
+import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -156,3 +159,285 @@ def test_core_has_no_harness_imports():
     text = GATE_PATH.read_text()
     assert "project_config" not in text and "check_" not in text
     assert text.isascii()
+
+
+# --------------------------------------------------------------------------
+# Executor (Step 3): run() is injected, no external tool is needed.
+# --------------------------------------------------------------------------
+RADON_OK = {"src/pkg/mod.py": [
+    {"type": "function", "name": "plain", "lineno": 1, "endline": 10,
+     "col_offset": 0, "complexity": 2, "closures": []}]}
+COV_FN = {"summary": {"covered_lines": 8, "num_statements": 8,
+                      "covered_branches": 2, "num_branches": 2}}
+
+
+def _cov_json(ts=None):
+    ts = ts or datetime.datetime.now().isoformat()
+    return {"meta": {"timestamp": ts},
+            "files": {"src/pkg/mod.py": {"functions": {"plain": COV_FN}}}}
+
+
+class Stub:
+    """Injectable run(cmd, env, cwd, timeout)."""
+
+    def __init__(self, cwd, codes=None, write_cov=True, cov_ts=None, outputs=None):
+        self.cwd = Path(cwd)
+        self.codes = codes or {}
+        self.write_cov = write_cov
+        self.cov_ts = cov_ts
+        self.outputs = outputs or {}
+        self.calls = []
+
+    def __call__(self, cmd, env, cwd, timeout):
+        self.calls.append((list(cmd), dict(env)))
+        head = cmd[0]
+        if head == "git" and "merge-base" in cmd:
+            return gate.RunResult(self.codes.get("merge-base", 0), "abc123\n", "")
+        if head == "git":
+            return gate.RunResult(0, self.outputs.get("git", ""), "")
+        if head == "pytest" and self.write_cov:
+            (self.cwd / "coverage.json").write_text(json.dumps(_cov_json(self.cov_ts)))
+        if head == "radon":
+            return gate.RunResult(0, json.dumps(RADON_OK), "")
+        if head == "mutmut" and cmd[1] == "results":
+            return gate.RunResult(0, self.outputs.get("mutmut", ""), "")
+        return gate.RunResult(self.codes.get(head, 0), self.outputs.get(head, ""), "")
+
+    def names(self):
+        return [c[0][0] for c in self.calls]
+
+    def env_of(self, head):
+        return [e for c, e in self.calls if c[0] == head][0]
+
+
+def _project(tmp_path, tests="def test_a():\n    assert 1 == 1\n", extra_toml=""):
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname = "pkg"\n[tool.seja-gate]\n' + extra_toml)
+    (tmp_path / "src/pkg").mkdir(parents=True)
+    (tmp_path / "src/pkg/__init__.py").write_text("")
+    (tmp_path / "src/pkg/mod.py").write_text("def plain():\n    return 1\n")
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "tests/test_mod.py").write_text(tests)
+    base = {"version": 1, "functions": {
+        "src/pkg/mod.py::plain": {"cc": 2, "cov": 1.0, "crap": 2.0, "survived": 0}},
+        "markers": {}, "mutation": {"survived_total": 0}}
+    (tmp_path / "quality-baseline.json").write_text(json.dumps(base))
+    return tmp_path
+
+
+def _run(tmp_path, args, stub, env=None):
+    out = tmp_path / "out"
+    code = gate.main(list(args) + ["--out-dir", str(out)], run=stub,
+                     which=lambda name: "/bin/" + name, cwd=str(tmp_path),
+                     env=env if env is not None else {})
+    return code, out
+
+
+def test_ruff_failure_exits_2_and_skips_pytest(tmp_path):
+    p = _project(tmp_path)
+    stub = Stub(p, codes={"ruff": 1})
+    code, _ = _run(p, ["--fast"], stub)
+    assert code == 2
+    assert "pytest" not in stub.names()
+
+
+def test_all_stages_pass_writes_json(tmp_path, capsys):
+    p = _project(tmp_path)
+    stub = Stub(p)
+    code, out = _run(p, ["--fast", "--json"], stub)
+    assert code == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["version"] == 1 and payload["status"] == "PASS"
+    assert payload["level"] == "fast" and payload["exit_code"] == 0
+    assert {s["name"] for s in payload["stages"]} >= {"ruff", "pyright", "pytest", "crap"}
+    assert len(list(out.glob("gate-*.json"))) == 1
+
+
+def test_stage_order(tmp_path):
+    p = _project(tmp_path)
+    stub = Stub(p)
+    _run(p, ["--fast"], stub)
+    names = stub.names()
+    assert names.index("ruff") < names.index("pyright") < names.index("pytest") < names.index("radon")
+
+
+def test_pytest_env_scrubbed(tmp_path):
+    p = _project(tmp_path)
+    stub = Stub(p)
+    env = {"ANTHROPIC_API_KEY": "k", "ANTHROPIC_AUTH_TOKEN": "t",
+           "CLAUDE_CODE_OAUTH_TOKEN": "o", "FOO_TOKEN": "x", "MY_SECRET": "s",
+           "PATH": "/usr/bin"}
+    _run(p, ["--fast"], stub, env=env)
+    e = stub.env_of("pytest")
+    assert e == {"PATH": "/usr/bin"}
+
+
+def test_env_passthrough_respected(tmp_path):
+    p = _project(tmp_path, extra_toml='env_passthrough = ["FOO_TOKEN"]\n')
+    stub = Stub(p)
+    _run(p, ["--fast"], stub, env={"FOO_TOKEN": "x", "BAR_TOKEN": "y"})
+    e = stub.env_of("pytest")
+    assert e.get("FOO_TOKEN") == "x" and "BAR_TOKEN" not in e
+
+
+def test_stale_coverage(tmp_path, capsys):
+    p = _project(tmp_path)
+    stub = Stub(p, write_cov=False)
+    (p / "coverage.json").write_text(json.dumps(_cov_json("2000-01-01T00:00:00")))
+    code, _ = _run(p, ["--fast", "--json"], stub)
+    payload = json.loads(capsys.readouterr().out)
+    assert code == 1 and payload["status"] == "ERROR"
+    assert any(f["key"] == "stale-coverage" for f in payload["findings"])
+
+
+def test_accept_baseline_requires_yes(tmp_path):
+    p = _project(tmp_path)
+    before = (p / "quality-baseline.json").read_text()
+    code, _ = _run(p, ["--accept-baseline"], Stub(p))
+    assert code == 1
+    assert (p / "quality-baseline.json").read_text() == before
+
+
+def test_accept_baseline_with_yes_overwrites(tmp_path):
+    p = _project(tmp_path)
+    (p / "quality-baseline.json").write_text("{}")
+    code, _ = _run(p, ["--accept-baseline", "--yes"], Stub(p))
+    assert code == 0
+    data = json.loads((p / "quality-baseline.json").read_text())
+    assert data["version"] == 1 and "src/pkg/mod.py::plain" in data["functions"]
+
+
+def test_init_baseline_only_if_absent(tmp_path):
+    p = _project(tmp_path)
+    (p / "quality-baseline.json").write_text('{"keep": true}')
+    code, _ = _run(p, ["--init-baseline"], Stub(p))
+    assert code == 0
+    assert json.loads((p / "quality-baseline.json").read_text()) == {"keep": True}
+    (p / "quality-baseline.json").unlink()
+    code, _ = _run(p, ["--init-baseline"], Stub(p))
+    assert code == 0 and (p / "quality-baseline.json").exists()
+
+
+def test_accept_abbreviation_rejected(tmp_path):
+    p = _project(tmp_path)
+    with pytest.raises(SystemExit) as exc:
+        gate.main(["--accept-b", "--yes"], run=Stub(p), which=lambda n: n, cwd=str(p), env={})
+    assert exc.value.code == 2
+
+
+def test_test_without_assert_exits_3(tmp_path, capsys):
+    p = _project(tmp_path, tests="def test_noassert():\n    x = 1\n\ndef test_ok():\n    assert True\n")
+    stub = Stub(p)
+    code, _ = _run(p, ["--fast", "--json"], stub)
+    payload = json.loads(capsys.readouterr().out)
+    assert code == 3
+    assert any("test_noassert" in f["key"] for f in payload["findings"])
+    assert "pytest" not in stub.names()
+
+
+def test_test_with_raises_is_ok(tmp_path):
+    p = _project(tmp_path, tests=(
+        "import pytest\n\ndef test_r():\n    with pytest.raises(ValueError):\n        int('x')\n"))
+    code, _ = _run(p, ["--fast"], Stub(p))
+    assert code == 0
+
+
+def test_missing_tool_lists_suggestion(tmp_path, capsys):
+    p = _project(tmp_path)
+    code = gate.main(["--fast", "--json", "--out-dir", str(p / "o")], run=Stub(p),
+                     which=lambda n: None if n == "radon" else "/bin/" + n,
+                     cwd=str(p), env={})
+    payload = json.loads(capsys.readouterr().out)
+    assert code == 1
+    msg = " ".join(f["message"] for f in payload["findings"])
+    assert "radon" in msg and "uv add --dev" in msg
+
+
+def test_no_diff_base(tmp_path, capsys):
+    p = _project(tmp_path)
+    code, _ = _run(p, ["--fast", "--json"], Stub(p, codes={"merge-base": 1}))
+    payload = json.loads(capsys.readouterr().out)
+    assert code == 1
+    assert any(f["key"] == "no-diff-base" for f in payload["findings"])
+
+
+def test_touched_function_over_limit_exits_4(tmp_path):
+    p = _project(tmp_path, extra_toml="crap_max_touched = 1\n")
+    diff = "+++ b/src/pkg/mod.py\n@@ -1,0 +1,1 @@\n+x\n"
+    code, _ = _run(p, ["--fast"], Stub(p, outputs={"git": diff}))
+    assert code == 4
+
+
+def test_no_pyproject_is_error(tmp_path):
+    env = dict(os.environ)
+    res = subprocess.run([sys.executable, str(GATE_PATH), "--json"], cwd=str(tmp_path),
+                         capture_output=True, text=True, env=env)
+    assert res.returncode == 1
+    assert json.loads(res.stdout)["status"] == "ERROR"
+
+
+def test_help_lists_options():
+    res = subprocess.run([sys.executable, str(GATE_PATH), "--help"], capture_output=True, text=True)
+    for opt in ("--fast", "--full", "--files", "--json", "--init-baseline",
+                "--accept-baseline", "--yes", "--out-dir"):
+        assert opt in res.stdout
+
+
+def test_out_dir_from_env(tmp_path):
+    p = _project(tmp_path)
+    qdir = tmp_path / "qd"
+    code = gate.main(["--fast"], run=Stub(p), which=lambda n: n, cwd=str(p),
+                     env={"SEJA_QUALITY_DIR": str(qdir)})
+    assert code == 0 and list(qdir.glob("gate-*.json"))
+
+
+# ---- mutation ------------------------------------------------------------
+
+def test_mutant_to_key_function_and_method():
+    files = ["src/pkg/mod.py"]
+    assert gate.mutant_to_key("pkg.mod.x_plain__mutmut_2", files) == "src/pkg/mod.py::plain"
+    assert gate.mutant_to_key("pkg.mod.x\u01c1K\u01c1meth__mutmut_3", files) == "src/pkg/mod.py::K.meth"
+    assert gate.mutant_to_key("other.mod.x_f__mutmut_1", files) is None
+
+
+def test_parse_mutmut_results_fixture():
+    text = (FIX / "mutmut_results.txt").read_text(encoding="utf-8")
+    rows = gate.parse_mutmut_results(text)
+    assert ("pkg.mod.x\u01c1K\u01c1meth__mutmut_3", "survived") in rows
+    assert len(rows) == 4
+
+
+def test_mutation_globs():
+    metrics = {}
+    for k in ("src/pkg/mod.py::plain", "src/pkg/mod.py::K.meth"):
+        f, q = k.split("::")
+        metrics[k] = gate.FunctionMetric(f, q, 1, 2, 1, 1.0, 1.0)
+    globs = gate.mutation_globs(list(metrics), ["src/"])
+    assert "pkg.mod.x_plain__mutmut_*" in globs
+    assert "pkg.mod.x\u01c1K\u01c1meth__mutmut_*" in globs
+
+
+def test_files_option_limits_globs(tmp_path):
+    p = _project(tmp_path)
+    stub = Stub(p, outputs={"mutmut": ""})
+    code, _ = _run(p, ["--full", "--files", "src/pkg/mod.py"], stub)
+    runs = [c for c, _e in stub.calls if c[0] == "mutmut" and c[1] == "run"]
+    assert runs and "pkg.mod.x_plain__mutmut_*" in runs[0]
+
+
+def test_full_survivor_in_target_exits_6_and_mutmut_env_scrubbed(tmp_path):
+    p = _project(tmp_path)
+    out = "    pkg.mod.x_plain__mutmut_2: survived\n"
+    stub = Stub(p, outputs={"mutmut": out})
+    code, _ = _run(p, ["--full", "--files", "src/pkg/mod.py"], stub,
+                   env={"ANTHROPIC_API_KEY": "k"})
+    assert code == 6
+    assert "ANTHROPIC_API_KEY" not in stub.env_of("mutmut")
+
+
+def test_marker_ratchet_exits_7(tmp_path):
+    p = _project(tmp_path)
+    (p / "src/pkg/mod.py").write_text(
+        "def plain():\n    return 1  # pragma: no cover\n")
+    code, _ = _run(p, ["--fast"], Stub(p))
+    assert code == 7
