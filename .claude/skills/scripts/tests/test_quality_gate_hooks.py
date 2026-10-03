@@ -62,15 +62,19 @@ class Repo:
         (self.stub_dir / "response.txt").write_text(response)
         (self.stub_dir / "exit.txt").write_text(str(code))
 
-    def write_conventions(self, fast_cmd=None, output_dir="_output"):
+    def stub_cmd(self):
+        return "%s %s --json" % (sys.executable, self.stub_dir / "stub_gate.py")
+
+    def write_conventions(self, fast_cmd=None, output_dir="_output", commit_cmd=""):
         if fast_cmd is None:
-            fast_cmd = "%s %s --json" % (sys.executable, self.stub_dir / "stub_gate.py")
+            fast_cmd = self.stub_cmd()
         (self.root / "product-design").mkdir(exist_ok=True)
         (self.root / "product-design" / "conventions.md").write_text(
             "| Variable | Value | Description |\n|---|---|---|\n"
             "| `OUTPUT_DIR` | `%s` | out |\n"
             "| `QUALITY_DIR` | `${OUTPUT_DIR}/quality` | q |\n"
-            "| `GATE_FAST_CMD` | `%s` | fast |\n" % (output_dir, fast_cmd))
+            "| `GATE_FAST_CMD` | `%s` | fast |\n"
+            "| `GATE_COMMIT_CMD` | `%s` | commit |\n" % (output_dir, fast_cmd, commit_cmd))
 
     def calls(self):
         log = self.stub_dir / "calls.log"
@@ -330,3 +334,202 @@ def test_subprocess_bad_stdin_fails_open(git_repo):
                          env=env, cwd=str(git_repo.root), timeout=60)
     assert res.returncode == 0
     assert "warning" in res.stderr.lower()
+
+
+# ---------------------------------------------------------------- PreToolUse
+
+@pytest.fixture
+def pre():
+    return _load("quality_gate_pretool")
+
+
+def bash(pre, repo, command, extra_env=None):
+    env = dict(repo.env, **(extra_env or {}))
+    return pre.main({"tool_name": "Bash", "tool_input": {"command": command},
+                     "cwd": str(repo.root)}, env)
+
+
+def with_commit_gate(repo):
+    repo.write_conventions(commit_cmd=repo.stub_cmd())
+
+
+@pytest.mark.parametrize("cmd", [
+    "uv run python gate.py --accept-baseline --yes",
+    "python gate.py --accept-b --yes",
+    "python gate.py --acc --yes",
+    "cd x && python3 gate.py --accept-baseline",
+])
+def test_accept_baseline_always_blocked(pre, git_repo, cmd):
+    code, err = bash(pre, git_repo, cmd)
+    assert code == 2
+    assert "only a human moves the quality baseline" in err
+
+
+def test_accept_baseline_blocked_for_gate_command_from_conventions(pre, git_repo):
+    git_repo.write_conventions(fast_cmd="mygate --json")
+    assert bash(pre, git_repo, "mygate --accept-baseline")[0] == 2
+
+
+def test_accept_prefix_in_unrelated_command_passes(pre, git_repo):
+    assert bash(pre, git_repo, "grep --accept-baseline README.md")[0] == 0
+    assert bash(pre, git_repo, "python other.py --acc")[0] == 0
+
+
+@pytest.mark.parametrize("cmd", [
+    "git commit --no-verify -m x",
+    "git commit --no-verif -m x",
+    "git commit --no-v -m x",
+    "git commit -nm x",
+    "git commit -anm x",
+    "git commit -n -m x",
+    "git -c user.name=a commit -n -m x",
+    "git -c user.name=a commit -n",
+    "git -C . --no-pager commit -n -m x",
+    "FOO=1 git commit -n -m x",
+    'bash -c "git commit -n -m x"',
+    "sh -c 'git add -A && git commit --no-verify -m x'",
+    "git -c core.hooksPath=/dev/null commit -m x",
+    "git commit --config-env=core.hooksPath=H -m x",
+    "git status; git commit -n",
+    "git add . | cat\ngit commit -n",
+])
+def test_commit_hook_skips_blocked(pre, git_repo, cmd):
+    code, err = bash(pre, git_repo, cmd.replace("\\n", "\n"))
+    assert code == 2
+    assert "commit hooks must not be skipped" in err
+
+
+@pytest.mark.parametrize("cmd", [
+    "git commit -mn",
+    'git commit -m "fix -n flag"',
+    "git commit -m 'x' -- -n",
+    "git commit -am 'fix --no-verify'",
+    "git commit -F msg.txt",
+    "git status",
+    "git log -n 3",
+    "grep x README.md",
+    "git commit --amend --no-edit",
+])
+def test_non_skipping_commands_pass_without_gate(pre, git_repo, cmd):
+    assert bash(pre, git_repo, cmd) == (0, "")
+    assert git_repo.calls() == []
+
+
+def test_alias_resolved(pre, git_repo):
+    _git(git_repo.root, "config", "alias.ci", "commit")
+    assert bash(pre, git_repo, "git ci -n -m x")[0] == 2
+    assert bash(pre, git_repo, "git ci -m x")[0] == 0
+
+
+def test_commit_runs_commit_gate_on_union_and_blocks_on_fail(pre, git_repo):
+    with_commit_gate(git_repo)
+    git_repo.set_gate(FAIL_CRAP, 4)
+    dirty(git_repo, "a.py")
+    (git_repo.root / "new.py").write_text("q = 1\n")
+    code, err = bash(pre, git_repo, "git add -A && git commit -m x")
+    assert code == 2
+    assert "a.py::f" in err
+    argv = git_repo.calls()[-1]
+    assert argv[-3:] == ["--files", "a.py", "new.py"]
+
+
+def test_commit_gate_pass_exits_zero_and_no_cache(pre, git_repo):
+    with_commit_gate(git_repo)
+    dirty(git_repo)
+    assert bash(pre, git_repo, "git commit -am x")[0] == 0
+    assert bash(pre, git_repo, "git commit -am x")[0] == 0
+    assert len(git_repo.calls()) == 2
+
+
+def test_commit_gate_error_blocks(pre, git_repo):
+    with_commit_gate(git_repo)
+    git_repo.set_gate("not json", 1)
+    dirty(git_repo)
+    assert bash(pre, git_repo, "git commit -m x")[0] == 2
+
+
+def test_commit_gate_timeout_blocks(pre, git_repo):
+    with_commit_gate(git_repo)
+    (git_repo.stub_dir / "sleep").write_text("1")
+    dirty(git_repo)
+    code, err = bash(pre, git_repo, "git commit -m x", {"SEJA_GATE_HOOK_TIMEOUT": "1"})
+    assert code == 2
+    assert "timeout" in err
+
+
+def test_commit_without_py_changes_skips_gate(pre, git_repo):
+    with_commit_gate(git_repo)
+    (git_repo.root / "n.md").write_text("x")
+    assert bash(pre, git_repo, "git add -A && git commit -m x")[0] == 0
+    assert git_repo.calls() == []
+
+
+def test_commit_blocked_when_gate_lines_changed(pre, git_repo):
+    _git(git_repo.root, "add", "-A")
+    _git(git_repo.root, "commit", "-q", "-m", "conv")
+    conv = git_repo.root / "product-design" / "conventions.md"
+    conv.write_text(conv.read_text().replace("GATE_FAST_CMD` | `", "GATE_FAST_CMD` | `true; "))
+    code, err = bash(pre, git_repo, "git commit -am x")
+    assert code == 2
+    assert "gate config must be committed by a human" in err
+
+
+def test_commit_allowed_when_other_conventions_lines_changed(pre, git_repo):
+    _git(git_repo.root, "add", "-A")
+    _git(git_repo.root, "commit", "-q", "-m", "conv")
+    conv = git_repo.root / "product-design" / "conventions.md"
+    conv.write_text(conv.read_text().replace("| out |", "| other |"))
+    assert bash(pre, git_repo, "git commit -am x")[0] == 0
+
+
+@pytest.mark.parametrize("tool", ["Write", "Edit", "MultiEdit"])
+def test_edit_tools_blocked_on_baseline(pre, git_repo, tool):
+    code, err = pre.main({"tool_name": tool, "cwd": str(git_repo.root),
+                          "tool_input": {"file_path": str(git_repo.root / "_output/quality/quality-baseline.json")}},
+                         git_repo.env)
+    assert code == 2
+    assert "only a human moves the quality baseline" in err
+
+
+def test_edit_on_other_file_passes(pre, git_repo):
+    assert pre.main({"tool_name": "Edit", "cwd": str(git_repo.root),
+                     "tool_input": {"file_path": str(git_repo.root / "a.py")}}, git_repo.env) == (0, "")
+
+
+def test_other_tool_passes(pre, git_repo):
+    assert pre.main({"tool_name": "Read", "tool_input": {}}, git_repo.env) == (0, "")
+
+
+def test_internal_error_blocks_when_text_has_bypass_words(pre, git_repo, monkeypatch):
+    def boom(*a, **k):
+        raise RuntimeError("boom")
+    monkeypatch.setattr(pre, "_decide", boom)
+    code, err = bash(pre, git_repo, "git commit --no-verify")
+    assert code == 2
+    code, err = bash(pre, git_repo, "git -c core.hooksPath=x commit")
+    assert code == 2
+    assert bash(pre, git_repo, "python g.py --accept-b")[0] == 2
+    code, err = bash(pre, git_repo, "git status")
+    assert code == 0
+    assert "warning" in err.lower()
+
+
+def test_pretool_subprocess_blocks(git_repo):
+    import os
+
+    env = dict(os.environ, **git_repo.env)
+    res = subprocess.run([sys.executable, str(HOOKS_DIR / "quality_gate_pretool.py")],
+                         input=json.dumps({"tool_name": "Bash", "tool_input": {"command": "git commit -n"}}),
+                         text=True, capture_output=True, env=env, cwd=str(git_repo.root), timeout=60)
+    assert res.returncode == 2
+    assert "commit hooks must not be skipped" in res.stderr
+
+
+def test_pretool_subprocess_bad_stdin_fails_open(git_repo):
+    import os
+
+    env = dict(os.environ, **git_repo.env)
+    res = subprocess.run([sys.executable, str(HOOKS_DIR / "quality_gate_pretool.py")],
+                         input="{no", text=True, capture_output=True, env=env,
+                         cwd=str(git_repo.root), timeout=60)
+    assert res.returncode == 0
