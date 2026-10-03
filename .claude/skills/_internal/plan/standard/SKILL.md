@@ -100,6 +100,16 @@ This mode is the reference prose -- other modes delta off of its shape. Steps 1,
 
 6. Output the plan id.
 
+   **6a. Plan-phase reflection note and communication offer.** Before post-skill:
+
+   - Write the plan-phase reflection-on-action note (past tense, what you observed): `python3 .claude/skills/scripts/step_notes.py append --plan <id> --phase plan --step 0 --title "<plan title>" --happened "..." --deviated "..." --less-sure "..." --gate not-applicable`. `deviated` says what changed from the brief to the plan; `less-sure` says what the review left open (use `none` when nothing). This creates the progress file, which post-skill commits with the plan.
+   - Ask the user via AskUserQuestion whether they want the plan told to an audience (options phrased per C4):
+     - **Communicate** -- run `/communicate <segment> --source <plan>`. Recommended when the plan changes what the user sees, or when the designer is at the citizen pole of H-003. NOT recommended when the plan is internal to the harness or a small fix.
+     - **Proceed without communicating** -- continue to step 7. Recommended when the plan is internal or small. NOT recommended when the plan changes user-visible behavior.
+
+     If accepted, run `/communicate` and record `python3 .claude/skills/scripts/step_notes.py record --plan <id> --kind communication --path <artifact path> --detail <segment>` (writes `- communication: <path> (<segment>)`). If declined, record `... --kind communication --declined` (writes `- communication: declined`). The offer never blocks.
+   - Inline invocation from a roadmap (or any caller that skips the next-step prompt): write the note only, without the offer.
+
 7. Run /post-skill <id> to commit the plan. The plan is now a durable git artifact regardless of the user's next choice.
 
 8. Ask the user via AskUserQuestion what to do next (options phrased per C4):

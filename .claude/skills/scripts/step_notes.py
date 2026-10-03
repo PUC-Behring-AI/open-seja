@@ -12,16 +12,18 @@ Lifecycle: active
 Writes and reads a fixed-form note block in ``${PLANS_DIR}/plan-<id>-progress.md``:
 
     ### Step <N> -- reflection-on-action | <YYYY-MM-DD HH:MM UTC> | <title>
+    ### Plan -- reflection-on-action | <YYYY-MM-DD HH:MM UTC> | <title>   (--phase plan)
     - happened: <txt>
     - deviated: <txt|none>
     - less-sure: <txt|none>
-    - gate: <PASS|FAIL|ERROR> (exit <n>, attempts <k>, <path>) | not-installed | not-run
+    - gate: <PASS|FAIL|ERROR> (exit <n>, attempts <k>, <path>) | not-installed | not-run | not-applicable (plan phase only)
     - human: "<verbatim>"            (only with --human)
 
 Subcommands:
     append        append one note (creates the progress file when missing)
     parse         read the notes back (--json, --stats)
     reflect-bullet  append a dated aggregate bullet to the plan's ## Reflection
+    record        append a registry line (`- communication:` / `- drift:`) to the progress file
 
 Exit codes: 0 ok, 2 refused (nothing written).
 """
@@ -52,8 +54,12 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 """
 
 GATE_FLAGS = ("not-installed", "not-run")
+PLAN_GATE_FLAG = "not-applicable"
+PHASES = ("plan", "build")
+RECORD_KINDS = {"communication": "declined", "drift": "not-measured"}
 _NOTE_HEADER_RE = re.compile(
-    r"^### Step (?P<step>\d+) -- reflection-on-action \| (?P<dt>[^|]+?) \| (?P<title>.*)$"
+    r"^### (?:Step (?P<step>\d+)|(?P<plan>Plan)) -- reflection-on-action"
+    r" \| (?P<dt>[^|]+?) \| (?P<title>.*)$"
 )
 _FIELD_RE = re.compile(r"^- (happened|deviated|less-sure|gate|human): ?(.*)$")
 _GATE_LINE_RE = re.compile(
@@ -78,6 +84,7 @@ class StepNote:
     gate_attempts: int | None = None
     gate_path: str | None = None
     human: str | None = None
+    phase: str = "build"  # plan|build
 
 
 # ---------------------------------------------------------------------------
@@ -162,6 +169,7 @@ def append_note(
     gate: str | None = None,
     plans_dir: Path | None = None,
     now: str | None = None,
+    phase: str = "build",
 ) -> Path:
     """Append a note block to the plan's progress file and return its path."""
     happened, deviated, less_sure = (_one_line(x) for x in (happened, deviated, less_sure))
@@ -170,11 +178,16 @@ def append_note(
         raise StepNotesError("happened must be non-empty and differ from the step title")
     if not deviated or not less_sure:
         raise StepNotesError("deviated and less-sure must be non-empty (use 'none')")
+    if phase not in PHASES:
+        raise StepNotesError(f"--phase must be one of {', '.join(PHASES)}")
+    if phase == "plan" and gate_json is not None:
+        raise StepNotesError("plan-phase notes take no --gate-json (use --gate not-applicable)")
     if (gate_json is None) == (gate is None):
         raise StepNotesError("give exactly one of --gate-json or --gate")
     if gate is not None:
-        if gate not in GATE_FLAGS:
-            raise StepNotesError(f"--gate must be one of {', '.join(GATE_FLAGS)}")
+        allowed = (PLAN_GATE_FLAG,) if phase == "plan" else GATE_FLAGS
+        if gate not in allowed:
+            raise StepNotesError(f"--gate must be one of {', '.join(allowed)} for phase {phase}")
         gate_line = gate
     else:
         assert gate_json is not None
@@ -182,7 +195,8 @@ def append_note(
         gate_line = f"{status} (exit {code}, attempts {att}, {shown})"
 
     lines = [
-        f"### Step {step} -- reflection-on-action | {now or _now()} | {title}",
+        (f"### Plan -- reflection-on-action | {now or _now()} | {title}" if phase == "plan"
+         else f"### Step {step} -- reflection-on-action | {now or _now()} | {title}"),
         f"- happened: {happened}",
         f"- deviated: {deviated}",
         f"- less-sure: {less_sure}",
@@ -204,6 +218,33 @@ def append_note(
     return path
 
 
+def append_record(
+    plan_id: str,
+    kind: str,
+    path: str | None = None,
+    detail: str | None = None,
+    declined: bool = False,
+    plans_dir: Path | None = None,
+) -> Path:
+    """Append ``- <kind>: <path> (<detail>)`` or the declined form to an existing progress file."""
+    if kind not in RECORD_KINDS:
+        raise StepNotesError(f"kind must be one of {', '.join(RECORD_KINDS)}")
+    if declined == bool(path):
+        raise StepNotesError("give exactly one of a path or --declined")
+    if declined:
+        value = RECORD_KINDS[kind]
+    else:
+        value = _one_line(path or "") + (f" ({_one_line(detail)})" if detail else "")
+    prog = progress_path(plan_id, plans_dir)
+    if not prog.is_file():
+        raise StepNotesError(f"progress file not found: {prog}")
+    content = prog.read_bytes()
+    prefix = b"" if content.endswith(b"\n") or not content else b"\n"
+    with prog.open("ab") as fh:
+        fh.write(prefix + f"- {kind}: {value}\n".encode("utf-8"))
+    return prog
+
+
 def parse_notes(text: str) -> list[StepNote]:
     """Extract note blocks in file order, ignoring everything else."""
     notes: list[StepNote] = []
@@ -211,7 +252,10 @@ def parse_notes(text: str) -> list[StepNote]:
     for line in text.splitlines():
         m = _NOTE_HEADER_RE.match(line)
         if m:
-            current = StepNote(int(m["step"]), m["dt"].strip(), m["title"].strip())
+            current = StepNote(
+                int(m["step"]) if m["step"] else 0, m["dt"].strip(), m["title"].strip(),
+                phase="plan" if m["plan"] else "build",
+            )
             notes.append(current)
             continue
         if current is None:
@@ -327,9 +371,17 @@ def _build_parser() -> argparse.ArgumentParser:
     a.add_argument("--deviated", required=True)
     a.add_argument("--less-sure", required=True, dest="less_sure")
     a.add_argument("--gate-json", type=Path)
-    a.add_argument("--gate", choices=GATE_FLAGS)
+    a.add_argument("--phase", choices=PHASES, default="build")
+    a.add_argument("--gate", choices=GATE_FLAGS + (PLAN_GATE_FLAG,))
     a.add_argument("--gate-attempts", type=int)
     a.add_argument("--human")
+
+    c = sub.add_parser("record", help="append a communication/drift registry line")
+    c.add_argument("--plan", required=True)
+    c.add_argument("--kind", required=True, choices=tuple(RECORD_KINDS))
+    c.add_argument("--path")
+    c.add_argument("--detail", help="segment (communication) or item count (drift)")
+    c.add_argument("--declined", action="store_true")
 
     r = sub.add_parser("parse", help="read notes from a progress file")
     r.add_argument("progress_file", type=Path)
@@ -349,9 +401,11 @@ def main(argv: list[str] | None = None) -> int:
             path = append_note(
                 args.plan, args.step, args.title, args.happened, args.deviated,
                 args.less_sure, args.gate_json, args.gate_attempts, args.human,
-                gate=args.gate,
+                gate=args.gate, phase=args.phase,
             )
             print(path)
+        elif args.cmd == "record":
+            print(append_record(args.plan, args.kind, args.path, args.detail, args.declined))
         elif args.cmd == "reflect-bullet":
             print(reflect_bullet(args.plan, args.synthesis))
         else:

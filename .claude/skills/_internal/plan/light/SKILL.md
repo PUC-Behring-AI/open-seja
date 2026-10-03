@@ -25,4 +25,4 @@ Minimal change proposal for small, surgical modifications. No multi-step decompo
 | 3. Generate proposal | C3 | Shape per `.claude/references/template/proposal.md`, plus the Review (Light) block described there. |
 | 4. Quick review | -- | Unique: inline 2-3 perspective scan; always include SEC for code changes. Record per the Review (Light) block in `template/proposal.md`. |
 | 5. Save proposal | -- | Unique: save to `${PROPOSALS_DIR}/proposal-<id>-<slug>.md`. |
-| 6. Execute-now prompt | C4 + C6 | Ask "Execute this proposal now?"; if yes, execute inline (no subagent orchestration for single-change proposals), mark checkbox done, then run /post-skill <id>. If no, run /post-skill <id>. |
+| 6. Execute-now prompt | C4 + C6 | Ask "Execute this proposal now?"; if yes, execute inline (no subagent orchestration for single-change proposals), mark checkbox done, then run /post-skill <id>. If no, run /post-skill <id>. Before /post-skill, record the plan-phase reflection note only (`step_notes.py append --phase plan --step 0 ... --gate not-applicable`, see the standard workflow step 6a); no communication offer in this mode. |

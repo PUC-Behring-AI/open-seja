@@ -150,3 +150,67 @@ def test_reflect_bullet_creates_section_at_eof(plans):
         "# P\n\n## Steps\n- [ ] x\n\n## Reflection\n\n"
         "- 2026-10-03: Resumo. (notes 1, with deviation 0, with gate 0)\n"
     )
+
+
+# --- plan phase and communication record ---------------------------------
+
+
+def test_plan_phase_header_and_gate_not_applicable(plans):
+    path = _append(step=0, title="My plan", phase="plan", gate="not-applicable")
+    text = path.read_text()
+    assert re.search(r"^### Plan -- reflection-on-action \| .+ \| My plan$", text, re.M)
+    assert "- gate: not-applicable" in text
+    assert "### Step 0" not in text
+
+
+def test_plan_phase_refuses_gate_json(plans, tmp_path):
+    with pytest.raises(step_notes.StepNotesError):
+        _append(phase="plan", gate=None, gate_json=_gate(tmp_path, "PASS", 0))
+    rc = step_notes.main(["append", "--plan", "99", "--step", "0", "--title", "T",
+                          "--happened", "h", "--deviated", "none", "--less-sure", "none",
+                          "--phase", "plan", "--gate-json", str(_gate(tmp_path, "PASS", 0))])
+    assert rc == 2
+    assert not (plans / "plan-000099-progress.md").exists()
+
+
+def test_not_applicable_only_for_plan_phase(plans):
+    with pytest.raises(step_notes.StepNotesError):
+        _append(gate="not-applicable")
+
+
+def test_parse_phase_and_stats(plans):
+    _append(step=0, title="P", phase="plan", gate="not-applicable")
+    path = _append(step=1, title="S", happened="Did s", gate="not-run")
+    notes = step_notes.parse_notes(path.read_text())
+    assert [n.phase for n in notes] == ["plan", "build"]
+    assert notes[0].gate_status == "not-applicable"
+    st = step_notes.stats(notes)
+    assert st["notes"] == 2 and st["with_gate"] == 0
+
+
+def test_cli_append_phase_plan(plans):
+    rc = step_notes.main(["append", "--plan", "99", "--step", "0", "--title", "T",
+                          "--happened", "h", "--deviated", "none", "--less-sure", "none",
+                          "--phase", "plan", "--gate", "not-applicable"])
+    assert rc == 0
+
+
+def test_record_communication_lines(plans):
+    path = _append()
+    before = path.read_bytes()
+    step_notes.append_record("99", "communication", path="_output/communication/c.md", detail="devs")
+    step_notes.append_record("99", "communication", declined=True)
+    text = path.read_text()
+    assert path.read_bytes().startswith(before)
+    assert "- communication: _output/communication/c.md (devs)\n" in text
+    assert text.endswith("- communication: declined\n")
+    assert len(step_notes.parse_notes(text)) == 1
+
+
+def test_record_cli_and_refusals(plans, capsys):
+    _append()
+    assert step_notes.main(["record", "--plan", "99", "--kind", "communication", "--declined"]) == 0
+    assert step_notes.main(["record", "--plan", "99", "--kind", "communication"]) == 2
+    assert step_notes.main(["record", "--plan", "99", "--kind", "communication",
+                            "--path", "p", "--declined"]) == 2
+    assert step_notes.main(["record", "--plan", "77", "--kind", "communication", "--declined"]) == 2
