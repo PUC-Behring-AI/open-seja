@@ -266,6 +266,18 @@ designer_description: "I'm your project's single source of truth for directory s
 
 ---
 
+## Quality Gate
+> Optional deterministic quality gate. Absent, empty, or `{{...}}` = gate not installed; the value must be in backticks for `project_config` to read it.
+
+| Variable | Value | Description |
+|----------|-------|-------------|
+| `GATE_FAST_CMD` | `{{GATE_FAST_CMD}}` | Fast gate command (lint, types, tests, CRAP); empty = gate not installed |
+| `GATE_FULL_CMD` | `{{GATE_FULL_CMD}}` | Full gate command (fast gate plus mutation testing); empty = gate not installed |
+| `GATE_COMMIT_CMD` | `{{GATE_COMMIT_CMD}}` | Commit hook command; install step 7f fills it with the `GATE_FULL_CMD` value; empty = no hook |
+| `QUALITY_DIR` | `${OUTPUT_DIR}/quality` | Directory for gate reports and baseline |
+
+---
+
 ## Workspace Deployment
 
 When using the foundational SEJA harness as a companion to an existing codebase, the recommended deployment pattern is:
