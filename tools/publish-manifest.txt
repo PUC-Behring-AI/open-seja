@@ -1,0 +1,28 @@
+# Public surface of open-seja (plan-000067).
+# One git pathspec per line; '#' lines are comments. Consumed by:
+#   git ls-files -- $(grep -v '^#' tools/publish-manifest.txt)
+#   git archive <ref> -- $(grep -v '^#' tools/publish-manifest.txt)
+# This file lives only in the private dev repository (tools/ is excluded below).
+# Do not run /publish here: it wraps tools/publish.py from the upstream private repo, absent in this fork.
+:(glob).claude/**
+:(glob)docs/**
+CHANGELOG.md
+CLAUDE.md
+LICENSE
+README.md
+TRADEMARKS.md
+.gitignore
+:(glob)npm/**
+:(exclude,glob)_output/**
+:(exclude,glob)tools/**
+:(exclude)product-design/conventions.md
+:(exclude).seja-version
+:(exclude,glob)docs/revisao-*
+:(exclude,glob)docs/o-que-e-o-seja.*
+:(exclude)docs/inline-assets.py
+:(exclude,glob)docs/call-graph.*
+# Third-party material held back until consent / an anonymized version lands (plan-000067).
+# product-design/seja-as-intended.md re-enters only after the designer applies the proposed block.
+:(exclude)docs/design-software-project.png
+:(exclude)docs/designt-harnerss.png
+# docs/doc-A..D: author's written permission recorded in the private audit report (plan-000067).
