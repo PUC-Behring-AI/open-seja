@@ -56,7 +56,7 @@ metadata:
 
 ## Design Guard
 
-Before planning, verify `product-design/conventions.md` exists in `product-design/`. If missing, stop and tell the user: "No project design found. Run `/design` first to define your project's stack, conventions, and domain model." If present, proceed.
+Before planning, verify `product-design/conventions.md` exists in `product-design/`. If missing, stop and tell the user: "No project design found. Run `/design` first to define your project's stack, conventions, and domain model." Then verify `product-design/product-design-as-intended.md` exists. If missing, stop and tell the user: "No design intent found. Run `/design` first -- the PLAN -> BUILD -> REFLECT cycle needs an as-intended to measure drift against." If both are present, proceed.
 
 If there are no arguments, ask for the brief.
 
