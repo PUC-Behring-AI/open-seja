@@ -602,6 +602,86 @@ origem (rastreabilidade de P-004). O que a refutaria: reflexões acumuladas sem 
 plano que as cite -- a crítica de Eraut (1994) a andaimes que viram ritual, já
 registrada em H-002. Abre Q-013.
 
+### 2.8 As três fases com validação por passo: o portão determinístico
+
+D-001 leu o `Agent WF` de quatro itens como o grão grosso do caminho canônico, com o
+`/critique` dentro de BUILD. Curto é a superfície que o leitor vê, não o conteúdo.
+Falta dizer o que torna confiável a validação dentro de BUILD quando quem constrói é
+um agente que escreve mais rápido do que o humano revisa.
+
+<!-- H-008 -->
+**H-008 (hipótese) -- PLAN -> BUILD -> REFLECT pode ser oferecido como caminho de
+entrada ao agente de workflow sem perder o que P-005 protege, desde que: (a) dentro de
+BUILD, cada passo do agente só conta como feito quando um portão determinístico responde
+PASS -- a validação que 2.1 põe dentro de BUILD passa a acontecer passo a passo, como
+resultado de ferramenta, antes do `/critique`; e (b) a reflexão atravessa as fases, e
+cada fase termina com um espelho oferecido ao designer: no PLAN, o plano contado a uma
+audiência; no BUILD, a deriva entre o que se pretendia e o que existe.**
+
+A condição (a) é a frase "PASS é resultado de ferramenta, não frase": prosa no prompt
+não é plano de controle. O portão reúne verificações que não negociam -- lint e tipos,
+testes com cobertura por ramo, complexidade ponderada pela cobertura (CRAP) nas funções
+tocadas, contratos de dependência entre módulos e, numa rodada mais lenta, testes de
+mutação. O limiar só se move por mão humana (ratchet a partir do baseline): o agente fica
+no laço interno, o humano no externo, dono das restrições.
+
+P-005 continua de pé: `/critique` sempre precede `/document` e `/communicate`. O que a
+H-008 muda é o papel do `/critique` no fim de BUILD: ele deixa de ser a primeira
+validação e passa a ser a medida do que escapou do portão.
+
+A condição (b) relê 2.6 no grão do passo e no grão da fase. Reflexão-na-ação: a
+justificativa de cada `AskUserQuestion` e, no microloop de BUILD, o que muda na
+tentativa seguinte a um FAIL. Reflexão-sobre-a-ação: a nota ao fim do `/plan` (1.2.4) e
+uma nota curta por passo de BUILD -- o que aconteceu, o que desviou, sobre o que se está
+menos seguro -- com o resultado do portão como evidência. Reflexão-sobre-a-prática: o
+`/reflect` com lente *prática* (2.6), lendo notas e resultados do portão através de
+vários planos -- a entrada de que H-006 precisa.
+
+Os espelhos são o que a nota do agente sobre si mesmo não alcança. O espelho do PLAN é
+o plano contado a um segmento (`/communicate`): a retradução de P-003 aplicada à
+intenção antes de ela virar código; plano que não sobrevive a ser contado não está
+claro. O espelho do BUILD é a deriva entre as-intended e as-coded (`/explain drift`,
+com o as-coded regenerado): o portão responde se cada passo foi construído certo; a
+deriva responde se o que se construiu era o que se pretendia, e o que se pretendia e
+não entrou. Os dois são **oferecidos** ao fim da fase, nunca impostos -- a retradução é
+eletiva no polo power (H-003) -- e o `/reflect` registra quando um deles não foi medido.
+É assim que a Q-008 se fecha: o ciclo curto não descarta `/communicate` e `/explain`;
+ele os internaliza como instrumentos de reflexão de cada fase, e P-005 segue de pé --
+o `plan-reviewer` precede o comunicar do plano, e o `/critique` do fim de BUILD precede
+o explicar da deriva.
+
+O ciclo tem uma pré-condição: sem `as-intended` não há PLAN -> BUILD -> REFLECT. O
+`/design` precede qualquer ciclo, como 2.1 já diz da primeira iteração; não existe modo
+degradado em que a deriva não tenha contra o que ser medida.
+
+É um caso de H-004: o orquestrador compõe, por passo, um subagente novo e o portão, e,
+por fase, o espelho que o designer aceitar; a composição varia com a escala de H-003
+(no polo citizen, a retradução do resultado do portão é obrigatória; no polo power, o
+resultado cru basta).
+
+| Medida | Fonte |
+|---|---|
+| iterações até PASS, por passo | resultado do portão por passo |
+| taxa de escape: achados críticos do `/critique` final em código de passo com PASS, por passos com PASS | log do `/critique` x resultado do portão |
+| escapes de intenção: itens de deriva (construído sem intenção, intenção não construída) por plano, nos ciclos em que a deriva foi medida | relatório do `/explain drift` após o BUILD |
+| sobreviventes de mutação por commit, na rodada lenta | resultado do portão |
+| marcadores de evasão acrescentados (skip, xfail, no cover, no mutate) sem motivo registrado | ratchet do portão |
+| notas por passo com desvio cujo passo seguinte as cita (nota que age) | nota por passo x passo seguinte |
+| espelhos aceitos por fase (comunicação do plano, deriva do BUILD) | registro do `/plan` e do `/implement` no progress file |
+
+Antes do primeiro ciclo medido, o designer fixa e registra (como `D-NNN`) o número
+mínimo de planos e os limiares; fixá-los depois de ver os dados invalida a medida. O
+que a confirmaria: a taxa de escape abaixo do limiar, marcadores de evasão estáveis, a
+maioria das notas com desvio mudando o passo seguinte e, nos ciclos com deriva medida,
+escapes de intenção raros. O que a refutaria: (i) a taxa de escape acima do limiar -- o
+portão não ocupa o lugar da validação; (ii) evasão ou sobreviventes de mutação crescendo
+com o portão em PASS -- o agente otimiza o número, e o ratchet não segura; (iii) notas
+por passo que não mudam nenhum passo seguinte -- o ritual que H-003 aponta como risco do
+polo power; (iv) escapes de intenção frequentes com o portão em PASS -- o portão prova
+correção, não intenção, e o ciclo curto precisa do espelho como passo fixo, não como
+oferta.
+Registrado em D-002 o que o release faz enquanto a hipótese está em teste.
+
 ---
 
 ## Questões abertas
@@ -615,7 +695,7 @@ registrada em H-002. Abre Q-013.
 | `Q-005` | Este documento fica em pt-BR ou é traduzido para en-US junto com `docs/`? O SEJA é publicado publicamente. | publicação |
 | `Q-006` | Relação entre este documento e o `product-design-as-intended.md` no formato §0-§17 do template -- ver nota abaixo. | estrutura |
 | `Q-007` | Duas vias de autoria escrevem no mesmo `</>` (Figura 1). De quem é a voz que o leitor do código está lendo? O harness precisa distinguir trecho de autoria humana de trecho de autoria do preposto? | `P-002a` |
-| `Q-008` | O `Agent WF` da Figura 2 lista **Research → Plan → Implement → Reflect** -- um ciclo **reduzido**, sem `/design`, `/critique`, `/document` e `/communicate`. É simplificação do desenho, ou é uma proposta deliberada de ciclo mais curto para o agente de workflow? Se for deliberada, colide com `P-005` (validar antes de comunicar). **Fechada por D-001 (2026-09-18).** | `P-005`, `H-004` |
+| `Q-008` | O `Agent WF` da Figura 2 lista **Research → Plan → Implement → Reflect** -- um ciclo **reduzido**, sem `/design`, `/critique`, `/document` e `/communicate`. É simplificação do desenho, ou é uma proposta deliberada de ciclo mais curto para o agente de workflow? Se for deliberada, colide com `P-005` (validar antes de comunicar). **Fechada por D-001 (2026-09-18).** Reforçada por H-008 (2026-10-03): o ciclo curto internaliza `/communicate` e `/explain` como espelhos de fase. | `P-005`, `H-004` |
 | `Q-009` | "Orquestrador" aparece **duas vezes** na Figura 2: dentro da lista do `Agent WF` e de novo, solto, fora da caixa. São dois níveis de orquestração (um por-workflow e um global), ou é repetição de ênfase? | `H-004` |
 | `Q-010` | O círculo com figura no alto à esquerda da Figura 1, alimentado por um humano e ligado ao `</>`, não foi identificado com segurança. O que representa? | leitura da Figura 1 |
 | `Q-011` | Como a faixa contínua de EXPLAIN (2.2) respeita o portão de P-005 sem virar ritual -- o que é "preparar" um COMMUNICATE sem emiti-lo? | 2.2, Q-004 |
@@ -795,3 +875,5 @@ ausência não é cosmética. Registrada em `Q-008`.
 2026-09-18 | Q-006 | partial | - | seção ## Decisions criada neste arquivo independentemente da fusão com o template; D-NNN daqui ficam fora do decision digest e CHANGELOG_APPEND não aceita os IDs deste arquivo até o registro As-Intended/As-Coded e o regex do harness os conhecerem; Q-006 segue aberta só na fusão
 2026-09-18 | 1.2.4 | refined | - | reflexão-na-ação passa a incluir os microloops de PLAN e BUILD; /reflect se desdobra pelas lentes produto (sobre-a-ação) e prática (sobre-a-prática) -- ver 2.6
 2026-09-18 | H-007 | renumbered | plan-000004 | a hipótese que o plan-000004 (SEJA como serviço) propõe registrar passa a ser H-007, e a próxima questão aberta é Q-014
+2026-10-03 | H-008 | added | - | PLAN -> BUILD -> REFLECT de 2.1 como entrada, com portão determinístico por passo, reflexão transversal e espelho oferecido ao fim de cada fase (comunicação do plano, deriva do BUILD); fecha Q-008 por internalização; caso de H-004, dá condição operacional a D-001
+2026-10-03 | D-002 | added | - | o release apresenta as três fases como entrada, com o portão como condição, a taxa de escape do /critique final e os escapes de intenção como medidas, e /design obrigatório antes do ciclo; projetos sem portão ficam fora da medida
