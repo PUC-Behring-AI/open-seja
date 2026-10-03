@@ -1,0 +1,42 @@
+# Example import-linter contracts. Adapt `my_package` and the layer names, then
+# copy the blocks into pyproject.toml (or keep them in a `.importlinter` file).
+# gate.py runs `lint-imports` when either exists.
+
+[tool.importlinter]
+root_package = "my_package"
+
+# 1. Layers: cli may import pipeline, pipeline may import store, never upwards.
+[[tool.importlinter.contracts]]
+name = "Layers: cli > pipeline > store"
+type = "layers"
+layers = [
+    "my_package.cli",
+    "my_package.pipeline",
+    "my_package.store",
+]
+
+# 2. Core layers stay framework-agnostic: no click, no mcp.
+[[tool.importlinter.contracts]]
+name = "pipeline and store do not import click or mcp"
+type = "forbidden"
+source_modules = [
+    "my_package.pipeline",
+    "my_package.store",
+]
+forbidden_modules = [
+    "click",
+    "mcp",
+]
+
+# 3. Only the store layer talks to chromadb.
+[[tool.importlinter.contracts]]
+name = "only store imports chromadb"
+type = "forbidden"
+source_modules = [
+    "my_package.cli",
+    "my_package.pipeline",
+]
+forbidden_modules = [
+    "chromadb",
+]
+allow_indirect_imports = true
