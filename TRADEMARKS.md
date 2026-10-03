@@ -14,7 +14,7 @@ For brand permissions, contact: simonedjb@gmail.com
 
 ## Permission for the open-seja name
 
-<!-- PENDING (plan-000067): date and wording await the trademark holder's written approval.
+<!-- PENDING: date and wording await the trademark holder's written approval.
      Do not publish until this comment is removed and the text below is confirmed by her. -->
 
 The name `open-seja` is used with the permission of Simone Diniz Junqueira Barbosa, granted to
