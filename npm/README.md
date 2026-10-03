@@ -41,8 +41,19 @@ source of truth.
 That means **this is not usable unattended in CI**: `/seja-setup` asks you
 questions and waits for answers.
 
+## Attribution
+
+open-seja is a derivative of
+[SEJA -- Semiotic Engineering Journeys with Agents](https://github.com/simonedjb/seja),
+Copyright (c) 2025-2026 Simone Diniz Junqueira Barbosa, licensed under
+[CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/). This version has been modified
+(installer, quality gate, `/mob`, per-step reflection notes); see the
+[CHANGELOG](https://github.com/PUC-Behring-AI/open-seja/blob/main/CHANGELOG.md). Provided as-is,
+without warranties (Section 5 of the license); non-commercial use only. The name `open-seja` is used
+with the trademark holder's permission.
+
 ## License
 
 The open-seja harness is distributed under CC BY-NC 4.0 (non-commercial), the
 same license as its upstream, [simonedjb/seja](https://github.com/simonedjb/seja).
-See the `LICENSE` file in the repository.
+See the `LICENSE` file shipped with this package.
