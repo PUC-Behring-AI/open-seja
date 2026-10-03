@@ -225,6 +225,7 @@ def test_fourth_stop_releases_after_three_blocks(stop, git_repo):
     code, err = stop.main(payload(True), git_repo.env)
     assert code == 0
     assert "released after 3 blocks; the human decides" in err
+    assert "CRAP(a.py::f)=31 > 30" in err  # the last findings stay visible
     assert len(git_repo.calls()) == 3
     # counter was reset: the next active stop blocks again
     assert stop.main(payload(True), git_repo.env)[0] == 2

@@ -133,6 +133,22 @@ removed, unless listed in `env_passthrough`.
 framework isolation, single owner of the vector store). If `[tool.importlinter]`
 or `.importlinter` exists, stage 5 runs.
 
+## Running the gate from hooks and `GATE_*_CMD`
+
+The commands in `GATE_FAST_CMD`, `GATE_FULL_CMD` and `GATE_COMMIT_CMD` are run
+without a shell (split like `shlex`, cwd = project root) and inherit the hook's
+PATH. The tools gate.py looks up (`ruff`, `pyright`, `pytest`, `radon`,
+`mutmut`) must therefore be on that PATH: either put the venv's `bin` on it or
+launch the gate with `uv run python gate.py ...` (then `uv` must be on PATH).
+
+The dev dependencies must include `ruff`, `pyright`, `pytest`, `pytest-cov`,
+`pytest-timeout` (the gate passes `--timeout=30` and reports a config error
+when the plugin is missing), `coverage[toml]`, `radon` and, for `--full`,
+`mutmut`. A venv without radon, mutmut or pytest-timeout cannot run the gate.
+
+A function whose cyclomatic complexity alone exceeds `crap_max_touched` cannot
+pass by adding tests (at 100% coverage CRAP equals cc): simplify it.
+
 ## Tool versions
 
 The dev group pins major ranges: `coverage[toml]>=7.5,<8`, `radon>=6,<7`,

@@ -145,7 +145,7 @@ metadata:
 
    On accept:
    - Copy `.claude/references/template/quality-gate/python/gate.py` to the project root and `.../README.md` to `docs/quality-gate.md`.
-   - Show the block from `pyproject-dev.example.toml` and the matching `uv add --dev ...` command; do NOT run it.
+   - Show the block from `pyproject-dev.example.toml` and the matching `uv add --dev ...` command; do NOT run it. The block includes `[tool.ruff] extend-exclude = ["gate.py", ".claude"]` and `[tool.pyright] include = ["src", "tests"]`, so the gate does not lint its own copy and the hooks; merge them into the project's `pyproject.toml`.
    - Append `## Quality Gate` to `product-design/conventions.md` with values in backticks: `GATE_FAST_CMD`, `GATE_FULL_CMD`, `GATE_COMMIT_CMD` (same value as `GATE_FULL_CMD`) and `QUALITY_DIR`.
    - Resolve `<PY>`: the first of `python3`, `python`, `py -3` that runs `-c "import sys"` successfully (none works -> skip the next bullet and tell the user the hooks were not wired).
    - Merge `.claude/references/template/quality-gate/settings.fragment.json` into the project's `.claude/settings.json` (create it if missing), replacing the literal `<PY>` in the hook commands with the resolved interpreter. Append only: skip any hook command or `permissions.deny` rule already present, never remove or rewrite existing hooks or rules. The hooks are the authority; the deny rules are complementary.

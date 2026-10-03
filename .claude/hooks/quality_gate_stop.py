@@ -32,7 +32,8 @@ def _decide(payload, env):
     blocks = int(state.get("blocks", 0)) if payload.get("stop_hook_active") else 0
     if blocks >= MAX_BLOCKS:
         common.save_state(env, session, {"blocks": 0})
-        return 0, "Quality gate: released after %d blocks; the human decides.\n" % MAX_BLOCKS
+        last = state.get("last_findings") or ""
+        return 0, ("Quality gate: released after %d blocks; the human decides.\n" % MAX_BLOCKS) + last
     digest = common.state_hash(cwd, files, cmd)
     if state.get("pass_hash") == digest:
         common.save_state(env, session, {"blocks": 0, "pass_hash": digest})
@@ -41,8 +42,9 @@ def _decide(payload, env):
     if result.passed:
         common.save_state(env, session, {"blocks": 0, "pass_hash": digest})
         return 0, ""
-    common.save_state(env, session, {"blocks": blocks + 1})
-    return 2, common.block_message(result)
+    message = common.block_message(result)
+    common.save_state(env, session, {"blocks": blocks + 1, "last_findings": message})
+    return 2, message
 
 
 def main(payload, env):

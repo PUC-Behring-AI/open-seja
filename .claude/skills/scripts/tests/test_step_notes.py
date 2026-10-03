@@ -214,3 +214,14 @@ def test_record_cli_and_refusals(plans, capsys):
     assert step_notes.main(["record", "--plan", "99", "--kind", "communication",
                             "--path", "p", "--declined"]) == 2
     assert step_notes.main(["record", "--plan", "77", "--kind", "communication", "--declined"]) == 2
+
+
+def test_parse_cli_stats_shows_gate_attempts(plans, capsys):
+    path = _append(gate="not-run")
+    gj = plans / "g.json"
+    gj.write_text(json.dumps({"version": 1, "status": "PASS", "exit_code": 0}))
+    _append(step=2, title="B", gate=None, gate_json=gj, gate_attempts=2)
+    capsys.readouterr()
+    assert step_notes.main(["parse", str(path), "--stats"]) == 0
+    out = capsys.readouterr().out
+    assert "attempts 2" in out
