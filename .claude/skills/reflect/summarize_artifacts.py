@@ -19,10 +19,11 @@ import sys
 from pathlib import Path
 
 # Shared scripts (project_config, etc.) live in the sibling scripts/ directory
-import sys as _sys; from pathlib import Path as _Path
+import sys as _sys; from pathlib import Path as _Path  # noqa: E702
 _sys.path.insert(0, str(_Path(__file__).resolve().parent.parent / 'scripts'))
 del _sys, _Path
-from project_config import REPO_ROOT, get_path
+from project_config import REPO_ROOT, get_path  # noqa: E402
+import step_notes  # noqa: E402
 
 _HEADER_RE = re.compile(
     r"^#\s+(?:DONE\s*\|[^|]*\|)?\s*(?:Plan|Advisory|Reflection|Inventory|Proposal|Explained|Check)"
@@ -150,8 +151,91 @@ def summarize(artifact_refs: list[str]) -> list[dict]:
             "interpretation_excerpt": _extract_section(lines, "## Agent interpretation")
                 or _extract_section(lines, "## Problem"),
         }
+        if entry["type"] == "plan":
+            entry.update(_plan_evidence(path))
         results.append(entry)
     return results
+
+
+_RECORD_RE = re.compile(r"^- (communication|drift): (.*?)\s*$")
+_DETAIL_RE = re.compile(r"^(.*?)\s*\(([^()]*)\)$")
+
+
+def _gate_json_exists(raw: str | None) -> bool:
+    if not raw:
+        return False
+    p = Path(raw)
+    return (p if p.is_absolute() else REPO_ROOT / p).is_file()
+
+
+def _read_records(text: str) -> dict[str, str]:
+    """Last ``- communication:`` / ``- drift:`` line wins (written by step_notes.py record)."""
+    found: dict[str, str] = {}
+    for line in text.splitlines():
+        m = _RECORD_RE.match(line)
+        if m:
+            found[m.group(1)] = m.group(2)
+    return found
+
+
+def _communication_evidence(raw: str | None) -> dict:
+    if raw is None:
+        return {"status": "not-offered"}
+    if raw == "declined":
+        return {"status": "declined"}
+    m = _DETAIL_RE.match(raw)
+    path, segment = (m.group(1), m.group(2)) if m else (raw, "")
+    return {"status": "recorded", "path": path, "segment": segment}
+
+
+def _drift_evidence(raw: str | None) -> dict:
+    if raw is None:
+        return {"status": "not-offered"}
+    if raw == "not-measured":
+        return {"status": "not-measured"}
+    m = _DETAIL_RE.match(raw)
+    path, detail = (m.group(1), m.group(2)) if m else (raw, "")
+    count = re.match(r"\s*(\d+)", detail)
+    ev: dict = {"status": "recorded", "path": path, "items": int(count.group(1)) if count else None}
+    full = Path(path) if Path(path).is_absolute() else REPO_ROOT / path
+    ev["exists"] = full.is_file()
+    if ev["exists"]:
+        ev["header"] = _first_line(full)
+    return ev
+
+
+def _plan_evidence(plan_path: Path) -> dict:
+    """Read the sibling progress file: step notes, gate, communication and drift evidence."""
+    prog = plan_path.with_name(re.sub(r"^(plan-\d{6}).*$", r"\1-progress.md", plan_path.name))
+    text = ""
+    if prog.is_file():
+        try:
+            text = prog.read_text(encoding="utf-8")
+        except OSError:
+            text = ""
+    notes = step_notes.parse_notes(text)
+    build = [n for n in notes if n.phase == "build"]
+    records = _read_records(text)
+    return {
+        "step_notes": [
+            {"step": n.step, "phase": n.phase, "deviated": n.deviated, "less_sure": n.less_sure,
+             "gate_status": n.gate_status, "gate_attempts": n.gate_attempts}
+            for n in notes
+        ],
+        "gate_evidence": {
+            "total": len(build),
+            "first_attempt_pass": sum(
+                1 for n in build if n.gate_status == "PASS" and n.gate_attempts == 1),
+            "steps": [
+                {"step": n.step, "status": n.gate_status, "exit": n.gate_exit,
+                 "attempts": n.gate_attempts, "path": n.gate_path,
+                 "json_exists": _gate_json_exists(n.gate_path)}
+                for n in build
+            ],
+        },
+        "communication_evidence": _communication_evidence(records.get("communication")),
+        "drift_evidence": _drift_evidence(records.get("drift")),
+    }
 
 
 def _infer_type(path: Path) -> str:
@@ -162,6 +246,64 @@ def _infer_type(path: Path) -> str:
         "inventories": "inventory", "proposals": "proposal", "check-logs": "check",
     }
     return mapping.get(name, "artifact")
+
+
+def _steps(nums: list[int]) -> str:
+    return ", ".join(str(n) for n in nums)
+
+
+def _evidence_lines(s: dict) -> list[str]:
+    """Markdown lines for plan evidence; agent words only appear quoted and attributed."""
+    out: list[str] = []
+    notes = s["step_notes"]
+    if not notes:
+        out.append("  - **Step notes**: no step notes recorded")
+    else:
+        deviated = [n["step"] for n in notes if not step_notes._is_none(n["deviated"])]
+        line = f"  - **Step notes**: {len(notes)} notes"
+        if deviated:
+            line += f"; deviations in steps {_steps(deviated)}"
+        out.append(line)
+        for n in notes:
+            if not step_notes._is_none(n["less_sure"]):
+                label = "plan" if n["phase"] == "plan" else str(n["step"])
+                out.append(f'    - step {label}, agent recorded (less sure): "{n["less_sure"]}"')
+        g = s["gate_evidence"]
+        if g["total"]:
+            steps = g["steps"]
+            bad = [x["step"] for x in steps if x["status"] in ("FAIL", "ERROR")]
+            notrun = [x["step"] for x in steps if x["status"] == "not-run"]
+            notinst = [x["step"] for x in steps if x["status"] == "not-installed"]
+            line = f"  - **Gate evidence**: {g['first_attempt_pass']}/{g['total']} steps PASS on first attempt"
+            if bad:
+                line += f"; FAIL/ERROR in steps {_steps(bad)}"
+            if notrun:
+                line += f"; not-run in steps {_steps(notrun)}"
+            if notinst:
+                line += f"; not-installed in steps {_steps(notinst)}"
+            out.append(line)
+            for x in steps:
+                if x["path"]:
+                    link = f"[{x['path']}]({x['path']})" if x["json_exists"] else f"{x['path']} (json missing)"
+                    out.append(f"    - step {x['step']}: {x['status']} (exit {x['exit']}, attempts {x['attempts']}), {link}")
+    c = s["communication_evidence"]
+    if c["status"] == "recorded":
+        seg = c["segment"] or "segment unrecorded"
+        out.append(f"  - **Communication evidence**: {seg}, [{c['path']}]({c['path']})")
+    else:
+        out.append(f"  - **Communication evidence**: {c['status'].replace('-', ' ')}")
+    d = s["drift_evidence"]
+    if d["status"] == "recorded":
+        n = f"{d['items']} items" if d["items"] is not None else "items unrecorded"
+        if d["exists"]:
+            out.append(f"  - **Drift evidence**: {n}, [{d['path']}]({d['path']})")
+            if d.get("header"):
+                out.append(f'    - report header: "{d["header"]}"')
+        else:
+            out.append(f"  - **Drift evidence**: {n}, {d['path']} (report missing)")
+    else:
+        out.append(f"  - **Drift evidence**: {d['status'].replace('-', ' ')}")
+    return out
 
 
 def as_markdown_block(summaries: list[dict]) -> str:
@@ -178,6 +320,8 @@ def as_markdown_block(summaries: list[dict]) -> str:
             lines.append(f"  - **Brief**: {s['brief_excerpt']}")
         if s.get("interpretation_excerpt"):
             lines.append(f"  - **Interpretation**: {s['interpretation_excerpt']}")
+        if s.get("type") == "plan" and "step_notes" in s:
+            lines.extend(_evidence_lines(s))
     return "\n".join(lines)
 
 
