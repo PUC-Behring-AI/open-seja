@@ -89,7 +89,7 @@ def test_generate_index_skips_missing_reflections_dir(tmp_path, monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# Mob Session header extraction (plan-000059)
+# Mob Session header extraction
 # ---------------------------------------------------------------------------
 
 
