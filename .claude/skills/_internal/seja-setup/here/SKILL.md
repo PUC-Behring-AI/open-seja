@@ -70,6 +70,10 @@ Apply the `Scaffold-Rules` anchor body from Standard Install Flow step 7d agains
 
 Apply the `Scaffold-SmokeTestInfra` anchor body from Standard Install Flow step 7e against cwd. Same semantics: skip entirely when `BACKEND_FRAMEWORK == none`; otherwise emit `smoke_test_registry.json` and `smoke_test_api.py` in cwd, plus `e2e/smoke.spec.ts` only when BOTH `FRONTEND_FRAMEWORK != none` AND an E2E tool was chosen in Section 1. If the smoke-test files already exist (a prior `--here` reconciliation populated them), skip rather than overwrite. Stack decisions reuse the slug answered (or pre-filled) in Step 4b.
 
+### Step 4f -- Offer quality gate
+
+Apply the `Offer-QualityGate` anchor body from Standard Install Flow step 7f against cwd. Same trigger (Section 1 test answer includes `pytest`) and same accept/decline semantics. If `gate.py` or a `## Quality Gate` section already exists, skip rather than overwrite. Reuses the answers from Step 4b.
+
 ### Step 5 -- Git history handling
 
 AskUserQuestion (two-line rationale; trade-offs are non-obvious):

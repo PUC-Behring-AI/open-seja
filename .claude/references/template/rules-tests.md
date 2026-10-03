@@ -21,6 +21,10 @@ When editing files under these paths:
 - **Review questions**: see `.claude/references/general/review-perspectives/test.md`, `.claude/references/general/review-perspectives/dx.md` -- P0 questions are the critical checks.
 - **Full conventions**: see `product-design/standards.md § Testing` -- stack-specific rules.
 
+## Quality Gate
+
+- If the project installed the quality gate, run `gate.py --fast --files <changed>` before declaring a step done; every test asserts; never add `skip`, `xfail`, `no cover` or `no mutate` without a reason; never run `--accept-baseline`.
+
 ## Perspective Alignment
 
 This rule is governed by: **TEST** (testability), **DX** (developer experience).
