@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated": "2026-05-01T19:37:00Z",
+  "generated": "2026-09-26T02:13:42Z",
   "categories": [
     "planning-execution",
     "analysis-review",
@@ -61,6 +61,18 @@
       "after": "/implement",
       "suggest": "/reflect",
       "reason": "Surface patterns across recent skill runs (non-prescriptive)",
+      "category": "planning-execution"
+    },
+    {
+      "after": "/mob",
+      "suggest": "/reflect --deep",
+      "reason": "Compare several mob sessions?",
+      "category": "planning-execution"
+    },
+    {
+      "after": "/mob",
+      "suggest": "/implement",
+      "reason": "Finish the steps left pending in the session?",
       "category": "planning-execution"
     },
     {

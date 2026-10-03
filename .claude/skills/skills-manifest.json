@@ -1,6 +1,6 @@
 {
-  "generated": "2026-07-03T12:34:35Z",
-  "count": 15,
+  "generated": "2026-09-26T02:13:42Z",
+  "count": 16,
   "skills": [
     {
       "name": "communicate",
@@ -48,6 +48,13 @@
       "name": "implement",
       "description": "Execute a previously generated plan to add a feature, fix a bug, or refactor code. Use when user mentions \"implement\", \"execute plan\", or \"run plan\".",
       "argument_hint": "<planned-item-id> [--manual] [--roadmap <roadmap-id>] [--pending] [--checkpoint wave|plan|none] [--max-iterations N] [--dry-run] [--skip-checks] [--skip-docs]",
+      "category": "planning",
+      "version": "1.0.0"
+    },
+    {
+      "name": "mob",
+      "description": "Run a timed mob programming (ensemble programming) group session: PLAN -> BUILD -> REFLECT with adjustable duration. I ask for the slot and phase times, build a clock agenda, run a timebox timer that announces phase and driver changes, chain /plan, /implement and /reflect, and write a session record comparing planned and actual times.",
+      "argument_hint": "<goal> [--duration 75] [--slot 90|120] [--split 20/60/20] [--plan-min N] [--build-min N] [--reflect-min N] [--rotation 10] [--no-timer]",
       "category": "planning",
       "version": "1.0.0"
     },

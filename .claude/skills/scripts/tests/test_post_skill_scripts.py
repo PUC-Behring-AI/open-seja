@@ -356,6 +356,22 @@ class TestVerifyCommitScope:
         assert result["pass"] is True
         assert "_output/briefs.md" in result["missing"]
 
+    def test_mob_skill_output_dir_is_expected(self) -> None:
+        """For skill `mob`, files under _output/mob-sessions/ are not unexpected."""
+        sys.path.insert(0, str(_SCRIPTS_DIR))
+        import importlib
+        vcs = importlib.import_module("verify_commit_scope")
+
+        expected = vcs.build_expected("mob", "000001", None, [], None, None)
+        assert "_output/mob-sessions/" in expected
+        staged = [
+            "_output/mob-sessions/mob-session-000001-demo.md",
+            "_output/mob-sessions/mob-session-000001-agenda.json",
+        ]
+        result = vcs.check_scope(staged, expected)
+        assert result["pass"] is True
+        assert result["unexpected"] == []
+
 
 # ===========================================================================
 # update_cross_refs.py
