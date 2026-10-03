@@ -533,3 +533,23 @@ def test_pretool_subprocess_bad_stdin_fails_open(git_repo):
                          input="{no", text=True, capture_output=True, env=env,
                          cwd=str(git_repo.root), timeout=60)
     assert res.returncode == 0
+
+
+def test_settings_fragment_points_at_existing_hooks():
+    import json
+    import re
+
+    root = Path(__file__).resolve().parents[3]
+    frag = json.loads(
+        (root / "references/template/quality-gate/settings.fragment.json").read_text()
+    )
+    assert set(frag) == {"hooks", "permissions"}
+    assert set(frag["hooks"]) == {"Stop", "PreToolUse"}
+    assert frag["permissions"]["deny"]
+    for entries in frag["hooks"].values():
+        for entry in entries:
+            for h in entry["hooks"]:
+                assert h["command"].startswith("<PY> ")
+                name = re.search(r"/hooks/(\w+\.py)", h["command"]).group(1)
+                assert (root / "hooks" / name).is_file()
+                assert h["timeout"] > 0
