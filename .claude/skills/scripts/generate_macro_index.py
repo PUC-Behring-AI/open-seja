@@ -182,7 +182,7 @@ _REFLECTION_RE = re.compile(
     re.IGNORECASE,
 )
 
-# Mob Session: # Mob Session <id> | datetime | title  (${MOB_SESSIONS_DIR}, plan-000059)
+# Mob Session: # Mob Session <id> | datetime | title  (${MOB_SESSIONS_DIR})
 _MOB_SESSION_RE = re.compile(
     r"^#\s+Mob\s+Session\s+(\d+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
     re.IGNORECASE,

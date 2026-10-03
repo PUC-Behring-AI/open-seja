@@ -15,7 +15,8 @@
   "files": [
     "bin/",
     "lib/",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "keywords": [
     "claude-code",
@@ -33,6 +34,6 @@
   "bugs": {
     "url": "https://github.com/PUC-Behring-AI/open-seja/issues"
   },
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "CC-BY-NC-4.0",
   "author": "arodrigues-puc-rio"
 }

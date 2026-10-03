@@ -7,7 +7,7 @@ __pycache__/
 .venv/
 venv/
 
-# WSL / Windows download artifacts (189 apareceram em 2026-08-26)
+# WSL / Windows download artifacts
 *:Zone.Identifier
 
 # OS

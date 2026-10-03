@@ -5,7 +5,7 @@
  *
  * Every child-process call lives here; no decisions are made in this module
  * (those belong to `lib/core.js`). Nothing here is unit-tested -- the surface
- * is entirely `git`/`claude` invocation, verified manually per plan-000001.
+ * is entirely `git`/`claude` invocation, verified manually.
  */
 
 const { execFileSync, spawnSync } = require('node:child_process');

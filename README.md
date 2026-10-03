@@ -1,5 +1,13 @@
 # SEJA -- Semiotic Engineering Journeys with Agents
 
+> **Attribution.** open-seja is a derivative of
+> [SEJA -- Semiotic Engineering Journeys with Agents](https://github.com/simonedjb/seja),
+> Copyright (c) 2025-2026 Simone Diniz Junqueira Barbosa, licensed under
+> [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/). This version has been modified:
+> an `npx open-seja` installer (`npm/`), a Python quality gate template with a critical plugin, the `/mob` timed mob-programming skill, per-step reflection notes feeding `/reflect`, and related harness adjustments. See [`CHANGELOG.md`](CHANGELOG.md) for the full list. The material is provided as-is,
+> without warranties (Section 5 of the license), and may be used for non-commercial purposes only.
+> The name `open-seja` is used with the trademark holder's permission; see [`TRADEMARKS.md`](TRADEMARKS.md).
+
 SEJA is an agent harness grounded in semiotic engineering. It gives an
 agent-driven project a shared memory of intent, conventions, and
 implementation state, so that people and agents can reflect on what the

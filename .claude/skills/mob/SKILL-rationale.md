@@ -6,7 +6,7 @@ designer_description: "When you are maintaining /mob and need the backstory -- w
 
 Maintainer-only context for `mob/SKILL.md`. NOT loaded at runtime (no entry in `metadata.references`; the sync tool and call-graph generator both ignore this file). Edit both files when rationale changes.
 
-Origin: plan-000059 of the Doutourado project ("skill /mob no open-seja (mob programming PLAN-BUILD-REFLECT, duracao ajustavel)"). The canonical governance record is the **Mob session skill (/mob)** entry under `### Architectural Decisions` in `.claude/references/general/harness-governance.md`; this file does not repeat it at length.
+Origin: a request for a timed mob programming skill (PLAN-BUILD-REFLECT, adjustable duration) in open-seja. The canonical governance record is the **Mob session skill (/mob)** entry under `### Architectural Decisions` in `.claude/references/general/harness-governance.md`; this file does not repeat it at length.
 
 ## Why a skill of its own (3 of 4)
 
@@ -15,7 +15,7 @@ The governance test asks a new skill to meet 3 of 4 criteria. `/mob` meets (a) d
 - **A mode of `/implement` or `/reflect`** -- PLAN and REFLECT would depend on a skill that does not own them.
 - **A prose-only timer** ("warn every 10 min") -- the agent has no reliable clock between turns.
 - **One commit per session** (chained skills suffixed, as in the roadmap modes) -- a live session can be interrupted; per-artifact commits keep what was done, and the record links it all afterwards.
-- **Implementing it first in the Doutourado project** -- the designer chose open-seja as the target.
+- **Implementing it first in a downstream project** -- the designer chose open-seja as the target.
 
 Revisit if `/mob` ever comes to orchestrate a single skill only.
 
@@ -25,7 +25,7 @@ Revisit if `/mob` ever comes to orchestrate a single skill only.
 
 ## Why `/plan --plan`, not `--light`
 
-`--light` produces a proposal without numbered steps. `/implement` executes plan steps, so a proposal would leave BUILD with nothing to run. The goal is sent with a size hint ("must fit in N min of BUILD, in small independent steps") so the plan is cut to the timebox instead of the timebox being stretched to the plan. An early draft of plan-000059 used `--light`; the review caught it.
+`--light` produces a proposal without numbered steps. `/implement` executes plan steps, so a proposal would leave BUILD with nothing to run. The goal is sent with a size hint ("must fit in N min of BUILD, in small independent steps") so the plan is cut to the timebox instead of the timebox being stretched to the plan. An early draft of the plan used `--light`; the review caught it.
 
 ## Why `/implement --manual --skip-docs`
 
@@ -36,7 +36,7 @@ Revisit if `/mob` ever comes to orchestrate a single skill only.
 
 In v1 the **driver operates the agent**: types the instructions and approvals of each step, while navigators decide what to ask and what to accept. Rotation happens at step boundaries, never mid-step, because a step is the smallest unit `/implement --manual` completes and commits; a rotation that falls due mid-step waits.
 
-**Open question** (from plan-000059): a mode in which the human driver writes the code and the agent only navigates and records. That mode is closer to the `apprentice` preset of seja-twist (Doutourado D-004), where the learner writes the code and the agent tutors. If wanted, it becomes a flag in a later version (e.g. `--build agent|human`); it was left out of v1 because it changes what BUILD chains (not `/implement`) and what the record measures.
+**Open question**: a mode in which the human driver writes the code and the agent only navigates and records. That mode is closer to an apprentice setting, where the learner writes the code and the agent tutors. If wanted, it becomes a flag in a later version (e.g. `--build agent|human`); it was left out of v1 because it changes what BUILD chains (not `/implement`) and what the record measures.
 
 ## Why the timer is a script, a log and a `status` command
 
@@ -51,11 +51,11 @@ In v1 the **driver operates the agent**: types the instructions and approvals of
 
 ## Partial stop contract with `/implement`
 
-A timebox protects REFLECT: when BUILD runs out, the group stops building rather than skipping reflection. That needed a contract `/implement` did not have (it used to mark a plan DONE unconditionally). plan-000059 added the **partial stop** to `/implement` Manual Mode step 9, with the matching change to post-skill 2g.iv: when execution stops with unchecked steps, the plan is not marked `# DONE`, the `implement` pending entry stays open, the roadmap status update is skipped, the summary gets `PARTIAL: N/M steps; stopped by <reason>`, and completed work is still committed. `/mob` passes `session mob-session-<id>` as the reason and copies the unchecked steps to the record's Pending section, so `/implement <plan-id>` can pick them up later.
+A timebox protects REFLECT: when BUILD runs out, the group stops building rather than skipping reflection. That needed a contract `/implement` did not have (it used to mark a plan DONE unconditionally). The `/mob` work added the **partial stop** to `/implement` Manual Mode step 9, with the matching change to post-skill 2g.iv: when execution stops with unchecked steps, the plan is not marked `# DONE`, the `implement` pending entry stays open, the roadmap status update is skipped, the summary gets `PARTIAL: N/M steps; stopped by <reason>`, and completed work is still committed. `/mob` passes `session mob-session-<id>` as the reason and copies the unchecked steps to the record's Pending section, so `/implement <plan-id>` can pick them up later.
 
 ## Consent condition for research data
 
-Mob sessions may be studied (e.g. the TWIST edition that motivated seja-twist, D-004, under an ethics protocol). A session record, a plan, a reflection with verbatim lines and the commit messages all go into git history, which is hard to scrub. Hence:
+Mob sessions may be studied as research data (e.g. in a course or training programme, under an ethics protocol). A session record, a plan, a reflection with verbatim lines and the commit messages all go into git history, which is hard to scrub. Hence:
 
 - The skill asks whether the session is research data, and if so asks the facilitator to confirm that every participant signed the consent form (TCLE). Without confirmation the session runs with initials or pseudonyms only and no identifiable reflection lines.
 - Pseudonyms (`P1`, `P2`, ...) are the default labels; the name->pseudonym map is kept outside the repository.
@@ -69,7 +69,6 @@ Section 1.2.4 of `product-design/seja-as-intended.md` (textual citation; `seja-i
 
 ## References
 
-- plan-000059 (Doutourado): `_output/plans/plan-000059-skill-mob-open-seja-plan-build-reflect.md` in the Doutourado repository.
 - `.claude/references/general/harness-governance.md` -- **Mob session skill (/mob)** entry.
 - `mob_schedule.py`, `mob_timer.py` and their tests in this directory.
 - `/implement` SKILL.md, Manual Mode step 9 (partial stop); post-skill SKILL.md step 2g.iv.
