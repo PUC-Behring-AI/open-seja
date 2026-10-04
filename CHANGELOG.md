@@ -2,7 +2,7 @@
 
 Public-facing changelog for the SEJA harness.
 
-This file is hand-edited before each tag cut. Entries describe **consumer-visible** changes (skills, rules, agents, references, CLI behavior) and omit private dev-repo concerns. For tag convention and release process, see [`tools/release-process.md`](tools/release-process.md).
+This file is hand-edited before each tag cut. Entries describe **consumer-visible** changes (skills, rules, agents, references, CLI behavior) and omit private dev-repo concerns. For tag convention and release process, see `tools/release-process.md` in the `dev` branch (not distributed).
 
 Format: loosely based on [Keep a Changelog](https://keepachangelog.com/). SemVer: `vMAJOR.MINOR.PATCH`.
 
@@ -15,6 +15,8 @@ Format: loosely based on [Keep a Changelog](https://keepachangelog.com/). SemVer
 -->
 
 ## [Unreleased]
+
+## [v0.10.0] - 2026-10-04
 
 ### Breaking changes
 
@@ -33,6 +35,10 @@ Format: loosely based on [Keep a Changelog](https://keepachangelog.com/). SemVer
 
 ### Changed
 
+- **Install by `git clone` + `/seja-setup --here`**: the README, the quickstart and its first cycle now install with `git clone git@github.com:PUC-Behring-AI/open-seja my-project` followed by `/seja-setup --here`; the repository is shared with members of the PUC-Behring-AI organization. The `npx open-seja` package in `npm/` is not published yet and says so.
+- **`/seja-setup --upgrade` and version resolution use the open-seja remote**: `resolve_seja_version.py` and the upgrade flow query and clone `git@github.com:PUC-Behring-AI/open-seja.git` instead of upstream SEJA; set `SEJA_REMOTE` (or pass `--remote`) to use another URL, e.g. HTTPS. A failed lookup no longer waits for a credential prompt and prints that hint.
+- **Releases on `main` are distribution snapshots**: `main` carries only the harness and its public documentation (no `product-design/`, `_output/` or `tools/`), so a fresh clone is detected as a new project; development happens on `dev`, where the design record (`product-design/seja-as-intended.md`) lives. `docs/hypothesis.md` links to it there.
+
 - **Attribution and trademark notice**: `README.md` and `npm/README.md` now carry an Attribution block (derivative of SEJA by Simone Diniz Junqueira Barbosa, CC BY-NC 4.0, provided as-is without warranties, changes made, non-commercial use). `TRADEMARKS.md` gains a *Permission for the open-seja name* section (scope, no endorsement, revocable). The npm package now ships `LICENSE` and declares `CC-BY-NC-4.0`.
 - **`/implement` manual mode: partial-stop contract**: when execution stops with steps still unchecked (at the user's or the caller's request), `/implement` no longer marks the plan `# DONE`, does not close the `implement` pending entry, skips the roadmap status update, and appends `PARTIAL: N/M steps; stopped by <reason>` to its summary; the commit via `/post-skill` still runs. `/post-skill` step 2g.iv now closes the `implement` pending entry only when the plan header is marked `# DONE` (previously unconditional).
 - **`/post-skill`: design-intent reminder and DONE marker proposal gated on a DONE plan**: steps 2c (design intent curation reminder) and 2e (DONE marker proposal) now run only when the plan header is marked DONE (`# DONE | ...` or legacy `# Plan NNNN | DONE | ...`), like 2g.iv; a partial plan skips them.
@@ -43,6 +49,8 @@ Format: loosely based on [Keep a Changelog](https://keepachangelog.com/). SemVer
 - **Manual `/implement` now creates the progress file** and, like auto mode, writes a `## Reflection` bullet at wrap-up (`step_notes.py reflect-bullet`).
 
 ### Fixed
+
+- **`/seja-setup --upgrade` no longer requires `product-design/` in the source**: only `.claude/skills/` is checked, matching what `upgrade_harness.py` reads.
 
 - **Quality gate: pytest-timeout, CRAP message, hook release, setup excludes**: `gate.py` no longer passes `-p pytest_timeout` (pytest died with "Plugin already registered" when the plugin was autoloaded) and reports a configuration finding when the plugin is missing; the CRAP finding now shows `cc` and `cov` and says whether to simplify or add tests; the `Stop` hook repeats the last findings when it releases after 3 blocks; `step_notes.py parse --stats` prints the gate attempt count; `pyproject-dev.example.toml` and the install step exclude `gate.py` and `.claude` from ruff and pyright so a fresh install does not fail its first run.
 

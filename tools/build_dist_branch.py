@@ -73,7 +73,7 @@ def pruned_tree(source: str, pathspecs: list[str], index_file: str) -> tuple[str
 
 def release_label(source: str) -> str:
     changelog = git("show", f"{source}:CHANGELOG.md")
-    match = re.search(r"^## \[(\d+\.\d+\.\d+)\]", changelog, flags=re.M)
+    match = re.search(r"^## \[v?(\d+\.\d+\.\d+)\]", changelog, flags=re.M)
     return f"v{match.group(1)}" if match else "unversioned"
 
 
