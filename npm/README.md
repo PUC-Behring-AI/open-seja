@@ -1,5 +1,8 @@
 # open-seja
 
+> **Not yet published.** This package is not on the npm registry yet; install with `git clone` as described in the
+> [README](https://github.com/PUC-Behring-AI/open-seja#install).
+
 Install or upgrade the [open-seja](https://github.com/PUC-Behring-AI/open-seja)
 Claude Code harness with a single command.
 
@@ -37,7 +40,6 @@ suggest a first cycle, small enough to finish in one sitting:
 It is a hypothesis, not a promise; the page that says what would confirm it or refute it is
 [the hypothesis](https://github.com/PUC-Behring-AI/open-seja/blob/main/docs/hypothesis.md).
 
-<!-- TEMPORARY: the links above resolve only once release/0.10 reaches main (npx clones main). Remove this comment after the check in roadmap item 8. -->
 
 ## What this command does *not* do
 

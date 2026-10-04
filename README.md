@@ -4,21 +4,33 @@
 > [SEJA -- Semiotic Engineering Journeys with Agents](https://github.com/simonedjb/seja),
 > Copyright (c) 2025-2026 Simone Diniz Junqueira Barbosa, licensed under
 > [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/). This version has been modified:
-> an `npx open-seja` installer (`npm/`), a Python quality gate template with a critical plugin, the `/mob` timed mob-programming skill, per-step reflection notes feeding `/reflect`, and related harness adjustments. See [`CHANGELOG.md`](CHANGELOG.md) for the full list. The material is provided as-is,
+> an `npx` installer (`npm/`, not yet published), a Python quality gate template with a critical plugin, the `/mob` timed mob-programming skill, per-step reflection notes feeding `/reflect`, and related harness adjustments. See [`CHANGELOG.md`](CHANGELOG.md) for the full list. The material is provided as-is,
 > without warranties (Section 5 of the license), and may be used for non-commercial purposes only.
 > The name `open-seja` is used with the trademark holder's permission; see [`TRADEMARKS.md`](TRADEMARKS.md).
 
-open-seja gives Claude Code a short cycle -- plan, implement, reflect -- in which each implementation step must pass a deterministic quality gate (lint, types, tests) before it counts as done. It is an open-access distribution of SEJA (Semiotic Engineering Journeys with Agents), installable with one command.
+open-seja gives Claude Code a short cycle -- plan, implement, reflect -- in which each implementation step must pass a deterministic quality gate (lint, types, tests) before it counts as done. It is an open-access distribution of SEJA (Semiotic Engineering Journeys with Agents).
 
 ## Install
 
 ```bash
-npx open-seja my-project
+git clone git@github.com:PUC-Behring-AI/open-seja my-project
+cd my-project
+claude
 ```
 
-You need Node.js >= 18, git, and the [`claude` CLI](https://claude.com/claude-code) installed and authenticated.
-The command clones the harness into `my-project/` and opens Claude Code there, ready to run `/seja-setup`.
-See [`npm/README.md`](npm/README.md) for what the command does and does not do.
+Then, inside Claude Code:
+
+```text
+/seja-setup --here
+```
+
+You need git, the [`claude` CLI](https://claude.com/claude-code) installed and authenticated, and read access to this
+repository (it is shared with members of the PUC-Behring-AI organization). `/seja-setup --here` turns the clone into
+your project: it asks about your stack, offers the quality gate, and asks what to do with the git history. Choose
+**Re-init fresh** unless you need open-seja's history, and do not push open-seja's history to a remote outside the
+organization.
+
+An `npx open-seja` installer exists in [`npm/`](npm/README.md) but is not published yet.
 
 Two conditions apply. The quality gate currently supports Python projects with pytest; for other stacks the cycle runs without it. And you run `/design` once, before the first plan, to record your intent. [Your first cycle](docs/quickstart.md#your-first-cycle) walks through both.
 
@@ -50,7 +62,7 @@ I do not claim this cycle works. It is a hypothesis (H-008, the identifier used 
 ## About SEJA
 
 <!-- upstream:begin -->
-Everything below is the upstream SEJA documentation. If you installed with `npx open-seja`, you do not need its clone options: start at [Your first cycle](docs/quickstart.md#your-first-cycle), then come back here for the concepts.
+Everything below is the upstream SEJA documentation. If you installed with `git clone` and `/seja-setup --here`, you do not need its clone options: start at [Your first cycle](docs/quickstart.md#your-first-cycle), then come back here for the concepts.
 
 SEJA is an agent harness grounded in semiotic engineering. It gives an
 agent-driven project a shared memory of intent, conventions, and
@@ -89,7 +101,7 @@ maps each combination to the right how-to guide.
 | **Greenfield** | New product, harness lives next to source. [Guide](docs/how-to/greenfield-collocated.md) | New product, harness lives in a separate workspace repo. [Guide](docs/how-to/greenfield-workspace.md) |
 | **Brownfield** | Existing codebase, harness added in place. [Guide](docs/how-to/brownfield-collocated.md) | Existing codebase, harness kept in a side workspace. [Guide](docs/how-to/brownfield-workspace.md)    |
 
-You can also clone SEJA directly into your project folder (e.g. `git clone https://github.com/PUC-Behring-AI/open-seja my-project`) and run `/seja-setup --here` to finalise setup in place without copying harness files. This is the most common entry point for the collocated patterns; the four how-to guides above describe the same flow in detail.
+You can also clone SEJA directly into your project folder (e.g. `git clone git@github.com:PUC-Behring-AI/open-seja my-project`) and run `/seja-setup --here` to finalise setup in place without copying harness files. This is the most common entry point for the collocated patterns; the four how-to guides above describe the same flow in detail.
 
 `/seja-setup --here` finalises SEJA setup inside a directory where you have already cloned SEJA (no file copying -- it detects the current state, prompts about git history and harness-dev artefact cleanup, and pins `.seja-version` from the clone's tag). Pass `--version vX.Y.Z` to `/seja-setup` in either install or `--upgrade` mode to pin to a specific harness release; the resolved version is recorded in `.seja-version` for later upgrades. See the walkthrough at [docs/how-to/greenfield-collocated.md#option-b-clone-directly-into-the-project-folder](docs/how-to/greenfield-collocated.md#option-b-clone-directly-into-the-project-folder).
 
