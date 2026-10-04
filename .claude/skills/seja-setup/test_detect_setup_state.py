@@ -221,6 +221,31 @@ def test_public_clone_soft_confirm():
         assert result["state"] == State.PUBLIC_CLONE_SOFT_CONFIRM
 
 
+OPEN_SEJA_SSH = "git@github.com:PUC-Behring-AI/open-seja.git"
+
+
+def test_open_seja_distribution_clone_is_fresh_download():
+    """A clone of open-seja's distributed main (no product-design/, no _output/) is fresh (D0, plan-000073)."""
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        init_git_with_remote(tmp, url=OPEN_SEJA_SSH, branch="main")
+        make_claude_skills(tmp)
+        result = detect_state(tmp)
+        assert result["state"] == State.FRESH_DOWNLOAD
+
+
+def test_open_seja_clone_with_design_record_is_partial_init():
+    """Why main carries no product-design/: seja-as-intended.md alone flips a clone to partial-init."""
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        init_git_with_remote(tmp, url=OPEN_SEJA_SSH, branch="main")
+        make_claude_skills(tmp)
+        (tmp / "product-design").mkdir()
+        (tmp / "product-design" / "seja-as-intended.md").write_text("# record\n", encoding="utf-8")
+        result = detect_state(tmp)
+        assert result["state"] == State.PARTIAL_INIT
+
+
 def test_cwd_does_not_exist():
     """detect_state on a nonexistent path raises FileNotFoundError."""
     bogus = Path(tempfile.gettempdir()) / "definitely-not-a-real-seja-dir-xyz123"

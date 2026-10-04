@@ -56,3 +56,47 @@ def test_resolve_version_empty_falls_back_to_head() -> None:
     assert resolved == rsv.HEAD_SENTINEL
     assert warning is not None
     assert "HEAD" in warning
+
+
+def _capture_remote(monkeypatch) -> list[str]:
+    seen: list[str] = []
+
+    def fake_fetch(remote: str) -> list[str]:
+        seen.append(remote)
+        return ["v0.10.0"]
+
+    monkeypatch.setattr(rsv, "fetch_remote_tags", fake_fetch)
+    return seen
+
+
+def test_main_defaults_to_open_seja_remote(monkeypatch, capsys) -> None:
+    monkeypatch.delenv("SEJA_REMOTE", raising=False)
+    seen = _capture_remote(monkeypatch)
+    assert rsv.main([]) == 0
+    assert seen == ["git@github.com:PUC-Behring-AI/open-seja.git"]
+    assert capsys.readouterr().out.strip() == "v0.10.0"
+
+
+def test_main_uses_seja_remote_env(monkeypatch) -> None:
+    monkeypatch.setenv("SEJA_REMOTE", "https://example.invalid/open-seja")
+    seen = _capture_remote(monkeypatch)
+    assert rsv.main([]) == 0
+    assert seen == ["https://example.invalid/open-seja"]
+
+
+def test_main_explicit_remote_beats_env(monkeypatch) -> None:
+    monkeypatch.setenv("SEJA_REMOTE", "https://example.invalid/from-env")
+    seen = _capture_remote(monkeypatch)
+    assert rsv.main(["--remote", "https://example.invalid/from-flag"]) == 0
+    assert seen == ["https://example.invalid/from-flag"]
+
+
+def test_main_fetch_failure_prints_hint(monkeypatch, capsys) -> None:
+    def failing_fetch(remote: str) -> list[str]:
+        raise RuntimeError("git ls-remote failed: Permission denied (publickey)")
+
+    monkeypatch.setattr(rsv, "fetch_remote_tags", failing_fetch)
+    assert rsv.main([]) == 2
+    err = capsys.readouterr().err
+    assert "ERROR:" in err
+    assert "SEJA_REMOTE" in err

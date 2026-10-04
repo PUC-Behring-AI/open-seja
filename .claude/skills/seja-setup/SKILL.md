@@ -26,7 +26,7 @@ metadata:
 | `--here` | No | Finalise SEJA setup in the current directory without copying harness files (use when you downloaded SEJA directly into your project) |
 | `--demo` | No | Set up with the pre-configured TaskFlow demo project |
 | `--upgrade` | No | Upgrade harness files in the current project to the latest SemVer tag (or `--version <tag>`). Preserves project-specific files. |
-| `--version <tag>` | No | Public `seja` release tag to pin to (e.g. `v0.1.0`). Default: latest SemVer tag on `simonedjb/seja`. Falls back to HEAD with a warning if no tags exist. |
+| `--version <tag>` | No | open-seja release tag to pin to (e.g. `v0.10.0`). Default: latest SemVer tag on the open-seja remote (`$SEJA_REMOTE`, else `git@github.com:PUC-Behring-AI/open-seja.git`). Falls back to HEAD with a warning if no tags exist. |
 | `--dry-run` | No | Preview upgrade changes without applying them (valid with `--upgrade`) |
 
 # Seja-Setup
@@ -41,7 +41,7 @@ This skill manages every harness-state transition in a project: **install** (cop
 
 Under the A2 release model, public `seja` ships tagged releases (`vMAJOR.MINOR.PATCH`). `/seja-setup` resolves the tag **before** any copy or upgrade and writes it to `<target>/.seja-version` as the baseline for future upgrades.
 
-**Resolution order**: `--version <tag>` -> that tag; else latest SemVer tag on remote; else warn and record `HEAD` (pre-release fallback). `.claude/skills/seja-setup/resolve_seja_version.py` queries `git ls-remote --tags https://github.com/simonedjb/seja` and validates `--version`.
+**Resolution order**: `--version <tag>` -> that tag; else latest SemVer tag on remote; else warn and record `HEAD` (pre-release fallback). `.claude/skills/seja-setup/resolve_seja_version.py` queries `git ls-remote --tags` on the open-seja remote (`$SEJA_REMOTE` if set, else `git@github.com:PUC-Behring-AI/open-seja.git`; `--remote` overrides both) and validates `--version`.
 
 When running from a local seja checkout, confirm the working tree is at the resolved tag before copying. If HEAD diverges, either `git checkout <tag>` or pass `--version HEAD`.
 
