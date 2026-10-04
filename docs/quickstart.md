@@ -139,8 +139,12 @@ project.
 
 1. **Install, with the gate.** Run `npx open-seja my-project` (or `/seja-setup` in an existing project). The gate
    needs a Python project with pytest, and `/seja-setup` only offers it when it sees pytest in your answers. For a new,
-   empty project, tell `/seja-setup` the stack is Python with pytest, and create a `pyproject.toml` and a `tests/`
-   folder. Accept the gate when it is offered. You should now see `gate.py` in the project root. If the project is not
+   empty project, tell `/seja-setup` the stack is Python with pytest. Accept the gate when it is offered. You should
+   now see `gate.py` in the project root. Setup does not create the Python project itself, so give the gate something
+   to measure: a `pyproject.toml` with the blocks from
+   `.claude/references/template/quality-gate/python/pyproject-dev.example.toml` (set `package` to your package
+   name), one package under `src/` (for example `src/my_project/__init__.py`), a `tests/` folder, and the tools the
+   gate runs (`uv add --dev ruff pyright pytest pytest-cov pytest-timeout radon`). If the project is not
    Python, skip the gate: the cycle still works, and the `gate` field of each step note reads `not-installed`.
 2. **Record your intent.** Run `/design` (skip it if you already ran it in the worked example). It asks a short
    sequence of questions about your project and writes `product-design/product-design-as-intended.md`; a plan needs
