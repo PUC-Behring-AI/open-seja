@@ -35,6 +35,8 @@ you can start typing now and read the "why" afterwards.
 /seja-setup --upgrade
 ```
 
+From a terminal, `npx open-seja hello-seja` does step 1 for you and opens Claude Code in the new folder.
+
 ## Worked example: hello-seja
 
 We will walk you through a concrete run so you see a real result
@@ -119,6 +121,32 @@ You now have a SEJA project with four files under `product-design/`:
 The harness reads these four files at the start of every skill
 invocation. You do not need to memorize the whole file inventory
 yet: you have a running project, and that is enough for now.
+
+## Your first cycle
+
+Once the project has its four design files, you can try the cycle this release proposes: PLAN, IMPLEMENT, REFLECT
+(see [the hypothesis](hypothesis.md)). It takes one small change, and it shows you the quality gate and the
+reflection notes working in your own project.
+
+1. **Install, with the gate.** Run `npx open-seja my-project` (or `/seja-setup` in an existing project). If the
+   project is Python and uses pytest, `/seja-setup` offers to install the quality gate; accept. If the project is not
+   Python, skip it: the cycle still works without the gate, and the `gate` field of each step note reads
+   `not-installed`. Then run `/design` if you have not yet; a plan needs `product-design/product-design-as-intended.md`.
+2. **Record the baseline.** From the project root, run `python gate.py --init-baseline` once. The gate now remembers
+   the current state, and from here on thresholds only move when you accept it.
+3. **Plan a small change.** Run `/plan` with something tiny, for example "add a function `slugify(title)` with a
+   test". You get a numbered plan, reviewed before anything is written.
+4. **Implement it.** Run `/implement <plan-id>`. For each step you will see the gate run on the files the step
+   touched, up to three attempts, and a step only counts as done on PASS. Each step also leaves a short note in the
+   plan's progress file: what happened, what deviated, what the agent is less sure about, with the gate result.
+5. **Reflect.** Run `/reflect` on the plan. It reads the notes and the gate evidence before it asks you anything, and
+   it records your answer in your own words.
+
+### What you just tested
+
+You ran one cycle of H-008. If you want to see how the cycle did, run `python3 .claude/skills/scripts/step_notes.py
+parse --stats <progress-file>` on the plan's progress file, and look at the gate reports under `_output/quality/`.
+[The hypothesis page](hypothesis.md) says what the numbers mean, and how to send them to me if you choose to.
 
 ## The canonical loop: what happens on iteration 2 and beyond
 
