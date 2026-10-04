@@ -12,13 +12,13 @@ yet, and I want you to be able to see what would make me wrong.
 ## The hypothesis in plain words
 
 A short cycle -- PLAN, IMPLEMENT, REFLECT -- can be offered as the entry path for working with an agent, without
-losing what SEJA's principle P-005 protects (validate before you communicate), provided two conditions hold:
+losing what SEJA's design record protects (validate before you communicate), provided two conditions hold. To install, see the [README](../README.md#install).
 
-1. **A deterministic gate decides each step.** Inside IMPLEMENT (called BUILD in the source text), an agent's step
+1. **A deterministic gate decides each step.** Inside IMPLEMENT, an agent's step
    only counts as done when the gate answers PASS. PASS is a tool result, not a sentence in a prompt.
 2. **Reflection runs across the phases, and each phase ends with a mirror.** After PLAN, the plan told to an
-   audience (`/communicate`); after IMPLEMENT, the drift between what was intended and what exists
-   (`/explain drift`). Both are offered to the designer, never imposed.
+   audience (`/communicate`, which turns a plan into a message for a specific audience); after IMPLEMENT, the drift between what was intended and what exists
+   (`/explain drift`, which compares what was intended with what the code now does). Both are offered to the designer, never imposed.
 
 The cycle also has a precondition: without `product-design/product-design-as-intended.md` there is no cycle. Run
 `/design` first.
@@ -27,7 +27,7 @@ The cycle also has a precondition: without `product-design/product-design-as-int
 
 An agent writes faster than a person can review. If the only validation is `/critique` at the end, the person
 reviews everything at once, after the fact. The gate moves validation inside the loop, step by step: lint and types,
-tests with branch coverage, complexity weighted by coverage (CRAP) on the functions the step touched, and
+tests with branch coverage, complexity weighted by coverage (the CRAP score) on the functions the step touched, and
 dependency contracts between modules. A slower run adds mutation testing.
 
 The gate's thresholds only move by a human hand (a ratchet from a baseline). The agent stays in the inner loop;
@@ -66,9 +66,13 @@ correctness, not intent, so the drift mirror would have to become a fixed step i
 
 ## How you can help
 
-Run one cycle in a small project, starting from [Your first cycle](quickstart.md#your-first-cycle). If you want to
-tell me how it went, open an issue with the output of `step_notes.py parse --stats` and a short summary of the
-gate results. Nothing is collected automatically: open-seja has no telemetry, and sharing is your decision.
+Run one cycle in a small project, starting from [Your first cycle](quickstart.md#your-first-cycle). One cycle is a
+demonstration, not a measurement: the thresholds above are fixed before the first measured cycle, so a single run
+cannot confirm or refute anything. I still want to hear about it, labelled as an anecdote.
+
+To tell me how it went, [open an issue](https://github.com/PUC-Behring-AI/open-seja/issues/new) with the output of
+`python3 .claude/skills/scripts/step_notes.py parse --stats _output/plans/plan-<id>-progress.md` and a short summary
+of the gate results. Nothing is collected automatically: open-seja has no telemetry, and sharing is your decision.
 
 If the cycle fails for you, that is exactly the evidence I want.
 

@@ -37,8 +37,7 @@ suggest a first cycle, small enough to finish in one sitting:
 It is a hypothesis, not a promise; the page that says what would confirm it or refute it is
 [the hypothesis](https://github.com/PUC-Behring-AI/open-seja/blob/main/docs/hypothesis.md).
 
-These links resolve only once this release reaches `main`; until then `npx` clones `main` and delivers the previous
-harness.
+<!-- TEMPORARY: the links above resolve only once release/0.10 reaches main (npx clones main). Remove this comment after the check in roadmap item 8. -->
 
 ## What this command does *not* do
 

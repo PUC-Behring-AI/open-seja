@@ -8,7 +8,7 @@
 > without warranties (Section 5 of the license), and may be used for non-commercial purposes only.
 > The name `open-seja` is used with the trademark holder's permission; see [`TRADEMARKS.md`](TRADEMARKS.md).
 
-open-seja is an open-access distribution of SEJA, an agent harness for Claude Code, installable with one command.
+open-seja gives Claude Code a short cycle -- plan, implement, reflect -- in which each implementation step must pass a deterministic quality gate (lint, types, tests) before it counts as done. It is an open-access distribution of SEJA (Semiotic Engineering Journeys with Agents), installable with one command.
 
 ## Install
 
@@ -20,9 +20,11 @@ You need Node.js >= 18, git, and the [`claude` CLI](https://claude.com/claude-co
 The command clones the harness into `my-project/` and opens Claude Code there, ready to run `/seja-setup`.
 See [`npm/README.md`](npm/README.md) for what the command does and does not do.
 
+Two conditions apply. The quality gate currently supports Python projects with pytest; for other stacks the cycle runs without it. And you run `/design` once, before the first plan, to record your intent. [Your first cycle](docs/quickstart.md#your-first-cycle) walks through both.
+
 ## The cycle
 
-This release proposes a short cycle for working with an agent: PLAN, IMPLEMENT (called BUILD in H-008), REFLECT.
+This release proposes a short cycle for working with an agent: PLAN, IMPLEMENT, REFLECT. It is the shortest path through the fuller SEJA lifecycle described under "About SEJA" below.
 
 ```text
   PLAN ---------> IMPLEMENT ---------------> (done)
@@ -37,7 +39,7 @@ Reflection is not a final phase: the agent leaves a short note at each step, and
 
 ## This is a hypothesis
 
-I do not claim this cycle works. It is a hypothesis (H-008), and [`docs/hypothesis.md`](docs/hypothesis.md) says what would confirm it, what would refute it, and how you can send evidence if you try it.
+I do not claim this cycle works. It is a hypothesis (H-008, the identifier used in the design record), and [`docs/hypothesis.md`](docs/hypothesis.md) says what would confirm it, what would refute it, and how you can send evidence if you try it.
 
 ## Where to go next
 
@@ -48,6 +50,8 @@ I do not claim this cycle works. It is a hypothesis (H-008), and [`docs/hypothes
 ## About SEJA
 
 <!-- upstream:begin -->
+Everything below is the upstream SEJA documentation. If you installed with `npx open-seja`, you do not need its clone options: start at [Your first cycle](docs/quickstart.md#your-first-cycle), then come back here for the concepts.
+
 SEJA is an agent harness grounded in semiotic engineering. It gives an
 agent-driven project a shared memory of intent, conventions, and
 implementation state, so that people and agents can reflect on what the
@@ -108,7 +112,7 @@ project scaffold in a single invocation (stack-populated `conventions.md`,
 design intent (personas, metacomm, entities, permissions, standards,
 constitution) and amends `CLAUDE.md` rather than regenerating it.
 
-- [docs/quickstart.md](docs/quickstart.md) -- 20-minute worked example, read this first. Walks through a tiny project end to end so you can see the harness in motion before committing to a pattern.
+- [docs/quickstart.md](docs/quickstart.md) -- 20-minute worked example; read it after [Your first cycle](docs/quickstart.md#your-first-cycle). Walks through a tiny project end to end so you can see the harness in motion before committing to a pattern.
 - [docs/concepts.md](docs/concepts.md) -- sign system, profile x pattern matrix, and the Harness lifecycle chapter. Read this once the quickstart makes sense and you want to know why each artifact exists.
 - [docs/foundations.md](docs/foundations.md) -- theoretical primer on semiotic engineering and reflective practice, the two research traditions SEJA draws on.
 - [docs/foundations-assessment.md](docs/foundations-assessment.md) -- correspondence assessment mapping semiotic engineering constructs onto SEJA artifacts and workflows.
