@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-volume" content="0">
+  <meta name="doc-chapter" content="0">
+  <meta name="doc-phase" content="stable">
+  <meta name="doc-status" content="published">
+
+  <title>How Not to Use SEJA -- SEJA Documentation</title>
+
+  <!-- CSS depth: 0 (collection root) -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Volume navigation bar -->
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="index.html">Home</a>
+    <a href="tutorials/index.html">Tutorials</a>
+    <a href="how-to/index.html">How-To Guides</a>
+    <a href="reference/index.html">Reference</a>
+    <a href="explanation/index.html">Explanation</a>
+  </nav>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="index.html">Collection</a></li>
+      <li>How Not to Use SEJA</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content" class="chapter-content">
+    <article>
+      <p class="vol-accent"><strong>explanation</strong></p>
+
+      <h1>How Not to Use SEJA</h1>
+
+      <p>
+        SEJA's guarantees -- that AI-assisted development stays governable and
+        epistemic, that design intent is preserved, that private material never
+        leaks -- are not automatic. They hold only when the harness is used the
+        way it was designed to be used. Each guarantee is enforced by a
+        mechanism (a lifecycle step, a write path, a commit gate, a ledger), and
+        each mechanism can be circumvented. When it is, the guarantee it
+        protected silently disappears.
+      </p>
+
+      <p>
+        This page catalogs seven common anti-patterns: ways of working that
+        <em>look</em> faster or more convenient in the moment but that undermine
+        the very properties that make SEJA worth using. For each, we describe the
+        symptom (what it looks like in practice), the consequence (why it is
+        harmful), and the correct approach (what to do instead). If you recognize
+        your own habits here, the fix is usually to slow down by one step and let
+        the harness do the work it was built to do.
+      </p>
+
+      <!-- ============================================================ -->
+      <!-- 1. Bypassing the lifecycle                                    -->
+      <!-- ============================================================ -->
+
+      <section id="bypassing-the-lifecycle">
+        <h2>1. Bypassing the lifecycle</h2>
+
+        <dl>
+          <dt>Symptom</dt>
+          <dd>
+            You have a change in mind and you jump straight to
+            <code>/implement</code>, skipping <code>/research</code> (or
+            <code>/explain</code>) and <code>/plan</code>. The lifecycle's
+            canonical path -- <code>/research</code> (or <code>/explain</code>)
+            &rarr; <code>/design</code> | <code>/plan</code> &rarr;
+            <code>/implement</code> &rarr; <code>/critique</code> &rarr;
+            <code>/document</code> | <code>/communicate</code> &rarr;
+            <code>/reflect</code> -- gets collapsed into a single implementation
+            burst because the earlier steps feel like overhead.
+          </dd>
+
+          <dt>Consequence</dt>
+          <dd>
+            Lifecycle discipline is the core value SEJA provides; bypassing it
+            defeats the governance model (constitution principle T1). Without a
+            preceding <code>/research</code> or <code>/explain</code> pass you
+            implement against an unverified mental model of the codebase, and
+            without a <code>/plan</code> there is no reviewed, committed record of
+            intent for <code>/critique</code> to validate against or for
+            <code>/reflect</code> to learn from. The epistemic scaffolding that
+            surfaces unknowns before you commit to a direction is simply absent.
+          </dd>
+
+          <dt>Correct approach</dt>
+          <dd>
+            Follow the canonical path. Investigate first with
+            <code>/research</code> (or <code>/explain</code> when you need to
+            understand existing behavior or reconcile drift), then produce a
+            plan with <code>/plan</code>, and only then run
+            <code>/implement</code> against that plan. Auto mode reduces
+            clarifying questions; it does not license skipping steps. Every
+            user-facing skill still runs pre-skill on entry and post-skill on
+            exit, so the discipline holds even when you move quickly.
+          </dd>
+        </dl>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 2. Hand-editing Human (markers) files                         -->
+      <!-- ============================================================ -->
+
+      <section id="hand-editing-human-markers-files">
+        <h2>2. Hand-editing Human (markers) files</h2>
+
+        <dl>
+          <dt>Symptom</dt>
+          <dd>
+            You (or an agent acting on your behalf) open a Human (markers) file
+            such as <code>product-design-as-intended.md</code> and edit its
+            lifecycle markers directly in a text editor -- flipping a
+            <code>STATUS</code> line, pasting in a decision entry, or appending a
+            changelog line by hand -- instead of going through
+            <code>apply_marker.py</code>.
+          </dd>
+
+          <dt>Consequence</dt>
+          <dd>
+            These files encode the boundary between human-authored design intent
+            and agent-maintained lifecycle state (constitution principle T2).
+            <code>apply_marker.py</code> is the sole write path for markers: it
+            validates marker syntax, enforces the allowed status transitions, and
+            keeps the file readable by the harness validation scripts. A
+            hand-edited marker can use a value or transition the tools reject,
+            desynchronize the machine-readable record, and break the very checks
+            that keep as-intended and as-coded state aligned.
+          </dd>
+
+          <dt>Correct approach</dt>
+          <dd>
+            Write prose intent as a human designer; leave markers to the tooling.
+            Agents apply markers only via <code>apply_marker.py</code>, and only
+            after an <code>AskUserQuestion</code> confirmation. The script
+            supports five marker types -- <code>STATUS</code>,
+            <code>ESTABLISHED</code>, <code>INCORPORATED</code>,
+            <code>CHANGELOG_APPEND</code>, and <code>DECISION_APPEND</code> -- so
+            whatever the lifecycle event, there is a validated command for it
+            rather than a manual edit.
+          </dd>
+        </dl>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 3. Skipping pre-commit hooks                                  -->
+      <!-- ============================================================ -->
+
+      <section id="skipping-pre-commit-hooks">
+        <h2>3. Skipping pre-commit hooks</h2>
+
+        <dl>
+          <dt>Symptom</dt>
+          <dd>
+            A commit is blocked by the pre-commit hook, and instead of reading
+            and fixing the reported problem you reach for
+            <code>git commit --no-verify</code> to push the commit through
+            unchecked.
+          </dd>
+
+          <dt>Consequence</dt>
+          <dd>
+            The pre-commit hook runs the fast preflight checks and then the
+            pre-sync leak gate (<code>check_no_private_leaks.py --staged</code>)
+            on every commit. Hook bypass is the most common accidental path to
+            leaking private content or shipping unvalidated code (constitution
+            invariant S2). Once private material reaches a public mirror it can be
+            cached irreversibly (S1), so a single <code>--no-verify</code> can
+            undo the whole privacy guarantee.
+          </dd>
+
+          <dt>Correct approach</dt>
+          <dd>
+            Treat a blocked commit as a signal, not an obstacle: read the hook
+            output, fix the underlying cause, and re-run the commit so the checks
+            pass. No plan or implementation step may circumvent the hook without
+            explicit designer approval recorded in a <code>D-NNN</code> decision
+            entry. If you have not installed the hook yet, install it once per
+            clone so the gate runs automatically.
+          </dd>
+        </dl>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 4. Mixing priv content into public docs                       -->
+      <!-- ============================================================ -->
+
+      <section id="mixing-priv-content-into-public-docs">
+        <h2>4. Mixing private content into public docs</h2>
+
+        <dl>
+          <dt>Symptom</dt>
+          <dd>
+            While writing public-facing documentation you paste in material that
+            belongs only to the private workspace -- design rationale, decision
+            records, internal research logs, plan files, or content from
+            <code>product-design/</code> -- because it happened to be the most
+            convenient source text at hand.
+          </dd>
+
+          <dt>Consequence</dt>
+          <dd>
+            Private content (design files, research logs, plans,
+            <code>product-design/</code> files, the project constitution) must
+            never reach the public mirror without explicit opt-in (constitution
+            invariant S1). The <code>product-design/</code> directory in
+            particular is permanently private and is never synced. Mixing it into
+            public docs exposes internal reasoning the designer did not choose to
+            publish, and unlike a code bug the exposure is effectively permanent
+            once mirrored and indexed.
+          </dd>
+
+          <dt>Correct approach</dt>
+          <dd>
+            Keep a clean separation of sources. Public prose is authored directly
+            in the public surface; private design and workspace material stays in
+            the private repository. When a public page needs a fact that lives in
+            a private file, summarize or restate the fact rather than copying the
+            private text. The leak gate
+            (<code>check_no_private_leaks.py --staged</code>) is the safety net,
+            not the plan -- author with the boundary in mind and let the gate
+            catch mistakes.
+          </dd>
+        </dl>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 5. Ignoring pending actions                                   -->
+      <!-- ============================================================ -->
+
+      <section id="ignoring-pending-actions">
+        <h2>5. Ignoring pending actions</h2>
+
+        <dl>
+          <dt>Symptom</dt>
+          <dd>
+            Outstanding human actions accumulate in the pending ledger
+            (<code>_output/pending.jsonl</code>) -- implementations awaiting
+            verification, markers awaiting a status flip, periodic curation due --
+            and you never run <code>/pending</code> to review or resolve them.
+            The pre-skill pending notice scrolls by unread.
+          </dd>
+
+          <dt>Consequence</dt>
+          <dd>
+            SEJA is designed to surface what is not yet done or not yet verified,
+            not only what has been decided (constitution principle Q2). The
+            pending ledger is where deferred, human-owned follow-ups live: status
+            markers that should have been flipped, implementations that still need
+            verification, drift checks that are due. Ignoring it lets the
+            machine-readable record drift out of step with reality, so the
+            harness's confident-looking outputs quietly rest on stale state.
+          </dd>
+
+          <dt>Correct approach</dt>
+          <dd>
+            Run <code>/pending</code> regularly. With no argument it lists every
+            open item grouped by type with a per-item recommendation;
+            <code>/pending address &lt;id&gt;</code> runs the guided resolution
+            (including marker flips through <code>apply_marker.py</code> after
+            confirmation), and <code>done</code>, <code>snooze</code>, or
+            <code>dismiss</code> close items you have handled or deliberately
+            deferred. Draining the ledger keeps the record honest.
+          </dd>
+        </dl>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 6. Treating the constitution as optional                      -->
+      <!-- ============================================================ -->
+
+      <section id="treating-the-constitution-as-optional">
+        <h2>6. Treating the constitution as optional</h2>
+
+        <dl>
+          <dt>Symptom</dt>
+          <dd>
+            A plan or implementation step contradicts a constitutional principle
+            -- overriding design intent, bypassing a security invariant, rewriting
+            the first-person metacommunication voice -- and it is allowed to
+            proceed on the assumption that the constitution is advisory guidance
+            rather than a binding contract.
+          </dd>
+
+          <dt>Consequence</dt>
+          <dd>
+            The constitution holds SEJA's immutable, non-negotiable principles; it
+            is loaded first by pre-skill, before conventions or any other
+            reference, and its rules take precedence over everything else. Design
+            intent is authoritative (principle Q1): no plan or implementation step
+            may contradict the constitution without an explicit, designer-approved
+            <code>D-NNN</code> decision record. Treating it as optional turns a
+            governance failure into a silent one -- the harness keeps running
+            while the guarantees it advertises no longer hold.
+          </dd>
+
+          <dt>Correct approach</dt>
+          <dd>
+            Read the constitution as binding. When a genuine tension arises
+            between what a principle requires and what a task wants, do not quietly
+            override it: surface the conflict and record an explicit
+            <code>D-NNN</code> decision entry with designer approval. Violations
+            found during <code>/critique</code> review or preflight are classified
+            as blocking and must be resolved before commit -- so the cheapest path
+            is to respect the principle up front.
+          </dd>
+        </dl>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 7. Running /implement without a plan                          -->
+      <!-- ============================================================ -->
+
+      <section id="running-implement-without-a-plan">
+        <h2>7. Running /implement without a plan</h2>
+
+        <dl>
+          <dt>Symptom</dt>
+          <dd>
+            You invoke <code>/implement</code> with no plan in
+            <code>_output/plans/</code> to execute against, expecting the skill to
+            improvise the work from a one-line request. This is closely related to
+            bypassing the lifecycle, but the specific failure is the missing
+            planning artifact rather than the skipped research pass.
+          </dd>
+
+          <dt>Consequence</dt>
+          <dd>
+            <code>/implement</code> is designed to execute a
+            <em>previously generated plan</em>. Without one there is no reviewed
+            statement of intent, no step decomposition, and no Verify criteria for
+            <code>/critique</code> to check the result against. The pending ledger
+            never receives the <code>implement</code> item that <code>/plan</code>
+            files and <code>/implement</code> closes, so the governance trail that
+            connects intent to execution is broken from the start.
+          </dd>
+
+          <dt>Correct approach</dt>
+          <dd>
+            Before coding, always check for an existing plan in
+            <code>_output/plans/</code>. If none exists, run <code>/plan</code>
+            first to produce one, review it, and then run <code>/implement</code>
+            against it. Only waive the plan when the designer has explicitly
+            chosen to -- and even then, prefer <code>/plan --light</code> for a
+            lightweight proposal over no plan at all.
+          </dd>
+        </dl>
+      </section>
+
+    </article>
+
+    <!-- See also: cross-volume related pages -->
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="tutorials/lifecycle-in-one-feature.html">Lifecycle in One Feature</a> -- a tutorial that walks through the canonical path these anti-patterns bypass</li>
+        <li><a href="how-to/governance.html">Governance Operations</a> -- the operational procedures that enforce the guarantees these anti-patterns undermine</li>
+      </ul>
+    </nav>
+  </main>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="index.html">Collection Index</a>
+      <a href="index.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

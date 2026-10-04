@@ -28,7 +28,7 @@ metadata:
    | Not a git repo | Target exists, not a git repo | Offer `git init`, or abort |
 
    **`.claude/` exists menu** (target already has a SEJA install):
-   - **Overwrite harness only** (recommended for upgrades) -- overwrite skills, `general/` refs, `template/` refs, scripts, agents, rules. **Never touch** `project/` refs, `settings.json`, `settings.local.json`, output dir, or `CLAUDE.md`.
+   - **Overwrite harness only** (recommended for upgrades) -- overwrite skills, `general/` refs, `template/` refs, scripts, agents, rules, `.claude/hooks/quality_gate_*.py` and `_gate_hook_common.py`. **Never touch** `project/` refs, `settings.json`, `settings.local.json`, output dir, or `CLAUDE.md`.
    - **Overwrite everything** -- full re-setup (destructive, requires confirmation).
    - **Create companion workspace** -- treat this dir as codebase; create workspace alongside (codebase not modified). Proceed to 2b (brownfield).
    - **Abort**.
@@ -48,6 +48,7 @@ metadata:
    - All skill `SKILL.md` files (project-independent).
    - `.claude/agents/*.md`, `.claude/rules/*.md`, `.claude/skills/scripts/*.py`.
    - `.claude/CHANGELOG.md`, `.claude/CHEATSHEET.md`, `.claude/skills/VERSION`.
+   - `.claude/hooks/quality_gate_*.py` and `.claude/hooks/_gate_hook_common.py` (harness files; inert until `GATE_*` variables exist in `conventions.md`).
 
 4b. **Scaffolding questionnaire** (populate `conventions.md`): run `.claude/references/template/questionnaire.md` with `section-include: "stack-only"` (the shortcut defined in the Parser directives section, which expands to Q 0.1 metacomm-message + all of Section 1 basic-definitions). Skip entirely when `--demo` is active -- demo mode uses the pre-filled `.claude/references/template/demo/conventions.md` and the subsequent `--demo` step 9 copies it into place. Output: populated `product-design/conventions.md` instantiated from `.claude/references/template/conventions.md`. The optional Q 0.1 metacomm answer (if provided) is stored for `/design` to consume when it runs; at setup time we do not yet produce `product-design-as-intended.md`.
 
@@ -135,6 +136,25 @@ metadata:
      - `e2e/smoke.spec.ts` -- emit ONLY when BOTH `FRONTEND_FRAMEWORK != none` AND an E2E tool was chosen in Section 1 (e.g. `playwright`, `cypress`). Omit when frontend is `none` (no browser target) or when no E2E tool was declared (the T-tier testing answer did not include E2E). The generated spec file carries the canonical smoke-test shape for the chosen E2E tool.
 
    Anchor name: `Scaffold-SmokeTestInfra`. Referenced by `/design` Update when the stack flips.
+
+7f. **Offer quality gate** (anchor: `Offer-QualityGate`). Runs before the initial commit (7b). Trigger: the Section 1 test answer includes `pytest`, regardless of `BACKEND_FRAMEWORK` (the CLI / library profile of 4c.3 is the typical case). Otherwise skip silently.
+
+   Ask with `AskUserQuestion` (rationale per C4):
+   - **Install the Python quality gate** -- Recommended when the project is Python with pytest and you want ruff, pyright, tests, CRAP and mutation checks behind one command with a human-owned baseline. NOT recommended when the project has no tests yet, is not Python, or you do not want extra dev dependencies.
+   - **Do not install** -- Recommended when you prefer to run your own checks. NOT recommended when agents will change code unattended.
+
+   On accept:
+   - Copy `.claude/references/template/quality-gate/python/gate.py` to the project root and `.../README.md` to `docs/quality-gate.md`.
+   - Show the block from `pyproject-dev.example.toml` and the matching `uv add --dev ...` command; do NOT run it. The block includes `[tool.ruff] extend-exclude = ["gate.py", ".claude"]` and `[tool.pyright] include = ["src", "tests"]`, so the gate does not lint its own copy and the hooks; merge them into the project's `pyproject.toml`.
+   - Append `## Quality Gate` to `product-design/conventions.md` with values in backticks: `GATE_FAST_CMD`, `GATE_FULL_CMD`, `GATE_COMMIT_CMD` (same value as `GATE_FULL_CMD`) and `QUALITY_DIR`.
+   - Resolve `<PY>`: the first of `python3`, `python`, `py -3` that runs `-c "import sys"` successfully (none works -> skip the next bullet and tell the user the hooks were not wired).
+   - Merge `.claude/references/template/quality-gate/settings.fragment.json` into the project's `.claude/settings.json` (create it if missing), replacing the literal `<PY>` in the hook commands with the resolved interpreter. Append only: skip any hook command or `permissions.deny` rule already present, never remove or rewrite existing hooks or rules. The hooks are the authority; the deny rules are complementary.
+   - Add `_output/quality/`, `mutants/`, `.coverage` and `coverage.json` to `.gitignore`.
+   - Tell the user the first run must be `gate.py --init-baseline`.
+
+   On decline: do not emit the `## Quality Gate` section (absent = not installed; respects 4c.4, no placeholders).
+
+   Anchor name: `Offer-QualityGate`. Referenced by `--here` Step 4f.
 
 7b. **Initial commit**: `git add . && git commit -m "chore: set up SEJA harness"` in the target (or workspace) dir. Workspace+greenfield (2b created both): commit in both. Demo mode: this step runs after step 10 (so the commit includes demo files), not after 7. If `git commit` fails (git user.name/email unconfigured), warn and continue -- do not abort.
 

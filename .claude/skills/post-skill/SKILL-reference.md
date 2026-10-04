@@ -62,6 +62,7 @@ Step 1b example record:
 | `communication-` | `${COMMUNICATION_DIR}` |
 | `inventory-` | `${INVENTORIES_DIR}` |
 | `reflection-` | `${REFLECTIONS_DIR}` |
+| `mob-session-` | `${MOB_SESSIONS_DIR}` |
 | `user-tests-` | `${USER_TESTS_DIR}` |
 | `explained-behavior-` / `-code-` / `-data-model-` / `-architecture-` | matching `${EXPLAINED_*_DIR}` (BEHAVIORS, CODE, DATA_MODEL, ARCHITECTURE) |
 | `behavior-evolution-` | `${BEHAVIOR_EVOLUTION_DIR}` |

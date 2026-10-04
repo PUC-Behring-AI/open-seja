@@ -2,7 +2,7 @@
 
 Public-facing changelog for the SEJA harness.
 
-This file is hand-edited before each tag cut. Entries describe **consumer-visible** changes (skills, rules, agents, references, CLI behavior) and omit private dev-repo concerns. For tag convention and release process, see [`tools/release-process.md`](tools/release-process.md).
+This file is hand-edited before each tag cut. Entries describe **consumer-visible** changes (skills, rules, agents, references, CLI behavior) and omit private dev-repo concerns. For tag convention and release process, see `tools/release-process.md` in the `dev` branch (not distributed).
 
 Format: loosely based on [Keep a Changelog](https://keepachangelog.com/). SemVer: `vMAJOR.MINOR.PATCH`.
 
@@ -16,13 +16,43 @@ Format: loosely based on [Keep a Changelog](https://keepachangelog.com/). SemVer
 
 ## [Unreleased]
 
+## [v0.10.0] - 2026-10-04
+
 ### Breaking changes
 
 - **`/document --type drr` renamed to `/document --type ddr`**: DDR (Design Decision Record) replaces DRR (Design Rationale Record). The acronym change aligns the name to what the record contains; scope is unchanged. Update saved prompts or scripts that pass `--type drr`.
 
+### Added
+
+- **Front door: README top, hypothesis page, first cycle**: the README now opens with one install command (`npx open-seja my-project`), the PLAN -> IMPLEMENT -> REFLECT cycle, the conditions of use (Python with pytest for the gate; `/design` before the first `/plan`) and a note that the cycle is a hypothesis; the upstream SEJA text moves under `## About SEJA`. New `docs/hypothesis.md` states H-008, the measures, and the conditions that would refute it. `docs/quickstart.md` gains `## Your first cycle`, a guided first cycle (gate, `/design`, baseline, `/plan`, `/implement`, `/reflect`) with a sample step note, and `npm/README.md` gains `## What happens next` pointing to it.
+
+- **Agent-facing quality gate: per-step gate, `Stop` and `PreToolUse` hooks, `deny` rules**: `/implement` auto mode now requires the gate (`GATE_FAST_CMD` on the touched files) to pass before a step counts as SUCCESS, with 3 gate runs per step and PARTIAL on the third failure; the attempt count is recorded in the step note (`step_notes.py`, `parse --json` returns `gate_attempts`). Two hooks ship in `.claude/hooks/`: `quality_gate_stop.py` blocks ending a turn while the gate fails (released after 3 consecutive blocks), and `quality_gate_pretool.py` refuses `--no-verify`, `-n`, `core.hooksPath` and `--accept-baseline`, writes to `quality-baseline.json`, and commits that change `GATE_*` rows or fail `GATE_COMMIT_CMD`. `quality-gate/settings.fragment.json` carries the hook wiring and five complementary `permissions.deny` rules; `/seja-setup` merges it when the gate is accepted. The hooks are not a sandbox: limits, how to switch them off, how to lower `GATE_COMMIT_CMD` to `--fast`, and how to confirm the wiring with `/hooks` and `/permissions` are in the template README ("How the agent is held"). Existing installs upgraded with `/seja-setup upgrade` get the hook files but must merge the settings fragment by hand. The `deny` patterns have not been tested in a live session.
+
+- **Quality gate for Python projects (template + critical plugin)**: `.claude/references/template/quality-gate/python/` holds `gate.py` (ruff, pyright, test lint, pytest with branch coverage, CRAP per function joined from radon and coverage, import-linter, marker ratchet; `--full` adds mutmut on touched functions), a README, and example `importlinter`/`pyproject` snippets. Stable JSON output and one exit code per category (0 pass; 2 lint/types; 3 tests; 4 CRAP; 5 architecture; 6 mutation; 7 evasion markers; 1 configuration or refusal). The new critical plugin `check_quality_gate.py` runs it from `/critique validate`, `preflight` and the end of `/implement`, and SKIPs where the gate is not installed. `/seja-setup` (install, here) offers the gate when the project uses pytest (anchor `Offer-QualityGate`), `--upgrade` refreshes it without overwriting customization, and `rules-tests.md` gains the anti-gaming rules. New `## Quality Gate` variables in conventions: `GATE_FAST_CMD`, `GATE_FULL_CMD`, `GATE_COMMIT_CMD`, `QUALITY_DIR`.
+- **`/mob` skill -- timed mob programming session (PLAN -> BUILD -> REFLECT)**: runs a group session against a wall clock, chaining `/plan --plan`, `/implement --manual --skip-docs`, and `/reflect`. The slot, total duration, and per-phase times are always asked (flags such as `--duration`, `--slot`, `--split`, `--plan-min`/`--build-min`/`--reflect-min`, and `--rotation` only pre-select the answers). Two deterministic scripts back it: `mob_schedule.py` builds the clock agenda (phases, slack, driver rotations) and `mob_timer.py` runs the timebox timer, announcing phase and driver changes, writing a JSONL log, and answering `status` queries. Each session writes a `mob-session-<id>.md` record (planned vs actual times, linked plan and reflection IDs) to the new `${MOB_SESSIONS_DIR}` (`_output/mob-sessions`); `generate_macro_index.py` indexes these records as type "Mob Session", and `verify_commit_scope.py` accepts the new output folder. `skill-graph.md` gains `/mob` -> `/reflect --deep` and `/mob` -> `/implement` edges. The governance decision (3/4 test, rejected alternatives) is recorded in `harness-governance.md`; the skill count is now 17 (15 user-facing + 2 internal lifecycle hooks).
+
+- **Reflection-on-action notes and evidence for `/reflect`**: `step_notes.py` writes a fixed-form note per step (`happened`, `deviated`, `less-sure`, `gate`) into the plan progress file, in both `/implement` modes, and a plan-phase note at the end of `/plan`. `/plan` offers `/communicate` for the plan and `/implement` offers `/explain drift` at wrap-up; both answers are recorded. `/reflect` on a plan shows the step notes, the quality-gate evidence, the communication and the drift report (agent words quoted and attributed), and says which were not measured.
+
 ### Changed
 
+- **Install by `git clone` + `/seja-setup --here`**: the README, the quickstart and its first cycle now install with `git clone git@github.com:PUC-Behring-AI/open-seja my-project` followed by `/seja-setup --here`; the repository is shared with members of the PUC-Behring-AI organization. The `npx open-seja` package in `npm/` is not published yet and says so.
+- **`/seja-setup --upgrade` and version resolution use the open-seja remote**: `resolve_seja_version.py` and the upgrade flow query and clone `git@github.com:PUC-Behring-AI/open-seja.git` instead of upstream SEJA; set `SEJA_REMOTE` (or pass `--remote`) to use another URL, e.g. HTTPS. A failed lookup no longer waits for a credential prompt and prints that hint.
+- **Releases on `main` are distribution snapshots**: `main` carries only the harness and its public documentation (no `product-design/`, `_output/` or `tools/`), so a fresh clone is detected as a new project; development happens on `dev`, where the design record (`product-design/seja-as-intended.md`) lives. `docs/hypothesis.md` links to it there.
+
+- **Attribution and trademark notice**: `README.md` and `npm/README.md` now carry an Attribution block (derivative of SEJA by Simone Diniz Junqueira Barbosa, CC BY-NC 4.0, provided as-is without warranties, changes made, non-commercial use). `TRADEMARKS.md` gains a *Permission for the open-seja name* section (scope, no endorsement, revocable). The npm package now ships `LICENSE` and declares `CC-BY-NC-4.0`.
+- **`/implement` manual mode: partial-stop contract**: when execution stops with steps still unchecked (at the user's or the caller's request), `/implement` no longer marks the plan `# DONE`, does not close the `implement` pending entry, skips the roadmap status update, and appends `PARTIAL: N/M steps; stopped by <reason>` to its summary; the commit via `/post-skill` still runs. `/post-skill` step 2g.iv now closes the `implement` pending entry only when the plan header is marked `# DONE` (previously unconditional).
+- **`/post-skill`: design-intent reminder and DONE marker proposal gated on a DONE plan**: steps 2c (design intent curation reminder) and 2e (DONE marker proposal) now run only when the plan header is marked DONE (`# DONE | ...` or legacy `# Plan NNNN | DONE | ...`), like 2g.iv; a partial plan skips them.
+- **Known stale generated docs**: `docs/concepts/call-graph.*`, `.claude/references/general/call-graph.json`, and `docs/reference/harness-reference.md` were not regenerated for `/mob`; their generators live in `scripts/priv/`, which is absent from this repository. They stay stale until the next upstream sync.
 - **DDR (Design Decision Record) replaces DRR (Design Rationale Record)** throughout the harness. The rename sharpens the naming — "Decision" is the noun; "Rationale" was an attribute of one section. DDR scope explicitly covers product, architecture, UX, and any other design discipline. Adds an optional `links:` field to the DDR format (supersedes / related / implements) for semantic cross-references between records.
+
+- **`/plan` requires `product-design/product-design-as-intended.md`**: the Design Guard stops with "No design intent found. Run `/design` first" when it is missing, so the PLAN -> BUILD -> REFLECT cycle always has an as-intended to measure drift against.
+- **Manual `/implement` now creates the progress file** and, like auto mode, writes a `## Reflection` bullet at wrap-up (`step_notes.py reflect-bullet`).
+
+### Fixed
+
+- **`/seja-setup --upgrade` no longer requires `product-design/` in the source**: only `.claude/skills/` is checked, matching what `upgrade_harness.py` reads.
+
+- **Quality gate: pytest-timeout, CRAP message, hook release, setup excludes**: `gate.py` no longer passes `-p pytest_timeout` (pytest died with "Plugin already registered" when the plugin was autoloaded) and reports a configuration finding when the plugin is missing; the CRAP finding now shows `cc` and `cov` and says whether to simplify or add tests; the `Stop` hook repeats the last findings when it releases after 3 blocks; `step_notes.py parse --stats` prints the gate attempt count; `pyproject-dev.example.toml` and the install step exclude `gate.py` and `.claude` from ruff and pyright so a fresh install does not fail its first run.
 
 ## [v0.6.0] - 2026-06-29
 

@@ -19,6 +19,8 @@ designer_description: "When one skill finishes and you are deciding what to do n
 | `/implement` | `/document` | Runs automatically via post-skill step 2b for FEATURE/REDESIGN plans and plans with non-N/A Docs: fields; edge stays informational for `--skip-docs` and standalone `/document` modes. |
 | `/implement` | `/pending` | Review pending actions created by this implementation |
 | `/implement` | `/reflect` | Surface patterns across recent skill runs (non-prescriptive) |
+| `/mob` | `/reflect --deep` | Compare several mob sessions? |
+| `/mob` | `/implement` | Finish the steps left pending in the session? |
 | `/explain drift` | `/plan` | Specs analyzed -- ready to plan next steps? |
 | `/explain drift` | `/design` | Drift indicates intent has evolved -- update the project design |
 | `/explain drift --promote` | `/explain drift --promote --apply-markers plan-<id>` | Decision proposal drafted -- after you apply the prose, flip the STATUS markers |

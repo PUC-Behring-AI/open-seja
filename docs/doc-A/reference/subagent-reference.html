@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="reference">
+  <meta name="doc-volume" content="Reference">
+  <meta name="doc-chapter" content="Subagent Reference">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>Subagent Reference -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="../how-to/index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Reference</a></li>
+      <li>Subagent Reference</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-reference">
+    <article>
+      <p class="vol-accent"><strong>reference</strong></p>
+
+      <h1>Subagent Reference</h1>
+
+      <section id="overview">
+        <h2>Overview</h2>
+
+        <p>
+          SEJA delegates specialized work to 16 subagent prompts defined in
+          <code>.claude/agents/</code>. Each subagent runs in an isolated context
+          window with a focused prompt, a constrained tool set, and a well-defined
+          input/output contract. Skills invoke subagents via the Agent tool; the
+          calling skill handles argument parsing, interactive prompts, and lifecycle
+          hooks while the subagent handles domain-specific analysis or generation.
+        </p>
+      </section>
+
+      <section id="role-categories">
+        <h2>Role Categories</h2>
+
+        <p>Subagents are organized into three role categories:</p>
+
+        <dl>
+          <dt>Evaluator (9 agents)</dt>
+          <dd>
+            Review artifacts against quality perspectives, run validation checks,
+            or execute test suites. Evaluators consume existing artifacts and produce
+            assessment reports. They do not modify project source code.
+          </dd>
+
+          <dt>Generator (7 agents)</dt>
+          <dd>
+            Produce self-contained artifacts from well-defined inputs -- explanation
+            reports, documentation files, communication material, onboarding plans.
+            Invoked by thin-skill wrappers that handle argument parsing and lifecycle
+            hooks. Generator agents must receive the project constitution as part of
+            their prompt for trust-boundary enforcement (except
+            <code>test-plan-generator</code>).
+          </dd>
+
+          <dt>Executor (pattern, no standalone files)</dt>
+          <dd>
+            Execute plan steps in isolated context windows. Used by
+            <code>/implement</code> auto mode. Not standalone prompt files -- the
+            implement skill constructs their prompts dynamically from plan step
+            metadata. Each executor receives the step description, file list,
+            references, and interface contract.
+          </dd>
+        </dl>
+      </section>
+
+      <section id="evaluator-agents">
+        <h2>Evaluator Agents</h2>
+
+        <p>
+          Nine agents that review, validate, or test existing artifacts. Evaluators
+          never modify project source code; they produce assessment reports only.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Agent</th>
+                <th>Purpose</th>
+                <th>Inputs</th>
+                <th>Outputs</th>
+                <th>Perspectives</th>
+                <th>Constitution</th>
+                <th>Invoking Skills</th>
+                <th>Tools</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>code-reviewer</code></td>
+                <td>Reviews code changes against review perspectives (depth-gated: deep evaluates all 16; standard/light use shortlisted subset)</td>
+                <td>File path/directory, <code>staged</code> for git staged changes, or a git diff; optional review depth (light/standard/deep, default: deep)</td>
+                <td>Perspective evaluation table (Adopted/Deferred/N/A per perspective), issues by severity (HIGH/MEDIUM/LOW), recommendations</td>
+                <td>All 16 (depth-gated)</td>
+                <td>No</td>
+                <td><code>/critique review</code>, <code>/critique preflight</code>, <code>/implement</code> auto mode</td>
+                <td>Read, Glob, Grep, Bash</td>
+              </tr>
+              <tr>
+                <td><code>council-debate</code></td>
+                <td>Runs a structured expert council debate for high-stakes design decisions; five fixed archetypes plus 0-2 brief-specific experts</td>
+                <td>Question/decision to debate; optional selected council members from brief-specific pool (0-2); optional context pointers</td>
+                <td>Debate transcript: Round 1 position statements, Round 2 cross-examination, synthesis (consensus, unresolved tensions, recommended path)</td>
+                <td>Own 5 archetypes + 0-2 from pool</td>
+                <td>No</td>
+                <td><code>/research --deep</code></td>
+                <td>Read, WebSearch</td>
+              </tr>
+              <tr>
+                <td><code>harness-health-evaluator</code></td>
+                <td>Runs harness self-diagnosis across 9 built-in checks and produces a Harness Health Report</td>
+                <td>Reserved <code>check-NNN</code> ID, <code>output_path</code>, optional verbose flag, optional source path for drift check</td>
+                <td>Health Report: 9-row status table (PASS/WARN/FAIL/INFO per check) with overall tally</td>
+                <td>None (9 built-in checks)</td>
+                <td>No</td>
+                <td><code>/critique health</code></td>
+                <td>Read, Bash, Grep, Write</td>
+              </tr>
+              <tr>
+                <td><code>migration-validator</code></td>
+                <td>Validates Alembic migration chain integrity, checks for idempotency issues, PostgreSQL syntax problems, and common pitfalls</td>
+                <td><code>all</code> (full validation), a specific migration file path, or <code>recent</code></td>
+                <td>Migration Validation Report: chain status (head, total, integrity), issues by severity (Critical/Warning/Info), per-file review, summary tally</td>
+                <td>None (migration-specific)</td>
+                <td>No</td>
+                <td><code>/critique</code> (migration scope)</td>
+                <td>Read, Bash, Glob, Grep</td>
+              </tr>
+              <tr>
+                <td><code>plan-reviewer</code></td>
+                <td>Reviews a plan against perspectives using a complexity-gated two-phase review process (Phase 1 scan, Phase 2 targeted deep-dives)</td>
+                <td>Full plan text, plan file path, review depth (Light/Standard/Deep)</td>
+                <td>Review log: Phase 1 perspective triage table, Phase 2 deep-dive findings (max 6), conflict checks, plan amendments, execution metrics</td>
+                <td>All 16 (depth-gated, 3-6 shortlisted per plan prefix)</td>
+                <td>No</td>
+                <td><code>/plan</code> (standard mode)</td>
+                <td>Read, Glob, Grep, Bash</td>
+              </tr>
+              <tr>
+                <td><code>research-reviewer</code></td>
+                <td>Evaluates design decisions, open-ended questions, and trade-offs against engineering and design perspectives</td>
+                <td>Question/decision/trade-off to evaluate; optional context file paths; optional review depth (light/standard/deep, default: standard)</td>
+                <td>Perspective evaluation table, key findings, recommendations ordered by impact, trade-off analysis</td>
+                <td>4-8 selected perspectives</td>
+                <td>No</td>
+                <td><code>/research</code></td>
+                <td>Read, Glob, Grep, WebSearch</td>
+              </tr>
+              <tr>
+                <td><code>semiotic-inspector</code></td>
+                <td>Conducts a Semiotic Inspection Method (SIM) evaluation of a project's interface communicability across metalinguistic, static, and dynamic sign classes</td>
+                <td>Scope (feature, page, user flow, or <code>all</code>), reserved <code>check-NNN</code> ID, <code>output_path</code></td>
+                <td>SIM Report: per-sign-class analysis, contrastive analysis with 4 quality dimensions (Consistency, Completeness, Redundancy, Distribution), communicability judgment, sign inventory table</td>
+                <td>None (SIM methodology)</td>
+                <td>No</td>
+                <td><code>/critique semiotic-inspection</code></td>
+                <td>Read, Glob, Grep, Write</td>
+              </tr>
+              <tr>
+                <td><code>standards-checker</code></td>
+                <td>Runs all project validation scripts registered in the Validation Scripts table of <code>conventions.md</code> and aggregates results</td>
+                <td><code>all</code> (run all scripts) or a specific check name (e.g., i18n, auth, migrations, constants)</td>
+                <td>Standards Compliance Report: summary table (check name, PASS/FAIL, error/warning counts), details for failures, overall tally</td>
+                <td>None (project-registered scripts)</td>
+                <td>No</td>
+                <td><code>/critique validate</code></td>
+                <td>Read, Bash, Glob, Grep</td>
+              </tr>
+              <tr>
+                <td><code>test-runner</code></td>
+                <td>Runs backend (pytest) and frontend (vitest) test suites, parses output, and reports failures with context</td>
+                <td><code>all</code>, <code>backend</code>, <code>frontend</code>, a specific test file path, or <code>integration</code></td>
+                <td>Test Results: passed/failed/skipped counts with duration, per-failure details (file, test name, line, error, classification: test bug / source bug / environment issue / flaky, suggested fix)</td>
+                <td>None (test suites)</td>
+                <td>No</td>
+                <td><code>/critique</code> (test scope)</td>
+                <td>Read, Bash, Glob, Grep</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="generator-agents">
+        <h2>Generator Agents</h2>
+
+        <p>
+          Seven agents that produce self-contained artifacts from well-defined
+          inputs. Invoked by thin-skill wrappers that handle argument parsing,
+          interactive prompts, and lifecycle hooks.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Agent</th>
+                <th>Purpose</th>
+                <th>Inputs</th>
+                <th>Outputs</th>
+                <th>Constitution</th>
+                <th>Invoking Skills</th>
+                <th>Tools</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>architecture-explainer</code></td>
+                <td>Surveys system structure, maps component boundaries and communication patterns, surfaces key design decisions and trade-offs</td>
+                <td><code>user_brief</code>, <code>output_path</code>, <code>artifact_id</code> (6-digit zero-padded), optional scope (component/subsystem)</td>
+                <td>Architecture explanation report: system overview, architecture diagram (ASCII), component inventory, design decisions and trade-offs, data flow walkthrough, cross-cutting concerns, gotchas/pitfalls, metacommunication message</td>
+                <td>Yes</td>
+                <td><code>/explain architecture</code></td>
+                <td>Read, Glob, Grep, Bash, WebSearch, Write</td>
+              </tr>
+              <tr>
+                <td><code>communication-generator</code></td>
+                <td>Generates tailored stakeholder-facing communication material for a specific audience segment (EVL, CLT, USR, ACD)</td>
+                <td><code>audience_tag</code>, <code>audience_file_path</code>, <code>diataxis_mapping_path</code>, <code>project_context</code>, <code>output_path</code>, <code>output_id</code>, <code>format</code> (md/html/both), <code>deep</code> (boolean), optional <code>source_file_path</code></td>
+                <td>Markdown and/or HTML output files with Layer 0 (universal foundation) + Layer 1 (audience-specific content); single file or multi-file subfolder depending on content size</td>
+                <td>Yes</td>
+                <td><code>/communicate</code></td>
+                <td>Read, Bash, Glob, Grep, Write</td>
+              </tr>
+              <tr>
+                <td><code>document-generator</code></td>
+                <td>Generates or updates project documentation for a specific documentation type</td>
+                <td><code>doc_type</code> (readme, contextual-help, api-reference, ddr, help-center, changelog), <code>scope</code>, <code>template_path</code>, <code>quality_guide_path</code>, <code>project_context</code>, <code>output_path</code>, optional <code>plan_context</code></td>
+                <td>Markdown documentation files in project-specific locations, per documentation type</td>
+                <td>Yes</td>
+                <td><code>/document</code></td>
+                <td>Read, Bash, Glob, Grep, Write</td>
+              </tr>
+              <tr>
+                <td><code>evolution-explainer</code></td>
+                <td>Mines plan history to trace how a feature reached its current state, building a chronological timeline of waves and design rationale</td>
+                <td><code>user_brief</code> (feature area to trace), <code>output_path</code>, <code>artifact_id</code> (6-digit zero-padded)</td>
+                <td>Behavior evolution report: current behavior snapshot, evolution timeline table (Wave/Plans/Date/Change/Motivation/Rules affected), before/after narratives per wave, cumulative rule ledger, metacommunication message</td>
+                <td>Yes</td>
+                <td><code>/explain behavior-evolution</code></td>
+                <td>Read, Glob, Grep, Bash, WebSearch, Write</td>
+              </tr>
+              <tr>
+                <td><code>explanation-generator</code></td>
+                <td>Generates explanation reports for behavior, code, or data-model modes with visual diagrams and analogies</td>
+                <td><code>mode</code> (behavior/code/data-model), <code>user_brief</code>, <code>output_path</code>, <code>artifact_id</code> (6-digit zero-padded)</td>
+                <td>Per-mode report: behavior (analogy, diagram, user-system interactions, gotchas, dangers, metacommunication); code (analogy, diagram, walk-through, gotchas); data-model (visual representation, walk-through, gotchas, dangers, SQL)</td>
+                <td>Yes</td>
+                <td><code>/explain behavior</code>, <code>/explain code</code>, <code>/explain data-model</code></td>
+                <td>Read, Glob, Grep, Bash, WebSearch, Write</td>
+              </tr>
+              <tr>
+                <td><code>onboarding-generator</code></td>
+                <td>Generates a personalized onboarding plan for a new team member based on role family (BLD/SHP/GRD) and expertise level (L1-L3)</td>
+                <td><code>role_tags</code> (BLD/SHP/GRD, combinable), <code>level</code> (L1-L3), optional <code>name</code>, optional <code>area</code>, <code>role_file_paths</code>, <code>level_file_path</code>, <code>project_context</code>, <code>output_path</code>, <code>output_id</code>, <code>format</code> (md/html/both)</td>
+                <td>Onboarding plan: welcome, Layer 0 universal foundation (Day 1), Layer 1 role-specific context (Week 1), Layer 2 level-specific depth (Weeks 1-4), Layer 3 living knowledge (30-60-90), timeline with milestones, reading list, key contacts appendix</td>
+                <td>Yes</td>
+                <td><code>/onboard</code></td>
+                <td>Read, Bash, Glob, Grep, Write</td>
+              </tr>
+              <tr>
+                <td><code>test-plan-generator</code></td>
+                <td>Generates a structured manual test plan from a brief and the most recent DONE plans, carrying forward unchecked items</td>
+                <td><code>brief</code>, reserved <code>usertest-NNN</code> ID, <code>output_path</code>, optional <code>plans_dir</code> override, optional <code>user_tests_dir</code> override</td>
+                <td>User-test artifact with header, user brief, agent interpretation, to-do enumeration of plan steps phrased as imperative commands with expected outcomes</td>
+                <td>No</td>
+                <td><code>/critique test-plan</code></td>
+                <td>Read, Glob, Grep, Write</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="constitution-enforcement">
+        <h2>Constitution Enforcement</h2>
+
+        <p>
+          Generator agents (except <code>test-plan-generator</code>) receive the
+          project constitution (<code>product-design/constitution.md</code>) as
+          part of their prompt. This ensures that generated artifacts -- documentation,
+          communication material, onboarding plans, explanation reports -- respect
+          the project's immutable principles (design authority, privacy invariants,
+          lifecycle discipline, authorship voice).
+        </p>
+
+        <p>
+          Evaluator agents do not enforce the constitution directly. They read
+          <code>product-design/conventions.md</code> for project-specific paths and
+          settings, and apply their own domain-specific evaluation criteria (review
+          perspectives, test assertions, validation scripts).
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Agent</th>
+                <th>Constitution</th>
+                <th>Rationale</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>architecture-explainer</code></td>
+                <td>Yes</td>
+                <td>Explanation reports must respect privacy invariants (S1) and voice rules (T4)</td>
+              </tr>
+              <tr>
+                <td><code>communication-generator</code></td>
+                <td>Yes</td>
+                <td>Stakeholder material must not expose private content (S1, C2)</td>
+              </tr>
+              <tr>
+                <td><code>document-generator</code></td>
+                <td>Yes</td>
+                <td>Generated documentation must respect privacy and design authority (Q1, S1)</td>
+              </tr>
+              <tr>
+                <td><code>evolution-explainer</code></td>
+                <td>Yes</td>
+                <td>Historical analysis must preserve authorship voice (T4) and privacy (S1)</td>
+              </tr>
+              <tr>
+                <td><code>explanation-generator</code></td>
+                <td>Yes</td>
+                <td>Explanation reports must respect privacy invariants (S1) and voice rules (T4)</td>
+              </tr>
+              <tr>
+                <td><code>onboarding-generator</code></td>
+                <td>Yes</td>
+                <td>Onboarding plans must reflect project principles and respect privacy (S1, C2)</td>
+              </tr>
+              <tr>
+                <td><code>test-plan-generator</code></td>
+                <td>No</td>
+                <td>Test plans reference conventions only; no generated prose requiring constitution governance</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="council-debate-archetypes">
+        <h2>Council Debate Archetypes</h2>
+
+        <p>
+          The <code>council-debate</code> agent uses a fixed set of five archetypes
+          for every debate, supplemented by 0-2 brief-specific experts selected from
+          a pool. This structure ensures consistent multi-perspective coverage while
+          allowing domain-specific expertise.
+        </p>
+
+        <h3 id="fixed-archetypes">Fixed Archetypes (always present)</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Archetype</th>
+                <th>Perspective</th>
+                <th>Role in Debate</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Security Advocate</td>
+                <td>Threat modeling, attack surfaces, data protection</td>
+                <td>Challenges proposals for security implications</td>
+              </tr>
+              <tr>
+                <td>DX Pragmatist</td>
+                <td>Developer experience, maintainability, complexity cost</td>
+                <td>Pushes for practical, buildable solutions</td>
+              </tr>
+              <tr>
+                <td>UX Champion</td>
+                <td>User experience, accessibility, communicability</td>
+                <td>Advocates for the end-user perspective</td>
+              </tr>
+              <tr>
+                <td>Architecture Purist</td>
+                <td>System design, separation of concerns, extensibility</td>
+                <td>Evaluates structural integrity and long-term implications</td>
+              </tr>
+              <tr>
+                <td>Product Strategist</td>
+                <td>Business value, roadmap alignment, opportunity cost</td>
+                <td>Grounds technical decisions in product goals</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="expert-pool">Expert Pool (0-2 selected per debate)</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Expert</th>
+                <th>Selected When</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Agentic AI Expert</td>
+                <td>Debate involves AI agent behavior, prompt engineering, or LLM integration</td>
+              </tr>
+              <tr>
+                <td>Data Engineer</td>
+                <td>Debate involves data pipelines, storage architecture, or ETL workflows</td>
+              </tr>
+              <tr>
+                <td>DevOps/Platform Engineer</td>
+                <td>Debate involves deployment, CI/CD, infrastructure, or observability</td>
+              </tr>
+              <tr>
+                <td>Domain Specialist</td>
+                <td>Debate involves domain-specific knowledge not covered by fixed archetypes</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="executor-pattern">
+        <h2>Executor Pattern</h2>
+
+        <p>
+          Executor agents are not standalone prompt files. The <code>/implement</code>
+          skill constructs executor prompts dynamically from plan step metadata:
+        </p>
+
+        <ul>
+          <li>Step title and self-contained description</li>
+          <li>File list (create/modify/delete paths)</li>
+          <li>Reference files to load</li>
+          <li>Interface contract (expected public surface from dependency-producing steps)</li>
+          <li>Verify condition (how to confirm the step succeeded)</li>
+          <li>Tests to create or update</li>
+        </ul>
+
+        <p>
+          Each executor runs in an isolated context window, receives only the
+          information needed for its step, and returns results to the orchestrating
+          <code>/implement</code> skill. In auto mode, executors iterate with the
+          <code>code-reviewer</code> evaluator in a generator-critic loop until the
+          step passes review.
+        </p>
+      </section>
+
+      <section id="cross-references">
+        <h2>Cross-References</h2>
+
+        <ul>
+          <li><a href="skills-reference.html">Ch. 1: Skills Reference</a> -- skills that invoke these agents</li>
+          <li><a href="scripts-reference.html">Ch. 3: Scripts Reference</a> -- scripts invoked by agents</li>
+          <li><a href="pipeline-reference.html">Ch. 5: Pipeline Reference</a> -- pre-skill and post-skill pipeline stages</li>
+          <li><a href="../how-to/skills/index.html">Vol. 2: Skill-by-Skill Guides</a> -- how to use skills that delegate to these agents</li>
+        </ul>
+      </section>
+
+      <!-- See also: cross-volume related chapters -->
+      <nav aria-label="see also" class="see-also">
+        <h2>See also</h2>
+        <ul>
+          <li><a href="../how-to/skills/index.html">Skill-by-Skill How-To Guides</a> -- how to run the skills that delegate to these agents</li>
+          <li><a href="../explanation/agent-as-reader.html">The Agent Reads SEJA</a> -- why work is delegated to focused reader-agents with narrow context</li>
+        </ul>
+      </nav>
+
+    </article>
+
+    <!-- Sequential chapter navigation -->
+    <nav aria-label="chapter navigation">
+      <a href="skills-reference.html">Previous: Skills Reference</a>
+      <a href="scripts-reference.html">Next: Scripts Reference</a>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#role-categories">Role Categories</a></li>
+      <li><a href="#evaluator-agents">Evaluator Agents</a></li>
+      <li><a href="#generator-agents">Generator Agents</a></li>
+      <li><a href="#constitution-enforcement">Constitution Enforcement</a></li>
+      <li><a href="#council-debate-archetypes">Council Debate Archetypes</a></li>
+      <li><a href="#executor-pattern">Executor Pattern</a></li>
+      <li><a href="#cross-references">Cross-References</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T16:30:00Z</p>
+  </footer>
+
+</body>
+</html>

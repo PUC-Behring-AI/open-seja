@@ -2,7 +2,7 @@
 # designer: When you finish any skill run that writes an artifact, I'm the
 #   indexer that refreshes `_output/INDEX.md` so you can find the new file
 #   without scanning directories -- every plan, advisory, roadmap, proposal,
-#   communication, onboarding, reflection, and explain report (behavior,
+#   communication, onboarding, reflection, mob session, and explain report (behavior,
 #   behavior-evolution, dev-onboarding, data-model, architecture) appears on
 #   one chronological list, newest first, with any RESERVED rows preserved
 #   across regenerations.
@@ -179,6 +179,12 @@ _CHECK_LOG_RE = re.compile(
 # Reflection: # Reflection <id> | datetime | title
 _REFLECTION_RE = re.compile(
     r"^#\s+Reflection\s+(\d+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
+    re.IGNORECASE,
+)
+
+# Mob Session: # Mob Session <id> | datetime | title  (${MOB_SESSIONS_DIR})
+_MOB_SESSION_RE = re.compile(
+    r"^#\s+Mob\s+Session\s+(\d+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
     re.IGNORECASE,
 )
 
@@ -471,6 +477,18 @@ def extract_artifact(filepath: Path) -> dict | None:
         return {
             "date": _normalize_date(m.group(2).strip()),
             "type": "Reflection",
+            "id": m.group(1).strip().zfill(6),
+            "title": truncate(m.group(3).strip().rstrip("|").strip()),
+            "status": "",
+            "file": str(rel_path),
+        }
+
+    # Mob Session
+    m = _MOB_SESSION_RE.match(header_line)
+    if m:
+        return {
+            "date": _normalize_date(m.group(2).strip()),
+            "type": "Mob Session",
             "id": m.group(1).strip().zfill(6),
             "title": truncate(m.group(3).strip().rstrip("|").strip()),
             "status": "",

@@ -31,6 +31,7 @@ Body line count is the agent-facing body from the first heading after
 | explain | standard | 259 | 300 | -41 | PASS |
 | help | light | 71 | 150 | -79 | PASS |
 | implement | heavy | 199 | 500 | -301 | PASS |
+| mob | heavy | 96 | 500 | -404 | PASS (added with `/mob`) |
 | onboard | standard | 129 | 300 | -171 | PASS |
 | pending | light | 56 | 150 | -94 | PASS |
 | plan | heavy | 423 | 500 | -77 | PASS |

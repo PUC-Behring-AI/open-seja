@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="The operational mechanics of SEJA's lifecycle markers: what STATUS, ESTABLISHED, and CHANGELOG_APPEND do, how apply_marker.py writes them, the allowed STATUS state transitions, and the guardrail scripts that keep marker files honest.">
+  <title>The Marker System — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/concepts sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>The Marker System</h1>
+      <p>What each lifecycle marker does, how the tooling writes it, and which state transitions are allowed.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Concepts</a></li>
+        <li aria-current="page">The Marker System</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-explanation">explanation</span>
+          <span class="badge core-concepts">concepts</span>
+        </p>
+
+        <section data-diataxis="explanation" aria-labelledby="operational-detail">
+          <h2 id="operational-detail">Operational detail</h2>
+          <p>
+            A marker is a small structured HTML comment stamped next to an item of
+            design intent. This page is the operational reference for the marker
+            system: the marker kinds, the single tool allowed to write them, the
+            state transitions that tool enforces, and the guardrails that verify no
+            other hand touched the file.
+          </p>
+          <aside class="callout-tip">
+            <strong>Boundary.</strong> The sibling
+            <a href="sign-system.html">Sign System</a> page covers the conceptual
+            model &mdash; why markers exist and what they stand for. This page
+            covers only the operational mechanics.
+          </aside>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="marker-kinds">
+          <h2 id="marker-kinds">What each marker does</h2>
+          <p>
+            Markers come in a fixed set of kinds. Some are stamped before an
+            entry's heading; two append a line to a dedicated section of the file.
+          </p>
+          <dl>
+            <dt>STATUS</dt>
+            <dd>
+              A state marker stamped immediately before an intent entry's
+              <code>### &lt;id&gt;</code> heading, recording where the item is in
+              its lifecycle. Its line carries the state value, an optional plan id,
+              and a date: <code>&lt;!-- STATUS: implemented | plan-000123 | 2026-07-15 --&gt;</code>.
+              STATUS is the only marker that <em>replaces</em> an existing line
+              rather than stacking a new one, so an item carries exactly one STATUS
+              at a time.
+            </dd>
+            <dt>ESTABLISHED</dt>
+            <dd>
+              A stamp-kind marker recording that a decision is now established:
+              <code>&lt;!-- ESTABLISHED: plan-000123 | 2026-07-15 --&gt;</code>. It
+              requires a plan id and takes no value. Stamps insert before the
+              heading and never replace an existing line.
+            </dd>
+            <dt>CHANGELOG_APPEND</dt>
+            <dd>
+              Appends a pipe-delimited line to the file's <code>## CHANGELOG</code>
+              section &mdash; <code>date | entry-id | action | plan | note</code>
+              &mdash; where <code>action</code> is one of <em>added</em>,
+              <em>revised</em>, <em>revoked</em>, or <em>superseded</em>. A note is
+              required. It records a change to intent as an audit line rather than
+              a stamp on a heading.
+            </dd>
+          </dl>
+          <p>
+            The same tool also supports the <code>INCORPORATED</code> stamp (a
+            research finding folded into intent), <code>DECISION_APPEND</code>
+            (append a new <code>D-NNN</code> decision entry with an auto-assigned
+            id to the <code>## Decisions</code> section), and
+            <code>REQ_TRACED_BY</code> (annotate a requirement marker with the plan
+            that traced it).
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="apply-marker-usage">
+          <h2 id="apply-marker-usage">Writing markers with apply_marker.py</h2>
+          <p>
+            <code>apply_marker.py</code> is the sole write path for a Human
+            (markers) file. An agent that needs to update a marker must go through
+            it; a direct <code>Edit</code> or <code>Write</code> on the file is
+            forbidden. The invocation names the target file, the entry id, the
+            marker kind, and (for STATUS and the append kinds) a value:
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>Key <code>apply_marker.py</code> arguments.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Argument</th>
+                  <th scope="col">Role</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row"><code>--file</code></th>
+                  <td>The target file, repo-relative. Must be classified Human (markers), or the write is refused.</td>
+                </tr>
+                <tr>
+                  <th scope="row"><code>--id</code></th>
+                  <td>The entry id whose heading the marker attaches to (e.g. <code>R-P-001</code>).</td>
+                </tr>
+                <tr>
+                  <th scope="row"><code>--marker</code></th>
+                  <td>The marker kind (STATUS, ESTABLISHED, CHANGELOG_APPEND, …).</td>
+                </tr>
+                <tr>
+                  <th scope="row"><code>--value</code></th>
+                  <td>Required for STATUS, CHANGELOG_APPEND, DECISION_APPEND, and REQ_TRACED_BY; ignored by the stamp kinds.</td>
+                </tr>
+                <tr>
+                  <th scope="row"><code>--plan</code> / <code>--date</code> / <code>--note</code></th>
+                  <td>Plan id (accepts <code>plan-NNNNNN</code>, a bare 6-digit id, or <code>manual</code>), an override date, and the CHANGELOG note.</td>
+                </tr>
+                <tr>
+                  <th scope="row"><code>--dry-run</code></th>
+                  <td>Print a unified diff without writing.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            The script validates before it writes: it resolves the file and refuses
+            any path not on the Human (markers) allowlist, then checks the
+            constructed marker line against an allowed regex for its kind. It exits
+            <code>0</code> on success, <code>1</code> on a validation failure, and
+            <code>2</code> on a runtime error.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="status-transitions">
+          <h2 id="status-transitions">Allowed STATUS transitions</h2>
+          <p>
+            STATUS is a small state machine. When a STATUS marker already precedes
+            an entry, <code>apply_marker.py</code> allows the new value only if the
+            current-to-new transition is permitted, and it <em>replaces</em> the
+            existing line rather than stacking a second marker. The legacy uppercase
+            <code>IMPLEMENTED</code> marker from pre-2.8.3 files is normalised to
+            the lowercase <code>implemented</code> value for the transition check, so
+            a promote flip can replace it in place. An illegal transition exits with
+            a validation error and leaves the file untouched.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="guardrails">
+          <h2 id="guardrails">Guardrail scripts</h2>
+          <p>
+            Two guardrails keep the marker system honest at commit time. Because
+            <code>apply_marker.py</code> refuses to write to any file not on the
+            Human (markers) allowlist, it cannot be turned against an ordinary file.
+            And because every marker line is validated against its regex and legal
+            transition, a malformed or illegal marker never lands. The companion
+            verifier <code>check_human_markers_only.py</code> then runs during the
+            post-skill commit and rejects any hunk in a Human (markers) file that is
+            <em>not</em> a marker change &mdash; catching a prose mutation that tried
+            to slip in alongside a legitimate marker.
+          </p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="sign-system.html">The Sign System</a> &mdash; the conceptual model markers express.</li>
+            <li><a href="enforcement-layers.html">Enforcement Layers</a> &mdash; how the marker guardrails fit the wider enforcement stack.</li>
+            <li><a href="lifecycle-pipeline.html">The Lifecycle Pipeline</a> &mdash; where post-skill proposes STATUS flips via apply_marker.py.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Concepts</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/concepts sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

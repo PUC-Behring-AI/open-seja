@@ -54,7 +54,7 @@ Run the Section 1 basic-definitions scaffolding questionnaire against cwd, using
 
 **Brownfield pre-fill**: before presenting Section 1, run the same auto-detection sub-step as Standard Install Flow step 4b.i (scan `${CODEBASE_DIR}` for `package.json`, `requirements.txt`, `pyproject.toml`, etc.; map detected dependencies to `BACKEND_FRAMEWORK`, `FRONTEND_FRAMEWORK`, `DATABASE`, `BACKEND_TEST`/`FRONTEND_TEST`, directory vars; present confirmation prompts for Q1.4, Q1.5, Q1.6, Q1.9). Fall back to standard manual entry for ambiguous or undetected fields.
 
-This step closes the first-run gap symmetrically for users who ran `git clone https://github.com/simonedjb/seja my-project` and then `/seja-setup --here`: they now end up with a populated `conventions.md` in one invocation rather than having to run `/design` afterwards just to get a bootable stack scaffold.
+This step closes the first-run gap symmetrically for users who ran `git clone git@github.com:PUC-Behring-AI/open-seja my-project` and then `/seja-setup --here`: they now end up with a populated `conventions.md` in one invocation rather than having to run `/design` afterwards just to get a bootable stack scaffold.
 
 When `product-design/conventions.md` already exists and is fully populated (no `{{VAR}}` placeholders), skip this step rather than re-prompt -- reconciliation-first semantics apply here as elsewhere in `--here`.
 
@@ -69,6 +69,10 @@ Apply the `Scaffold-Rules` anchor body from Standard Install Flow step 7d agains
 ### Step 4e -- Scaffold smoke-test infrastructure
 
 Apply the `Scaffold-SmokeTestInfra` anchor body from Standard Install Flow step 7e against cwd. Same semantics: skip entirely when `BACKEND_FRAMEWORK == none`; otherwise emit `smoke_test_registry.json` and `smoke_test_api.py` in cwd, plus `e2e/smoke.spec.ts` only when BOTH `FRONTEND_FRAMEWORK != none` AND an E2E tool was chosen in Section 1. If the smoke-test files already exist (a prior `--here` reconciliation populated them), skip rather than overwrite. Stack decisions reuse the slug answered (or pre-filled) in Step 4b.
+
+### Step 4f -- Offer quality gate
+
+Apply the `Offer-QualityGate` anchor body from Standard Install Flow step 7f against cwd. Same trigger (Section 1 test answer includes `pytest`) and same accept/decline semantics. If `gate.py` or a `## Quality Gate` section already exists, skip rather than overwrite. Reuses the answers from Step 4b.
 
 ### Step 5 -- Git history handling
 

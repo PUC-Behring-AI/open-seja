@@ -18,7 +18,7 @@ This how-to is for you when you are a solo designer or a team with an existing c
 
 Start by cloning SEJA into your codebase root:
 
-    git clone https://github.com/simonedjb/seja .
+    git clone git@github.com:PUC-Behring-AI/open-seja .
 
 Then open Claude Code in that directory and run `/seja-setup --here`. The `--here` flag finalises setup in place without copying harness files (the clone already provided them). Unlike a greenfield project, you are laying the harness over a tree of code that is already under version control.
 

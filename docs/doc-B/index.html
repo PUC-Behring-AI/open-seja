@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-status" content="published">
+
+  <title>SEJA Documentation Collection -- System-Isomorphic Edition</title>
+
+    <!-- CSS depth: 0 -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection -- System-Isomorphic Edition</p>
+  </header>
+
+  <!-- Breadcrumb navigation: collection index is the top level -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li>Collection</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>SEJA Documentation Collection -- System-Isomorphic Edition</h1>
+
+      <section id="about" data-diataxis="explanation">
+        <p>
+          SEJA (Software Engineering with AI) is an agent harness that
+          organizes human-AI collaboration through a system-isomorphic document
+          architecture. This edition is written for
+          <strong>practitioners who work with the harness day to day</strong>,
+          and it is organized to mirror the system itself: each of the five
+          numbered volumes maps to a distinct layer of SEJA -- onboarding, the
+          design layer, the execution layer, output and governance, and the
+          foundations. The intent is that the shape of the documentation matches
+          the shape of what it describes, so once you know the system you already
+          know where to look.
+        </p>
+        <p>
+          Each volume's chapters carry Diataxis section tags that classify
+          content as tutorial, how-to, reference, or explanation. An
+          audience-routing Reading Map helps you navigate to the content that
+          matches your role and immediate need.
+        </p>
+      </section>
+
+      <section id="volumes" data-diataxis="reference">
+        <h2>Volumes</h2>
+
+        <ol class="volume-cards">
+
+          <li class="volume-card">
+            <h3>
+              Vol. 1: Onboarding and Orientation
+              <span class="phase-badge">Phase 1</span>
+            </h3>
+            <p class="volume-meta">Directory: <code>vol1/</code></p>
+            <p>
+              Getting started with SEJA: what it is, how to use it, and where
+              to find what you need.
+            </p>
+            <ol class="chapter-list">
+              <li>
+                <a href="vol1/ch1-what-is-seja.html">1. What SEJA Is (and Is Not)</a>
+                <span class="chapter-summary">Positions SEJA as a harness (not a framework or platform), contrasts the raw agent with the harnessed agent, and introduces the three capabilities the harness provides: lifecycle discipline, design-intent alignment, and epistemic scaffolding.</span>
+              </li>
+              <li>
+                <a href="vol1/ch2-quickstart.html">2. Quickstart</a>
+                <span class="chapter-summary">A hands-on tutorial that walks you through cloning the repository, running <code>/seja-setup --here</code>, configuring your project with <code>/design</code>, and executing your first lifecycle cycle.</span>
+              </li>
+              <li>
+                <a href="vol1/ch3-reading-map.html">3. Reading Map</a>
+                <span class="chapter-summary">Audience-routed navigation paths that guide you to the chapters most relevant to your role and goals, with both a visual decision tree and a flat lookup table of direct links.</span>
+              </li>
+              <li>
+                <a href="vol1/ch4-glossary.html">4. Glossary</a>
+                <span class="chapter-summary">Alphabetical reference of key terms across core, semiotic-engineering, and lifecycle categories, each cross-referenced to the chapters that cover the concept in depth.</span>
+              </li>
+            </ol>
+            <a href="vol1/index.html">Open Vol. 1</a>
+          </li>
+
+          <li class="volume-card">
+            <h3>
+              Vol. 2: The Design Layer
+              <span class="phase-badge">Phase 2</span>
+            </h3>
+            <p class="volume-meta">Directory: <code>vol2/</code></p>
+            <p>
+              Understanding SEJA's design philosophy: metacommunication,
+              constitution, design intent, and markers.
+            </p>
+            <ol class="chapter-list">
+              <li>
+                <a href="vol2/ch1-metacommunication-message.html">1. The Metacommunication Message</a>
+                <span class="chapter-summary">The one-utterance-of-many-voices message at the apex of the design layer -- how the designer's intent is encoded so the agent can receive it, and why every downstream artifact is a fragment of that single message.</span>
+              </li>
+              <li>
+                <a href="vol2/ch2-constitution.html">2. The Constitution</a>
+                <span class="chapter-summary">The immutable anchor of the design layer: how <code>product-design/constitution.md</code> records principles that do not change and constrains everything the agent is allowed to decide.</span>
+              </li>
+              <li>
+                <a href="vol2/ch3-design-intent-files.html">3. Design Intent Files</a>
+                <span class="chapter-summary">The as-intended and as-coded views of design intent -- the living files that evolve as understanding deepens, how the two views are held in tension, and how drift between them is surfaced and reconciled.</span>
+              </li>
+              <li>
+                <a href="vol2/ch4-marker-system.html">4. The Marker System</a>
+                <span class="chapter-summary">The mechanism that governs what changes and what stays fixed: how markers classify content by mutability and how tooling reads them to decide what the agent may safely touch.</span>
+              </li>
+              <li>
+                <a href="vol2/ch5-ux-research-artifacts.html">5. UX Research Artifacts</a>
+                <span class="chapter-summary">The evidence base beneath the design layer -- the research artifacts that ground design decisions in observed reality rather than assumption, and how they feed back into design intent.</span>
+              </li>
+            </ol>
+            <a href="vol2/index.html">Open Vol. 2</a>
+          </li>
+
+          <li class="volume-card">
+            <h3>
+              Vol. 3: The Execution Layer
+              <span class="phase-badge">Phase 1</span>
+            </h3>
+            <p class="volume-meta">Directory: <code>vol3/</code></p>
+            <p>
+              Using SEJA day-to-day: the lifecycle pipeline, skills, subagent
+              delegation, plans, and quality critique.
+            </p>
+            <ol class="chapter-list">
+              <li>
+                <a href="vol3/ch1-lifecycle-pipeline.html">1. The Lifecycle Pipeline</a>
+                <span class="chapter-summary">The three-phase pipeline that wraps every skill invocation -- pre-skill, skill execution, and post-skill -- covering canonical skill ordering, enforcement mechanisms, lifecycle variations, and conversation-trace integration.</span>
+              </li>
+              <li>
+                <a href="vol3/ch2-skills-in-depth.html">2. Skills In Depth</a>
+                <span class="chapter-summary">Per-skill reference for all user-facing skills and internal lifecycle hooks, each following a consistent template: purpose, parameters, prerequisites, workflow, delegations, reference loads, outputs, and common mistakes.</span>
+              </li>
+              <li>
+                <a href="vol3/ch3-subagent-delegation.html">3. Subagent Delegation</a>
+                <span class="chapter-summary">The thin-orchestrator delegation model that separates skill-level coordination from engine-level work, with per-agent reference cards for evaluators and generators, trust boundaries, and result processing.</span>
+              </li>
+              <li>
+                <a href="vol3/ch4-plans-and-implementation.html">4. Plans and Implementation</a>
+                <span class="chapter-summary">The anatomy of a plan file, planning modes, complexity-gated review, and the <code>/implement</code> executor -- including progress tracking, checkpoint recovery, rollback branches, and design-intent traceability.</span>
+              </li>
+              <li>
+                <a href="vol3/ch5-quality-and-critique.html">5. Quality and Critique</a>
+                <span class="chapter-summary">The <code>/critique</code> skill's modes and the Essential/Standard/Deep review-perspective tiers -- the two-phase review process, stack-based filtering, conflict resolution, and how to interpret validation results.</span>
+              </li>
+            </ol>
+            <a href="vol3/index.html">Open Vol. 3</a>
+          </li>
+
+          <li class="volume-card">
+            <h3>
+              Vol. 4: Output and Governance
+              <span class="phase-badge">Phase 3</span>
+            </h3>
+            <p class="volume-meta">Directory: <code>vol4/</code></p>
+            <p>
+              Managing SEJA's outputs: artifacts, enforcement, pending ledger,
+              and drift detection.
+            </p>
+            <ol class="chapter-list">
+              <li>
+                <a href="vol4/ch1-output-artifacts.html">1. Output Artifacts</a>
+                <span class="chapter-summary">The output directory tree, the artifact types SEJA produces and their lifecycle, and the audit trail formed by the briefs log and the conversation trace.</span>
+              </li>
+              <li>
+                <a href="vol4/ch2-enforcement-architecture.html">2. Enforcement Architecture</a>
+                <span class="chapter-summary">The multi-layer enforcement model, file-maintainer classification, leak prevention, the priv/public boundary, and the anti-patterns the architecture is designed to catch.</span>
+              </li>
+              <li>
+                <a href="vol4/ch3-scripts-and-automation.html">3. Scripts and Automation</a>
+                <span class="chapter-summary">A reference for the key shared helper scripts and a guide to running and extending the validation suite.</span>
+              </li>
+              <li>
+                <a href="vol4/ch4-maintenance-and-drift.html">4. Maintenance and Drift</a>
+                <span class="chapter-summary">Freshness policies, periodic triggers, and the <code>/explain drift</code> alignment workflow that reconciles design specs with the as-coded state.</span>
+              </li>
+              <li>
+                <a href="vol4/ch5-release-and-publishing.html">5. Release and Publishing</a>
+                <span class="chapter-summary">The <code>/publish</code> pipeline, the tag conventions, and the ephemeral publish workspace used to build a public release.</span>
+              </li>
+            </ol>
+            <a href="vol4/index.html">Open Vol. 4</a>
+          </li>
+
+          <li class="volume-card">
+            <h3>
+              Vol. 5: Foundations
+              <span class="phase-badge">Phase 2</span>
+            </h3>
+            <p class="volume-meta">Directory: <code>vol5/</code></p>
+            <p>
+              The intellectual foundations: semiotic engineering, sign systems,
+              communicability, reflective practice, and the governable-and-epistemic thesis.
+            </p>
+            <ol class="chapter-list">
+              <li>
+                <a href="vol5/ch1-software-as-designed-communication.html">1. Software as Designed Communication</a>
+                <span class="chapter-summary">The founding premise of semiotic engineering: software is a one-shot message from designers to users, and every interface is a communicative artifact carrying its designers' intent.</span>
+              </li>
+              <li>
+                <a href="vol5/ch2-sign-systems-and-communicability.html">2. Sign Systems and Communicability</a>
+                <span class="chapter-summary">Signs, sign systems, and communicability as the criterion by which a designed message succeeds or breaks down -- and the inspection methods that expose where meaning fails to cross.</span>
+              </li>
+              <li>
+                <a href="vol5/ch3-extended-metacommunication-template.html">3. The Extended Metacommunication Template</a>
+                <span class="chapter-summary">Extends de Souza's metacommunication template to the agent setting, reframing the designer-to-user message as a designer-to-agent-to-user relay that the harness makes legible.</span>
+              </li>
+              <li>
+                <a href="vol5/ch4-reflective-practice.html">4. Reflective Practice</a>
+                <span class="chapter-summary">Grounds SEJA's lifecycle in Sch&ouml;n's reflective practitioner: reflection-in-action and reflection-on-action as the discipline the harness operationalizes through its critique and reflection steps.</span>
+              </li>
+              <li>
+                <a href="vol5/ch5-abduction-and-plural-readings.html">5. Abduction and Plural Readings</a>
+                <span class="chapter-summary">Draws on Peirce's abduction and Eco's model reader to explain how the harness reasons toward the best available interpretation and why a single artifact sustains multiple legitimate readings.</span>
+              </li>
+              <li>
+                <a href="vol5/ch6-governable-and-epistemic.html">6. The Governable AND Epistemic Thesis</a>
+                <span class="chapter-summary">The central claim: SEJA is designed to be simultaneously governable (its actions constrained and auditable) and epistemic (its reasoning surfaced and inspectable), and the tension between the two.</span>
+              </li>
+              <li>
+                <a href="vol5/ch7-how-the-agent-reads-the-harness.html">7. How the Agent Reads the Harness</a>
+                <span class="chapter-summary">Closes the loop: how the agent itself parses the harness as a sign system -- skills, rules, references, and markers -- turning the preceding theory into an account of the agent's own reading.</span>
+              </li>
+            </ol>
+            <a href="vol5/index.html">Open Vol. 5</a>
+          </li>
+
+        </ol>
+      </section>
+
+      <section id="how-to-read-this" data-diataxis="explanation">
+        <h2>How to Read This</h2>
+
+        <h3>Diataxis Section Tags</h3>
+        <p>
+          Chapters in this collection use
+          <a href="https://diataxis.fr/">Diataxis</a>-inspired section tags to
+          classify content by its purpose. Each <code>&lt;section&gt;</code>
+          element carries a <code>data-diataxis</code> attribute with one of
+          four values:
+        </p>
+        <dl>
+          <dt><code>tutorial</code></dt>
+          <dd>
+            Learning-oriented: step-by-step lessons that guide you through a
+            task for the first time.
+          </dd>
+
+          <dt><code>how-to</code></dt>
+          <dd>
+            Task-oriented: practical recipes for accomplishing specific goals
+            when you already understand the basics.
+          </dd>
+
+          <dt><code>reference</code></dt>
+          <dd>
+            Information-oriented: precise, complete descriptions of components,
+            APIs, or configuration options.
+          </dd>
+
+          <dt><code>explanation</code></dt>
+          <dd>
+            Understanding-oriented: conceptual discussions that clarify why
+            things work the way they do.
+          </dd>
+        </dl>
+
+        <h3>The Reading Map</h3>
+        <p>
+          The <a href="vol1/ch3-reading-map.html">Reading Map</a> provides
+          audience-routed navigation paths. Instead of reading linearly, you
+          select your role (e.g., new user, practitioner, contributor, or
+          researcher) and the map shows you a curated sequence of chapters
+          that matches your goals. This is the recommended entry point for
+          most readers.
+        </p>
+
+        <h3>Coming from the Existing Docs?</h3>
+        <p>
+          If you already know the public
+          <a href="migration-from-docs.html">SEJA docs tree</a>, the
+          <a href="migration-from-docs.html">Migration from the Existing Docs</a>
+          guide maps each existing document onto its equivalent in this
+          collection. It is informational: the existing docs are preserved, and
+          this collection is a complementary, reorganized view.
+        </p>
+      </section>
+
+      <section id="content-phasing" data-diataxis="reference">
+        <h2>Content Phasing</h2>
+        <p>
+          Content is developed in three phases. Volumes in earlier phases are
+          written first, providing the foundation for later volumes.
+        </p>
+        <table class="phasing-table">
+          <thead>
+            <tr>
+              <th>Phase</th>
+              <th>Volumes</th>
+              <th>Focus</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Phase 1</td>
+              <td>Vol. 1 (Onboarding) + Vol. 3 (Execution Layer)</td>
+              <td>Getting started and day-to-day usage -- the essential
+                practitioner path.</td>
+              <td>Draft</td>
+            </tr>
+            <tr>
+              <td>Phase 2</td>
+              <td>Vol. 2 (Design Layer) + Vol. 5 (Foundations)</td>
+              <td>Design philosophy and intellectual foundations -- the
+                conceptual depth path.</td>
+              <td>Draft</td>
+            </tr>
+            <tr>
+              <td>Phase 3</td>
+              <td>Vol. 4 (Output and Governance)</td>
+              <td>Output management, enforcement, and drift detection -- the
+                operational maturity path.</td>
+              <td>Draft</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+    <p class="gen-meta">
+      Generated 2026-07-16 &middot; Source: research-000661.
+    </p>
+  </footer>
+
+</body>
+</html>

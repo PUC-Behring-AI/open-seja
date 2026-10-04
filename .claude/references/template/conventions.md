@@ -42,6 +42,7 @@ designer_description: "I'm your project's single source of truth for directory s
 | `EXPLAINED_ARCHITECTURE_DIR` | `${OUTPUT_DIR}/explained-architecture` | Architecture explanation output folder |
 | `BEHAVIOR_EVOLUTION_DIR` | `${OUTPUT_DIR}/behavior-evolution` | Behavior evolution explanation output folder |
 | `REFLECTIONS_DIR` | `${OUTPUT_DIR}/reflections` | Reflection report output folder |
+| `MOB_SESSIONS_DIR` | `${OUTPUT_DIR}/mob-sessions` | Mob programming session records |
 | `ONBOARDING_PLANS_DIR` | `${OUTPUT_DIR}/onboarding-plans` | Onboarding plan output folder |
 | `COMMUNICATION_DIR` | `${OUTPUT_DIR}/communication` | Communication material output folder |
 | `ROADMAP_DIR` | `${OUTPUT_DIR}/roadmaps` | Roadmap output folder |
@@ -262,6 +263,18 @@ designer_description: "I'm your project's single source of truth for directory s
 | `E2E_TEST_CMD` | {{E2E_TEST_CMD}} | Command to run E2E tests |
 <!-- CONDITIONAL: BACKEND_FRAMEWORK != none -->
 | `MIGRATION_CHAIN_SCRIPT` | {{MIGRATION_CHAIN_SCRIPT}} | Script to check migration chain integrity |
+
+---
+
+## Quality Gate
+> Optional deterministic quality gate. Absent, empty, or `{{...}}` = gate not installed; the value must be in backticks for `project_config` to read it.
+
+| Variable | Value | Description |
+|----------|-------|-------------|
+| `GATE_FAST_CMD` | `{{GATE_FAST_CMD}}` | Fast gate command (lint, types, tests, CRAP); empty = gate not installed |
+| `GATE_FULL_CMD` | `{{GATE_FULL_CMD}}` | Full gate command (fast gate plus mutation testing); empty = gate not installed |
+| `GATE_COMMIT_CMD` | `{{GATE_COMMIT_CMD}}` | Commit hook command; install step 7f fills it with the `GATE_FULL_CMD` value; empty = no hook |
+| `QUALITY_DIR` | `${OUTPUT_DIR}/quality` | Directory for gate reports and baseline |
 
 ---
 

@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="3">
+  <meta name="doc-chapter" content="3">
+  <meta name="doc-phase" content="1">
+  <meta name="doc-status" content="draft">
+
+  <title>Subagent Delegation -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 3: The Execution Layer</a></li>
+      <li>Subagent Delegation</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>Subagent Delegation</h1>
+
+      <p>
+        SEJA skills handle lifecycle orchestration, argument parsing, and
+        user interaction directly. When a task requires specialized
+        analysis, generation, or evaluation, the skill delegates that
+        work to a <strong>subagent</strong> -- a focused agent launched
+        with a purpose-built prompt. This chapter documents the
+        delegation model, provides a per-agent reference for all 16
+        agents (9 evaluators and 7 generators), and explains how to
+        write custom subagents.
+      </p>
+
+      <section id="the-delegation-model" data-diataxis="explanation">
+        <h2>The Delegation Model</h2>
+
+        <p>
+          Skills delegate to subagents via the <code>Agent</code> tool,
+          which launches a fresh context window with a self-contained
+          prompt. The delegating skill constructs the prompt dynamically,
+          embedding plan step metadata, file paths, scope parameters, and
+          any project-specific context the agent needs to do its work.
+        </p>
+
+        <h3>Trust Boundary</h3>
+
+        <p>
+          Every subagent operates within a trust boundary enforced by two
+          mechanisms. First, generator agents receive the project
+          constitution (<code>product-design/constitution.md</code>) as
+          part of their prompt, ensuring that generated artifacts respect
+          the project's immutable principles. Second, the agent's tool
+          set is explicitly declared in its prompt file's YAML
+          frontmatter -- an agent receives only the tools it needs, not
+          the full set available to the parent skill.
+        </p>
+
+        <h3>Prompt Construction</h3>
+
+        <p>
+          The delegating skill builds the agent's prompt at invocation
+          time. For evaluator agents, this typically includes the diff or
+          artifact to review, the review depth, and pointers to relevant
+          reference files. For generator agents, it includes the output
+          path, a reserved artifact ID, the generation scope, and paths
+          to project state files (conventions, conceptual design,
+          communication style). The agent prompt file
+          (<code>.claude/agents/*.md</code>) defines the agent's role,
+          process, and output format; the skill fills in the
+          invocation-specific parameters.
+        </p>
+
+        <h3>Result Processing</h3>
+
+        <p>
+          When a subagent completes, it returns a result to the parent
+          skill. For evaluator agents, this is typically a review log or
+          compliance report that the skill presents to the user. For
+          generator agents, the output is a file written to the
+          project's output directory. The parent skill's post-skill
+          lifecycle then handles committing, indexing, and any follow-up
+          actions.
+        </p>
+
+        <h3>Executor Agents</h3>
+
+        <p>
+          A third category exists as a pattern rather than standalone
+          prompt files: <strong>executor agents</strong>. Used by
+          <code>/implement</code> in auto mode, these agents execute
+          individual plan steps in isolated context windows. The
+          <code>/implement</code> skill constructs their prompts
+          dynamically from plan step metadata (Files, References, Verify,
+          Tests) -- there are no separate <code>.claude/agents/</code>
+          files for executors.
+        </p>
+      </section>
+
+      <section id="agent-prompt-files" data-diataxis="reference">
+        <h2>Agent Prompt Files</h2>
+
+        <p>
+          Each subagent is defined by a Markdown file in
+          <code>.claude/agents/</code>. The file follows a consistent
+          structure:
+        </p>
+
+        <dl>
+          <dt>YAML Frontmatter</dt>
+          <dd>
+            Contains <code>name</code> (the agent identifier),
+            <code>description</code> (a concise role summary),
+            <code>designer_description</code> (a first-person
+            designer-voice paragraph for documentation and the call-graph
+            viewer), and <code>tools</code> (the explicit tool set the
+            agent receives -- e.g., <code>Read, Bash, Glob, Grep</code>).
+          </dd>
+
+          <dt>Role Boundary Block</dt>
+          <dd>
+            A blockquote that clarifies the division of responsibility
+            between the agent (execution engine) and its parent skill
+            (user-facing orchestrator). This prevents duplication of
+            lifecycle logic.
+          </dd>
+
+          <dt>Input Section</dt>
+          <dd>
+            Documents the parameters the agent receives from the
+            delegating skill: paths, IDs, scope strings, depth settings,
+            and any optional overrides.
+          </dd>
+
+          <dt>Process Section</dt>
+          <dd>
+            Step-by-step instructions for the agent's work. Evaluator
+            agents typically load references, analyze the target, and
+            produce findings. Generator agents load templates, scan the
+            codebase, and produce output files.
+          </dd>
+
+          <dt>Output Section</dt>
+          <dd>
+            Defines the format, file naming, and content structure of the
+            agent's deliverable.
+          </dd>
+        </dl>
+
+        <aside class="callout-tip">
+          <p>
+            Agent prompt files should not replicate SKILL.md logic.
+            The skill handles lifecycle (pre-skill, post-skill),
+            argument parsing, and user interaction. The agent handles
+            only the specialized work the skill delegates.
+          </p>
+        </aside>
+      </section>
+
+      <section id="evaluator-agents" data-diataxis="reference">
+        <h2>Evaluator Agents</h2>
+
+        <p>
+          Evaluator agents review artifacts against quality perspectives,
+          validate compliance, or assess design decisions. They receive a
+          target (diff, plan, migration chain, interface) and return a
+          structured report with findings.
+        </p>
+
+        <h3>code-reviewer</h3>
+
+        <table>
+          <thead>
+            <tr><th>Attribute</th><th>Detail</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Role</td><td>Reviews code changes against engineering and design perspectives. Depth-gated: deep evaluates all 16 perspectives; standard and light use a shortlisted subset.</td></tr>
+            <tr><td>Tools</td><td><code>Read, Glob, Grep, Bash</code></td></tr>
+            <tr><td>Inputs</td><td>A file path, directory, "staged" (git staged changes), or a diff. Optional review depth: <code>light</code>, <code>standard</code>, or <code>deep</code> (default).</td></tr>
+            <tr><td>Outputs</td><td>A review log with Adopted/Deferred/N/A status per perspective, issues found with severity levels, and a summary table.</td></tr>
+            <tr><td>Invoked by</td><td><code>/critique review</code>, <code>/code-review</code></td></tr>
+          </tbody>
+        </table>
+
+        <p>
+          The code-reviewer performs a vulnerability pattern pre-scan
+          using patterns from
+          <code>.claude/references/general/threat-model.md</code> before
+          the full perspective pass. Matches in test files are triaged as
+          MEDIUM rather than HIGH.
+        </p>
+
+        <h3>council-debate</h3>
+
+        <table>
+          <thead>
+            <tr><th>Attribute</th><th>Detail</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Role</td><td>Runs a structured expert council debate for high-stakes design decisions. Five fixed archetypes plus 0-2 brief-specific domain experts surface trade-offs through position statements and cross-examination.</td></tr>
+            <tr><td>Tools</td><td><code>Read, WebSearch</code></td></tr>
+            <tr><td>Inputs</td><td>The question or decision to debate, optional selected council members from the brief-specific pool, and optional context pointers.</td></tr>
+            <tr><td>Outputs</td><td>A debate transcript with position statements, cross-examination, areas of agreement and tension, and a recommended path with named trade-offs.</td></tr>
+            <tr><td>Invoked by</td><td><code>/research</code> (for high-stakes design questions)</td></tr>
+          </tbody>
+        </table>
+
+        <p>
+          The five fixed archetypes are: Security Advocate, DX
+          Pragmatist, UX Champion, Architecture Purist, and Product
+          Strategist. Brief-specific experts (Agentic AI Expert, Data
+          Engineer, DevOps/Platform Engineer, Domain Specialist) can be
+          added when the question warrants domain depth.
+        </p>
+
+        <h3>harness-health-evaluator</h3>
+
+        <table>
+          <thead>
+            <tr><th>Attribute</th><th>Detail</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Role</td><td>Runs 9 harness self-diagnosis checks and produces a Harness Health Report with PASS/WARN/FAIL per check and an overall tally.</td></tr>
+            <tr><td>Tools</td><td><code>Read, Bash, Grep, Write</code></td></tr>
+            <tr><td>Inputs</td><td>A reserved <code>check-NNN</code> ID, output path, optional verbose flag, and optional <code>source</code> path for drift comparison.</td></tr>
+            <tr><td>Outputs</td><td>A Harness Health Report with a nine-row status table (skill system integrity, orphaned briefs, stale plans, reference completeness, conventions completeness, constitution presence, spec compliance, pending ledger, harness drift).</td></tr>
+            <tr><td>Invoked by</td><td><code>/critique health</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>migration-validator</h3>
+
+        <table>
+          <thead>
+            <tr><th>Attribute</th><th>Detail</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Role</td><td>Validates Alembic migration chain integrity, checks for broken links, cycles, orphaned revisions, and multiple heads. Inspects migration files for idempotency issues, PostgreSQL syntax problems, and common pitfalls.</td></tr>
+            <tr><td>Tools</td><td><code>Read, Bash, Glob, Grep</code></td></tr>
+            <tr><td>Inputs</td><td><code>all</code> (full chain), a specific migration file path, or <code>recent</code> (since last tag).</td></tr>
+            <tr><td>Outputs</td><td>A validation report separating critical issues, warnings, and best-practice suggestions with file and line references.</td></tr>
+            <tr><td>Invoked by</td><td><code>/critique validate</code> (migration scope)</td></tr>
+          </tbody>
+        </table>
+
+        <h3>plan-reviewer</h3>
+
+        <table>
+          <thead>
+            <tr><th>Attribute</th><th>Detail</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Role</td><td>Reviews a plan against engineering and design perspectives using the complexity-gated two-phase review process. Phase 1 scans across shortlisted perspectives; Phase 2 runs targeted deep-dives on deferred concerns.</td></tr>
+            <tr><td>Tools</td><td><code>Read, Glob, Grep, Bash</code></td></tr>
+            <tr><td>Inputs</td><td>The full plan text, plan file path, and review depth (Light, Standard, or Deep).</td></tr>
+            <tr><td>Outputs</td><td>A review log with Adopted/Deferred/N/A status per perspective, deep-dive findings, and recommended amendments.</td></tr>
+            <tr><td>Invoked by</td><td><code>/plan</code> (review step)</td></tr>
+          </tbody>
+        </table>
+
+        <h3>research-reviewer</h3>
+
+        <table>
+          <thead>
+            <tr><th>Attribute</th><th>Detail</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Role</td><td>Evaluates design decisions, open-ended questions, and trade-offs against engineering and design perspectives. Handles research questions and recommendations (unlike code-reviewer for diffs and plan-reviewer for plans).</td></tr>
+            <tr><td>Tools</td><td><code>Read, Glob, Grep, WebSearch</code></td></tr>
+            <tr><td>Inputs</td><td>The question, decision, or trade-off to evaluate. Optional context file paths and review depth (<code>light</code>, <code>standard</code>, <code>deep</code>).</td></tr>
+            <tr><td>Outputs</td><td>A structured analysis with a perspective status table, per-perspective evaluation, prioritized recommendations with trade-offs, and open concerns.</td></tr>
+            <tr><td>Invoked by</td><td><code>/research</code> (review step)</td></tr>
+          </tbody>
+        </table>
+
+        <h3>semiotic-inspector</h3>
+
+        <table>
+          <thead>
+            <tr><th>Attribute</th><th>Detail</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Role</td><td>Conducts a Semiotic Inspection Method (SIM) evaluation of a project's interface communicability. Examines metalinguistic, static, and dynamic sign classes independently, then synthesizes findings into a communicability judgment.</td></tr>
+            <tr><td>Tools</td><td><code>Read, Glob, Grep, Write</code></td></tr>
+            <tr><td>Inputs</td><td>A scope string (feature name, page, user flow, or <code>all</code>), a reserved <code>check-NNN</code> ID, and output path.</td></tr>
+            <tr><td>Outputs</td><td>A SIM report with per-sign-class analysis, a metacommunication reconstruction, a cross-class comparison, and a communicability verdict flagging where the interface's three voices agree or contradict.</td></tr>
+            <tr><td>Invoked by</td><td><code>/critique semiotic-inspection</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>standards-checker</h3>
+
+        <table>
+          <thead>
+            <tr><th>Attribute</th><th>Detail</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Role</td><td>Runs all project validation scripts registered in <code>product-design/conventions.md</code> and aggregates results into a unified compliance report.</td></tr>
+            <tr><td>Tools</td><td><code>Read, Bash, Glob, Grep</code></td></tr>
+            <tr><td>Inputs</td><td><code>all</code> (run every registered script) or a specific check name (e.g., <code>i18n</code>, <code>auth</code>, <code>migrations</code>).</td></tr>
+            <tr><td>Outputs</td><td>A unified compliance report with a pass/fail summary table across all checks, then specific errors and warnings from failed checks with file and line references.</td></tr>
+            <tr><td>Invoked by</td><td><code>/critique validate</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>test-runner</h3>
+
+        <table>
+          <thead>
+            <tr><th>Attribute</th><th>Detail</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Role</td><td>Runs backend (pytest) and frontend (vitest) test suites, parses output, and reports failures with context. Classifies each failure as test bug, source bug, environment issue, or flaky.</td></tr>
+            <tr><td>Tools</td><td><code>Read, Bash, Glob, Grep</code></td></tr>
+            <tr><td>Inputs</td><td><code>all</code>, <code>backend</code>, <code>frontend</code>, a specific test file path, or <code>integration</code>.</td></tr>
+            <tr><td>Outputs</td><td>A test report with pass/fail/skip counts, and for each failure: file, test name, error message, classification, and suggested next step.</td></tr>
+            <tr><td>Invoked by</td><td><code>/critique smoke</code>, <code>/critique test-plan</code> (verification)</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="generator-agents" data-diataxis="reference">
+        <h2>Generator Agents</h2>
+
+        <p>
+          Generator agents produce self-contained artifacts from
+          well-defined inputs. They are invoked by thin-skill wrappers
+          that handle argument parsing, interactive prompts, and
+          lifecycle hooks. All generator agents receive the project
+          constitution (<code>product-design/constitution.md</code>) as
+          part of their prompt to enforce the trust boundary -- generated
+          content must respect the project's immutable principles.
+        </p>
+
+        <h3>communication-generator</h3>
+
+        <table>
+          <thead>
+            <tr><th>Attribute</th><th>Detail</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Role</td><td>Produces stakeholder-facing communication material for one audience segment (evaluators, clients, end users, or academics). Reads audience tone and content guidance, pulls in project identity and value proposition.</td></tr>
+            <tr><td>Tools</td><td><code>Read, Bash, Glob, Grep, Write</code></td></tr>
+            <tr><td>Inputs</td><td>Audience tag (<code>EVL</code>, <code>CLT</code>, <code>USR</code>, <code>ACD</code>), audience file path, Diataxis mapping path, project context paths, output path, artifact ID, and format (<code>md</code>, <code>html</code>, or <code>both</code>).</td></tr>
+            <tr><td>Outputs</td><td>A Markdown and/or HTML deliverable tailored to the audience's register, with no meta-commentary or internal notes.</td></tr>
+            <tr><td>Invoked by</td><td><code>/communicate</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>onboarding-generator</h3>
+
+        <table>
+          <thead>
+            <tr><th>Attribute</th><th>Detail</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Role</td><td>Produces a personalized onboarding plan for a new team member. Combines role family (Builder, Shaper, Guardian) with expertise level (L1-L3) to shape a plan grounded in the actual codebase.</td></tr>
+            <tr><td>Tools</td><td><code>Read, Bash, Glob, Grep, Write</code></td></tr>
+            <tr><td>Inputs</td><td>Role tags (<code>BLD</code>, <code>SHP</code>, <code>GRD</code>), level (<code>L1</code>-<code>L3</code>), optional name and focus area, role and level file paths, project context paths, output path, artifact ID, and format.</td></tr>
+            <tr><td>Outputs</td><td>An onboarding plan with welcome, day-one foundation, role- and level-specific weeks, a 30-60-90 timeline, and a prioritized reading list pointing at real project files.</td></tr>
+            <tr><td>Invoked by</td><td><code>/onboard</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>document-generator</h3>
+
+        <table>
+          <thead>
+            <tr><th>Attribute</th><th>Detail</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Role</td><td>Produces or updates project documentation for a specific documentation type. Reads the right template, scans the codebase for concrete specifics, and produces a user-facing document that fits its Diataxis category.</td></tr>
+            <tr><td>Tools</td><td><code>Read, Bash, Glob, Grep, Write</code></td></tr>
+            <tr><td>Inputs</td><td>Doc type (<code>readme</code>, <code>contextual-help</code>, <code>api-reference</code>, <code>ddr</code>, <code>help-center</code>, <code>changelog</code>), scope, template path, quality guide path, project context paths, output path, and optional plan context.</td></tr>
+            <tr><td>Outputs</td><td>A documentation file at the specified output path, following the template structure and documentation quality standards.</td></tr>
+            <tr><td>Invoked by</td><td><code>/document</code></td></tr>
+          </tbody>
+        </table>
+
+        <aside class="callout-tip">
+          <p>
+            The <code>spo</code> (Structured Product Overview) doc type
+            is handled by <code>generate_spo.py</code> directly, not by
+            the document-generator agent.
+          </p>
+        </aside>
+
+        <h3>test-plan-generator</h3>
+
+        <table>
+          <thead>
+            <tr><th>Attribute</th><th>Detail</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Role</td><td>Synthesizes a structured manual test plan from a user-supplied brief and the most recently executed plans. Carries forward unchecked items from earlier test reports so they are not lost.</td></tr>
+            <tr><td>Tools</td><td><code>Read, Glob, Grep, Write</code></td></tr>
+            <tr><td>Inputs</td><td>A test brief string, a reserved <code>usertest-NNN</code> ID, output path, and optional directory overrides.</td></tr>
+            <tr><td>Outputs</td><td>A user-test artifact with header, user brief, agent interpretation, and each step written as an imperative with its expected outcome.</td></tr>
+            <tr><td>Invoked by</td><td><code>/critique test-plan</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>explanation-generator</h3>
+
+        <table>
+          <thead>
+            <tr><th>Attribute</th><th>Detail</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Role</td><td>Produces explanation reports for the behavior, code, and data-model modes. Reads project sources, applies the mode's skeleton and voice, and produces a structured report.</td></tr>
+            <tr><td>Tools</td><td><code>Read, Glob, Grep, Bash, WebSearch, Write</code></td></tr>
+            <tr><td>Inputs</td><td>Mode (<code>behavior</code>, <code>code</code>, or <code>data-model</code>), user brief, output path, and artifact ID.</td></tr>
+            <tr><td>Outputs</td><td>An ID-stamped explanation report. Behavior and data-model modes use a conversational, user-centered voice; code mode is aimed at junior developers with multiple analogies.</td></tr>
+            <tr><td>Invoked by</td><td><code>/explain</code> (behavior, code, data-model modes)</td></tr>
+          </tbody>
+        </table>
+
+        <h3>architecture-explainer</h3>
+
+        <table>
+          <thead>
+            <tr><th>Attribute</th><th>Detail</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Role</td><td>Produces architecture explanation reports. Surveys the system structure, maps component boundaries and communication patterns, surfaces key design decisions and trade-offs.</td></tr>
+            <tr><td>Tools</td><td><code>Read, Glob, Grep, Bash, WebSearch, Write</code></td></tr>
+            <tr><td>Inputs</td><td>User brief, output path, artifact ID, and optional scope (component or subsystem to focus on).</td></tr>
+            <tr><td>Outputs</td><td>An architecture explanation report aimed at onboarding developers, focusing on the <em>why</em> behind the architecture with multiple analogies. Covers the full system when unscoped, or a specific component and its dependencies when scoped.</td></tr>
+            <tr><td>Invoked by</td><td><code>/explain</code> (architecture mode)</td></tr>
+          </tbody>
+        </table>
+
+        <h3>evolution-explainer</h3>
+
+        <table>
+          <thead>
+            <tr><th>Attribute</th><th>Detail</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Role</td><td>Produces behavior-evolution explanation reports. Mines the plan history to trace how a feature reached its current state, builds a timeline of waves and design rationale.</td></tr>
+            <tr><td>Tools</td><td><code>Read, Glob, Grep, Bash, WebSearch, Write</code></td></tr>
+            <tr><td>Inputs</td><td>User brief (the feature area to trace), output path, and artifact ID.</td></tr>
+            <tr><td>Outputs</td><td>A behavior-evolution report showing both the current behavior snapshot and the full evolution story via plan history. Includes all plan prefixes (FEATURE, FIX, REFACTOR, REDESIGN, CHORE) that touched the feature.</td></tr>
+            <tr><td>Invoked by</td><td><code>/explain</code> (behavior-evolution mode)</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="writing-custom-subagents" data-diataxis="how-to">
+        <h2>Writing Custom Subagents</h2>
+
+        <p>
+          To create a custom subagent, create a new Markdown file in
+          <code>.claude/agents/</code> following the established
+          structure:
+        </p>
+
+        <ol>
+          <li>
+            <strong>Define the YAML frontmatter</strong> with
+            <code>name</code>, <code>description</code>,
+            <code>designer_description</code>, and <code>tools</code>.
+            The <code>tools</code> field must list only the tools the
+            agent needs -- follow the principle of least privilege.
+          </li>
+          <li>
+            <strong>Write a role boundary blockquote</strong> clarifying
+            which skill orchestrates this agent and what the division of
+            responsibility is. The agent handles specialized work; the
+            skill handles lifecycle, argument parsing, and user
+            interaction.
+          </li>
+          <li>
+            <strong>Document the input contract</strong> -- what
+            parameters the agent expects to receive from the delegating
+            skill. Be explicit about required vs. optional inputs.
+          </li>
+          <li>
+            <strong>Define the process</strong> as step-by-step
+            instructions. Start with loading relevant references
+            (<code>product-design/conventions.md</code> for project
+            context, <code>product-design/constitution.md</code> for
+            generator agents). Then describe the analysis or generation
+            steps.
+          </li>
+          <li>
+            <strong>Specify the output format</strong> -- file naming,
+            content structure, and where the output is written.
+          </li>
+          <li>
+            <strong>Wire it into a skill</strong> by adding delegation
+            logic to the skill's SKILL.md. The skill constructs the
+            agent's prompt with invocation-specific parameters and
+            launches it via the <code>Agent</code> tool.
+          </li>
+        </ol>
+
+        <aside class="callout-warning">
+          <p>
+            The agent prompt file should not invoke
+            <code>/pre-skill</code> or <code>/post-skill</code> -- the
+            parent skill owns the lifecycle. Including lifecycle calls in
+            an agent prompt causes double-execution of briefs logging,
+            indexing, and commits.
+          </p>
+        </aside>
+
+        <h3>Best Practices</h3>
+
+        <ul>
+          <li>
+            <strong>Clear, focused role</strong>: each agent should do
+            one thing well. If an agent's process section spans more than
+            10-15 steps, consider whether the work should be split across
+            multiple agents.
+          </li>
+          <li>
+            <strong>Minimal tool set</strong>: grant only the tools the
+            agent's process requires. Evaluator agents typically need
+            <code>Read, Glob, Grep, Bash</code>; generator agents add
+            <code>Write</code>.
+          </li>
+          <li>
+            <strong>Constitution loading for generators</strong>: any
+            agent that produces user-facing content must read the
+            constitution to enforce the trust boundary.
+          </li>
+          <li>
+            <strong>Convention-aware startup</strong>: begin the process
+            with reading <code>product-design/conventions.md</code> to
+            obtain project-specific paths and configuration.
+          </li>
+          <li>
+            <strong>Structured output</strong>: define a clear output
+            format (header, sections, tables) so the parent skill can
+            process the result consistently.
+          </li>
+        </ul>
+      </section>
+
+      <section id="common-mistakes" data-diataxis="how-to">
+        <h2>Common Mistakes</h2>
+
+        <dl>
+          <dt>Giving agents too broad a tool set</dt>
+          <dd>
+            An agent with <code>Write</code> access that only needs to
+            read files can accidentally modify project files outside its
+            scope. Declare only the tools the agent's process requires in
+            the <code>tools</code> frontmatter field. Evaluator agents
+            rarely need <code>Write</code>; most need only
+            <code>Read, Glob, Grep, Bash</code>.
+          </dd>
+
+          <dt>Not passing the constitution to generator agents</dt>
+          <dd>
+            Generator agents produce user-facing artifacts that must
+            respect the project's immutable principles. If the agent's
+            process does not start with reading
+            <code>product-design/constitution.md</code>, the generated
+            content may violate constitutional constraints (e.g.,
+            identity, privacy, quality commitments). Every generator
+            agent must load the constitution before beginning generation.
+          </dd>
+
+          <dt>Confusing evaluator and generator roles</dt>
+          <dd>
+            Evaluator agents analyze existing artifacts and return
+            findings; generator agents produce new artifacts. Asking an
+            evaluator to generate content (or a generator to review code)
+            produces poor results because the agent's process, voice, and
+            output format are optimized for its declared role. Use the
+            right agent category for the task.
+          </dd>
+
+          <dt>Writing agent prompts that duplicate SKILL.md logic</dt>
+          <dd>
+            The agent should handle only the specialized work the skill
+            delegates. Lifecycle management (pre-skill, post-skill), ID
+            reservation, argument parsing, and user interaction belong in
+            the skill. An agent that includes lifecycle calls will cause
+            double-execution of briefs logging, index regeneration, and
+            commits.
+          </dd>
+        </dl>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 3: The Execution Layer</h2>
+    <ol>
+      <li>
+        <a href="lifecycle-pipeline.html">Lifecycle Pipeline</a>
+      </li>
+      <li>
+        <a href="skills-in-depth.html">Skills In Depth</a>
+      </li>
+      <li aria-current="page">
+        <a href="subagent-delegation.html">Subagent Delegation</a>
+        <ul>
+          <li><a href="#the-delegation-model">The Delegation Model</a></li>
+          <li><a href="#agent-prompt-files">Agent Prompt Files</a></li>
+          <li><a href="#evaluator-agents">Evaluator Agents</a></li>
+          <li><a href="#generator-agents">Generator Agents</a></li>
+          <li><a href="#writing-custom-subagents">Writing Custom Subagents</a></li>
+          <li><a href="#common-mistakes">Common Mistakes</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="plans-and-implementation.html">Plans and Implementation</a>
+      </li>
+      <li>
+        <a href="quality-and-critique.html">Quality and Critique</a>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="skills-in-depth.html">Previous: Skills In Depth</a>
+    <a href="plans-and-implementation.html">Next: Plans and Implementation</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

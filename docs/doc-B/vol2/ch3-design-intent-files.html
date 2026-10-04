@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="2">
+  <meta name="doc-chapter" content="3">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+
+  <title>Design Intent Files -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 2: The Design Layer</a></li>
+      <li>Design Intent Files</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>Design Intent Files</h1>
+
+      <p>
+        Below the metacommunication message and the constitution sits the pair
+        of files that carry the working detail of a SEJA project's design layer:
+        <code>product-design/product-design-as-intended.md</code> (the target
+        state -- what you intend the system to be) and
+        <code>product-design/product-design-as-coded.md</code> (the current
+        state -- what the system actually is). The first is authored by you, the
+        designer; the second is maintained by the harnessed agent as code ships.
+        The gap between them is where design intent lives or dies -- and this
+        chapter documents both files, the workflow that keeps them honest, and
+        the markers that track the lifecycle of every item they contain.
+      </p>
+
+      <p>
+        This chapter mixes three registers. The <strong>reference</strong>
+        sections walk the real section layout of each file so you can navigate
+        them without guessing. The <strong>explanation</strong> section makes
+        the case for maintaining two files instead of one. The
+        <strong>how-to</strong> section is the maintenance workflow you follow
+        as the project evolves.
+      </p>
+
+      <!-- Section 1: The as-intended file (reference) -->
+      <section data-diataxis="reference" id="as-intended-structure">
+        <h2>Inside product-design-as-intended.md</h2>
+
+        <p>
+          <code>product-design/product-design-as-intended.md</code> is the
+          unified working-intent artifact. It is classified
+          <strong>Human (markers)</strong>: the prose is authored by you and you
+          alone, while the harnessed agent may write only fixed-format lifecycle
+          markers (STATUS flags, <code>DECISION_APPEND</code>,
+          <code>CHANGELOG_APPEND</code>) through <code>apply_marker.py</code>
+          after an explicit AskUserQuestion confirmation. A direct agent prose
+          write is rejected by <code>check_human_markers_only.py</code> during
+          post-skill. The mechanics of that classification -- and the markers
+          that make it work -- are the subject of
+          <a href="ch4-marker-system.html">The Marker System</a>.
+        </p>
+
+        <h3>The numbered sections (&sect;0--&sect;17)</h3>
+
+        <p>
+          The file opens with a header block that records its classification and
+          the stable-ID conventions it uses, then proceeds through eighteen
+          numbered sections grouped into three parts.
+        </p>
+
+        <p>
+          <strong>&sect;0. Planned Changes</strong> is a forward-looking table
+          of changes targeted at future versions, each with a change summary and
+          a motivation column. It sits before the numbered domain sections
+          because it describes where the design intent is heading, not where it
+          is.
+        </p>
+
+        <p>
+          <strong>Part I -- Conceptual Design (&sect;1--&sect;10)</strong>
+          carries the domain model:
+        </p>
+
+        <div class="table-container">
+          <table class="ref-table">
+            <thead>
+              <tr>
+                <th>Section</th>
+                <th>Heading</th>
+                <th>What it captures</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>&sect;1</td><td>Platform Purpose</td><td>What the platform is for, plus a Design Philosophy subsection</td></tr>
+              <tr><td>&sect;2</td><td>Entity Hierarchy</td><td>The artifacts the harness produces and manages, as an ASCII tree with per-entity prose</td></tr>
+              <tr><td>&sect;3</td><td>Domain-Specific Concepts</td><td>Metacommunication, lifecycle governance, Human (markers) classification, epistemic posture, and the SPO</td></tr>
+              <tr><td>&sect;4</td><td>Permission Model</td><td>System-level roles and resource-level access tables</td></tr>
+              <tr><td>&sect;5</td><td>Content Authoring and Attribution</td><td>The Human/Agent authoring boundary and marker attribution</td></tr>
+              <tr><td>&sect;6</td><td>Content Import and Export</td><td>Marked "Not applicable" for the harness</td></tr>
+              <tr><td>&sect;7</td><td>User Community and Localization</td><td>Target community and localization design</td></tr>
+              <tr><td>&sect;8</td><td>User Experience Patterns (Domain-Driven)</td><td>Skill dispatch, AskUserQuestion at decision points, transparency of reasoning</td></tr>
+              <tr><td>&sect;9</td><td>Administrative Domain</td><td>Activity logging, backup and restore, design governance</td></tr>
+              <tr><td>&sect;10</td><td>Validation Constants (Domain)</td><td>Marked "Not applicable" for the harness</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          <strong>Part II -- Metacommunication (&sect;11--&sect;15)</strong>
+          holds the metacommunication artifacts proper:
+        </p>
+
+        <div class="table-container">
+          <table class="ref-table">
+            <thead>
+              <tr>
+                <th>Section</th>
+                <th>Heading</th>
+                <th>What it captures</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>&sect;11</td><td>Global Metacommunication Vision</td><td>The canonical first-person message: who you understand your user to be, what you have learned they need, and how you designed the system to serve them</td></tr>
+              <tr><td>&sect;12</td><td>Extended Metacommunication Template Guiding Questions</td><td>The EMT: structured "what I know / what I don't yet know" answers across Analysis, Design, Prototyping, and post-deployment stages</td></tr>
+              <tr><td>&sect;13</td><td>Solution Representations</td><td>Solution scenarios (SS-NNN) tying personas, goals, and problem scenarios to designed flows</td></tr>
+              <tr><td>&sect;14</td><td>Per-Feature Metacommunication Intentions</td><td>A table of per-feature designer intent, implementation status, source, and last-updated date</td></tr>
+              <tr><td>&sect;15</td><td>Designed User Journeys</td><td>The designed journey maps (JM-TB-NNN), each with steps, touchpoints, pain points, and outcomes</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          <strong>Part III -- Delta from As-Coded (&sect;16--&sect;17)</strong>
+          records how the intent has moved since the last as-coded update:
+          &sect;16 (Conceptual Design Delta) and &sect;17 (Delta Rationale).
+          Both are placeholder sections until the first
+          <code>/implement</code> run populates them via post-skill and
+          <code>/explain drift</code>.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Note:</strong> &sect;11 is the metacommunication message
+            itself -- the highest-authority artifact in the whole design layer,
+            written in first-person "I" (the designer) addressing second-person
+            "you" (the user). It is documented in full in
+            <a href="ch1-metacommunication-message.html">The Metacommunication
+            Message</a>. Everything else in the file is accountable to it.
+          </p>
+        </aside>
+
+        <h3>The Decisions section (D-NNN)</h3>
+
+        <p>
+          After the numbered sections comes <code>## Decisions</code> -- a run
+          of DDR-shaped decision records under
+          <code>### D-NNN: Title</code> headings. Each record has four fields:
+          <strong>Context</strong>, <strong>Decision</strong>,
+          <strong>Consequences</strong>, and <strong>Rejected Alternatives</strong>,
+          usually closed with a source line
+          (<em>Source: from research-000586</em>, for example). IDs are
+          auto-assigned in sequence (D-001, D-002, ...), and the
+          <code>D-NNN</code> namespace is orthogonal to the
+          <code>REQ-TYPE-NNN</code> requirement namespace -- the two are never
+          intermixed.
+        </p>
+
+        <p>
+          A decision record moves through a lifecycle of
+          <code>proposed</code> &rarr; <code>implemented</code> &rarr;
+          <code>established</code> &rarr; <code>superseded</code>, tracked by the
+          STATUS marker that sits immediately above its heading. Entries are
+          appended only through
+          <code>apply_marker.py --marker DECISION_APPEND</code> after
+          AskUserQuestion confirmation -- never hand-inserted by the agent. This
+          is where the rationale behind consequential architectural choices
+          lives, so that a future designer can understand not just what was
+          decided but what was rejected and why.
+        </p>
+
+        <h3>The CHANGELOG section</h3>
+
+        <p>
+          The file closes with <code>## CHANGELOG</code>: an append-only table
+          of Date / Action / Source rows recording each marker flip and each
+          significant change to the file. The agent writes to it only through
+          <code>apply_marker.py --marker CHANGELOG_APPEND</code>. Because it is
+          append-only, the CHANGELOG is a chronological audit trail: nothing is
+          ever rewritten or removed.
+        </p>
+      </section>
+
+      <!-- Section 2: The as-coded file (reference) -->
+      <section data-diataxis="reference" id="as-coded-structure">
+        <h2>Inside product-design-as-coded.md</h2>
+
+        <p>
+          <code>product-design/product-design-as-coded.md</code> is the
+          unified implementation-state artifact. Its classification is
+          <strong>Agent</strong>: it is written by post-skill after each plan
+          execution and is never hand-edited. You read it to understand what the
+          codebase currently implements; post-skill mirrors the target
+          structure of the as-intended file into it as code ships. Where the
+          as-intended file has eighteen numbered sections, the as-coded file
+          collapses them into <strong>three H2 domain sections</strong>, each
+          holding the numbered material as H3-and-deeper subsections.
+        </p>
+
+        <div class="table-container">
+          <table class="ref-table">
+            <thead>
+              <tr>
+                <th>H2 section</th>
+                <th>Mirrors</th>
+                <th>Contents</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>## Conceptual Design</code></td>
+                <td>As-intended &sect;1--&sect;10</td>
+                <td>The domain model as built -- platform purpose, entity hierarchy, domain concepts, permission model, authoring, and validation, each as an H3 subsection numbered to match its as-intended counterpart</td>
+              </tr>
+              <tr>
+                <td><code>## Metacommunication</code></td>
+                <td>As-intended &sect;11--&sect;14</td>
+                <td>The as-coded metacommunication chains: the global summary, the EMT answers, the implemented solution representations (with an Implementation Status of Implemented / Partial per scenario), the per-feature metacommunication log, and a per-section changelog</td>
+              </tr>
+              <tr>
+                <td><code>## Journey Maps</code></td>
+                <td>As-intended &sect;15</td>
+                <td>The implemented journey maps (JM-TB-NNN) with per-step "Implemented" flags, a Delta from As-Intended block listing not-yet-implemented steps, and a changelog</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Two disciplines are worth calling out. First, post-skill writes target
+          exactly one H2 domain section at a time; the
+          <code>check_section_boundary_writes.py</code> validator (preflight
+          step 6c) rejects any contiguous write region that spans two or more H2
+          sections, so a conceptual-design edit can never accidentally reach into
+          the metacommunication section. Second, the file carries a
+          <code>designer_description</code> in its YAML frontmatter and a
+          classification header identifying itself as the as-coded mirror -- both
+          orient a reader who lands in the file without context.
+        </p>
+
+        <p>
+          The as-coded file is where implementation reality is recorded plainly.
+          Its solution-representation entries, for instance, may carry a status
+          of <strong>Partial</strong> where the as-intended file describes a
+          fully designed flow -- an honest admission that part of the designed
+          journey (a planned feature, say) has not yet shipped. That honesty is
+          the entire point of maintaining the file separately, which the next
+          section explains.
+        </p>
+      </section>
+
+      <!-- Section 3: Why two files (explanation) -->
+      <section data-diataxis="explanation" id="as-intended-as-coded-split">
+        <h2>Why the As-Intended / As-Coded Split Exists</h2>
+
+        <p>
+          It would be simpler to keep one file. SEJA keeps two, deliberately,
+          because the target state and the current state answer different
+          questions and are owned by different authors.
+        </p>
+
+        <h3>Two questions, two authors</h3>
+
+        <p>
+          The as-intended file answers <em>what should the system be?</em> It is
+          yours -- Human (markers)-classified, authored in your voice, the place
+          where design intent is declared. The as-coded file answers <em>what is
+          the system, right now?</em> It is the agent's -- written by post-skill,
+          derived mechanically from what plans actually implemented. Collapsing
+          the two would force one author to overwrite the other: either the
+          agent would have to edit your design intent to keep it "current" (which
+          the Human (markers) classification forbids for exactly this reason), or
+          you would have to hand-maintain an implementation record that the
+          harness can generate for you.
+        </p>
+
+        <h3>The gap is the signal</h3>
+
+        <p>
+          Keeping the two files apart makes the gap between them a first-class,
+          inspectable object. That gap is the subject of
+          <code>/explain drift</code>: the skill compares
+          <code>product-design-as-intended.md</code> against
+          <code>product-design-as-coded.md</code> and surfaces every place where
+          the implementation has diverged from the intent. Some divergences are
+          sanctioned -- captured by a D-NNN decision record that deliberately
+          changed the approach. Others are unintended drift, the kind that is
+          invisible until it becomes expensive to fix. A single merged file
+          would erase the very distance that lets drift be measured.
+        </p>
+
+        <p>
+          The pattern is not unique to this file pair. SEJA maintains an
+          as-intended / as-coded pair for each registered design domain, and the
+          As-Intended / As-Coded Registry in
+          <code>product-design/conventions.md</code> is the single source of
+          truth for which pairs exist. It is what <code>/design</code>,
+          <code>/explain drift</code>, and post-skill's DONE-marker proposals all
+          consult to know which files pair with which.
+        </p>
+
+        <h3>How as-coded stays in step with the codebase</h3>
+
+        <p>
+          The as-coded file does not drift into staleness because it is not
+          hand-maintained -- it is regenerated by the lifecycle pipeline. When
+          <code>/implement</code> executes a plan, post-skill's as-coded
+          alignment step updates
+          <code>product-design-as-coded.md</code> to reflect what was actually
+          built: it edits the <code>## Conceptual Design</code> section for new
+          or changed entities, updates the <code>## Metacommunication</code>
+          section when the plan carried metacommunication framing, and
+          cross-references implemented features against the journey maps. Each
+          write stays within a single H2 boundary, and the section-boundary
+          validator enforces that at preflight. The full post-skill mechanics --
+          which steps run, in what order, and under what conditions -- are
+          documented in
+          <a href="../vol3/ch1-lifecycle-pipeline.html#post-skill-steps">The
+          Lifecycle Pipeline</a>.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> Because post-skill only runs as-coded
+            alignment when the parent skill is <code>/implement</code>, the
+            as-coded file reflects <em>shipped</em> work, not planned work. A
+            plan that has been written but not yet implemented does not move the
+            as-coded file at all. That is by design: the as-coded file tracks the
+            codebase, not the backlog.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 4: REQ markers and STATUS lifecycle (reference) -->
+      <section data-diataxis="reference" id="req-markers-and-status">
+        <h2>REQ Markers and the STATUS Lifecycle</h2>
+
+        <p>
+          Two marker families give the design-intent files their machine-readable
+          spine: <strong>REQ markers</strong> that identify individual
+          requirements, and <strong>STATUS markers</strong> that track each
+          item's lifecycle. Both are defined canonically in
+          <code>.claude/references/general/shared-definitions.md</code>; the
+          mechanics of how they are written and read are covered in
+          <a href="ch4-marker-system.html">The Marker System</a>. This section
+          documents what they mean.
+        </p>
+
+        <h3>REQ markers</h3>
+
+        <p>
+          A REQ marker is a stable, machine-parseable identifier for a
+          design-intent requirement, written as an HTML comment placed
+          immediately before the heading, table row, or bullet it applies to.
+          Its format is <code>&lt;!-- REQ-TYPE-NNN --&gt;</code>, where
+          <code>NNN</code> is a zero-padded three-digit counter per type,
+          starting at 001. The type prefix ties the requirement to the
+          as-intended section it lives in:
+        </p>
+
+        <div class="table-container">
+          <table class="ref-table">
+            <thead>
+              <tr>
+                <th>Type prefix</th>
+                <th>Design-intent section</th>
+                <th>Classification</th>
+                <th>Enforcement</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>ENT</td><td>&sect;2. Entity Hierarchy</td><td>technical</td><td>advisory</td></tr>
+              <tr><td>PERM</td><td>&sect;4. Permission Model</td><td>security</td><td>blocking at preflight</td></tr>
+              <tr><td>VAL</td><td>&sect;10. Validation Constants</td><td>security</td><td>blocking at preflight</td></tr>
+              <tr><td>UX</td><td>&sect;8. UX Patterns</td><td>ux</td><td>advisory</td></tr>
+              <tr><td>MC</td><td>&sect;14. Per-Feature Metacomm</td><td>ux</td><td>advisory</td></tr>
+              <tr><td>JM</td><td>&sect;15. Designed User Journeys</td><td>ux</td><td>advisory</td></tr>
+              <tr><td>I18N</td><td>&sect;7. Localization</td><td>cross-cutting</td><td>advisory</td></tr>
+              <tr><td>DELTA</td><td>&sect;16--17. Deltas</td><td>technical</td><td>advisory</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Security-classified requirements (PERM, VAL) must be traced by a plan
+          step in the same wave as their parent entity; advisory-classified
+          requirements produce warnings but do not block. Plan steps declare the
+          requirements they satisfy through a <code>Traces</code> metadata field
+          (for example, <code>Traces: REQ-ENT-001, REQ-PERM-003</code>), and
+          coverage is verified by <code>check_plan_coverage.py</code>. The
+          <code>/design</code> skill auto-assigns REQ IDs during verification. As
+          noted above, the <code>D-NNN</code> decision namespace is orthogonal to
+          <code>REQ-TYPE-NNN</code>: never interpolate a D-NNN into the REQ
+          taxonomy, and never write a <code>REQ-D-NNN</code> collision.
+        </p>
+
+        <h3>The STATUS lifecycle</h3>
+
+        <p>
+          A STATUS marker is an inline HTML comment placed immediately before a
+          prose section heading (or above a D-NNN heading). Two schemes coexist
+          on disk. The <strong>current scheme</strong> (SEJA 2.8.0 and later,
+          used by <code>apply_marker.py</code>) is a lowercase multi-value
+          marker driven by a state machine:
+        </p>
+
+        <pre><code>&lt;!-- STATUS: proposed | plan-NNNNNN | YYYY-MM-DD --&gt;
+### Section Title</code></pre>
+
+        <p>
+          The state machine has five legal transitions, validated against the
+          human-markers registry:
+        </p>
+
+        <ul>
+          <li><code>proposed</code> &rarr; <code>implemented</code></li>
+          <li><code>proposed</code> &rarr; <code>superseded</code></li>
+          <li><code>implemented</code> &rarr; <code>established</code></li>
+          <li><code>implemented</code> &rarr; <code>superseded</code></li>
+          <li><code>established</code> &rarr; <code>superseded</code></li>
+        </ul>
+
+        <p>
+          Regression (for example <code>established</code> &rarr;
+          <code>implemented</code>) is rejected. The plan ID and date are
+          optional for the initial <code>proposed</code> state and required
+          after it. The <strong>legacy scheme</strong> (pre-2.8.0, still
+          supported) uses a single uppercase
+          <code>STATUS: IMPLEMENTED</code> marker, typically paired with a later
+          <code>ESTABLISHED</code> stamp on promotion; a legacy marker without a
+          plan ID is valid for items implemented outside the plan workflow
+          (source <code>manual</code>). New and consolidated files use the
+          lowercase scheme, and
+          <code>product-design/product-design-as-intended.md</code> is the
+          canonical lowercase-primary Human (markers) file.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> STATUS markers are audit records. The agent may
+            read them and propose new ones, but must never remove or alter an
+            existing <code>implemented</code> or <code>established</code> marker.
+            When a promotion flips a marker, the tooling <em>replaces</em> the
+            existing marker rather than stacking a second one on top of it.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 5: Maintenance workflow (how-to) -->
+      <section data-diataxis="how-to" id="maintenance-workflow">
+        <h2>Maintaining the Design Intent Files</h2>
+
+        <p>
+          The two files are maintained on different cadences by different actors.
+          This section is the practical workflow for keeping them healthy as the
+          project evolves.
+        </p>
+
+        <h3>Updating an as-intended section</h3>
+
+        <p>
+          When your understanding of the design changes -- a revised domain
+          model, a new UX pattern, an updated metacommunication intention -- edit
+          the prose of <code>product-design-as-intended.md</code> directly. This
+          is your file to author. Prefer running <code>/design</code>, which
+          knows the section structure, auto-assigns REQ IDs during verification,
+          and keeps the numbering consistent, rather than hand-editing in a way
+          that the tooling later has to reconcile. Do <strong>not</strong> ask
+          the agent to write prose into the file on your behalf:
+          <code>check_human_markers_only.py</code> will flag the mutation at
+          post-skill step 6c and recommend aborting the commit.
+        </p>
+
+        <h3>Recording a decision</h3>
+
+        <p>
+          When a design decision worth preserving is reached -- most often during
+          <code>/research</code>, whose step 9b detects decisions in the Q&amp;A
+          and offers to capture them -- record it as a D-NNN entry rather than
+          burying it in prose. The entry is appended via
+          <code>apply_marker.py --marker DECISION_APPEND</code> after an
+          AskUserQuestion confirmation, with an auto-assigned ID and the DDR
+          shape (Context, Decision, Consequences, Rejected Alternatives). You can
+          create the entry now, defer it to the pending ledger, or skip it. The
+          same <code>apply_marker.py</code> path handles CHANGELOG appends, so the
+          audit trail stays intact.
+        </p>
+
+        <h3>Letting as-coded catch up</h3>
+
+        <p>
+          You do not maintain <code>product-design-as-coded.md</code> by hand --
+          post-skill does it for you when <code>/implement</code> runs. After an
+          implementation, post-skill updates the as-coded section that changed
+          and proposes any DONE markers on the as-intended items the plan
+          satisfied. Accept or defer those proposals through the AskUserQuestion
+          gate; the flip from <code>proposed</code>/<code>implemented</code> is
+          written by <code>apply_marker.py</code>, never by direct edit.
+        </p>
+
+        <h3>Promoting implemented intent to established</h3>
+
+        <p>
+          Once an intent item has shipped and settled, promote it from
+          <code>implemented</code> to <code>established</code> with the promote
+          workflow, which runs in two phases:
+        </p>
+
+        <ol>
+          <li>
+            <strong>Phase 3a -- draft decision entries.</strong>
+            <code>/explain drift --promote</code> reads plan metadata and drafts
+            DDR-shaped entries for items marked
+            <code>STATUS: implemented</code>, writing them to
+            <code>_output/promote-proposals/promote-proposal-plan-&lt;id&gt;.md</code>.
+            You review each draft, edit it into your own voice, and copy the
+            entries into the <code>## Decisions</code> section of the as-intended
+            file. The agent never writes the decision prose for you.
+          </li>
+          <li>
+            <strong>Phase 3b -- flip the markers.</strong>
+            <code>/explain drift --promote --apply-markers plan-&lt;id&gt;</code>
+            then flips the STATUS markers from <code>implemented</code> to
+            <code>established</code> via <code>apply_marker.py</code>, using a
+            heading-only match to verify each entry's presence without touching
+            the surrounding designer-authored prose.
+          </li>
+        </ol>
+
+        <h3>Checking for drift periodically</h3>
+
+        <p>
+          On a regular cadence -- and whenever a <code>spec-drift-check</code>
+          pending action comes due -- run <code>/explain drift</code> to compare
+          the two files. Triage each surfaced divergence: if it reflects a
+          deliberate change, capture it as a D-NNN entry (or confirm it is
+          already covered by one); if it is unintended drift, either fix the
+          implementation to match the intent or update the intent to match
+          reality, and record a pending action for the work if it cannot be done
+          on the spot.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The golden rule for both files: your prose is
+            yours to write, and the agent's markers are the agent's to write --
+            but only through <code>apply_marker.py</code>, only after
+            AskUserQuestion. If you ever find yourself about to hand-edit the
+            as-coded file, or about to let the agent draft as-intended prose,
+            stop -- you are working against the classification, and the
+            post-skill verifier will catch it.
+          </p>
+        </aside>
+      </section>
+
+      <!-- See also -->
+      <nav aria-label="see also" class="see-also">
+        <h2>See Also</h2>
+        <ul>
+          <li><a href="ch1-metacommunication-message.html">Vol. 2, Ch. 1 -- The Metacommunication Message</a>: &sect;11 of the as-intended file, the artifact everything else is accountable to.</li>
+          <li><a href="ch4-marker-system.html">Vol. 2, Ch. 4 -- The Marker System</a>: the write mechanics behind REQ, STATUS, DECISION_APPEND, and CHANGELOG_APPEND markers.</li>
+          <li><a href="../vol3/ch1-lifecycle-pipeline.html#post-skill-steps">Vol. 3, Ch. 1 -- The Lifecycle Pipeline</a>: how post-skill keeps the as-coded file in step with the codebase.</li>
+        </ul>
+      </nav>
+
+    </article>
+  </main>
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="ch2-constitution.html">Previous: The Constitution</a>
+    <a href="ch4-marker-system.html">Next: The Marker System</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

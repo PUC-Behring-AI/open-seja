@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-volume" content="Explanation">
+  <meta name="doc-chapter" content="Reflective Practice in SEJA">
+  <meta name="doc-phase" content="stable">
+  <meta name="doc-status" content="published">
+
+  <title>Reflective Practice in SEJA -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element (WCAG 2.4.1) -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Volume navigation bar -->
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="../how-to/index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Explanation</a></li>
+      <li>Reflective Practice in SEJA</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content area -->
+  <main id="main-content" class="chapter-content vol-explanation">
+    <article>
+      <!-- Diataxis type badge -->
+      <p class="vol-accent"><strong>explanation</strong></p>
+
+      <h1>Reflective Practice in SEJA</h1>
+
+      <p>
+        Semiotic engineering is one of the two traditions SEJA sits inside. The
+        other is Donald Schon's <strong>reflective practice</strong> (Schon 1983,
+        <em>The Reflective Practitioner</em>). The connection is not incidental:
+        de Souza adopted Schon's stance as the foundational epistemology of
+        semiotic engineering (de Souza 2005, Ch. 1), explicitly rejecting the
+        technical-rationality view in which design is the straightforward
+        application of theory to practice. If design is instead a reflective
+        conversation with the materials of a situation, then a tool that governs
+        AI-assisted design has to make room for that conversation. This chapter
+        explains Schon's three registers of reflection, takes two serious
+        counter-readings seriously, and shows exactly which SEJA mechanism carries
+        each register.
+      </p>
+
+      <section id="schons-three-registers">
+        <h2>Schon's Three Registers</h2>
+
+        <p>
+          Schon distinguishes three registers of reflection, and it is worth
+          keeping them separate because each licenses a different kind of move.
+        </p>
+
+        <dl>
+          <dt>Reflection-in-action</dt>
+          <dd>
+            Thinking about what you are doing <em>while</em> you are doing it -- the
+            in-the-moment pause to second-guess a step before you commit to it.
+            This is the register of the skilled practitioner who feels something is
+            off mid-stroke and adjusts. It happens inside the action, not after it,
+            and its hallmark is the productive hesitation: the beat where you stop
+            to consider before proceeding.
+          </dd>
+
+          <dt>Reflection-on-action</dt>
+          <dd>
+            Pausing <em>after</em> the work is done to think back over what
+            happened. This is the retrospective register: what did I do, what
+            worked, what surprised me, what would I do differently. It operates on
+            a completed piece of work and turns it into a lesson.
+          </dd>
+
+          <dt>Reflection-on-practice</dt>
+          <dd>
+            The longest-horizon register, where you step back from any single piece
+            of work to surface and criticize the tacit patterns you have been
+            running without noticing -- the habits of your practice itself. This is
+            not about one artifact; it is about the recurring shape of how you work
+            across many artifacts and sessions.
+          </dd>
+        </dl>
+
+        <p>
+          The three registers are nested by time horizon: in-action lives inside
+          the moment, on-action lives just after the moment, and on-practice lives
+          across many moments. A tool that wants to support reflective practice
+          cannot collapse them into one "reflection feature"; it needs a distinct
+          surface at each horizon. SEJA has exactly three, one per register, which
+          the mapping section below lays out.
+        </p>
+      </section>
+
+      <section id="abduction-the-reasoning-mode">
+        <h2>Abduction: The Reasoning Mode Reflection Runs On</h2>
+
+        <p>
+          Schon's account pairs naturally with Peirce's <strong>abduction</strong>.
+          Abduction is the mode of reasoning in which you observe a surprising
+          fact, entertain a hypothesis that would explain it if true, and
+          provisionally hold that hypothesis as your best available reading until
+          something contradicts it. Peirce is blunt about the provisionality: an
+          abductive conclusion holds only until better evidence arrives. It is the
+          only mode of reasoning that admits genuinely creative formulations, and
+          it is the engine of reflective sense-making -- the reflective
+          practitioner is, in Peircean terms, running abduction on their own work.
+        </p>
+
+        <p>
+          This is why SEJA's design documents, and the foundations material they
+          draw on, are written in a consistently provisional voice -- "we currently
+          read," "this is our current best reading" -- rather than in the voice of
+          settled fact. The provisionality is not hedging for its own sake; it is
+          the grammatical form that keeps the harness's self-understanding
+          abductive. SEJA operationalizes abduction most visibly in the
+          council-debate mode of <code>/research --deep</code>, where a small group
+          of named experts each run their own abductive reading of the same
+          question and are brought into structured disagreement, so that the
+          synthesis handed back carries its counter-readings on its face rather
+          than pretending a single recommendation is the only plausible one.
+        </p>
+      </section>
+
+      <section id="mapping-registers-to-mechanisms">
+        <h2>Mapping Registers to Mechanisms</h2>
+
+        <p>
+          SEJA carries one concrete scaffold per register. Each is deliberately
+          minimal -- the aim is to place a small structured pause at each horizon,
+          not to build a reflection ceremony a designer will learn to skip.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Schon register</th>
+                <th>SEJA mechanism</th>
+                <th>What the pause does</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Reflection-in-action</td>
+                <td>Decision-point rationale at every <code>AskUserQuestion</code></td>
+                <td>Turns a silent branch into a small visible deliberation before you commit</td>
+              </tr>
+              <tr>
+                <td>Reflection-on-action</td>
+                <td>Post-skill QA logging and the post-action reflection note</td>
+                <td>Records what happened, what deviated, and what is now less certain</td>
+              </tr>
+              <tr>
+                <td>Reflection-on-practice</td>
+                <td>The <code>/reflect</code> skill, product and practice lenses</td>
+                <td>Surfaces recurring patterns across sessions in your own words</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Reflection-in-action: decision-point rationale</h3>
+
+        <p>
+          Whenever a SEJA skill pauses to ask you a question -- pick a profile,
+          confirm a marker flip, choose the next step -- it carries a short
+          rationale for each option: not just <em>what</em> the option is but
+          <em>why</em> it is on the menu and when it is or is not recommended. This
+          is the smallest reflection-in-action scaffold the harness can build. It
+          converts a silent branch, which you would otherwise pass through on
+          autopilot, into a tiny deliberation. The convention is spelled out in
+          the harness's constraints reference, and its rationale is explicitly
+          Schonian: the harness is a <em>proposer</em>, the designer is the
+          <em>decider</em>, and no option may be pre-accepted by framing alone. You
+          can read the rationale and choose the other option anyway; the point is
+          that you paused to read it.
+        </p>
+
+        <h3>Reflection-on-action: post-skill QA logging</h3>
+
+        <p>
+          When a skill completes, the post-skill hook captures the session's
+          questions and answers -- by default into a companion
+          <code>&lt;prefix&gt;&lt;id&gt;-qa-&lt;slug&gt;.md</code> file collocated
+          with the artifact, or, for a handful of skills whose artifact already
+          <em>is</em> a transcript (like <code>/research</code>) or whose Q&amp;A
+          belongs with the plan (<code>/plan</code>, <code>/implement</code>),
+          inline within the artifact itself. The heavier skills also emit a brief
+          reflection-on-action note: what actually happened, what deviated from the
+          plan, and what is now less certain than it was at the start. The note is
+          short on purpose -- it is not a postmortem, it is the smallest possible
+          act of looking back before the next turn begins.
+        </p>
+
+        <h3>Reflection-on-practice: the <code>/reflect</code> skill</h3>
+
+        <p>
+          The longest-horizon register needs its own surface, and that surface is
+          the <code>/reflect</code> skill. In its default conversational mode,
+          <code>/reflect</code> anchors a session on artifacts you choose and then
+          asks which lens you are reflecting through. The <strong>product lens</strong>
+          examines what you built -- a feature, a design decision, a finished spec
+          -- and asks whether it does what you intended; this is reflection-on-action
+          at the level of an artifact. The <strong>practice lens</strong> examines
+          how you worked -- what patterns emerge, where you hesitated, what you
+          would do differently as a practitioner; this is Schon's
+          reflection-on-practice at the level of a session. Crucially,
+          <code>/reflect</code> records your words verbatim and does not prescribe
+          what to change. For patterns you cannot see inside a single session,
+          <code>--telemetry</code> mines briefs, QA logs, and pending-ledger
+          entries for recurring sequences, duration outliers, and drift, and
+          <code>--deep</code> adds a visualization layer with an event matrix and a
+          transition graph. Those modes are how reflection-on-practice reaches
+          across weeks of work rather than a single turn.
+        </p>
+      </section>
+
+      <section id="eraut-counter-reading">
+        <h2>A Counter-Reading: Eraut on Deliberative vs. Reactive Reflection</h2>
+
+        <p>
+          It would be too easy to present Schon's registers as an unqualified good
+          and SEJA's scaffolds as their obvious operationalization. Michael Eraut
+          (1994, <em>Developing Professional Knowledge and Competence</em>) is
+          sharp about the limits, and taking him seriously sharpens the design.
+          Eraut's broad concern is that "reflection" smuggles together very
+          different cognitive activities under one honorific word. In particular he
+          distinguishes <em>deliberative</em> reflection -- the considered,
+          time-affording kind that Schon's celebrated examples actually depict --
+          from <em>reactive</em> reflection, the split-second adjustment made under
+          time pressure with no room for genuine deliberation. His worry is that
+          much of what gets called reflection-in-action is really reactive, and
+          that dressing reactive adjustment in the language of deliberation
+          overstates how much considered thought is actually happening.
+        </p>
+
+        <p>
+          For SEJA this is a direct challenge to the decision-point rationale
+          scaffold. A designer clicking through an <code>AskUserQuestion</code>
+          under time pressure is closer to Eraut's reactive pole than his
+          deliberative one; the rationale text may scroll past unread. The honest
+          reading is that the scaffold can only <em>afford</em> deliberation, not
+          compel it -- it holds the door open for a considered pause, but a rushed
+          designer will pass through reactively. The design response SEJA takes is
+          to keep the rationale short enough to be read in the reactive mode while
+          still carrying the contextual "recommended when / not recommended when"
+          reasoning that would reward a deliberative reader. That is a compromise,
+          and Eraut would be right to note it is only a partial answer.
+        </p>
+      </section>
+
+      <section id="boud-counter-reading">
+        <h2>A Second Counter-Reading: Boud on Reflection as Genre Performance</h2>
+
+        <p>
+          David Boud (2013) makes a related argument from the setting of
+          educational reflective writing: when a reflection becomes an
+          <em>assessed artifact</em>, it stops being a thinking tool and starts
+          being a genre performance. The learner discovers the expected shape of a
+          "good reflection" and produces that shape, whether or not the underlying
+          cognitive work happened. The reflection becomes a ritual whose form is
+          rewarded regardless of its substance.
+        </p>
+
+        <p>
+          This is the most pointed critique of SEJA's whole reflection apparatus,
+          and it applies squarely. By turning reflection into something the harness
+          asks you to produce on a schedule -- a rationale at every decision point,
+          a note after every heavy skill, a <code>/reflect</code> session on
+          demand -- SEJA risks training a habit of shape without substance: the
+          designer learns to produce reflection-shaped output without doing the
+          reflecting. We find this position instructive even where we do not fully
+          accept it. The version we accept is that the scaffolds must stay small
+          enough that performance is not worth the effort -- if a reflection note
+          is two sentences, there is little to game. The version we do not accept
+          is the implied alternative, that no scaffolding at all produces better
+          reflection; our reading is that an unassisted designer under deadline
+          reflects less, not more honestly. The <code>/reflect</code> skill's
+          verbatim recording is a deliberate hedge against Boud's critique: by not
+          prescribing what a reflection should conclude, it refuses to define the
+          rewarded shape that genre performance would imitate.
+        </p>
+      </section>
+
+      <section id="what-we-are-uncertain-about">
+        <h2>What We Are Uncertain About</h2>
+
+        <p>
+          We are not confident the post-action reflection loop will stay short. The
+          failure mode we most worry about is that it grows into a boilerplate
+          paragraph the designer stops reading -- which, per Boud, would make the
+          scaffold worse than no reflection at all. Keeping it minimal is a design
+          choice that has to be re-defended every time the loop is tempted to grow.
+        </p>
+
+        <p>
+          We are also uncertain about the council-debate as an operationalization
+          of abduction. The debate reliably produces plural readings; we are less
+          sure the synthesis it hands back does justice to the disagreement rather
+          than collapsing it, because a single recommendation is easier to act on
+          than a preserved tension. If the synthesis flattens the plurality, the
+          abductive character is nominal. This is the same uncertainty that shadows
+          the "distributed we to collective we to I" mapping in the previous
+          chapter, seen from the reflection side.
+        </p>
+      </section>
+
+      <section id="what-this-means-for-seja-users">
+        <h2>What This Means for SEJA Users</h2>
+
+        <p>
+          The reflection scaffolds are not busywork the harness imposes; they are
+          three small pauses placed at Schon's three horizons so that reflective
+          practice becomes a habit you do not have to remember to adopt. Read the
+          rationale before you click. Read the post-action note before you start
+          the next task. Run <code>/reflect</code> when you want to step back and
+          look at what you have built or how you have been working. And take the
+          counter-readings seriously: if any of these scaffolds starts to feel like
+          a ritual you are performing rather than a pause you are using, that is the
+          signal that it has grown too heavy and should be trimmed. The next
+          chapter draws these threads together into the thesis that unifies the
+          whole harness: that SEJA is built to be governable <em>and</em> epistemic
+          at once.
+        </p>
+      </section>
+
+    </article>
+
+    <!-- Sequential chapter navigation -->
+    <nav aria-label="chapter navigation">
+      <a href="emt.html">Previous: The Extended Metacommunication Template</a>
+      <a href="dual-thesis.html">Next: The Governable and Epistemic Thesis</a>
+    </nav>
+
+    <!-- See also: cross-volume related chapters -->
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../reference/skills-reference.html">Skills Reference</a> -- the <code>/reflect</code> modes and their arguments</li>
+        <li><a href="../how-to/skills/reflect.html">How to Reflect on Your Practice</a> -- running a reflection session step by step</li>
+      </ul>
+    </nav>
+  </main>
+
+  <!-- Sidebar table of contents -->
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#schons-three-registers">Schon's Three Registers</a></li>
+      <li><a href="#abduction-the-reasoning-mode">Abduction: The Reasoning Mode</a></li>
+      <li><a href="#mapping-registers-to-mechanisms">Mapping Registers to Mechanisms</a></li>
+      <li><a href="#eraut-counter-reading">Eraut: Deliberative vs. Reactive</a></li>
+      <li><a href="#boud-counter-reading">Boud: Reflection as Genre Performance</a></li>
+      <li><a href="#what-we-are-uncertain-about">What We Are Uncertain About</a></li>
+      <li><a href="#what-this-means-for-seja-users">What This Means for SEJA Users</a></li>
+    </ul>
+  </aside>
+
+  <!-- Footer -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T22:55:00Z</p>
+  </footer>
+
+</body>
+</html>

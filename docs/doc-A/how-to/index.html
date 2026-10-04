@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="how-to">
+  <meta name="doc-volume" content="How-To Guides">
+  <meta name="doc-chapter" content="Volume Index">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>How-To Guides -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element (WCAG 2.4.1) -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Volume navigation bar -->
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li>How-To Guides</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content area -->
+  <main id="main-content" class="chapter-content vol-howto">
+    <article>
+      <!-- Diataxis type badge -->
+      <p class="vol-accent"><strong>how-to</strong></p>
+
+      <h1>Vol. 2: How-To Guides -- "Use SEJA"</h1>
+
+      <p>
+        Task-oriented, goal-first guides for people who already know what they
+        want to accomplish and need the steps to get there. Where the tutorials
+        teach by walking you through a guaranteed outcome, the how-to guides
+        assume you have a specific objective -- install the harness a particular
+        way, run a single skill, flip a governance marker, reconcile design
+        intent, or extend the harness -- and give you the shortest reliable path
+        to that goal. Each guide states its objective up front, lists the
+        prerequisites, and moves directly to the actions.
+      </p>
+
+      <!-- Chapter listing -->
+      <section id="chapters">
+        <h2>Chapters</h2>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Chapter</th>
+                <th>Use when you need to</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td><a href="installation.html">Installation and Setup</a></td>
+                <td>Install SEJA into a new codebase, finalise an in-place download, create a companion workspace, bootstrap a demo, or upgrade harness files with <code>/seja-setup</code>.</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td><a href="skills/index.html">Skill-by-Skill Guides</a></td>
+                <td>Run a specific skill correctly -- each of the 14 user-facing skills gets its own goal-first guide, organized by lifecycle phase.</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td><a href="governance.html">Governance Operations</a></td>
+                <td>Work the pending ledger, run periodic curation, manage the briefs log, and keep the harness governance state healthy.</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td><a href="design-intent.html">Design Intent Maintenance</a></td>
+                <td>Update as-intended design files, reconcile them with the as-coded state, and run the drift detection and promote workflow.</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td><a href="customization.html">Customization and Extension</a></td>
+                <td>Adjust conventions, add reference files, tune context budgets, and extend the harness with new skills or subagents.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- How to use this volume -->
+      <section id="how-to-use-this-volume">
+        <h2>How to Use This Volume</h2>
+
+        <p>
+          Unlike the tutorials, the how-to guides are not meant to be read in
+          order. Jump straight to the chapter that matches your current goal:
+        </p>
+
+        <ul>
+          <li><strong>Setting up SEJA in a project for the first time?</strong> Start with <a href="installation.html">Ch. 1: Installation and Setup</a>.</li>
+          <li><strong>Need to run one skill and want the exact steps?</strong> Go to <a href="skills/index.html">Ch. 2: Skill-by-Skill Guides</a> and pick the skill.</li>
+          <li><strong>Managing pending actions or curating governance state?</strong> See <a href="governance.html">Ch. 3: Governance Operations</a>.</li>
+          <li><strong>Keeping design intent aligned with the code?</strong> See <a href="design-intent.html">Ch. 4: Design Intent Maintenance</a>.</li>
+          <li><strong>Extending or reconfiguring the harness?</strong> See <a href="customization.html">Ch. 5: Customization and Extension</a>.</li>
+        </ul>
+
+        <p>
+          If you have never used SEJA before, the how-to guides assume a working
+          project. Complete <a href="../tutorials/index.html">Vol. 1: Tutorials</a>
+          first to establish that project, then return here when you have a
+          specific task in hand. When a guide references a component in depth --
+          a skill's full argument set, a script's parameters, a file format --
+          it links to the exhaustive specification in
+          <a href="../reference/index.html">Vol. 3: Reference</a>.
+        </p>
+      </section>
+
+      <!-- Cross-references to other volumes -->
+      <section id="cross-references">
+        <h2>Cross-References to Other Volumes</h2>
+
+        <ul>
+          <li><a href="../tutorials/index.html">Vol. 1: Tutorials</a> -- learning-oriented walkthroughs that build the project these guides operate on.</li>
+          <li><a href="../reference/index.html">Vol. 3: Reference</a> -- exhaustive specification of every skill, subagent, script, and file format the guides invoke. Start with the <a href="../reference/skills-reference.html">Skills Reference</a> for per-skill argument tables.</li>
+          <li><a href="../explanation/index.html">Vol. 4: Explanation</a> -- conceptual background on why the lifecycle and its skills are shaped the way they are.</li>
+        </ul>
+      </section>
+
+    </article>
+
+    <!-- Volume navigation (prev/next volume) -->
+    <nav aria-label="volume navigation">
+      <a href="../tutorials/index.html">Previous: Vol. 1 -- Tutorials</a>
+      <a href="../reference/index.html">Next: Vol. 3 -- Reference</a>
+    </nav>
+  </main>
+
+  <!-- Sidebar table of contents -->
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#chapters">Chapters</a></li>
+      <li><a href="#how-to-use-this-volume">How to Use This Volume</a></li>
+      <li><a href="#cross-references">Cross-References</a></li>
+    </ul>
+  </aside>
+
+  <!-- Footer -->
+  <footer>
+    <section>
+      <h2>Related</h2>
+      <ul>
+        <li><a href="../tutorials/index.html">Vol. 1: Tutorials</a> -- learning-oriented walkthroughs for new users</li>
+        <li><a href="../reference/index.html">Vol. 3: Reference</a> -- exhaustive specification for contributors and architects</li>
+        <li><a href="../explanation/index.html">Vol. 4: Explanation</a> -- theoretical foundations for academics and theorists</li>
+      </ul>
+    </section>
+
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T20:45:00Z</p>
+  </footer>
+
+</body>
+</html>

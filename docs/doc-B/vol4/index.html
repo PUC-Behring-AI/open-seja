@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&amp;family=Shippori+Mincho:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <!-- Classification metadata -->
+  <meta name="doc-status" content="draft">
+  <meta name="doc-volume" content="4">
+  <meta name="doc-chapter" content="0">
+  <meta name="doc-phase" content="3">
+  <meta name="diataxis" content="explanation">
+
+  <title>Vol. 4: The Output and Governance Layer -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection -- System-Isomorphic Edition</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li>Vol. 4: The Output and Governance Layer</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>Volume 4: The Output and Governance Layer <span class="phase-badge">Phase 3</span></h1>
+
+      <div class="status-notice">
+        This volume is in draft status. Chapter content has been written for Phase 3; editorial review is pending.
+      </div>
+
+      <section id="purpose" data-diataxis="explanation">
+        <p>
+          Everything about what SEJA produces, how it enforces discipline, and
+          how to keep a project healthy over time. This volume covers the output
+          directory and its artifacts, the multi-layer enforcement architecture
+          that guards the priv/public boundary, the shared helper scripts and
+          validation suite, the maintenance and drift-alignment workflows, and
+          the release-and-publishing pipeline. It is the reference for the
+          governance side of the harness -- the machinery that keeps outputs
+          auditable and a project trustworthy across iterations.
+        </p>
+      </section>
+
+      <section id="chapters" data-diataxis="reference">
+        <h2>Chapters</h2>
+
+        <ol class="chapter-list">
+          <li>
+            <a href="ch1-output-artifacts.html">1. Output Artifacts</a>
+            <span class="chapter-summary">Covers the output directory tree, the artifact types SEJA produces and their lifecycle, and the audit trail formed by the briefs log and the conversation trace.</span>
+          </li>
+          <li>
+            <a href="ch2-enforcement-architecture.html">2. Enforcement Architecture</a>
+            <span class="chapter-summary">Explains the multi-layer enforcement model, file-maintainer classification, leak prevention, the priv/public boundary, and the anti-patterns the architecture is designed to catch.</span>
+          </li>
+          <li>
+            <a href="ch3-scripts-and-automation.html">3. Scripts and Automation</a>
+            <span class="chapter-summary">A reference for the key shared helper scripts and a guide to how to run and extend the validation suite.</span>
+          </li>
+          <li>
+            <a href="ch4-maintenance-and-drift.html">4. Maintenance and Drift</a>
+            <span class="chapter-summary">Documents freshness policies, periodic triggers, and the <code>/explain drift</code> alignment workflow that reconciles design specs with the as-coded state.</span>
+          </li>
+          <li>
+            <a href="ch5-release-and-publishing.html">5. Release and Publishing</a>
+            <span class="chapter-summary">Walks through the <code>/publish</code> pipeline, the tag conventions, and the ephemeral publish workspace used to build a public release.</span>
+          </li>
+        </ol>
+      </section>
+
+      <section id="reading-order" data-diataxis="explanation">
+        <h2>Recommended Reading Order</h2>
+        <p>
+          Start with "Output Artifacts" to understand what SEJA produces and
+          where it lives, then read "Enforcement Architecture" for the model that
+          keeps those artifacts and the priv/public boundary safe. "Scripts and
+          Automation" grounds both in the concrete helpers and validation suite.
+          Finish with "Maintenance and Drift" and "Release and Publishing" for the
+          workflows that keep a project healthy over time and ship it outward.
+        </p>
+      </section>
+
+      <section id="cross-references" data-diataxis="reference">
+        <h2>Related Volumes</h2>
+        <aside>
+          <p>
+            The artifacts governed here are produced by the execution machinery of
+            <a href="../vol3/index.html">Vol. 3: The Execution Layer</a>,
+            which in turn realizes the design decisions of
+            <a href="../vol2/index.html">Vol. 2: The Design Layer</a>.
+            The governance discipline documented here is one half of the
+            governable-and-epistemic thesis argued in
+            <a href="../vol5/index.html">Vol. 5: Foundations and Philosophy</a>.
+          </p>
+        </aside>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Volume navigation -->
+  <nav aria-label="volume navigation" class="volume-nav">
+    <a href="../vol3/index.html">Previous: Vol. 3 -- The Execution Layer</a>
+    <a href="../vol5/index.html">Next: Vol. 5 -- Foundations and Philosophy</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../vol1/ch3-reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

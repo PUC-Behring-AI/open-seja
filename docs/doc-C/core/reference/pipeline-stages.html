@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="reference">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="Exhaustive lookup of the SEJA lifecycle pipelines: the six pre-skill stages and the post-skill steps, with criticality, gate conditions, skip conditions, and deferred-mode behavior.">
+  <title>Pipeline Stages — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/reference sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Pipeline Stages</h1>
+      <p>The exhaustive stage-and-step lookup for the pre-skill and post-skill lifecycle pipelines.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Reference</a></li>
+        <li aria-current="page">Pipeline Stages</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-reference">reference</span>
+          <span class="badge core-reference">reference</span>
+        </p>
+
+        <section data-diataxis="reference" aria-labelledby="overview">
+          <h2 id="overview">Overview</h2>
+          <p>
+            Every SEJA skill invocation is bracketed by two internal lifecycle
+            hooks: <code>pre-skill</code> runs first (loading references and logging
+            the brief), and <code>post-skill</code> runs last (aligning state, logging
+            Q&amp;A, and committing). This page is the exhaustive per-stage and
+            per-step lookup for both pipelines.
+          </p>
+          <aside class="callout-tip">
+            <strong>Boundary note.</strong> This page is the exhaustive lookup — the
+            complete table of stages, steps, and their gate conditions. The
+            conceptual model of why the lifecycle is shaped this way lives in the
+            Concepts sibling
+            <a href="../concepts/lifecycle-pipeline.html">The Lifecycle Pipeline</a>.
+            Read that page for the mental model; consult this one to look up a
+            specific stage or step.
+          </aside>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="pre-skill-pipeline">
+          <h2 id="pre-skill-pipeline">Pre-skill pipeline</h2>
+          <p>
+            Pre-skill runs six composable stages. Three are critical (always run):
+            <code>brief-log</code>, <code>budget-eval</code>, and <code>ref-load</code>.
+            The other three are non-critical — error-isolated (warn and continue) and
+            skippable when a calling skill lists them in
+            <code>metadata.skip_stages</code>. The legacy stage IDs
+            <code>orphan-check</code> and <code>compaction-check</code> are recognized as
+            sub-steps of <code>budget-eval</code> for backward compatibility.
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>The six pre-skill pipeline stages, in execution order.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Stage</th>
+                  <th scope="col">Critical?</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Skip Conditions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">help</th>
+                  <td>No</td>
+                  <td>Before any other processing, checks the calling skill's arguments for <code>--help</code>. If present, displays the skill's <code>SKILL-quickguide.md</code> body (or the <code>description</code> frontmatter field as fallback) and stops the whole pipeline.</td>
+                  <td>No-op when arguments do not contain <code>--help</code>; listable in <code>skip_stages</code>.</td>
+                </tr>
+                <tr>
+                  <th scope="row">brief-log</th>
+                  <td>Yes</td>
+                  <td>Obtains UTC time, then inserts a <code>STARTED | &lt;datetime&gt; | &lt;skill&gt; | &lt;brief&gt;</code> entry as the newest line in <code>briefs.md</code>. Sub-steps link the conversation trace and persist brief state for post-skill consumption.</td>
+                  <td>Never skipped (critical).</td>
+                </tr>
+                <tr>
+                  <th scope="row">budget-eval</th>
+                  <td>Yes</td>
+                  <td>Reads the calling skill's <code>metadata.context_budget</code> (default <code>standard</code>) and loads references per tier: <code>light</code> skips all briefs/refs; <code>standard</code> loads the briefs index; <code>heavy</code> loads full briefs with recency windowing plus the plan index. Hosts the orphan-detection and compaction-warning sub-steps.</td>
+                  <td>Never skipped (critical); its <code>orphan-check</code> and <code>compaction-check</code> sub-steps are individually skippable.</td>
+                </tr>
+                <tr>
+                  <th scope="row">pending-check</th>
+                  <td>No</td>
+                  <td>Runs <code>pending.py status --overdue-days 14 --format banner</code> and prints any non-empty output verbatim. Purely informational — never blocks the invocation.</td>
+                  <td>Skipped when <code>pending-check</code> is in the skill's <code>skip_stages</code> (e.g. <code>/pending</code>, <code>/publish</code>).</td>
+                </tr>
+                <tr>
+                  <th scope="row">ref-load</th>
+                  <td>Yes</td>
+                  <td>Loads the mandatory refs (<code>conventions.md</code>, <code>permissions.md</code>, <code>constraints.md</code>) then skill-specific refs — eager-only mode injects every <code>metadata.references</code> entry; demand-pull mode (<code>eager_references</code> present) injects eager refs and lists lazy refs on demand.</td>
+                  <td>Applies to standard/heavy tiers only; a <code>light</code>-budget skill skips ref-load entirely.</td>
+                </tr>
+                <tr>
+                  <th scope="row">constitution</th>
+                  <td>No</td>
+                  <td>Reads and injects <code>product-design/constitution.md</code> for trust-boundary enforcement.</td>
+                  <td>Skipped silently if the file is absent; also skipped for <code>light</code>-budget skills and when <code>constitution</code> is in <code>skip_stages</code>.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section data-diataxis="reference" aria-labelledby="post-skill-pipeline">
+          <h2 id="post-skill-pipeline">Post-skill pipeline</h2>
+          <p>
+            Post-skill runs an ordered sequence of numbered steps (with lettered
+            sub-steps) that update state, log Q&amp;A, run safety gates, and commit.
+            The <strong>Deferred mode</strong> column records what happens under the
+            <code>--deferred</code> flag, which the roadmap parallel-wave orchestrator
+            passes after merging a worktree branch back to main: only the per-plan
+            state alignment that needs the merged code runs; the orchestrator owns
+            wave-level briefs, docs, Q&amp;A, and commits. Under
+            <code>--deferred</code>, only steps 0, 1b, 2, 2c, 7, 2g, and 8b execute.
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>Post-skill pipeline steps, gate conditions, and deferred-mode behavior.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Step ID</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Gate Condition</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Deferred mode</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">0</th>
+                  <td>Checkpoint recovery</td>
+                  <td>Runs if <code>.post-skill-checkpoint</code> exists</td>
+                  <td>Reads the checkpoint (<code>&lt;step&gt; | &lt;datetime&gt; | &lt;skill-id&gt;</code>); resumes from the step after <code>&lt;step&gt;</code> when the skill-id matches, else deletes the stale file.</td>
+                  <td>Run</td>
+                </tr>
+                <tr>
+                  <th scope="row">1</th>
+                  <td>Brief-log (mark DONE)</td>
+                  <td>Always</td>
+                  <td>Obtains UTC time, loads the persisted brief, and marks the matching <code>STARTED</code> entry <code>DONE</code> (appending <code>| PLAN | &lt;id&gt;</code> where applicable).</td>
+                  <td>Skip — orchestrator writes the wave-level brief</td>
+                </tr>
+                <tr>
+                  <th scope="row">1b</th>
+                  <td>Telemetry prep</td>
+                  <td>Always</td>
+                  <td>Prepares an in-context telemetry record (flushed to disk at 8b) per the telemetry schema.</td>
+                  <td>Run (flushed at 8b)</td>
+                </tr>
+                <tr>
+                  <th scope="row">2</th>
+                  <td>As-Coded alignment</td>
+                  <td>Parent skill is <code>implement</code></td>
+                  <td>Reads the plan and incrementally updates <code>product-design-as-coded.md</code> Conceptual Design, plus DONE-marker proposals and changelog appends. Skipped when parent is <code>plan</code> (no code yet).</td>
+                  <td>Run — merged code is now on main</td>
+                </tr>
+                <tr>
+                  <th scope="row">2b</th>
+                  <td>Documentation auto-run</td>
+                  <td>Same gate as step 2</td>
+                  <td>Collects non-N/A <code>Docs:</code> fields and offers to run <code>/document --plan &lt;id&gt;</code> now, or files an <code>update-documentation</code> pending entry on Skip.</td>
+                  <td>Skip — orchestrator handles wave-level docs</td>
+                </tr>
+                <tr>
+                  <th scope="row">2c</th>
+                  <td>Design intent reminder</td>
+                  <td>Same gate as step 2</td>
+                  <td>Informational nudge to promote implemented design-intent items to <code>established</code> via <code>/explain drift --promote</code>. Does not perform the promotion.</td>
+                  <td>Run</td>
+                </tr>
+                <tr>
+                  <th scope="row">2d</th>
+                  <td>Eager implement entry</td>
+                  <td>Parent is <code>/plan</code> and brief carries <code>PLAN | &lt;id&gt;</code></td>
+                  <td>Files an idempotent <code>implement</code> pending entry from the completed plan so the next step is queued.</td>
+                  <td>Skip — not from <code>/plan</code></td>
+                </tr>
+                <tr>
+                  <th scope="row">3</th>
+                  <td>Q&amp;A log</td>
+                  <td>Unless <code>skip_qa_log</code></td>
+                  <td>Three branches: skip; inline in the artifact file (plan/implement/roadmap/critique); or companion <code>-qa-</code> file (default, all other artifact types).</td>
+                  <td>Skip — orchestrator handles wave-level Q&amp;A</td>
+                </tr>
+                <tr>
+                  <th scope="row">4</th>
+                  <td>Commit message</td>
+                  <td>Always</td>
+                  <td>Creates a commit message including the artifact ID.</td>
+                  <td>Skip — orchestrator commits atomically</td>
+                </tr>
+                <tr>
+                  <th scope="row">5</th>
+                  <td>Git-state safety check</td>
+                  <td>Always</td>
+                  <td>Runs <code>git status</code>; refuses to commit during a rebase, on an unmerged conflict, or with detached HEAD; warns and asks for confirmation on <code>main</code>/<code>master</code>.</td>
+                  <td>Skip — orchestrator commits atomically</td>
+                </tr>
+                <tr>
+                  <th scope="row">6</th>
+                  <td>Commit scope verification</td>
+                  <td>Always</td>
+                  <td>Runs <code>verify_commit_scope.py</code> to check staged files against expected paths; warns on unexpected pre-staged files.</td>
+                  <td>Skip — orchestrator commits atomically</td>
+                </tr>
+                <tr>
+                  <th scope="row">6b</th>
+                  <td>Fast preflight gate</td>
+                  <td>Always</td>
+                  <td>Runs <code>run_preflight_fast.py</code>; advisory (not blocking — the pre-commit hook is the hard gate).</td>
+                  <td>Skip — orchestrator runs preflight once for the wave</td>
+                </tr>
+                <tr>
+                  <th scope="row">6c</th>
+                  <td>Human markers verifier</td>
+                  <td>Always</td>
+                  <td>Runs <code>check_human_markers_only.py --staged</code>; on prose mutation in a Human (markers) file, asks whether to abort or proceed.</td>
+                  <td>Skip — orchestrator runs markers check once for the wave</td>
+                </tr>
+                <tr>
+                  <th scope="row">7</th>
+                  <td>Index regeneration</td>
+                  <td>Always</td>
+                  <td>Refreshes the briefs index and macro <code>INDEX.md</code>, updates cross-references, and conditionally regenerates the decision digest.</td>
+                  <td>Run</td>
+                </tr>
+                <tr>
+                  <th scope="row">2g</th>
+                  <td>Pending action creation</td>
+                  <td>Same gate as step 2</td>
+                  <td>Files <code>verify-as-coded</code>, <code>test-implementation</code>, and <code>update-documentation</code> pending actions from plan metadata; unconditionally closes the <code>implement</code> entry as a mark-done safety net.</td>
+                  <td>Run</td>
+                </tr>
+                <tr>
+                  <th scope="row">7e</th>
+                  <td>Deferred-artifact generation</td>
+                  <td>Parent skill is <code>implement</code></td>
+                  <td>Maintains the plan's <code>## Manual Actions</code> section and generates <code>_output/docs/deploy.html</code> from non-N/A <code>Deploy:</code> fields, before the step-8 commit.</td>
+                  <td>Skip — orchestrator handles wave-level docs</td>
+                </tr>
+                <tr>
+                  <th scope="row">8</th>
+                  <td>Commit</td>
+                  <td>Always</td>
+                  <td>Stages affected files (indexes, as-coded updates, step-7e artifacts) and commits; deletes the checkpoint on success.</td>
+                  <td>Skip — orchestrator commits</td>
+                </tr>
+                <tr>
+                  <th scope="row">8b</th>
+                  <td>Telemetry flush</td>
+                  <td>Only if step 8 produced a commit</td>
+                  <td>Enriches the 1b record with commit-dependent fields and appends it as a separate trailing <code>telemetry:</code> commit; drops the record if no primary commit occurred.</td>
+                  <td>Run (appended; orchestrator includes it in the wave commit)</td>
+                </tr>
+                <tr>
+                  <th scope="row">9-12</th>
+                  <td>Wrap-up &amp; next-step</td>
+                  <td>Always</td>
+                  <td>Reports surprises, links the generated file, prints the SKILL COMPLETE banner, and offers contextual next-step suggestions from the skill graph.</td>
+                  <td>Skip</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="../concepts/lifecycle-pipeline.html">The Lifecycle Pipeline</a> &mdash; the conceptual model this lookup table complements.</li>
+            <li><a href="skills-catalog.html">Skills Catalog</a> &mdash; the skills whose invocations these pipelines bracket, and their context budgets.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Reference</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/reference sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

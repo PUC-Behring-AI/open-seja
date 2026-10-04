@@ -1,0 +1,2017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vol. 2: The Design Layer -- Single Page -- SEJA Documentation</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 2: The Design Layer</a></li>
+      <li>Single Page</li>
+    </ol>
+  </nav>
+
+  <main id="main-content">
+    <article>
+      <h1>Vol. 2: The Design Layer</h1>
+
+    <nav aria-label="volume contents" class="volume-contents">
+      <ol>
+        <li>
+          <a href="#metacommunication">The Metacommunication Message</a>
+          <ul>
+            <li><a href="#metacommunication--what-is-a-metacommunication-message">What Is a Metacommunication Message</a></li>
+            <li><a href="#metacommunication--how-to-write-a-metacommunication-message">How to Write a Metacommunication Message</a></li>
+            <li><a href="#metacommunication--the-iyou-phrasing-rule">The I/You Phrasing Rule</a></li>
+            <li><a href="#metacommunication--worked-example">Worked Example</a></li>
+            <li><a href="#metacommunication--common-mistakes">Common Mistakes</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#constitution-guide">The Constitution</a>
+          <ul>
+            <li><a href="#constitution-guide--what-a-constitution-contains">What a Constitution Contains</a></li>
+            <li><a href="#constitution-guide--writing-and-maintaining-a-constitution">Writing and Maintaining a Constitution</a></li>
+            <li><a href="#constitution-guide--why-immutable-principles-matter">Why Immutable Principles Matter</a></li>
+            <li><a href="#constitution-guide--common-mistakes">Common Mistakes</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#design-intent-files">Design Intent Files</a>
+          <ul>
+            <li><a href="#design-intent-files--the-as-intended-as-coded-split">The As-Intended / As-Coded Split</a></li>
+            <li><a href="#design-intent-files--structure-of-product-design-as-intended">Structure of product-design-as-intended.md</a></li>
+            <li><a href="#design-intent-files--the-promote-workflow">The Promote Workflow</a></li>
+            <li><a href="#design-intent-files--design-decisions-and-trade-offs">Design Decisions and Trade-offs</a></li>
+            <li><a href="#design-intent-files--common-mistakes">Common Mistakes</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#marker-system">The Marker System</a>
+          <ul>
+            <li><a href="#marker-system--marker-types">Marker Types</a></li>
+            <li><a href="#marker-system--using-apply-marker">Using apply_marker.py</a></li>
+            <li><a href="#marker-system--markers-as-designed-signification">Markers as Designed Signification</a></li>
+            <li><a href="#marker-system--common-mistakes">Common Mistakes</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#ux-research">UX Research Artifacts</a>
+          <ul>
+            <li><a href="#ux-research--personas">Personas</a></li>
+            <li><a href="#ux-research--problem-scenarios">Problem Scenarios</a></li>
+            <li><a href="#ux-research--discovered-journeys">Discovered Journeys</a></li>
+            <li><a href="#ux-research--common-mistakes">Common Mistakes</a></li>
+          </ul>
+        </li>
+      </ol>
+    </nav>
+
+      <section id="metacommunication" class="print-chapter" aria-label="The Metacommunication Message">
+<h2>The Metacommunication Message</h2>
+
+      <p>
+        The metacommunication message is a SEJA project's highest-authority
+        design artifact. This chapter explains what it is, how to write one
+        using the Extended Metacommunication Template, why the I/you phrasing
+        rule matters, and how to avoid common pitfalls.
+      </p>
+
+      <!-- Section 1: What Is a Metacommunication Message -->
+      <section id="metacommunication--what-is-a-metacommunication-message" data-diataxis="explanation">
+        <h3>What Is a Metacommunication Message</h3>
+
+        <p>
+          In semiotic engineering, software is understood as a designer's
+          deputy -- an artifact that communicates the designer's message to the
+          user on the designer's behalf. The metacommunication message makes
+          this implicit communication explicit. It is the designer's canonical
+          first-person statement to the user, expressing:
+        </p>
+
+        <blockquote>
+          <p>
+            "Here is my understanding of who you are, what I've learned you
+            want or need to do, in which preferred ways, and why. This is the
+            system that I have therefore designed for you, and this is the way
+            you can or should use it in order to fulfill a range of purposes
+            that fall within this vision."
+          </p>
+        </blockquote>
+
+        <p>
+          This template, drawn from semiotic engineering theory, structures
+          every metacommunication message in SEJA. It is always voiced in first
+          person: the designer as "I," the user as "you." Third-person
+          restatements are never permitted as the canonical form.
+        </p>
+
+        <p>
+          In a SEJA project, the metacommunication message lives in §11
+          (Global Metacommunication Vision) of
+          <code>product-design/product-design-as-intended.md</code>. It is the
+          highest-authority artifact in the design layer alongside the
+          <a href="#constitution-guide">constitution</a>: all other design
+          decisions -- entity hierarchies, permission models, UX patterns,
+          feature-level intentions -- are ultimately accountable to it. No plan
+          or implementation step may contradict the metacommunication message
+          without an explicit decision record (D-NNN) approved by the designer.
+        </p>
+
+        <p>
+          The metacommunication message is not a feature list, a README, or a
+          mission statement. It is the designer's personal, first-person
+          communication about what they understand the user to be and what they
+          have designed for them. For the semiotic engineering theory that
+          underpins this concept, see
+          <a href="../foundations/software-as-communication.html#the-communication-metaphor">Software as Designed Communication</a>.
+        </p>
+
+        <p>
+          The following section walks through the practical process of writing
+          a metacommunication message using SEJA's interview-driven design
+          workflow.
+        </p>
+      </section>
+
+      <!-- Section 2: How to Write a Metacommunication Message -->
+      <section id="metacommunication--how-to-write-a-metacommunication-message" data-diataxis="tutorial">
+        <h3>How to Write a Metacommunication Message</h3>
+
+        <p>
+          SEJA's <code>/design</code> skill includes a dedicated interview mode
+          (Mode 5: Interview-Driven) that guides the designer through writing a
+          metacommunication message. The interview covers five dimensions drawn
+          from the Extended Metacommunication Template (EMT):
+        </p>
+
+        <ol>
+          <li><strong>Who are your users?</strong> -- Target users, personas,
+            their backgrounds, expertise levels, and contexts of use.</li>
+          <li><strong>What problems do they face?</strong> -- Pain points,
+            problem scenarios, unmet needs, and frustrations with current
+            solutions.</li>
+          <li><strong>How should they solve them?</strong> -- Design solutions,
+            workflows, interaction patterns, and the system's approach to
+            addressing the identified problems.</li>
+          <li><strong>What should they know?</strong> -- Domain knowledge the
+            user needs, constraints they should be aware of, and conceptual
+            models they must understand.</li>
+          <li><strong>What is the overall metacommunication vision?</strong> --
+            The unified I/you message that weaves the preceding four dimensions
+            into a single coherent designer-to-user statement.</li>
+        </ol>
+
+        <h4>The Interview Process</h4>
+
+        <p>
+          To write a metacommunication message, invoke
+          <code>/design --mode interview</code>. The process unfolds in four
+          phases:
+        </p>
+
+        <dl>
+          <dt>Phase A: Open-Ended Interview</dt>
+          <dd>
+            The agent asks open-ended questions covering the five EMT
+            dimensions. There is no fixed question order -- the conversation
+            adapts based on your answers. Each exchange is recorded as a
+            triple: the agent's question, your verbatim response, and the
+            agent's interpretation of how your answer maps to design fields.
+            The transcript is saved to
+            <code>specs/design-interview-YYYYMMDD.md</code>.
+          </dd>
+
+          <dt>Phase B: Synthesis</dt>
+          <dd>
+            The agent iterates over every design field and assigns a
+            confidence level to each: <strong>DS</strong> (directly stated by
+            the designer), <strong>INF</strong> (inferred from context), or
+            <strong>PAC</strong> (proposed by the agent and confirmed by the
+            designer). The synthesis is written to
+            <code>specs/design-confidence-YYYYMMDD.md</code>.
+          </dd>
+
+          <dt>Phase C: Confirmation</dt>
+          <dd>
+            Security-critical fields (permission model, validation constants,
+            constitution invariants) require mandatory confirmation -- no
+            inferred values are accepted without explicit designer approval.
+            Other inferred fields are batched for review. Any gaps are filled
+            with focused follow-up questions.
+          </dd>
+
+          <dt>Phase D: Instantiation</dt>
+          <dd>
+            The confirmed field values are used to instantiate the project's
+            design files, including the metacommunication message in §11 of
+            <code>product-design/product-design-as-intended.md</code>.
+          </dd>
+        </dl>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> If you already have a metacommunication
+            message drafted, you can provide it at invocation time. The
+            interview will treat it as a pre-answered Section 0.1 and skip the
+            vision question, extracting project name, description, target user
+            type, and primary use case as hints for subsequent questions.
+          </p>
+        </aside>
+
+        <p>
+          The I/you phrasing rule applies to the final message produced by this
+          process. The following section explains why this rule exists and how
+          to verify your message conforms to it.
+        </p>
+      </section>
+
+      <!-- Section 3: The I/You Phrasing Rule -->
+      <section id="metacommunication--the-iyou-phrasing-rule" data-diataxis="explanation">
+        <h3>The I/You Phrasing Rule</h3>
+
+        <p>
+          Constitution principle T4 mandates that the metacommunication message
+          is always voiced in first person -- the designer as "I," the user as
+          "you." This is not a stylistic preference; it is a structural
+          requirement grounded in semiotic engineering theory.
+        </p>
+
+        <h4>Why First Person Is Mandatory</h4>
+
+        <p>
+          The I/you frame is the semiotic contract between the designer and
+          the user. When a designer writes "I designed this for you because I
+          understand that you need..." they are taking personal responsibility
+          for the design decisions. They are asserting that a specific person
+          studied a specific user's situation and made deliberate choices in
+          response to it. This directness is the metacommunication message's
+          defining quality.
+        </p>
+
+        <p>
+          Third-person rewrites -- "The system provides..." or "Users can..." --
+          sever this relationship. They anonymize the designer, obscure the
+          intentionality of the design, and reduce the message to a feature
+          description. Passive-voice formulations ("Privacy is enforced with
+          minimal friction") are equally problematic: they describe a property
+          of the system without attributing it to a designer's deliberate
+          choice for a specific user.
+        </p>
+
+        <h4>How to Self-Check Phrasing</h4>
+
+        <p>
+          Read every sentence of your metacommunication message aloud as if
+          you were speaking directly to your user. If a sentence cannot
+          naturally be voiced as the designer addressing the user, it needs
+          rephrasing. Two tests:
+        </p>
+
+        <ul>
+          <li><strong>The "I" test:</strong> Does the sentence begin with or
+            contain "I" (the designer)? If the subject is "the system," "the
+            application," or "the feature," rephrase.</li>
+          <li><strong>The "you" test:</strong> Does the sentence address "you"
+            (the user) or refer to "the user," "users," or "they"? If the
+            latter, rephrase to address the user directly.</li>
+        </ul>
+
+        <figure>
+          <pre><code>Before: "The system enforces privacy constraints automatically."
+After:  "I have designed the privacy controls to work automatically
+         because I know you should not have to think about compliance
+         during your daily workflow."
+
+Before: "Users can export their data in CSV format."
+After:  "I want you to be able to take your data with you, so I have
+         provided CSV export for every dataset you create."</code></pre>
+          <figcaption>Rephrasing third-person statements into I/you format.</figcaption>
+        </figure>
+
+        <p>
+          With the phrasing rule established, the following section provides a
+          complete worked example showing how a metacommunication message comes
+          together from the EMT dimensions.
+        </p>
+      </section>
+
+      <!-- Section 4: Worked Example -->
+      <section id="metacommunication--worked-example" data-diataxis="tutorial">
+        <h3>Worked Example</h3>
+
+        <p>
+          The following is a complete metacommunication message for a
+          hypothetical task management application called TaskFlow, written for
+          freelancers managing multiple client projects. Each paragraph maps to
+          one of the five EMT dimensions.
+        </p>
+
+        <figure>
+          <pre><code>I have designed TaskFlow for you because I understand that you are a
+freelancer managing multiple client projects simultaneously. I have
+learned that you need to see all your commitments in one place, track
+time against specific client agreements, and switch between projects
+without losing context.
+
+I know that your biggest frustration is the overhead of managing tasks
+across disconnected tools -- separate to-do lists, time trackers, and
+client portals that do not talk to each other. You have told me that
+you lose billable hours to administrative busywork and sometimes miss
+deadlines because a task was buried in the wrong tool.
+
+I have therefore designed TaskFlow as a single workspace where every
+task, time entry, and client conversation lives together. You can
+create a project, add tasks, log time, and send a client update
+without leaving the application. I want you to spend your time on
+billable work, not on managing the tools that track it.
+
+You should know that TaskFlow organises work around "engagements" --
+each engagement maps to a client contract with a start date, end date,
+and budget. This is the core concept you will interact with. Tasks
+belong to engagements, and time entries belong to tasks, so every hour
+you log is automatically attributed to the right client and budget.
+
+This is the system I have designed for you: a workspace that respects
+your time, keeps your client commitments visible, and lets you focus
+on the work itself rather than the administration around it.</code></pre>
+          <figcaption>
+            A complete metacommunication message mapping to the five EMT
+            dimensions: (1) who the user is, (2) what problems they face,
+            (3) how the system addresses them, (4) what the user needs to
+            know, and (5) the overall vision.
+          </figcaption>
+        </figure>
+
+        <p>
+          Notice that every paragraph uses I/you phrasing. The designer takes
+          personal ownership ("I have designed," "I have learned," "I know")
+          and addresses the user directly ("you are," "you need," "you should
+          know"). No sentence describes the system in the third person.
+        </p>
+      </section>
+
+      <!-- Section 5: Common Mistakes -->
+      <section id="metacommunication--common-mistakes" data-diataxis="how-to">
+        <h3>Common Mistakes</h3>
+
+        <dl>
+          <dt>Writing in third person</dt>
+          <dd>
+            A metacommunication message that says "The system provides
+            automated backups" or "Users can configure their dashboard" has
+            lost the designer's voice. Rephrase as: "I have designed automated
+            backups for you because I know you cannot afford to lose work" or
+            "I want you to be able to arrange your dashboard the way that
+            makes sense for your workflow." The I/you frame is not optional --
+            it is what distinguishes a metacommunication message from a feature
+            list.
+          </dd>
+
+          <dt>Conflating the metacommunication message with a README</dt>
+          <dd>
+            A README describes what the software does and how to install it. A
+            metacommunication message expresses what the designer understands
+            about the user and why the software was designed the way it was.
+            The two serve different audiences and purposes. The README is for
+            anyone evaluating or setting up the software; the metacommunication
+            message is the designer's personal communication to the user about
+            the design intent behind the system. If your message reads like
+            installation instructions or a feature catalogue, it is a README,
+            not a metacommunication message.
+          </dd>
+
+          <dt>Making the message too abstract</dt>
+          <dd>
+            A message that says "I want you to have a good experience" or "I
+            have designed this system to be useful" communicates nothing
+            specific. Every paragraph should contain concrete "I want you
+            to..." or "I have designed... because I know you..." statements
+            that a reader can verify against the actual system. If you cannot
+            point to a specific design decision that implements what the
+            message claims, the message is too abstract.
+          </dd>
+
+          <dt>Forgetting to update the message when design evolves</dt>
+          <dd>
+            The metacommunication message is not written once and forgotten. As
+            the designer's understanding of the user deepens -- through UX
+            research, problem scenario analysis, or field observation -- the
+            message should evolve to reflect that new understanding. An
+            outdated metacommunication message creates a gap between what the
+            system claims to be for and what it actually does. Use
+            <code>/design update metacomm</code> to revise the message when
+            your understanding changes.
+          </dd>
+        </dl>
+      </section>
+      </section>
+
+      <section id="constitution-guide" class="print-chapter" aria-label="The Constitution">
+<h2>The Constitution</h2>
+
+      <p>
+        A SEJA project constitution declares the immutable principles that
+        every skill, agent, and plan must observe. It is the first artifact
+        loaded by pre-skill -- before conventions, standards, or any other
+        reference -- and its rules take precedence over everything else.
+        This chapter explains what a constitution contains, how to write and
+        maintain one, and why immutable principles are essential for
+        governing agent behavior.
+      </p>
+
+      <!-- ================================================== -->
+      <section id="constitution-guide--what-a-constitution-contains" data-diataxis="reference">
+        <h3>What a Constitution Contains</h3>
+
+        <p>
+          Every constitution follows the same four-section structure, defined
+          in the template at
+          <code>.claude/references/template/constitution.md</code>.
+          Each section serves a distinct governance purpose:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Section</th>
+              <th>Purpose</th>
+              <th>Typical entries</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Technical Principles</td>
+              <td>Non-negotiable architectural decisions that shape how
+                the system is built.</td>
+              <td>Lifecycle discipline, file classification rules,
+                authoring boundaries, voice and phrasing rules.</td>
+            </tr>
+            <tr>
+              <td>Quality Principles</td>
+              <td>Quality gates that cannot be bypassed -- the standards
+                the project is committed to regardless of schedule
+                pressure.</td>
+              <td>Design-intent authority, epistemic posture
+                requirements, governance-plus-epistemic mandate.</td>
+            </tr>
+            <tr>
+              <td>Security Invariants</td>
+              <td>Security rules that must never be relaxed without
+                explicit sign-off from the project lead.</td>
+              <td>Private-content isolation, hook-bypass controls,
+                credential handling rules.</td>
+            </tr>
+            <tr>
+              <td>Compliance Requirements</td>
+              <td>Regulatory, contractual, or policy obligations the
+                project is bound by.</td>
+              <td>Repository visibility rules, sync-boundary
+                constraints, data-residency requirements.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Every entry in the constitution is a row in a principles table
+          with three columns: a stable identifier (T1, Q2, S1, C1, etc.),
+          the principle itself, and a rationale explaining why the rule
+          exists. The rationale is not optional -- it is what allows the
+          agent (and future maintainers) to judge edge cases rather than
+          blindly following the letter of the rule.
+        </p>
+
+        <h4>Worked Example: SEJA's Own Constitution</h4>
+
+        <p>
+          SEJA uses its own harness, so its constitution at
+          <code>product-design/constitution.md</code> serves as a real-world
+          reference. The following entries illustrate the kind of commitments
+          each section captures:
+        </p>
+
+        <figure>
+          <figcaption>Technical Principles (excerpt)</figcaption>
+          <dl>
+            <dt>T1 -- Lifecycle discipline</dt>
+            <dd>Every user-facing skill starts with pre-skill and ends
+              with post-skill. Skills may opt out of non-critical stages
+              but may never skip pre-skill entirely.</dd>
+            <dt>T2 -- Human (markers) boundary</dt>
+            <dd>Human (markers) files receive prose writes only from
+              human designers. Agents write only lifecycle markers via
+              <code>apply_marker.py</code> after confirmation.</dd>
+            <dt>T4 -- I/you phrasing</dt>
+            <dd>The metacommunication message is always voiced in first
+              person (designer "I" to user "you"). Third-person
+              restatements must never replace the canonical I/you
+              message.</dd>
+          </dl>
+        </figure>
+
+        <figure>
+          <figcaption>Quality Principles (excerpt)</figcaption>
+          <dl>
+            <dt>Q1 -- Design-intent authority</dt>
+            <dd>The metacommunication message and constitution are the
+              highest-authority artifacts; no plan or implementation step
+              may contradict them without an explicit D-NNN decision
+              record.</dd>
+            <dt>Q2 -- Surface the unknown</dt>
+            <dd>SEJA must surface what is not yet known, not only what
+              has been decided. Gaps and epistemic uncertainties must be
+              made visible.</dd>
+          </dl>
+        </figure>
+
+        <figure>
+          <figcaption>Security Invariants (excerpt)</figcaption>
+          <dl>
+            <dt>S1 -- Private-content isolation</dt>
+            <dd>Private content must never reach the public repository
+              without explicit opt-in. The pre-commit hook and publish
+              pipeline both enforce this gate.</dd>
+          </dl>
+        </figure>
+
+        <p>
+          The template also includes a Project Identity preamble (a
+          one-sentence mission statement and primary users), an Enforcement
+          section (describing how principles are loaded and validated), and
+          a Changelog (recording amendments with version numbers and dates).
+        </p>
+      </section>
+
+      <!-- ================================================== -->
+      <p>
+        The reference above describes what goes into a constitution. The
+        following section explains how to create one and keep it current
+        over time.
+      </p>
+
+      <section id="constitution-guide--writing-and-maintaining-a-constitution" data-diataxis="how-to">
+        <h3>Writing and Maintaining a Constitution</h3>
+
+        <h4>Starting from the Template</h4>
+
+        <p>
+          When you run <code>/design</code> on a new project (or select
+          the "Constitution" option from the update menu), SEJA copies the
+          template from
+          <code>.claude/references/template/constitution.md</code> into
+          <code>product-design/constitution.md</code>. The template contains
+          placeholder rows with <code>{{…}}</code> tokens and HTML comments
+          showing examples for each section. Replace the placeholders with
+          your project's actual commitments and delete the example comments.
+        </p>
+
+        <h4>Adding Principles over Time</h4>
+
+        <p>
+          New principles often emerge from design decisions. When a D-NNN
+          decision record in <code>product-design-as-intended.md</code>
+          identifies a commitment that should be immutable -- one that
+          should never be overridden by a plan or implementation step
+          without explicit approval -- promote it to a constitution entry.
+          Assign the next available identifier in the appropriate section
+          (e.g., T5, Q4) and write a rationale that explains why this
+          rule exists.
+        </p>
+
+        <h4>The Amendment Protocol</h4>
+
+        <p>
+          Constitutions change rarely, and every change requires:
+        </p>
+
+        <ol>
+          <li>Explicit approval from the project lead (the designer).</li>
+          <li>A new version entry in the constitution's Changelog section,
+            recording the date and what changed.</li>
+        </ol>
+
+        <p>
+          This protocol ensures that constitution changes are deliberate
+          and auditable. An agent cannot amend the constitution
+          unilaterally -- the file is classified as <code>Human</code>,
+          meaning only the designer writes to it.
+        </p>
+
+        <h4>Constitution vs. Conventions vs. Standards</h4>
+
+        <p>
+          Three different artifacts capture project rules at different
+          levels of mutability:
+        </p>
+
+        <dl>
+          <dt>Constitution (<code>product-design/constitution.md</code>)</dt>
+          <dd>Immutable principles. Loaded first by pre-skill. Violations
+            are blocking -- they must be resolved before commit. Change
+            requires explicit designer approval and a changelog
+            entry.</dd>
+
+          <dt>Conventions (<code>product-design/conventions.md</code>)</dt>
+          <dd>Project structure: directory paths, stack choices, key file
+            locations, review configuration. Mutable -- updated when the
+            stack changes or the project reorganizes. Does not carry
+            governance weight.</dd>
+
+          <dt>Standards (<code>product-design/standards.md</code>, <code>product-design/design-standards.md</code>)</dt>
+          <dd>Engineering standards: coding patterns, testing rules, UX
+            patterns, accessibility requirements. Mutable --
+            <code>Human / Agent</code> classification, so both the
+            designer and the agent can update them. Advisory rather than
+            blocking unless a constitution principle elevates a specific
+            standard.</dd>
+        </dl>
+
+        <p>
+          The decision rule: if a commitment should survive any refactoring,
+          any stack change, and any team turnover, it belongs in the
+          constitution. If it describes how the project is structured today,
+          it belongs in conventions. If it describes how code should be
+          written, it belongs in standards.
+        </p>
+      </section>
+
+      <!-- ================================================== -->
+      <p>
+        With the mechanics of writing and maintaining a constitution
+        covered, the next section explains why immutable principles are
+        worth the governance overhead.
+      </p>
+
+      <section id="constitution-guide--why-immutable-principles-matter" data-diataxis="explanation">
+        <h3>Why Immutable Principles Matter</h3>
+
+        <p>
+          The constitution is the first artifact loaded during pre-skill's
+          constitution stage. It enters the agent's context before
+          conventions, before skill-specific references, and before the
+          plan being executed. This loading order is deliberate: it means
+          every subsequent decision the agent makes is bounded by the
+          constitution's constraints.
+        </p>
+
+        <p>
+          Without immutable principles, an agent operating under schedule
+          pressure or optimization heuristics can silently drift from the
+          designer's commitments. A plan might skip review steps to save
+          time. An implementation might bypass the Human (markers) boundary
+          because direct writes are faster than routing through
+          <code>apply_marker.py</code>. A critique might overlook a
+          security invariant because it was not salient in the current
+          context.
+        </p>
+
+        <p>
+          The constitution prevents this drift by making certain commitments
+          non-negotiable. When <code>/critique validate</code> runs, it
+          checks the agent's output against the constitution's principles
+          and classifies violations as blocking. The agent cannot merge
+          a change that contradicts a constitution entry without an explicit
+          D-NNN decision record approved by the designer -- and that
+          decision record itself becomes part of the project's audit trail.
+        </p>
+
+        <p>
+          This is the governance half of what SEJA calls the "governable
+          and epistemic" thesis: immutable principles provide the
+          governance floor, while epistemic mechanisms (gap detection, drift
+          surfacing, uncertainty tracking) provide the awareness ceiling.
+          Neither alone is sufficient. For the theoretical foundations of
+          this thesis, see
+          <a href="../foundations/governable-epistemic.html#why-both-axes-are-required">The
+          Governable AND Epistemic Thesis</a>.
+        </p>
+      </section>
+
+      <!-- ================================================== -->
+      <section id="constitution-guide--common-mistakes" data-diataxis="how-to">
+        <h3>Common Mistakes</h3>
+        <dl>
+          <dt>Putting mutable conventions in the constitution</dt>
+          <dd>
+            Directory paths, stack choices, and other structural details
+            change as a project evolves. If these are encoded as
+            constitution principles, every reorganization requires a formal
+            amendment. Put structural details in
+            <code>product-design/conventions.md</code> instead, and
+            reserve the constitution for commitments that should survive
+            any refactoring.
+          </dd>
+
+          <dt>Writing principles without rationale</dt>
+          <dd>
+            The rationale column in the principles table is not optional.
+            A principle without a rationale is an unexplained rule that
+            the agent cannot reason about at the edges. When an edge case
+            arises, the agent needs the "why" to determine whether the
+            principle applies or whether the case falls outside its scope.
+            Always explain why the rule exists.
+          </dd>
+
+          <dt>Making the constitution too long</dt>
+          <dd>
+            The constitution is loaded into every agent context window via
+            pre-skill. A bloated constitution consumes token budget that
+            could be used for the actual task. Keep the constitution
+            focused on genuinely immutable commitments -- typically 4 to
+            12 principles total. If a rule is important but not immutable,
+            it belongs in standards, not the constitution.
+          </dd>
+
+          <dt>Confusing the constitution with standards</dt>
+          <dd>
+            Standards (<code>product-design/standards.md</code>) are
+            mutable engineering rules that evolve as the project matures.
+            Constitution principles are immutable commitments that require
+            explicit designer approval to change. A coding convention
+            ("use snake_case for function names") is a standard. A
+            governance commitment ("no plan may bypass the pre-commit
+            hook") is a constitution principle. Putting standards in the
+            constitution makes the constitution noisy and makes standards
+            unnecessarily hard to update.
+          </dd>
+        </dl>
+      </section>
+      </section>
+
+      <section id="design-intent-files" class="print-chapter" aria-label="Design Intent Files">
+<h2>Design Intent Files</h2>
+
+      <p>
+        SEJA maintains a pair of parallel design files for every project: one
+        that records what the designer intends the system to be, and one that
+        records what the system actually is. This chapter explains why that
+        split exists, walks through the structure of the primary design-intent
+        file, describes the workflow for promoting items from one lifecycle
+        state to the next, and surfaces the design trade-offs behind the
+        marker system that governs these files.
+      </p>
+
+      <section id="design-intent-files--the-as-intended-as-coded-split" data-diataxis="explanation">
+        <h3>The As-Intended / As-Coded Split</h3>
+
+        <p>
+          Every SEJA project maintains two complementary artifacts that
+          together capture the full picture of a system's design:
+        </p>
+
+        <dl>
+          <dt><code>product-design-as-intended.md</code></dt>
+          <dd>
+            The designer's vision -- what the system <em>should</em> be. This
+            file is classified as <code>Human (markers)</code>: its prose is
+            authored exclusively by the human designer. Agents may not write
+            free-form text into it. They may only apply structured lifecycle
+            markers (STATUS, INCORPORATED, DECISION_APPEND, CHANGELOG_APPEND)
+            through <code>apply_marker.py</code>, and only after explicit
+            confirmation from the designer.
+          </dd>
+
+          <dt><code>product-design-as-coded.md</code></dt>
+          <dd>
+            The implementation state -- what the system <em>actually is</em>
+            right now. This file is classified as <code>Agent</code>:
+            it is maintained automatically by post-skill and designated skill
+            steps. The designer does not hand-edit it.
+          </dd>
+        </dl>
+
+        <p>
+          The As-Intended / As-Coded Registry in
+          <code>product-design/conventions.md</code> is the single source of
+          truth for which file pairs exist in a project. It maps each
+          as-intended file and section to its as-coded counterpart:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>As-Intended file</th>
+              <th>Section</th>
+              <th>As-Coded counterpart</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>product-design-as-intended.md</code></td>
+              <td>§0--§17 design intent + Decisions + CHANGELOG</td>
+              <td><code>product-design-as-coded.md</code></td>
+            </tr>
+            <tr>
+              <td><code>product-design-as-intended.md</code></td>
+              <td>§15 designed journeys</td>
+              <td><code>product-design-as-coded.md</code> § Journey Maps</td>
+            </tr>
+            <tr>
+              <td><code>ux-research-results.md</code></td>
+              <td>all (personas, scenarios, journeys, CHANGELOG)</td>
+              <td>--</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          This split enforces Constitution principle T2: design intent is
+          human-authored; implementation state is agent-maintained. The
+          boundary is not merely a convention -- it is validated at commit
+          time by <code>check_human_markers_only.py</code>, which rejects
+          any agent prose writes to <code>Human (markers)</code> files.
+        </p>
+
+        <p>
+          The gap between what the designer intends and what the system
+          currently implements is the subject of the
+          <code>/explain drift</code> command, which compares the two files
+          and surfaces misalignments before they compound into design debt.
+        </p>
+
+        <p>
+          The reference table above covers the structure of the as-intended
+          file in detail. The following section walks through its eighteen
+          numbered sections.
+        </p>
+      </section>
+
+      <section id="design-intent-files--structure-of-product-design-as-intended" data-diataxis="reference">
+        <h3>Structure of product-design-as-intended.md</h3>
+
+        <p>
+          The design-intent file is organized into eighteen numbered sections
+          (§0 through §17), followed by a Decisions section and a CHANGELOG.
+          Together they form the project's unified working intent -- the
+          single artifact that records what the designer wants the system to
+          be across every design dimension.
+        </p>
+
+        <h4>Section inventory</h4>
+
+        <table>
+          <thead>
+            <tr>
+              <th>§</th>
+              <th>Section</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0</td>
+              <td>Planned Changes</td>
+              <td>Upcoming design changes with target version and rationale</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Platform Purpose</td>
+              <td>What the system is and why it exists</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Entity Hierarchy</td>
+              <td>Domain model: entities, relationships, ownership tree</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Domain-Specific Concepts</td>
+              <td>Terminology and concepts unique to the project's domain</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Permission Model</td>
+              <td>System-level roles and resource-level access rules</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Content Authoring and Attribution</td>
+              <td>Authoring model and marker attribution rules</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>Content Import and Export</td>
+              <td>Data portability: import formats, export mechanisms</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>User Community and Localization</td>
+              <td>i18n strategy and community features</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>User Experience Patterns (Domain-Driven)</td>
+              <td>UX patterns derived from domain needs</td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td>Administrative Domain</td>
+              <td>Admin capabilities and operational controls</td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td>Validation Constants (Domain)</td>
+              <td>Field constraints: lengths, ranges, formats</td>
+            </tr>
+            <tr>
+              <td>11</td>
+              <td>Global Metacommunication Vision</td>
+              <td>The designer's I/you message to the user (highest-authority artifact)</td>
+            </tr>
+            <tr>
+              <td>12</td>
+              <td>Extended Metacommunication Template Guiding Questions</td>
+              <td>EMT answers: who the users are, what they need, how the system helps</td>
+            </tr>
+            <tr>
+              <td>13</td>
+              <td>Solution Representations</td>
+              <td>How the system represents its solutions to the user</td>
+            </tr>
+            <tr>
+              <td>14</td>
+              <td>Per-Feature Metacommunication Intentions</td>
+              <td>Feature-level I/you statements for individual capabilities</td>
+            </tr>
+            <tr>
+              <td>15</td>
+              <td>Designed User Journeys</td>
+              <td>JM-TB-NNN designed journey maps linking personas to tasks</td>
+            </tr>
+            <tr>
+              <td>16</td>
+              <td>Conceptual Design Delta</td>
+              <td>Structural changes since the last design iteration</td>
+            </tr>
+            <tr>
+              <td>17</td>
+              <td>Delta Rationale</td>
+              <td>Why each delta was introduced</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>Decisions section</h4>
+
+        <p>
+          Below the eighteen numbered sections, a <code>## Decisions</code>
+          section holds DDR-shaped (Design Decision Record) entries under
+          <code>### D-NNN: Title</code> headings. Each entry records:
+        </p>
+
+        <ul>
+          <li><strong>Context</strong> -- the situation that prompted the decision</li>
+          <li><strong>Decision</strong> -- what was decided</li>
+          <li><strong>Consequences</strong> -- downstream effects</li>
+          <li><strong>Rejected Alternatives</strong> -- what was considered and set aside</li>
+        </ul>
+
+        <p>
+          Decision IDs (<code>D-001</code>, <code>D-002</code>, ...) are
+          auto-assigned by <code>apply_marker.py --marker DECISION_APPEND</code>.
+          They use a namespace orthogonal to <code>REQ-TYPE-NNN</code>
+          requirement markers -- the two are never intermixed.
+        </p>
+
+        <h4>CHANGELOG section</h4>
+
+        <p>
+          A <code>## CHANGELOG</code> at the bottom of the file provides a
+          chronological record of marker flips and design-intent changes.
+          Entries are appended via <code>apply_marker.py --marker CHANGELOG_APPEND</code>,
+          never written by hand. The CHANGELOG serves as the audit trail for
+          when and why design-intent items changed lifecycle state.
+        </p>
+
+        <h4>File classification</h4>
+
+        <p>
+          The entire file carries the <code>Human (markers)</code>
+          classification. This means:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Prose</strong> (section content, decision rationale,
+            entity descriptions) is written exclusively by the human
+            designer.
+          </li>
+          <li>
+            <strong>Markers</strong> (STATUS comments, DECISION_APPEND
+            entries, CHANGELOG_APPEND lines) are written by the agent
+            through <code>apply_marker.py</code>, but only after the
+            designer confirms via an explicit prompt.
+          </li>
+          <li>
+            <strong>Enforcement</strong>: <code>check_human_markers_only.py</code>
+            runs during post-skill and rejects any agent prose mutations
+            that bypass the marker pathway.
+          </li>
+        </ul>
+
+        <p>
+          With the file's structure established, the next section explains
+          how design-intent items advance through their lifecycle.
+        </p>
+      </section>
+
+      <section id="design-intent-files--the-promote-workflow" data-diataxis="how-to">
+        <h3>The Promote Workflow</h3>
+
+        <p>
+          Design-intent items move through a four-state lifecycle tracked by
+          STATUS markers. The state machine enforces a strict forward
+          progression:
+        </p>
+
+        <pre><code>proposed  →  implemented  →  established  →  superseded</code></pre>
+
+        <p>
+          Regression (moving backward, such as <code>established</code> back
+          to <code>implemented</code>) is rejected by
+          <code>apply_marker.py</code>. Each transition requires a plan ID
+          and date.
+        </p>
+
+        <p>
+          The primary promotion path -- moving items from
+          <code>implemented</code> to <code>established</code> -- uses the
+          <code>/explain drift --promote</code> command and proceeds in two
+          phases:
+        </p>
+
+        <h4>Phase 3a: Decision entry proposal</h4>
+
+        <p>
+          <code>/explain drift --promote</code> scans
+          <code>product-design-as-intended.md</code> for items marked
+          <code>STATUS: implemented</code>. For each one, it generates a
+          DDR-shaped decision entry proposal and writes it to
+          <code>_output/promote-proposals/promote-proposal-plan-&lt;id&gt;.md</code>.
+          The designer reviews the proposal, edits it to their voice, and
+          copies approved entries into the <code>## Decisions</code> section
+          of the design-intent file.
+        </p>
+
+        <h4>Phase 3b: STATUS marker flip</h4>
+
+        <p>
+          Once the decision entry is in place, the designer runs
+          <code>/explain drift --apply-markers plan-&lt;id&gt;</code>. This
+          invokes <code>apply_marker.py</code> to flip the STATUS marker
+          from <code>implemented</code> to <code>established</code>. The
+          script verifies the entry heading exists (using heading-only grep
+          to avoid matching prose) before applying the transition.
+        </p>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> The two-phase split exists to preserve the
+            designer's voice. Phase 3a generates a <em>proposal</em> that
+            the designer edits before it enters the permanent record. Phase
+            3b is a mechanical marker flip that happens only after the
+            human-authored entry is confirmed.
+          </p>
+        </aside>
+
+        <p>
+          The rationale behind the marker types and the as-intended/as-coded
+          split is explored in the following section.
+        </p>
+      </section>
+
+      <section id="design-intent-files--design-decisions-and-trade-offs" data-diataxis="explanation">
+        <h3>Design Decisions and Trade-offs</h3>
+
+        <h4>Why three marker types</h4>
+
+        <p>
+          SEJA's marker system uses three distinct marker types, each serving
+          a different governance purpose:
+        </p>
+
+        <dl>
+          <dt>STATUS markers</dt>
+          <dd>
+            Track the lifecycle of individual design-intent items through the
+            <code>proposed → implemented → established → superseded</code>
+            state machine. STATUS markers answer: "has this design intention
+            been realized in code, and has that realization been confirmed?"
+          </dd>
+
+          <dt>INCORPORATED markers</dt>
+          <dd>
+            Record when research findings have been absorbed into design
+            intent. An INCORPORATED stamp links a research log to the
+            design-intent section it informed, creating traceability from
+            discovery to design.
+          </dd>
+
+          <dt>DECISION_APPEND / CHANGELOG_APPEND</dt>
+          <dd>
+            Structured append operations that add new entries to the
+            Decisions or CHANGELOG sections. These are not status transitions
+            -- they are content additions that extend the design record
+            without modifying existing prose.
+          </dd>
+        </dl>
+
+        <p>
+          Each type has a specific regex-validated format, preventing
+          free-form mutations from slipping through the marker pathway.
+        </p>
+
+        <h4>Why the as-intended / as-coded split</h4>
+
+        <p>
+          The split enforces Constitution principle T2: design intent is
+          human-authored; implementation state is agent-maintained. Without
+          this boundary, two failure modes emerge:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Agent drift</strong>: if the agent can write design
+            intent, it can silently rewrite the designer's vision to match
+            what it built, eliminating the gap signal that
+            <code>/explain drift</code> relies on.
+          </li>
+          <li>
+            <strong>Stale intent</strong>: if the designer must also
+            maintain the implementation record, the as-coded file falls
+            behind, and drift detection produces false positives that erode
+            trust.
+          </li>
+        </ul>
+
+        <p>
+          The split is not duplication -- each file serves a distinct
+          audience. The as-intended file is the designer's authoritative
+          statement of what should exist. The as-coded file is the agent's
+          honest report of what does exist. The productive tension between
+          them is the engine of SEJA's governance model.
+        </p>
+
+        <h4>Why path-scoped rules</h4>
+
+        <p>
+          Rules in <code>.claude/rules/</code> are auto-loaded by Claude
+          when editing files that match the rule's scope. This means
+          governance constraints are applied contextually: a rule about
+          <code>product-design/</code> files loads when the agent touches
+          those files, but does not clutter the context window when working
+          on unrelated code. Path scoping keeps governance lightweight by
+          loading constraints only when they are relevant. For details on
+          the marker mechanics, see
+          <a href="#marker-system">The Marker System</a>.
+        </p>
+      </section>
+
+      <section id="design-intent-files--common-mistakes" data-diataxis="how-to">
+        <h3>Common Mistakes</h3>
+
+        <dl>
+          <dt>Hand-editing Human (markers) files</dt>
+          <dd>
+            Writing prose directly into
+            <code>product-design-as-intended.md</code> or
+            <code>ux-research-results.md</code> as an agent, instead of
+            using <code>apply_marker.py</code>. The
+            <code>check_human_markers_only.py</code> verifier catches this
+            during post-skill and rejects the mutation. The fix: always use
+            <code>apply_marker.py</code> with the appropriate
+            <code>--marker</code> type (STATUS, INCORPORATED,
+            DECISION_APPEND, or CHANGELOG_APPEND) and wait for designer
+            confirmation via the AskUserQuestion prompt.
+          </dd>
+
+          <dt>Treating as-coded as authoritative over as-intended</dt>
+          <dd>
+            Assuming that because <code>product-design-as-coded.md</code>
+            reflects the current implementation, it represents the "real"
+            design. It does not. The as-intended file is the designer's
+            authoritative vision; the as-coded file is the agent's report of
+            current state. When the two diverge, the as-intended file is
+            correct and the implementation needs to catch up -- not the other
+            way around. Use <code>/explain drift</code> to surface and
+            manage these gaps.
+          </dd>
+
+          <dt>Forgetting the Registry when adding new design files</dt>
+          <dd>
+            Creating a new as-intended or as-coded file without registering
+            it in the As-Intended / As-Coded Registry in
+            <code>product-design/conventions.md</code>. Unregistered files
+            are invisible to <code>/explain drift</code>, post-skill DONE
+            marker proposals, and <code>/design</code> template generation.
+            Always add a row to the Registry when introducing a new
+            design-intent artifact pair.
+          </dd>
+
+          <dt>Confusing STATUS markers with git status</dt>
+          <dd>
+            STATUS markers (<code>&lt;!-- STATUS: implemented | plan-000123 | 2026-07-01 --&gt;</code>)
+            track the <em>design lifecycle</em> of an item -- whether a
+            design intention has been proposed, implemented, established, or
+            superseded. They have no relation to <code>git status</code>,
+            which tracks file modifications in the working tree. A file can
+            have <code>STATUS: implemented</code> markers on all its
+            sections while showing as unmodified in <code>git status</code>,
+            and vice versa.
+          </dd>
+        </dl>
+      </section>
+      </section>
+
+      <section id="marker-system" class="print-chapter" aria-label="The Marker System">
+<h2>The Marker System</h2>
+
+      <p>
+        SEJA uses lifecycle markers to track the status of design-intent items
+        as they move from proposal through implementation to establishment.
+        Markers are the mechanism by which the agent records lifecycle state
+        changes in human-authored files without altering the designer's prose.
+        All marker writes go through a single script --
+        <code>apply_marker.py</code> -- which validates format, enforces
+        transition rules, and requires explicit human confirmation before
+        every write.
+      </p>
+
+      <section id="marker-system--marker-types" data-diataxis="reference">
+        <h3>Marker Types</h3>
+
+        <p>
+          SEJA's marker system comprises five marker types organized in
+          three functional categories: status tracking (STATUS), research
+          absorption (INCORPORATED), structured-entry appending
+          (DECISION_APPEND, CHANGELOG_APPEND), and traceability
+          (REQ_TRACED_BY). Each type serves a distinct governance purpose
+          and follows a specific format.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Purpose</th>
+              <th>Format</th>
+              <th>Triggered By</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>STATUS</code></td>
+              <td>Tracks lifecycle state of design-intent items</td>
+              <td><code>&lt;!-- STATUS: &lt;value&gt; | &lt;plan-id&gt; | &lt;date&gt; --&gt;</code></td>
+              <td>Post-skill (agent proposes, human confirms)</td>
+            </tr>
+            <tr>
+              <td><code>INCORPORATED</code></td>
+              <td>Records absorption of research findings into design</td>
+              <td><code>&lt;!-- INCORPORATED: &lt;plan-id&gt; | &lt;date&gt; --&gt;</code></td>
+              <td>Post-skill after research findings are acted upon</td>
+            </tr>
+            <tr>
+              <td><code>DECISION_APPEND</code></td>
+              <td>Appends DDR-shaped decision entries to the Decisions section</td>
+              <td><code>### D-NNN: &lt;title&gt;</code> with Context, Decision, Consequences</td>
+              <td><code>/research</code> step 9b or <code>/design</code> Phase C</td>
+            </tr>
+            <tr>
+              <td><code>CHANGELOG_APPEND</code></td>
+              <td>Appends timestamped entries to the CHANGELOG section</td>
+              <td>Table row: <code>| &lt;date&gt; | &lt;action&gt; | &lt;source&gt; |</code></td>
+              <td>Post-skill after marker flips or design changes</td>
+            </tr>
+            <tr>
+              <td><code>REQ_TRACED_BY</code></td>
+              <td>Annotates REQ markers with traceability links to implementing plans</td>
+              <td><code>&lt;!-- REQ-TYPE-NNN | traced_by: &lt;value&gt; --&gt;</code></td>
+              <td>Post-skill after plan implementation traces to a REQ</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>STATUS: Lifecycle State Machine</h4>
+
+        <p>
+          The <code>STATUS</code> marker is an inline HTML comment placed
+          immediately before a section heading. It is invisible in rendered
+          Markdown but machine-parseable by agent tooling. The state machine
+          enforces a strict progression:
+        </p>
+
+        <pre><code>proposed  →  implemented  →  established  →  superseded</code></pre>
+
+        <p>
+          Each transition requires a plan ID and date. Regressions (such as
+          <code>established → implemented</code>) are rejected by the script.
+          A STATUS marker in context looks like this:
+        </p>
+
+        <pre><code>&lt;!-- STATUS: implemented | plan-000178 | 2026-04-02 --&gt;
+### Platform Purpose</code></pre>
+
+        <p>
+          Legacy uppercase markers (<code>STATUS: IMPLEMENTED</code>) from
+          pre-2.8.3 files are still recognized. When a Phase 3b promotion
+          flip targets a legacy marker, <code>apply_marker.py</code> replaces
+          the line in place rather than stacking a new marker above it.
+        </p>
+
+        <h4>ESTABLISHED: The Promotion Stamp</h4>
+
+        <p>
+          When a human confirms that an <code>implemented</code> item should
+          be promoted to <code>established</code>, two things happen: the
+          STATUS marker is flipped to <code>established</code>, and an
+          ESTABLISHED stamp is applied. The stamp records the promotion event:
+        </p>
+
+        <pre><code>&lt;!-- ESTABLISHED: plan-000178 | 2026-04-02 | v2.8.3 --&gt;</code></pre>
+
+        <p>
+          The version field (<code>vX.Y.Z</code>) is optional. Projects
+          without semantic versioning use the date alone.
+        </p>
+
+        <h4>INCORPORATED: Research Absorption</h4>
+
+        <p>
+          The <code>INCORPORATED</code> marker records that research findings
+          from a specific plan or research log have been absorbed into the
+          design-intent file. It is inserted before the heading of the section
+          that was informed by the research:
+        </p>
+
+        <pre><code>&lt;!-- INCORPORATED: plan-000268 | 2026-04-11 --&gt;
+### Entity Hierarchy</code></pre>
+
+        <h4>DECISION_APPEND and CHANGELOG_APPEND: Structured Entries</h4>
+
+        <p>
+          These two marker types do not modify existing lines -- they append
+          new structured content to designated sections.
+          <code>DECISION_APPEND</code> adds a DDR-shaped decision entry
+          (<code>### D-NNN: Title</code> with Context, Decision, Consequences
+          fields) to the <code>## Decisions</code> section. The D-NNN ID is
+          auto-assigned by scanning existing entries.
+          <code>CHANGELOG_APPEND</code> adds a timestamped row to the
+          <code>## CHANGELOG</code> table.
+        </p>
+      </section>
+
+      <p>
+        The reference above catalogues each marker type and its format. The
+        following section shows how to apply these markers in practice using
+        the <code>apply_marker.py</code> script.
+      </p>
+
+      <section id="marker-system--using-apply-marker" data-diataxis="how-to">
+        <h3>Using apply_marker.py</h3>
+
+        <p>
+          <code>apply_marker.py</code> is the sole write path for files
+          classified as <code>Human (markers)</code>. Agents that need to
+          update a marker must invoke this script rather than using Edit or
+          Write on the file directly. The companion verifier
+          <code>check_human_markers_only.py</code> rejects any prose
+          mutations that bypass this path.
+        </p>
+
+        <h4>Command-Line Interface</h4>
+
+        <pre><code>python .claude/skills/scripts/apply_marker.py \
+    --file &lt;path&gt; \
+    --id &lt;entry-id&gt; \
+    --marker &lt;kind&gt; \
+    --value &lt;value&gt; \
+    [--plan &lt;plan-id&gt;] \
+    [--date &lt;YYYY-MM-DD&gt;] \
+    [--note &lt;text&gt;] \
+    [--dry-run]</code></pre>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Required</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--file</code></td>
+              <td>Yes</td>
+              <td>Path to the target <code>Human (markers)</code> file</td>
+            </tr>
+            <tr>
+              <td><code>--id</code></td>
+              <td>Yes</td>
+              <td>Entry ID or section heading to locate (e.g., <code>"Platform Purpose"</code> or <code>"D-001"</code>)</td>
+            </tr>
+            <tr>
+              <td><code>--marker</code></td>
+              <td>Yes</td>
+              <td>Marker kind: <code>STATUS</code>, <code>ESTABLISHED</code>, <code>INCORPORATED</code>, <code>DECISION_APPEND</code>, <code>CHANGELOG_APPEND</code>, or <code>REQ_TRACED_BY</code></td>
+            </tr>
+            <tr>
+              <td><code>--value</code></td>
+              <td>Conditional</td>
+              <td>Marker value (e.g., <code>implemented</code> for STATUS, entry text for DECISION_APPEND). Required for STATUS, CHANGELOG_APPEND, DECISION_APPEND, and REQ_TRACED_BY; ignored by stamp-kind markers (ESTABLISHED, INCORPORATED)</td>
+            </tr>
+            <tr>
+              <td><code>--plan</code></td>
+              <td>Depends</td>
+              <td>Plan ID (required for ESTABLISHED and INCORPORATED; recommended for STATUS)</td>
+            </tr>
+            <tr>
+              <td><code>--date</code></td>
+              <td>No</td>
+              <td>Date in <code>YYYY-MM-DD</code> format (defaults to today in UTC)</td>
+            </tr>
+            <tr>
+              <td><code>--note</code></td>
+              <td>No</td>
+              <td>Optional annotation text</td>
+            </tr>
+            <tr>
+              <td><code>--dry-run</code></td>
+              <td>No</td>
+              <td>Preview the change without writing to disk</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>The Confirmation Flow</h4>
+
+        <p>
+          Before invoking <code>apply_marker.py</code>, the agent must ask
+          the designer for confirmation using <code>AskUserQuestion</code>.
+          This is not optional -- it is the human-in-the-loop governance
+          check that ensures no lifecycle state change happens without
+          explicit designer approval. The flow is:
+        </p>
+
+        <ol>
+          <li>The agent identifies that a marker write is needed (e.g., post-skill detects a plan step was completed).</li>
+          <li>The agent presents the proposed change via <code>AskUserQuestion</code>: which file, which entry, which marker, which value.</li>
+          <li>The designer confirms or rejects.</li>
+          <li>On confirmation, the agent runs <code>apply_marker.py</code> with the agreed parameters.</li>
+        </ol>
+
+        <h4>Examples</h4>
+
+        <h5>Marking a section as implemented</h5>
+
+        <pre><code>python .claude/skills/scripts/apply_marker.py \
+    --file product-design/product-design-as-intended.md \
+    --id "Platform Purpose" \
+    --marker STATUS \
+    --value implemented \
+    --plan plan-000178</code></pre>
+
+        <p>
+          This inserts <code>&lt;!-- STATUS: implemented | plan-000178 |
+          2026-07-15 --&gt;</code> immediately before the
+          <code>### Platform Purpose</code> heading.
+        </p>
+
+        <h5>Recording research incorporation</h5>
+
+        <pre><code>python .claude/skills/scripts/apply_marker.py \
+    --file product-design/product-design-as-intended.md \
+    --id "Entity Hierarchy" \
+    --marker INCORPORATED \
+    --plan plan-000268</code></pre>
+
+        <h5>Appending a decision entry</h5>
+
+        <pre><code>python .claude/skills/scripts/apply_marker.py \
+    --file product-design/product-design-as-intended.md \
+    --id "_" \
+    --marker DECISION_APPEND \
+    --value "Use HTML-only output for product topology
+**Context**: Mermaid cannot support persona-filter or roadmap-lane views.
+**Decision**: Adopt HTML as the canonical topology deliverable.
+**Consequences**: No Mermaid dependency; requires custom rendering logic." \
+    --plan plan-000200</code></pre>
+
+        <p>
+          The <code>--id</code> parameter is ignored for
+          <code>DECISION_APPEND</code> -- the script auto-assigns the next
+          <code>D-NNN</code> ID by scanning existing entries in the
+          <code>## Decisions</code> section.
+        </p>
+
+        <h5>Previewing a change</h5>
+
+        <p>
+          Add <code>--dry-run</code> to any command to see what would be
+          written without modifying the file. The script prints the marker
+          line and target location, then exits without writing.
+        </p>
+      </section>
+
+      <p>
+        With the practical mechanics established, the following section
+        explains why markers are structured this way and what role they play
+        in SEJA's governance model.
+      </p>
+
+      <section id="marker-system--markers-as-designed-signification" data-diataxis="explanation">
+        <h3>Markers as Designed Signification</h3>
+
+        <p>
+          Markers in SEJA are not arbitrary metadata tags. They are a
+          designed signification system -- a set of conventionalized
+          expression-content pairs where each marker type carries a specific,
+          governance-relevant meaning. This is a deliberate application of
+          the semiotic engineering concept of signification systems, where
+          signs are designed to convey particular meanings within a particular
+          context of use.
+        </p>
+
+        <p>
+          The <code>STATUS</code> marker signifies where a design-intent
+          item stands in its lifecycle: has it been proposed, built, confirmed
+          by the designer, or superseded? The <code>INCORPORATED</code>
+          marker signifies that external knowledge (research findings) has
+          been absorbed into the design layer. The <code>DECISION_APPEND</code>
+          marker signifies that a new design decision -- with its rationale,
+          consequences, and rejected alternatives -- has been formally
+          recorded.
+        </p>
+
+        <p>
+          The <code>Human (markers)</code> file classification enforces the
+          boundary between these structured signs and free-form prose. In a
+          file classified as <code>Human (markers)</code>, the designer
+          writes all narrative content -- the descriptions, rationale, and
+          design intent. The agent writes only lifecycle markers, and only
+          through <code>apply_marker.py</code>. This is constitution
+          principle T2 in action: the boundary preserves the distinction
+          between design intent (human-authored) and implementation state
+          (agent-maintained).
+        </p>
+
+        <p>
+          The practical consequence is that markers serve as an audit trail.
+          Every STATUS flip, every INCORPORATED stamp, every DECISION_APPEND
+          entry records which plan triggered it and when. A designer reviewing
+          <code>product-design-as-intended.md</code> can trace any lifecycle
+          change back to the plan that caused it. The signification is not
+          just labeling -- it is accountable record-keeping.
+        </p>
+
+        <p>
+          For the theoretical foundations of signification systems and their
+          role in SEJA's design, see
+          <a href="../foundations/software-as-communication.html#designers-deputy">Software as Designed Communication</a>.
+        </p>
+      </section>
+
+      <section id="marker-system--common-mistakes" data-diataxis="how-to">
+        <h3>Common Mistakes</h3>
+
+        <dl>
+          <dt>Writing markers by hand instead of via apply_marker.py</dt>
+          <dd>
+            Manually typing a <code>&lt;!-- STATUS: implemented | ... --&gt;</code>
+            comment into a design-intent file bypasses format validation,
+            transition-rule enforcement, and the audit trail.
+            <code>check_human_markers_only.py</code> will flag the write as
+            a prose mutation during post-skill. Always use
+            <code>apply_marker.py</code> -- it validates the marker format
+            against allowed regular expressions, checks that the state
+            transition is permitted, and records the plan ID for traceability.
+          </dd>
+
+          <dt>Using STATUS markers on non-design files</dt>
+          <dd>
+            STATUS markers belong on entries within files registered in the
+            As-Intended / As-Coded Registry in
+            <code>product-design/conventions.md</code> -- specifically, the
+            as-intended files like
+            <code>product-design/product-design-as-intended.md</code>.
+            Applying STATUS markers to arbitrary Markdown files, plans, or
+            output artifacts has no governance effect: the marker tooling
+            does not track those files, and the promote workflow
+            (<code>/explain drift --promote</code>) will not find them.
+          </dd>
+
+          <dt>Confusing <code>implemented</code> with <code>established</code></dt>
+          <dd>
+            <code>implemented</code> means the item has been built -- a plan
+            executed it, and the code exists. <code>established</code> means
+            the designer has reviewed the implementation, confirmed it matches
+            intent, and promoted it via <code>/explain drift --promote</code>.
+            The distinction matters: an <code>implemented</code> item is
+            still subject to review and may be revised. An
+            <code>established</code> item is confirmed as the accepted
+            design-to-code mapping. Skipping the promotion step leaves the
+            design layer in a permanently provisional state.
+          </dd>
+
+          <dt>Skipping the AskUserQuestion confirmation</dt>
+          <dd>
+            Running <code>apply_marker.py</code> without first asking the
+            designer for confirmation violates the human-in-the-loop
+            governance model. The confirmation step is not ceremony -- it is
+            the moment where the designer exercises authority over what gets
+            recorded as the lifecycle state of their design intent. An agent
+            that writes markers autonomously is making governance decisions
+            on the designer's behalf, which undermines constitution
+            principle T2.
+          </dd>
+        </dl>
+      </section>
+      </section>
+
+      <section id="ux-research" class="print-chapter" aria-label="UX Research Artifacts">
+<h2>UX Research Artifacts</h2>
+
+      <p>
+        SEJA projects ground their design in structured UX research artifacts:
+        personas that model target users, problem scenarios that capture pain
+        points motivating the design, and discovered journeys that record how
+        users actually interact with the system. These artifacts live in
+        <code>product-design/ux-research-results.md</code>, classified as
+        <code>Human (markers)</code> -- prose is human-authored only, and
+        agents may write only INCORPORATED markers and CHANGELOG appends via
+        <code>apply_marker.py</code>.
+      </p>
+
+      <p>
+        This chapter documents the structure, purpose, and maintenance of
+        each artifact type, and explains the critical distinction between
+        discovered journeys (evidence from observation) and designed journeys
+        (intent from the designer).
+      </p>
+
+      <!-- Section 1: Personas -->
+      <section id="ux-research--personas" data-diataxis="reference">
+        <h3>Personas</h3>
+
+        <p>
+          In SEJA's context, personas are structured archetypes of the
+          project's target users. They are not exhaustive user profiles but
+          focused models that capture the goals, frustrations, and relevant
+          context that shape design decisions. Each persona answers a slice
+          of the metacommunication message's opening clause: "Here is my
+          understanding of who you are."
+        </p>
+
+        <h4>Where Personas Live</h4>
+
+        <p>
+          Personas are defined in sections 1 and 2 of
+          <code>product-design/ux-research-results.md</code>. Section 1
+          contains a Persona Inventory table (summary) and full persona
+          profiles. Section 3 (Cross-Reference Map) links each persona to
+          the design artifacts it feeds.
+        </p>
+
+        <h4>How Personas Are Created</h4>
+
+        <p>
+          The <code>/design</code> skill generates personas during its Mode 5
+          (Interview-Driven) workflow. Phase A collects open-ended information
+          about the project's target users through conversational Q&amp;A.
+          Phase B synthesizes the interview data into structured persona
+          entries, assigning stable IDs and mapping goals to the Extended
+          Metacommunication Template (EMT) dimensions. The designer reviews
+          and confirms each persona during Phase C before the artifacts are
+          written.
+        </p>
+
+        <h4>Persona Entry Structure</h4>
+
+        <p>
+          Each persona entry follows a fixed structure with stable identifiers:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Format</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ID</td>
+              <td><code>R-P-NNN</code></td>
+              <td>Stable identifier; never reused, even for superseded personas</td>
+            </tr>
+            <tr>
+              <td>Name</td>
+              <td>Short given name</td>
+              <td>Human-readable label for cross-references</td>
+            </tr>
+            <tr>
+              <td>Role / Archetype</td>
+              <td>Free text</td>
+              <td>The user's primary relationship to the system</td>
+            </tr>
+            <tr>
+              <td>Bio</td>
+              <td>Narrative paragraph</td>
+              <td>Background, expertise, and context for design reasoning</td>
+            </tr>
+            <tr>
+              <td>Goals</td>
+              <td><code>G-NNN</code> entries</td>
+              <td>What the persona wants or needs to accomplish; referenced by problem scenarios and design features</td>
+            </tr>
+            <tr>
+              <td>Key Frustrations</td>
+              <td>Bullet list</td>
+              <td>Pain points that motivate design decisions</td>
+            </tr>
+            <tr>
+              <td>Relevant Context</td>
+              <td>Structured fields</td>
+              <td>Technical proficiency, usage frequency, domain knowledge</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Persona IDs use the <code>R-P-NNN</code> format (zero-padded,
+          starting at 001). IDs are stable and never reassigned -- a
+          superseded persona gets a new ID rather than reusing the old one.
+        </p>
+
+        <p>
+          The reference tables above describe the structure of individual
+          personas. The following section covers problem scenarios -- the
+          artifacts that connect personas to the design features they
+          motivate.
+        </p>
+      </section>
+
+      <!-- Section 2: Problem Scenarios -->
+      <section id="ux-research--problem-scenarios" data-diataxis="reference">
+        <h3>Problem Scenarios</h3>
+
+        <p>
+          Problem scenarios are structured narratives that capture specific
+          pain points users experience without SEJA (or with earlier versions
+          of it). Each scenario describes a concrete situation where a user's
+          goals are frustrated, grounding abstract persona frustrations in
+          observable, testable contexts.
+        </p>
+
+        <h4>Where Problem Scenarios Live</h4>
+
+        <p>
+          Problem scenarios are defined in section 2 of
+          <code>product-design/ux-research-results.md</code>. The
+          Cross-Reference Map in section 3 links each scenario to the design
+          artifacts it feeds -- typically specific sections of
+          <code>product-design/product-design-as-intended.md</code> and
+          per-feature metacommunication intentions.
+        </p>
+
+        <h4>Scenario Entry Structure</h4>
+
+        <p>
+          Each problem scenario entry includes:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Format</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ID</td>
+              <td><code>R-PS-NNN</code></td>
+              <td>Stable identifier for cross-referencing</td>
+            </tr>
+            <tr>
+              <td>Persona(s)</td>
+              <td><code>R-P-NNN</code> references</td>
+              <td>Which personas experience this pain point</td>
+            </tr>
+            <tr>
+              <td>Goals</td>
+              <td><code>G-NNN</code> references</td>
+              <td>Which persona goals are frustrated</td>
+            </tr>
+            <tr>
+              <td>Setting</td>
+              <td>Narrative sentence</td>
+              <td>When and where the scenario occurs</td>
+            </tr>
+            <tr>
+              <td>Narrative</td>
+              <td>Multi-paragraph prose</td>
+              <td>What happens, why it is a problem, what the user cannot do</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>Connecting Scenarios to Design</h4>
+
+        <p>
+          The traceability chain runs: <strong>Persona</strong> (who) →
+          <strong>Goal</strong> (what they need) → <strong>Problem
+          Scenario</strong> (what goes wrong) → <strong>Design
+          Feature</strong> (what SEJA does about it). The Cross-Reference
+          Map in section 3 of
+          <code>product-design/ux-research-results.md</code> records these
+          links explicitly, mapping each artifact ID to the design-intent
+          section it feeds. This ensures that no design feature exists without
+          a traceable motivation and no problem scenario is left unaddressed
+          without a conscious decision to defer it.
+        </p>
+
+        <p>
+          With personas and problem scenarios defining what users need and
+          where they struggle, the next section covers discovered journeys --
+          the artifacts that record how users actually behave once the system
+          is in use.
+        </p>
+      </section>
+
+      <!-- Section 3: Discovered Journeys -->
+      <section id="ux-research--discovered-journeys" data-diataxis="how-to">
+        <h3>Discovered Journeys</h3>
+
+        <p>
+          SEJA distinguishes two kinds of journey maps, identified by their
+          ID prefixes. Understanding this distinction is essential for
+          maintaining accurate design records.
+        </p>
+
+        <h4>Discovered vs. Designed Journeys</h4>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Attribute</th>
+              <th>Discovered Journeys</th>
+              <th>Designed Journeys</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ID prefix</td>
+              <td><code>JM-E-NNN</code></td>
+              <td><code>JM-TB-NNN</code></td>
+            </tr>
+            <tr>
+              <td>Source</td>
+              <td>Field observation of actual use</td>
+              <td>Designer's planned interaction flow</td>
+            </tr>
+            <tr>
+              <td>Nature</td>
+              <td>Evidence (what happened)</td>
+              <td>Intent (what should happen)</td>
+            </tr>
+            <tr>
+              <td>Location (as-intended)</td>
+              <td><code>ux-research-results.md</code> §5</td>
+              <td><code>product-design-as-intended.md</code> §15</td>
+            </tr>
+            <tr>
+              <td>Location (as-coded)</td>
+              <td>N/A</td>
+              <td><code>product-design-as-coded.md</code> Journey Maps</td>
+            </tr>
+            <tr>
+              <td>Maintained by</td>
+              <td>Human (researcher/designer)</td>
+              <td>Human (markers) / Agent (as-coded)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The distinction matters because discovered journeys are
+          <em>evidence</em> -- they record what actually happened when a user
+          interacted with the system, including unexpected paths,
+          workarounds, and breakdowns. Designed journeys are <em>intent</em>
+          -- they describe the interaction flow the designer planned. When
+          discovered journeys diverge from designed journeys, the gap is a
+          signal for design review, not a bug to fix.
+        </p>
+
+        <h4>Recording a Discovered Journey</h4>
+
+        <p>
+          Discovered journeys are recorded by the human designer or
+          researcher in section 5 of
+          <code>product-design/ux-research-results.md</code>. The section
+          is structurally append-only: new journeys are added at the end;
+          existing entries are never removed or reordered.
+        </p>
+
+        <p>To record a discovered journey:</p>
+
+        <ol>
+          <li>Observe the user's actual interaction path during field use
+              of the harness.</li>
+          <li>Write a narrative entry in
+              <code>ux-research-results.md</code> section 5, assigning the
+              next available <code>JM-E-NNN</code> ID.</li>
+          <li>Note the personas involved, the context, and any divergence
+              from designed journeys.</li>
+          <li>If the journey reveals a design gap, record it in the
+              Processing Status table (section 4) for future incorporation
+              into design intent.</li>
+        </ol>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> Harness tooling discriminates journey
+            types by ID prefix -- <code>JM-E-</code> for discovered,
+            <code>JM-TB-</code> for designed. Using the wrong prefix will
+            cause the journey to appear in the wrong file context and
+            confuse drift detection.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Section 4: Common Mistakes -->
+      <section id="ux-research--common-mistakes" data-diataxis="how-to">
+        <h3>Common Mistakes</h3>
+
+        <dl>
+          <dt>Confusing discovered and designed journeys</dt>
+          <dd>
+            Discovered journeys (<code>JM-E-NNN</code>) and designed
+            journeys (<code>JM-TB-NNN</code>) use different ID prefixes,
+            live in different files, and serve different purposes. Discovered
+            journeys are evidence from field observation; designed journeys
+            are intent from the designer. Mixing them up -- recording a
+            planned flow as <code>JM-E-NNN</code> or an observed path as
+            <code>JM-TB-NNN</code> -- corrupts the evidence/intent
+            distinction and confuses drift detection, which relies on the
+            ID prefix to determine where each journey belongs.
+          </dd>
+
+          <dt>Hand-editing the UX research file with agent prose</dt>
+          <dd>
+            <code>product-design/ux-research-results.md</code> is classified
+            as <code>Human (markers)</code>. All narrative prose must be
+            written by the human designer or researcher. Agents may write
+            only INCORPORATED markers and CHANGELOG_APPEND entries, and
+            only via <code>apply_marker.py</code> after explicit
+            AskUserQuestion confirmation. Direct agent prose writes are
+            rejected by <code>check_human_markers_only.py</code> during
+            post-skill. If an agent needs to propose UX research content,
+            it should present the proposal to the designer for manual
+            incorporation.
+          </dd>
+
+          <dt>Treating personas as exhaustive user descriptions</dt>
+          <dd>
+            Personas are design archetypes, not comprehensive user profiles.
+            They capture enough about a user type to ground design reasoning
+            -- goals, frustrations, relevant context -- but they are
+            deliberately simplified. A persona named "Ana" does not describe
+            every semiotic engineer who might use SEJA; she models the
+            concerns and workflow that shape design decisions for that user
+            type. Personas evolve as the designer's understanding grows:
+            new observations may refine existing personas or prompt new ones
+            with fresh <code>R-P-NNN</code> IDs.
+          </dd>
+        </dl>
+      </section>
+      </section>
+    </article>
+  </main>
+
+  <nav aria-label="volume navigation" class="volume-nav">
+    <a href="index.html">Back to Vol. 2: The Design Layer index</a>
+  </nav>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

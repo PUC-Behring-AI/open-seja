@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How SEJA structures review: the engineering and design perspective families, the Essential/Standard/Deep expertise levels, the sixteen review perspectives, and the depth gating and two-stage loading that keep coverage deterministic without bulk-loading every lens.">
+  <title>Review Perspectives — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/concepts sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Review Perspectives</h1>
+      <p>The sixteen domain lenses SEJA reviews against, their tiers, and how depth gating decides which ones load.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Concepts</a></li>
+        <li aria-current="page">Review Perspectives</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-explanation">explanation</span>
+          <span class="badge core-concepts">concepts</span>
+        </p>
+
+        <section data-diataxis="explanation" aria-labelledby="structured-review">
+          <h2 id="structured-review">Structured, deterministic review</h2>
+          <p>
+            SEJA reviews plans, diffs, and architectural decisions against a fixed
+            checklist of domain lenses called <strong>perspectives</strong>. This
+            replaces an ad-hoc &ldquo;simulate a council&rdquo; instruction with a
+            structured, deterministic sweep: each applicable perspective is
+            evaluated and recorded with an explicit status. A change is not
+            reviewed by vibe; it is reviewed lens by lens, and the record shows
+            which lenses were applied and what each concluded.
+          </p>
+          <aside class="callout-tip">
+            <strong>Boundary.</strong> This page is the conceptual overview. The
+            exhaustive catalog of every perspective &mdash; the full per-lens
+            question set at each priority &mdash; lives in the Reference Core
+            sibling <code>perspectives.html</code>.
+          </aside>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="role-families">
+          <h2 id="role-families">Two role families</h2>
+          <p>
+            The sixteen perspectives split into two families. Eleven
+            <strong>engineering</strong> perspectives cover the build-and-run
+            concerns; five <strong>design</strong> perspectives cover the
+            experience concerns. Each carries a short tag used in review logs.
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>The two perspective families and their lenses.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Family</th>
+                  <th scope="col">Perspectives (tag)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Engineering (11)</th>
+                  <td>Security (SEC), Performance (PERF), Database (DB), API Design (API), Architecture (ARCH), Developer Experience (DX), Internationalization (I18N), Testability (TEST), Operations / DevOps (OPS), Compatibility (COMPAT), Data Integrity &amp; Privacy (DATA)</td>
+                </tr>
+                <tr>
+                  <th scope="row">Design (5)</th>
+                  <td>User Experience (UX), Accessibility (A11Y), Visual Design (VIS), Responsive Design (RESP), Microinteractions (MICRO)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Each review records a tag plus a status: <strong>Adopted</strong>
+            (evaluated, concerns addressed), <strong>Deferred</strong> (evaluated,
+            not addressed &mdash; with pros and cons stated), or <strong>N/A</strong>
+            (does not apply). When two perspectives conflict, fixed rules resolve
+            it: security wins by default unless the user accepts the risk, and
+            accessibility is non-negotiable &mdash; never traded against visual
+            design or performance.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="expertise-levels">
+          <h2 id="expertise-levels">Three expertise levels</h2>
+          <p>
+            Each perspective is authored at three depths, and each of its questions
+            carries a priority from <code>[P0]</code> (critical, blocking) through
+            <code>[P4]</code> (informational). The tiers bundle those priorities:
+          </p>
+          <dl>
+            <dt>Essential (P0)</dt>
+            <dd>
+              The critical, blocking questions. Always evaluated; loaded for
+              <code>standard</code> context or the default shortlist.
+            </dd>
+            <dt>Standard (P1–P2)</dt>
+            <dd>
+              Questions for a thorough review; loaded for <code>heavy</code>
+              context or a perspective that is a primary focus of the review.
+            </dd>
+            <dt>Deep (P3–P4)</dt>
+            <dd>
+              Exhaustive analysis; optional unless the perspective is the primary
+              focus. Under time or context pressure, focus P0&ndash;P1 first.
+            </dd>
+          </dl>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="depth-gating">
+          <h2 id="depth-gating">Depth gating and two-stage loading</h2>
+          <p>
+            SEJA never bulk-loads all sixteen perspective files. Depth gating and a
+            two-stage load protocol keep review context lean. First the review
+            loads a compact <em>index</em> &mdash; tag, name, and scope for each
+            lens &mdash; which is small enough to hold cheaply. From that index it
+            selects four to six perspectives, either by a plan-prefix shortcut
+            table or by the content of the change. Only the selected
+            <code>&lt;tag&gt;.md</code> files are then loaded in full.
+          </p>
+          <p>
+            The plan prefix drives the default shortlist: a backend feature
+            (<code>FEATURE-B</code>) pulls SEC, DB, API, ARCH, TEST, and PERF; a
+            frontend feature (<code>FEATURE-F</code>) pulls UX, A11Y, VIS, RESP,
+            I18N, TEST, and MICRO; up to two extra lenses may be added when the plan
+            content warrants. The consumers &mdash; <code>/plan</code> and
+            <code>/critique review</code> &mdash; follow this protocol unless the
+            depth is Deep and every perspective is genuinely needed, in which case
+            all sixteen load. This is how the harness gets deterministic coverage
+            without paying the context cost of every lens on every review.
+          </p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="lifecycle-pipeline.html">The Lifecycle Pipeline</a> &mdash; where /plan and /critique invoke the review protocol.</li>
+            <li><a href="enforcement-layers.html">Enforcement Layers</a> &mdash; how review fits SEJA's wider governance stack.</li>
+            <li><a href="../reference/perspectives.html">Perspectives (reference)</a> &mdash; the exhaustive catalog of all 16 perspectives with tags, scope, and tiers.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Concepts</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/concepts sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

@@ -1,5 +1,8 @@
 # open-seja
 
+> **Not yet published.** This package is not on the npm registry yet; install with `git clone` as described in the
+> [README](https://github.com/PUC-Behring-AI/open-seja#install).
+
 Install or upgrade the [open-seja](https://github.com/PUC-Behring-AI/open-seja)
 Claude Code harness with a single command.
 
@@ -29,6 +32,15 @@ With `--upgrade`, the handoff prompt becomes `/seja-setup --upgrade`, which
 refreshes the harness files while preserving your project-specific
 configuration.
 
+## What happens next
+
+Inside the Claude Code session, `/seja-setup` asks you a few questions and scaffolds the project. After that I
+suggest a first cycle, small enough to finish in one sitting:
+[Your first cycle](https://github.com/PUC-Behring-AI/open-seja/blob/main/docs/quickstart.md#your-first-cycle).
+It is a hypothesis, not a promise; the page that says what would confirm it or refute it is
+[the hypothesis](https://github.com/PUC-Behring-AI/open-seja/blob/main/docs/hypothesis.md).
+
+
 ## What this command does *not* do
 
 **It does not finish the setup by itself.** The wrapper is deliberately thin:
@@ -41,8 +53,19 @@ source of truth.
 That means **this is not usable unattended in CI**: `/seja-setup` asks you
 questions and waits for answers.
 
+## Attribution
+
+open-seja is a derivative of
+[SEJA -- Semiotic Engineering Journeys with Agents](https://github.com/simonedjb/seja),
+Copyright (c) 2025-2026 Simone Diniz Junqueira Barbosa, licensed under
+[CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/). This version has been modified
+(installer, quality gate, `/mob`, per-step reflection notes); see the
+[CHANGELOG](https://github.com/PUC-Behring-AI/open-seja/blob/main/CHANGELOG.md). Provided as-is,
+without warranties (Section 5 of the license); non-commercial use only. The name `open-seja` is used
+with the trademark holder's permission.
+
 ## License
 
 The open-seja harness is distributed under CC BY-NC 4.0 (non-commercial), the
 same license as its upstream, [simonedjb/seja](https://github.com/simonedjb/seja).
-See the `LICENSE` file in the repository.
+See the `LICENSE` file shipped with this package.

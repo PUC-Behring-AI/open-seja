@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How to generate stakeholder communication and team onboarding material with SEJA: the /communicate audience segments and the /onboard role x level matrix, plus their batch modes.">
+  <title>Team and Stakeholders — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/operations sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Team and Stakeholders</h1>
+      <p>Produce tailored stakeholder material and onboarding plans with <code>/communicate</code> and <code>/onboard</code>.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Operations</a></li>
+        <li aria-current="page">Team and Stakeholders</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge core-operations">operations</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="overview">
+          <h2 id="overview">Overview</h2>
+          <p>
+            Two skills produce human-facing material from your project's design and
+            implementation state. <code>/communicate</code> generates stakeholder
+            material tailored to a specific audience segment. <code>/onboard</code>
+            generates a ramp-up plan for a new team member, tailored to their role
+            and expertise level. Both write date-versioned output folders and both
+            support batch modes for producing a full set in a single pass.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="communicate">
+          <h2 id="communicate">Stakeholder material with <code>/communicate</code></h2>
+          <p>
+            <code>/communicate &lt;audience&gt;</code> targets one of four audience
+            segments, addressable by name or by tag:
+          </p>
+          <ul>
+            <li><strong>EVL — Evaluators</strong>: CTO, tech lead, or engineering manager assessing adoption.</li>
+            <li><strong>CLT — Clients</strong>: project commissioner, business owner, or funding partner of the product.</li>
+            <li><strong>USR — End users</strong>: the person using the software built with the harness.</li>
+            <li><strong>ACD — Academics</strong>: researcher in semiotic engineering, HCI, or AI-assisted development.</li>
+          </ul>
+          <p>
+            <code>--format &lt;md|html|both&gt;</code> selects the output format
+            (default <code>both</code>). <code>--all</code> generates material for
+            all four segments in parallel; <code>--source &lt;file&gt;</code>
+            reformats an existing advisory or markdown file for the target audience,
+            and <code>--deep</code> adds deep-dive sections. Output lands in a
+            date-versioned folder — <code>&lt;COMMUNICATION_DIR&gt;/&lt;YYYY-MM-DD&gt;</code>
+            — so material generated on the same UTC date shares one folder and
+            different dates create a versioned history. Filenames follow
+            <code>communication-&lt;id&gt;-&lt;audience-slug&gt;.&lt;ext&gt;</code>,
+            and when a date folder holds more than one artifact an
+            <code>index.md</code> is generated to link them.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="onboard">
+          <h2 id="onboard">Onboarding plans with <code>/onboard</code></h2>
+          <p>
+            <code>/onboard &lt;role-family&gt; &lt;expertise-level&gt;</code>
+            generates a ramp-up plan. There are three role families:
+          </p>
+          <ul>
+            <li><strong>BLD — Builder</strong>: developer, DevOps, or infra engineer.</li>
+            <li><strong>SHP — Shaper</strong>: product designer, product manager, UX researcher, or analyst.</li>
+            <li><strong>GRD — Guardian</strong>: QA, security, tech lead, or engineering manager.</li>
+          </ul>
+          <p>
+            And three expertise levels: <strong>L1 Contributor</strong> (junior to
+            mid, individual contributor), <strong>L2 Expert</strong> (senior, deep
+            expertise, needs trade-off context), and <strong>L3 Leader</strong>
+            (staff/principal/manager, strategic or people influence). Role families
+            can be combined (e.g. <code>builder+guardian</code>) for hybrid profiles.
+            As with <code>/communicate</code>, output lands in a date-versioned
+            folder — <code>&lt;ONBOARDING_PLANS_DIR&gt;/&lt;YYYY-MM-DD&gt;</code> —
+            with filenames like
+            <code>onboarding-&lt;id&gt;-&lt;name-or-role-slug&gt;.md</code>.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="role-level-matrix">
+          <h2 id="role-level-matrix">The role &times; level matrix</h2>
+          <p>
+            The three role families and three levels form nine single-role
+            combinations. <code>--all</code> generates all nine in parallel;
+            <code>--all-levels &lt;role&gt;</code> generates the three levels of one
+            role; <code>--all-roles &lt;level&gt;</code> generates the three roles at
+            one level; and <code>--batch &lt;spec-list&gt;</code> generates an
+            explicit semicolon-separated set of specs. The nine combinations:
+          </p>
+          <table>
+            <caption>The nine role &times; level onboarding combinations.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Role family</th>
+                <th scope="col">L1 Contributor</th>
+                <th scope="col">L2 Expert</th>
+                <th scope="col">L3 Leader</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">BLD Builder</th>
+                <td>BLD-L1</td>
+                <td>BLD-L2</td>
+                <td>BLD-L3</td>
+              </tr>
+              <tr>
+                <th scope="row">SHP Shaper</th>
+                <td>SHP-L1</td>
+                <td>SHP-L2</td>
+                <td>SHP-L3</td>
+              </tr>
+              <tr>
+                <th scope="row">GRD Guardian</th>
+                <td>GRD-L1</td>
+                <td>GRD-L2</td>
+                <td>GRD-L3</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="plan-and-execute.html">Planning and Executing</a> &mdash; the batch-execution pattern that <code>--all</code> modes follow.</li>
+            <li><a href="installation.html">Installing SEJA</a> &mdash; setting up the project whose design state these skills read from.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Operations</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/operations sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

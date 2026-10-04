@@ -6,7 +6,7 @@ last-reviewed: 2026-05-05
 
 # Quality gates how-to
 
-This how-to is for you when you are about to commit, push, or merge work and you want to know which quality gate is the right one for the moment. By the end of it you will know which `/critique` mode to reach for and when. The matrix covers ten modes; most days we use two or three of them.
+This how-to is for you when you are about to commit, push, or merge work and you want to know which quality gate is the right one for the moment. By the end of it you will know which `/critique` mode to reach for and when. The matrix covers ten modes plus the project's deterministic gate; most days we use two or three of them.
 
 **Quick reference:**
 
@@ -22,6 +22,7 @@ This how-to is for you when you are about to commit, push, or merge work and you
 | `freshness` | Git upstream comparison | When returning to the project |
 | `telemetry` | Usage analytics and outcome balance | When suspecting outcome drift |
 | `semiotic-inspection` | Communicability evaluation | When writing user-facing copy |
+| `gate.py --fast/--full` | Deterministic project gate (ruff, pyright, pytest, CRAP, mutation) | validate, preflight, end of `/implement` |
 
 ## Before you start
 
@@ -88,6 +89,10 @@ We run `/critique telemetry` when we suspect outcome imbalance in `_output/telem
 When we are writing or reviewing copy (labels, error messages, onboarding prose), we run `/critique semiotic-inspection`.
 
 **Harness:** `/critique semiotic-inspection` runs the semiotic inspection method against copy tone and signage, flagging communicability issues like ambiguous labels or missing feedback messages.
+
+## The project's deterministic gate
+
+Projects that installed the Python quality gate also have `gate.py --fast` (and `--full`, which adds mutation testing). It is a plain command, not a `/critique` mode: it runs ruff, pyright, pytest, a CRAP ratchet on the functions you touched, import contracts and a marker ratchet, and exits with a code per failing category. It runs as part of `/critique validate` and `/critique preflight` (through the Quality Gate plugin) and at the end of `/implement`. When `GATE_FAST_CMD` in `project/conventions.md` is empty, the gate is not installed and the step is skipped. See the [template README](../../.claude/references/template/quality-gate/python/README.md) for the stages, exit codes and baseline rules.
 
 ## Section-boundary callout (read this once)
 

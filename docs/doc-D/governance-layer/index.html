@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="doc-status" content="draft">
+  <meta name="doc-volume" content="4">
+  <meta name="doc-phase" content="3">
+
+  <title>Vol. 4: The Output and Governance Layer -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li>Vol. 4: The Output and Governance Layer</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <!-- PRINT-LINK:START -->
+      <p class="print-view-link"><a href="governance-layer-print.html">Single-page / print view</a> &mdash; the whole volume on one page.</p>
+      <!-- PRINT-LINK:END -->
+      <h1>Vol. 4: The Output and Governance Layer <span class="phase-badge">Phase 3</span></h1>
+
+      <div class="status-notice">
+        This volume is in draft status. All five chapters contain substantive content sourced from the harness codebase.
+      </div>
+
+      <section id="purpose" data-diataxis="explanation">
+        <p>
+          This volume covers everything that happens after execution: the
+          artifacts SEJA produces, the enforcement mechanisms that keep outputs
+          aligned with design intent, the scripts and automation that maintain
+          harness health, drift detection and maintenance workflows, and the
+          release pipeline for publishing. It is the operational maturity layer
+          for teams that have moved beyond initial adoption.
+        </p>
+      </section>
+
+      <section id="chapters" data-diataxis="reference">
+        <h2>Chapters</h2>
+
+        <ol class="chapter-list">
+          <li>
+            <a href="output-artifacts.html">1. Output Artifacts</a>
+            <span class="chapter-summary">Catalogs the 20 subdirectories under <code>_output/</code>, the 13 key files that anchor the harness workspace, and the artifact lifecycle from skill-execution creation through post-skill commit and INDEX.md registration.</span>
+          </li>
+          <li>
+            <a href="enforcement-architecture.html">2. Enforcement Architecture</a>
+            <span class="chapter-summary">Documents SEJA's three-layer enforcement model -- post-skill advisory, pre-commit blocking, and CI coverage -- along with the Human (markers) classification, leak-prevention gate, path-scoped rules, and anti-patterns that undermine governance.</span>
+          </li>
+          <li>
+            <a href="scripts-and-automation.html">3. Scripts and Automation</a>
+            <span class="chapter-summary">Reference for the 70+ Python scripts organized by function: validation, generation, marker management, index/metadata, sync, lifecycle support, design support, testing, and migration. Includes guidance on using <code>run_all_checks.py</code> and extending the validation suite.</span>
+          </li>
+          <li>
+            <a href="maintenance-and-drift.html">4. Maintenance and Drift</a>
+            <span class="chapter-summary">Covers freshness policies and periodic triggers (curation, spec-drift, git freshness), the <code>/explain drift</code> workflow for detecting and promoting design-implementation alignment, and the <code>/seja-setup --upgrade</code> migration path.</span>
+          </li>
+          <li>
+            <a href="release-and-publishing.html">5. Release and Publishing</a>
+            <span class="chapter-summary">End-to-end walkthrough of the <code>/publish</code> pipeline, tag conventions and version inference, the ephemeral publish workspace design, and the priv/public boundary that keeps design artifacts private while syncing harness files to the public repository.</span>
+          </li>
+        </ol>
+      </section>
+
+      <section id="reading-order" data-diataxis="explanation">
+        <h2>Recommended Reading Order</h2>
+        <p>
+          Begin with "Output Artifacts" to understand what SEJA produces, then
+          "Enforcement Architecture" to see how those outputs are validated.
+          "Scripts and Automation" provides the technical details of the
+          automation layer. "Maintenance and Drift" addresses long-term
+          operational concerns. "Release and Publishing" is primarily relevant
+          to SEJA maintainers and contributors.
+        </p>
+      </section>
+
+      <section id="cross-references" data-diataxis="reference">
+        <h2>Related Volumes</h2>
+        <aside>
+          <p>
+            This volume governs the outputs produced by
+            <a href="../execution-layer/index.html">Vol. 3: The Execution Layer</a>.
+            The enforcement mechanisms here ultimately trace back to the
+            constraints established in
+            <a href="../design-layer/index.html">Vol. 2: The Design Layer</a>.
+          </p>
+        </aside>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 4: The Output and Governance Layer</h2>
+    <ol>
+      <li>
+        <a href="output-artifacts.html">Output Artifacts</a>
+      </li>
+      <li>
+        <a href="enforcement-architecture.html">Enforcement Architecture</a>
+      </li>
+      <li>
+        <a href="scripts-and-automation.html">Scripts and Automation</a>
+      </li>
+      <li>
+        <a href="maintenance-and-drift.html">Maintenance and Drift</a>
+      </li>
+      <li>
+        <a href="release-and-publishing.html">Release and Publishing</a>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Volume navigation -->
+  <nav aria-label="volume navigation" class="volume-nav">
+    <a href="../execution-layer/index.html">Previous: Vol. 3 -- The Execution Layer</a>
+    <a href="../foundations/index.html">Next: Vol. 5 -- Foundations and Philosophy</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

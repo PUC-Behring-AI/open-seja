@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="tutorial">
+  <meta name="doc-volume" content="Tutorials">
+  <meta name="doc-chapter" content="Drift Detection and Alignment">
+  <meta name="doc-phase" content="stable">
+  <meta name="doc-status" content="published">
+
+  <title>Drift Detection and Alignment -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element (WCAG 2.4.1) -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Volume navigation bar -->
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="../how-to/index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Tutorials</a></li>
+      <li>Drift Detection and Alignment</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content area -->
+  <main id="main-content" class="chapter-content vol-tutorials">
+    <article>
+      <!-- Diataxis type badge -->
+      <p class="vol-accent"><strong>tutorial</strong></p>
+
+      <h1>Drift Detection and Alignment</h1>
+
+      <p>
+        Over time, the code in your project and the design intent you wrote
+        will diverge. A feature gets added without updating the design files.
+        A decision gets made during implementation that changes the original
+        plan. This divergence -- called <strong>drift</strong> -- is normal and
+        inevitable. What matters is detecting it and deciding what to do about
+        it. This tutorial walks you through the entire drift cycle: introducing
+        drift deliberately, detecting it, and resolving it.
+      </p>
+
+      <!-- Prerequisites -->
+      <section id="prerequisites">
+        <h2>Prerequisites</h2>
+
+        <ul>
+          <li>A working SEJA project with at least one implemented feature (complete <a href="first-project.html">Chapter 1</a> and <a href="lifecycle-in-one-feature.html">Chapter 2</a> first)</li>
+          <li>The to-do app project (<code>my-todo-app</code>) open in your terminal</li>
+        </ul>
+      </section>
+
+      <!-- Part 1: Introduce drift -->
+      <section id="introducing-drift">
+        <h2>Part 1: Introduce Drift Deliberately</h2>
+
+        <p>
+          To learn how drift detection works, you will introduce drift on
+          purpose. In your to-do app, the design intent says tasks have three
+          priority levels (high, medium, low). You will now add a fourth level
+          -- <strong>critical</strong> -- directly in the code, without
+          updating the design intent file.
+        </p>
+
+        <h3>Step 1: Modify the code</h3>
+
+        <p>
+          Open your task model and add a fourth priority level. For example, if
+          your <code>Task</code> class uses an enum, add
+          <code>CRITICAL = 0</code> before <code>HIGH = 1</code>. Update the
+          CLI to accept <code>--priority critical</code>. Commit the change:
+        </p>
+
+        <pre><code><span class="token-command">git add</span> -A
+<span class="token-command">git commit</span> -m <span class="token-string">"add critical priority level"</span></code></pre>
+
+        <h3>Step 2: Leave the design intent unchanged</h3>
+
+        <p>
+          Do <strong>not</strong> update
+          <code>product-design/product-design-as-intended.md</code>. The design
+          intent still says there are three priority levels. This gap between
+          what the code does and what the design says is drift.
+        </p>
+
+        <aside class="callout-tip">
+          <h3>What just happened?</h3>
+          <p>
+            You have created a controlled divergence between two sources of
+            truth in your project. The <em>as-intended</em> file
+            (<code>product-design/product-design-as-intended.md</code>) describes
+            what you designed. The <em>as-coded</em> state (your actual source
+            code and <code>product-design/product-design-as-coded.md</code>)
+            describes what the code actually does. When these two diverge,
+            SEJA calls it <strong>drift</strong>.
+          </p>
+          <p>
+            Drift is not inherently bad. Sometimes the code evolved for good
+            reasons during implementation, and the design intent needs to catch
+            up. Sometimes the code drifted accidentally and needs to be brought
+            back in line. The important thing is to <em>know</em> about the
+            drift and <em>decide</em> what to do about it.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Part 2: Detect drift -->
+      <section id="detecting-drift">
+        <h2>Part 2: Detect the Drift</h2>
+
+        <p>
+          Run the drift detection skill:
+        </p>
+
+        <pre><code><span class="token-command">/explain</span> drift</code></pre>
+
+        <h3>Expected output</h3>
+
+        <p>
+          The agent compares your as-intended and as-coded design specs. It
+          reads the As-Intended / As-Coded Registry in
+          <code>product-design/conventions.md</code> to know which file pairs
+          to compare, then scans each pair for divergences. The drift report
+          looks like this:
+        </p>
+
+        <pre><code><span class="token-comment"># Drift Report</span>
+
+<span class="token-keyword">## Conceptual Design</span>
+
+<span class="token-keyword">### Priority entity</span>
+<span class="token-string">As-intended:</span> Three levels (high, medium, low)
+<span class="token-string">As-coded:</span>    Four levels (critical, high, medium, low)
+<span class="token-string">Drift:</span>       As-coded adds "critical" level not present in as-intended
+
+<span class="token-keyword">## Summary</span>
+1 entity with drift detected
+0 permissions with drift
+0 UX patterns with drift</code></pre>
+
+        <p>
+          The report identifies exactly where the divergence is: the priority
+          entity has four levels in code but only three in the design intent.
+          The agent then asks whether you want to sync -- that is, whether
+          you want to resolve the drift.
+        </p>
+
+        <aside class="callout-tip">
+          <h3>What just happened?</h3>
+          <p>
+            The <code>/explain drift</code> skill performed a structured
+            comparison between your design intent and your implementation.
+            Unlike a simple text diff, it understands the semantic structure
+            of your design documents: entities, permissions, UX patterns,
+            and journey maps. It reports not just <em>that</em> something
+            changed but <em>what</em> the change means in design terms.
+          </p>
+          <p>
+            The registry in <code>product-design/conventions.md</code> tells
+            the drift detector which files to compare. This registry is the
+            single source of truth for all drift-related operations. When you
+            add new design files, you register them here so drift detection
+            covers them automatically.
+          </p>
+        </aside>
+      </section>
+
+      <!-- Part 3: Resolve drift -->
+      <section id="resolving-drift">
+        <h2>Part 3: Resolve the Drift</h2>
+
+        <p>
+          There are two ways to resolve drift:
+        </p>
+
+        <dl>
+          <dt>Option A: Update the design intent to match the code</dt>
+          <dd>
+            If the code change was intentional and the design intent should
+            catch up, you <strong>promote</strong> the as-coded state into the
+            as-intended file. This is the more common resolution -- the
+            implementation discovered something the original design missed.
+          </dd>
+
+          <dt>Option B: Change the code to match the design intent</dt>
+          <dd>
+            If the code change was accidental or undesirable, you revert the
+            code to match the design intent. This is less common but important
+            when implementation drifted from a deliberate design decision.
+          </dd>
+        </dl>
+
+        <h3>Resolving with the promote workflow</h3>
+
+        <p>
+          For this tutorial, the "critical" priority level was an intentional
+          improvement. Promote it:
+        </p>
+
+        <pre><code><span class="token-command">/explain</span> drift --promote</code></pre>
+
+        <p>
+          The agent generates a Decision proposal (a D-NNN entry) that documents
+          <em>why</em> the design intent is changing. The proposal follows the
+          DDR (Design Decision Record) shape:
+        </p>
+
+        <pre><code><span class="token-keyword">### D-042: Add critical priority level</span>
+
+<span class="token-string">Context:</span> Users reported that "high" was not urgent enough
+         for time-sensitive tasks.
+<span class="token-string">Decision:</span> Add a "critical" priority level above "high."
+<span class="token-string">Trade-offs:</span> Four levels increase cognitive load slightly,
+             but the gain in urgency signaling outweighs the cost.
+<span class="token-string">Status:</span> Accepted</code></pre>
+
+        <p>
+          After you confirm the Decision entry, the agent flips the STATUS
+          markers in your as-intended file. The priority entity in
+          <code>product-design/product-design-as-intended.md</code> is updated
+          to include four levels, and the drift is resolved.
+        </p>
+
+        <h3>Applying the markers</h3>
+
+        <p>
+          Once the Decision entry is written, apply the STATUS markers:
+        </p>
+
+        <pre><code><span class="token-command">/explain</span> drift --promote --apply-markers plan-000042</code></pre>
+
+        <p>
+          Replace <code>plan-000042</code> with the actual plan ID. The agent
+          flips the <code>STATUS: implemented</code> markers for items covered
+          by the plan.
+        </p>
+
+        <aside class="callout-tip">
+          <h3>What just happened?</h3>
+          <p>
+            You resolved the drift using the <strong>promote workflow</strong>,
+            which is split into two phases:
+          </p>
+          <ul>
+            <li>
+              <strong>Phase 3a</strong>: Generate Decision proposals. The agent
+              creates a DDR-shaped entry (D-NNN) that captures the context,
+              decision, and trade-offs. This entry becomes a permanent record
+              of <em>why</em> the design changed.
+            </li>
+            <li>
+              <strong>Phase 3b</strong>: Apply STATUS markers. The agent flips
+              the lifecycle markers (<code>STATUS: implemented</code>) for items
+              that are now aligned.
+            </li>
+          </ul>
+          <p>
+            The promote workflow connects two aspects of SEJA's governance:
+            <strong>enforcement</strong> (the drift detector catches
+            divergences) and <strong>epistemic awareness</strong> (the Decision
+            entry records <em>why</em> the divergence happened). Drift is not
+            just an error to fix -- it is a signal that something was learned
+            during implementation that the original design did not anticipate.
+            The Decision entry preserves that learning.
+          </p>
+          <p>
+            For a deeper exploration of how governance and epistemic awareness
+            interact, see
+            <a href="../explanation/dual-thesis.html#how-seja-embodies-both">
+            The Governable AND Epistemic Thesis</a>.
+          </p>
+        </aside>
+      </section>
+
+      <!-- When drift matters -->
+      <section id="when-drift-matters">
+        <h2>When Drift Matters</h2>
+
+        <p>
+          Drift detection is most valuable at two moments in the lifecycle:
+        </p>
+
+        <dl>
+          <dt>After implementing a plan</dt>
+          <dd>
+            Run <code>/explain drift --scope since-plan plan-000042</code> to
+            check whether the implementation introduced any unintended
+            divergence from the design intent. This scoped check is faster
+            than a full drift scan because it only examines registry files
+            touched by the plan.
+          </dd>
+
+          <dt>After a reflection cycle</dt>
+          <dd>
+            After <code>/reflect</code> closes a development cycle, run
+            <code>/explain drift</code> to catch accumulated divergences across
+            multiple features. This is the recurring governance rhythm: build,
+            validate, document, reflect, then check for drift.
+          </dd>
+        </dl>
+      </section>
+
+      <!-- Summary -->
+      <section id="summary">
+        <h2>Summary</h2>
+
+        <p>In this tutorial, you:</p>
+
+        <ol>
+          <li>Introduced deliberate drift by modifying code without updating design intent</li>
+          <li>Detected the drift with <code>/explain drift</code></li>
+          <li>Resolved the drift using the promote workflow (<code>--promote</code> and <code>--apply-markers</code>)</li>
+          <li>Created a Decision entry (D-NNN) documenting why the design changed</li>
+        </ol>
+
+        <p>
+          Drift detection is SEJA's mechanism for keeping design intent and
+          implementation in sync. It treats drift as a signal, not just an
+          error: when code and intent diverge, something was learned during
+          implementation. The Decision entry captures that learning so future
+          development can build on it.
+        </p>
+
+        <p>
+          This completes the tutorial series. You have now experienced all
+          five core aspects of SEJA: project setup, the development lifecycle,
+          metacommunication, council debates, and drift detection. Return to
+          the <a href="index.html">Tutorials index</a> for an overview of all
+          chapters, or continue to the
+          <a href="../how-to/index.html">How-To Guides</a> to learn
+          goal-specific workflows.
+        </p>
+      </section>
+
+    </article>
+
+    <!-- Sequential chapter navigation -->
+    <nav aria-label="chapter navigation">
+      <a href="first-council-debate.html">Previous: Your First Council Debate</a>
+    </nav>
+
+    <!-- Cross-volume related chapters -->
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../how-to/governance.html">Governance Operations</a> -- the goal-first guide to running drift checks and the promote workflow in practice</li>
+        <li><a href="../explanation/dual-thesis.html#how-seja-embodies-both">The Governable and Epistemic Thesis</a> -- why governance and epistemic awareness are both required to make drift a signal</li>
+        <li><a href="../explanation/design-decisions.html#why-as-intended-as-coded-split">Design Decisions and Trade-offs</a> -- why the as-intended/as-coded split exists in the first place</li>
+      </ul>
+    </nav>
+  </main>
+
+  <!-- Sidebar table of contents -->
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#prerequisites">Prerequisites</a></li>
+      <li><a href="#introducing-drift">Part 1: Introduce Drift Deliberately</a></li>
+      <li><a href="#detecting-drift">Part 2: Detect the Drift</a></li>
+      <li><a href="#resolving-drift">Part 3: Resolve the Drift</a></li>
+      <li><a href="#when-drift-matters">When Drift Matters</a></li>
+      <li><a href="#summary">Summary</a></li>
+    </ul>
+  </aside>
+
+  <!-- Footer -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T12:00:00Z</p>
+  </footer>
+
+</body>
+</html>

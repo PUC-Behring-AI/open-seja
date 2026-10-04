@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="how-to">
+  <meta name="doc-volume" content="How-To Guides">
+  <meta name="doc-chapter" content="How to Reflect">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>How to Reflect -- SEJA Documentation</title>
+
+  <!-- CSS depth: 2 (sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../../index.html">Home</a>
+    <a href="../../tutorials/index.html">Tutorials</a>
+    <a href="../index.html">How-To Guides</a>
+    <a href="../../reference/index.html">Reference</a>
+    <a href="../../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../../index.html">Home</a></li>
+      <li><a href="../index.html">How-To Guides</a></li>
+      <li><a href="index.html">Skill-by-Skill Guides</a></li>
+      <li>How to Reflect</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-howto">
+    <article>
+      <p class="vol-accent"><strong>how-to</strong></p>
+
+      <h1>How to Reflect</h1>
+
+      <p>
+        Goal: step back and look at specific work you have done, through one of two
+        explicit lenses -- the <strong>product lens</strong> (what you built: does
+        it do what you intended?) or the <strong>practice lens</strong> (how you
+        worked: what patterns emerge in how you designed and built it?). The
+        <code>/reflect</code> skill records your reflection in your own words. It
+        has three modes: <strong>conversational</strong> (default),
+        <strong>deep</strong> (<code>--deep</code>, visualization-backed practice
+        narrative), and <strong>telemetry</strong> (<code>--telemetry</code>,
+        statistical pattern mining).
+      </p>
+
+      <section id="when-to-use">
+        <h2>When to Use</h2>
+        <ul>
+          <li>You want to examine what you built and ask whether it does what you intended (product lens).</li>
+          <li>You want to examine how you worked -- where you hesitated, what you would do differently (practice lens).</li>
+          <li>You want a visual timeline and narrative of practice evolution over a period (use <code>--deep</code>).</li>
+          <li>You want statistical pattern mining across weeks of usage data (use <code>--telemetry</code>).</li>
+        </ul>
+      </section>
+
+      <section id="required-inputs">
+        <h2>Required Inputs</h2>
+        <ul>
+          <li>A scope: recent plans, recent research, a specific artifact ID, a time window, or free-form.</li>
+          <li>For deep and telemetry modes, an optional time window (<code>--since 14d</code>) and scope keyword or <code>--skill &lt;name&gt;</code> filter.</li>
+        </ul>
+      </section>
+
+      <section id="step-by-step">
+        <h2>Step by Step</h2>
+
+        <ol>
+          <li>
+            <strong>Pick a mode.</strong>
+            <ul>
+              <li><strong>Conversational (default)</strong> -- Recommended when you want to write a reflection in your own words about specific artifacts. NOT recommended when you want statistics rather than narrative.</li>
+              <li><strong>Deep (<code>--deep</code>)</strong> -- Recommended when you want a visual, narrative chronicle of how your practice evolved across a period. NOT recommended for a quick reflection on one artifact.</li>
+              <li><strong>Telemetry (<code>--telemetry</code>)</strong> -- Recommended when you want statistical pattern mining (sequence frequency, duration outliers, revision density, stuck-loop detection, decision reversals). NOT recommended when you want a written personal reflection.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Choose a scope and lens (conversational mode).</strong> Pick the
+            artifacts; the skill summarizes them, then asks whether you are
+            reflecting through the product lens, the practice lens, or both, and
+            poses the lens-appropriate open-ended question.
+            <br><em>Expected output:</em> your reflection saved to
+            <code>_output/reflections/reflection-&lt;id&gt;-&lt;slug&gt;.md</code>,
+            recording which lens was used.
+          </li>
+          <li>
+            <strong>Run deep or telemetry mode for aggregate views.</strong> Deep
+            mode produces an event-matrix visualization, a transition graph, and a
+            past-tense practice-evolution narrative. Telemetry mode runs five
+            analysis primitives over <code>telemetry.jsonl</code>.
+            <br><em>Expected output:</em> a markdown report under
+            <code>_output/reflections/</code>, with companion visualization files in
+            deep mode.
+          </li>
+        </ol>
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip.</strong> The practice lens is Sch&ouml;n's
+            reflection-on-practice: the point is not to grade the artifact but to
+            notice the patterns in how you worked so you can adjust as a
+            practitioner.
+          </p>
+        </aside>
+      </section>
+
+      <section id="expected-outputs">
+        <h2>Expected Outputs</h2>
+        <ul>
+          <li>A <code>reflection-&lt;id&gt;-&lt;slug&gt;.md</code> report in <code>_output/reflections/</code>, with the lens recorded.</li>
+          <li>In deep mode, companion visualization files (event matrix and transition graph).</li>
+          <li>In telemetry mode, a statistical report (printed to stdout with <code>--dry-run</code>).</li>
+        </ul>
+      </section>
+
+      <section id="common-mistakes">
+        <h2>Common Mistakes</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th scope="col">Mistake</th><th scope="col">Better approach</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Letting the agent write the reflection for you.</td>
+                <td><code>/reflect</code> records <em>your</em> words verbatim. The value is in your own account, not a generated summary.</td>
+              </tr>
+              <tr>
+                <td>Blurring the two lenses.</td>
+                <td>Choose deliberately: product lens for what you built, practice lens for how you worked. The report records which one.</td>
+              </tr>
+              <tr>
+                <td>Using <code>--telemetry</code> when you wanted a personal reflection.</td>
+                <td>Telemetry is statistical pattern mining. For a written reflection, use conversational mode.</td>
+              </tr>
+              <tr>
+                <td>Reflecting but never acting on what surfaced.</td>
+                <td>Follow up with <code>/research</code>, <code>/design</code>, or <code>/plan</code> to turn a pattern into new intent or work.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="cross-references">
+        <h2>Cross-References</h2>
+        <ul>
+          <li><a href="research.html">How to Research a Question</a> -- a prescriptive follow-up to any surfaced pattern.</li>
+          <li><a href="design.html">How to Define Design Intent</a> -- turn a surfaced pattern into new design intent.</li>
+          <li><a href="explain.html">How to Explain Behavior or Code</a> -- run <code>/explain drift</code> after a cycle closes.</li>
+          <li><a href="../../explanation/reflective-practice.html">Reflective Practice</a> (Vol. 4) -- the theory behind the two lenses.</li>
+        </ul>
+      </section>
+
+    </article>
+
+    <nav aria-label="chapter navigation">
+      <a href="communicate.html">Back: How to Communicate to an Audience</a>
+      <a href="pending.html">Next: How to Manage Pending Actions</a>
+    </nav>
+
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../../explanation/reflective-practice.html">Reflective Practice</a> -- the theory behind the product and practice lenses.</li>
+        <li><a href="../../tutorials/first-council-debate.html">Running Your First Council Debate</a> -- another way to surface and examine your reasoning.</li>
+      </ul>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#when-to-use">When to Use</a></li>
+      <li><a href="#required-inputs">Required Inputs</a></li>
+      <li><a href="#step-by-step">Step by Step</a></li>
+      <li><a href="#expected-outputs">Expected Outputs</a></li>
+      <li><a href="#common-mistakes">Common Mistakes</a></li>
+      <li><a href="#cross-references">Cross-References</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../../index.html">Collection Index</a>
+      <a href="../../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T20:50:00Z</p>
+  </footer>
+
+</body>
+</html>

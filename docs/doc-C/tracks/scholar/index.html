@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="Entry point to the Scholar Track: why semiotic engineering is structurally load-bearing in SEJA rather than decorative, how each theoretical concept maps to a harness mechanism, and where the theory is still open.">
+  <title>Why Theory Matters &mdash; SEJA Documentation</title>
+  <!-- CSS depth: 2 (tracks/scholar/index.html) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Why Theory Matters</h1>
+      <p>Your entry point to the Scholar Track: the argument that semiotic engineering is load-bearing here, and a route through the mechanisms that carry the load.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#tracks">Tracks</a></li>
+        <li aria-current="page">Scholar</li>
+      </ol>
+    </nav>
+
+    <!-- Sidebar scope (doc-guidelines section E): WITHIN-PAGE (.doc-nav,
+         aria-label="on this page"), populated by nav.js from this page's h2/h3.
+         Section E fixes one sidebar model per collection and records doc-C as
+         page-scoped; the volume-scoped .volume-toc model is doc-D's and has no
+         supporting rules in doc-C's styles.css. A gate page is therefore an
+         in-collection page like any other here -- do not switch it to
+         .volume-toc without migrating the whole collection. -->
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-explanation">explanation</span>
+          <span class="badge track-scholar">Scholar</span>
+        </p>
+
+        <section data-diataxis="explanation" aria-labelledby="load-bearing-not-decorative">
+          <h2 id="load-bearing-not-decorative">Load-bearing, not decorative</h2>
+          <p>
+            Most tools that invoke a design theory use it as vocabulary. The theory
+            names things the tool already did, and removing the theory would leave the
+            tool intact. That is the decorative case, and it is worth stating plainly
+            because it is the default.
+          </p>
+          <p>
+            SEJA is structured the other way. Semiotic engineering treats software as
+            a <strong>metacommunication act</strong>: the designer communicates to the
+            user, through the system, about who the user is taken to be and how the
+            system is meant to serve them. If that is true, then the designer's message
+            is the artifact that must be preserved &mdash; and an AI collaborator that
+            silently substitutes its own reading of the user has not made a coding
+            error, it has broken the communication.
+          </p>
+          <p>
+            Every mechanism in the harness follows from taking that seriously. The
+            reason design intent is human-authored and machine-marked rather than
+            AI-generated is that an authored message cannot be delegated without
+            ceasing to be authored. The reason implementation state is recorded
+            separately from intent is that the distance between them is the measurable
+            form of drift. The reason a constitution is loaded before every skill runs
+            is that the message must be present when work is done, not consulted after.
+            Remove the theory and these are arbitrary ceremony; keep it and they are
+            the minimum the position requires.
+          </p>
+          <p>
+            This track is a reading route, not a second exposition. Phase 1 establishes
+            the framework, Phase 2 maps each concept to the mechanism that carries it,
+            and Phase 3 collects what remains open. If your question is how to
+            <em>use</em> the harness, the
+            <a href="../practitioner/index.html">Practitioner Track</a> is the shorter
+            road.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="phase-1-theoretical-framework">
+          <h2 id="phase-1-theoretical-framework">Phase 1: The Theoretical Framework</h2>
+          <p>
+            Four concept pages, in this order. The first establishes the semiotic
+            model; the rest are the commitments that follow from it.
+          </p>
+          <ol>
+            <li>
+              <a href="../../core/concepts/sign-system.html">The Sign System</a>
+              &mdash; the file classifications that decide who may write what, the
+              markers that stand in for design intent, and the epistemic posture the
+              harness takes toward its own knowledge.
+            </li>
+            <li>
+              <a href="../../core/concepts/constitution.html">The Constitution</a>
+              &mdash; immutable principles as the highest-authority artifact, and what
+              it means for a tool to hold a commitment it cannot revise at runtime.
+            </li>
+            <li>
+              <a href="../../core/concepts/marker-system.html">The Marker System</a>
+              &mdash; how a machine writes into a human-authored document without
+              authoring it, and the lifecycle a marked item moves through.
+            </li>
+            <li>
+              <a href="../../core/concepts/as-intended-as-coded.html">As-Intended and As-Coded</a>
+              &mdash; the two-record pattern that makes drift a measurable quantity
+              rather than an intuition.
+            </li>
+          </ol>
+          <p>
+            A full theoretical treatment &mdash; semiotic engineering's primary
+            literature, the communicability framework, and the reflective-practice and
+            abduction sources the harness draws on &mdash; is planned as a standalone
+            <a href="../../foundations/index.html#placeholder">Foundations volume</a>
+            and is not part of this collection yet. The four pages above are the
+            operative subset: enough theory to read the mechanisms, not the monograph.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="phase-2-theory-into-practice">
+          <h2 id="phase-2-theory-into-practice">Phase 2: Theory into Practice</h2>
+          <p>
+            Each theoretical commitment is carried by a specific mechanism. The table
+            names the relationship and links the page that explains it; the explanation
+            itself lives there, not here.
+          </p>
+          <div class="table-container">
+            <table>
+              <caption>Each theoretical concept and the mechanism that carries it.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Concept</th>
+                  <th scope="col">Mechanism</th>
+                  <th scope="col">The relationship</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Metacommunication</th>
+                  <td><a href="../../core/skills/design.html">/design</a></td>
+                  <td>The designer's message to the user is elicited and recorded as a first-person artifact rather than inferred from the code.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Sign systems</th>
+                  <td><a href="../../core/concepts/marker-system.html">The Marker System</a></td>
+                  <td>Markers are the harness's own sign system, letting a machine annotate design intent without becoming its author.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Reflective practice</th>
+                  <td><a href="../../core/skills/reflect.html">/reflect</a></td>
+                  <td>Reflection is scheduled as a lifecycle phase with its own artifact, rather than left to whenever a practitioner happens to look back.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Abduction</th>
+                  <td><a href="../../core/skills/critique.html">/critique</a></td>
+                  <td>Structured perspectives force plural readings of the same change, so a single plausible explanation is not mistaken for the only one.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Epistemic posture</th>
+                  <td><a href="../../core/concepts/as-intended-as-coded.html">As-Intended and As-Coded</a></td>
+                  <td>Keeping intent and implementation as separate records makes the gap between them visible instead of resolvable by assertion.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="phase-3-open-questions">
+          <h2 id="phase-3-open-questions">Phase 3: Open Questions</h2>
+          <p>
+            The counter-reading. Read this before drawing conclusions about the
+            harness from Phases 1 and 2.
+          </p>
+          <ol>
+            <li>
+              <a href="open-questions.html">Open Questions</a> &mdash; where the theory
+              is thin, what the harness explicitly cannot enforce, the risk that its
+              own gap-surfacing produces false confidence, and how little of it has
+              been evaluated outside a single-designer context.
+            </li>
+          </ol>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="other-tracks">
+          <h2 id="other-tracks">If this is not your question</h2>
+          <p>
+            Two other routes cross the same core:
+          </p>
+          <ul>
+            <li>
+              <a href="../practitioner/index.html">Practitioner Track</a> &mdash; for
+              using the harness rather than examining its commitments.
+            </li>
+            <li>
+              <a href="../architect/index.html">Architect Track</a> &mdash; for the
+              structural view: topology, extension points, and maintenance.
+            </li>
+          </ul>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="../../core/concepts/index.html">Concepts</a> &mdash; the full conceptual layer, beyond the four pages this track routes through.</li>
+            <li><a href="../../core/reference/glossary.html">Glossary</a> &mdash; the vocabulary, defined once.</li>
+            <li><a href="../../index.html">Reading Map</a> &mdash; the full collection, routed by audience.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="../../index.html#tracks">Tracks</a>
+        <a href="../../core/concepts/index.html">Concepts</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (tracks/scholar/index.html) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="how-to">
+  <meta name="doc-volume" content="How-To Guides">
+  <meta name="doc-chapter" content="How to Explain Behavior or Code">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>How to Explain Behavior or Code -- SEJA Documentation</title>
+
+  <!-- CSS depth: 2 (sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../../index.html">Home</a>
+    <a href="../../tutorials/index.html">Tutorials</a>
+    <a href="../index.html">How-To Guides</a>
+    <a href="../../reference/index.html">Reference</a>
+    <a href="../../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../../index.html">Home</a></li>
+      <li><a href="../index.html">How-To Guides</a></li>
+      <li><a href="index.html">Skill-by-Skill Guides</a></li>
+      <li>How to Explain Behavior or Code</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-howto">
+    <article>
+      <p class="vol-accent"><strong>how-to</strong></p>
+
+      <h1>How to Explain Behavior or Code</h1>
+
+      <p>
+        Goal: understand how a part of the system works, or see and resolve the
+        gap between your design intent and the code that implements it. The
+        <code>/explain</code> skill produces explanation reports with diagrams and
+        analogies. It has six mode types; the <code>drift</code> mode additionally
+        offers an interactive workflow to realign diverged specs.
+      </p>
+
+      <section id="when-to-use">
+        <h2>When to Use</h2>
+        <ul>
+          <li>You want to understand a feature's behavior, the data model, or the overall architecture.</li>
+          <li>You are onboarding yourself onto unfamiliar code and want a junior-friendly walkthrough.</li>
+          <li>You want to trace how a behavior evolved through past plans and commits.</li>
+          <li>You want to detect and resolve drift between <code>product-design/product-design-as-coded.md</code> and <code>product-design/product-design-as-intended.md</code>.</li>
+        </ul>
+        <aside class="callout-tip">
+          <p>
+            <strong>Not for</strong> generating artifacts someone else will read
+            (use <code>/document</code>, <code>/communicate</code>, or
+            <code>/onboard</code>). <code>/explain</code> answers <em>your</em>
+            questions about the system.
+          </p>
+        </aside>
+      </section>
+
+      <section id="required-inputs">
+        <h2>Required Inputs</h2>
+        <ul>
+          <li>A mode: <code>architecture</code>, <code>behavior</code>, <code>behavior-evolution</code>, <code>code</code>, <code>data-model</code>, or <code>drift</code>.</li>
+          <li>A brief or target, e.g. <code>/explain code src/auth/middleware.ts</code> or <code>/explain behavior What happens when a form fails validation?</code></li>
+          <li>For drift mode, populated design intent and as-coded files (the registry in <code>conventions.md</code> declares the pairs that are compared).</li>
+        </ul>
+      </section>
+
+      <section id="step-by-step">
+        <h2>Step by Step</h2>
+
+        <h3>General modes (architecture, behavior, code, data-model, behavior-evolution)</h3>
+        <ol>
+          <li>
+            <strong>Choose the mode that matches your question.</strong> Use
+            <code>architecture</code> for a system overview, <code>behavior</code>
+            for a user-visible flow, <code>code</code> for a specific file,
+            <code>data-model</code> for entity relationships, and
+            <code>behavior-evolution</code> to trace change over time.
+          </li>
+          <li>
+            <strong>Run the skill.</strong> The report is written under the matching
+            <code>_output/explained-*</code> folder (for example
+            <code>_output/explained-architecture/</code>).
+            <br><em>Expected output:</em> an explanation report with diagrams,
+            plain-language walkthrough, and highlighted design decisions.
+          </li>
+          <li>
+            <strong>Follow up.</strong> These modes usually hand off to
+            <code>/research</code> for deeper questions.
+          </li>
+        </ol>
+
+        <h3>Drift mode</h3>
+        <ol>
+          <li>
+            <strong>Run <code>/explain drift</code>.</strong> It compares as-coded
+            and as-intended specs and reports entities, permissions, and UX patterns
+            that have diverged. Narrow the scan with <code>conceptual-design</code>,
+            <code>metacomm</code>, or <code>--scope since-plan plan-&lt;id&gt;</code>
+            (useful right after <code>/implement</code>).
+            <br><em>Expected output:</em> a drift report listing divergences.
+          </li>
+          <li>
+            <strong>Decide how to reconcile.</strong>
+            <ul>
+              <li><strong>Sync now</strong> -- Recommended when the divergence is a straightforward realignment you understand.</li>
+              <li><strong>Move to <code>/plan</code></strong> -- Recommended when closing the drift requires real implementation work.</li>
+              <li><strong>Move to <code>/design</code></strong> -- Recommended when the intent itself has evolved and the spec should change, not the code.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Promote as-coded reality into intent (optional).</strong> Run
+            <code>/explain drift --promote</code> to generate <code>D-NNN</code>
+            Decision proposals for items ready to move from as-coded to as-intended.
+            After you have written the Decision entries, run
+            <code>/explain drift --promote --apply-markers plan-&lt;id&gt;</code> to
+            flip the <code>STATUS</code> markers (Phase 3b) via
+            <code>apply_marker.py</code>.
+            <br><em>Expected output:</em> draft Decision entries first; a marker flip
+            isolated as its own audit event second.
+          </li>
+        </ol>
+      </section>
+
+      <section id="expected-outputs">
+        <h2>Expected Outputs</h2>
+        <ul>
+          <li>An explanation report under the matching <code>_output/explained-*</code> folder, with diagrams and analogies.</li>
+          <li>In drift mode, a divergence report and -- if you promote -- draft <code>D-NNN</code> Decision entries, then a <code>STATUS</code> marker flip.</li>
+        </ul>
+      </section>
+
+      <section id="common-mistakes">
+        <h2>Common Mistakes</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th scope="col">Mistake</th><th scope="col">Better approach</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Using <code>/explain</code> to write docs for a teammate.</td>
+                <td>Use <code>/document</code> for reader-facing artifacts; <code>/explain</code> is for your own understanding.</td>
+              </tr>
+              <tr>
+                <td>Running <code>drift --promote --apply-markers</code> before writing the Decision entries.</td>
+                <td>Promote is two phases: generate and review the <code>D-NNN</code> proposals first, then apply markers so the flip is a clean, separate audit event.</td>
+              </tr>
+              <tr>
+                <td>Confusing drift direction: changing code when intent evolved.</td>
+                <td>If the intent changed, update the spec via <code>/design</code>; if the code is behind the spec, plan the change via <code>/plan</code>.</td>
+              </tr>
+              <tr>
+                <td>Scanning the whole registry when you only touched one plan's files.</td>
+                <td>Use <code>--scope since-plan plan-&lt;id&gt;</code> to check only the drift a specific plan introduced.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="cross-references">
+        <h2>Cross-References</h2>
+        <ul>
+          <li><a href="research.html">How to Research a Question</a> -- follow up a general explanation with deeper questions.</li>
+          <li><a href="plan.html">How to Make a Plan</a> -- address drift that needs implementation.</li>
+          <li><a href="design.html">How to Define Design Intent</a> -- update the spec when intent has evolved.</li>
+          <li><a href="../design-intent.html">Design Intent Maintenance</a> (Ch. 4) -- markers, Decision records, and the promote workflow in depth.</li>
+        </ul>
+      </section>
+
+    </article>
+
+    <nav aria-label="chapter navigation">
+      <a href="research.html">Back: How to Research a Question</a>
+      <a href="design.html">Next: How to Define Design Intent</a>
+    </nav>
+
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../../tutorials/drift-detection.html">Detecting and Resolving Drift</a> -- a hands-on walkthrough of the drift-mode workflow.</li>
+        <li><a href="../../explanation/design-decisions.html">Design Decisions and Trade-offs</a> -- why intent and code are kept as a comparable pair.</li>
+      </ul>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#when-to-use">When to Use</a></li>
+      <li><a href="#required-inputs">Required Inputs</a></li>
+      <li><a href="#step-by-step">Step by Step</a></li>
+      <li><a href="#expected-outputs">Expected Outputs</a></li>
+      <li><a href="#common-mistakes">Common Mistakes</a></li>
+      <li><a href="#cross-references">Cross-References</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../../index.html">Collection Index</a>
+      <a href="../../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T20:50:00Z</p>
+  </footer>
+
+</body>
+</html>

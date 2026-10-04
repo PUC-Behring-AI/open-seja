@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="how-to">
+  <meta name="doc-volume" content="How-To Guides">
+  <meta name="doc-chapter" content="How to Log a Q&amp;A Session">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>How to Log a Q&amp;A Session -- SEJA Documentation</title>
+
+  <!-- CSS depth: 2 (sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../../index.html">Home</a>
+    <a href="../../tutorials/index.html">Tutorials</a>
+    <a href="../index.html">How-To Guides</a>
+    <a href="../../reference/index.html">Reference</a>
+    <a href="../../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../../index.html">Home</a></li>
+      <li><a href="../index.html">How-To Guides</a></li>
+      <li><a href="index.html">Skill-by-Skill Guides</a></li>
+      <li>How to Log a Q&amp;A Session</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-howto">
+    <article>
+      <p class="vol-accent"><strong>how-to</strong></p>
+
+      <h1>How to Log a Q&amp;A Session</h1>
+
+      <p>
+        Goal: save the entire current conversation -- every question you asked and
+        every answer the agent gave -- into a file for future reference. The
+        <code>/qa-log</code> skill captures the full Q&amp;A exchange, assigns a
+        globally unique ID, and writes a timestamped Markdown file. You can provide
+        a short title or let the skill derive one from the conversation topic.
+      </p>
+
+      <section id="when-to-use">
+        <h2>When to Use</h2>
+        <ul>
+          <li>You have had a productive conversation with useful decisions or insights and want to preserve it as project documentation.</li>
+          <li>You want to capture a research exchange, design discussion, or debugging session before it scrolls out of view.</li>
+          <li>You are about to end a session and want an indexed record of what was covered.</li>
+        </ul>
+        <aside class="callout-tip">
+          <p>
+            <strong>Note.</strong> Post-skill also uses <code>/qa-log</code>
+            internally to produce companion QA logs next to parent artifacts.
+            You do not need to invoke it manually after a skill run -- post-skill
+            handles that automatically.
+          </p>
+        </aside>
+      </section>
+
+      <section id="required-inputs">
+        <h2>Required Inputs</h2>
+        <ul>
+          <li>Nothing for a default invocation: <code>/qa-log</code> derives the title from the conversation topic.</li>
+          <li>Optionally, a short title: <code>/qa-log Design decisions for the notification system</code>.</li>
+        </ul>
+      </section>
+
+      <section id="step-by-step">
+        <h2>Step by Step</h2>
+
+        <ol>
+          <li>
+            <strong>Decide whether to provide a title.</strong> If you pass one,
+            it becomes the log file's title and slug. If you omit it, the skill
+            derives a title from the conversation topic.
+          </li>
+          <li>
+            <strong>Run the skill.</strong> Type <code>/qa-log</code> (with or
+            without a title argument). The skill reserves a globally unique ID,
+            captures all user prompts and agent responses in chronological order,
+            and writes a timestamped Markdown file.
+            <br><em>Expected output:</em> a file at
+            <code>_output/qa-logs/qa-&lt;id&gt;-&lt;slug&gt;.md</code> with a
+            numbered Q&amp;A log.
+          </li>
+          <li>
+            <strong>Check the output.</strong> The skill prints a link to the
+            generated file and commits it automatically. The file includes a
+            header with the ID, timestamp, and title, followed by numbered
+            <code>## Q1</code> / <code>## A1</code> exchanges.
+          </li>
+        </ol>
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip.</strong> Lengthy agent responses (code generation, plan
+            execution) are summarized in the log rather than reproduced verbatim.
+            The log is a reference index, not a full transcript.
+          </p>
+        </aside>
+      </section>
+
+      <section id="expected-outputs">
+        <h2>Expected Outputs</h2>
+        <ul>
+          <li>A <code>qa-&lt;id&gt;-&lt;slug&gt;.md</code> file in <code>_output/qa-logs/</code>.</li>
+          <li>Header with globally unique ID, timestamp (<code>YYYY-MM-DD HH:MM UTC</code>), and title.</li>
+          <li>Numbered Q&amp;A exchanges: <code>## Q1</code>, <code>## A1</code>, <code>## Q2</code>, etc.</li>
+          <li>An automatic commit with the message <code>Log QA session: &lt;title&gt;</code>.</li>
+        </ul>
+      </section>
+
+      <section id="common-mistakes">
+        <h2>Common Mistakes</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th scope="col">Mistake</th><th scope="col">Better approach</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Running <code>/qa-log</code> after every skill invocation.</td>
+                <td>Post-skill already produces a companion QA log next to the parent artifact. Use <code>/qa-log</code> only for standalone sessions you want to preserve separately.</td>
+              </tr>
+              <tr>
+                <td>Expecting the log to be a full verbatim transcript.</td>
+                <td>Long agent responses are summarized. The log is a reference index of what was discussed, not a raw dump.</td>
+              </tr>
+              <tr>
+                <td>Forgetting to provide a title for a multi-topic session.</td>
+                <td>Pass a short title so the slug is descriptive. The auto-derived title works best for single-topic sessions.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="cross-references">
+        <h2>Cross-References</h2>
+        <ul>
+          <li><a href="research.html">How to Research a Question</a> -- research sessions are prime candidates for <code>/qa-log</code>.</li>
+          <li><a href="reflect.html">How to Reflect</a> -- reflect on a session after logging it.</li>
+          <li><a href="../../reference/scripts-reference.html">Scripts Reference</a> (Vol. 3) -- the <code>reserve_id.py</code> script behind the ID reservation.</li>
+        </ul>
+      </section>
+
+    </article>
+
+    <nav aria-label="chapter navigation">
+      <a href="pending.html">Back: How to Manage Pending Actions</a>
+      <a href="onboard.html">Next: How to Onboard a Team Member</a>
+    </nav>
+
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../../reference/skills-reference.html">Skills Reference</a> -- full specification table for <code>/qa-log</code> including caller overrides.</li>
+        <li><a href="research.html">How to Research a Question</a> -- research exchanges are the most common standalone use case for QA logging.</li>
+      </ul>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#when-to-use">When to Use</a></li>
+      <li><a href="#required-inputs">Required Inputs</a></li>
+      <li><a href="#step-by-step">Step by Step</a></li>
+      <li><a href="#expected-outputs">Expected Outputs</a></li>
+      <li><a href="#common-mistakes">Common Mistakes</a></li>
+      <li><a href="#cross-references">Cross-References</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../../index.html">Collection Index</a>
+      <a href="../../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T20:50:00Z</p>
+  </footer>
+
+</body>
+</html>

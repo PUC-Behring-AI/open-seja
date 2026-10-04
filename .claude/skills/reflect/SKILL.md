@@ -68,7 +68,7 @@ If `--deep` is present in the arguments, route to the [Deep workflow](#deep-work
    - **A time window**: Prompt for start/end dates via plain text. Glob `${OUTPUT_DIR}/**/*.md`, filter by mtime, group by type, present the list, and let the user pick.
    - **Free-form**: No artifact resolution needed. Skip to Step C with an empty summary.
 
-5. **Step B -- Summarize chosen artifacts.** Run `python .claude/skills/reflect/summarize_artifacts.py <id1> <id2> ...` to produce the narrative summary block. Capture the stdout output. Present it to the user so they can see what they are reflecting on.
+5. **Step B -- Summarize chosen artifacts.** Run `python .claude/skills/reflect/summarize_artifacts.py <id1> <id2> ...` to produce the narrative summary block. Capture the stdout output. Present it to the user so they can see what they are reflecting on. For plans, the summary also carries the per-step reflection-on-action notes, the plan-phase note, the quality-gate evidence and, when the designer accepted them, the communication of the plan and the drift report recorded by `/plan` and `/implement`; name explicitly which of the four were not measured. Present them before the lens question, as recorded, without interpreting them; agent words appear quoted and attributed, never as the skill's voice.
 
 6. **Step B2 -- Pick lens.** Ask the user which lens they are reflecting through via AskUserQuestion:
 

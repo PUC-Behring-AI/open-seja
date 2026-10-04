@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-volume" content="Explanation">
+  <meta name="doc-chapter" content="The Semiotic Engineering Foundation">
+  <meta name="doc-phase" content="stable">
+  <meta name="doc-status" content="published">
+
+  <title>The Semiotic Engineering Foundation -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element (WCAG 2.4.1) -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Volume navigation bar -->
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="../how-to/index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Explanation</a></li>
+      <li>The Semiotic Engineering Foundation</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content area -->
+  <main id="main-content" class="chapter-content vol-explanation">
+    <article>
+      <!-- Diataxis type badge -->
+      <p class="vol-accent"><strong>explanation</strong></p>
+
+      <h1>The Semiotic Engineering Foundation</h1>
+
+      <p>
+        SEJA is not a neutral productivity wrapper around Claude Code. It is a
+        harness with a theory of what software <em>is</em>, and every mechanism
+        it imposes -- the first-person design specs, the marker system, the
+        lifecycle hooks, the council debates -- follows from that theory. This
+        chapter lays out the theory. It draws on semiotic engineering as Clarisse
+        de Souza articulated it in <em>The Semiotic Engineering of
+        Human-Computer Interaction</em> (de Souza 2005), and it shows, concept by
+        concept, where each idea surfaces in the harness you are using.
+      </p>
+
+      <p>
+        You do not need this chapter to operate SEJA; the tutorials and how-to
+        guides carry the critical path. Read this when you find yourself asking
+        <em>why</em> -- why the design intent is written in the first person, why
+        the harness treats a comment marker as a semiotic act, why it insists on
+        surfacing what it does not know. The short answer to all of those
+        questions is the same: SEJA reads software as a message, and it is built
+        to help you send that message deliberately.
+      </p>
+
+      <section id="software-as-designed-communication">
+        <h2>Software as Designed Communication</h2>
+
+        <p>
+          The central premise of semiotic engineering is that software is a
+          message. Not a product, not a tool, not a system in the abstract -- a
+          message that a designer sends to a user, mediated by code that speaks
+          on the designer's behalf at the moment of use. De Souza's formulation
+          (de Souza 2005, Ch. 1 and Ch. 3) is that human-computer interaction is
+          a special case of computer-mediated human communication: the interface
+          is the channel through which the designer talks to the user, and the
+          user talks back, across a distance in time.
+        </p>
+
+        <p>
+          This reframing moves responsibility. If the system is a message, then a
+          usability failure is not a mechanical fault in an autonomous artifact --
+          it is a <em>communication breakdown</em> between two people, one of whom
+          happens to be absent. When a user cannot figure out what to do, the
+          designer has failed to make themselves understood. That is a
+          diagnosable failure, the way communication breakdowns are diagnosable,
+          rather than a mysterious defect in a machine with a will of its own.
+        </p>
+
+        <p>
+          For a tool built to sit between a human designer and an AI coding agent,
+          this premise does real work. It refuses the framing in which "the AI
+          decided" is a complete account of anything. Under semiotic engineering,
+          the software the agent helps produce is still <em>your</em> message to
+          your users; the agent is a medium through which you compose it, not an
+          independent author of it. Everything else in SEJA follows from holding
+          that line.
+        </p>
+      </section>
+
+      <section id="the-designers-deputy">
+        <h2>The Designer's Deputy</h2>
+
+        <p>
+          De Souza gives the message a speaker. She calls it the
+          <strong>designer's deputy</strong>: the stand-in that speaks the
+          designer's intentions to the user at run time, when the designer is not
+          in the room. The deputy is not the system itself and it is not an
+          autonomous agent with its own goals; it is the designer's voice speaking
+          through the system. Every label, every default value, every error
+          message, every state transition is a line of the deputy's script. When
+          the user clicks around an application, they are reading that script.
+          When the script fails them, the designer failed them through the deputy.
+        </p>
+
+        <p>
+          The deputy concept is why SEJA is so insistent about authorship. In an
+          AI-assisted pipeline, there is a genuine risk that the deputy stops
+          speaking for the designer and starts speaking for the model -- that the
+          agent, drafting labels and copy and design decisions at speed, quietly
+          becomes the author of the message rather than its scribe. SEJA's entire
+          governance apparatus exists to keep the deputy accountable to a human.
+          The design intent is human-authored; the agent may record lifecycle
+          state but not rewrite intent; consequential moves pause for human
+          confirmation. Each of those rules is a way of keeping your hand on the
+          deputy's script.
+        </p>
+      </section>
+
+      <section id="the-metacommunication-template">
+        <h2>The Metacommunication Template</h2>
+
+        <p>
+          If software is a message, the message has a shape. De Souza proposed a
+          template for it (de Souza 2005, Ch. 1, p. 25 and Ch. 3, p. 84) with
+          three structural parts: what the designer believes about the user (their
+          profile, goals, and context); what the designer built (the system
+          description); and what the designer permits the user to do that the
+          designer did not specifically anticipate (appropriation provisions). The
+          template reads in the first person, and it reads roughly like this:
+        </p>
+
+        <blockquote>
+          <p>
+            "Here is my understanding of who you are, here is what I have learned
+            you want or need to do, here is the system I have built for you, and
+            here is how you can -- or should -- use it to achieve your goals."
+          </p>
+        </blockquote>
+
+        <p>
+          This template is the reason SEJA's design intent is written the way it
+          is. The canonical metacommunication message lives in
+          <code>§11</code> of <code>product-design/product-design-as-intended.md</code>,
+          and it is voiced in the first person, designer "I" to user "you." That
+          is not a house style. The first person carries the moral weight of the
+          template. When the message says "I designed a postpone shortcut for you
+          because I have learned you tend to over-schedule," a person is
+          committing, in public, to a claim about the user and a choice made on
+          their behalf. When the same functionality is described as "the system
+          provides a postpone shortcut," no one is accountable for anything. The
+          first-person phrasing rule is there to hold that accountability, and
+          SEJA's constitution (principle T4) makes it non-negotiable: the
+          canonical message must never be replaced by a passive-voice or
+          third-person rewrite, because doing so severs the intentional
+          authorship relationship between the designer and the user.
+        </p>
+
+        <p>
+          Barbosa et al. (2021), in their FAccT paper, extended this template
+          into the <strong>Extended Metacommunication Template (EMT)</strong>,
+          which adds four lifecycle dimensions and a set of explicit ethical
+          questions. SEJA operationalizes the EMT directly in its <code>/design</code>
+          questionnaire and in <code>§12</code> of the design intent file. That
+          extension is substantial enough to warrant its own treatment; the next
+          chapter,
+          <a href="emt.html">The Extended Metacommunication Template</a>, walks
+          through it.
+        </p>
+      </section>
+
+      <section id="sign-systems-in-hci">
+        <h2>Sign Systems in HCI</h2>
+
+        <p>
+          Within the same 2005 book, de Souza borrows from Peirce and Eco to sort
+          interface signs into three classes (de Souza 2005, Ch. 4; and de Souza
+          and Leitao 2009). <strong>Static</strong> signs are read in a single
+          moment -- a label, a layout, an icon. <strong>Dynamic</strong> signs
+          emerge only through interaction -- a state transition, a confirmation
+          dialog, an animation that plays out over time. <strong>Metalinguistic</strong>
+          signs are the signs that explain the other two -- help text, error
+          messages, tooltips, the documentation you are reading now. These three
+          classes are how the Semiotic Inspection Method decomposes an interface
+          before reassembling the pieces into a single reading of the designer's
+          message.
+        </p>
+
+        <p>
+          De Souza also picks up Eco's distinction between a
+          <strong>signification system</strong> and a
+          <strong>communication process</strong> (de Souza 2005, Ch. 2, citing
+          Eco 1976). A signification system is the socially conventionalized pool
+          of expression-and-content pairs a community has available -- the shared
+          vocabulary. A communication process is what someone does when they reach
+          into that pool and assemble an intentional message from it. The two are
+          related but not identical, and the gap between the shared vocabulary and
+          any particular use of it is exactly where invention lives.
+        </p>
+
+        <p>
+          SEJA's marker system is a designed signification system in precisely
+          this sense. The lifecycle markers -- STATUS, ESTABLISHED,
+          CHANGELOG_APPEND, and the wider set the harness's write path supports --
+          form a small, conventionalized vocabulary for lifecycle events. STATUS
+          names where an item sits on its journey from <code>proposed</code> to
+          <code>implemented</code> to <code>established</code> to
+          <code>superseded</code>. ESTABLISHED is the stamp that records a human
+          promotion. CHANGELOG_APPEND is the append-only channel for audit
+          entries. Each marker has a fixed shape (enforced by
+          <code>apply_marker.py</code>) and a fixed place (writes outside the
+          allowed pattern are rejected by <code>check_human_markers_only.py</code>).
+          Together they let you and the agent talk about where design intent has
+          moved without either party having to rewrite prose every time something
+          changes. That is a sign system in the semiotic sense, deliberately kept
+          small. The full grammar is treated in
+          <a href="../reference/pipeline-reference.html">the Pipeline Reference</a>
+          and the marker how-to; here the point is only that the harness treats
+          its own conventions as signs, not as arbitrary formatting rules.
+        </p>
+      </section>
+
+      <section id="communicability-and-communication-breakdowns">
+        <h2>Communicability and Communication Breakdowns</h2>
+
+        <p>
+          Semiotic engineering supplies its own quality criterion.
+          <strong>Communicability</strong> (de Souza 2005, Ch. 4; de Souza and
+          Leitao 2009) is the measure of how well the designer's deputy succeeds
+          at conveying the full metacommunication message -- not merely whether
+          the user can complete a task, but whether the user grasps the designer's
+          intent, the range of what the system affords, and why it behaves as it
+          does. A system can be usable and still communicate poorly, if the user
+          gets the job done while badly misreading what the designer meant.
+        </p>
+
+        <p>
+          SEJA reaches communicability mostly from the <em>emission</em> side --
+          the side where the designer composes the message -- rather than the
+          <em>reception</em> side, where a user's understanding is observed
+          directly. This is an honest structural limit, not an oversight: SEJA is
+          a harness for <em>producing</em> software, not an analytical instrument
+          for inspecting a running interface against real user behavior. Its
+          contribution is to keep the designer's side of the message coherent and
+          traceable -- through the design specs, the drift detection between
+          intent and code, and the review perspectives -- so that whatever the
+          user eventually reads is at least a faithful rendering of what the
+          designer decided to say. What SEJA cannot do, and does not claim to do,
+          is confirm that the user received the message as intended. That would
+          require user-observation methods the harness does not carry.
+        </p>
+      </section>
+
+      <section id="theory-to-mechanism-map">
+        <h2>Theory-to-Mechanism Map</h2>
+
+        <p>
+          The table below consolidates the correspondences argued above: each
+          semiotic-engineering concept and the concrete SEJA mechanism that
+          embodies it. Every correspondence is a reading held provisionally, not a
+          proof -- the harness could grow in ways that tighten or loosen any row.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Semiotic engineering concept</th>
+                <th>SEJA mechanism</th>
+                <th>How it shows up</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Software as designed communication (de Souza 2005, Ch. 1)</td>
+                <td>The design-intent artifacts as a living message</td>
+                <td><code>product-design/product-design-as-intended.md</code> paired with <code>product-design/product-design-as-coded.md</code></td>
+              </tr>
+              <tr>
+                <td>The designer's deputy (de Souza 2005, Ch. 3)</td>
+                <td>Human-authorship guarantees on design intent</td>
+                <td>Human (markers) classification; agent writes only lifecycle markers after confirmation; constitution T2</td>
+              </tr>
+              <tr>
+                <td>The metacommunication template (de Souza 2005, Ch. 1, p. 25)</td>
+                <td>First-person canonical design message</td>
+                <td><code>product-design-as-intended.md §11</code>; first-person rule; constitution T4</td>
+              </tr>
+              <tr>
+                <td>Extended Metacommunication Template (Barbosa et al. 2021)</td>
+                <td>EMT guiding questions in the design questionnaire</td>
+                <td><code>product-design-as-intended.md §12</code>; the <code>/design</code> questionnaire</td>
+              </tr>
+              <tr>
+                <td>Sign classes: static, dynamic, metalinguistic (de Souza 2005, Ch. 4)</td>
+                <td>Semiotic inspection as a critique mode</td>
+                <td><code>/critique semiotic-inspection</code> via the <code>semiotic-inspector</code> agent</td>
+              </tr>
+              <tr>
+                <td>Signification system vs. communication process (Eco 1976, in de Souza 2005, Ch. 2)</td>
+                <td>The marker system as a designed sign vocabulary</td>
+                <td><code>apply_marker.py</code> markers; <code>conventions.md</code> as the project's conventional pool</td>
+              </tr>
+              <tr>
+                <td>Communicability as a quality criterion (de Souza and Leitao 2009)</td>
+                <td>Intent-to-code drift detection</td>
+                <td><code>/explain drift</code>; the as-intended / as-coded pair</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="what-we-are-uncertain-about">
+        <h2>What We Are Uncertain About</h2>
+
+        <p>
+          It would be dishonest to present these correspondences as settled. Two
+          are genuinely shaky. The first is the first-person phrasing rule. It
+          works well for a solo designer and small teams, but we do not know
+          whether the first-person voice survives a ten-person design team without
+          diluting into committee prose. The EMT's team-consensus process (treated
+          in the next chapter) is an attempt to solve exactly this, and we have
+          only run it in small collaborations. Somewhere there is a team size at
+          which "I designed this for you" starts to read as performative, and we
+          do not yet know where that ceiling is.
+        </p>
+
+        <p>
+          The second is the sign-class taxonomy. SEJA does <em>not</em> carry a
+          first-class classification of interface signs into static, dynamic, and
+          metalinguistic categories the way the Semiotic Inspection Method does;
+          the taxonomy surfaces only inside the <code>semiotic-inspection</code>
+          critique mode, not as a pervasive concept in the design specs. This is
+          the single sharpest gap between SEJA and the semiotic-engineering
+          literature. We think the gap is honest rather than accidental -- SEJA
+          produces interfaces rather than inspecting them, and the sign-class
+          taxonomy is fundamentally an inspection tool -- but a reader coming from
+          the literature should know it is a gap and not mistake the harness for a
+          complete operationalization of the theory.
+        </p>
+      </section>
+
+      <section id="what-this-means-for-seja-users">
+        <h2>What This Means for SEJA Users</h2>
+
+        <p>
+          If you take one idea from this chapter into your daily use of SEJA, make
+          it this: the design-intent file is not project-management overhead, it
+          is your message to your users, written down so it can survive contact
+          with an AI agent. When <code>/design</code> asks you to state, in the
+          first person, who your user is and what you have built for them, it is
+          asking you to compose the metacommunication template. When the harness
+          refuses to let the agent overwrite that message and permits only marker
+          writes, it is protecting the designer's deputy from being quietly
+          reauthored by the model. When <code>/explain drift</code> compares your
+          intent against your code, it is checking communicability -- asking
+          whether the message you meant to send is still the message the system
+          actually sends.
+        </p>
+
+        <p>
+          Every one of those mechanisms is downstream of a single commitment: that
+          the software you build with SEJA remains your message, accountable to
+          you, even when a capable agent does much of the typing. The chapters
+          that follow trace that commitment through the rest of the harness. The
+          next one takes up the ethical extension of the template; from there we
+          move to reflective practice, to the governance-and-epistemics thesis
+          that unifies the design, to how the agent itself reads the harness, and
+          finally to the concrete design trade-offs the harness makes.
+        </p>
+      </section>
+
+    </article>
+
+    <!-- Sequential chapter navigation -->
+    <nav aria-label="chapter navigation">
+      <a href="emt.html">Next: The Extended Metacommunication Template</a>
+    </nav>
+
+    <!-- See also: cross-volume related chapters -->
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../tutorials/first-metacommunication.html">Writing Your First Metacommunication Message</a> -- the hands-on tutorial for composing the template</li>
+        <li><a href="../reference/pipeline-reference.html">Pipeline Reference</a> -- the stage-by-stage specification of the lifecycle that carries these ideas</li>
+      </ul>
+    </nav>
+  </main>
+
+  <!-- Sidebar table of contents -->
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#software-as-designed-communication">Software as Designed Communication</a></li>
+      <li><a href="#the-designers-deputy">The Designer's Deputy</a></li>
+      <li><a href="#the-metacommunication-template">The Metacommunication Template</a></li>
+      <li><a href="#sign-systems-in-hci">Sign Systems in HCI</a></li>
+      <li><a href="#communicability-and-communication-breakdowns">Communicability and Communication Breakdowns</a></li>
+      <li><a href="#theory-to-mechanism-map">Theory-to-Mechanism Map</a></li>
+      <li><a href="#what-we-are-uncertain-about">What We Are Uncertain About</a></li>
+      <li><a href="#what-this-means-for-seja-users">What This Means for SEJA Users</a></li>
+    </ul>
+  </aside>
+
+  <!-- Footer -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T22:55:00Z</p>
+  </footer>
+
+</body>
+</html>

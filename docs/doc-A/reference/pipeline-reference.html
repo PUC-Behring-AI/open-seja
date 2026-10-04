@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="reference">
+  <meta name="doc-volume" content="Reference">
+  <meta name="doc-chapter" content="Pipeline Reference">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>Pipeline Reference -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="../how-to/index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Reference</a></li>
+      <li>Pipeline Reference</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-reference">
+    <article>
+      <p class="vol-accent"><strong>reference</strong></p>
+
+      <h1>Pipeline Reference</h1>
+
+      <p>
+        Every user-facing skill invocation is bookended by two internal lifecycle hooks:
+        <strong>pre-skill</strong> (6 composable stages that prepare context, load references,
+        and enforce governance) and <strong>post-skill</strong> (a multi-step pipeline that
+        updates design state, captures QA, regenerates indexes, and commits). Together they
+        ensure that no skill runs without governance and no work is lost.
+      </p>
+
+      <!-- ============================================================ -->
+      <!-- Section 1: Pre-skill Pipeline Overview                        -->
+      <!-- ============================================================ -->
+
+      <section id="pre-skill-pipeline">
+        <h2>Pre-skill Pipeline</h2>
+
+        <p>
+          Pre-skill runs 6 stages in fixed order. Three are <strong>critical</strong>
+          (always run, failure blocks the skill) and three are <strong>non-critical</strong>
+          (error-isolated, skippable via <code>metadata.skip_stages</code> in the calling
+          skill's SKILL.md frontmatter). Legacy stage IDs <code>orphan-check</code> and
+          <code>compaction-check</code> are recognized as sub-steps of
+          <code>budget-eval</code>.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Stage</th>
+                <th>ID</th>
+                <th>Critical</th>
+                <th>Purpose</th>
+                <th>Skip Conditions</th>
+                <th>Failure Mode</th>
+                <th>Sub-steps</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td><code>help</code></td>
+                <td>No</td>
+                <td>Check if calling skill's arguments contain <code>--help</code>; if so, display <code>SKILL-quickguide.md</code> and stop</td>
+                <td>N/A (runs first; if triggered, remaining stages are skipped entirely)</td>
+                <td>Falls back to <code>description</code> field from SKILL.md frontmatter if quickguide not found</td>
+                <td>Uses <code>load_quickguide.py</code> helper</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td><code>brief-log</code></td>
+                <td>Yes</td>
+                <td>Insert a <code>STARTED</code> entry into the briefs file with UTC timestamp</td>
+                <td>Never skipped</td>
+                <td>Must succeed (file write required)</td>
+                <td>Conversation trace linkage via <code>conversation_trace.py backfill-skill</code></td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td><code>budget-eval</code></td>
+                <td>Yes</td>
+                <td>Parse calling skill's <code>context_budget</code> tier and load appropriate briefs</td>
+                <td>Never skipped</td>
+                <td>Warn on parse error</td>
+                <td>Orphan detection (standard + heavy); Compaction warning (heavy only)</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td><code>pending-check</code></td>
+                <td>No</td>
+                <td>Run <code>pending.py status --overdue-days 14 --format banner</code></td>
+                <td>Skipped if <code>pending-check</code> in calling skill's <code>skip_stages</code></td>
+                <td>Never blocks; informational only</td>
+                <td>None</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td><code>ref-load</code></td>
+                <td>Yes</td>
+                <td>Load reference files per context_budget tier</td>
+                <td>Skipped for <code>light</code> tier</td>
+                <td>Warn if skill has no <code>metadata.references</code></td>
+                <td>Mandatory refs; Mode 1 (eager-only) or Mode 2 (demand-pull)</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td><code>constitution</code></td>
+                <td>No</td>
+                <td>Read and inject <code>product-design/constitution.md</code></td>
+                <td>Skipped for <code>light</code> tier; skipped if <code>constitution</code> in <code>skip_stages</code></td>
+                <td>Skip silently if file does not exist</td>
+                <td>None</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pre-skill Stage Details -->
+
+        <section id="stage-help">
+          <h3>Stage 1: help</h3>
+          <p>
+            Before any other processing, check if the calling skill's arguments contain
+            <code>--help</code>. If so:
+          </p>
+          <ol>
+            <li>Read <code>.claude/skills/&lt;skill&gt;/SKILL-quickguide.md</code> and display its full body (YAML frontmatter stripped).</li>
+            <li>If the sibling file does not exist, display the <code>description</code> field from the skill's SKILL.md YAML frontmatter.</li>
+            <li>Stop -- do not proceed with the remaining pre-skill stages or the calling skill's instructions.</li>
+          </ol>
+          <p>
+            The shared helper <code>load_quickguide.py</code> at
+            <code>.claude/skills/scripts/load_quickguide.py</code> is the canonical loader
+            for scripts; the agent replicates its behavior here.
+          </p>
+        </section>
+
+        <section id="stage-brief-log">
+          <h3>Stage 2: brief-log</h3>
+          <p>
+            Obtains the current UTC time via <code>date -u +"%Y-%m-%d %H:%M UTC"</code>
+            and inserts a new entry as the first entry after the <code># Briefs Log</code>
+            header in the briefs file (newest entries first).
+          </p>
+          <dl>
+            <dt>Format</dt>
+            <dd><code>STARTED | &lt;datetime UTC&gt; | &lt;skill-name&gt; | &lt;brief&gt;</code></dd>
+            <dt>Example</dt>
+            <dd><code>STARTED | 2026-03-19 21:00 UTC | plan | Add user profile page</code></dd>
+            <dt>Error briefs</dt>
+            <dd>Summarized to one sentence, prepended with <code>ERROR: </code></dd>
+          </dl>
+          <h4>Sub-step: Conversation trace linkage</h4>
+          <p>
+            After the brief-log entry is saved, calls
+            <code>conversation_trace.py last-evt-id</code> and then
+            <code>conversation_trace.py backfill-skill</code> to link the preceding
+            conversation exchange to this skill invocation. Skips silently if no trace
+            entries exist or the script is not found.
+          </p>
+        </section>
+
+        <section id="stage-budget-eval">
+          <h3>Stage 3: budget-eval</h3>
+          <p>
+            Reads the calling skill's SKILL.md and parses <code>metadata.context_budget</code>
+            (default: <code>standard</code>). Acts per tier:
+          </p>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tier</th>
+                  <th>Briefs Loading</th>
+                  <th>Then</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>light</code></td>
+                  <td>Skips all briefs and reference files (brief-log only)</td>
+                  <td>Skip ref-load and constitution stages</td>
+                </tr>
+                <tr>
+                  <td><code>standard</code> (default)</td>
+                  <td>Briefs index (<code>briefs-index.md</code>; generated via <code>generate_briefs_index.py</code> if missing)</td>
+                  <td>Proceed to orphan detection, then ref-load</td>
+                </tr>
+                <tr>
+                  <td><code>heavy</code></td>
+                  <td>Full briefs file with recency windowing (first 50 entries, summary for older); also loads plan index</td>
+                  <td>Proceed to orphan detection and compaction warning, then ref-load</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>Sub-step: Orphan detection</h4>
+          <p>
+            Applies to <code>standard</code> and <code>heavy</code> tiers. Skip if
+            <code>orphan-check</code> is in the calling skill's <code>skip_stages</code>.
+            Scans for <code>STARTED</code> entries with no matching <code>DONE</code>.
+            Lists the 5 most recent orphaned entries if found.
+          </p>
+
+          <h4>Sub-step: Compaction warning</h4>
+          <p>
+            Applies to <code>heavy</code> tier only. Skip if <code>compaction-check</code>
+            is in <code>skip_stages</code>. Counts <code>STARTED</code> entries within the
+            last 2 hours. If count exceeds 8, emits a warning suggesting a fresh conversation.
+            Advisory only -- does not block.
+          </p>
+        </section>
+
+        <section id="stage-pending-check">
+          <h3>Stage 4: pending-check</h3>
+          <p>
+            Runs <code>pending.py status --overdue-days 14 --format banner</code>.
+            Prints the output verbatim if non-empty. Never blocks the skill invocation;
+            purely informational.
+          </p>
+        </section>
+
+        <section id="stage-ref-load">
+          <h3>Stage 5: ref-load</h3>
+          <p>
+            Applies to <code>standard</code> and <code>heavy</code> tiers only.
+            Always includes three mandatory references:
+          </p>
+          <ul>
+            <li><code>product-design/conventions.md</code> (falls back to <code>.claude/references/template/conventions.md</code>)</li>
+            <li><code>.claude/references/general/permissions.md</code></li>
+            <li><code>.claude/references/general/constraints.md</code></li>
+          </ul>
+
+          <h4>Mode 1: Eager-only (no <code>eager_references</code> field)</h4>
+          <p>
+            Reads and injects every file in <code>metadata.references</code>, resolving
+            each path via the routing table (<code>general/</code> maps to
+            <code>.claude/references/general/</code>, <code>template/</code> maps to
+            <code>.claude/references/template/</code>). An empty <code>references: []</code>
+            is valid.
+          </p>
+
+          <h4>Mode 2: Demand-pull (<code>eager_references</code> field present)</h4>
+          <ol>
+            <li><strong>Eager tier</strong> -- reads and injects each file in <code>eager_references</code> alongside mandatory refs.</li>
+            <li><strong>Lazy tier</strong> -- entries in <code>metadata.references</code> not in <code>eager_references</code> become available on demand. Emits a compact numbered list with trigger hints.</li>
+          </ol>
+          <p>
+            An empty <code>eager_references: []</code> is valid (all skill-specific refs
+            lazy; only mandatory refs loaded upfront).
+          </p>
+        </section>
+
+        <section id="stage-constitution">
+          <h3>Stage 6: constitution</h3>
+          <p>
+            Reads and injects <code>product-design/constitution.md</code>. If the file
+            does not exist, skips silently. Constitution is optional for backwards
+            compatibility with projects that have not generated one yet.
+          </p>
+        </section>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 2: Post-skill Pipeline Overview                       -->
+      <!-- ============================================================ -->
+
+      <section id="post-skill-pipeline">
+        <h2>Post-skill Pipeline</h2>
+
+        <p>
+          Post-skill runs after every skill invocation. It marks the brief done, aligns
+          as-coded state, captures QA, verifies commit scope, regenerates indexes, and
+          commits. Steps are numbered but do not run strictly in sequence --
+          some steps share a number prefix with sub-steps (e.g., 2, 2b, 2c, 2d, 2g)
+          and step 7e runs between 7 and 8.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Step</th>
+                <th>Name</th>
+                <th>Purpose</th>
+                <th>Conditional Triggers</th>
+                <th>Side Effects</th>
+                <th>Failure Mode</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>0</td>
+                <td>Checkpoint recovery</td>
+                <td>Resume from checkpoint if <code>.post-skill-checkpoint</code> exists</td>
+                <td>Always runs</td>
+                <td>Reads checkpoint file</td>
+                <td>Deletes stale checkpoint if skill-id mismatch</td>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>Brief-log DONE</td>
+                <td>Mark <code>STARTED</code> entry as <code>DONE</code> via <code>mark_brief_done.py</code></td>
+                <td>Always (skip in <code>--deferred</code>)</td>
+                <td>Writes to briefs file</td>
+                <td>Writes checkpoint</td>
+              </tr>
+              <tr>
+                <td>1b</td>
+                <td>Telemetry prep</td>
+                <td>Prepare telemetry record in memory per SKILL-reference.md schema</td>
+                <td>Always</td>
+                <td>None (flushed at 8b)</td>
+                <td>Non-blocking</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>As-Coded alignment</td>
+                <td>Update <code>product-design-as-coded.md</code> sections (Conceptual Design, Metacommunication, Journey Maps)</td>
+                <td>Only when parent is <code>/implement</code></td>
+                <td>Writes to as-coded file, changelog</td>
+                <td>Three branches: unified file update, instantiate from template, or legacy layout warning</td>
+              </tr>
+              <tr>
+                <td>2b</td>
+                <td>Documentation auto-run</td>
+                <td>Run <code>/document --plan</code> if plan has non-N/A <code>Docs:</code> fields</td>
+                <td>Only when parent is <code>/implement</code> and plan has <code>Docs:</code> fields</td>
+                <td>May invoke <code>/document</code> skill</td>
+                <td>Skip preset via <code>--skip-docs</code>; otherwise AskUserQuestion</td>
+              </tr>
+              <tr>
+                <td>2c</td>
+                <td>Design intent reminder</td>
+                <td>Output promotion reminder text for <code>/explain drift --promote</code></td>
+                <td>Only when parent is <code>/implement</code></td>
+                <td>None (informational)</td>
+                <td>Non-blocking</td>
+              </tr>
+              <tr>
+                <td>2d</td>
+                <td>Eager implement entry</td>
+                <td>File a pending <code>implement</code> entry from <code>/plan</code> completion</td>
+                <td>Only when parent is <code>/plan</code></td>
+                <td>Creates pending action via <code>pending.py add --if-absent</code></td>
+                <td>Non-blocking</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>QA log</td>
+                <td>Capture Q&amp;A session</td>
+                <td>Branch A: skip if <code>skip_qa_log: true</code>. Branch B: inline in plan file if plan/implement. Branch C: companion file for all others</td>
+                <td>Writes QA file or appends to plan</td>
+                <td>Writes checkpoint</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>Commit message</td>
+                <td>Create appropriate commit message including skill id</td>
+                <td>Always (skip in <code>--deferred</code>)</td>
+                <td>None</td>
+                <td>N/A</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td>Git-state safety</td>
+                <td>Check for rebase in progress, unmerged conflicts, detached HEAD</td>
+                <td>Always (skip in <code>--deferred</code>)</td>
+                <td>May block commit</td>
+                <td>Outputs commit message for manual use; warns on <code>main</code>/<code>master</code></td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td>Commit scope verification</td>
+                <td>Run <code>verify_commit_scope.py</code> to check staged files against expected paths</td>
+                <td>Always (skip in <code>--deferred</code>)</td>
+                <td>May block commit on unexpected files</td>
+                <td>Warns and outputs commit message for manual use</td>
+              </tr>
+              <tr>
+                <td>6b</td>
+                <td>Fast preflight gate</td>
+                <td>Run <code>run_preflight_fast.py</code></td>
+                <td>Always (skip in <code>--deferred</code>)</td>
+                <td>Advisory gate</td>
+                <td>Non-blocking; displays failures and asks whether to proceed</td>
+              </tr>
+              <tr>
+                <td>6c</td>
+                <td>Human markers verifier</td>
+                <td>Run <code>check_human_markers_only.py --staged</code></td>
+                <td>Always (skip in <code>--deferred</code>)</td>
+                <td>May block commit</td>
+                <td>AskUserQuestion on violation; default recommendation: abort</td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td>Index regeneration</td>
+                <td>Refresh briefs index, macro index, cross-refs, decision digest</td>
+                <td>Always</td>
+                <td>Writes index files</td>
+                <td>Writes checkpoint; captures <code>pre-commit-sha</code></td>
+              </tr>
+              <tr>
+                <td>2g</td>
+                <td>Pending action creation</td>
+                <td>Create pending actions from plan metadata</td>
+                <td>Only when parent is <code>/implement</code></td>
+                <td>Creates pending actions</td>
+                <td>Non-blocking; one-line warning on failure</td>
+              </tr>
+              <tr>
+                <td>7e</td>
+                <td>Deferred-artifact generation</td>
+                <td>Generate <code>deploy.html</code> and Manual Actions section in plan file</td>
+                <td>Only when parent is <code>/implement</code> and plan has <code>Deploy:</code> fields</td>
+                <td>Writes <code>deploy.html</code>, updates plan file</td>
+                <td>Idempotent under checkpoint resume</td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td>Commit</td>
+                <td>Stage affected files and commit</td>
+                <td>Always (skip in <code>--deferred</code>)</td>
+                <td>Git commit</td>
+                <td>Writes checkpoint; deletes checkpoint on success</td>
+              </tr>
+              <tr>
+                <td>8b</td>
+                <td>Telemetry flush</td>
+                <td>Write telemetry record via <code>build_telemetry.py</code></td>
+                <td>Always</td>
+                <td>Separate telemetry commit</td>
+                <td>Non-blocking; skips if no primary commit at step 8</td>
+              </tr>
+              <tr>
+                <td>9</td>
+                <td>Surprises</td>
+                <td>Output any surprises from execution with resolution status</td>
+                <td>Always (skip in <code>--deferred</code>)</td>
+                <td>None</td>
+                <td>N/A</td>
+              </tr>
+              <tr>
+                <td>10</td>
+                <td>Output link</td>
+                <td>Link to generated file within output directory</td>
+                <td>Always (skip in <code>--deferred</code>)</td>
+                <td>None</td>
+                <td>N/A</td>
+              </tr>
+              <tr>
+                <td>11</td>
+                <td>Completion</td>
+                <td>Output <code>SKILL COMPLETE</code> banner with skill name and id</td>
+                <td>Always (skip in <code>--deferred</code>)</td>
+                <td>None</td>
+                <td>N/A</td>
+              </tr>
+              <tr>
+                <td>12</td>
+                <td>Next-step suggestions</td>
+                <td>Present contextual next-step options from <code>skill-graph.md</code></td>
+                <td>Always (skip in <code>--deferred</code>)</td>
+                <td>May invoke another skill</td>
+                <td>Top-3 cap with suppression rules; skips silently if skill-graph.md absent</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Post-skill Step Details -->
+
+        <section id="step-0-checkpoint-recovery">
+          <h3>Step 0: Checkpoint Recovery</h3>
+          <p>
+            If <code>${OUTPUT_DIR}/.post-skill-checkpoint</code> exists, reads it
+            (format: <code>&lt;step&gt; | &lt;datetime&gt; | &lt;skill-id&gt;</code>).
+            If <code>&lt;skill-id&gt;</code> matches the current invocation, resumes from
+            the step after <code>&lt;step&gt;</code>. Otherwise deletes the stale file and
+            proceeds normally.
+          </p>
+          <p>
+            Step order for resume: step <code>7e</code> runs between <code>7</code> and
+            <code>8</code>, so a <code>7</code> token resumes at <code>7e</code> (idempotent)
+            and a <code>7e</code> token resumes at step 8. When resuming from a <code>7</code>
+            or <code>7e</code> token, captures <code>pre-commit-sha</code> via
+            <code>git rev-parse HEAD</code>.
+          </p>
+        </section>
+
+        <section id="step-1-brief-log-done">
+          <h3>Step 1: Brief-log DONE</h3>
+          <p>
+            Obtains UTC time and runs
+            <code>mark_brief_done.py --brief-pattern "&lt;brief text&gt;" --done-time "&lt;datetime&gt;"</code>
+            to mark the matching <code>STARTED</code> entry as <code>DONE</code>.
+            Optionally includes <code>--plan-id &lt;id&gt;</code>.
+          </p>
+        </section>
+
+        <section id="step-1b-telemetry-prep">
+          <h3>Step 1b: Telemetry Prep</h3>
+          <p>
+            Prepares a telemetry record in context per the schema in
+            <code>SKILL-reference.md</code>. Fields include skill name, id, outcome,
+            timestamp, duration, token counts. The record is held in memory and flushed
+            to disk at step 8b. The <code>session_id</code> is populated automatically
+            from the <code>CLAUDE_SESSION_ID</code> environment variable.
+          </p>
+        </section>
+
+        <section id="step-2-as-coded-alignment">
+          <h3>Step 2: As-Coded Alignment</h3>
+          <p>
+            Runs only when the parent skill is <code>/implement</code>. Updates three
+            sections of <code>product-design/product-design-as-coded.md</code>:
+          </p>
+          <dl>
+            <dt>2a. Conceptual Design</dt>
+            <dd>
+              Three branches:
+              (1) File exists -- incremental anchor-based <code>Edit</code> on H3 subsections;
+              (2) File absent, no legacy files -- instantiate from template;
+              (3) File absent, legacy files present -- emit warning and skip.
+              Appends a changelog entry to <code>product-design-changelog.md</code>.
+            </dd>
+            <dt>2b sub-part. Metacommunication</dt>
+            <dd>
+              Updates <code>### 4. Per-Feature Metacommunication Log</code> with
+              implemented intent. Uses first-person "I" (designer) and second-person
+              "you" (user) phrasing. Tags changes <code>source: agent (post-skill)</code>.
+            </dd>
+            <dt>2c sub-part. Journey Maps</dt>
+            <dd>
+              Skips if <code>## Journey Maps</code> is a placeholder. Otherwise updates
+              <code>JM-TB-NNN</code> statuses incrementally and the Delta from As-Intended
+              section. Multi-section updates require multiple Edits (enforced by
+              <code>check_section_boundary_writes.py</code> at step 6c).
+            </dd>
+          </dl>
+
+          <h4>Step 2e: DONE Marker Proposal</h4>
+          <p>
+            If the plan implemented user-facing features or journey steps, scans the
+            as-intended/as-coded registry for items matching implemented features.
+            Presents an AskUserQuestion with three options:
+          </p>
+          <ul>
+            <li><strong>Apply now</strong> -- flip STATUS markers via <code>apply_marker.py</code></li>
+            <li><strong>Defer for later review</strong> -- add candidates to the pending ledger</li>
+            <li><strong>Skip</strong> -- do nothing</li>
+          </ul>
+
+          <h4>Step 2f: Commit Scope Inclusion</h4>
+          <p>
+            Updated as-coded files and as-intended files with DONE markers are included
+            in the commit scope at step 8.
+          </p>
+        </section>
+
+        <section id="step-2b-documentation-auto-run">
+          <h3>Step 2b: Documentation Auto-run</h3>
+          <p>
+            Collects non-N/A <code>Docs:</code> fields from the plan. FEATURE/REDESIGN
+            always trigger; FIX/CHORE trigger only when any step has non-N/A
+            <code>Docs:</code>. If the parent carried <code>--skip-docs</code>, skips to
+            step 2g pending action creation. Otherwise presents an AskUserQuestion:
+          </p>
+          <ul>
+            <li><strong>Auto-run now</strong> (recommended) -- runs <code>/document --plan &lt;plan-id&gt;</code></li>
+            <li><strong>Skip</strong> -- files an <code>update-documentation</code> pending entry</li>
+          </ul>
+        </section>
+
+        <section id="step-2c-design-intent-reminder">
+          <h3>Step 2c: Design Intent Curation Reminder</h3>
+          <p>
+            Informational only -- outputs a text reminder to consider promoting items to
+            <code>established</code> status via <code>/explain drift --promote</code>.
+            Does not perform the promotion itself. Highlights P0 priority sections.
+          </p>
+        </section>
+
+        <section id="step-2d-eager-implement-entry">
+          <h3>Step 2d: Eager Implement Entry</h3>
+          <p>
+            Runs only when parent skill is <code>/plan</code>. Reads the plan header to
+            extract the short title, then invokes
+            <code>pending.py add --if-absent --type implement --source plan-&lt;id&gt;</code>.
+            Silent on success; non-zero exit produces a warning. Uses <code>--if-absent</code>
+            for idempotency under checkpoint recovery.
+          </p>
+        </section>
+
+        <section id="step-3-qa-log">
+          <h3>Step 3: QA Log</h3>
+          <p>Three branches, evaluated in order:</p>
+          <dl>
+            <dt>Branch A: Skip</dt>
+            <dd>If the parent passed <code>skip_qa_log: true</code>. Currently used by <code>/research</code> (which embeds its own inline Q&amp;A).</dd>
+            <dt>Branch B: Inline in plan file</dt>
+            <dd>If the artifact prefix is <code>plan-</code> or <code>implement-</code>, appends Q&amp;A directly to the plan file under <code>## Q&amp;A Log</code>. Uses numbered <code>### Q&lt;n&gt;</code> / <code>### A&lt;n&gt;</code> exchange format. For subsequent implementations, inserts a separator comment and continues numbering.</dd>
+            <dt>Branch C: Companion file</dt>
+            <dd>For all other artifact types, runs <code>/qa-log</code> with <code>no_commit: true</code>. Filename follows <code>&lt;prefix&gt;&lt;id&gt;-qa-&lt;slug&gt;.md</code> convention. Output directory resolved from prefix via the QA-Log Directory Mapping.</dd>
+          </dl>
+        </section>
+
+        <section id="step-4-commit-message">
+          <h3>Step 4: Commit Message</h3>
+          <p>Creates an appropriate commit message including the skill invocation id.</p>
+        </section>
+
+        <section id="step-5-git-state-safety">
+          <h3>Step 5: Git-state Safety Check</h3>
+          <p>
+            Runs <code>git status</code>. Does NOT commit if:
+          </p>
+          <ul>
+            <li>A rebase is in progress (<code>rebase-merge</code> / <code>rebase-apply</code> in <code>.git/</code>)</li>
+            <li>An unmerged conflict exists</li>
+            <li>HEAD is detached</li>
+          </ul>
+          <p>
+            On <code>main</code>/<code>master</code>: warns and asks for confirmation.
+            If blocked, outputs the commit message for manual use.
+          </p>
+        </section>
+
+        <section id="step-6-commit-scope">
+          <h3>Step 6: Commit Scope Verification</h3>
+          <p>
+            Runs <code>verify_commit_scope.py --skill-type &lt;type&gt; --artifact-id &lt;id&gt;</code>
+            to check staged files against expected paths. Passes <code>--plan-id</code>,
+            <code>--roadmap-id</code>, and <code>--always-include</code> as applicable.
+            The script outputs JSON with <code>expected</code>, <code>staged</code>,
+            <code>unexpected</code>, <code>missing</code>, and <code>pass</code> keys.
+            Unexpected pre-staged files trigger a warning.
+          </p>
+        </section>
+
+        <section id="step-6b-preflight-gate">
+          <h3>Step 6b: Fast Preflight Gate</h3>
+          <p>
+            Runs <code>run_preflight_fast.py</code>. Exit 0 proceeds silently. Non-zero
+            displays failures and asks whether to proceed or abort. Advisory, not blocking --
+            post-skill runs after lengthy work; <code>.githooks/pre-commit</code> is the
+            hard gate. Script not found is silently skipped.
+          </p>
+        </section>
+
+        <section id="step-6c-human-markers-verifier">
+          <h3>Step 6c: Human Markers Verifier</h3>
+          <p>
+            Runs <code>check_human_markers_only.py --staged</code>. Exit 0 proceeds
+            silently. Exit 1 (prose mutation in a Human (markers) file) displays the
+            violation and asks via AskUserQuestion whether to abort or proceed. Default
+            recommendation: abort (unauthorized edit should go through
+            <code>apply_marker.py</code>). Script not found is silently skipped.
+          </p>
+        </section>
+
+        <section id="step-7-index-regeneration">
+          <h3>Step 7: Index Regeneration</h3>
+          <p>Four sub-steps:</p>
+          <dl>
+            <dt>7a. Briefs index</dt>
+            <dd><code>generate_briefs_index.py</code> -- refreshes the briefs index file.</dd>
+            <dt>7b. Macro index</dt>
+            <dd><code>generate_macro_index.py</code> -- refreshes the artifact index (<code>INDEX.md</code>).</dd>
+            <dt>7c. Cross-reference update</dt>
+            <dd><code>update_cross_refs.py --artifact &lt;path&gt;</code> -- reads the <code>source:</code> header and updates the <code>spawned:</code> field on the source artifact.</dd>
+            <dt>7d. Decision digest regeneration (conditional)</dt>
+            <dd>If the completed skill was <code>/research</code> with HIGH/MEDIUM recommendations, or a plan applied DECISION_APPEND markers: runs <code>generate_decision_digest.py</code> to regenerate the decision digest JSONL file.</dd>
+          </dl>
+          <p>
+            After sub-steps complete, writes a checkpoint and captures
+            <code>pre-commit-sha</code> via <code>git rev-parse HEAD</code>.
+          </p>
+        </section>
+
+        <section id="step-2g-pending-action-creation">
+          <h3>Step 2g: Pending Action Creation</h3>
+          <p>
+            Runs when parent is <code>/implement</code>. Each sub-step is silent on success
+            and emits a one-line warning on failure; never blocks.
+          </p>
+          <dl>
+            <dt>2g.i. Verify-as-coded</dt>
+            <dd>If the plan's Modified + Created file count exceeds the verify-as-coded file threshold (default: 5 -- see <a href="configuration-reference.html#periodic-triggers">Configuration Reference</a>), files a <code>verify-as-coded</code> pending action.</dd>
+            <dt>2g.ii. Test-implementation</dt>
+            <dd>If the plan has a non-empty <code>## Test Plan</code>, files a <code>test-implementation</code> pending action.</dd>
+            <dt>2g.iii. Update-documentation</dt>
+            <dd>If documentation auto-run was skipped (step 2b) and the plan has non-N/A <code>Docs:</code> fields, files an <code>update-documentation</code> pending action.</dd>
+            <dt>2g.iv. Implement mark-done safety net</dt>
+            <dd>Unconditionally runs <code>pending.py done --source plan-&lt;id&gt; --type implement</code> to close the entry filed at <code>/plan</code> step 7h. Idempotent.</dd>
+          </dl>
+        </section>
+
+        <section id="step-7e-deferred-artifact-generation">
+          <h3>Step 7e: Deferred-artifact Generation</h3>
+          <p>
+            Runs only when parent is <code>/implement</code>; skipped in
+            <code>--deferred</code> worktree mode. Runs before the step 8 commit so the
+            primary commit includes generated artifacts.
+          </p>
+          <dl>
+            <dt>7e.a. Manual Actions</dt>
+            <dd>
+              If any step requires manual operator action after deployment, maintains a
+              <code>## Manual Actions</code> section in the plan file with dev and production
+              instructions separated. Idempotent: updates in place if section already exists.
+            </dd>
+            <dt>7e.b. deploy.html</dt>
+            <dd>
+              Scans the plan for steps with non-N/A <code>Deploy:</code> fields. If found,
+              writes (create or overwrite) <code>_output/docs/deploy.html</code> with sections:
+              Header, "Changed in plan-&lt;id&gt;" banner (visually highlighted), Docker,
+              Standalone -- Linux, Standalone -- Windows, Change history. Synthesizes content
+              from all prior deploy entries (from change history) plus current plan for
+              full current deployment state.
+            </dd>
+          </dl>
+        </section>
+
+        <section id="step-8-commit">
+          <h3>Step 8: Commit</h3>
+          <p>
+            Stages all affected files (regenerated indexes, updated as-coded files,
+            step 7e artifacts, plan file with Manual Actions) and commits using the
+            message from step 4. Writes a checkpoint, then deletes it on success.
+          </p>
+        </section>
+
+        <section id="step-8b-telemetry-flush">
+          <h3>Step 8b: Telemetry Flush</h3>
+          <p>
+            Enriches the step 1b record with commit-dependent fields:
+            <code>git_commit_sha</code>, <code>files_changed</code>, <code>parent_skill</code>.
+            Runs <code>build_telemetry.py</code> to construct and append the record.
+          </p>
+          <p>
+            <strong>Gate</strong>: compares <code>git rev-parse HEAD</code> against the SHA
+            captured before step 8. If equal (no primary commit), drops the telemetry record.
+            Otherwise commits telemetry as a separate trailing commit:
+            <code>git commit -m "telemetry: &lt;skill&gt; &lt;id&gt;"</code>.
+          </p>
+        </section>
+
+        <section id="step-9-surprises">
+          <h3>Steps 9--11: Wrap-up</h3>
+          <dl>
+            <dt>Step 9: Surprises</dt>
+            <dd>Outputs surprises from execution with resolution status.</dd>
+            <dt>Step 10: Output link</dt>
+            <dd>Links to the generated file within the output directory.</dd>
+            <dt>Step 11: Completion</dt>
+            <dd>Outputs the <code>SKILL COMPLETE</code> banner with skill name and artifact id.</dd>
+          </dl>
+        </section>
+
+        <section id="step-12-next-step-suggestions">
+          <h3>Step 12: Next-step Suggestions</h3>
+          <p>
+            Reads <code>.claude/references/general/skill-graph.md</code> and looks up the
+            completed skill. Presents at most 3 suggestions plus an "End" option. Each
+            suggestion carries the skill-graph reason and a "NOT recommended when" clause.
+          </p>
+          <p><strong>Suppression rules</strong> -- omit a suggestion when:</p>
+          <ol>
+            <li>Check modes ran at steps 6b or 6c -- omit <code>/critique validate</code>, <code>/critique review</code>, <code>/critique preflight</code></li>
+            <li><code>/document</code> was offered or ran at step 2b -- omit <code>/document</code></li>
+            <li>The brief's plan prefix is CHORE or DOCUMENT -- omit <code>/reflect</code></li>
+          </ol>
+        </section>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 3: Worktree Deferred Mode                             -->
+      <!-- ============================================================ -->
+
+      <section id="worktree-deferred-mode">
+        <h2>Worktree Deferred Mode</h2>
+
+        <p>
+          When <code>--deferred</code> is passed (by the roadmap parallel-wave orchestrator
+          after merging a worktree branch back to main), post-skill runs a reduced pipeline.
+          The orchestrator handles wave-level briefs, QA, and commits;
+          <code>--deferred</code> handles only the per-plan state alignment that requires
+          the merged code on main.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Step</th>
+                <th>Normal Mode</th>
+                <th><code>--deferred</code> Mode</th>
+                <th>Rationale</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>0 (checkpoint recovery)</td>
+                <td>Run</td>
+                <td>Run</td>
+                <td>Recovery is always needed</td>
+              </tr>
+              <tr>
+                <td>1 (brief-log)</td>
+                <td>Run</td>
+                <td>Skip</td>
+                <td>Orchestrator writes wave-level brief</td>
+              </tr>
+              <tr>
+                <td>1b (telemetry prep)</td>
+                <td>Run</td>
+                <td>Run</td>
+                <td>Flushed at 8b</td>
+              </tr>
+              <tr>
+                <td>2 (as-coded alignment)</td>
+                <td>Run</td>
+                <td>Run</td>
+                <td>Merged code is now on main</td>
+              </tr>
+              <tr>
+                <td>2b (documentation auto-run)</td>
+                <td>Run</td>
+                <td>Skip</td>
+                <td>Orchestrator handles wave-level docs</td>
+              </tr>
+              <tr>
+                <td>2c (design intent reminder)</td>
+                <td>Run</td>
+                <td>Run</td>
+                <td>Informational -- always useful</td>
+              </tr>
+              <tr>
+                <td>2d (eager implement entry)</td>
+                <td>Run</td>
+                <td>Skip</td>
+                <td>Not from <code>/plan</code></td>
+              </tr>
+              <tr>
+                <td>3 (QA log)</td>
+                <td>Run</td>
+                <td>Skip</td>
+                <td>Orchestrator handles wave-level QA</td>
+              </tr>
+              <tr>
+                <td>4--6 (commit message, safety, scope)</td>
+                <td>Run</td>
+                <td>Skip</td>
+                <td>Orchestrator commits atomically</td>
+              </tr>
+              <tr>
+                <td>6b--6c (preflight, markers check)</td>
+                <td>Run</td>
+                <td>Skip</td>
+                <td>Orchestrator runs these once for the wave</td>
+              </tr>
+              <tr>
+                <td>7 (index regeneration)</td>
+                <td>Run</td>
+                <td>Run</td>
+                <td>Indexes must reflect merged state</td>
+              </tr>
+              <tr>
+                <td>2g (pending action creation)</td>
+                <td>Run</td>
+                <td>Run</td>
+                <td>Per-plan pending actions needed</td>
+              </tr>
+              <tr>
+                <td>7e (deferred-artifact generation)</td>
+                <td>Run</td>
+                <td>Skip</td>
+                <td>Orchestrator handles wave-level docs</td>
+              </tr>
+              <tr>
+                <td>8 (commit)</td>
+                <td>Run</td>
+                <td>Skip</td>
+                <td>Orchestrator commits</td>
+              </tr>
+              <tr>
+                <td>8b (telemetry flush)</td>
+                <td>Run</td>
+                <td>Run</td>
+                <td>Appended; orchestrator includes in wave commit</td>
+              </tr>
+              <tr>
+                <td>9--12 (wrap-up, next-step)</td>
+                <td>Run</td>
+                <td>Skip</td>
+                <td>Orchestrator handles wave-level completion</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 4: Checkpoint Recovery                                -->
+      <!-- ============================================================ -->
+
+      <section id="checkpoint-recovery">
+        <h2>Checkpoint Recovery</h2>
+
+        <p>
+          Post-skill writes checkpoint files at critical points to enable crash recovery.
+          The checkpoint file lives at <code>${OUTPUT_DIR}/.post-skill-checkpoint</code>
+          with format:
+        </p>
+
+        <pre><code>&lt;step&gt; | &lt;datetime UTC&gt; | &lt;skill-id&gt;</code></pre>
+
+        <p>Checkpoint locations in the pipeline:</p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Checkpoint Token</th>
+                <th>Written After</th>
+                <th>Resumes At</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>1</code></td>
+                <td>Step 1 (brief-log DONE)</td>
+                <td>Step 1b (telemetry prep)</td>
+              </tr>
+              <tr>
+                <td><code>3</code></td>
+                <td>Step 3 (QA log)</td>
+                <td>Step 4 (commit message)</td>
+              </tr>
+              <tr>
+                <td><code>7</code></td>
+                <td>Step 7 (index regeneration)</td>
+                <td>Step 7e (deferred-artifact generation, idempotent)</td>
+              </tr>
+              <tr>
+                <td><code>7e</code></td>
+                <td>Step 7e (deferred-artifact generation)</td>
+                <td>Step 8 (commit)</td>
+              </tr>
+              <tr>
+                <td><code>8</code></td>
+                <td>Step 8 (commit)</td>
+                <td>Step 8b (telemetry flush); checkpoint then deleted</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          When resuming from a <code>7</code> or <code>7e</code> token, the pipeline
+          captures <code>pre-commit-sha</code> via <code>git rev-parse HEAD</code>
+          because step 8 has not yet run and HEAD is still the pre-commit state.
+        </p>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Cross-references                                              -->
+      <!-- ============================================================ -->
+
+      <section id="cross-references">
+        <h2>Cross-references</h2>
+        <ul>
+          <li><a href="skills-reference.html">Skills Reference</a> -- per-skill context_budget tiers and skip_stages declarations that control pre-skill behavior</li>
+          <li><a href="scripts-reference.html">Scripts Reference</a> -- detailed CLI interfaces for all scripts invoked by the pipelines</li>
+          <li><a href="configuration-reference.html">Configuration Reference</a> -- periodic trigger thresholds and review configuration that affect post-skill step 2g</li>
+          <li><a href="file-format-reference.html">File Format Reference</a> -- briefs log, checkpoint, and telemetry JSONL formats</li>
+          <li><a href="../how-to/skills/index.html">How-To: Skill-by-Skill Guides</a> -- practical workflows for each skill that these pipelines bookend</li>
+        </ul>
+      </section>
+
+      <!-- See also: cross-volume related chapters -->
+      <nav aria-label="see also" class="see-also">
+        <h2>See also</h2>
+        <ul>
+          <li><a href="../how-to/skills/index.html">How-To: Skill-by-Skill Guides</a> -- the skills whose invocations these pipelines bookend</li>
+          <li><a href="../explanation/design-decisions.html">Design Decisions and Trade-offs</a> -- why the lifecycle is split into pre-skill and post-skill stages</li>
+        </ul>
+      </nav>
+
+    </article>
+
+    <!-- Sequential chapter navigation -->
+    <nav aria-label="chapter navigation">
+      <a href="reference-files-catalog.html">Previous: Reference Files Catalog</a>
+      <a href="file-format-reference.html">Next: File Format Reference</a>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#pre-skill-pipeline">Pre-skill Pipeline</a></li>
+      <li><a href="#stage-help">Stage 1: help</a></li>
+      <li><a href="#stage-brief-log">Stage 2: brief-log</a></li>
+      <li><a href="#stage-budget-eval">Stage 3: budget-eval</a></li>
+      <li><a href="#stage-pending-check">Stage 4: pending-check</a></li>
+      <li><a href="#stage-ref-load">Stage 5: ref-load</a></li>
+      <li><a href="#stage-constitution">Stage 6: constitution</a></li>
+      <li><a href="#post-skill-pipeline">Post-skill Pipeline</a></li>
+      <li><a href="#step-0-checkpoint-recovery">Step 0: Checkpoint</a></li>
+      <li><a href="#step-1-brief-log-done">Step 1: Brief-log DONE</a></li>
+      <li><a href="#step-2-as-coded-alignment">Step 2: As-Coded</a></li>
+      <li><a href="#step-2b-documentation-auto-run">Step 2b: Docs auto-run</a></li>
+      <li><a href="#step-3-qa-log">Step 3: QA log</a></li>
+      <li><a href="#step-6-commit-scope">Step 6: Scope verify</a></li>
+      <li><a href="#step-7-index-regeneration">Step 7: Indexes</a></li>
+      <li><a href="#step-7e-deferred-artifact-generation">Step 7e: Artifacts</a></li>
+      <li><a href="#step-8-commit">Step 8: Commit</a></li>
+      <li><a href="#step-12-next-step-suggestions">Step 12: Next steps</a></li>
+      <li><a href="#worktree-deferred-mode">Deferred Mode</a></li>
+      <li><a href="#checkpoint-recovery">Checkpoint Recovery</a></li>
+      <li><a href="#cross-references">Cross-references</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T16:30:00Z</p>
+  </footer>
+
+</body>
+</html>

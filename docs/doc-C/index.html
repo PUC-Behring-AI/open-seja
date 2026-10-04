@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SEJA Documentation -- Audience-Routed Collection</title>
+  <meta name="description" content="Reading Map for the SEJA documentation collection: a shared core plus three audience tracks (Practitioner, Architect, Scholar). Find where to start by role and question.">
+  <!-- Shared doc-C stylesheet (co-located, depth 0) -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- Page-scoped styles: only components NOT already in styles.css
+       (track-card grid, visually-hidden caption).
+       All colours/spacing reuse the shared design tokens. -->
+  <style>
+    /* Visually-hidden but screen-reader-available (table caption). */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Responsive grid of audience-track cards. */
+    .track-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+      gap: var(--spacing-md);
+      margin: var(--spacing-md) 0;
+    }
+
+    .track-card {
+      padding: var(--spacing-md);
+      background-color: var(--color-aside-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+    }
+
+    .track-card h3 {
+      margin-top: var(--spacing-xs);
+    }
+
+    .track-card h3 a {
+      text-decoration: none;
+    }
+
+    .track-card p:last-child {
+      margin-bottom: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Skip-navigation link (WCAG 2.4.1) -->
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+
+  <div class="doc-shell">
+    <header>
+      <h1>SEJA Documentation &mdash; Audience-Routed Collection</h1>
+      <p>The Reading Map: choose your track, or jump straight to the shared core.</p>
+    </header>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="#main-content" aria-current="page">Reading Map</a></li>
+      </ol>
+    </nav>
+
+    <!-- Navigation sidebar. nav.js injects the auto-TOC here from the
+         .doc-content headings; the fallback link below keeps the sidebar
+         usable with JavaScript disabled (progressive enhancement). -->
+    <nav class="doc-nav" aria-label="on this page">
+      <p class="doc-nav-title">Reading Map</p>
+      <ul>
+        <li><a href="#where-to-start">Where to start</a></li>
+        <li><a href="#tracks">Audience tracks</a></li>
+        <li><a href="#core">Core documentation</a></li>
+        <li><a href="#quick-links">Quick links</a></li>
+      </ul>
+    </nav>
+
+    <main class="doc-content" id="main-content">
+      <!-- ============================================================ -->
+      <!-- Introduction                                                 -->
+      <!-- ============================================================ -->
+      <section aria-labelledby="intro-heading">
+        <h2 id="intro-heading">A shared core, three audience tracks</h2>
+        <p>
+          This collection is organised around one idea: everyone reads the same
+          <strong>core documentation</strong> &mdash; the Skills, Concepts,
+          Operations, and Reference pages that describe how the SEJA harness
+          actually works &mdash; but few readers need all of it in the same order.
+          A first-time user, a systems architect, and a semiotics scholar are
+          looking at the same harness with very different questions in mind.
+        </p>
+        <p>
+          So the core is wrapped in three <strong>audience tracks</strong>.
+          Each track is a curated route through the shared core, opened by a
+          short <em>gate</em> page that sets context and hands you a reading
+          sequence: <a href="tracks/practitioner/index.html">Practitioner</a> (get things
+          done), <a href="tracks/architect/index.html">Architect</a> (understand
+          the structure), and <a href="tracks/scholar/index.html">Scholar</a>
+          (understand the theory). Tracks do not fork the
+          content &mdash; they only recommend an order. Use the decision tree below
+          to find your starting point, or skip straight to any core section.
+        </p>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Where to start: decision tree                                -->
+      <!-- ============================================================ -->
+      <section aria-labelledby="where-to-start">
+        <h2 id="where-to-start">Where to start</h2>
+        <p>
+          Find the row that matches your role and question. The last column is
+          your recommended starting point, and every destination is a link.
+        </p>
+        <div class="table-container">
+          <table>
+            <caption class="sr-only">
+              Nine reader roles and their recommended starting points, covering
+              all five audiences this collection serves: new users, experienced
+              users, contributors and architects, scholars, and the AI agent that
+              operates the harness.
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Your role</th>
+                <th scope="col">Your question</th>
+                <th scope="col">Start here</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">New user</th>
+                <td>&ldquo;How do I get started with SEJA?&rdquo;</td>
+                <td>
+                  <a href="tracks/practitioner/index.html">Practitioner track gate</a>
+                  <span class="badge track-practitioner">Practitioner</span>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Experienced user</th>
+                <td>&ldquo;How do I run a specific procedure again?&rdquo;</td>
+                <td>
+                  <a href="core/operations/index.html">Operations reference</a>
+                  <span class="badge core-operations">Operations</span>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Architect</th>
+                <td>&ldquo;What is the system topology and how do the parts connect?&rdquo;</td>
+                <td>
+                  <a href="tracks/architect/index.html">Architect track gate</a>
+                  <span class="badge track-architect">Architect</span>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Contributor</th>
+                <td>&ldquo;How do I extend or modify the harness?&rdquo;</td>
+                <td>
+                  <a href="tracks/architect/index.html#phase-2-extension-points">Architect track &mdash; Extension Points</a>
+                  <span class="badge track-architect">Architect</span>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Scholar</th>
+                <td>&ldquo;What is the theory and reasoning behind the design?&rdquo;</td>
+                <td>
+                  <a href="tracks/scholar/index.html">Scholar track gate</a>
+                  <span class="badge track-scholar">Scholar</span>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">AI agent</th>
+                <td>&ldquo;What must I read to operate this harness correctly?&rdquo;</td>
+                <td>
+                  <a href="core/reference/index.html">Reference core</a> &mdash; then the
+                  harness files themselves under <code>.claude/</code>, which are the
+                  operative source rather than this collection
+                  <span class="badge core-reference">Reference</span>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Any user</th>
+                <td>&ldquo;Something is not working &mdash; how do I troubleshoot it?&rdquo;</td>
+                <td>
+                  <a href="core/operations/index.html">Operations &mdash; troubleshooting</a>
+                  <span class="badge core-operations">Operations</span>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Existing user</th>
+                <td>&ldquo;How do I upgrade my harness to the latest version?&rdquo;</td>
+                <td>
+                  <a href="core/operations/upgrade.html">Operations &mdash; upgrade</a>
+                  <span class="badge core-operations">Operations</span>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Curious reader</th>
+                <td>&ldquo;What does a term or concept actually mean?&rdquo;</td>
+                <td>
+                  <a href="core/concepts/index.html">Concepts</a>
+                  <span class="badge core-concepts">Concepts</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Audience tracks: three cards                                 -->
+      <!-- ============================================================ -->
+      <section aria-labelledby="tracks">
+        <h2 id="tracks">Audience tracks</h2>
+        <p>
+          Each track opens with a gate page that frames the harness for your goal
+          and lays out a reading sequence through the shared core. All three tracks
+          are open.
+        </p>
+        <div class="track-cards">
+          <article class="track-card" aria-labelledby="track-practitioner-heading">
+            <span class="badge track-practitioner">Practitioner</span>
+            <h3 id="track-practitioner-heading">
+              <a href="tracks/practitioner/index.html">Practitioner</a>
+            </h3>
+            <p>
+              For readers who want to get work done: run skills, follow
+              procedures, and ship changes with the harness.
+            </p>
+            <p><a href="tracks/practitioner/index.html">Open the Practitioner gate &rarr;</a></p>
+          </article>
+
+          <article class="track-card" aria-labelledby="track-architect-heading">
+            <span class="badge track-architect">Architect</span>
+            <h3 id="track-architect-heading">
+              <a href="tracks/architect/index.html">Architect</a>
+            </h3>
+            <p>
+              For readers who want to understand the structure: how skills,
+              agents, rules, and references fit together into a lifecycle &mdash;
+              and how to extend any of them.
+            </p>
+            <p><a href="tracks/architect/index.html">Open the Architect gate &rarr;</a></p>
+          </article>
+
+          <article class="track-card" aria-labelledby="track-scholar-heading">
+            <span class="badge track-scholar">Scholar</span>
+            <h3 id="track-scholar-heading">
+              <a href="tracks/scholar/index.html">Scholar</a>
+            </h3>
+            <p>
+              For readers who want the theory: the semiotic-engineering roots,
+              the reasoning behind the harness&rsquo;s design decisions, and what
+              remains open.
+            </p>
+            <p><a href="tracks/scholar/index.html">Open the Scholar gate &rarr;</a></p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Core documentation at a glance                               -->
+      <!-- ============================================================ -->
+      <section aria-labelledby="core">
+        <h2 id="core">Core documentation at a glance</h2>
+        <p>
+          The four core categories are the shared destination of every track,
+          and all four &mdash; Skills, Concepts, Operations, and Reference &mdash;
+          are available now.
+        </p>
+        <dl>
+          <dt>
+            <a href="core/skills/index.html">Skills</a>
+            <span class="badge core-skills">Skills</span>
+          </dt>
+          <dd>
+            One page per lifecycle skill &mdash; what it does, when to run it, and
+            how it fits the canonical path. <strong>16 pages.</strong>
+          </dd>
+
+          <dt>
+            <a href="core/concepts/index.html">Concepts</a>
+            <span class="badge core-concepts">Concepts</span>
+          </dt>
+          <dd>
+            The vocabulary and mental models &mdash; sign system, constitution,
+            lifecycle, markers, and semiotic framing. <strong>8 pages.</strong>
+          </dd>
+
+          <dt>
+            <a href="core/operations/index.html">Operations</a>
+            <span class="badge core-operations">Operations</span>
+          </dt>
+          <dd>
+            Task-oriented procedures &mdash; installation, upgrade, planning,
+            quality gates, CI, release, and team material. <strong>7 pages.</strong>
+          </dd>
+
+          <dt>
+            <a href="core/reference/index.html">Reference</a>
+            <span class="badge core-reference">Reference</span>
+          </dt>
+          <dd>
+            Lookup material &mdash; skills and agents catalogs, perspectives,
+            pipeline stages, skill map, call graph, and glossary.
+            <strong>7 pages.</strong>
+          </dd>
+        </dl>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Quick links                                                  -->
+      <!-- ============================================================ -->
+      <section aria-labelledby="quick-links">
+        <h2 id="quick-links">Quick links</h2>
+        <ul>
+          <li><a href="tracks/practitioner/index.html">Practitioner track</a> &mdash; get started fast.</li>
+          <li><a href="tracks/architect/index.html">Architect track</a> &mdash; topology, extension points, maintenance.</li>
+          <li><a href="tracks/scholar/index.html">Scholar track</a> &mdash; the theory and what remains open.</li>
+          <li><a href="core/concepts/index.html">Concepts</a> &mdash; the vocabulary and mental models.</li>
+          <li><a href="core/operations/index.html">Operations</a> &mdash; setup, upgrade, troubleshooting.</li>
+          <li><a href="core/reference/index.html">Reference</a> &mdash; catalogs, maps, and the glossary.</li>
+          <li><a href="core/skills/index.html">Skills</a> &mdash; the lifecycle skill catalogue.</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="#main-content">Back to top</a>
+        <a href="tracks/practitioner/index.html">Practitioner</a>
+        <a href="core/skills/index.html">Skills</a>
+        <a href="core/concepts/index.html">Concepts</a>
+        <a href="core/operations/index.html">Operations</a>
+        <a href="core/reference/index.html">Reference</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- Shared doc-C navigation script (co-located, depth 0, progressive
+       enhancement). Adds auto-TOC, scrollspy, and collapsible groups. -->
+  <script src="nav.js" defer></script>
+</body>
+</html>

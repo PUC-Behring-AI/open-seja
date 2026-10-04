@@ -61,6 +61,7 @@ _SKILL_DIR_VARS: dict[str, str] = {
     "explain": "EXPLAINED_BEHAVIORS_DIR",
     "communicate": "COMMUNICATION_DIR",
     "reflect": "REFLECTIONS_DIR",
+    "mob": "MOB_SESSIONS_DIR",
     "onboard": "ONBOARDING_PLANS_DIR",
     "roadmap": "ROADMAP_DIR",
     "qa-log": "QA_LOGS_DIR",

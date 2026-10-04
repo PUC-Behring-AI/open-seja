@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How-to guide for the /plan skill: make a step-by-step plan to add a feature, fix a bug, or refactor, across standard, lightweight, and roadmap modes.">
+  <title>/plan — SEJA Documentation</title>
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>/plan</h1>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Skills</a></li>
+        <li aria-current="page">/plan</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge core-skills">skills</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="what-it-does">
+          <h2 id="what-it-does">What it does</h2>
+          <p><code>/plan</code> creates a step-by-step plan for your next feature, bug fix, or improvement. You describe what you want, and the agent produces a detailed plan you can review before anything changes. Each step lists the files to change, verification criteria, and dependencies.</p>
+          <p>Three modes cover different sizes of work: <strong>standard</strong> (a single plan, the default), <strong>lightweight</strong> (<code>--light</code>, a shorter, less formal proposal suitable for small fixes), and <strong>roadmap</strong> (<code>--roadmap</code>, a full product roadmap that decomposes the work into dependency-aware execution waves and generates individual plans for each item). The <code>--framing metacomm</code> option frames the brief as a designer's metacommunication message, preserving the user-experience perspective in the plan, and <code>--review deep</code> overrides the complexity-gated review depth.</p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="when-to-run">
+          <h2 id="when-to-run">When to run it</h2>
+          <p>Run <code>/plan</code> when you have a clear idea of what you want to build or fix and want a structured plan before any code changes happen. If you omit both <code>--light</code> and <code>--roadmap</code>, the agent auto-detects the best mode from your brief and asks for confirmation before proceeding.</p>
+          <p>Use <code>--light</code> for quick proposals that do not need full step metadata, <code>--roadmap</code> for building a complete product across multiple waves, and <code>--framing metacomm</code> when describing the change from the user's perspective.</p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="how-it-fits">
+          <h2 id="how-it-fits">How it fits the lifecycle</h2>
+          <p>On the canonical path &mdash; <code>/research</code> &rarr; <code>/design</code> | <code>/plan</code> &rarr; <code>/implement</code> &rarr; <code>/critique</code> &rarr; <code>/document</code> | <code>/communicate</code> &rarr; <code>/reflect</code> &mdash; <code>/plan</code> shares the intent-setting stage with <code>/design</code>. After investigating with <code>/research</code> or <code>/explain</code>, you branch into <code>/plan</code> when intent is already set and you just need a build plan, and into <code>/design</code> when the intent itself must change.</p>
+          <p>Once you have reviewed the plan, the next step is <code>/implement</code> to execute it (or the first roadmap item). When passed a research ID, the plan records its source so the lifecycle stays traceable.</p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="../concepts/lifecycle-pipeline.html">Lifecycle pipeline</a> &mdash; where /plan sits on the canonical path.</li>
+            <li><a href="../operations/plan-and-execute.html">Plan and execute</a> &mdash; the operational flow from plan through implementation.</li>
+            <li><a href="implement.html">/implement</a> &mdash; execute the plan once you have reviewed it.</li>
+            <li><a href="design.html">/design</a> &mdash; the sibling intent-stage skill, for when intent must change.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Skills</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

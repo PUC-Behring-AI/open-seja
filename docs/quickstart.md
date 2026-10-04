@@ -1,7 +1,7 @@
 ---
 diataxis: tutorial
 freshness: release-bound
-last-reviewed: 2026-05-05
+last-reviewed: 2026-10-04
 ---
 
 # Quickstart
@@ -19,12 +19,25 @@ SEJA project.
 
 ## The three commands
 
-Run these three commands in order. Each is explained in the worked
-example below. Nothing else needs to happen on this first screen:
-you can start typing now and read the "why" afterwards.
+Run these in order. Each is explained in the worked example below.
+Nothing else needs to happen on this first screen: you can start
+typing now and read the "why" afterwards. Once you have a project,
+[Your first cycle](#your-first-cycle) is the next stop.
+
+From a terminal, clone the harness into a new folder and open Claude Code
+there (you need read access to the repository; it is shared with members
+of the PUC-Behring-AI organization):
 
 ```bash
-/seja-setup hello-seja
+git clone git@github.com:PUC-Behring-AI/open-seja my-project
+cd my-project
+claude
+```
+
+Inside Claude Code, the three steps are:
+
+```bash
+/seja-setup --here
 ```
 
 ```bash
@@ -35,7 +48,7 @@ you can start typing now and read the "why" afterwards.
 /seja-setup --upgrade
 ```
 
-## Worked example: hello-seja
+## Worked example: my-project
 
 We will walk you through a concrete run so you see a real result
 before you leave this page. The project is a small personal task
@@ -43,23 +56,27 @@ tracker. The domain is "personal tasks and reminders". The stack
 is Python plus SQLite. The mode is greenfield (new project, no
 prior code to migrate).
 
-### Step 1: `/seja-setup hello-seja`
+### Step 1: `/seja-setup my-project`
+
+This example shows the other install path: running Claude Code in a checkout of open-seja and copying the harness
+into a separate folder. If you cloned straight into `my-project/` as above, your Step 1 is `/seja-setup --here`
+instead; the rest of the example is the same.
 
 From an empty parent directory, you run:
 
 ```bash
-/seja-setup hello-seja
+/seja-setup my-project
 ```
 
-You will see SEJA copy its harness files into `hello-seja/.claude/`
-and `hello-seja/.claude/references/`. When the setup finishes, you have a
+You will see SEJA copy its harness files into `my-project/.claude/`
+and `my-project/.claude/references/`. When the setup finishes, you have a
 new SEJA-ready project directory containing the skills, rules, and
 reference scaffolding the harness needs to operate. You then run
-`cd hello-seja` and move on to the next command.
+`cd my-project` and move on to the next command.
 
 ### Step 2: `/design`
 
-From inside `hello-seja`, you run:
+From inside `my-project`, you run:
 
 ```bash
 /design
@@ -67,7 +84,7 @@ From inside `hello-seja`, you run:
 
 You will be asked a short sequence of questions about your project.
 For this worked example, you answer them as if you are building a
-personal task tracker: the project name is `hello-seja`, the domain
+personal task tracker: the project name is `my-project`, the domain
 is `personal tasks and reminders`, the stack is `Python + SQLite`,
 and the mode is `greenfield`. SEJA then generates four project
 files under `product-design/`, customized with your answers.
@@ -119,6 +136,58 @@ You now have a SEJA project with four files under `product-design/`:
 The harness reads these four files at the start of every skill
 invocation. You do not need to memorize the whole file inventory
 yet: you have a running project, and that is enough for now.
+
+## Your first cycle
+
+Once the project has its four design files, you can try the cycle this release proposes: PLAN, IMPLEMENT, REFLECT
+(see [the hypothesis](hypothesis.md)). It takes one small change and roughly an hour end to end, most of it in
+`/design` if you have not run it yet. It shows you the quality gate and the reflection notes working in your own
+project.
+
+1. **Install, with the gate.** Clone the harness (`git clone git@github.com:PUC-Behring-AI/open-seja my-project`),
+   open Claude Code in `my-project/` and run `/seja-setup --here` (or `/seja-setup` in an existing project). There is
+   no menu: `/seja-setup --here` goes straight to questions about your stack, then asks what to do with the git
+   history (choose **Re-init fresh** and type `confirm`; the history is open-seja's, not yours) and which harness
+   files to tidy up (the defaults move `docs/` to `docs/seja/` and rename `README.md` and `CHANGELOG.md`). The gate
+   needs a Python project with pytest, and `/seja-setup` only offers it when it sees pytest in your answers. For a new,
+   empty project, tell `/seja-setup` the stack is Python with pytest. Accept the gate when it is offered. You should
+   now see `gate.py` in the project root. Setup does not create the Python project itself, so give the gate something
+   to measure: a `pyproject.toml` with the blocks from
+   `.claude/references/template/quality-gate/python/pyproject-dev.example.toml` (set `package` to your package
+   name), one package under `src/` (for example `src/my_project/__init__.py`), a `tests/` folder, and the tools the
+   gate runs (`uv add --dev ruff pyright pytest pytest-cov pytest-timeout radon`). If the project is not
+   Python, skip the gate: the cycle still works, and the `gate` field of each step note reads `not-installed`.
+2. **Record your intent.** Run `/design` (skip it if you already ran it in the worked example). It asks a short
+   sequence of questions about your project and writes `product-design/product-design-as-intended.md`; a plan needs
+   that file.
+3. **Record the baseline.** From the project root, run `python gate.py --init-baseline` once. The gate now remembers
+   the current state, and from here on thresholds only move when you accept it. If `gate.py` is missing, the gate was
+   not installed: re-run `/seja-setup` and choose the gate.
+4. **Plan a small change.** Run `/plan` with something tiny, for example "add a function `slugify(title)` with a
+   test". You get a numbered plan, reviewed before anything is written.
+5. **Implement it.** Run `/implement <plan-id>`. For each step you will see the gate run on the files the step
+   touched, up to three attempts, and a step only counts as done on PASS. Each step also leaves a short note in
+   `_output/plans/plan-<id>-progress.md`: what happened, what deviated, what the agent is less sure about, with the
+   gate result. A note looks like this:
+
+   ```text
+   ### Step 2 -- reflection-on-action | 2026-10-04 14:10 UTC | Add slugify
+   - happened: added slugify() and a test for accents and spaces
+   - deviated: none
+   - less-sure: behavior for empty strings
+   - gate: PASS (exit 0, attempts 1, _output/quality/plan-000001-step-2-try-1.json)
+   ```
+
+6. **Reflect.** Run `/reflect` on the plan. It reads the notes and the gate evidence before it asks you anything, and
+   it records your answer in your own words.
+
+### What you just tested
+
+You ran the gate and reflection-note half of H-008. The other half -- the mirrors, `/communicate` for the plan and
+`/explain drift` after implementing -- is offered by `/plan` and `/implement` and was not part of this first cycle;
+try them on a second one. To see how the cycle did, run `python3 .claude/skills/scripts/step_notes.py parse --stats
+_output/plans/plan-<id>-progress.md` and look at the gate reports under `_output/quality/`. [The hypothesis
+page](hypothesis.md) says what the numbers mean, and how to send them to me if you choose to.
 
 ## The canonical loop: what happens on iteration 2 and beyond
 

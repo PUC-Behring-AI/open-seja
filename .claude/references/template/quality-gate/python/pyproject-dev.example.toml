@@ -1,0 +1,37 @@
+# Example blocks for the project's pyproject.toml. Adapt and merge.
+# `uv add --dev <pkg>` writes this [dependency-groups] shape; uv.lock pins the
+# exact versions, so commit it.
+
+[dependency-groups]
+dev = [
+    "ruff",
+    "pyright",
+    "pytest",
+    "pytest-cov",
+    "pytest-timeout",
+    "coverage[toml]>=7.5,<8",
+    "radon>=6,<7",
+    "mutmut>=3,<4",
+    "import-linter",
+]
+
+# Single source of the gate thresholds.
+[tool.seja-gate]
+package = "my_package"        # importable package under src/
+diff_base = "origin/main"     # ref used to find the touched functions
+crap_max_touched = 10         # ramp: 10 -> 8 -> 6
+crap_max_abs = 30             # ceiling nothing may newly cross
+# env_passthrough = []        # secret-looking env vars the tools may see
+
+[tool.mutmut]
+paths_to_mutate = ["src/"]
+tests_dir = ["tests/"]
+timeout_multiplier = 2.0      # per-mutant timeout, relative to the test run
+
+# The gate runs ruff and pyright on the whole project; keep it from linting
+# its own installed copy and the harness hooks.
+[tool.ruff]
+extend-exclude = ["gate.py", ".claude"]
+
+[tool.pyright]
+include = ["src", "tests"]

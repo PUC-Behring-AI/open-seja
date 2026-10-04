@@ -1,0 +1,12 @@
+{
+  "src/pkg/mod.py": [
+    {"type": "function", "name": "plain", "lineno": 1, "endline": 10, "col_offset": 0, "complexity": 5, "closures": []},
+    {"type": "function", "name": "decorated", "lineno": 12, "endline": 20, "col_offset": 0, "complexity": 5, "closures": []},
+    {"type": "class", "name": "K", "lineno": 22, "endline": 40, "col_offset": 0, "complexity": 6,
+     "methods": [
+       {"type": "method", "name": "meth", "classname": "K", "lineno": 24, "endline": 38, "col_offset": 4, "complexity": 4,
+        "closures": [{"type": "function", "name": "inner", "lineno": 30, "endline": 34, "col_offset": 8, "complexity": 2, "closures": []}]}
+     ], "closures": []},
+    {"type": "function", "name": "fresh", "lineno": 50, "endline": 60, "col_offset": 0, "complexity": 11, "closures": []}
+  ]
+}

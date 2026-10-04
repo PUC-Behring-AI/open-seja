@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-status" content="draft">
+
+  <title>SEJA Documentation Collection</title>
+
+    <!-- CSS depth: 0 -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation: collection index is the top level -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li>Collection</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <main id="main-content">
+    <article>
+      <h1>SEJA Documentation Collection</h1>
+
+      <section id="about" data-diataxis="explanation">
+        <p>
+          SEJA (Software Engineering with AI) is an agent harness that
+          organizes human-AI collaboration through a system-isomorphic document
+          architecture. This documentation collection is structured around five
+          volumes, each mapping to a distinct layer of the SEJA system. It is
+          written for a <strong>mixed audience</strong>: it pairs those
+          layer-organized volumes with an audience-routing Reading Map, so it
+          serves both practitioners who need task-oriented, do-it-now guidance
+          and readers who want to understand the conceptual foundations. The
+          intent is that a single structure works whether you arrive to get
+          something done or to understand how and why the harness is built.
+        </p>
+        <p>
+          Each volume's chapters carry Diataxis section tags that classify
+          content as tutorial, how-to, reference, or explanation. An
+          audience-routing Reading Map helps you navigate to the content that
+          matches your role and immediate need.
+        </p>
+      </section>
+
+      <section id="volumes" data-diataxis="reference">
+        <h2>Volumes</h2>
+
+        <ol class="volume-cards">
+
+          <li class="volume-card">
+            <h3>
+              Vol. 1: Onboarding and Orientation
+              <span class="phase-badge">Phase 1</span>
+            </h3>
+            <p class="volume-meta">Directory: <code>onboarding/</code></p>
+            <p>
+              Getting started with SEJA: what it is, how to use it, and where
+              to find what you need.
+            </p>
+            <a href="onboarding/index.html">Open Vol. 1</a>
+          </li>
+
+          <li class="volume-card">
+            <h3>
+              Vol. 2: The Design Layer
+              <span class="phase-badge">Phase 2</span>
+            </h3>
+            <p class="volume-meta">Directory: <code>design-layer/</code></p>
+            <p>
+              Understanding SEJA's design philosophy: metacommunication,
+              constitution, design intent, and markers.
+            </p>
+            <a href="design-layer/index.html">Open Vol. 2</a>
+          </li>
+
+          <li class="volume-card">
+            <h3>
+              Vol. 3: The Execution Layer
+              <span class="phase-badge">Phase 1</span>
+            </h3>
+            <p class="volume-meta">Directory: <code>execution-layer/</code></p>
+            <p>
+              Using SEJA day-to-day: the lifecycle pipeline, skills, subagent
+              delegation, plans, and quality critique.
+            </p>
+            <a href="execution-layer/index.html">Open Vol. 3</a>
+          </li>
+
+          <li class="volume-card">
+            <h3>
+              Vol. 4: The Output and Governance Layer
+              <span class="phase-badge">Phase 3</span>
+            </h3>
+            <p class="volume-meta">Directory: <code>governance-layer/</code></p>
+            <p>
+              Managing SEJA's outputs: artifacts, enforcement, scripts,
+              maintenance, and release.
+            </p>
+            <a href="governance-layer/index.html">Open Vol. 4</a>
+          </li>
+
+          <li class="volume-card">
+            <h3>
+              Vol. 5: Foundations and Philosophy
+              <span class="phase-badge">Phase 2</span>
+            </h3>
+            <p class="volume-meta">Directory: <code>foundations/</code></p>
+            <p>
+              The intellectual foundations: semiotic engineering, sign systems,
+              reflective practice, and the epistemic thesis.
+            </p>
+            <a href="foundations/index.html">Open Vol. 5</a>
+          </li>
+
+        </ol>
+      </section>
+
+      <section id="how-to-read-this" data-diataxis="explanation">
+        <h2>How to Read This</h2>
+
+        <h3>Diataxis Section Tags</h3>
+        <p>
+          Chapters in this collection use
+          <a href="https://diataxis.fr/">Diataxis</a>-inspired section tags to
+          classify content by its purpose. Each <code>&lt;section&gt;</code>
+          element carries a <code>data-diataxis</code> attribute with one of
+          four values:
+        </p>
+        <dl>
+          <dt><code>tutorial</code></dt>
+          <dd>
+            Learning-oriented: step-by-step lessons that guide you through a
+            task for the first time.
+          </dd>
+
+          <dt><code>how-to</code></dt>
+          <dd>
+            Task-oriented: practical recipes for accomplishing specific goals
+            when you already understand the basics.
+          </dd>
+
+          <dt><code>reference</code></dt>
+          <dd>
+            Information-oriented: precise, complete descriptions of components,
+            APIs, or configuration options.
+          </dd>
+
+          <dt><code>explanation</code></dt>
+          <dd>
+            Understanding-oriented: conceptual discussions that clarify why
+            things work the way they do.
+          </dd>
+        </dl>
+
+        <h3>The Reading Map</h3>
+        <p>
+          The <a href="reading-map.html">Reading Map</a> provides
+          audience-routed navigation paths. Instead of reading linearly, you
+          select your role (e.g., new user, practitioner, contributor, or
+          researcher) and the map shows you a curated sequence of chapters
+          that matches your goals. This is the recommended entry point for
+          most readers.
+        </p>
+      </section>
+
+      <section id="content-phasing" data-diataxis="reference">
+        <h2>Content Phasing</h2>
+        <p>
+          Content was developed in three phases. All phases are now complete
+          and every chapter carries <code>doc-status: draft</code>. The table
+          below records the development order for reference.
+        </p>
+        <table class="phasing-table">
+          <thead>
+            <tr>
+              <th>Phase</th>
+              <th>Volumes</th>
+              <th>Focus</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Phase 1</td>
+              <td>Vol. 1 (Onboarding) + Vol. 3 (Execution Layer)</td>
+              <td>Getting started and day-to-day usage -- the essential
+                practitioner path.</td>
+            </tr>
+            <tr>
+              <td>Phase 2</td>
+              <td>Vol. 2 (Design Layer) + Vol. 5 (Foundations)</td>
+              <td>Design philosophy and intellectual foundations -- the
+                conceptual depth path.</td>
+            </tr>
+            <tr>
+              <td>Phase 3</td>
+              <td>Vol. 4 (Governance Layer)</td>
+              <td>Output management, enforcement, and release -- the
+                operational maturity path.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="cross-reference-map" data-diataxis="reference">
+        <h2>Cross-Reference Map</h2>
+        <p>
+          This table maps existing <code>docs/</code> pages to their
+          corresponding chapters in this collection. It is an author reference
+          for content planning, not a set of navigable links.
+        </p>
+        <div class="table-container">
+          <table class="xref-table">
+            <thead>
+              <tr>
+                <th>Existing doc</th>
+                <th>Location in this collection</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>quickstart.md</code></td>
+                <td>Vol. 1 Ch. 2 (Quickstart)</td>
+              </tr>
+              <tr>
+                <td><code>foundations.md</code></td>
+                <td>Vol. 5 (multiple chapters)</td>
+              </tr>
+              <tr>
+                <td><code>foundations-assessment.md</code></td>
+                <td>Vol. 5 (multiple chapters)</td>
+              </tr>
+              <tr>
+                <td><code>concepts.md</code></td>
+                <td>Vol. 3 Ch. 1 (Lifecycle Pipeline)</td>
+              </tr>
+              <tr>
+                <td><code>concepts/skill-map.md</code></td>
+                <td>Vol. 3 Ch. 2 (Skills In Depth)</td>
+              </tr>
+              <tr>
+                <td><code>concepts/call-graph.md</code></td>
+                <td>Vol. 3 Ch. 3 (Subagent Delegation)</td>
+              </tr>
+              <tr>
+                <td><code>how-to/greenfield-collocated.md</code></td>
+                <td>Vol. 1 Ch. 2 (Quickstart)</td>
+              </tr>
+              <tr>
+                <td><code>how-to/greenfield-workspace.md</code></td>
+                <td>Vol. 1 Ch. 2 (Quickstart)</td>
+              </tr>
+              <tr>
+                <td><code>how-to/brownfield-collocated.md</code></td>
+                <td>Vol. 1 Ch. 2 (Quickstart)</td>
+              </tr>
+              <tr>
+                <td><code>how-to/brownfield-workspace.md</code></td>
+                <td>Vol. 1 Ch. 2 (Quickstart)</td>
+              </tr>
+              <tr>
+                <td><code>how-to/plan-and-execute.md</code></td>
+                <td>Vol. 3 Ch. 4 (Plans and Implementation)</td>
+              </tr>
+              <tr>
+                <td><code>how-to/quality-gates.md</code></td>
+                <td>Vol. 3 Ch. 5 (Quality and Critique)</td>
+              </tr>
+              <tr>
+                <td><code>how-to/ci-integration.md</code></td>
+                <td>Vol. 4 Ch. 3 (Scripts and Automation)</td>
+              </tr>
+              <tr>
+                <td><code>how-to/team-and-stakeholders.md</code></td>
+                <td>Vol. 4 Ch. 5 (Release and Publishing)</td>
+              </tr>
+              <tr>
+                <td><code>how-to/upgrade.md</code></td>
+                <td>Vol. 4 Ch. 4 (Maintenance and Drift)</td>
+              </tr>
+              <tr>
+                <td><code>how-to/which-communicative-skill.md</code></td>
+                <td>Vol. 3 Ch. 2 (Skills In Depth)</td>
+              </tr>
+              <tr>
+                <td><code>reference/skills.md</code></td>
+                <td>Vol. 3 Ch. 2 (Skills In Depth)</td>
+              </tr>
+              <tr>
+                <td><code>reference/agents.md</code></td>
+                <td>Vol. 3 Ch. 3 (Subagent Delegation)</td>
+              </tr>
+              <tr>
+                <td><code>reference/perspectives.md</code></td>
+                <td>Vol. 3 Ch. 5 (Quality and Critique)</td>
+              </tr>
+              <tr>
+                <td><code>reference/glossary.md</code></td>
+                <td>Vol. 1 Ch. 4 (Glossary)</td>
+              </tr>
+              <tr>
+                <td><code>reference/harness-reference.md</code></td>
+                <td>Vol. 3 Ch. 1 (Lifecycle Pipeline)</td>
+              </tr>
+              <tr>
+                <td><code>reference/release-process.md</code></td>
+                <td>Vol. 4 Ch. 5 (Release and Publishing)</td>
+              </tr>
+              <tr>
+                <td><code>troubleshooting.md</code></td>
+                <td>Vol. 4 Ch. 4 (Maintenance and Drift)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="reading-map.html">Reading Map</a>
+      <a href="authoring-guide.html">Authoring Guide</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

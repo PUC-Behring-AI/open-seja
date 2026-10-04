@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How to plan and execute work in SEJA: the /plan modes and plan format, the structured step anatomy, and /implement execution across auto, manual, and roadmap modes.">
+  <title>Planning and Executing — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/operations sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>Planning and Executing</h1>
+      <p>Turn a brief into a reviewed plan, then execute it step by step.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Operations</a></li>
+        <li aria-current="page">Planning and Executing</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge core-operations">operations</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="overview">
+          <h2 id="overview">Overview</h2>
+          <p>
+            <code>/plan</code> decides <em>how</em> to build something and produces
+            a durable, reviewed plan artifact; <code>/implement</code> executes that
+            plan. Together they are the build stretch of the canonical lifecycle:
+            you plan without changing intent, then implement, then validate. This
+            page covers the plan modes, the plan format, and the execution modes.
+          </p>
+          <aside class="callout-tip">
+            <strong>Design guard.</strong> <code>/plan</code> requires
+            <code>product-design/conventions.md</code> to exist. If it is missing,
+            planning stops and directs you to run <code>/design</code> first to
+            define your stack, conventions, and domain model.
+          </aside>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="plan-modes">
+          <h2 id="plan-modes">The <code>/plan</code> modes</h2>
+          <p>
+            <code>/plan</code> auto-detects the right mode from the brief, or you
+            can force one with a flag.
+          </p>
+          <dl>
+            <dt>Standard single-plan</dt>
+            <dd>
+              The default for a single feature, bug fix, or refactor. Produces a
+              full structured plan with a complexity-gated, two-phase review. Force
+              it with <code>--plan</code>.
+            </dd>
+            <dt><code>--light</code></dt>
+            <dd>
+              A lightweight proposal for a small, surgical change — no multi-step
+              decomposition, no multi-phase review, just an inline 2–3 perspective
+              scan (always including SEC for code changes). For changes too small to
+              warrant a full plan but worth tracking.
+            </dd>
+            <dt><code>--roadmap</code></dt>
+            <dd>
+              A full product roadmap: it decomposes conceptual design and standards
+              into independent work items, classifies each as technical or design,
+              and groups them into dependency-aware execution waves, generating a
+              plan per item. Three sub-modes: auto-generate from project references
+              (<code>--auto</code>), compile a pre-filled spec (<code>--from-spec
+              &lt;path&gt;</code>), or emit a blank spec skeleton.
+            </dd>
+          </dl>
+          <p>
+            Auto-detection scores the brief: signals like three or more distinct
+            entities, spanning two or more architectural layers, or multiple pages
+            point toward a roadmap; a single bug, a specific file, or a scope that
+            fits in twelve steps points toward a single plan. Majority wins, and the
+            roadmap recommendation is confirmed before proceeding.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="plan-format">
+          <h2 id="plan-format">The plan format (<code>plan_format_version</code> 1)</h2>
+          <p>
+            A standard plan is a self-contained markdown artifact with a fixed set
+            of sections. <code>/implement</code> reads the header for
+            <code>plan_format_version: 1</code>; a plan without it falls back to
+            manual execution.
+          </p>
+          <ul>
+            <li><strong>Brief</strong> — the user brief (or the designer's verbatim metacommunication message under metacomm framing) plus the agent's interpretation: problem, approach, and — for Standard/Deep — alternatives rejected.</li>
+            <li><strong>Best practices</strong> and, for Standard/Deep, <strong>design decisions</strong> (user-visible impact, trade-offs accepted, metacommunication impact).</li>
+            <li><strong>Steps</strong> — the structured step list (detailed below).</li>
+            <li><strong>Review Log</strong> — the perspective triage, Adopted/Deferred findings, any amendments, and the mandatory Execution Metrics table.</li>
+            <li><strong>Outcomes</strong> — expected outcomes.</li>
+            <li><strong>Smoke</strong> — <code>true</code> when any step creates or modifies API route or frontend page/component files, else <code>false</code>; <code>/implement</code> reads it to decide whether to run <code>/critique smoke api</code>.</li>
+          </ul>
+          <p>Each step carries structured metadata:</p>
+          <div class="table-container">
+            <table>
+              <caption>The fields of a structured plan step.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Field</th>
+                  <th scope="col">Required?</th>
+                  <th scope="col">Purpose</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Files</th>
+                  <td>Yes</td>
+                  <td>The files the step creates or modifies (no step touches more than five).</td>
+                </tr>
+                <tr>
+                  <th scope="row">References</th>
+                  <td>Yes</td>
+                  <td>The specific <code>product-design/</code> references the executing subagent must load.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Depends on</th>
+                  <td>Optional</td>
+                  <td>Prior steps that must complete first; absent means no dependencies.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Interface</th>
+                  <td>Yes (may be N/A)</td>
+                  <td>The type or API contract a dependency-producing step exposes.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Verify</th>
+                  <td>Yes</td>
+                  <td>How to confirm the step succeeded.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Tests</th>
+                  <td>Yes (may be N/A)</td>
+                  <td>An observable behavior to test ("when X is called with Y, returns Z"), used to write a failing test before implementation.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Review depth is complexity-gated: <strong>Light</strong> (≤6 steps and
+            ≤4 files, Phase 1 only), <strong>Standard</strong> (7–12 steps or 5–8
+            files, plan-reviewer agent), or <strong>Deep</strong> (&gt;12 steps,
+            &gt;8 files, or migrations/auth, all deep-dives). The
+            <code>--review &lt;light|standard|deep&gt;</code> flag and the project's
+            <code>MINIMUM_REVIEW_DEPTH</code> floor can raise the effective depth.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="implement-execution">
+          <h2 id="implement-execution"><code>/implement</code> execution</h2>
+          <p>
+            <code>/implement &lt;plan-id&gt;</code> executes a plan. The default is
+            <strong>auto mode</strong>: each step runs in a fresh
+            <code>general-purpose</code> subagent (the Ralph pattern), with state
+            carried between steps through an append-only progress file. Auto mode
+            follows a TDD red-green cycle per step — write a failing test from the
+            <code>Tests:</code> field, implement until it passes, then confirm
+            <code>Verify:</code> — and runs a bounded generator-critic loop that
+            retries critical code-review findings up to twice before logging them as
+            unresolved and continuing.
+          </p>
+          <p>
+            <strong>Manual mode</strong> (<code>--manual</code>) executes all steps
+            sequentially in the current context — recommended for small plans
+            (≤6 steps) or when you want per-step confirmation. It retains test-after
+            ordering by design: your presence provides the oversight that the
+            red-green cycle substitutes for in auto mode.
+          </p>
+          <p>
+            Both modes end with the <strong>Quality Gate</strong> —
+            <code>/critique validate</code>, <code>/critique review</code>, the
+            test-runner, and <code>/critique smoke api</code> when the plan's
+            <code>smoke</code> field is <code>true</code> — unless
+            <code>--skip-checks</code> is passed. Critical issues are fixed before
+            the plan is marked <code>DONE</code>.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="roadmap-execution">
+          <h2 id="roadmap-execution">Roadmap execution and wave parallelism</h2>
+          <p>
+            <code>/implement --roadmap &lt;roadmap-id&gt;</code> executes every plan
+            in a roadmap, wave by wave. Each plan runs auto mode in a fresh
+            subagent. Wave 0 (foundation migrations) is always sequential for
+            migration-chain safety; later waves may run in <strong>parallel</strong>
+            when the plans' <code>Files:</code> lists — and their call-graph
+            edges — do not overlap. Parallel plans run in isolated git worktrees and
+            are merged back in a serialized merge phase.
+          </p>
+          <p>
+            The <code>--checkpoint &lt;wave|plan|none&gt;</code> flag sets pause
+            granularity (default <code>wave</code>): <code>wave</code> pauses
+            between waves so you can review what was built and revise downstream
+            plans, <code>plan</code> pauses after every plan, and <code>none</code>
+            runs full autopilot (failures still always pause). Roadmap runs are
+            resumable — re-running <code>/implement --roadmap &lt;id&gt;</code> on a
+            partially complete roadmap picks up from the first incomplete item.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="the-lifecycle">
+          <h2 id="the-lifecycle">The plan-to-implement lifecycle</h2>
+          <p>
+            When <code>/plan</code> concludes, it commits the plan as a durable git
+            artifact and asks whether to implement now or later. The plan file
+            persists regardless of that choice, so you can review it offline or
+            implement it in a separate session. <code>/implement</code> then renames
+            the plan to <code>DONE</code> on completion, closes the plan's pending
+            entry, and — for roadmap-sourced plans — flips the roadmap's wave-summary
+            row to <code>done</code> in the same commit as the rename. Validate the
+            result with <code>/critique</code> before you communicate or document.
+          </p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="quality-gates.html">Quality Gates</a> &mdash; the <code>/critique</code> modes the Quality Gate runs after execution.</li>
+            <li><a href="../concepts/lifecycle-pipeline.html">The Lifecycle Pipeline</a> &mdash; where plan and implement sit on the canonical path.</li>
+            <li><a href="../concepts/review-perspectives.html">Review Perspectives</a> &mdash; the perspective set that plan review and code review draw on.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Operations</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/operations sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

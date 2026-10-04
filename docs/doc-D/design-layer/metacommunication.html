@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="2">
+  <meta name="doc-chapter" content="1">
+  <meta name="doc-phase" content="2">
+  <meta name="doc-status" content="draft">
+
+  <title>The Metacommunication Message -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 2: The Design Layer</a></li>
+      <li>The Metacommunication Message</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>The Metacommunication Message</h1>
+
+      <p>
+        The metacommunication message is a SEJA project's highest-authority
+        design artifact. This chapter explains what it is, how to write one
+        using the Extended Metacommunication Template, why the I/you phrasing
+        rule matters, and how to avoid common pitfalls.
+      </p>
+
+      <!-- Section 1: What Is a Metacommunication Message -->
+      <section id="what-is-a-metacommunication-message" data-diataxis="explanation">
+        <h2>What Is a Metacommunication Message</h2>
+
+        <p>
+          In semiotic engineering, software is understood as a designer's
+          deputy -- an artifact that communicates the designer's message to the
+          user on the designer's behalf. The metacommunication message makes
+          this implicit communication explicit. It is the designer's canonical
+          first-person statement to the user, expressing:
+        </p>
+
+        <blockquote>
+          <p>
+            "Here is my understanding of who you are, what I've learned you
+            want or need to do, in which preferred ways, and why. This is the
+            system that I have therefore designed for you, and this is the way
+            you can or should use it in order to fulfill a range of purposes
+            that fall within this vision."
+          </p>
+        </blockquote>
+
+        <p>
+          This template, drawn from semiotic engineering theory, structures
+          every metacommunication message in SEJA. It is always voiced in first
+          person: the designer as "I," the user as "you." Third-person
+          restatements are never permitted as the canonical form.
+        </p>
+
+        <p>
+          In a SEJA project, the metacommunication message lives in §11
+          (Global Metacommunication Vision) of
+          <code>product-design/product-design-as-intended.md</code>. It is the
+          highest-authority artifact in the design layer alongside the
+          <a href="constitution-guide.html">constitution</a>: all other design
+          decisions -- entity hierarchies, permission models, UX patterns,
+          feature-level intentions -- are ultimately accountable to it. No plan
+          or implementation step may contradict the metacommunication message
+          without an explicit decision record (D-NNN) approved by the designer.
+        </p>
+
+        <p>
+          The metacommunication message is not a feature list, a README, or a
+          mission statement. It is the designer's personal, first-person
+          communication about what they understand the user to be and what they
+          have designed for them. For the semiotic engineering theory that
+          underpins this concept, see
+          <a href="../foundations/software-as-communication.html#the-communication-metaphor">Software as Designed Communication</a>.
+        </p>
+
+        <p>
+          The following section walks through the practical process of writing
+          a metacommunication message using SEJA's interview-driven design
+          workflow.
+        </p>
+      </section>
+
+      <!-- Section 2: How to Write a Metacommunication Message -->
+      <section id="how-to-write-a-metacommunication-message" data-diataxis="tutorial">
+        <h2>How to Write a Metacommunication Message</h2>
+
+        <p>
+          SEJA's <code>/design</code> skill includes a dedicated interview mode
+          (Mode 5: Interview-Driven) that guides the designer through writing a
+          metacommunication message. The interview covers five dimensions drawn
+          from the Extended Metacommunication Template (EMT):
+        </p>
+
+        <ol>
+          <li><strong>Who are your users?</strong> -- Target users, personas,
+            their backgrounds, expertise levels, and contexts of use.</li>
+          <li><strong>What problems do they face?</strong> -- Pain points,
+            problem scenarios, unmet needs, and frustrations with current
+            solutions.</li>
+          <li><strong>How should they solve them?</strong> -- Design solutions,
+            workflows, interaction patterns, and the system's approach to
+            addressing the identified problems.</li>
+          <li><strong>What should they know?</strong> -- Domain knowledge the
+            user needs, constraints they should be aware of, and conceptual
+            models they must understand.</li>
+          <li><strong>What is the overall metacommunication vision?</strong> --
+            The unified I/you message that weaves the preceding four dimensions
+            into a single coherent designer-to-user statement.</li>
+        </ol>
+
+        <h3>The Interview Process</h3>
+
+        <p>
+          To write a metacommunication message, invoke
+          <code>/design --mode interview</code>. The process unfolds in four
+          phases:
+        </p>
+
+        <dl>
+          <dt>Phase A: Open-Ended Interview</dt>
+          <dd>
+            The agent asks open-ended questions covering the five EMT
+            dimensions. There is no fixed question order -- the conversation
+            adapts based on your answers. Each exchange is recorded as a
+            triple: the agent's question, your verbatim response, and the
+            agent's interpretation of how your answer maps to design fields.
+            The transcript is saved to
+            <code>specs/design-interview-YYYYMMDD.md</code>.
+          </dd>
+
+          <dt>Phase B: Synthesis</dt>
+          <dd>
+            The agent iterates over every design field and assigns a
+            confidence level to each: <strong>DS</strong> (directly stated by
+            the designer), <strong>INF</strong> (inferred from context), or
+            <strong>PAC</strong> (proposed by the agent and confirmed by the
+            designer). The synthesis is written to
+            <code>specs/design-confidence-YYYYMMDD.md</code>.
+          </dd>
+
+          <dt>Phase C: Confirmation</dt>
+          <dd>
+            Security-critical fields (permission model, validation constants,
+            constitution invariants) require mandatory confirmation -- no
+            inferred values are accepted without explicit designer approval.
+            Other inferred fields are batched for review. Any gaps are filled
+            with focused follow-up questions.
+          </dd>
+
+          <dt>Phase D: Instantiation</dt>
+          <dd>
+            The confirmed field values are used to instantiate the project's
+            design files, including the metacommunication message in §11 of
+            <code>product-design/product-design-as-intended.md</code>.
+          </dd>
+        </dl>
+
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip:</strong> If you already have a metacommunication
+            message drafted, you can provide it at invocation time. The
+            interview will treat it as a pre-answered Section 0.1 and skip the
+            vision question, extracting project name, description, target user
+            type, and primary use case as hints for subsequent questions.
+          </p>
+        </aside>
+
+        <p>
+          The I/you phrasing rule applies to the final message produced by this
+          process. The following section explains why this rule exists and how
+          to verify your message conforms to it.
+        </p>
+      </section>
+
+      <!-- Section 3: The I/You Phrasing Rule -->
+      <section id="the-iyou-phrasing-rule" data-diataxis="explanation">
+        <h2>The I/You Phrasing Rule</h2>
+
+        <p>
+          Constitution principle T4 mandates that the metacommunication message
+          is always voiced in first person -- the designer as "I," the user as
+          "you." This is not a stylistic preference; it is a structural
+          requirement grounded in semiotic engineering theory.
+        </p>
+
+        <h3>Why First Person Is Mandatory</h3>
+
+        <p>
+          The I/you frame is the semiotic contract between the designer and
+          the user. When a designer writes "I designed this for you because I
+          understand that you need..." they are taking personal responsibility
+          for the design decisions. They are asserting that a specific person
+          studied a specific user's situation and made deliberate choices in
+          response to it. This directness is the metacommunication message's
+          defining quality.
+        </p>
+
+        <p>
+          Third-person rewrites -- "The system provides..." or "Users can..." --
+          sever this relationship. They anonymize the designer, obscure the
+          intentionality of the design, and reduce the message to a feature
+          description. Passive-voice formulations ("Privacy is enforced with
+          minimal friction") are equally problematic: they describe a property
+          of the system without attributing it to a designer's deliberate
+          choice for a specific user.
+        </p>
+
+        <h3>How to Self-Check Phrasing</h3>
+
+        <p>
+          Read every sentence of your metacommunication message aloud as if
+          you were speaking directly to your user. If a sentence cannot
+          naturally be voiced as the designer addressing the user, it needs
+          rephrasing. Two tests:
+        </p>
+
+        <ul>
+          <li><strong>The "I" test:</strong> Does the sentence begin with or
+            contain "I" (the designer)? If the subject is "the system," "the
+            application," or "the feature," rephrase.</li>
+          <li><strong>The "you" test:</strong> Does the sentence address "you"
+            (the user) or refer to "the user," "users," or "they"? If the
+            latter, rephrase to address the user directly.</li>
+        </ul>
+
+        <figure>
+          <pre><code>Before: "The system enforces privacy constraints automatically."
+After:  "I have designed the privacy controls to work automatically
+         because I know you should not have to think about compliance
+         during your daily workflow."
+
+Before: "Users can export their data in CSV format."
+After:  "I want you to be able to take your data with you, so I have
+         provided CSV export for every dataset you create."</code></pre>
+          <figcaption>Rephrasing third-person statements into I/you format.</figcaption>
+        </figure>
+
+        <p>
+          With the phrasing rule established, the following section provides a
+          complete worked example showing how a metacommunication message comes
+          together from the EMT dimensions.
+        </p>
+      </section>
+
+      <!-- Section 4: Worked Example -->
+      <section id="worked-example" data-diataxis="tutorial">
+        <h2>Worked Example</h2>
+
+        <p>
+          The following is a complete metacommunication message for a
+          hypothetical task management application called TaskFlow, written for
+          freelancers managing multiple client projects. Each paragraph maps to
+          one of the five EMT dimensions.
+        </p>
+
+        <figure>
+          <pre><code>I have designed TaskFlow for you because I understand that you are a
+freelancer managing multiple client projects simultaneously. I have
+learned that you need to see all your commitments in one place, track
+time against specific client agreements, and switch between projects
+without losing context.
+
+I know that your biggest frustration is the overhead of managing tasks
+across disconnected tools -- separate to-do lists, time trackers, and
+client portals that do not talk to each other. You have told me that
+you lose billable hours to administrative busywork and sometimes miss
+deadlines because a task was buried in the wrong tool.
+
+I have therefore designed TaskFlow as a single workspace where every
+task, time entry, and client conversation lives together. You can
+create a project, add tasks, log time, and send a client update
+without leaving the application. I want you to spend your time on
+billable work, not on managing the tools that track it.
+
+You should know that TaskFlow organises work around "engagements" --
+each engagement maps to a client contract with a start date, end date,
+and budget. This is the core concept you will interact with. Tasks
+belong to engagements, and time entries belong to tasks, so every hour
+you log is automatically attributed to the right client and budget.
+
+This is the system I have designed for you: a workspace that respects
+your time, keeps your client commitments visible, and lets you focus
+on the work itself rather than the administration around it.</code></pre>
+          <figcaption>
+            A complete metacommunication message mapping to the five EMT
+            dimensions: (1) who the user is, (2) what problems they face,
+            (3) how the system addresses them, (4) what the user needs to
+            know, and (5) the overall vision.
+          </figcaption>
+        </figure>
+
+        <p>
+          Notice that every paragraph uses I/you phrasing. The designer takes
+          personal ownership ("I have designed," "I have learned," "I know")
+          and addresses the user directly ("you are," "you need," "you should
+          know"). No sentence describes the system in the third person.
+        </p>
+      </section>
+
+      <!-- Section 5: Common Mistakes -->
+      <section id="common-mistakes" data-diataxis="how-to">
+        <h2>Common Mistakes</h2>
+
+        <dl>
+          <dt>Writing in third person</dt>
+          <dd>
+            A metacommunication message that says "The system provides
+            automated backups" or "Users can configure their dashboard" has
+            lost the designer's voice. Rephrase as: "I have designed automated
+            backups for you because I know you cannot afford to lose work" or
+            "I want you to be able to arrange your dashboard the way that
+            makes sense for your workflow." The I/you frame is not optional --
+            it is what distinguishes a metacommunication message from a feature
+            list.
+          </dd>
+
+          <dt>Conflating the metacommunication message with a README</dt>
+          <dd>
+            A README describes what the software does and how to install it. A
+            metacommunication message expresses what the designer understands
+            about the user and why the software was designed the way it was.
+            The two serve different audiences and purposes. The README is for
+            anyone evaluating or setting up the software; the metacommunication
+            message is the designer's personal communication to the user about
+            the design intent behind the system. If your message reads like
+            installation instructions or a feature catalogue, it is a README,
+            not a metacommunication message.
+          </dd>
+
+          <dt>Making the message too abstract</dt>
+          <dd>
+            A message that says "I want you to have a good experience" or "I
+            have designed this system to be useful" communicates nothing
+            specific. Every paragraph should contain concrete "I want you
+            to..." or "I have designed... because I know you..." statements
+            that a reader can verify against the actual system. If you cannot
+            point to a specific design decision that implements what the
+            message claims, the message is too abstract.
+          </dd>
+
+          <dt>Forgetting to update the message when design evolves</dt>
+          <dd>
+            The metacommunication message is not written once and forgotten. As
+            the designer's understanding of the user deepens -- through UX
+            research, problem scenario analysis, or field observation -- the
+            message should evolve to reflect that new understanding. An
+            outdated metacommunication message creates a gap between what the
+            system claims to be for and what it actually does. Use
+            <code>/design update metacomm</code> to revise the message when
+            your understanding changes.
+          </dd>
+        </dl>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 2: The Design Layer</h2>
+    <ol>
+      <li aria-current="page">
+        <a href="metacommunication.html">The Metacommunication Message</a>
+        <ul>
+          <li><a href="#what-is-a-metacommunication-message">What Is a Metacommunication Message</a></li>
+          <li><a href="#how-to-write-a-metacommunication-message">How to Write a Metacommunication Message</a></li>
+          <li><a href="#the-iyou-phrasing-rule">The I/You Phrasing Rule</a></li>
+          <li><a href="#worked-example">Worked Example</a></li>
+          <li><a href="#common-mistakes">Common Mistakes</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="constitution-guide.html">The Constitution</a>
+      </li>
+      <li>
+        <a href="design-intent-files.html">Design Intent Files</a>
+      </li>
+      <li>
+        <a href="marker-system.html">The Marker System</a>
+      </li>
+      <li>
+        <a href="ux-research.html">UX Research Artifacts</a>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Chapter navigation: Ch.1 omits Previous -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <span></span>
+    <a href="constitution-guide.html">Next: The Constitution</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

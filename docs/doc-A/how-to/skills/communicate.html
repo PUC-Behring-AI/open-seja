@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="how-to">
+  <meta name="doc-volume" content="How-To Guides">
+  <meta name="doc-chapter" content="How to Communicate to an Audience">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>How to Communicate to an Audience -- SEJA Documentation</title>
+
+  <!-- CSS depth: 2 (sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../../index.html">Home</a>
+    <a href="../../tutorials/index.html">Tutorials</a>
+    <a href="../index.html">How-To Guides</a>
+    <a href="../../reference/index.html">Reference</a>
+    <a href="../../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../../index.html">Home</a></li>
+      <li><a href="../index.html">How-To Guides</a></li>
+      <li><a href="index.html">Skill-by-Skill Guides</a></li>
+      <li>How to Communicate to an Audience</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-howto">
+    <article>
+      <p class="vol-accent"><strong>how-to</strong></p>
+
+      <h1>How to Communicate to an Audience</h1>
+
+      <p>
+        Goal: present the project to a specific audience in their language, focused
+        on what matters to them. The <code>/communicate</code> skill generates
+        tailored communication material for one of four audience segments:
+        evaluators, clients, end users, and academics.
+      </p>
+
+      <section id="when-to-use">
+        <h2>When to Use</h2>
+        <ul>
+          <li>You need to present the project to evaluators, clients, end users, or academics.</li>
+          <li>You want material that speaks each audience's language rather than a single generic summary.</li>
+          <li>You want to reformat an existing report (for example an advisory log) for a particular audience.</li>
+        </ul>
+        <aside class="callout-tip">
+          <p>
+            <strong>Not for</strong> new team-member onboarding (use
+            <code>/onboard</code>) or project documentation (use
+            <code>/document</code>).
+          </p>
+        </aside>
+      </section>
+
+      <section id="required-inputs">
+        <h2>Required Inputs</h2>
+        <ul>
+          <li>An audience segment or alias: <code>evaluators</code> / <code>EVL</code>, <code>clients</code> / <code>CLT</code>, <code>end-users</code> / <code>USR</code>, or <code>academics</code> / <code>ACD</code>. Or <code>--all</code> for every segment.</li>
+          <li>A project with design vision and design files the skill can read.</li>
+          <li>Optionally a source artifact to reformat, e.g. <code>--source _output/research-logs/research-000100.md</code>.</li>
+        </ul>
+      </section>
+
+      <section id="step-by-step">
+        <h2>Step by Step</h2>
+
+        <ol>
+          <li>
+            <strong>Pick the audience.</strong>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr><th scope="col">Audience</th><th scope="col">Aliases</th><th scope="col">Focus</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Evaluators</td><td><code>evaluator</code>, <code>EVL</code></td><td>Technical depth, architecture decisions, quality evidence</td></tr>
+                  <tr><td>Clients</td><td><code>client</code>, <code>CLT</code></td><td>Value proposition, ROI, project outcomes</td></tr>
+                  <tr><td>End Users</td><td><code>end-user</code>, <code>USR</code></td><td>Features, benefits, how-to guidance</td></tr>
+                  <tr><td>Academics</td><td><code>academic</code>, <code>ACD</code></td><td>Research context, methodology, theoretical framing</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </li>
+          <li>
+            <strong>Choose format and depth.</strong> By default the skill generates
+            both Markdown and HTML. Use <code>--format md</code> or
+            <code>--format html</code> to restrict output, and <code>--deep</code>
+            to include expanded Deep-dive sections.
+            <ul>
+              <li><strong>Single audience</strong> -- Recommended when you are presenting to one group. NOT recommended when you need parallel material for several groups at once.</li>
+              <li><strong><code>--all</code></strong> -- Recommended when you want material for all four segments in one run, each generated in its own subagent.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Run the skill.</strong> Output artifacts carry the
+            <code>communication-NNN</code> prefix and land in
+            <code>_output/communication/</code>.
+            <br><em>Expected output:</em> audience-tailored material in the requested
+            formats.
+          </li>
+        </ol>
+        <aside class="callout-tip">
+          <p>
+            <strong>Tip.</strong> Per-audience tone, sections, and content strategy
+            are defined in the communication reference files under
+            <code>.claude/references/general/communication/</code>. Edit those files
+            to change how each audience is addressed.
+          </p>
+        </aside>
+      </section>
+
+      <section id="expected-outputs">
+        <h2>Expected Outputs</h2>
+        <ul>
+          <li>One or more <code>communication-&lt;id&gt;-*</code> artifacts in <code>_output/communication/</code>.</li>
+          <li>Markdown and/or HTML per the <code>--format</code> setting, with Deep-dive sections when <code>--deep</code> is passed.</li>
+        </ul>
+      </section>
+
+      <section id="common-mistakes">
+        <h2>Common Mistakes</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th scope="col">Mistake</th><th scope="col">Better approach</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Using <code>/communicate</code> to onboard a new hire.</td>
+                <td>Onboarding is <code>/onboard</code>; it produces a personalized learning plan, not audience messaging.</td>
+              </tr>
+              <tr>
+                <td>Using <code>/communicate</code> to write project docs.</td>
+                <td>Project documentation is <code>/document</code>. <code>/communicate</code> is stakeholder messaging.</td>
+              </tr>
+              <tr>
+                <td>Sending clients evaluator-grade technical depth.</td>
+                <td>Pick the audience that matches your reader; each segment is tuned to a different focus.</td>
+              </tr>
+              <tr>
+                <td>Communicating before validating.</td>
+                <td>Validate first with <code>/critique</code> -- the lifecycle rule is "validate before you communicate".</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="cross-references">
+        <h2>Cross-References</h2>
+        <ul>
+          <li><a href="onboard.html">How to Onboard a Team Member</a> -- for personalized onboarding plans.</li>
+          <li><a href="document.html">How to Generate Documentation</a> -- for project documentation artifacts.</li>
+          <li><a href="critique.html">How to Critique Quality</a> -- validate before you communicate.</li>
+          <li><a href="../../reference/reference-files-catalog.html">Reference Files Catalog</a> (Vol. 3) -- the per-audience communication reference files.</li>
+        </ul>
+      </section>
+
+    </article>
+
+    <nav aria-label="chapter navigation">
+      <a href="document.html">Back: How to Generate Documentation</a>
+      <a href="reflect.html">Next: How to Reflect</a>
+    </nav>
+
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../../reference/skills-reference.html">Skills Reference</a> -- audience segments, format flags, and mode tables for <code>/communicate</code>.</li>
+        <li><a href="../../explanation/agent-as-reader.html">The Agent as Reader</a> -- why tailoring the message to its reader is a semiotic act.</li>
+      </ul>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#when-to-use">When to Use</a></li>
+      <li><a href="#required-inputs">Required Inputs</a></li>
+      <li><a href="#step-by-step">Step by Step</a></li>
+      <li><a href="#expected-outputs">Expected Outputs</a></li>
+      <li><a href="#common-mistakes">Common Mistakes</a></li>
+      <li><a href="#cross-references">Cross-References</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../../index.html">Collection Index</a>
+      <a href="../../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T20:50:00Z</p>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="mixed">
+  <meta name="doc-volume" content="3">
+  <meta name="doc-chapter" content="4">
+  <meta name="doc-phase" content="1">
+  <meta name="doc-status" content="draft">
+
+  <title>Plans and Implementation -- SEJA Documentation</title>
+
+    <!-- CSS depth: 1 -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="has-doc-layout">
+
+  <!-- Skip-navigation link: first focusable element -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <!-- Page header: collection title -->
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Collection</a></li>
+      <li><a href="index.html">Vol. 3: The Execution Layer</a></li>
+      <li>Plans and Implementation</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content -->
+  <!-- DOC-LAYOUT:START -->
+  <div class="doc-layout">
+  <main id="main-content">
+    <article>
+      <h1>Plans and Implementation</h1>
+
+      <p>
+        Plans are the bridge between design intent and working code. Every
+        non-trivial change in a SEJA project passes through a plan file that
+        decomposes the work into self-contained steps, records metadata for
+        traceability and review, and serves as the execution contract for the
+        <code>/implement</code> skill. This chapter documents the plan file
+        format, the three planning modes, the implementation executor, and the
+        traceability mechanisms that connect implementation back to design
+        decisions.
+      </p>
+
+
+      <!-- Section 1: Plan File Structure -->
+      <section id="plan-file-structure" data-diataxis="reference">
+        <h2>Plan File Structure</h2>
+
+        <p>
+          A plan file is a Markdown document stored in the plans directory
+          (<code>_output/plans/</code> by default). It carries a structured
+          header, a body of self-contained steps, and optional sections for
+          review logs, Q&amp;A, and outcomes.
+        </p>
+
+        <h3>Plan Header</h3>
+
+        <p>
+          The first line of every plan follows this shape:
+        </p>
+
+        <pre><code># Plan 000123 | FEATURE-X | 2026-03-15 14:30 | Add user profiles | Review: standard
+plan_format_version: 1</code></pre>
+
+        <p>The header fields are:</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Plan ID</td>
+              <td>A 6-digit numeric identifier reserved via <code>reserve_id.py</code></td>
+            </tr>
+            <tr>
+              <td>Prefix-Scope</td>
+              <td>The plan type and scope (e.g., <code>FEATURE-X</code>, <code>FIX-B</code>, <code>REFACTOR-R</code>, <code>CHORE-O</code>, <code>DOCUMENT-X</code>)</td>
+            </tr>
+            <tr>
+              <td>Datetime</td>
+              <td>UTC timestamp when the plan was created</td>
+            </tr>
+            <tr>
+              <td>Short Title</td>
+              <td>A human-readable summary of the plan's purpose</td>
+            </tr>
+            <tr>
+              <td>Review Depth</td>
+              <td>The complexity-gated review level: <code>light</code>, <code>standard</code>, or <code>deep</code></td>
+            </tr>
+            <tr>
+              <td>Format Version</td>
+              <td><code>plan_format_version: 1</code> on the line after the header; enables version-aware parsing</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Plans generated with metacommunication framing insert
+          <code>METACOMM |</code> after the prefix-scope. Plans sourced from
+          an advisory insert <code>source: advisory-&lt;id&gt;</code>.
+        </p>
+
+        <h3>Plan Body Sections</h3>
+
+        <p>After the header, the plan body contains:</p>
+
+        <dl>
+          <dt>User brief / Designer's metacommunication message</dt>
+          <dd>The original request, recorded verbatim.</dd>
+
+          <dt>Agent interpretation</dt>
+          <dd>Problem statement, chosen approach, and (for standard/deep reviews) alternatives rejected and selection rationale.</dd>
+
+          <dt>Files</dt>
+          <dd>All files the plan creates, modifies, or deletes, with disposition annotations.</dd>
+
+          <dt>Best practices</dt>
+          <dd>Coding standards and conventions applied.</dd>
+
+          <dt>Design decisions (standard/deep only)</dt>
+          <dd>User-visible impact, trade-offs accepted, and metacommunication impact when the plan changes what the system communicates to users.</dd>
+
+          <dt>Steps</dt>
+          <dd>The structured step list (see below).</dd>
+
+          <dt>Outcomes</dt>
+          <dd>Expected results when all steps complete.</dd>
+
+          <dt>Smoke</dt>
+          <dd><code>true</code> if any step creates or modifies API route files or frontend page/component files; <code>false</code> otherwise. Consumed by <code>/implement</code> to decide whether to run <code>/critique smoke api</code>.</dd>
+        </dl>
+
+        <h3>Step Format</h3>
+
+        <p>
+          Each step follows a canonical template defined in
+          <code>.claude/references/template/plan-step.md</code>. Steps must be
+          self-contained: executable by a subagent with no shared context from
+          prior steps.
+        </p>
+
+        <pre><code>### Step 1: &lt;short imperative title&gt;
+&lt;Self-contained description of what to do.&gt;
+- **Files**: path/to/file.py (create), path/to/other.py (modify)
+- **References**: product-design/standards.md &sect; Backend
+- **Depends on**: Step N, Step M
+- **Interface**: exports UserService with find_by_id(id) -&gt; User | None
+- **Verify**: tests pass, endpoint returns 200
+- **Tests**: Add unit tests for new service method
+- **Docs**: Update API reference for /users endpoint
+- **Deploy**: Add USER_DB_URL env var (connection string)
+- **Traces**: REQ-ENT-001, REQ-PERM-003
+- [ ] Done</code></pre>
+
+        <p>The step metadata fields serve specific purposes:</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Required</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Files</strong></td>
+              <td>Yes</td>
+              <td>Every path the step reads, creates, modifies, or deletes. Existing files are verified on disk during planning.</td>
+            </tr>
+            <tr>
+              <td><strong>References</strong></td>
+              <td>Yes</td>
+              <td>Only the <code>product-design/</code> files relevant to this step. Omit irrelevant refs.</td>
+            </tr>
+            <tr>
+              <td><strong>Depends on</strong></td>
+              <td>No</td>
+              <td>Step numbers whose output this step requires. Omit entirely for independent steps. Dependencies must flow forward.</td>
+            </tr>
+            <tr>
+              <td><strong>Interface</strong></td>
+              <td>Yes</td>
+              <td>The expected public surface for dependency-producing steps (function names, class names, type signatures). <code>N/A</code> for leaf steps.</td>
+            </tr>
+            <tr>
+              <td><strong>Verify</strong></td>
+              <td>Yes</td>
+              <td>A concrete, testable condition. Prefer automated checks over subjective ones.</td>
+            </tr>
+            <tr>
+              <td><strong>Tests</strong></td>
+              <td>Yes</td>
+              <td>What tests to create or update. <code>N/A</code> for doc/config/harness-only steps. Express as observable behavior for TDD.</td>
+            </tr>
+            <tr>
+              <td><strong>Docs</strong></td>
+              <td>No</td>
+              <td>What documentation to create or update. Omit entirely when not applicable.</td>
+            </tr>
+            <tr>
+              <td><strong>Deploy</strong></td>
+              <td>No</td>
+              <td>Deployment configuration changes: env vars, ports, services, migration commands. Omit when no deployment impact.</td>
+            </tr>
+            <tr>
+              <td><strong>Traces</strong></td>
+              <td>No</td>
+              <td>Comma-separated REQ IDs from <code>product-design-as-intended.md</code> that this step implements.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Decomposition Guidelines</h3>
+
+        <ul>
+          <li>Each step must be completable in one subagent context window (rule of thumb: touches 5 or fewer files). Split larger steps.</li>
+          <li>Order steps so dependencies flow forward (Step 2 depends on Step 1, not the reverse).</li>
+          <li>Step descriptions must include enough context to make sense in isolation: what the code should do, not just which file to edit.</li>
+        </ul>
+      </section>
+
+
+      <!-- Section 2: Three Plan Modes -->
+      <section id="three-plan-modes" data-diataxis="reference">
+        <h2>Three Plan Modes</h2>
+
+        <p>
+          The <code>/plan</code> skill supports three modes, selected
+          explicitly via flags or auto-detected from the brief's scope.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Mode</th>
+              <th>Flag</th>
+              <th>Output</th>
+              <th>When to Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Standard</td>
+              <td><code>--plan</code> (or auto-detected)</td>
+              <td>Full plan file with structured steps, review log, and metadata</td>
+              <td>Most features, bug fixes, and refactors. The default for single-scope work.</td>
+            </tr>
+            <tr>
+              <td>Lightweight Proposal</td>
+              <td><code>--light</code></td>
+              <td>Minimal proposal with What/Why/Files/Verify/Risks plus a 2-3 perspective inline review</td>
+              <td>Small, surgical changes too small for a full plan but worth tracking.</td>
+            </tr>
+            <tr>
+              <td>Roadmap</td>
+              <td><code>--roadmap</code></td>
+              <td>Multi-wave roadmap with dependency-aware execution waves and per-item plans</td>
+              <td>Work spanning 3+ entities, 2+ architectural layers, or multiple pages/screens.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Standard Mode</h3>
+
+        <p>
+          The default mode produces a full plan with a structured header,
+          agent interpretation, step list, review log, and outcomes. Plans
+          undergo a complexity-gated review process (see
+          <a href="#plan-review-and-critique">Plan Review and Critique</a>).
+        </p>
+
+        <h3>Lightweight Proposal Mode</h3>
+
+        <p>
+          Activated with <code>--light</code>. Produces a compact proposal
+          stored in <code>_output/proposals/</code> with the shape defined in
+          <code>.claude/references/template/proposal.md</code>: What, Why,
+          Files, Verify, Risks, and a light inline review covering 2-3
+          perspectives (always including SEC for code changes). Proposals can
+          be executed inline immediately after creation.
+        </p>
+
+        <h3>Roadmap Mode</h3>
+
+        <p>
+          Activated with <code>--roadmap</code>. Decomposes a broad brief into
+          dependency-aware execution waves. Three sub-modes control how the
+          roadmap is sourced:
+        </p>
+
+        <dl>
+          <dt>Auto-generate (<code>--auto</code>)</dt>
+          <dd>
+            Reads project reference files
+            (<code>product-design-as-intended.md</code>,
+            <code>product-design-as-coded.md</code>,
+            <code>conventions.md</code>, <code>standards.md</code>) and
+            decomposes the delta between as-intended and as-coded states into
+            work items. Classifies each as technical or design, groups into
+            waves (Foundation &rarr; Service+API &rarr; Frontend &rarr;
+            Cross-cutting &rarr; Testing+Polish), and optionally generates
+            plans for each item. The <code>--only-unimplemented</code> flag
+            scopes extraction to REQ items without a STATUS marker.
+          </dd>
+
+          <dt>From spec (<code>--from-spec &lt;path&gt;</code>)</dt>
+          <dd>
+            Parses a pre-filled <code>roadmap-spec.md</code> file with themes,
+            work items, constraints, and wave groupings. Validates
+            dependencies, classifies items, and generates plans.
+          </dd>
+
+          <dt>Blank spec (no sub-mode flag)</dt>
+          <dd>
+            Generates a blank <code>roadmap-spec.md</code> skeleton for
+            offline editing. No ID reservation or plan generation occurs.
+          </dd>
+        </dl>
+
+        <h3>Mode Auto-Detection</h3>
+
+        <p>
+          When neither <code>--plan</code> nor <code>--roadmap</code> is
+          specified, the skill scores the brief against scope signals. Briefs
+          mentioning 3+ entities, spanning 2+ architectural layers, or
+          describing multiple pages lean toward roadmap mode. Single-bug,
+          single-file, or comfortably-under-12-step briefs lean toward a
+          standard plan. If roadmap mode is auto-detected, a confirmation gate
+          asks the user before proceeding.
+        </p>
+      </section>
+
+
+      <!-- Section 3: Plan Generation Workflow -->
+      <section id="plan-generation-workflow" data-diataxis="how-to">
+        <h2>Plan Generation Workflow</h2>
+
+        <p>
+          The end-to-end workflow for generating a standard plan follows these
+          phases:
+        </p>
+
+        <h3>1. Design Guard</h3>
+
+        <p>
+          Before any planning, <code>/plan</code> verifies that
+          <code>product-design/conventions.md</code> exists. If missing, the
+          skill stops with a message directing the user to run
+          <code>/design</code> first. This ensures the project has a defined
+          stack, directory layout, and domain model before planning begins.
+        </p>
+
+        <h3>2. Pre-Skill and Mode Detection</h3>
+
+        <p>
+          Pre-skill loads the context budget (heavy tier for <code>/plan</code>),
+          registers the brief, and loads reference files. Mode detection then
+          resolves whether to produce a standard plan, lightweight proposal, or
+          roadmap based on explicit flags or auto-detection heuristics.
+        </p>
+
+        <h3>3. Reference Loading</h3>
+
+        <p>
+          References are loaded on demand based on what the plan touches.
+          Eager references (loaded automatically) include the as-coded and
+          as-intended design files, report conventions, coding standards, and
+          the review perspectives index. Lazy references (loaded when needed)
+          include project standards, security checklists, design standards, the
+          full review perspectives file, and the review log template.
+        </p>
+
+        <h3>4. Step Decomposition</h3>
+
+        <p>
+          The agent decomposes the brief into structured steps following the
+          plan-step template. Each step is self-contained with Files,
+          References, Verify, Tests, and other metadata fields. The
+          decomposition follows layer-aware ordering: foundation (models,
+          migrations) first, then services and APIs, then frontend, then
+          cross-cutting concerns.
+        </p>
+
+        <h3>5. Coverage Check</h3>
+
+        <p>
+          If <code>product-design-as-intended.md</code> contains REQ markers,
+          <code>/plan</code> runs an advisory coverage check
+          (<code>critique_plan_coverage.py --mode advisory</code>) that
+          reports which requirements are addressed by the plan's steps and
+          which remain uncovered. This is informational only and does not
+          block plan generation.
+        </p>
+
+        <h3>6. Review</h3>
+
+        <p>
+          The plan undergoes a complexity-gated, two-phase review process
+          (detailed in the next section). The review log and any amendments
+          are appended to the plan file.
+        </p>
+
+        <h3>7. Post-Skill and Commit</h3>
+
+        <p>
+          After review, the plan is committed as a durable git artifact via
+          post-skill. The user is then asked whether to implement now or defer
+          to a later session.
+        </p>
+      </section>
+
+
+      <!-- Section 4: Plan Review and Critique -->
+      <section id="plan-review-and-critique" data-diataxis="explanation">
+        <h2>Plan Review and Critique</h2>
+
+        <p>
+          Every standard plan undergoes a complexity-gated, two-phase review
+          process that evaluates the plan against the project's 16 engineering
+          and design perspectives. The review depth scales with the plan's
+          complexity, and the process is designed to catch regressions,
+          standards violations, and cross-cutting concerns before
+          implementation begins.
+        </p>
+
+        <h3>Complexity Gate</h3>
+
+        <p>
+          The review depth is determined automatically based on plan
+          complexity:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Depth</th>
+              <th>Criteria</th>
+              <th>Review Scope</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Light</td>
+              <td>6 or fewer action steps AND 4 or fewer files</td>
+              <td>Phase 1 only</td>
+            </tr>
+            <tr>
+              <td>Standard</td>
+              <td>7-12 steps OR 5-8 files</td>
+              <td>Phase 1; Phase 2 eligible</td>
+            </tr>
+            <tr>
+              <td>Deep</td>
+              <td>More than 12 steps OR more than 8 files OR involves migrations, auth, or cross-scope changes</td>
+              <td>Phase 1 + Phase 2 for all Deferred concerns</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          The <code>--review &lt;level&gt;</code> flag can override
+          auto-detected depth. The effective depth is the maximum of the
+          auto-detected level, the project's minimum review depth floor (from
+          <code>conventions.md</code>), and the flag value.
+        </p>
+
+        <h3>Phase 1: Perspective Triage and Scan</h3>
+
+        <p>
+          Phase 1 uses the two-stage loading protocol. First, the compact
+          perspectives index is loaded to see all 16 perspectives. Then a
+          shortlist of 3-6 perspectives is selected using the Perspective
+          Shortcuts table (keyed by plan prefix). Up to 2 additional
+          perspectives may be added with justification. Only the selected
+          perspective files are loaded from
+          <code>.claude/references/general/review-perspectives/</code>.
+        </p>
+
+        <p>The 16 perspectives span two categories:</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Perspectives</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Engineering (11)</td>
+              <td>SEC (Security), PERF (Performance), DB (Database), API (API Design), ARCH (Architecture), DX (Developer Experience), I18N (Internationalization), TEST (Testability), OPS (Operations), COMPAT (Compatibility), DATA (Data Integrity &amp; Privacy)</td>
+            </tr>
+            <tr>
+              <td>Design (5)</td>
+              <td>UX (User Experience), A11Y (Accessibility), VIS (Visual Design), RESP (Responsive Design), MICRO (Microinteractions)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Each perspective receives a status: <strong>Adopted</strong>
+          (concerns addressed), <strong>Deferred</strong> (concerns noted for
+          Phase 2 or future work), or <strong>N/A</strong> (not applicable to
+          this plan).
+        </p>
+
+        <h3>Phase 2: Targeted Deep-Dives</h3>
+
+        <p>
+          Phase 2 triggers only for Deferred perspectives whose concerns could
+          cause regression, production incidents, or standards violations. For
+          deep reviews, additive-improvement concerns also trigger deep-dives.
+          Cosmetic or out-of-scope concerns never trigger Phase 2.
+        </p>
+
+        <p>
+          For standard and deep plans, the <code>plan-reviewer</code> agent is
+          launched to perform the deep-dives autonomously. The agent returns a
+          review log with amendments that are appended to the plan file.
+        </p>
+
+        <h3>Amendments and Convergence</h3>
+
+        <p>
+          When Phase 2 changes the plan, an amendment section is appended
+          (additive, preserving the original text). The Steps section is
+          updated in place since it is a living checklist. Modified
+          perspectives are re-evaluated, and the loop continues until all
+          findings are resolved, 3 iterations are reached, or the deep-dive
+          budget (6) is exhausted.
+        </p>
+
+        <h3>Conflict Resolution</h3>
+
+        <p>
+          After each iteration, a conflict check identifies contradictions
+          between perspectives (e.g., security recommending strict validation
+          while DX recommends minimal boilerplate). Conflicts are resolved per
+          the rules in <code>.claude/references/general/review-perspectives.md</code>
+          and logged in the review log.
+        </p>
+      </section>
+
+
+      <!-- Section 5: The /implement Executor -->
+      <section id="the-implement-executor" data-diataxis="reference">
+        <h2>The /implement Executor</h2>
+
+        <p>
+          The <code>/implement</code> skill executes a previously generated
+          plan. It supports four execution modes, each suited to different
+          scenarios.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Mode</th>
+              <th>Flag</th>
+              <th>Topology</th>
+              <th>When to Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Auto</td>
+              <td>(default)</td>
+              <td>Each step in a fresh subagent; state via progress file</td>
+              <td>Most plans, especially those with more than 6 steps where context degradation is a risk</td>
+            </tr>
+            <tr>
+              <td>Manual</td>
+              <td><code>--manual</code></td>
+              <td>Sequential in the current context</td>
+              <td>Small plans (6 or fewer steps) or when per-step confirmation is needed</td>
+            </tr>
+            <tr>
+              <td>Roadmap</td>
+              <td><code>--roadmap &lt;id&gt;</code></td>
+              <td>Each plan in auto mode via a fresh subagent; pauses between waves</td>
+              <td>Executing every plan in a roadmap without per-plan invocation</td>
+            </tr>
+            <tr>
+              <td>Pending</td>
+              <td><code>--pending</code></td>
+              <td>Generates a lightweight roadmap from pending entries, then dispatches to roadmap mode</td>
+              <td>Clearing all pending implement entries in one go</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Auto Mode</h3>
+
+        <p>
+          Auto mode is the default and recommended execution mode. It operates
+          in three phases:
+        </p>
+
+        <dl>
+          <dt>Phase 0: Setup</dt>
+          <dd>
+            Reads the plan file, parses the Steps section, creates a progress
+            file, builds the execution queue in dependency order, and creates
+            a rollback branch (<code>pre-plan-&lt;id&gt;</code>) from the
+            current HEAD.
+          </dd>
+
+          <dt>Phase 1: Iteration Loop</dt>
+          <dd>
+            For each step in the execution queue (up to
+            <code>--max-iterations</code>, default 20): picks the next
+            eligible step, builds a self-contained prompt, and spawns a fresh
+            <code>general-purpose</code> subagent. If the step has a non-N/A
+            <code>Tests</code> field, the subagent follows the TDD red-green
+            cycle: write a failing test first, then implement until the test
+            passes. Each subagent reports SUCCESS, PARTIAL, or FAILED.
+          </dd>
+
+          <dt>Phase 2: Wrap-up</dt>
+          <dd>
+            Runs the quality gate (validate, review, test), marks the plan as
+            DONE, appends an aggregated summary, merges the progress file into
+            the plan, and updates any associated roadmap.
+          </dd>
+        </dl>
+
+        <h3>Manual Mode</h3>
+
+        <p>
+          Manual mode executes all steps sequentially in the current context
+          rather than spawning subagents. The user maintains full visibility
+          and can intervene at each step. Tests are written after
+          implementation (not TDD) because the user's presence provides the
+          quality oversight that TDD substitutes for in auto mode.
+        </p>
+
+        <h3>Roadmap Mode</h3>
+
+        <p>
+          Roadmap mode executes all plans in a roadmap, wave by wave. Wave 0
+          always runs sequentially (migration chain safety). Subsequent waves
+          may run plans in parallel using worktree isolation when their file
+          lists do not overlap. An enhanced overlap check uses
+          <code>.claude/references/general/call-graph.json</code> to detect
+          transitive dependencies between files across plans.
+        </p>
+
+        <p>
+          Between waves, checkpoint behavior is controlled by
+          <code>--checkpoint</code>: <code>wave</code> (default) pauses
+          between waves for review, <code>plan</code> pauses after every plan,
+          and <code>none</code> runs full autopilot with progress notes only.
+        </p>
+
+        <h3>Quality Gate</h3>
+
+        <p>
+          The quality gate runs at the end of implementation (skippable with
+          <code>--skip-checks</code>):
+        </p>
+
+        <ol>
+          <li>Run <code>/critique validate</code> (validation scripts).</li>
+          <li>Run <code>/critique review</code> (code review against perspectives).</li>
+          <li>Launch the <code>test-runner</code> agent with scope "all".</li>
+          <li>If the plan's <code>smoke</code> field is <code>true</code>, run <code>/critique smoke api</code>.</li>
+        </ol>
+
+        <p>
+          In auto mode, a generator-critic loop retries critical findings
+          (security, correctness, failing tests) up to 2 times. If critical
+          issues remain after retries, they are logged as unresolved and
+          implementation continues.
+        </p>
+      </section>
+
+
+      <!-- Section 6: Progress Tracking -->
+      <section id="progress-tracking" data-diataxis="reference">
+        <h2>Progress Tracking</h2>
+
+        <p>
+          Auto mode creates a progress file
+          (<code>_output/plans/plan-&lt;id&gt;-progress.md</code>) that
+          serves as the shared state between subagent iterations. The file is
+          append-only and structured for cross-iteration learning.
+        </p>
+
+        <h3>Progress File Format</h3>
+
+        <pre><code># Progress -- Plan 000123
+
+Append-only cross-iteration learnings. Each subagent reads
+this file at the start and appends findings at the end.
+
+## Codebase Patterns
+&lt;!-- Subagents consolidate reusable patterns here --&gt;
+
+## Iteration Log
+### Step 1: Create user model (SUCCESS)
+- Discovered existing base model pattern in models/base.py
+- Used SQLAlchemy declarative_base from existing setup
+
+### Step 2: Add user service (PARTIAL)
+- Blocker: missing database session factory
+- Workaround: created session_factory in db/session.py</code></pre>
+
+        <h3>Sections</h3>
+
+        <dl>
+          <dt>Codebase Patterns</dt>
+          <dd>
+            Subagents promote reusable discoveries here (naming conventions,
+            existing utilities, established patterns). Later subagents read
+            these patterns to maintain consistency without re-discovering them.
+          </dd>
+
+          <dt>Iteration Log</dt>
+          <dd>
+            Each subagent appends an entry with the step title, result status,
+            discoveries, gotchas, and any useful context for subsequent steps.
+            Blockers are described in enough detail for the orchestrator to
+            decide whether to retry, skip, or ask the user.
+          </dd>
+        </dl>
+
+        <h3>Checkpoint Recovery</h3>
+
+        <p>
+          Post-skill writes checkpoint tokens
+          (<code>_output/.post-skill-checkpoint</code>) at key steps. If a
+          session crashes mid-post-skill, the next invocation reads the
+          checkpoint file and resumes from the step after the recorded
+          checkpoint, avoiding duplicate work.
+        </p>
+
+        <h3>Progress File Lifecycle</h3>
+
+        <p>
+          At wrap-up (Phase 2), the progress file's content is merged into the
+          plan file as a <code>## Progress Log</code> section, then deleted.
+          If the progress file contains only the initial header with no
+          substantive content, it is deleted silently without merging.
+        </p>
+      </section>
+
+
+      <!-- Section 7: Design-Intent Traceability -->
+      <section id="design-intent-traceability" data-diataxis="explanation">
+        <h2>Design-Intent Traceability</h2>
+
+        <p>
+          SEJA maintains a traceability chain from design intent through
+          planning to implementation. This chain ensures that every code
+          change can be traced back to a design requirement, and that the
+          implementation state of design requirements is always visible.
+        </p>
+
+        <h3>The Traces Field</h3>
+
+        <p>
+          Plan steps include an optional <code>Traces</code> field that lists
+          the REQ IDs from
+          <code>product-design/product-design-as-intended.md</code> that the
+          step implements. REQ IDs follow a typed naming convention:
+          <code>REQ-ENT-NNN</code> for entities,
+          <code>REQ-PERM-NNN</code> for permissions,
+          <code>REQ-UX-NNN</code> for UX patterns,
+          <code>REQ-MC-NNN</code> for metacommunication intentions, and so on.
+        </p>
+
+        <h3>Coverage Check</h3>
+
+        <p>
+          When REQ markers exist in the as-intended file, <code>/plan</code>
+          runs an advisory coverage check that reports which requirements are
+          addressed by the plan's steps (via their Traces fields) and which
+          remain uncovered. This is informational: it highlights gaps in
+          traceability without blocking plan generation.
+        </p>
+
+        <h3>STATUS Marker Lifecycle</h3>
+
+        <p>
+          Design requirements progress through a lifecycle tracked by STATUS
+          markers in <code>product-design-as-intended.md</code>:
+        </p>
+
+        <ol>
+          <li>
+            <strong>Unmarked</strong>: the requirement exists in the design
+            intent but has not been implemented.
+          </li>
+          <li>
+            <strong>Implemented</strong>: after a plan executes successfully,
+            post-skill proposes flipping the STATUS marker to
+            <code>&lt;!-- STATUS: implemented | plan-NNNNNN | YYYY-MM-DD --&gt;</code>.
+            The user chooses to apply now, defer to the pending ledger, or
+            skip.
+          </li>
+          <li>
+            <strong>Established</strong>: a promoted state indicating the
+            implementation has been verified and the design decision is
+            considered stable. Promoted via
+            <code>/explain drift --promote</code>, which generates a Decision
+            entry proposal (Phase 3a) and then flips the STATUS markers
+            (Phase 3b) via <code>apply_marker.py</code>.
+          </li>
+        </ol>
+
+        <h3>Metacommunication Framing</h3>
+
+        <p>
+          Plans generated with <code>--framing metacomm</code> record the
+          brief as a designer's metacommunication message using "I" (designer)
+          and "you" (user) phrasing. After implementation, post-skill updates
+          the per-feature metacommunication log in
+          <code>product-design-as-coded.md</code> with the implemented intent
+          and sets its status to "Implemented". This keeps the as-coded
+          metacommunication record in sync with what actually shipped.
+        </p>
+
+        <h3>As-Coded Alignment</h3>
+
+        <p>
+          Post-skill's as-coded alignment step (step 2) updates
+          <code>product-design/product-design-as-coded.md</code> after every
+          implementation. It incrementally edits three domain sections:
+          Conceptual Design (entities added, modified, or removed),
+          Metacommunication (per-feature intention log), and Journey Maps
+          (status updates for designed journeys). A changelog entry is
+          appended to
+          <code>product-design/product-design-changelog.md</code> for each
+          update, creating an audit trail of design evolution. For details on
+          the as-coded alignment mechanism, see
+          <a href="lifecycle-pipeline.html#post-skill-steps">Post-Skill Steps</a>.
+        </p>
+      </section>
+
+
+      <!-- Section 8: Common Mistakes -->
+      <section id="common-mistakes" data-diataxis="how-to">
+        <h2>Common Mistakes</h2>
+
+        <dl>
+          <dt>Implementing without a plan</dt>
+          <dd>
+            Jumping straight to code without running <code>/plan</code>
+            bypasses the review process, skips traceability, and produces no
+            durable record of what was intended. Even small changes benefit
+            from <code>/plan --light</code>, which creates a tracked proposal
+            with minimal overhead.
+          </dd>
+
+          <dt>Writing vague step descriptions</dt>
+          <dd>
+            Step descriptions like "update the user module" give subagents
+            insufficient context. Each step must be self-contained with enough
+            detail to execute without reading other steps. Describe what the
+            code should do, not just which file to edit.
+          </dd>
+
+          <dt>Skipping the Verify field</dt>
+          <dd>
+            Steps without concrete Verify criteria have no measurable
+            completion condition. The executor cannot determine whether a step
+            succeeded. Use automated checks ("tests pass", "migration runs
+            forward and backward") rather than subjective conditions ("code
+            looks clean").
+          </dd>
+
+          <dt>Not checking file existence during planning</dt>
+          <dd>
+            Referencing files that do not exist on disk (or misspelling paths)
+            causes subagent failures during implementation. The plan skill
+            validates file paths during step metadata checks; ensure all paths
+            in the <code>Files</code> field resolve to real files for
+            <code>(modify)</code> and <code>(delete)</code> dispositions.
+          </dd>
+
+          <dt>Amending commits when a new commit is safer</dt>
+          <dd>
+            In projects with concurrent sessions, <code>git commit --amend</code>
+            can absorb unrelated modified files via the hook chain. Prefer
+            creating a new commit over amending, especially in
+            <code>seja-priv</code> where multiple sessions may be active.
+          </dd>
+
+          <dt>Ignoring the coverage check output</dt>
+          <dd>
+            The advisory coverage check identifies which design requirements
+            are not addressed by the plan. While it does not block plan
+            generation, consistently ignoring it leads to implementation drift
+            where coded features diverge from the design intent without
+            anyone noticing.
+          </dd>
+        </dl>
+      </section>
+
+    </article>
+  </main>
+<!-- VOLUME-TOC:START -->
+  <nav aria-label="volume contents" class="volume-toc">
+    <h2 class="volume-toc-title">Vol. 3: The Execution Layer</h2>
+    <ol>
+      <li>
+        <a href="lifecycle-pipeline.html">Lifecycle Pipeline</a>
+      </li>
+      <li>
+        <a href="skills-in-depth.html">Skills In Depth</a>
+      </li>
+      <li>
+        <a href="subagent-delegation.html">Subagent Delegation</a>
+      </li>
+      <li aria-current="page">
+        <a href="plans-and-implementation.html">Plans and Implementation</a>
+        <ul>
+          <li><a href="#plan-file-structure">Plan File Structure</a></li>
+          <li><a href="#three-plan-modes">Three Plan Modes</a></li>
+          <li><a href="#plan-generation-workflow">Plan Generation Workflow</a></li>
+          <li><a href="#plan-review-and-critique">Plan Review and Critique</a></li>
+          <li><a href="#the-implement-executor">The /implement Executor</a></li>
+          <li><a href="#progress-tracking">Progress Tracking</a></li>
+          <li><a href="#design-intent-traceability">Design-Intent Traceability</a></li>
+          <li><a href="#common-mistakes">Common Mistakes</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="quality-and-critique.html">Quality and Critique</a>
+      </li>
+    </ol>
+  </nav>
+<!-- VOLUME-TOC:END -->
+  </div>
+  <!-- DOC-LAYOUT:END -->
+
+  <!-- Chapter navigation -->
+  <nav aria-label="chapter navigation" class="chapter-nav">
+    <a href="subagent-delegation.html">Previous: Subagent Delegation</a>
+    <a href="quality-and-critique.html">Next: Quality and Critique</a>
+  </nav>
+
+  <!-- Collection-level footer navigation -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../reading-map.html">Reading Map</a>
+    </nav>
+  </footer>
+
+  <!-- NAV-SCRIPT:START -->
+  <script src="../nav.js" defer></script>
+  <!-- NAV-SCRIPT:END -->
+</body>
+</html>

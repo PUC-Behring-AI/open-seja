@@ -86,3 +86,65 @@ def test_generate_index_skips_missing_reflections_dir(tmp_path, monkeypatch):
     assert count == 0
     content = index_file.read_text(encoding="utf-8")
     assert "# Artifact Index" in content
+
+
+# ---------------------------------------------------------------------------
+# Mob Session header extraction
+# ---------------------------------------------------------------------------
+
+
+def test_extract_mob_session_header(tmp_path, monkeypatch):
+    """A mob-session record with the canonical header is recognized as type 'Mob Session'."""
+    output_dir = tmp_path / "_output"
+    mob_dir = output_dir / "mob-sessions"
+    mob_dir.mkdir(parents=True)
+
+    record = mob_dir / "mob-session-000001-x.md"
+    record.write_text(
+        "# Mob Session 000001 | 2026-09-26 14:00 UTC | Filtro de tarefas\n"
+        "\n"
+        "## Objetivo\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(gen, "OUTPUT_DIR", output_dir)
+    monkeypatch.setattr(gen, "INDEX_FILE", output_dir / "INDEX.md")
+
+    entry = gen.extract_artifact(record)
+    assert entry is not None
+    assert entry["type"] == "Mob Session"
+    assert entry["id"] == "000001"
+    assert entry["title"] == "Filtro de tarefas"
+    assert entry["date"] == "2026-09-26 14:00 UTC"
+    assert entry["file"].replace("\\", "/") == "mob-sessions/mob-session-000001-x.md"
+
+
+def test_generate_index_includes_mob_session_and_skips_siblings(tmp_path, monkeypatch):
+    """generate_index lists the mob-session record once; agenda/timer/state siblings are not indexed."""
+    output_dir = tmp_path / "_output"
+    mob_dir = output_dir / "mob-sessions"
+    mob_dir.mkdir(parents=True)
+
+    (mob_dir / "mob-session-000001-x.md").write_text(
+        "# Mob Session 000001 | 2026-09-26 14:00 UTC | Filtro de tarefas\n",
+        encoding="utf-8",
+    )
+    (mob_dir / "mob-session-000001-agenda.json").write_text("{}", encoding="utf-8")
+    (mob_dir / "mob-session-000001-timer.jsonl").write_text("{}\n", encoding="utf-8")
+    (mob_dir / "mob-session-000001-state.json").write_text("{}", encoding="utf-8")
+
+    index_file = output_dir / "INDEX.md"
+    monkeypatch.setattr(gen, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(gen, "OUTPUT_DIR", output_dir)
+    monkeypatch.setattr(gen, "INDEX_FILE", index_file)
+
+    count = gen.generate_index(verbose=False)
+    assert count == 1
+
+    content = index_file.read_text(encoding="utf-8").replace("\\", "/")
+    assert (
+        "| 2026-09-26 14:00 UTC | Mob Session | 000001 | Filtro de tarefas |" in content
+    )
+    assert "mob-sessions/mob-session-000001-x.md" in content
+    for sibling in ("agenda.json", "timer.jsonl", "state.json"):
+        assert sibling not in content

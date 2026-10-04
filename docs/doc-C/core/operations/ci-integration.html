@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How to wire SEJA validation into CI/CD: the run_preflight_fast.py fast gate, the pre-commit hook and its installer, and the run_all_checks.py full-coverage orchestrator with JUnit XML.">
+  <title>CI Integration — SEJA Documentation</title>
+  <!-- CSS depth: 2 (core/operations sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>CI Integration</h1>
+      <p>Run SEJA's validation checks locally, on commit, and in continuous integration.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Operations</a></li>
+        <li aria-current="page">CI Integration</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge core-operations">operations</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="overview">
+          <h2 id="overview">Overview</h2>
+          <p>
+            SEJA ships two orchestrators for running its validation scripts, sized
+            for two different jobs. <code>run_preflight_fast.py</code> is the fast
+            gate — a curated subset that finishes in under ten seconds and returns a
+            single pass/fail verdict, so it can run on every commit without becoming
+            the reason you stop running it. <code>run_all_checks.py</code> is the
+            full-coverage orchestrator — it discovers every registered
+            <code>check_*.py</code> script, runs them in turn, and can emit a JUnit
+            XML report for a CI dashboard. The same fast gate backs the local
+            <code>pre-commit</code> hook, the post-skill lifecycle step, and the
+            GitHub Actions fast gate.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="preflight-fast">
+          <h2 id="preflight-fast">The <code>run_preflight_fast.py</code> entry point</h2>
+          <p>
+            <code>run_preflight_fast.py</code> is the single entry point for the
+            fast gate. It is invoked from three contexts:
+          </p>
+          <ul>
+            <li><strong>Local hook</strong> — <code>.githooks/pre-commit</code> calls it, blocking, before every commit.</li>
+            <li><strong>Post-skill</strong> — the post-skill lifecycle step runs it advisorily after a skill completes.</li>
+            <li><strong>GitHub Actions</strong> — the CI fast gate runs it, blocking, on push.</li>
+          </ul>
+          <p>
+            It runs a curated list of fast checks in order — conventions,
+            retired-tokens, skill-system, secrets, skills-manifest, skill-spec,
+            version-changelog-sync, design-output, plan-coverage, human-markers,
+            changelog-append-only, section-boundary-writes, the three
+            <code>check_docs.py</code> documentation scanners
+            (harness-reference-coverage, docs-frontmatter,
+            mantra-banner-consistency), and skill-graph-sync — printing one
+            <code>PASS</code>/<code>FAIL</code> line per check. Three priv-only
+            checks (the private-leak gate, plus the call-graph and
+            harness-reference freshness checks) are appended only when their
+            script files exist on disk, so a public consumer repo silently omits
+            them.
+            Deliberately excluded from this hot path is
+            <code>lifecycle-fact-uniqueness</code>: its O(N²) comparison can produce
+            false positives during transitional doc states, so it runs only under
+            <code>/critique docs</code> and <code>run_all_checks.py</code>.
+          </p>
+          <aside class="callout-tip">
+            <strong>Exit codes.</strong> <code>0</code> = all checks pass,
+            <code>1</code> = one or more checks failed, <code>2</code> = script
+            error. The same code convention is honored by
+            <code>run_all_checks.py</code>.
+          </aside>
+          <p>
+            Two flags tune the run. <code>--verbose</code> streams each check's
+            detailed output instead of capturing it. <code>--ci</code> appends the
+            harness unit-test suite (<code>pytest</code>) to the run — the fast gate
+            skips pytest by default to stay under its time budget, and the
+            <code>--ci</code> flag opts into full test inclusion where the extra
+            seconds are acceptable.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="pre-commit-hook">
+          <h2 id="pre-commit-hook">The <code>pre-commit</code> hook and installer</h2>
+          <p>
+            <code>.githooks/pre-commit</code> is a thin bash wrapper: it locates a
+            Python interpreter, resolves the repo root, and runs
+            <code>run_preflight_fast.py</code>. If the fast gate fails, the commit is
+            blocked with guidance to fix the issues or bypass with
+            <code>git commit --no-verify</code> (used sparingly). After the fast gate
+            passes, the hook runs a second, priv-only stage — the pre-sync leak gate
+            (<code>check_no_private_leaks.py --staged</code>) — but only when that
+            script exists, so upgrades and public clones stay safe. If either stage
+            fails, the commit is blocked.
+          </p>
+          <p>
+            The hook is not active until you point Git at it.
+            <code>.githooks/install.sh</code> does this in one step: it runs
+            <code>git config core.hooksPath .githooks</code>, after which the
+            pre-commit checks run on every commit. Run it once per clone
+            (<code>bash .githooks/install.sh</code>); uninstall with
+            <code>git config --unset core.hooksPath</code>.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="run-all-checks">
+          <h2 id="run-all-checks">The <code>run_all_checks.py</code> orchestrator</h2>
+          <p>
+            <code>run_all_checks.py</code> is the CI-independent, full-coverage
+            orchestrator. It discovers every <code>check_*.py</code> script in the
+            scripts directory and in co-located skill subdirectories, runs each in
+            turn, and rolls the results into a per-check summary table plus a single
+            pass/fail verdict. It accepts <code>--root</code> to set the repository
+            root, <code>--filter &lt;stack&gt;</code> to keep only checks matching a
+            stack keyword via the plugin registry, and <code>--verbose</code> to
+            stream child output. Its exit codes match the fast gate:
+            <code>0</code> pass, <code>1</code> failure, <code>2</code> orchestrator
+            error.
+          </p>
+          <p>
+            For CI dashboards, <code>--junit &lt;path&gt;</code> writes a JUnit XML
+            report — a <code>&lt;testsuite&gt;</code> with one
+            <code>&lt;testcase&gt;</code> per script, carrying per-check durations
+            and embedding captured output inside <code>&lt;failure&gt;</code> or
+            <code>&lt;error&gt;</code> elements. This is the preferred orchestrator
+            for CI pipelines that need full coverage and a machine-readable report,
+            while <code>run_preflight_fast.py</code> remains the lighter-weight
+            option for git hooks and quick local validation.
+          </p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="comparison">
+          <h2 id="comparison">Fast gate vs. full orchestrator</h2>
+          <div class="table-container">
+            <table>
+              <caption>How the two orchestrators differ.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Aspect</th>
+                  <th scope="col">Scope</th>
+                  <th scope="col">Speed</th>
+                  <th scope="col">Output format</th>
+                  <th scope="col">Invocation context</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row"><code>run_preflight_fast.py</code></th>
+                  <td>Curated subset of fast checks (plus <code>--ci</code> pytest opt-in)</td>
+                  <td>Under ~10s</td>
+                  <td>One <code>PASS</code>/<code>FAIL</code> line per check + verdict</td>
+                  <td>Pre-commit hook, post-skill, GitHub Actions fast gate</td>
+                </tr>
+                <tr>
+                  <th scope="row"><code>run_all_checks.py</code></th>
+                  <td>Every discovered <code>check_*.py</code> script (optional stack filter)</td>
+                  <td>Slower — full sweep</td>
+                  <td>Summary table + optional JUnit XML (<code>--junit</code>)</td>
+                  <td>CI pipelines needing full coverage and machine-readable reports</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="quality-gates.html">Quality Gates</a> &mdash; the <code>/critique</code> modes whose checks these orchestrators run.</li>
+            <li><a href="release.html">Release</a> &mdash; the publish pipeline that runs smoke tests before pushing a tagged release.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Operations</a>
+      </nav>
+      <p>SEJA documentation — audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (core/operations sub-directory page) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="howto">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="How-to guide for the /design skill: define or update project design intent — stack, conventions, domain model, conceptual design, metacommunication, and standards.">
+  <title>/design — SEJA Documentation</title>
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>/design</h1>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#core">Core</a></li>
+        <li><a href="index.html">Skills</a></li>
+        <li aria-current="page">/design</li>
+      </ol>
+    </nav>
+
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-howto">how-to</span>
+          <span class="badge core-skills">skills</span>
+        </p>
+
+        <section data-diataxis="howto" aria-labelledby="what-it-does">
+          <h2 id="what-it-does">What it does</h2>
+          <p><code>/design</code> configures design intent for your project. After <code>/seja-setup</code> populates <code>conventions.md</code> with stack definitions, <code>/design</code> generates the remaining design-intent artifacts &mdash; product-design-as-intended, ux-research-results, standards, design-standards, security checklists, and the constitution &mdash; and amends <code>CLAUDE.md</code>.</p>
+          <p>Six modes cover every design lifecycle stage: an interactive questionnaire (the default), configuration from a pre-filled spec file, adding documentation templates, generating a blank spec skeleton to fill out offline, an interview-driven conversation, and updating existing design sections. Use <code>/design update &lt;section-slug&gt;</code> to jump straight to a specific section &mdash; stack, conceptual, metacomm, standards, security, testing, constitution, and more &mdash; skipping the interactive menu.</p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="when-to-run">
+          <h2 id="when-to-run">When to run it</h2>
+          <p>Run <code>/design</code> after <code>/seja-setup</code> to define design intent for a new project, and anytime you want to update your project's design foundations: stack, domain model, standards, or metacommunication. Use the interview mode when you want to think out loud rather than fill in a form, and the default questionnaire when you know your stack and want speed.</p>
+          <p>It is not for topology scaffolding (use <code>/seja-setup</code>), planning implementation (use <code>/plan</code>), or checking drift between intent and code (use <code>/explain drift</code>).</p>
+        </section>
+
+        <section data-diataxis="howto" aria-labelledby="how-it-fits">
+          <h2 id="how-it-fits">How it fits the lifecycle</h2>
+          <p>The canonical path is <code>/research</code> &rarr; <code>/design</code> | <code>/plan</code> &rarr; <code>/implement</code> &rarr; <code>/critique</code> &rarr; <code>/document</code> | <code>/communicate</code> &rarr; <code>/reflect</code>. <code>/design</code> shares the intent-setting stage with <code>/plan</code>: after investigating with <code>/research</code> or <code>/explain</code>, you branch into <code>/design</code> when the intent itself needs to change, and into <code>/plan</code> when intent is already set.</p>
+          <p>On the first iteration, <code>/seja-setup</code> hands off to <code>/design</code> to configure the project. From there, the natural next step is <code>/plan --roadmap</code> to generate a development roadmap from the new design, or <code>/plan</code> to plan your first feature.</p>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="../concepts/lifecycle-pipeline.html">Lifecycle pipeline</a> &mdash; where /design sits on the canonical path.</li>
+            <li><a href="research.html">/research</a> &mdash; investigate before deciding intent must change.</li>
+            <li><a href="plan.html">/plan</a> &mdash; the sibling intent-stage skill, for when intent is already set.</li>
+            <li><a href="explain.html">/explain</a> &mdash; check drift between design intent and code.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="index.html">Skills</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

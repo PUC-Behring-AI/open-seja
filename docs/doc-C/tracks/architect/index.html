@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="diataxis" content="explanation">
+  <meta name="doc-status" content="published"><!-- stub|draft|published -->
+  <meta name="description" content="Entry point to the Architect Track: a reading route through SEJA's topology, its extension points, and the maintenance operations that keep a harness installation current.">
+  <title>The Structural View &mdash; SEJA Documentation</title>
+  <!-- CSS depth: 2 (tracks/architect/index.html) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <div class="doc-shell">
+    <header>
+      <h1>The Structural View</h1>
+      <p>Your entry point to the Architect Track: how the harness is put together, where it is meant to be extended, and what maintaining it involves.</p>
+    </header>
+
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#tracks">Tracks</a></li>
+        <li aria-current="page">Architect</li>
+      </ol>
+    </nav>
+
+    <!-- Sidebar scope (doc-guidelines section E): WITHIN-PAGE (.doc-nav,
+         aria-label="on this page"), populated by nav.js from this page's h2/h3.
+         Section E fixes one sidebar model per collection and records doc-C as
+         page-scoped; the volume-scoped .volume-toc model is doc-D's and has no
+         supporting rules in doc-C's styles.css. A gate page is therefore an
+         in-collection page like any other here -- do not switch it to
+         .volume-toc without migrating the whole collection. -->
+    <nav class="doc-nav" aria-label="on this page"></nav>
+
+    <main class="doc-content" id="main-content">
+      <article>
+        <p>
+          <span class="badge diataxis-explanation">explanation</span>
+          <span class="badge track-architect">Architect</span>
+        </p>
+
+        <section data-diataxis="explanation" aria-labelledby="what-this-track-offers">
+          <h2 id="what-this-track-offers">What the structural view offers</h2>
+          <p>
+            The Practitioner Track answers "how do I use this?" This track answers a
+            different question: <strong>how is it built, and what happens if I change
+            it?</strong> It is for readers evaluating the harness as a system &mdash;
+            deciding whether to adopt it, integrating it into an existing toolchain,
+            or preparing to extend it.
+          </p>
+          <p>
+            SEJA is a governance layer assembled from a small number of part types:
+            skills that own a lifecycle phase, subagents that do bounded work in
+            isolated contexts, reference files that carry shared knowledge,
+            path-scoped rules that surface the right questions at the right moment,
+            and scripts that enforce what prose cannot. The value of reading it
+            structurally is that these parts constrain each other. Where a skill may
+            write, when a hook fires, which reference a review must load &mdash; none of
+            these is incidental, and changing one without seeing the others is how a
+            governance layer quietly stops governing.
+          </p>
+          <p>
+            This track is a <em>route</em>, not a second copy of the documentation.
+            Every phase below links into the shared core that all readers use; the
+            only pages unique to this track are the four extension guides in Phase 2,
+            which exist because no other audience needs them.
+          </p>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="phase-1-topology">
+          <h2 id="phase-1-topology">Phase 1: The Topology</h2>
+          <p>
+            Start with the shape of the system. Read the reference pages first to see
+            what the parts <em>are</em>, then the concept pages to see why they are
+            arranged this way.
+          </p>
+          <ol>
+            <li>
+              <a href="../../core/reference/call-graph.html">Call Graph</a> &mdash; the
+              whole system in one picture: which skills invoke which agents, load which
+              references, and call which scripts. The fastest way to see the real
+              shape rather than the intended one.
+            </li>
+            <li>
+              <a href="../../core/reference/skill-map.html">Skill Map</a> &mdash; how the
+              lifecycle skills relate to one another and where each sits on the
+              canonical path.
+            </li>
+            <li>
+              <a href="../../core/reference/pipeline-stages.html">Pipeline Stages</a>
+              &mdash; the stages every skill invocation passes through, and which of
+              them a skill may opt out of.
+            </li>
+            <li>
+              <a href="../../core/reference/agents-catalog.html">Agents Catalog</a>
+              &mdash; the subagent roster by role, and what each one is responsible for.
+            </li>
+            <li>
+              <a href="../../core/concepts/lifecycle-pipeline.html">The Lifecycle Pipeline</a>
+              &mdash; why every skill is wrapped by the same two hooks, and what that
+              buys the system.
+            </li>
+            <li>
+              <a href="../../core/concepts/enforcement-layers.html">Enforcement Layers</a>
+              &mdash; the four layers of governance in depth, from the immutable
+              constitution down to the guardrail scripts.
+            </li>
+          </ol>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="phase-2-extension-points">
+          <h2 id="phase-2-extension-points">Phase 2: Extension Points</h2>
+          <p>
+            Four things you can add to a SEJA harness, each with its own contract.
+            These pages exist only in this track; read them once you can place a
+            change on the topology from Phase 1.
+          </p>
+          <ol>
+            <li>
+              <a href="writing-a-skill.html">Writing a Skill</a> &mdash; the frontmatter
+              contract, the lifecycle bookends, the required sibling files, and where
+              a skill's scripts live.
+            </li>
+            <li>
+              <a href="writing-a-subagent.html">Writing a Subagent</a> &mdash; the prompt
+              file shape, the evaluator and generator roles, the constitution-injection
+              trust boundary, and how a wrapper dispatches to one.
+            </li>
+            <li>
+              <a href="adding-a-review-perspective.html">Adding a Review Perspective</a>
+              &mdash; the tier system, the two-stage loading protocol, and the three
+              places a new perspective must be registered.
+            </li>
+            <li>
+              <a href="modifying-enforcement-rules.html">Modifying Enforcement Rules</a>
+              &mdash; path-scoped rules, the check-script contract, the commit-time hook
+              chain, and the constitutional limit on bypassing it.
+            </li>
+          </ol>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="phase-3-maintenance">
+          <h2 id="phase-3-maintenance">Phase 3: Maintenance</h2>
+          <p>
+            What running a harness installation costs over time: keeping the gates
+            green in automation, and moving an installation forward without losing
+            project state.
+          </p>
+          <ol>
+            <li>
+              <a href="../../core/operations/quality-gates.html">Quality Gates</a>
+              &mdash; the validation surface as an operator sees it, rather than as an
+              author changes it.
+            </li>
+            <li>
+              <a href="../../core/operations/ci-integration.html">CI Integration</a>
+              &mdash; running the full check sweep in a pipeline.
+            </li>
+            <li>
+              <a href="../../core/operations/upgrade.html">Upgrading SEJA</a> &mdash;
+              moving harness files forward while preserving project-specific
+              configuration.
+            </li>
+            <li>
+              <a href="../../core/operations/release.html">Release</a> &mdash; how a
+              tagged release is cut and published.
+            </li>
+          </ol>
+        </section>
+
+        <section data-diataxis="explanation" aria-labelledby="other-tracks">
+          <h2 id="other-tracks">If this is not your question</h2>
+          <p>
+            Two other routes cross the same core:
+          </p>
+          <ul>
+            <li>
+              <a href="../practitioner/index.html">Practitioner Track</a> &mdash; for
+              getting work done with the harness rather than changing it.
+            </li>
+            <li>
+              <a href="../scholar/index.html">Scholar Track</a> &mdash; for
+              the semiotic-engineering theory the structure rests on.
+            </li>
+          </ul>
+        </section>
+
+        <nav class="see-also" aria-label="see also">
+          <p class="see-also-title">See also</p>
+          <ul>
+            <li><a href="../../core/reference/index.html">Reference</a> &mdash; the full lookup layer: catalogs, maps, and the glossary.</li>
+            <li><a href="../../core/concepts/index.html">Concepts</a> &mdash; the vocabulary this track assumes.</li>
+            <li><a href="../../index.html">Reading Map</a> &mdash; the full collection, routed by audience.</li>
+          </ul>
+        </nav>
+      </article>
+    </main>
+
+    <footer>
+      <nav aria-label="collection">
+        <a href="../../index.html">Reading Map</a>
+        <a href="../../index.html#tracks">Tracks</a>
+        <a href="../../core/reference/index.html">Reference</a>
+        <a href="../../core/operations/index.html">Operations</a>
+      </nav>
+      <p>SEJA documentation &mdash; audience-routed collection for Practitioner, Architect, and Scholar readers over a shared core.</p>
+    </footer>
+  </div>
+
+  <!-- JS depth: 2 (tracks/architect/index.html) -->
+  <script src="../../nav.js" defer></script>
+</body>
+</html>

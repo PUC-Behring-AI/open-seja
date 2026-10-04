@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="how-to">
+  <meta name="doc-volume" content="How-To Guides">
+  <meta name="doc-chapter" content="How to Critique Quality">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>How to Critique Quality -- SEJA Documentation</title>
+
+  <!-- CSS depth: 2 (sub-directory page) -->
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../../index.html">Home</a>
+    <a href="../../tutorials/index.html">Tutorials</a>
+    <a href="../index.html">How-To Guides</a>
+    <a href="../../reference/index.html">Reference</a>
+    <a href="../../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../../index.html">Home</a></li>
+      <li><a href="../index.html">How-To Guides</a></li>
+      <li><a href="index.html">Skill-by-Skill Guides</a></li>
+      <li>How to Critique Quality</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-howto">
+    <article>
+      <p class="vol-accent"><strong>how-to</strong></p>
+
+      <h1>How to Critique Quality</h1>
+
+      <p>
+        Goal: answer any "is it OK?" question -- validation, code review, smoke
+        tests, preflight, harness health, documentation consistency, git
+        freshness, telemetry, test-plan generation, or semiotic inspection. The
+        <code>/critique</code> skill is the unified quality gate. It has ten modes;
+        you run one at a time.
+      </p>
+
+      <section id="when-to-use">
+        <h2>When to Use</h2>
+        <ul>
+          <li>Before committing, or after making changes, to verify code quality.</li>
+          <li>To check overall project or harness health.</li>
+          <li>To get a go / no-go verdict for merging (use <code>preflight</code>).</li>
+          <li>To generate a structured manual test plan for QA (use <code>test-plan</code>).</li>
+        </ul>
+      </section>
+
+      <section id="required-inputs">
+        <h2>Required Inputs</h2>
+        <ul>
+          <li>A mode: <code>validate</code>, <code>review</code>, <code>smoke</code>, <code>preflight</code>, <code>health</code>, <code>docs</code>, <code>freshness</code>, <code>telemetry</code>, <code>test-plan</code>, or <code>semiotic-inspection</code>.</li>
+          <li>An optional scope, e.g. <code>/critique review src/components</code> or <code>/critique validate i18n</code>.</li>
+          <li>An optional depth override for review and preflight: <code>--depth light|standard|deep</code>.</li>
+        </ul>
+      </section>
+
+      <section id="step-by-step">
+        <h2>Step by Step</h2>
+
+        <ol>
+          <li>
+            <strong>Pick the mode that matches your question.</strong>
+            <ul>
+              <li><strong><code>validate</code></strong> -- Recommended when you want a pass/fail from every project validation script. NOT recommended when you want subjective review of a diff (use <code>review</code>).</li>
+              <li><strong><code>review</code></strong> -- Recommended when you want perspective-based review of changed code. NOT recommended when you only need script-level validation.</li>
+              <li><strong><code>preflight</code></strong> -- Recommended when you want a single go / no-go verdict combining validate and review before a merge.</li>
+              <li><strong><code>health</code></strong> -- Recommended when you want harness self-diagnosis across its nine built-in checks.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Set depth if needed.</strong> For <code>review</code> and
+            <code>preflight</code>, <code>--depth deep</code> evaluates all 16
+            quality perspectives; <code>--depth light</code> is a faster pass with
+            fewer perspectives.
+          </li>
+          <li>
+            <strong>Run the skill.</strong> Most modes write a timestamped
+            <code>check-&lt;id&gt;</code> log under
+            <code>_output/critique-logs/</code>. (<code>telemetry</code> is
+            read-only and does not write a log.)
+            <br><em>Expected output:</em> a findings report -- pass/fail per script,
+            perspective findings, a health verdict, or a manual test plan, depending
+            on the mode.
+          </li>
+          <li>
+            <strong>Act on the findings.</strong> Fix findings via <code>/plan</code>
+            (then <code>/implement</code>), or reflect on a clean pass with
+            <code>/reflect</code>.
+          </li>
+        </ol>
+      </section>
+
+      <section id="expected-outputs">
+        <h2>Expected Outputs</h2>
+        <ul>
+          <li>A <code>check-&lt;id&gt;</code> log under <code>_output/critique-logs/</code> for most modes, with any Q&amp;A appended inline.</li>
+          <li>For <code>preflight</code>, a go / no-go verdict.</li>
+          <li>For <code>health</code>, a Harness Health Report across the nine built-in checks (skill system, briefs hygiene, plans hygiene, references, conventions, constitution, spec compliance, pending ledger, and harness drift).</li>
+          <li>For <code>test-plan</code>, a structured manual test plan with scenarios, steps, expected results, and edge cases.</li>
+        </ul>
+      </section>
+
+      <section id="common-mistakes">
+        <h2>Common Mistakes</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th scope="col">Mistake</th><th scope="col">Better approach</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Confusing <code>validate</code> with <code>review</code>.</td>
+                <td><code>validate</code> runs scripts for pass/fail; <code>review</code> applies quality perspectives to a diff. Use the one that matches your question.</td>
+              </tr>
+              <tr>
+                <td>Expecting <code>/critique</code> to fix findings.</td>
+                <td><code>/critique</code> reports. Fix findings by planning and implementing the change.</td>
+              </tr>
+              <tr>
+                <td>Using <code>/critique</code> to mutate the pending ledger.</td>
+                <td>Ledger mutations (add / done / snooze / dismiss) flow through <code>/pending</code>. <code>/critique health</code> only surfaces the count as a signal.</td>
+              </tr>
+              <tr>
+                <td>Assuming <code>freshness</code> pulls remote changes.</td>
+                <td><code>freshness</code> reports ahead/behind counts only; it never pulls automatically.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="cross-references">
+        <h2>Cross-References</h2>
+        <ul>
+          <li><a href="implement.html">How to Implement a Plan</a> -- the quality gate runs automatically here.</li>
+          <li><a href="pending.html">How to Manage Pending Actions</a> -- act on the ledger surfaced by <code>health</code>.</li>
+          <li><a href="../governance.html">Governance Operations</a> (Ch. 3) -- preflight, the pre-commit hook, and health in context.</li>
+          <li><a href="../../reference/subagent-reference.html">Subagent Reference</a> (Vol. 3) -- the evaluator agents each critique mode delegates to.</li>
+        </ul>
+      </section>
+
+    </article>
+
+    <nav aria-label="chapter navigation">
+      <a href="implement.html">Back: How to Implement a Plan</a>
+      <a href="document.html">Next: How to Generate Documentation</a>
+    </nav>
+
+    <nav aria-label="see also" class="see-also">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="../../reference/subagent-reference.html">Subagent Reference</a> -- the evaluator agents each critique mode delegates to.</li>
+        <li><a href="../../explanation/design-decisions.html">Design Decisions and Trade-offs</a> -- why quality is a unified gate rather than scattered checks.</li>
+      </ul>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#when-to-use">When to Use</a></li>
+      <li><a href="#required-inputs">Required Inputs</a></li>
+      <li><a href="#step-by-step">Step by Step</a></li>
+      <li><a href="#expected-outputs">Expected Outputs</a></li>
+      <li><a href="#common-mistakes">Common Mistakes</a></li>
+      <li><a href="#cross-references">Cross-References</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../../index.html">Collection Index</a>
+      <a href="../../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T20:50:00Z</p>
+  </footer>
+
+</body>
+</html>

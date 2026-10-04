@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Classification metadata -->
+  <meta name="diataxis" content="reference">
+  <meta name="doc-volume" content="Reference">
+  <meta name="doc-chapter" content="Configuration Reference">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>Configuration Reference -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <!-- Skip-navigation link: first focusable element (WCAG 2.4.1) -->
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <!-- Volume navigation bar -->
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="../how-to/index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Reference</a></li>
+      <li>Configuration Reference</li>
+    </ol>
+  </nav>
+
+  <!-- Primary content area -->
+  <main id="main-content" class="chapter-content vol-reference">
+    <article>
+      <p class="vol-accent"><strong>reference</strong></p>
+
+      <h1>Configuration Reference</h1>
+
+      <p>
+        Exhaustive reference for every configuration variable, periodic trigger,
+        threshold, and structural convention in SEJA's project configuration
+        files: <code>product-design/conventions.md</code> and
+        <code>product-design/constitution.md</code>.
+      </p>
+
+      <!-- ============================================================ -->
+      <!-- Section 1: Project Identity                                   -->
+      <!-- ============================================================ -->
+
+      <section id="project-identity-variables">
+        <h2>Project Identity Variables</h2>
+
+        <p>
+          Defined in the <code>## Project Identity</code> section of
+          <code>product-design/conventions.md</code>. These variables
+          identify the project across all skills and generated artifacts.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>PROJECT_NAME</code></td>
+                <td>string</td>
+                <td>Project display name. Used in report headers, commit messages, and generated documentation titles.</td>
+              </tr>
+              <tr>
+                <td><code>PROJECT_DESCRIPTION</code></td>
+                <td>string</td>
+                <td>One-line project description. Used in README generation, onboarding plans, and communication materials.</td>
+              </tr>
+              <tr>
+                <td><code>PROJECT_MODE</code></td>
+                <td>enum: <code>greenfield</code>, <code>brownfield</code></td>
+                <td>Project mode. Greenfield indicates a new project; brownfield indicates an existing, actively maintained project. Affects <code>/seja-setup</code> behavior and <code>/design</code> questionnaire flow.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 2: Directory Structure                                -->
+      <!-- ============================================================ -->
+
+      <section id="directory-structure-variables">
+        <h2>Directory Structure Variables</h2>
+
+        <p>
+          Defined in the <code>## Directory Structure</code> section of
+          <code>product-design/conventions.md</code>. These variables control
+          where skills and scripts read from and write to. All paths are
+          relative to the project root unless prefixed with
+          <code>${OUTPUT_DIR}</code>.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Default Value</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>SKILLS_DIR</code></td>
+                <td><code>.claude/skills</code></td>
+                <td>Root directory for skill definitions. Each skill lives in a subdirectory with a <code>SKILL.md</code> file.</td>
+              </tr>
+              <tr>
+                <td><code>AGENT_SPECS_DIR</code></td>
+                <td><code>project/agent</code></td>
+                <td>Agent-facing structured specifications in YAML, located under <code>product-design/</code>.</td>
+              </tr>
+              <tr>
+                <td><code>OUTPUT_DIR</code></td>
+                <td><code>_output</code></td>
+                <td>Root directory for all generated artifacts. All other output directories derive from this path.</td>
+              </tr>
+              <tr>
+                <td><code>PLANS_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/plans</code></td>
+                <td>Plan output folder. Stores plan files, progress files, and QA logs.</td>
+              </tr>
+              <tr>
+                <td><code>SCRIPTS_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/generated-scripts</code></td>
+                <td>Script output folder for generated helper scripts.</td>
+              </tr>
+              <tr>
+                <td><code>ADVISORY_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/advisory-logs</code></td>
+                <td>Legacy advisory log output folder. Retained as a read alias; new artifacts use <code>RESEARCH_DIR</code>.</td>
+              </tr>
+              <tr>
+                <td><code>RESEARCH_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/research-logs</code></td>
+                <td>Research log output folder for <code>/research</code> artifacts.</td>
+              </tr>
+              <tr>
+                <td><code>PROPOSALS_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/proposals</code></td>
+                <td>Lightweight change proposals from <code>/plan --light</code>.</td>
+              </tr>
+              <tr>
+                <td><code>INVENTORIES_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/inventories</code></td>
+                <td>Inventory output folder for <code>/research --inventory</code>.</td>
+              </tr>
+              <tr>
+                <td><code>USER_TESTS_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/user-tests</code></td>
+                <td>User test plan output folder for <code>/critique test-plan</code>.</td>
+              </tr>
+              <tr>
+                <td><code>EXPLAINED_BEHAVIORS_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/explained-behaviors</code></td>
+                <td>Behavior explanation output for <code>/explain behavior</code>.</td>
+              </tr>
+              <tr>
+                <td><code>EXPLAINED_CODE_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/explained-code</code></td>
+                <td>Code explanation output for <code>/explain code</code>.</td>
+              </tr>
+              <tr>
+                <td><code>EXPLAINED_DATA_MODEL_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/explained-data-model</code></td>
+                <td>Data model explanation output for <code>/explain data-model</code>.</td>
+              </tr>
+              <tr>
+                <td><code>EXPLAINED_ARCHITECTURE_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/explained-architecture</code></td>
+                <td>Architecture explanation output for <code>/explain architecture</code>.</td>
+              </tr>
+              <tr>
+                <td><code>BEHAVIOR_EVOLUTION_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/behavior-evolution</code></td>
+                <td>Behavior evolution explanation output for <code>/explain behavior-evolution</code>.</td>
+              </tr>
+              <tr>
+                <td><code>REFLECTIONS_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/reflections</code></td>
+                <td>Reflection report output for <code>/reflect</code>.</td>
+              </tr>
+              <tr>
+                <td><code>ONBOARDING_PLANS_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/onboarding-plans</code></td>
+                <td>Onboarding plan output for <code>/onboard</code>.</td>
+              </tr>
+              <tr>
+                <td><code>COMMUNICATION_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/communication</code></td>
+                <td>Communication material output for <code>/communicate</code>.</td>
+              </tr>
+              <tr>
+                <td><code>ROADMAP_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/roadmaps</code></td>
+                <td>Roadmap output for <code>/plan --roadmap</code>.</td>
+              </tr>
+              <tr>
+                <td><code>QA_LOGS_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/qa-logs</code></td>
+                <td>QA session log output for user-invoked <code>/qa-log</code> (fallback dir).</td>
+              </tr>
+              <tr>
+                <td><code>CRITIQUE_LOGS_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/critique-logs</code></td>
+                <td>Critique, preflight, and review output for <code>/critique</code>.</td>
+              </tr>
+              <tr>
+                <td><code>DOCS_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/docs</code></td>
+                <td>Generated documentation output for <code>/document</code>.</td>
+              </tr>
+              <tr>
+                <td><code>TMP_DIR</code></td>
+                <td><code>${OUTPUT_DIR}/tmp</code></td>
+                <td>Temporary and helper scripts. Session-scoped working memory lives here.</td>
+              </tr>
+              <tr>
+                <td><code>CODEBASE_DIR</code></td>
+                <td><code>.</code></td>
+                <td>Root of the project codebase. For SEJA itself, this is the harness repository root.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 3: Key Files                                          -->
+      <!-- ============================================================ -->
+
+      <section id="key-files-variables">
+        <h2>Key Files Variables</h2>
+
+        <p>
+          Defined in the <code>## Key Files</code> section of
+          <code>product-design/conventions.md</code>. Each entry names a
+          specific file with its maintainer classification.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Default Value</th>
+                <th>Description</th>
+                <th>Maintained By</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>BRIEFS_FILE</code></td>
+                <td><code>${OUTPUT_DIR}/briefs.md</code></td>
+                <td>Execution log of all skill invocations. Newest entries first.</td>
+                <td>Agent</td>
+              </tr>
+              <tr>
+                <td><code>BRIEFS_INDEX_FILE</code></td>
+                <td><code>${OUTPUT_DIR}/briefs-index.md</code></td>
+                <td>Lightweight briefs index with one-line summaries. Regenerated by <code>generate_briefs_index.py</code>.</td>
+                <td>Agent</td>
+              </tr>
+              <tr>
+                <td><code>ARTIFACT_INDEX_FILE</code></td>
+                <td><code>${OUTPUT_DIR}/INDEX.md</code></td>
+                <td>Single global artifact index. Regenerated by <code>generate_macro_index.py</code>.</td>
+                <td>Agent</td>
+              </tr>
+              <tr>
+                <td><code>CONSTITUTION_FILE</code></td>
+                <td><code>product-design/constitution.md</code></td>
+                <td>Project constitution with immutable principles. Loaded first by pre-skill; takes precedence over all other references.</td>
+                <td>Human</td>
+              </tr>
+              <tr>
+                <td><code>AS_CODED</code></td>
+                <td><code>product-design/product-design-as-coded.md</code></td>
+                <td>Unified implementation state with three sections: Conceptual Design, Metacommunication, Journey Maps.</td>
+                <td>Agent</td>
+              </tr>
+              <tr>
+                <td><code>CD_AS_IS_CHANGELOG</code></td>
+                <td><code>product-design/product-design-changelog.md</code></td>
+                <td>As-built conceptual design changelog. Kept separate from the as-coded file.</td>
+                <td>Agent</td>
+              </tr>
+              <tr>
+                <td><code>DESIGN_INTENT</code></td>
+                <td><code>product-design/product-design-as-intended.md</code></td>
+                <td>Unified working intent (sections 0--17) plus Decisions and CHANGELOG. The authoritative design-intent document.</td>
+                <td>Human (markers)</td>
+              </tr>
+              <tr>
+                <td><code>UX_RESEARCH</code></td>
+                <td><code>product-design/ux-research-results.md</code></td>
+                <td>UX research: personas, problem scenarios, discovered journeys, CHANGELOG.</td>
+                <td>Human (markers)</td>
+              </tr>
+              <tr>
+                <td><code>STANDARDS</code></td>
+                <td><code>product-design/standards.md</code></td>
+                <td>Unified engineering standards. Backend, Frontend, Testing, and i18n sections.</td>
+                <td>Human / Agent</td>
+              </tr>
+              <tr>
+                <td><code>DESIGN_STANDARDS</code></td>
+                <td><code>product-design/design-standards.md</code></td>
+                <td>Unified design standards. UX patterns and visual design sections.</td>
+                <td>Human / Agent</td>
+              </tr>
+              <tr>
+                <td><code>SESSION_NOTES_FILE</code></td>
+                <td><code>${TMP_DIR}/session-notes.md</code></td>
+                <td>Session-scoped working memory for persisting key decisions across context compaction.</td>
+                <td>Agent</td>
+              </tr>
+              <tr>
+                <td><code>DECISION_DIGEST_FILE</code></td>
+                <td><code>${OUTPUT_DIR}/decision-digest.jsonl</code></td>
+                <td>Machine-readable decision index. Generated from D-NNN entries and HIGH/MEDIUM research recommendations.</td>
+                <td>Agent</td>
+              </tr>
+              <tr>
+                <td><code>CONVERSATION_TRACE_FILE</code></td>
+                <td><code>${OUTPUT_DIR}/conversation-trace.jsonl</code></td>
+                <td>Append-only conversation trace log. Each entry carries session ID, emitter, message summary, and type.</td>
+                <td>Agent</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="file-maintainer-classification">File Maintainer Classification</h3>
+
+        <p>
+          The "Maintained By" column uses a four-value classification scheme:
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Value</th>
+                <th>Meaning</th>
+                <th>Agent Rule</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Human</strong></td>
+                <td>Authored and updated exclusively by humans.</td>
+                <td>Agents must NOT write. May read and propose changes via <code>AskUserQuestion</code>.</td>
+              </tr>
+              <tr>
+                <td><strong>Human (markers)</strong></td>
+                <td>Human-authored prose; agent may write fixed-format structured markers only (STATUS, INCORPORATED, CHANGELOG_APPEND, DECISION_APPEND).</td>
+                <td>Write only via <code>apply_marker.py</code> after <code>AskUserQuestion</code> confirmation. Enforced by <code>check_human_markers_only.py</code> at post-skill step 6c.</td>
+              </tr>
+              <tr>
+                <td><strong>Agent</strong></td>
+                <td>Auto-maintained by agents and skills (e.g., via post-skill).</td>
+                <td>Agents read/write freely. Humans typically do not edit directly.</td>
+              </tr>
+              <tr>
+                <td><strong>Human / Agent</strong></td>
+                <td>Seeded by an agent (e.g., <code>/design</code>), then human-owned; both may update.</td>
+                <td>Agents may write per file-specific rules. Humans are primary curators after seeding.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 4: Review Configuration                               -->
+      <!-- ============================================================ -->
+
+      <section id="review-configuration">
+        <h2>Review Configuration</h2>
+
+        <p>
+          Defined in the <code>## Review Configuration</code> section of
+          <code>product-design/conventions.md</code>.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Value</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>MINIMUM_REVIEW_DEPTH</code></td>
+                <td><code>standard</code></td>
+                <td>Minimum review depth for project changes. Valid values: <code>light</code>, <code>standard</code>, <code>deep</code>. Standard is the floor; <code>/critique</code> can raise the depth but not lower it below this minimum. Plans invoke <code>plan-reviewer</code> at this depth or higher.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="review-depth-tiers">Review Depth Tiers</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Depth</th>
+                <th>Perspective Count</th>
+                <th>Deep-Dives</th>
+                <th>Use Case</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>light</code></td>
+                <td>3--4 shortlisted</td>
+                <td>0</td>
+                <td>Quick sanity check for low-risk changes (CHORE, DOCUMENT prefixes).</td>
+              </tr>
+              <tr>
+                <td><code>standard</code></td>
+                <td>4--6 shortlisted</td>
+                <td>Up to 3</td>
+                <td>Default for most plans. Balances thoroughness with context budget.</td>
+              </tr>
+              <tr>
+                <td><code>deep</code></td>
+                <td>6--8 or all 16</td>
+                <td>Up to 6</td>
+                <td>Comprehensive review for high-risk changes (FEATURE, REDESIGN prefixes).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 5: Periodic Triggers                                  -->
+      <!-- ============================================================ -->
+
+      <section id="periodic-triggers">
+        <h2>Periodic Triggers</h2>
+
+        <p>
+          Defined in the <code>## Periodic Triggers</code> section of
+          <code>product-design/conventions.md</code>. Periodic triggers cause
+          the harness to surface reminders or actions at configured intervals.
+          Pre-skill's <code>pending-check</code> stage displays overdue entries.
+        </p>
+
+        <h3 id="trigger-intervals">Trigger Intervals</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Trigger</th>
+                <th>Interval (days)</th>
+                <th>Action Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Periodic curation</td>
+                <td>30</td>
+                <td><code>periodic-curation</code></td>
+                <td>Review <code>product-design-as-intended.md</code> for items ready to promote from <code>implemented</code> to <code>established</code> status.</td>
+              </tr>
+              <tr>
+                <td>Spec-drift check</td>
+                <td>14</td>
+                <td><code>spec-drift-check</code></td>
+                <td>Run <code>/explain drift</code> to surface drift between design intent and as-coded state.</td>
+              </tr>
+              <tr>
+                <td>Git freshness check</td>
+                <td>7</td>
+                <td><code>check-git-freshness</code></td>
+                <td>Compare local branches to their upstreams; surface behind/ahead counts. Invoked by <code>check_git_freshness.py</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="thresholds">Thresholds</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Threshold</th>
+                <th>Value</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Pending plan age escalation</td>
+                <td>30 days</td>
+                <td>Days before an open <code>implement</code> pending entry is surfaced with the overdue banner in pre-skill's <code>pending-check</code> stage.</td>
+              </tr>
+              <tr>
+                <td>Verify-as-coded file threshold</td>
+                <td>5 files</td>
+                <td>Minimum number of files changed in a plan before post-skill auto-creates a <code>verify-as-coded</code> pending action.</td>
+              </tr>
+              <tr>
+                <td>Pending age escalation</td>
+                <td>14 days</td>
+                <td>Days before any pending action is flagged as overdue in pre-skill notices.</td>
+              </tr>
+              <tr>
+                <td>Pending auto-dismiss</td>
+                <td>90 days</td>
+                <td>Days after which unaddressed pending actions are auto-dismissed by <code>pending.py cleanup</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 6: Stack Description                                  -->
+      <!-- ============================================================ -->
+
+      <section id="stack-description">
+        <h2>Stack Description</h2>
+
+        <p>
+          Defined in the <code>## Stack Description</code> section of
+          <code>product-design/conventions.md</code>. Describes the
+          technology stack that the harness operates within.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Value</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>HARNESS_RUNTIME</code></td>
+                <td>Claude Code CLI</td>
+                <td>Primary runtime. The harness runs inside Claude Code's context window, not as a standalone process.</td>
+              </tr>
+              <tr>
+                <td><code>SCRIPTING_LANGUAGE</code></td>
+                <td>Python 3</td>
+                <td>Language for helper scripts in <code>.claude/skills/scripts/</code>.</td>
+              </tr>
+              <tr>
+                <td><code>ARTIFACT_FORMAT</code></td>
+                <td>Markdown + YAML + JSONL + HTML</td>
+                <td>Formats used for skill outputs, design files, trace logs, and topology visualizations.</td>
+              </tr>
+              <tr>
+                <td><code>TESTING_STACK</code></td>
+                <td>pytest + run_all_checks.py</td>
+                <td>Script-level unit tests via pytest; harness-wide validation via the <code>run_all_checks.py</code> orchestrator.</td>
+              </tr>
+              <tr>
+                <td><code>DEPLOYMENT_STACK</code></td>
+                <td>Git + GitHub</td>
+                <td>Version control and distribution via the <code>seja-priv</code> / <code>seja-public</code> repo pair.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 7: Architecture Description                           -->
+      <!-- ============================================================ -->
+
+      <section id="architecture-description">
+        <h2>Architecture Description</h2>
+
+        <p>
+          Defined in the <code>## Architecture Description</code> section of
+          <code>product-design/conventions.md</code>. Describes SEJA's
+          architectural pattern and non-negotiable conventions.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Value</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>ARCHITECTURE_DESCRIPTION</code></td>
+                <td>Rule-governed lifecycle harness for Claude Code</td>
+                <td>SEJA is a governance layer, not a web application or programming framework.</td>
+              </tr>
+              <tr>
+                <td><code>ARCHITECTURE_PATTERN</code></td>
+                <td>Skill dispatch with lifecycle hooks (pre-skill, skill, post-skill); agent delegation for specialized work</td>
+                <td>Core execution pattern. Every skill invocation follows the pre-skill, skill body, post-skill sequence.</td>
+              </tr>
+              <tr>
+                <td><code>CONVENTION_1</code></td>
+                <td>All skills start with pre-skill and end with post-skill</td>
+                <td>Lifecycle discipline is non-negotiable. Mapped to constitution principle T1.</td>
+              </tr>
+              <tr>
+                <td><code>CONVENTION_2</code></td>
+                <td>Human (markers) files are written only via <code>apply_marker.py</code>, never by direct agent prose writes</td>
+                <td>Human-authored content integrity. Mapped to constitution principle T2.</td>
+              </tr>
+              <tr>
+                <td><code>CONVENTION_3</code></td>
+                <td>Private content never reaches public without explicit gating via <code>check_no_private_leaks.py</code></td>
+                <td>Leak prevention. Mapped to constitution principle S1.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 8: Source Directories                                  -->
+      <!-- ============================================================ -->
+
+      <section id="source-directories">
+        <h2>Source Directories</h2>
+
+        <p>
+          Defined in the <code>## Source Directories</code> section of
+          <code>product-design/conventions.md</code>. These variables point
+          to the harness source code, not generated output.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Value</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>HARNESS_DIR</code></td>
+                <td><code>.claude</code></td>
+                <td>Root of all harness skill, agent, reference, and rule files.</td>
+              </tr>
+              <tr>
+                <td><code>SCRIPTS_SOURCE_DIR</code></td>
+                <td><code>.claude/skills/scripts</code></td>
+                <td>Shared utility Python scripts used across skills.</td>
+              </tr>
+              <tr>
+                <td><code>AGENTS_DIR</code></td>
+                <td><code>.claude/agents</code></td>
+                <td>Subagent prompt files (16 agents). See <a href="subagent-reference.html">Subagent Reference</a>.</td>
+              </tr>
+              <tr>
+                <td><code>RULES_DIR</code></td>
+                <td><code>.claude/rules</code></td>
+                <td>Path-scoped rule files (7 rules). Auto-loaded by Claude when editing files matching the rule's scope.</td>
+              </tr>
+              <tr>
+                <td><code>REFERENCES_DIR</code></td>
+                <td><code>.claude/references</code></td>
+                <td>Shared reference files organized into <code>general/</code>, <code>template/</code>, and project-specific groups. See <a href="reference-files-catalog.html">Reference Files Catalog</a>.</td>
+              </tr>
+              <tr>
+                <td><code>PRODUCT_DESIGN_DIR</code></td>
+                <td><code>product-design</code></td>
+                <td>Project-specific design intent files generated by <code>/design</code>. Private to the workspace; never synced to public repositories.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 9: Constitution Structure                             -->
+      <!-- ============================================================ -->
+
+      <section id="constitution-structure">
+        <h2>Constitution Structure</h2>
+
+        <p>
+          The constitution file (<code>product-design/constitution.md</code>)
+          defines immutable project principles. It is loaded first by pre-skill
+          before conventions or any other reference, and its rules take
+          precedence over everything else. The constitution template lives at
+          <code>.claude/references/template/constitution.md</code>.
+        </p>
+
+        <h3 id="constitution-sections">Sections</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Section</th>
+                <th>ID Prefix</th>
+                <th>Count</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Project Identity</td>
+                <td>--</td>
+                <td>--</td>
+                <td>One-paragraph project description and primary user identification.</td>
+              </tr>
+              <tr>
+                <td>Technical Principles</td>
+                <td>T</td>
+                <td>T1--T4</td>
+                <td>Non-negotiable technical rules: lifecycle discipline (T1), human markers integrity (T2), artifact maintenance (T3), metacommunication voice (T4).</td>
+              </tr>
+              <tr>
+                <td>Quality Principles</td>
+                <td>Q</td>
+                <td>Q1--Q3</td>
+                <td>Quality commitments: design intent authority (Q1), surfacing unknowns (Q2), governable AND epistemic (Q3).</td>
+              </tr>
+              <tr>
+                <td>Security Invariants</td>
+                <td>S</td>
+                <td>S1--S2</td>
+                <td>Security rules: private/public boundary (S1), no pre-commit hook bypass (S2).</td>
+              </tr>
+              <tr>
+                <td>Compliance Requirements</td>
+                <td>C</td>
+                <td>C1--C2</td>
+                <td>Regulatory and contractual constraints: private repositories only (C1), product-design never synced to public (C2).</td>
+              </tr>
+              <tr>
+                <td>Enforcement</td>
+                <td>--</td>
+                <td>--</td>
+                <td>How principles are loaded into agent context and verified. Violations are blocking.</td>
+              </tr>
+              <tr>
+                <td>Changelog</td>
+                <td>--</td>
+                <td>--</td>
+                <td>Amendment history. Changes require explicit designer approval.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="constitution-principle-format">Principle Format</h3>
+
+        <p>Each principle in the constitution follows a table format:</p>
+
+        <pre><code>| # | Principle | Rationale |
+|---|-----------|-----------|
+| T1 | &lt;principle text&gt; | &lt;rationale text&gt; |</code></pre>
+
+        <p>
+          The <strong>#</strong> column contains the section prefix and number
+          (e.g., T1, Q2, S1). The <strong>Principle</strong> column contains
+          the non-negotiable rule. The <strong>Rationale</strong> column
+          explains why the principle exists.
+        </p>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 10: As-Intended / As-Coded Registry                   -->
+      <!-- ============================================================ -->
+
+      <section id="as-intended-as-coded-registry">
+        <h2>As-Intended / As-Coded Registry</h2>
+
+        <p>
+          Defined in the <code>## As-Intended / As-Coded Registry</code>
+          section of <code>product-design/conventions.md</code>. This
+          registry is the single source of truth for <code>/design</code>
+          (template generation), <code>/explain drift</code> (drift checking),
+          and post-skill (DONE marker proposals).
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>As-Intended File</th>
+                <th>Section</th>
+                <th>As-Coded Counterpart</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>${DESIGN_INTENT}</code></td>
+                <td>Sections 0--17: design intent + Decisions + CHANGELOG</td>
+                <td><code>${AS_CODED}</code></td>
+              </tr>
+              <tr>
+                <td><code>${DESIGN_INTENT}</code></td>
+                <td>Section 15: designed journeys</td>
+                <td><code>${AS_CODED}</code> -- Journey Maps section</td>
+              </tr>
+              <tr>
+                <td><code>${UX_RESEARCH}</code></td>
+                <td>All (personas, problem scenarios, discovered journeys, CHANGELOG)</td>
+                <td>--</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Tools discriminate artifact types by ID prefix:
+          <code>JM-TB-NNN</code> (designed journeys) vs.
+          <code>JM-E-NNN</code> (discovered journeys). The Section column
+          enables multi-artifact-type files where a single as-intended file
+          maps to different sections of the as-coded counterpart.
+        </p>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 11: Context Budget Tiers                              -->
+      <!-- ============================================================ -->
+
+      <section id="context-budget-tiers">
+        <h2>Context Budget Tiers</h2>
+
+        <p>
+          Each skill declares a <code>context_budget</code> in its SKILL.md
+          YAML frontmatter. Pre-skill's <code>budget-eval</code> stage uses
+          this to control how much context is loaded. See
+          <a href="pipeline-reference.html">Pipeline Reference</a> for full
+          stage details.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Tier</th>
+                <th>Briefs Loading</th>
+                <th>Subsequent Stages</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>light</code></td>
+                <td>Skips all briefs and reference files (brief-log only).</td>
+                <td>Skips <code>ref-load</code> and <code>constitution</code> stages entirely.</td>
+              </tr>
+              <tr>
+                <td><code>standard</code> (default)</td>
+                <td>Loads briefs index (<code>${BRIEFS_INDEX_FILE}</code>) instead of full briefs.</td>
+                <td>Proceeds to orphan detection sub-step, then <code>ref-load</code> and <code>constitution</code>.</td>
+              </tr>
+              <tr>
+                <td><code>heavy</code></td>
+                <td>Loads full <code>${BRIEFS_FILE}</code> with recency windowing (first 50 entries). Also loads plan index.</td>
+                <td>Proceeds to orphan detection and compaction warning sub-steps, then <code>ref-load</code> and <code>constitution</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Section 12: settings.json Configuration                       -->
+      <!-- ============================================================ -->
+
+      <section id="settings-json-configuration">
+        <h2>settings.json Configuration</h2>
+
+        <p>
+          Claude Code's <code>settings.json</code> files control permissions,
+          hooks, MCP server connections, and environment variables. SEJA uses
+          these files to enforce permission allowlists, wire lifecycle hooks,
+          and configure runtime behavior. Unlike <code>conventions.md</code>
+          (which is SEJA-specific configuration parsed by harness scripts),
+          <code>settings.json</code> is a Claude Code platform file consumed
+          directly by the Claude Code runtime.
+        </p>
+
+        <h3 id="settings-file-locations">File Locations and Precedence</h3>
+
+        <p>
+          Claude Code reads settings from three locations. Values merge with
+          later sources overriding earlier ones. The project-level file is
+          version-controlled; the local-override file is gitignored.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>File</th>
+                <th>Scope</th>
+                <th>Version-Controlled</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>~/.claude/settings.json</code></td>
+                <td>User-global</td>
+                <td>No (user home directory)</td>
+                <td>Baseline settings applied to all projects. Useful for org-wide defaults such as <code>forceLoginOrgUUID</code>.</td>
+              </tr>
+              <tr>
+                <td><code>.claude/settings.json</code></td>
+                <td>Project-level</td>
+                <td>Yes</td>
+                <td>Shared team settings: permission allowlists, hooks, MCP servers, additional directories. Created by <code>/seja-setup</code> from the template at <code>.claude/references/template/settings.json</code>.</td>
+              </tr>
+              <tr>
+                <td><code>.claude/settings.local.json</code></td>
+                <td>Local override</td>
+                <td>No (gitignored)</td>
+                <td>Per-developer overrides. Extra permissions, additional directories, or machine-specific MCP servers that should not be shared with the team.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="settings-permission-allowlists">Permission Allowlists</h3>
+
+        <p>
+          The <code>permissions</code> object controls which tools and commands
+          the agent can use without prompting for confirmation. The
+          <code>allow</code> array contains patterns that grant access; the
+          <code>deny</code> array contains patterns that block access (deny
+          takes precedence over allow).
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>permissions.allow</code></td>
+                <td>string[]</td>
+                <td>
+                  Patterns granting tool access without confirmation prompts.
+                  Each entry is a tool name optionally followed by a path or
+                  command glob in parentheses. Examples:
+                  <code>"Read(/**)"</code> (read any file),
+                  <code>"Bash(git commit:*)"</code> (any git commit command),
+                  <code>"WebSearch"</code> (web search with no qualifier),
+                  <code>"Skill(post-skill:*)"</code> (invoke post-skill skill).
+                </td>
+              </tr>
+              <tr>
+                <td><code>permissions.deny</code></td>
+                <td>string[]</td>
+                <td>
+                  Patterns that block tool access regardless of allow entries.
+                  Example: <code>"Bash(git push*)"</code> prevents all git push
+                  operations.
+                </td>
+              </tr>
+              <tr>
+                <td><code>permissions.defaultMode</code></td>
+                <td>string</td>
+                <td>
+                  Default operating mode when Claude Code starts.
+                  Common values: <code>"plan"</code> (read-only planning),
+                  <code>"auto"</code> (full execution).
+                </td>
+              </tr>
+              <tr>
+                <td><code>permissions.additionalDirectories</code></td>
+                <td>string[]</td>
+                <td>
+                  Additional directories the agent can access beyond the
+                  project root. Useful for companion workspaces, shared skill
+                  directories, or temporary output locations.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="settings-hooks">Hook Types</h3>
+
+        <p>
+          The <code>hooks</code> object defines lifecycle hooks that run at
+          specific points during agent execution. Each hook type maps to an
+          array of matcher-hooks pairs. When a tool use or event matches,
+          the associated hooks execute.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Hook Type</th>
+                <th>Fires When</th>
+                <th>Use Case</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>PreToolUse</code></td>
+                <td>Before a tool is invoked</td>
+                <td>Validate or gate tool calls. Example: check Bash commands for destructive operations before execution.</td>
+              </tr>
+              <tr>
+                <td><code>PostToolUse</code></td>
+                <td>After a tool completes</td>
+                <td>Post-process tool results. Example: log file writes or validate outputs.</td>
+              </tr>
+              <tr>
+                <td><code>UserPromptSubmit</code></td>
+                <td>When the user submits a prompt</td>
+                <td>Pre-process user input. SEJA uses this to run <code>seja_harness_hook.py</code> on every prompt for lifecycle enforcement.</td>
+              </tr>
+              <tr>
+                <td><code>Notification</code></td>
+                <td>When a notification is generated</td>
+                <td>Handle system notifications such as subagent completion or background task results.</td>
+              </tr>
+              <tr>
+                <td><code>Stop</code></td>
+                <td>When the agent stops responding</td>
+                <td>Run cleanup or summary actions after the agent finishes a turn.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Each hook entry has the following structure:</p>
+
+        <pre><code>{
+  "matcher": "ToolName",
+  "hooks": [
+    {
+      "type": "command",
+      "command": "python .claude/skills/scripts/my_hook.py"
+    }
+  ]
+}</code></pre>
+
+        <p>
+          The <code>matcher</code> field filters which tool invocations trigger
+          the hook (empty string matches all). The <code>type</code> field is
+          either <code>"command"</code> (runs a shell command; non-zero exit
+          blocks the tool call for <code>PreToolUse</code>) or
+          <code>"prompt"</code> (injects a prompt for the agent to evaluate;
+          the agent decides whether to proceed based on the prompt's guidance).
+        </p>
+
+        <h3 id="settings-mcp-servers">MCP Server Configuration</h3>
+
+        <p>
+          The <code>mcpServers</code> object configures Model Context Protocol
+          servers, which extend the agent with additional tools and data sources
+          (e.g., browser automation, database access, external APIs).
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>mcpServers.&lt;name&gt;.command</code></td>
+                <td>string</td>
+                <td>The command to launch the MCP server process (e.g., <code>"npx"</code>, <code>"python"</code>).</td>
+              </tr>
+              <tr>
+                <td><code>mcpServers.&lt;name&gt;.args</code></td>
+                <td>string[]</td>
+                <td>Arguments passed to the server command.</td>
+              </tr>
+              <tr>
+                <td><code>mcpServers.&lt;name&gt;.env</code></td>
+                <td>object</td>
+                <td>Environment variables set for the server process. Useful for API keys or configuration tokens.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="settings-environment-variables">Environment Variables</h3>
+
+        <p>
+          The <code>env</code> object sets environment variables for the agent's
+          shell sessions. These are available to all Bash commands and hook
+          scripts executed during the session. Useful for injecting API keys,
+          feature flags, or debug toggles without modifying system environment.
+        </p>
+
+        <pre><code>{
+  "env": {
+    "DEBUG": "true",
+    "API_BASE_URL": "https://api.example.com"
+  }
+}</code></pre>
+
+        <h3 id="settings-other-keys">Other Top-Level Keys</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>model</code></td>
+                <td>string</td>
+                <td>Default model to use (e.g., <code>"claude-opus-4-6"</code>, <code>"claude-sonnet-4-6"</code>). Can be overridden per-session.</td>
+              </tr>
+              <tr>
+                <td><code>forceLoginOrgUUID</code></td>
+                <td>string</td>
+                <td>Forces authentication against a specific Anthropic organization UUID. Useful for team accounts.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Cross-references                                              -->
+      <!-- ============================================================ -->
+
+      <section id="cross-references">
+        <h2>Cross-References</h2>
+
+        <ul>
+          <li><a href="skills-reference.html">Skills Reference</a> -- per-skill <code>context_budget</code> and <code>skip_stages</code> values.</li>
+          <li><a href="pipeline-reference.html">Pipeline Reference</a> -- how pre-skill uses these configuration values at each stage.</li>
+          <li><a href="reference-files-catalog.html">Reference Files Catalog</a> -- the reference files loaded by <code>ref-load</code>.</li>
+          <li><a href="file-format-reference.html">File Format Reference</a> -- formats of the key files listed above.</li>
+          <li><a href="../how-to/skills/index.html">How-To: Skill-by-Skill Guides</a> -- practical guidance on configuring skills.</li>
+          <li><a href="../how-to/installation.html">Installation and Setup</a> -- how <code>/seja-setup</code> creates <code>settings.json</code> from the template.</li>
+        </ul>
+      </section>
+
+      <!-- See also: cross-volume related chapters -->
+      <nav aria-label="see also" class="see-also">
+        <h2>See also</h2>
+        <ul>
+          <li><a href="../how-to/installation.html">Installation and Setup</a> -- how to populate these configuration variables when setting up a project</li>
+          <li><a href="../how-to/customization.html">Customization and Extension</a> -- how to tune review tiers, thresholds, and triggers for your project</li>
+        </ul>
+      </nav>
+
+    </article>
+
+    <!-- Sequential chapter navigation -->
+    <nav aria-label="chapter navigation">
+      <a href="file-format-reference.html">Previous: File Format Reference</a>
+      <a href="index.html">Next: Reference Index</a>
+    </nav>
+  </main>
+
+  <!-- Sidebar table of contents -->
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#project-identity-variables">Project Identity Variables</a></li>
+      <li><a href="#directory-structure-variables">Directory Structure Variables</a></li>
+      <li><a href="#key-files-variables">Key Files Variables</a></li>
+      <li><a href="#file-maintainer-classification">File Maintainer Classification</a></li>
+      <li><a href="#review-configuration">Review Configuration</a></li>
+      <li><a href="#review-depth-tiers">Review Depth Tiers</a></li>
+      <li><a href="#periodic-triggers">Periodic Triggers</a></li>
+      <li><a href="#trigger-intervals">Trigger Intervals</a></li>
+      <li><a href="#thresholds">Thresholds</a></li>
+      <li><a href="#stack-description">Stack Description</a></li>
+      <li><a href="#architecture-description">Architecture Description</a></li>
+      <li><a href="#source-directories">Source Directories</a></li>
+      <li><a href="#constitution-structure">Constitution Structure</a></li>
+      <li><a href="#constitution-sections">Sections</a></li>
+      <li><a href="#constitution-principle-format">Principle Format</a></li>
+      <li><a href="#as-intended-as-coded-registry">As-Intended / As-Coded Registry</a></li>
+      <li><a href="#context-budget-tiers">Context Budget Tiers</a></li>
+      <li><a href="#settings-json-configuration">settings.json Configuration</a></li>
+      <li><a href="#settings-file-locations">File Locations and Precedence</a></li>
+      <li><a href="#settings-permission-allowlists">Permission Allowlists</a></li>
+      <li><a href="#settings-hooks">Hook Types</a></li>
+      <li><a href="#settings-mcp-servers">MCP Server Configuration</a></li>
+      <li><a href="#settings-environment-variables">Environment Variables</a></li>
+      <li><a href="#settings-other-keys">Other Top-Level Keys</a></li>
+      <li><a href="#cross-references">Cross-References</a></li>
+    </ul>
+  </aside>
+
+  <!-- Footer -->
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T16:30:00Z</p>
+  </footer>
+
+</body>
+</html>

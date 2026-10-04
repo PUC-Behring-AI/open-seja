@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="diataxis" content="reference">
+  <meta name="doc-volume" content="Reference">
+  <meta name="doc-chapter" content="Reference Files Catalog">
+  <meta name="doc-phase" content="draft">
+  <meta name="doc-status" content="published">
+
+  <title>Reference Files Catalog -- SEJA Documentation</title>
+
+  <!-- CSS depth: 1 (volume-level page) -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-nav">Skip to content</a>
+
+  <header>
+    <p>SEJA Documentation Collection</p>
+  </header>
+
+  <nav aria-label="volume navigation" class="nav-bar">
+    <span class="nav-bar-title">SEJA Documentation</span>
+    <a href="../index.html">Home</a>
+    <a href="../tutorials/index.html">Tutorials</a>
+    <a href="../how-to/index.html">How-To Guides</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../explanation/index.html">Explanation</a>
+  </nav>
+
+  <nav aria-label="breadcrumb" class="breadcrumb">
+    <ol>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Reference</a></li>
+      <li>Reference Files Catalog</li>
+    </ol>
+  </nav>
+
+  <main id="main-content" class="chapter-content vol-reference">
+    <article>
+      <p class="vol-accent"><strong>reference</strong></p>
+
+      <h1>Reference Files Catalog</h1>
+
+      <p>
+        SEJA reference files provide the context that skills and agents need to make
+        informed decisions. They are organized into three groups by scope: general
+        references (shared across all projects), template references (used to generate
+        project-specific files), and project-specific references (generated per-project
+        by <code>/design</code>). This catalog documents every reference file, its
+        load mechanism, consumer skills, and maintainer classification.
+      </p>
+
+      <section id="load-mechanisms">
+        <h2>Load Mechanisms</h2>
+
+        <dl>
+          <dt>Eager (mandatory)</dt>
+          <dd>Always loaded by pre-skill ref-load stage for standard and heavy context budget tiers. These files are injected into every skill invocation: <code>conventions.md</code>, <code>permissions.md</code>, <code>constraints.md</code>.</dd>
+
+          <dt>Eager (skill-declared)</dt>
+          <dd>Loaded immediately when declared in a skill's <code>metadata.eager_references</code> field. Injected alongside the mandatory refs before the skill body executes.</dd>
+
+          <dt>Lazy (demand-pull)</dt>
+          <dd>Listed in the "Available references" block but not injected until the skill requests them during execution. Used when a skill declares <code>metadata.eager_references</code> (Mode 2 demand-pull).</dd>
+
+          <dt>Eager-only (legacy)</dt>
+          <dd>When a skill has no <code>metadata.eager_references</code> field (Mode 1), all entries in <code>metadata.references</code> are loaded eagerly.</dd>
+
+          <dt>Manual</dt>
+          <dd>Not loaded automatically by pre-skill. Read on demand by specific skills, agents, or scripts when needed.</dd>
+        </dl>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Group 1: General References                                   -->
+      <!-- ============================================================ -->
+
+      <section id="general-references">
+        <h2>General References</h2>
+
+        <p>
+          50 files in <code>.claude/references/general/</code>: 19 top-level
+          reference documents, 4 machine-readable and visual data files, 16 per-perspective
+          review files, 6 onboarding role/level files, and 5 communication audience
+          files. These are shared across all projects and define the harness's
+          universal behavior.
+        </p>
+
+        <h3 id="general-top-level">Top-Level Reference Files (23)</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Purpose</th>
+                <th>Load Mechanism</th>
+                <th>Consumer Skills</th>
+                <th>Freshness</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>general/batch-execution-pattern.md</code></td>
+                <td>Parallel fan-out execution pattern for skills processing multiple independent work items</td>
+                <td>Manual</td>
+                <td>/implement (auto mode)</td>
+                <td>N/A</td>
+                <td>When you run a skill that fans out across many independent work items -- one ...</td>
+              </tr>
+              <tr>
+                <td><code>general/call-graph.json</code></td>
+                <td>Machine-readable call graph: 7 node types, 6 edge types, all skill-agent-script-reference relationships</td>
+                <td>Manual</td>
+                <td>generate_call_graph.py, generate_spo.py (--harness)</td>
+                <td>N/A</td>
+                <td>Machine-readable call graph data</td>
+              </tr>
+              <tr>
+                <td><code>general/coding-standards.md</code></td>
+                <td>Universal coding defaults applied when no project-specific standards exist</td>
+                <td>Eager (skill-declared)</td>
+                <td>/plan, /implement</td>
+                <td>N/A</td>
+                <td>When you are writing or reviewing code and want the universal defaults -- sma...</td>
+              </tr>
+              <tr>
+                <td><code>general/communication.md</code></td>
+                <td>Stakeholder communication patterns, audience segmentation, Layer 0/1 content model</td>
+                <td>Eager-only</td>
+                <td>/communicate</td>
+                <td>N/A</td>
+                <td>When you need to produce stakeholder-facing material from what your project a...</td>
+              </tr>
+              <tr>
+                <td><code>general/constraints.md</code></td>
+                <td>Non-negotiable guardrails: pinned anchors, decision-point rationale convention, autonomous action limits</td>
+                <td>Eager (mandatory)</td>
+                <td>All skills (via pre-skill ref-load)</td>
+                <td>N/A</td>
+                <td>When you want to know the non-negotiable guardrails every skill operates unde...</td>
+              </tr>
+              <tr>
+                <td><code>general/design-system.html</code></td>
+                <td>SEJA visual design system: brand palette, typography (Zen Kaku Gothic New, Shippori Mincho, IBM Plex Mono), component patterns, light/dark theme tokens</td>
+                <td>Manual</td>
+                <td>Documentation generation, /communicate (HTML output)</td>
+                <td>N/A</td>
+                <td>SEJA visual design system and brand tokens</td>
+              </tr>
+              <tr>
+                <td><code>general/designer-copy-voice.md</code></td>
+                <td>Agent-facing copy voice and encoding rules for node side-panel paragraphs in topology visualizations</td>
+                <td>Manual</td>
+                <td>generate_call_graph.py, generate_spo.py</td>
+                <td>N/A</td>
+                <td>When you write a node's side-panel paragraph -- an agent, a rule, a reference...</td>
+              </tr>
+              <tr>
+                <td><code>general/designer-copy-voice-rationale.md</code></td>
+                <td>Maintainer-only rationale sibling explaining why the copy voice rules exist</td>
+                <td>Manual</td>
+                <td>Maintainers only</td>
+                <td>N/A</td>
+                <td>When you are maintaining designer-copy-voice.md and need the backstory -- why...</td>
+              </tr>
+              <tr>
+                <td><code>general/documentation-quality.md</code></td>
+                <td>Documentation quality standard: Diataxis classification, freshness policy, structural-completeness rules</td>
+                <td>Eager-only</td>
+                <td>/document, /critique docs</td>
+                <td>N/A</td>
+                <td>When you write or review project documentation, I'm the reference that define...</td>
+              </tr>
+              <tr>
+                <td><code>general/harness-governance.md</code></td>
+                <td>Governance guardrails: authoring patterns, maintainer classification, codebase/workspace distinction, private-only conventions</td>
+                <td>Manual</td>
+                <td>Maintainers, /critique health</td>
+                <td>N/A</td>
+                <td>When you need the harness's governance guardrails -- skill and agent count ju...</td>
+              </tr>
+              <tr>
+                <td><code>general/onboarding.md</code></td>
+                <td>Onboarding framework: role families (BLD/SHP/GRD), expertise levels (L1-L3), layered content model</td>
+                <td>Eager-only</td>
+                <td>/onboard</td>
+                <td>N/A</td>
+                <td>When you onboard a new team member, I'm the reference that defines the role-f...</td>
+              </tr>
+              <tr>
+                <td><code>general/permissions.md</code></td>
+                <td>Actions SEJA takes without asking: file writes, git operations, script execution permissions</td>
+                <td>Eager (mandatory)</td>
+                <td>All skills (via pre-skill ref-load)</td>
+                <td>N/A</td>
+                <td>When you want to know which actions SEJA takes without asking and which ones ...</td>
+              </tr>
+              <tr>
+                <td><code>general/report-conventions.md</code></td>
+                <td>Report file format: header fields (id, datetime, prefix, scope), artifact immutability, file encoding, character restrictions</td>
+                <td>Eager-only / Eager (skill-declared)</td>
+                <td>/plan, /research, /communicate, /document, /explain</td>
+                <td>N/A</td>
+                <td>When a skill produces a report file under your output directory -- a plan, a ...</td>
+              </tr>
+              <tr>
+                <td><code>general/review-log-template.md</code></td>
+                <td>Canonical structure for review logs: Phase 1 perspective triage table, Phase 2 deep-dive format, execution metrics</td>
+                <td>Eager-only / Lazy</td>
+                <td>/plan, /critique review</td>
+                <td>N/A</td>
+                <td>When /plan, /critique review, or any skill that evaluates a change against th...</td>
+              </tr>
+              <tr>
+                <td><code>general/review-perspectives-essential-summary.md</code></td>
+                <td>Auto-generated compact summary of Essential tier (P0) perspectives for quick reference</td>
+                <td>Manual</td>
+                <td>/plan (light mode)</td>
+                <td>N/A</td>
+                <td>Auto-generated P0 perspective summary</td>
+              </tr>
+              <tr>
+                <td><code>general/review-perspectives-index.md</code></td>
+                <td>Perspective selection guide: maps plan prefixes to shortlisted perspectives for Phase 1 triage</td>
+                <td>Eager (skill-declared)</td>
+                <td>/plan</td>
+                <td>N/A</td>
+                <td>When you or a review skill needs to pick a short-list of perspectives before ...</td>
+              </tr>
+              <tr>
+                <td><code>general/review-perspectives.md</code></td>
+                <td>Full 16-perspective evaluation reference: SEC, PERF, DB, API, ARCH, DX, I18N, TEST, OPS, COMPAT, DATA, UX, A11Y, VIS, RESP, MICRO with Essential/Standard/Deep tier classification</td>
+                <td>Eager-only / Lazy</td>
+                <td>/plan, /critique review, /research</td>
+                <td>N/A</td>
+                <td>When you evaluate a plan, a diff, or an architectural decision, I'm the refer...</td>
+              </tr>
+              <tr>
+                <td><code>general/script-header-convention.md</code></td>
+                <td>Standard metadata header format for Python scripts: invocation context, lifecycle position, dependencies</td>
+                <td>Manual</td>
+                <td>Script authors</td>
+                <td>N/A</td>
+                <td>When you want every script in the harness to declare who invokes it and where...</td>
+              </tr>
+              <tr>
+                <td><code>general/shared-definitions.md</code></td>
+                <td>Harness-wide concept definitions: terminology, semiotic engineering concepts, lifecycle markers, requirement ID convention, file maintainer classification</td>
+                <td>Eager-only / Lazy</td>
+                <td>/communicate, /explain, /research, /plan</td>
+                <td>N/A</td>
+                <td>When a skill, plan, or artifact uses a harness-wide concept -- the metacommun...</td>
+              </tr>
+              <tr>
+                <td><code>general/skill-graph.md</code></td>
+                <td>Skill transition graph: "After skill X, consider Y" rules for post-skill step 12 next-step suggestions</td>
+                <td>Lazy</td>
+                <td>post-skill (step 12), /reflect</td>
+                <td>N/A</td>
+                <td>When one skill finishes and you are deciding what to do next, I'm the referen...</td>
+              </tr>
+              <tr>
+                <td><code>general/skill-graph.json</code></td>
+                <td>Machine-readable skill transition data (JSON companion to skill-graph.md)</td>
+                <td>Manual</td>
+                <td>Scripts, visualization tools</td>
+                <td>N/A</td>
+                <td>Machine-readable skill transition data</td>
+              </tr>
+              <tr>
+                <td><code>general/skill-map.mmd</code></td>
+                <td>Mermaid diagram of the skill lifecycle map for visual documentation</td>
+                <td>Manual</td>
+                <td>Documentation, /explain</td>
+                <td>N/A</td>
+                <td>Mermaid skill lifecycle map diagram</td>
+              </tr>
+              <tr>
+                <td><code>general/threat-model.md</code></td>
+                <td>STRIDE-lite threat model: attack vectors, trust boundaries, mitigation status for the harness itself</td>
+                <td>Manual</td>
+                <td>/critique health, maintainers</td>
+                <td>N/A</td>
+                <td>When you want to understand how SEJA defends itself against poisoned conventi...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="general-review-perspectives">Review Perspective Files (16)</h3>
+
+        <p>
+          Individual perspective definition files in
+          <code>general/review-perspectives/</code>. Each contains the full evaluation
+          criteria, guiding questions, and communicability assessment for one perspective.
+          Loaded on demand by review skills when a perspective is shortlisted.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>File</th>
+                <th>Perspective</th>
+                <th>Tier</th>
+                <th>Focus Area</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><code>review-perspectives/sec.md</code></td><td>SEC</td><td>Essential (P0)</td><td>Security: authentication, authorization, injection, data exposure</td></tr>
+              <tr><td><code>review-perspectives/perf.md</code></td><td>PERF</td><td>Essential (P0)</td><td>Performance: query efficiency, caching, resource usage</td></tr>
+              <tr><td><code>review-perspectives/db.md</code></td><td>DB</td><td>Essential (P0)</td><td>Database: schema design, migrations, indexing, transactions</td></tr>
+              <tr><td><code>review-perspectives/api.md</code></td><td>API</td><td>Standard (P1)</td><td>API design: REST conventions, versioning, error responses</td></tr>
+              <tr><td><code>review-perspectives/arch.md</code></td><td>ARCH</td><td>Standard (P1)</td><td>Architecture: separation of concerns, dependency flow, coupling</td></tr>
+              <tr><td><code>review-perspectives/dx.md</code></td><td>DX</td><td>Standard (P1)</td><td>Developer experience: naming, discoverability, maintainability</td></tr>
+              <tr><td><code>review-perspectives/i18n.md</code></td><td>I18N</td><td>Standard (P2)</td><td>Internationalization: string externalization, locale handling</td></tr>
+              <tr><td><code>review-perspectives/test.md</code></td><td>TEST</td><td>Standard (P2)</td><td>Testing: coverage, test design, fixtures, mocking strategy</td></tr>
+              <tr><td><code>review-perspectives/ops.md</code></td><td>OPS</td><td>Standard (P2)</td><td>Operations: logging, monitoring, deployment, error handling</td></tr>
+              <tr><td><code>review-perspectives/compat.md</code></td><td>COMPAT</td><td>Deep (P3)</td><td>Compatibility: backward compatibility, migration paths</td></tr>
+              <tr><td><code>review-perspectives/data.md</code></td><td>DATA</td><td>Deep (P3)</td><td>Data integrity: validation, consistency, privacy boundaries</td></tr>
+              <tr><td><code>review-perspectives/ux.md</code></td><td>UX</td><td>Deep (P3)</td><td>User experience: communicability, sign classes, feedback loops</td></tr>
+              <tr><td><code>review-perspectives/a11y.md</code></td><td>A11Y</td><td>Deep (P4)</td><td>Accessibility: WCAG compliance, screen reader support, keyboard navigation</td></tr>
+              <tr><td><code>review-perspectives/vis.md</code></td><td>VIS</td><td>Deep (P4)</td><td>Visual design: consistency, spacing, typography, color usage</td></tr>
+              <tr><td><code>review-perspectives/resp.md</code></td><td>RESP</td><td>Deep (P4)</td><td>Responsive design: breakpoints, mobile layouts, touch targets</td></tr>
+              <tr><td><code>review-perspectives/micro.md</code></td><td>MICRO</td><td>Deep (P4)</td><td>Micro-interactions: animations, transitions, feedback timing</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="general-onboarding">Onboarding Files (6)</h3>
+
+        <p>
+          Role family and expertise level definitions in
+          <code>general/onboarding/</code>. Loaded by
+          <code>/onboard</code> via the onboarding-generator agent.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>File</th>
+                <th>Category</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><code>onboarding/builders.md</code></td><td>Role: BLD</td><td>Builder role family: developers who write features and fix bugs</td></tr>
+              <tr><td><code>onboarding/shapers.md</code></td><td>Role: SHP</td><td>Shaper role family: designers and architects who shape product direction</td></tr>
+              <tr><td><code>onboarding/guardians.md</code></td><td>Role: GRD</td><td>Guardian role family: QA, security, compliance specialists</td></tr>
+              <tr><td><code>onboarding/l1-contributor.md</code></td><td>Level: L1</td><td>Contributor level: new team members, hands-on learning focus</td></tr>
+              <tr><td><code>onboarding/l2-expert.md</code></td><td>Level: L2</td><td>Expert level: experienced practitioners, deeper harness understanding</td></tr>
+              <tr><td><code>onboarding/l3-leader.md</code></td><td>Level: L3</td><td>Leader level: team leads, governance and customization focus</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="general-communication">Communication Audience Files (5)</h3>
+
+        <p>
+          Audience segment definitions in <code>general/communication/</code>.
+          Loaded by <code>/communicate</code> via the communication-generator agent.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>File</th>
+                <th>Audience Tag</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><code>communication/evaluators.md</code></td><td>EVL</td><td>Evaluators: reviewers assessing SEJA's value proposition</td></tr>
+              <tr><td><code>communication/clients.md</code></td><td>CLT</td><td>Clients: project stakeholders and decision-makers</td></tr>
+              <tr><td><code>communication/end-users.md</code></td><td>USR</td><td>End users: developers and designers using SEJA daily</td></tr>
+              <tr><td><code>communication/academics.md</code></td><td>ACD</td><td>Academics: researchers interested in semiotic engineering and agent governance</td></tr>
+              <tr><td><code>communication/diataxis-mapping.md</code></td><td>-</td><td>Maps audience segments to Diataxis quadrants for content routing</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Group 2: Template References                                  -->
+      <!-- ============================================================ -->
+
+      <section id="template-references">
+        <h2>Template References</h2>
+
+        <p>
+          50 files in <code>.claude/references/template/</code>. These templates
+          are used by <code>/design</code> and <code>/seja-setup</code> to generate
+          project-specific files. They define the canonical structure for each file
+          type. Templates are never loaded by pre-skill -- they are read on demand
+          by the skills that instantiate them.
+        </p>
+
+        <h3 id="template-core">Core Project Templates (9)</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Purpose</th>
+                <th>Consumer Skills</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>template/conventions.md</code></td>
+                <td>Project conventions template: directory structure, key files, variables, stack description</td>
+                <td>/design, /seja-setup, pre-skill (fallback)</td>
+              </tr>
+              <tr>
+                <td><code>template/constitution.md</code></td>
+                <td>Project constitution template: immutable principles (Technical, Quality, Security, Compliance)</td>
+                <td>/design (Mode 5), /seja-setup</td>
+              </tr>
+              <tr>
+                <td><code>template/claude-md.md</code></td>
+                <td>CLAUDE.md template: project root instructions for Claude Code</td>
+                <td>/seja-setup</td>
+              </tr>
+              <tr>
+                <td><code>template/product-design-as-intended.md</code></td>
+                <td>Design intent template: 17-section structure (Entity Hierarchy through Journey Maps) + Decisions + CHANGELOG</td>
+                <td>/design, /seja-setup</td>
+              </tr>
+              <tr>
+                <td><code>template/product-design-as-coded.md</code></td>
+                <td>As-coded state template: three H2 sections (Conceptual Design, Metacommunication, Journey Maps)</td>
+                <td>post-skill (step 2, branch 2)</td>
+              </tr>
+              <tr>
+                <td><code>template/product-design-changelog.md</code></td>
+                <td>Conceptual design changelog template: versioned entries with Added/Changed/Removed</td>
+                <td>post-skill (step 2)</td>
+              </tr>
+              <tr>
+                <td><code>template/product-overview.yaml</code></td>
+                <td>Structured Product Overview data model: layers, personas, quality criteria, card graph</td>
+                <td>/document --type spo, /design</td>
+              </tr>
+              <tr>
+                <td><code>template/ux-research-results.md</code></td>
+                <td>UX research template: personas, problem scenarios, discovered journeys, CHANGELOG</td>
+                <td>/design</td>
+              </tr>
+              <tr>
+                <td><code>template/questionnaire.md</code></td>
+                <td>Design questionnaire template: structured questions for /design interview mode</td>
+                <td>/design, /seja-setup</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="template-standards">Standards Templates (3)</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Purpose</th>
+                <th>Consumer Skills</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>template/standards.md</code></td>
+                <td>Engineering standards template: Backend, Frontend, Testing, i18n sections</td>
+                <td>/design</td>
+              </tr>
+              <tr>
+                <td><code>template/design-standards.md</code></td>
+                <td>Design standards template: UX patterns, visual design sections</td>
+                <td>/design</td>
+              </tr>
+              <tr>
+                <td><code>template/security-checklists.md</code></td>
+                <td>Security checklists template: OWASP-aligned security verification</td>
+                <td>/design</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="template-plan-report">Plan and Report Templates (5)</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Purpose</th>
+                <th>Consumer Skills</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>template/plan-step.md</code></td>
+                <td>Canonical plan step format: title, description, Files/References/Depends on/Interface/Verify/Tests/Docs/Deploy/Traces metadata</td>
+                <td>/plan</td>
+              </tr>
+              <tr>
+                <td><code>template/proposal.md</code></td>
+                <td>Lightweight change proposal template for /plan --light</td>
+                <td>/plan (light mode)</td>
+              </tr>
+              <tr>
+                <td><code>template/roadmap-summary.md</code></td>
+                <td>Roadmap summary template: plan list, dependencies, timeline</td>
+                <td>/plan --roadmap</td>
+              </tr>
+              <tr>
+                <td><code>template/roadmap-spec.md</code></td>
+                <td>Roadmap specification template: scope, plan generation rules</td>
+                <td>/plan --roadmap</td>
+              </tr>
+              <tr>
+                <td><code>template/project-spec.md</code></td>
+                <td>Project specification template for from-spec mode</td>
+                <td>/design, /plan --from-spec</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="template-agent">Agent-Facing Specification Templates (4)</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Purpose</th>
+                <th>Consumer Skills</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>template/agent/constraints.yaml</code></td>
+                <td>Agent-facing constraints: machine-readable validation rules derived from constitution</td>
+                <td>/design (--generate-spec), /critique validate</td>
+              </tr>
+              <tr>
+                <td><code>template/agent/entities.yaml</code></td>
+                <td>Agent-facing entity definitions: structured entity hierarchy for automated checks</td>
+                <td>/design (--generate-spec), /critique validate</td>
+              </tr>
+              <tr>
+                <td><code>template/agent/permissions.yaml</code></td>
+                <td>Agent-facing permissions: structured permission model for automated validation</td>
+                <td>/design (--generate-spec), /critique validate</td>
+              </tr>
+              <tr>
+                <td><code>template/agent/spec-checks.yaml</code></td>
+                <td>Agent-facing spec checks: automated verification rules for design compliance</td>
+                <td>/design (--generate-spec), /critique validate</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="template-agents">Agent Prompt Templates (5)</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Purpose</th>
+                <th>Consumer Skills</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>template/agents-code-reviewer.md</code></td>
+                <td>Project-specific code reviewer customization template</td>
+                <td>/design (--add-docs)</td>
+              </tr>
+              <tr>
+                <td><code>template/agents-migration-validator.md</code></td>
+                <td>Project-specific migration validator customization template</td>
+                <td>/design (--add-docs)</td>
+              </tr>
+              <tr>
+                <td><code>template/agents-plan-reviewer.md</code></td>
+                <td>Project-specific plan reviewer customization template</td>
+                <td>/design (--add-docs)</td>
+              </tr>
+              <tr>
+                <td><code>template/agents-standards-checker.md</code></td>
+                <td>Project-specific standards checker customization template</td>
+                <td>/design (--add-docs)</td>
+              </tr>
+              <tr>
+                <td><code>template/agents-test-runner.md</code></td>
+                <td>Project-specific test runner customization template</td>
+                <td>/design (--add-docs)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="template-rules">Path-Scoped Rule Templates (6)</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Purpose</th>
+                <th>Consumer Skills</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>template/rules-backend.md</code></td>
+                <td>Backend rule template: auto-loaded when editing backend source files</td>
+                <td>/design, /seja-setup</td>
+              </tr>
+              <tr>
+                <td><code>template/rules-frontend.md</code></td>
+                <td>Frontend rule template: auto-loaded when editing frontend source files</td>
+                <td>/design, /seja-setup</td>
+              </tr>
+              <tr>
+                <td><code>template/rules-e2e.md</code></td>
+                <td>E2E testing rule template: auto-loaded when editing end-to-end test files</td>
+                <td>/design, /seja-setup</td>
+              </tr>
+              <tr>
+                <td><code>template/rules-i18n.md</code></td>
+                <td>Internationalization rule template: auto-loaded when editing i18n files</td>
+                <td>/design, /seja-setup</td>
+              </tr>
+              <tr>
+                <td><code>template/rules-migrations.md</code></td>
+                <td>Migration rule template: auto-loaded when editing database migration files</td>
+                <td>/design, /seja-setup</td>
+              </tr>
+              <tr>
+                <td><code>template/rules-tests.md</code></td>
+                <td>Test rule template: auto-loaded when editing test files</td>
+                <td>/design, /seja-setup</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="template-demo">Demo Templates (5)</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Purpose</th>
+                <th>Consumer Skills</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>template/demo/WALKTHROUGH.md</code></td>
+                <td>Demo walkthrough: guided hello-world experience script</td>
+                <td>/seja-setup --demo</td>
+              </tr>
+              <tr>
+                <td><code>template/demo/conventions.md</code></td>
+                <td>Pre-filled demo conventions for the hello-world project</td>
+                <td>/seja-setup --demo</td>
+              </tr>
+              <tr>
+                <td><code>template/demo/constitution.md</code></td>
+                <td>Pre-filled demo constitution for the hello-world project</td>
+                <td>/seja-setup --demo</td>
+              </tr>
+              <tr>
+                <td><code>template/demo/product-design-as-intended.md</code></td>
+                <td>Pre-filled demo design intent for the hello-world project</td>
+                <td>/seja-setup --demo</td>
+              </tr>
+              <tr>
+                <td><code>template/demo/product-overview.yaml</code></td>
+                <td>Pre-filled demo SPO data for the hello-world project</td>
+                <td>/seja-setup --demo</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="template-docs">Documentation Templates (6)</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Purpose</th>
+                <th>Consumer Skills</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>template/docs/readme.md</code></td>
+                <td>README generation template with freshness and Diataxis metadata</td>
+                <td>/document --type readme</td>
+              </tr>
+              <tr>
+                <td><code>template/docs/contextual-help.md</code></td>
+                <td>Contextual help template: expanded 6-section pattern for in-app guidance</td>
+                <td>/document --type contextual-help</td>
+              </tr>
+              <tr>
+                <td><code>template/docs/api-reference.md</code></td>
+                <td>API reference documentation template</td>
+                <td>/document --type api-reference</td>
+              </tr>
+              <tr>
+                <td><code>template/docs/ddr.md</code></td>
+                <td>Design Decision Record template: Context, Decision, Consequences structure</td>
+                <td>/document --type ddr</td>
+              </tr>
+              <tr>
+                <td><code>template/docs/help-center.md</code></td>
+                <td>Help center article template</td>
+                <td>/document --type help-center</td>
+              </tr>
+              <tr>
+                <td><code>template/docs/changelog.md</code></td>
+                <td>Changelog generation template</td>
+                <td>/document --type changelog</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="template-other">Other Templates (5)</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Purpose</th>
+                <th>Consumer Skills</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>template/communication-style.md</code></td>
+                <td>Communication style guide template for consistent voice</td>
+                <td>/design</td>
+              </tr>
+              <tr>
+                <td><code>template/design-confidence-annotations.md</code></td>
+                <td>Confidence annotation template for design decisions</td>
+                <td>/design</td>
+              </tr>
+              <tr>
+                <td><code>template/design-interview-transcript.md</code></td>
+                <td>Design interview transcript template for Mode 5 (interview-driven)</td>
+                <td>/design (--mode interview)</td>
+              </tr>
+              <tr>
+                <td><code>template/script-rationale.md</code></td>
+                <td>SKILL-rationale.md sibling template for documenting design choice backstories</td>
+                <td>/design</td>
+              </tr>
+              <tr>
+                <td><code>template/smoke-test-registry.json</code></td>
+                <td>Smoke test registry: JSON schema for registered smoke test definitions</td>
+                <td>/critique smoke</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="template-config">Configuration Templates (2)</h3>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Purpose</th>
+                <th>Consumer Skills</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>template/settings.json</code></td>
+                <td>Claude Code settings template: permissions, hooks, MCP configuration</td>
+                <td>/seja-setup</td>
+              </tr>
+              <tr>
+                <td><code>template/ci/github-actions-checks.yml</code></td>
+                <td>GitHub Actions CI workflow template for automated validation</td>
+                <td>/seja-setup</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Group 3: Project-Specific References                          -->
+      <!-- ============================================================ -->
+
+      <section id="project-references">
+        <h2>Project-Specific References</h2>
+
+        <p>
+          Files in <code>product-design/</code>, generated per-project by
+          <code>/design</code>. These define the project's specific design
+          intent, implementation state, and engineering standards. Loaded by
+          pre-skill ref-load when declared in a skill's references.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Purpose</th>
+                <th>Maintainer</th>
+                <th>Load Mechanism</th>
+                <th>Consumer Skills</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>product-design/conventions.md</code></td>
+                <td>Project conventions: directory structure, key files, variables, stack description, as-intended/as-coded registry, periodic triggers</td>
+                <td>Human / Agent</td>
+                <td>Eager (mandatory)</td>
+                <td>All skills (via pre-skill), all scripts (via project_config.py)</td>
+              </tr>
+              <tr>
+                <td><code>product-design/constitution.md</code></td>
+                <td>Immutable project principles: Technical (T1-T4), Quality (Q1-Q3), Security (S1-S2), Compliance (C1-C2)</td>
+                <td>Human</td>
+                <td>Pre-skill constitution stage</td>
+                <td>All skills (via pre-skill), generator agents (trust boundary enforcement)</td>
+              </tr>
+              <tr>
+                <td><code>product-design/product-design-as-intended.md</code></td>
+                <td>Unified working intent: 17 design-intent sections (§0-§17), Decisions section (D-NNN entries), CHANGELOG</td>
+                <td>Human (markers)</td>
+                <td>Eager (skill-declared) / Lazy</td>
+                <td>/plan, /implement, /explain drift, post-skill (step 2e)</td>
+              </tr>
+              <tr>
+                <td><code>product-design/product-design-as-coded.md</code></td>
+                <td>Unified implementation state: three H2 sections (Conceptual Design, Metacommunication, Journey Maps)</td>
+                <td>Agent</td>
+                <td>Eager (skill-declared) / Lazy</td>
+                <td>/plan, /implement, /explain drift, post-skill (step 2), /communicate, /research</td>
+              </tr>
+              <tr>
+                <td><code>product-design/product-design-changelog.md</code></td>
+                <td>Conceptual design changelog: versioned entries tracking as-coded changes</td>
+                <td>Agent</td>
+                <td>Manual</td>
+                <td>post-skill (step 2)</td>
+              </tr>
+              <tr>
+                <td><code>product-design/ux-research-results.md</code></td>
+                <td>UX research: personas, problem scenarios, discovered user journeys (JM-E-NNN), CHANGELOG</td>
+                <td>Human (markers)</td>
+                <td>Manual</td>
+                <td>/explain drift, post-skill (step 2d)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="project-optional">Optional Project Files</h3>
+
+        <p>
+          These files may be generated by <code>/design</code> depending on the
+          project's stack and configuration. They are not present in all projects.
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Purpose</th>
+                <th>Maintainer</th>
+                <th>Consumer Skills</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>product-design/standards.md</code></td>
+                <td>Unified engineering standards: Backend, Frontend, Testing, i18n sections</td>
+                <td>Human / Agent</td>
+                <td>/plan, /implement, /critique review</td>
+              </tr>
+              <tr>
+                <td><code>product-design/design-standards.md</code></td>
+                <td>Unified design standards: UX patterns, visual design sections</td>
+                <td>Human / Agent</td>
+                <td>/plan, /implement, /critique review</td>
+              </tr>
+              <tr>
+                <td><code>product-design/security-checklists.md</code></td>
+                <td>Security verification checklists: OWASP-aligned security gates</td>
+                <td>Human / Agent</td>
+                <td>/critique review, /implement</td>
+              </tr>
+              <tr>
+                <td><code>product-design/agent/constraints.yaml</code></td>
+                <td>Agent-facing constraints: machine-readable validation rules</td>
+                <td>Agent</td>
+                <td>/critique validate, standards-checker</td>
+              </tr>
+              <tr>
+                <td><code>product-design/agent/entities.yaml</code></td>
+                <td>Agent-facing entity definitions: structured hierarchy</td>
+                <td>Agent</td>
+                <td>/critique validate, standards-checker</td>
+              </tr>
+              <tr>
+                <td><code>product-design/agent/permissions.yaml</code></td>
+                <td>Agent-facing permissions: structured permission model</td>
+                <td>Agent</td>
+                <td>/critique validate, standards-checker</td>
+              </tr>
+              <tr>
+                <td><code>product-design/agent/spec-checks.yaml</code></td>
+                <td>Agent-facing spec checks: automated verification rules</td>
+                <td>Agent</td>
+                <td>/critique validate, standards-checker</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- Summary                                                       -->
+      <!-- ============================================================ -->
+
+      <section id="summary">
+        <h2>Summary</h2>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Group</th>
+                <th>Directory</th>
+                <th>File Count</th>
+                <th>Primary Consumer</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>General references</td>
+                <td><code>.claude/references/general/</code></td>
+                <td>50 (23 top-level + 16 perspectives + 6 onboarding + 5 communication)</td>
+                <td>Pre-skill ref-load, all review skills</td>
+              </tr>
+              <tr>
+                <td>Template references</td>
+                <td><code>.claude/references/template/</code></td>
+                <td>50</td>
+                <td>/design, /seja-setup, /document</td>
+              </tr>
+              <tr>
+                <td>Project-specific references</td>
+                <td><code>product-design/</code></td>
+                <td>6 core + optional standards and agent specs</td>
+                <td>Pre-skill, /plan, /implement, /explain drift</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- See also: cross-volume related chapters -->
+      <nav aria-label="see also" class="see-also">
+        <h2>See also</h2>
+        <ul>
+          <li><a href="../how-to/customization.html">Customization and Extension</a> -- how to create custom reference files for your project</li>
+          <li><a href="../explanation/semiotic-engineering.html">The Semiotic Engineering Foundation</a> -- why the harness carries curated reference files for the agent to read</li>
+        </ul>
+      </nav>
+
+    </article>
+
+    <!-- Sequential chapter navigation -->
+    <nav aria-label="chapter navigation">
+      <a href="scripts-reference.html">Previous: Scripts Reference</a>
+      <a href="pipeline-reference.html">Next: Pipeline Reference</a>
+    </nav>
+  </main>
+
+  <aside aria-label="Table of contents" class="sidebar-toc">
+    <h2>On This Page</h2>
+    <ul>
+      <li><a href="#load-mechanisms">Load Mechanisms</a></li>
+      <li><a href="#general-references">General References</a></li>
+      <li><a href="#general-top-level">Top-Level Files (23)</a></li>
+      <li><a href="#general-review-perspectives">Review Perspectives (16)</a></li>
+      <li><a href="#general-onboarding">Onboarding Files (6)</a></li>
+      <li><a href="#general-communication">Communication Files (5)</a></li>
+      <li><a href="#template-references">Template References</a></li>
+      <li><a href="#template-core">Core Templates (9)</a></li>
+      <li><a href="#template-standards">Standards Templates (3)</a></li>
+      <li><a href="#template-plan-report">Plan/Report Templates (5)</a></li>
+      <li><a href="#template-agent">Agent Spec Templates (4)</a></li>
+      <li><a href="#template-agents">Agent Prompt Templates (5)</a></li>
+      <li><a href="#template-rules">Rule Templates (6)</a></li>
+      <li><a href="#template-demo">Demo Templates (5)</a></li>
+      <li><a href="#template-docs">Documentation Templates (6)</a></li>
+      <li><a href="#template-other">Other Templates (5)</a></li>
+      <li><a href="#template-config">Configuration Templates (2)</a></li>
+      <li><a href="#project-references">Project-Specific References</a></li>
+      <li><a href="#project-optional">Optional Project Files</a></li>
+      <li><a href="#summary">Summary</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <nav aria-label="collection">
+      <a href="../index.html">Collection Index</a>
+      <a href="../index.html">Reading Map</a>
+    </nav>
+
+    <p>Generated: 2026-07-14T16:30:00Z</p>
+  </footer>
+
+</body>
+</html>
