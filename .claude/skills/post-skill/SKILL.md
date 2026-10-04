@@ -155,7 +155,7 @@ When `--deferred` is active, execute steps 0, 1b, 2, 2c, 7, 2g, and 8b only. Ski
 
 6b. **Fast preflight gate** -- `python .claude/skills/scripts/run_preflight_fast.py`. Exit 0 -> proceed silently. Non-zero -> display failures; ask whether to proceed or abort (advisory, not blocking -- post-skill runs after lengthy work; `.githooks/pre-commit` is the hard gate). Script not found -> skip silently.
 
-6c. **Human markers verifier** -- `python .claude/skills/scripts/critique_human_markers_only.py --staged`. Exit 0 -> proceed silently. Exit 1 (prose mutation in a Human (markers) file) -> display the violation; ask via AskUserQuestion whether to abort or proceed. Default recommendation: abort (unauthorized edit should go through `apply_marker.py`). Script not found -> skip silently.
+6c. **Human markers verifier** -- `python .claude/skills/scripts/check_human_markers_only.py --staged`. Exit 0 -> proceed silently. Exit 1 (prose mutation in a Human (markers) file) -> display the violation; ask via AskUserQuestion whether to abort or proceed. Default recommendation: abort (unauthorized edit should go through `apply_marker.py`). Script not found -> skip silently.
 
 7. **Index regeneration**:
    a. `python .claude/skills/scripts/generate_briefs_index.py` -- refreshes `${BRIEFS_INDEX_FILE}`.

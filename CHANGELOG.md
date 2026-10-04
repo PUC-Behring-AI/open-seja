@@ -16,6 +16,14 @@ Format: loosely based on [Keep a Changelog](https://keepachangelog.com/). SemVer
 
 ## [Unreleased]
 
+## [v0.10.1] - 2026-10-04
+
+### Fixed
+
+- **First cycle with the quality gate, as rehearsed on v0.10.0**: `/seja-setup` now offers the gate when the backend is Python (the old trigger waited for a `pytest` answer that the setup questions never ask). Setup makes its initial commit first and writes the gate's commands to `product-design/conventions.md` afterwards, uncommitted; you commit them yourself after `uv run python gate.py --init-baseline`. Before, the commit hook refused setup's own commit and every later agent commit, and the `Stop` hook blocked setup turns before the project existed. The commands are now `uv run python gate.py --fast --json` and `--full --json`, so the hooks get a JSON report and find the venv's tools. With a backend folder (for example `backend/`), the gate measures that folder instead of an empty `src/` package. The template's `[tool.ruff] extend-exclude` adds `product-design`, `docs` and `_output`, so `ruff format --check .` no longer fails on Python snippets inside the design files. `docs/quickstart.md` "Your first cycle" follows the new order (baseline and gate commit before `/design`) and lists the full `uv add --dev` line.
+- **`/implement` shows each step note as it is written**: in auto and manual mode the note and its gate result are shown after each step, not first met in `/reflect`. Manual mode runs the gate per step on that step's files; a gate run over the whole change is not attributed to any step.
+- **Human (markers) verifier in `/post-skill`**: step 6c called a script that does not exist (`critique_human_markers_only.py`) and was silently skipped; it now calls `check_human_markers_only.py`.
+
 ## [v0.10.0] - 2026-10-04
 
 ### Breaking changes

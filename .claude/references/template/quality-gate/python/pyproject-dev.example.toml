@@ -29,9 +29,10 @@ tests_dir = ["tests/"]
 timeout_multiplier = 2.0      # per-mutant timeout, relative to the test run
 
 # The gate runs ruff and pyright on the whole project; keep it from linting
-# its own installed copy and the harness hooks.
+# its own installed copy, the harness hooks, and the Python snippets inside
+# the design and output Markdown (`ruff format --check .` reads them).
 [tool.ruff]
-extend-exclude = ["gate.py", ".claude"]
+extend-exclude = ["gate.py", ".claude", "product-design", "docs", "_output"]
 
 [tool.pyright]
 include = ["src", "tests"]
