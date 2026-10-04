@@ -72,7 +72,7 @@ Apply the `Scaffold-SmokeTestInfra` anchor body from Standard Install Flow step 
 
 ### Step 4f -- Offer quality gate
 
-Apply the `Offer-QualityGate` anchor body from Standard Install Flow step 7f against cwd. Same trigger (Section 1 test answer includes `pytest`) and same accept/decline semantics. If `gate.py` or a `## Quality Gate` section already exists, skip rather than overwrite. Reuses the answers from Step 4b.
+Apply the `Offer-QualityGate` anchor body from Standard Install Flow step 7f against cwd. Same trigger (the Q1.4 backend answer is Python) and same accept/decline semantics; the `## Quality Gate` section is written in Step 7b, after the initial commit, not here. If `gate.py` or a `## Quality Gate` section already exists, skip rather than overwrite. Reuses the answers from Step 4b.
 
 ### Step 5 -- Git history handling
 
@@ -115,6 +115,10 @@ Apply chosen actions sequentially; log each rename/move before executing.
 ### Step 7 -- Initial commit
 
 `git add . && git commit -m "chore: finalise SEJA setup in place (plan-000392)"` in cwd. If it fails (git user.name/email unconfigured, or Re-init fresh already produced an initial commit), warn and continue to handoff -- do not abort.
+
+### Step 7b -- Quality gate config
+
+Only when Step 4f was accepted. Apply the `Write-QualityGateConfig` anchor body from Standard Install Flow step 7c against cwd: append `## Quality Gate` to `product-design/conventions.md` after the initial commit, leave it uncommitted, and tell the user to commit it themselves after `uv run python gate.py --init-baseline`.
 
 ### Step 8 -- Handoff
 

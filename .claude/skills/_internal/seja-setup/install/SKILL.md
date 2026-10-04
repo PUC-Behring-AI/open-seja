@@ -137,7 +137,7 @@ metadata:
 
    Anchor name: `Scaffold-SmokeTestInfra`. Referenced by `/design` Update when the stack flips.
 
-7f. **Offer quality gate** (anchor: `Offer-QualityGate`). Runs before the initial commit (7b). Trigger: the Section 1 test answer includes `pytest`, regardless of `BACKEND_FRAMEWORK` (the CLI / library profile of 4c.3 is the typical case). Otherwise skip silently.
+7f. **Offer quality gate** (anchor: `Offer-QualityGate`). Runs before the initial commit (7b); its conventions block is written after it (7c). Trigger: the Q1.4 backend answer is Python (a Python web framework such as `fastapi`, `flask` or `django`, or the CLI / library profile of 4c.3). Section 1 has no testing question, so do not wait for a `pytest` answer: the gate brings pytest with it. Otherwise skip silently.
 
    Ask with `AskUserQuestion` (rationale per C4):
    - **Install the Python quality gate** -- Recommended when the project is Python with pytest and you want ruff, pyright, tests, CRAP and mutation checks behind one command with a human-owned baseline. NOT recommended when the project has no tests yet, is not Python, or you do not want extra dev dependencies.
@@ -145,18 +145,21 @@ metadata:
 
    On accept:
    - Copy `.claude/references/template/quality-gate/python/gate.py` to the project root and `.../README.md` to `docs/quality-gate.md`.
-   - Show the block from `pyproject-dev.example.toml` and the matching `uv add --dev ...` command; do NOT run it. The block includes `[tool.ruff] extend-exclude = ["gate.py", ".claude"]` and `[tool.pyright] include = ["src", "tests"]`, so the gate does not lint its own copy and the hooks; merge them into the project's `pyproject.toml`.
-   - Append `## Quality Gate` to `product-design/conventions.md` with values in backticks: `GATE_FAST_CMD`, `GATE_FULL_CMD`, `GATE_COMMIT_CMD` (same value as `GATE_FULL_CMD`) and `QUALITY_DIR`.
+   - Show the block from `pyproject-dev.example.toml` and the matching command, `uv add --dev ruff pyright pytest pytest-cov pytest-timeout "coverage[toml]>=7.5,<8" "radon>=6,<7" "mutmut>=3,<4" import-linter`; do NOT run it. The block includes `[tool.ruff] extend-exclude = ["gate.py", ".claude", "product-design", "docs", "_output"]` (the gate runs `ruff format --check .`, which would otherwise check the Python snippets inside the design files) and `[tool.pyright] include = ["src", "tests"]`; merge them into the project's `pyproject.toml`.
+   - Point the block at the code the gate measures. With a `src/` layout, `package` is the package under `src/`. With a backend directory (`BACKEND_DIR` from Q1.9, for example `backend`), set `[tool.seja-gate] package` to that directory (it must contain an `__init__.py`), `[tool.mutmut] paths_to_mutate` to `["<BACKEND_DIR>/"]` and add `<BACKEND_DIR>` to `[tool.pyright] include`; do not create an empty `src/` package for the gate.
+   - Do NOT write the `## Quality Gate` section yet: it is written by 7c, after the initial commit. While `GATE_FAST_CMD` is absent the hooks below are inert, so they do not block setup turns before the project has a `pyproject.toml` and its dev tools.
    - Resolve `<PY>`: the first of `python3`, `python`, `py -3` that runs `-c "import sys"` successfully (none works -> skip the next bullet and tell the user the hooks were not wired).
    - Merge `.claude/references/template/quality-gate/settings.fragment.json` into the project's `.claude/settings.json` (create it if missing), replacing the literal `<PY>` in the hook commands with the resolved interpreter. Append only: skip any hook command or `permissions.deny` rule already present, never remove or rewrite existing hooks or rules. The hooks are the authority; the deny rules are complementary.
    - Add `_output/quality/`, `mutants/`, `.coverage` and `coverage.json` to `.gitignore`.
-   - Tell the user the first run must be `gate.py --init-baseline`.
+   - Tell the user what comes next (7c repeats it): create the Python project, run `uv add --dev ...`, then `uv run python gate.py --init-baseline` once, then commit `product-design/conventions.md` and `quality-baseline.json` themselves.
 
    On decline: do not emit the `## Quality Gate` section (absent = not installed; respects 4c.4, no placeholders).
 
    Anchor name: `Offer-QualityGate`. Referenced by `--here` Step 4f.
 
 7b. **Initial commit**: `git add . && git commit -m "chore: set up SEJA harness"` in the target (or workspace) dir. Workspace+greenfield (2b created both): commit in both. Demo mode: this step runs after step 10 (so the commit includes demo files), not after 7. If `git commit` fails (git user.name/email unconfigured), warn and continue -- do not abort.
+
+7c. **Quality gate config** (anchor: `Write-QualityGateConfig`; only when 7f was accepted; runs right after 7b, so in demo mode after step 10). Append `## Quality Gate` to `product-design/conventions.md` with values in backticks: `GATE_FAST_CMD` = `uv run python gate.py --fast --json`, `GATE_FULL_CMD` = `uv run python gate.py --full --json`, `GATE_COMMIT_CMD` (same value as `GATE_FULL_CMD`) and `QUALITY_DIR` = `_output/quality`. `--json` is required: the hooks parse the gate's JSON report. `uv run` puts the project venv on the gate's PATH, so the hooks find ruff, pyright and pytest. Leave the change uncommitted: `quality_gate_pretool.py` refuses an agent commit that changes `GATE_` lines, by design. Tell the user, in these words or close: "The gate is configured but not yet committed. Create the Python project, run the `uv add --dev ...` command, run `uv run python gate.py --init-baseline` once, then commit `product-design/conventions.md` and `quality-baseline.json` yourself. Until you do, agent commits (including `/plan` and `/implement`) are blocked."
 
 8. **Handoff**: report the scaffolded stack summary and direct the user to `/design` for design-intent concerns. Construct the summary from the questionnaire answers: use the literal framework slugs for present stacks (e.g. `flask`, `react`) and the string `no backend` or `no frontend` when the user answered `framework: none`.
 

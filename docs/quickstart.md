@@ -146,29 +146,34 @@ project.
 
 1. **Install, with the gate.** Clone the harness (`git clone git@github.com:PUC-Behring-AI/open-seja my-project`),
    open Claude Code in `my-project/` and run `/seja-setup --here` (or `/seja-setup` in an existing project). There is
-   no menu: `/seja-setup --here` goes straight to questions about your stack, then asks what to do with the git
-   history (choose **Re-init fresh** and type `confirm`; the history is open-seja's, not yours) and which harness
-   files to tidy up (the defaults move `docs/` to `docs/seja/` and rename `README.md` and `CHANGELOG.md`). The gate
-   needs a Python project with pytest, and `/seja-setup` only offers it when it sees pytest in your answers. For a new,
-   empty project, tell `/seja-setup` the stack is Python with pytest. Accept the gate when it is offered. You should
+   no menu: `/seja-setup --here` goes straight to questions about your stack, then asks whether to install the
+   quality gate, what to do with the git history (choose **Re-init fresh** and type `confirm`; the history is
+   open-seja's, not yours) and which harness files to tidy up (the defaults move `docs/` to `docs/seja/` and rename
+   `README.md` and `CHANGELOG.md`). The gate is offered when your backend is Python; for a new, empty project, tell
+   `/seja-setup` the stack is Python with no frontend. Accept the gate. Setup makes its initial commit, then adds the
+   gate's commands to `product-design/conventions.md` and leaves that change for you to commit (step 2). You should
    now see `gate.py` in the project root. Setup does not create the Python project itself, so give the gate something
    to measure: a `pyproject.toml` with the blocks from
    `.claude/references/template/quality-gate/python/pyproject-dev.example.toml` (set `package` to your package
-   name), one package under `src/` (for example `src/my_project/__init__.py`), a `tests/` folder, and the tools the
-   gate runs (`uv add --dev ruff pyright pytest pytest-cov pytest-timeout radon`). If the project is not
-   Python, skip the gate: the cycle still works, and the `gate` field of each step note reads `not-installed`.
-2. **Record your intent.** Run `/design` (skip it if you already ran it in the worked example). It asks a short
+   name), one package under `src/` (for example `src/my_project/__init__.py`) or in your backend folder, a `tests/`
+   folder, and the tools the gate runs (`uv add --dev ruff pyright pytest pytest-cov pytest-timeout
+   "coverage[toml]>=7.5,<8" "radon>=6,<7" "mutmut>=3,<4" import-linter`). If the project is not Python, skip the
+   gate: the cycle still works, and the `gate` field of each step note reads `not-installed`.
+2. **Record the baseline and commit the gate.** From the project root, run `uv run python gate.py --init-baseline`
+   once. The gate now remembers the current state, and from here on thresholds only move when you accept it. Then
+   commit the gate's configuration yourself: `git add -A && git commit -m "chore: quality gate baseline"`. Agents are
+   not allowed to commit changes to the gate's commands, so until this commit exists every agent commit, including
+   the ones `/design`, `/plan` and `/implement` make, is refused. If `gate.py` is missing, the gate was not
+   installed: re-run `/seja-setup` and choose the gate.
+3. **Record your intent.** Run `/design` (skip it if you already ran it in the worked example). It asks a short
    sequence of questions about your project and writes `product-design/product-design-as-intended.md`; a plan needs
    that file.
-3. **Record the baseline.** From the project root, run `python gate.py --init-baseline` once. The gate now remembers
-   the current state, and from here on thresholds only move when you accept it. If `gate.py` is missing, the gate was
-   not installed: re-run `/seja-setup` and choose the gate.
 4. **Plan a small change.** Run `/plan` with something tiny, for example "add a function `slugify(title)` with a
    test". You get a numbered plan, reviewed before anything is written.
 5. **Implement it.** Run `/implement <plan-id>`. For each step you will see the gate run on the files the step
    touched, up to three attempts, and a step only counts as done on PASS. Each step also leaves a short note in
-   `_output/plans/plan-<id>-progress.md`: what happened, what deviated, what the agent is less sure about, with the
-   gate result. A note looks like this:
+   `_output/plans/plan-<id>-progress.md`, shown to you as it is written: what happened, what deviated, what the agent
+   is less sure about, with the gate result of that step. A note looks like this:
 
    ```text
    ### Step 2 -- reflection-on-action | 2026-10-04 14:10 UTC | Add slugify
