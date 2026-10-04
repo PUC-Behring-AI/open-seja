@@ -36,11 +36,11 @@ Runs from the **target project** (not the source repo). Applies safe updates to 
 
 ### Steps
 
-1. **Resolve target version**: `python .claude/skills/seja-setup/resolve_seja_version.py [--version <tag>]` (default: latest SemVer tag on `simonedjb/seja`). Capture the resolved tag for steps 3 and 5; surface the `HEAD` fallback warning if emitted. If resolved tag matches current `.seja-version`, print "Harness already up to date at `<tag>`" and exit.
+1. **Resolve target version**: `python .claude/skills/seja-setup/resolve_seja_version.py [--version <tag>]` (default: latest SemVer tag on the open-seja remote -- `$SEJA_REMOTE` if set, else `git@github.com:PUC-Behring-AI/open-seja.git`). Capture the resolved tag for steps 3 and 5; surface the `HEAD` fallback warning if emitted. If resolved tag matches current `.seja-version`, print "Harness already up to date at `<tag>`" and exit.
 
-2. **Locate SEJA source repo**: if a path is provided, trust the user has it at the desired tag. Otherwise `git clone --depth 1 --branch <resolved-tag> https://github.com/simonedjb/seja <temp-dir>` (drop `--branch` if resolved ref is `HEAD`). On clone failure, ask for a local path.
+2. **Locate SEJA source repo**: if a path is provided, trust the user has it at the desired tag. Otherwise `git clone --depth 1 --branch <resolved-tag> "${SEJA_REMOTE:-git@github.com:PUC-Behring-AI/open-seja.git}" <temp-dir>` (drop `--branch` if resolved ref is `HEAD`). On clone failure, ask for a local path.
 
-3. **Validate source repo**: confirm it contains `.claude/skills/` with skill definitions and `product-design/` with reference files.
+3. **Validate source repo**: confirm it contains `.claude/skills/` with skill definitions. (Releases are tags on open-seja's distribution branch `main`, which carries no `product-design/`; `upgrade_harness.py` only needs `.claude/`.)
 
 4. **Read project conventions**: read `product-design/conventions.md` for output-directory name and other project-specific paths.
 

@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 # designer: When /seja-setup needs to pin your project against a concrete
-#   SEJA release, I'm the resolver that asks the public seja remote for its
+#   open-seja release, I'm the resolver that asks the open-seja remote for its
 #   current tag list and hands back the version to use -- the newest SemVer
 #   tag by default, or whichever tag you named with --version. You get a
 #   deterministic answer instead of an implicit "whatever is on main today".
-"""resolve_seja_version.py -- Resolve the public seja release tag to pin against.
+"""resolve_seja_version.py -- Resolve the open-seja release tag to pin against.
 
 Invocation: skill-invoked, user-cli
 Lifecycle: active
 
 Used by `/seja-setup` (install and --upgrade modes) to turn a `--version <tag>` request into a concrete
-SemVer tag name (e.g. `v0.1.0`) discovered on the public `simonedjb/seja` remote.
+SemVer tag name (e.g. `v0.1.0`) discovered on the open-seja remote
+(`git@github.com:PUC-Behring-AI/open-seja.git`; override with the `SEJA_REMOTE` environment variable or `--remote`).
 Defaults to the newest SemVer tag. Falls back to `HEAD` (with a warning) when the
 remote has no SemVer tags yet.
 
@@ -23,12 +24,14 @@ Library:
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import subprocess
 import sys
 
 TAG_RE = re.compile(r"^v(\d+)\.(\d+)\.(\d+)$")
-DEFAULT_REMOTE = "https://github.com/simonedjb/seja"
+DEFAULT_REMOTE = "git@github.com:PUC-Behring-AI/open-seja.git"
+REMOTE_ENV_VAR = "SEJA_REMOTE"
 HEAD_SENTINEL = "HEAD"
 
 
@@ -61,6 +64,8 @@ def fetch_remote_tags(remote: str) -> list[str]:
         capture_output=True,
         text=True,
         timeout=30,
+        # Never block on a credential prompt; fail fast and print the hint instead.
+        env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
     )
     if result.returncode != 0:
         raise RuntimeError(f"git ls-remote failed: {result.stderr.strip()}")
@@ -96,8 +101,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Resolve a seja release tag.")
     parser.add_argument(
         "--remote",
-        default=DEFAULT_REMOTE,
-        help=f"Remote URL to query tags from (default: {DEFAULT_REMOTE})",
+        default=os.environ.get(REMOTE_ENV_VAR, DEFAULT_REMOTE),
+        help=(
+            f"Remote URL to query tags from (default: ${REMOTE_ENV_VAR}, "
+            f"else {DEFAULT_REMOTE})"
+        ),
     )
     parser.add_argument(
         "--version",
@@ -110,6 +118,11 @@ def main(argv: list[str] | None = None) -> int:
         available = fetch_remote_tags(args.remote)
     except (RuntimeError, subprocess.TimeoutExpired) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
+        print(
+            f"hint: set {REMOTE_ENV_VAR}=https://github.com/PUC-Behring-AI/open-seja "
+            "or pass --remote",
+            file=sys.stderr,
+        )
         return 2
 
     resolved, warning = resolve_version(args.version, available)

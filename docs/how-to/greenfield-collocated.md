@@ -40,13 +40,13 @@ Choose this path when you do not have a local SEJA clone, when you want to explo
 
 Pin to a specific public `seja` release at clone time so `/seja-setup --here` can capture an exact-match tag:
 
-    git clone --branch v0.1.0 --depth 1 https://github.com/simonedjb/seja my-project
+    git clone --branch v0.10.0 --depth 1 git@github.com:PUC-Behring-AI/open-seja my-project
 
 If you instead clone `main`, `/seja-setup --here` will record the literal string `HEAD` in `.seja-version` and print a warning; `/seja-setup --upgrade` will still work from that baseline but may not resolve relative deltas cleanly. See [upgrade.md -- Pinning to a specific release](upgrade.md#pinning-to-a-specific-release) for the full pinning procedure.
 
 #### Baseline command
 
-    git clone https://github.com/simonedjb/seja my-project && cd my-project && /seja-setup --here
+    git clone git@github.com:PUC-Behring-AI/open-seja my-project && cd my-project && /seja-setup --here
 
 Open Claude Code in `my-project/` and run `/seja-setup --here`. The `--here` flag finalises setup in place without copying harness files (the clone already provided them).
 
