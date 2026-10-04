@@ -1,0 +1,36 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "<PY> \"$CLAUDE_PROJECT_DIR/.claude/hooks/quality_gate_stop.py\"",
+            "timeout": 150
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "<PY> \"$CLAUDE_PROJECT_DIR/.claude/hooks/quality_gate_pretool.py\"",
+            "timeout": 660
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "deny": [
+      "Bash(git commit*--no-verify*)",
+      "Bash(git commit* -n)",
+      "Bash(git commit* -n *)",
+      "Bash(*--accept-baseline*)",
+      "Edit(**/quality-baseline.json)"
+    ]
+  }
+}

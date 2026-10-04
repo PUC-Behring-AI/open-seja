@@ -197,9 +197,14 @@ def evaluate_crap(metrics: Dict[str, FunctionMetric], baseline: dict, touched: S
         if key in touched or entry is None:
             if value > max_touched + _EPS:
                 why = "touched" if key in touched else "new"
-                findings.append(Finding(CAT_CRAP, key,
-                                        "CRAP(%s)=%.2f > %s (%s function)" % (key, value, max_touched, why),
-                                        value, max_touched))
+                m = metrics[key]
+                hint = ("reduce complexity, not just add tests" if m.cc > max_touched
+                        else "add tests or simplify")
+                findings.append(Finding(
+                    CAT_CRAP, key,
+                    "CRAP(%s)=%.2f > %s (%s function; cc=%d, cov=%.0f%%): %s"
+                    % (key, value, max_touched, why, m.cc, m.cov * 100, hint),
+                    value, max_touched))
             continue
         base_crap = float(entry["crap"])
         if value > base_crap + _EPS:
@@ -523,7 +528,12 @@ def _measure(run, env, root, pkg, cfg, rep, files=None):
     pdir = package_dir(root, pkg)
     started = time.time()
     res = run(["pytest", "--cov=%s" % pkg, "--cov-branch", "--cov-report=json",
-               "-p", "pytest_timeout", "--timeout=30"], env, root, 1800)
+               "--timeout=30"], env, root, 1800)
+    if res.returncode != 0 and "unrecognized arguments: --timeout" in _tail(res, 2000):
+        rep.stage("pytest", "fail", started)
+        rep.findings.append(Finding(CAT_CONFIG, "missing-pytest-timeout",
+                                    "pytest-timeout is not installed. Install with: uv add --dev pytest-timeout"))
+        return None
     if res.returncode != 0:
         rep.stage("pytest", "fail", started)
         rep.findings.append(Finding(CAT_TESTS, "pytest", "pytest failed (exit %d): %s" % (res.returncode, _tail(res))))

@@ -441,3 +441,35 @@ def test_marker_ratchet_exits_7(tmp_path):
         "def plain():\n    return 1  # pragma: no cover\n")
     code, _ = _run(p, ["--fast"], Stub(p))
     assert code == 7
+
+
+def test_pytest_cmd_does_not_register_timeout_plugin_twice(tmp_path):
+    p = _project(tmp_path)
+    stub = Stub(p)
+    _run(p, ["--fast"], stub)
+    cmd = [c for c, _ in stub.calls if c[0] == "pytest"][0]
+    assert "-p" not in cmd and "--timeout=30" in cmd
+
+
+def test_missing_pytest_timeout_plugin_is_config_error(tmp_path):
+    p = _project(tmp_path)
+    stub = Stub(p, codes={"pytest": 4},
+                outputs={"pytest": "pytest: error: unrecognized arguments: --timeout=30"})
+    code, _ = _run(p, ["--fast"], stub)
+    assert code == 1
+
+
+def test_crap_message_has_cc_cov_and_hint():
+    hi = {"a.py::f": gate.FunctionMetric("a.py", "f", 1, 5, 13, 1.0, 13.0)}
+    msg = gate.evaluate_crap(hi, {"functions": {}}, set(), 10, 30)[0].message
+    assert "cc=13" in msg and "cov=100%" in msg and "reduce complexity" in msg
+    lo = {"a.py::f": gate.FunctionMetric("a.py", "f", 1, 5, 5, 0.0, 30.0)}
+    msg = gate.evaluate_crap(lo, {"functions": {}}, set(), 10, 30)[0].message
+    assert "cc=5" in msg and "cov=0%" in msg and "add tests" in msg
+
+
+def test_example_toml_excludes_gate_and_hooks():
+    here = Path(gate.__file__).parent
+    text = (here / "pyproject-dev.example.toml").read_text()
+    assert "extend-exclude" in text and "gate.py" in text and ".claude" in text
+    assert "[tool.pyright]" in text

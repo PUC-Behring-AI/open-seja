@@ -420,7 +420,8 @@ def main(argv: list[str] | None = None) -> int:
                 print(json.dumps(out, ensure_ascii=False, indent=2))
             else:
                 for n in notes:
-                    print(f"step {n.step} | {n.title} | gate: {n.gate_status}")
+                    att = f" (attempts {n.gate_attempts})" if n.gate_attempts is not None else ""
+                    print(f"step {n.step} | {n.title} | gate: {n.gate_status}{att}")
                 if st is not None:
                     print(
                         f"notes {st['notes']}, with deviation {st['with_deviation']}, "

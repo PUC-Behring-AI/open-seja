@@ -133,6 +133,120 @@ removed, unless listed in `env_passthrough`.
 framework isolation, single owner of the vector store). If `[tool.importlinter]`
 or `.importlinter` exists, stage 5 runs.
 
+## Running the gate from hooks and `GATE_*_CMD`
+
+The commands in `GATE_FAST_CMD`, `GATE_FULL_CMD` and `GATE_COMMIT_CMD` are run
+without a shell (split like `shlex`, cwd = project root) and inherit the hook's
+PATH. The tools gate.py looks up (`ruff`, `pyright`, `pytest`, `radon`,
+`mutmut`) must therefore be on that PATH: either put the venv's `bin` on it or
+launch the gate with `uv run python gate.py ...` (then `uv` must be on PATH).
+
+The dev dependencies must include `ruff`, `pyright`, `pytest`, `pytest-cov`,
+`pytest-timeout` (the gate passes `--timeout=30` and reports a config error
+when the plugin is missing), `coverage[toml]`, `radon` and, for `--full`,
+`mutmut`. A venv without radon, mutmut or pytest-timeout cannot run the gate.
+
+A function whose cyclomatic complexity alone exceeds `crap_max_touched` cannot
+pass by adding tests (at 100% coverage CRAP equals cc): simplify it.
+
+## How the agent is held
+
+The gate is only useful if the agent cannot walk around it. Three layers hold
+it; none of them replaces the human who owns the baseline.
+
+**Per-step gate (in `/implement` auto mode).** After each step the subagent
+runs `GATE_FAST_CMD` on the files it touched and fixes the findings. There are
+3 gate runs in total per step (the first run plus two retries). If the third
+run still fails, the step is reported PARTIAL with the gate as the reason, and
+the run and its attempt count go into the step note.
+
+**Stop hook** (`.claude/hooks/quality_gate_stop.py`). When the agent tries to
+end its turn with changed `.py` files, the hook runs `GATE_FAST_CMD` on them.
+PASS (or nothing changed) lets the turn end; FAIL, ERROR or a timeout blocks it
+(exit 2) and hands the findings back to the agent. Release valve: after 3
+blocks in a row, the next call with `stop_hook_active=true` is let through with
+the message `released after 3 blocks` plus the last findings, so the human
+decides. That counter then resets, so a 5th call (still `stop_hook_active=true`)
+starts a new sequence of blocks. A PASS is cached per tree state, so an
+unchanged tree is not re-run.
+
+**PreToolUse hook** (`.claude/hooks/quality_gate_pretool.py`, matcher
+`Bash|Edit|Write|MultiEdit`). Always blocks, whether or not `GATE_COMMIT_CMD`
+is set:
+
+- `git commit` with `--no-verify` (or any abbreviation), `-n` (also clustered,
+  as in `-nm`), `-c core.hooksPath=...` or `--config-env`;
+- `gate.py --accept-baseline` (and abbreviations), also through `uv run`,
+  `bash -c`, `eval` and git aliases;
+- any Edit, Write or MultiEdit of `quality-baseline.json`, and the common shell
+  writers to it (redirect, `tee`, `rm`, `mv`, `cp`, `truncate`, `dd`, `sed -i`);
+- a commit while a `GATE_*` row of `conventions.md` is modified (the gate
+  configuration is committed by a human).
+
+When `GATE_COMMIT_CMD` is set, a `git commit` also runs it on the union of
+staged, modified and untracked `.py` files (timeout 600 s, no cache) and is
+refused with the findings when it fails. When it is unset or still a
+`{{placeholder}}`, the commit check is skipped; the always-blocked items above
+still apply.
+
+**`deny` rules** (`permissions.deny` in the settings fragment) refuse the same
+commands before the hook is even called: `Bash(git commit*--no-verify*)`,
+`Bash(git commit* -n)`, `Bash(git commit* -n *)`, `Bash(*--accept-baseline*)`
+and `Edit(**/quality-baseline.json)`. They are complementary. The hook is the
+authority: it parses the command, sees clustered flags and wrappers, and gives
+the reason.
+
+**Switching it off.** Remove the `Stop` and `PreToolUse` entries from
+`.claude/settings.json` (and, if you want, the `deny` rules). The hook files
+may stay; without the entries nothing calls them. Without the hooks the
+per-step gate in `/implement` still applies.
+
+**Lowering the cost of the commit check.** `GATE_COMMIT_CMD` defaults to the
+`--full` command. To run only the fast level on commit, set it to the fast
+command in `conventions.md`, for example `python gate.py --fast --json` (same
+value as `GATE_FAST_CMD`). Mutation testing then runs only when you run
+`--full` yourself.
+
+### Limits
+
+The hooks are not a sandbox. They look at the command text and at the tool
+call, and a determined or careless agent can get around them. These routes are
+not closed:
+
+- `git config core.hooksPath X` followed by a plain `git commit`;
+  `GIT_CONFIG_COUNT/KEY/VALUE` or `GIT_CONFIG_PARAMETERS` set in the
+  environment; an inline alias defined with `git -c alias.x=...`;
+- `git commit` hidden in a script file, a language runtime
+  (`python -c "subprocess..."`), `xargs git commit -n`, or built through
+  variable or command substitution (`$CMD`, `$(...)`);
+- editing `quality-baseline.json` through an interpreter (`python -c
+  open(...)`) or an editor; only the direct edit tools and the listed shell
+  writers are caught;
+- a commit made outside Bash (for example an MCP git tool) is not seen;
+- `git -C <path>` is ignored: the hook uses the project directory;
+- the `GATE_*` change check only sees what git sees (an untracked
+  `conventions.md` is invisible);
+- a commit check that takes longer than its 600 s timeout is blocked, not
+  skipped.
+
+The `deny` patterns have not been tested in a live Claude Code session. In
+particular it is not confirmed that a `*` in the middle of a Bash rule spans
+arguments, and `-an`-style clustered flags are covered by the hook only. The
+hooks themselves were exercised with real payloads and the real gate, but not
+inside a live session.
+
+### Installing and checking it
+
+- New installs: `/seja-setup` copies the hook files and merges the settings
+  fragment (`quality-gate/settings.fragment.json`) into `.claude/settings.json`
+  when the gate is accepted, replacing `<PY>` with a working Python command.
+- Existing installs upgraded with `/seja-setup upgrade` receive the hook files
+  with the harness, but upgrade never edits `settings.json`: merge the
+  fragment by hand (replace `<PY>` with `python3`, `python` or `py -3`).
+- Hooks are captured when a session starts. After changing `settings.json`,
+  open a new session, then confirm the wiring with `/hooks` (Stop and
+  PreToolUse listed) and `/permissions` (the five deny rules).
+
 ## Tool versions
 
 The dev group pins major ranges: `coverage[toml]>=7.5,<8`, `radon>=6,<7`,
