@@ -29,6 +29,16 @@ With `--upgrade`, the handoff prompt becomes `/seja-setup --upgrade`, which
 refreshes the harness files while preserving your project-specific
 configuration.
 
+## What happens next
+
+Inside the Claude Code session, `/seja-setup` asks you a few questions and scaffolds the project. After that I
+suggest a first cycle, small enough to finish in one sitting:
+[Your first cycle](https://github.com/PUC-Behring-AI/open-seja/blob/main/docs/quickstart.md#your-first-cycle).
+It is a hypothesis, not a promise; the page that says what would confirm it or refute it is
+[the hypothesis](https://github.com/PUC-Behring-AI/open-seja/blob/main/docs/hypothesis.md).
+
+<!-- TEMPORARY: the links above resolve only once release/0.10 reaches main (npx clones main). Remove this comment after the check in roadmap item 8. -->
+
 ## What this command does *not* do
 
 **It does not finish the setup by itself.** The wrapper is deliberately thin:
