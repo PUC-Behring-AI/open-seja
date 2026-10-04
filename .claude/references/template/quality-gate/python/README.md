@@ -203,7 +203,7 @@ per-step gate in `/implement` still applies.
 
 **Lowering the cost of the commit check.** `GATE_COMMIT_CMD` defaults to the
 `--full` command. To run only the fast level on commit, set it to the fast
-command in `conventions.md`, for example `python gate.py --fast --json` (same
+command in `conventions.md`, for example `uv run python gate.py --fast --json` (same
 value as `GATE_FAST_CMD`). Mutation testing then runs only when you run
 `--full` yourself.
 

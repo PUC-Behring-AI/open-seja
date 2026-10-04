@@ -32,7 +32,7 @@ organization.
 
 An `npx open-seja` installer exists in [`npm/`](npm/README.md) but is not published yet.
 
-Two conditions apply. The quality gate currently supports Python projects with pytest; for other stacks the cycle runs without it. And you run `/design` once, before the first plan, to record your intent. [Your first cycle](docs/quickstart.md#your-first-cycle) walks through both.
+Two conditions apply. The quality gate currently supports Python projects (it brings pytest with it) and is offered when your backend is Python; you commit its configuration yourself once, after recording its baseline. For other stacks the cycle runs without it. And you run `/design` once, before the first plan, to record your intent. [Your first cycle](docs/quickstart.md#your-first-cycle) walks through both.
 
 ## The cycle
 
