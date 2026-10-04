@@ -24,17 +24,20 @@ Nothing else needs to happen on this first screen: you can start
 typing now and read the "why" afterwards. Once you have a project,
 [Your first cycle](#your-first-cycle) is the next stop.
 
-From a terminal, one command does the first step for you and opens
-Claude Code in the new folder:
+From a terminal, clone the harness into a new folder and open Claude Code
+there (you need read access to the repository; it is shared with members
+of the PUC-Behring-AI organization):
 
 ```bash
-npx open-seja my-project
+git clone git@github.com:PUC-Behring-AI/open-seja my-project
+cd my-project
+claude
 ```
 
-Inside Claude Code, the same three steps are:
+Inside Claude Code, the three steps are:
 
 ```bash
-/seja-setup my-project
+/seja-setup --here
 ```
 
 ```bash
@@ -54,6 +57,10 @@ is Python plus SQLite. The mode is greenfield (new project, no
 prior code to migrate).
 
 ### Step 1: `/seja-setup my-project`
+
+This example shows the other install path: running Claude Code in a checkout of open-seja and copying the harness
+into a separate folder. If you cloned straight into `my-project/` as above, your Step 1 is `/seja-setup --here`
+instead; the rest of the example is the same.
 
 From an empty parent directory, you run:
 
@@ -137,7 +144,11 @@ Once the project has its four design files, you can try the cycle this release p
 `/design` if you have not run it yet. It shows you the quality gate and the reflection notes working in your own
 project.
 
-1. **Install, with the gate.** Run `npx open-seja my-project` (or `/seja-setup` in an existing project). The gate
+1. **Install, with the gate.** Clone the harness (`git clone git@github.com:PUC-Behring-AI/open-seja my-project`),
+   open Claude Code in `my-project/` and run `/seja-setup --here` (or `/seja-setup` in an existing project). There is
+   no menu: `/seja-setup --here` goes straight to questions about your stack, then asks what to do with the git
+   history (choose **Re-init fresh** and type `confirm`; the history is open-seja's, not yours) and which harness
+   files to tidy up (the defaults move `docs/` to `docs/seja/` and rename `README.md` and `CHANGELOG.md`). The gate
    needs a Python project with pytest, and `/seja-setup` only offers it when it sees pytest in your answers. For a new,
    empty project, tell `/seja-setup` the stack is Python with pytest. Accept the gate when it is offered. You should
    now see `gate.py` in the project root. Setup does not create the Python project itself, so give the gate something
