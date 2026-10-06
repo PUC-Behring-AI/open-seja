@@ -48,3 +48,14 @@ Nada escrito fora do ledger. `git status` limpo no inicio.
 - deviated: Nenhum arquivo do open-seja foi escrito; caminhos open-seja/X lidos como X.
 - less-sure: Formato do relatorio do runner: contrato diz Cucumber JSON e planos 000010/000014 falam de JUnit XML.
 - gate: not-installed
+
+### Step 2 -- drift-metric.md (2026-10-06, executor)
+- Criado `.claude/references/general/drift-metric.md` com regras `DRM-001..014`. Os 4 degraus tem as 6 linhas (mede, fonte, coberto, descoberto, nao medido, escrito por); formula e denominador zero em DRM-001; colunas derivadas em DRM-006; relatorio em DRM-007; leituras fora do D em DRM-008; catalogo `NM-*` em DRM-009; "O que o D nao ve", D0, auditoria semantica e tres medidores do citizen em DRM-010; anti-gaming DRM-011; M1/M2 DRM-012; casos limite DRM-013.
+- Escolhas de interpretacao: (a) populacao do D3a = cenarios com D2 coberto (nao conta duas vezes); (b) sem registro de vermelho, D3a do cenario e `nao medido` (`NM-SEM-REGISTRO-VERMELHO`) com ressalva; o plano 000014 fala de "D3a com ressalva" e "estado NM": lido como as duas coisas; (c) teste `error`/`undefined` e `coberto` em D2 e `descoberto` em D3a.
+- `run_all_checks.py` no baseline (15 PASS / 14 FAIL; 17 undefined; 2 e 9 errors). Uma rodada isolada deu `check_skill_system` ERROR por timeout de 120 s (flake; a repeticao deu 3,5 s). Nao rodar duas ao mesmo tempo.
+
+### Step 2 -- reflection-on-action | 2026-10-06 17:04 UTC | Definicao normativa por degrau
+- happened: Escrevi drift-metric.md com DRM-001..014: unidade, estados, formula, quatro degraus, colunas derivadas, relatorio, codigos NM, D0, anti-gaming e M1/M2.
+- deviated: Acrescentei regras alem das listadas (catalogo NM, casos limite) para dar IDs estaveis; populacao do D3a definida como D2 coberto.
+- less-sure: Se ausencia de registro de vermelho e nao medido ou ressalva em D3a; li como os dois.
+- gate: not-installed

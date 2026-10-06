@@ -132,7 +132,7 @@ Criar o documento com: (1) unidade, estados e fórmula (`D = descobertos / (cobe
 - **Verify**: o arquivo existe; cada um dos 4 degraus tem as linhas "mede", "fonte", "coberto", "descoberto", "não medido", "escrito por"; contém a fórmula e a regra de denominador zero; `git grep -ci` dos termos de C1 (lista do Step 1) devolve zero; `python .claude/skills/scripts/run_all_checks.py` igual ao baseline do Step 1.
 - **Tests**: N/A (documento normativo; os dados de teste são o Step 3)
 - **Docs**: o próprio documento; o quickguide pt-BR é do item 9.
-- [ ] Done
+- [x] Done
 
 ### Step 3: Criar fixtures golden da matriz e do relatório esperado
 Criar, no caminho de fixtures do Step 1, matrizes de entrada (JSON) para uma feature fictícia (sem parceiro e sem dado real) e o relatório esperado de cada uma, calculado à mão pela fórmula do Step 2: (a) **normal**: 10 REQs, 12 cenários, mistura de cobertos/descobertos nos três degraus; (b) **nada medido**: sem `gate.json`, D3a e D3b todos `não medido` e D "n/a"; (c) **specify pulado**: D1 `não medido`, relatório "não aplicável"; (d) **órfão e sem tag**: um cenário sem tag e uma tag sem REQ, contados fora do D; (e) **escada fechada, intenção não capturada**: D1=D2=D3a=0 e O1>0 no oráculo, dispara a leitura de alerta; (f) **amostra pequena**: 5 REQs, marcada. Cada fixture traz numerador e denominador por degrau. Estes arquivos são o contrato de teste que o item 8 deve reproduzir.
