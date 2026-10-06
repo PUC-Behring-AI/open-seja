@@ -228,3 +228,4 @@ Achados (resumo do plano):
 - Timeouts: todo `subprocess.run` passa por `_run` (60 s); `TimeoutExpired` vira `BuildError` (exit 2, sem traceback). Teste com `subprocess.run` simulado que não termina.
 - Filtro do citizen: `demo_text` descarta pergunta do Hardener com token técnico (`TECH_TOKENS` importado de `check_specify.py`, mais número de linha e `.py`). `demo` imprime essas perguntas em stderr, com a ressalva "Pergunta com termo técnico, fora do registro do citizen", e com `--out` grava `<out>.power-dev.md`. Testes positivo e negativo.
 - Verificação: 130 testes verdes nos quatro arquivos; ruff limpo; `run_all_checks.py`: 14 FAIL de sempre (17 undefined, 2 error(s), 9 error(s)).
+- drift: not-measured

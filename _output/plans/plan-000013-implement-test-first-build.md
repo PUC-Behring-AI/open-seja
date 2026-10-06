@@ -1,3 +1,4 @@
+# DONE | 2026-10-06 19:20 UTC |
 # Plan 000013 | FEATURE-O | 2026-10-05 12:43 UTC | implement-test-first-build: /implement por step com teste vermelho por cenário, Coder, Cleaner (CRAP), Hardener (mutação) e loop até PASS | Review: standard
 
 > **Origem**: movido do ledger do Doutourado em 2026-10-05 (proposal-000088; la era `plan-000082`). Os IDs roadmap-000006 e plan-000007..000016 sao deste ledger (tabela no roadmap). Referencias a research-NNNNNN, reflection-NNNNNN, communication-NNNNNN, roadmap-000062 e plan-000064..000074 apontam para o ledger do Doutourado (repositorio do pesquisador). Caminhos `open-seja/...` em Files passam a ser relativos a raiz deste repositorio.
@@ -346,3 +347,22 @@ Metacomm contradiction check: nenhuma intenção existente em `product-design-as
 - Medidas do ensaio (invocações, tempo, findings por step) para decidir a Decisão pendente 1 e alimentar o item 10.
 
 smoke: false
+
+## Implementation summary (2026-10-06)
+
+- Steps: 9/9 SUCCESS, executados por um subagente Opus (um commit por step), em paralelo com o plan-000014; orquestrador repassou ao executor os formatos de entrada definidos pelo 000014 (DRP-001), revisou e fechou.
+- Arquivos: `.claude/references/general/implement-test-first.md` (ITF-001..025), `.claude/skills/scripts/build_checks.py` (rota, vermelho R1..R8, green-check, CRAP, export, demo, snapshot) e `build_brief.py`, plugin `.claude/references/template/bdd/python/scenario_report.py.example`, agentes `scenario-tester`, `cleaner`, `hardener`, ramo v2 + `--pipeline` + escalada no `/implement` (corpo 254/500), `step_notes.py` (`--pipeline`, `--red-reason-ok`), CYC-025/030; testes `test_build_checks.py`, `test_build_brief.py`, `test_scenario_report.py`.
+- Portao, hooks, settings e `product-design/` fora do diff. Planos v1 e steps sem cenario seguem o caminho anterior (D-008, CYC-020).
+- Ensaio ponta a ponta (projeto descartavel, pytest-bdd 9.0.0 e mutmut reais, papeis e humano roteirizados, pyright stub): casos (a)-(j) com o resultado esperado; 4 defeitos achados e corrigidos; o relatorio de divergencia leu os arquivos exportados (D1 3/0/0, D2 4/0/0, D3a 0/4/0, D3b 9/1/0). n = 1, papeis roteirizados: nao e medida de H-009.
+- Baseline novo: run_all_checks 19 PASS / 14 FAIL (17/2/9); pytest 1437 passed / 12 failed.
+- Propostas ao designer: D-014 (escopo de cada papel medido contra um snapshot por fase; humano so move baseline entre fases); follow-up do portao (lint de teste recusa `@scenario` + `def test_x(): pass`).
+- Quality gate: `/critique review` (code-reviewer standard): 0 critical, 5 advisory; corrigidos no commit aa5504b: snapshot por fase com `GIT_INDEX_FILE` temporario (o comando antigo apagava o staging do usuario), timeout em todo subprocesso, filtro de termos tecnicos nas perguntas do Hardener ao citizen. Deferidos: `--pipeline` visivel na tabela de argumentos para todo plano (so documentacao) e conferencia direta do formato exportado contra o DRP-001 (coberta indiretamente pelo ensaio).
+
+### Generator-Critic Iterations
+- Iteration count: 1/2
+- Findings per iteration: [0 critical, 5 advisory]
+- Resolution status: 3 advisory resolved, 2 deferred
+
+## Reflection
+
+- 2026-10-06: O ensaio com portao e mutacao reais achou quatro defeitos e mostrou que uma falha do gate full por um mutante marca D3a descoberto em todos os cenarios; a revisao achou o snapshot por fase apagando o staging do usuario, corrigido. (notes 9, with deviation 9, with gate 0)
