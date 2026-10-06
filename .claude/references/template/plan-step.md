@@ -1,5 +1,5 @@
 ---
-designer_description: "When /plan generates a structured step inside the ## Steps section of a plan file, I'm the canonical step format -- title, self-contained description, Files / References / Depends on / Verify / Tests / Docs / Traces metadata, checkbox -- and the decomposition guidelines that keep each step executable by a fresh subagent without shared context."
+designer_description: "When /plan generates a structured step inside the ## Steps section of a plan file, I'm the canonical step format -- title, self-contained description, Files / References / Depends on / Verify / Tests / Docs / Traces / Scenarios metadata, checkbox -- and the decomposition guidelines that keep each step executable by a fresh subagent without shared context."
 ---
 
 # Template: Plan Step Format
@@ -25,6 +25,7 @@ Include enough context that the step makes sense in isolation: what the code sho
 - **Docs**: <what documentation to create or update> *(omit line entirely when N/A)*
 - **Deploy**: <deployment configuration changes required by this step — new env vars, changed ports, new services, Docker or server-config changes; cover Docker and standalone (Windows / Linux) where they differ> *(omit line entirely when N/A)*
 - **Traces**: REQ-xxx, REQ-yyy *(omit line entirely when N/A)*
+- **Scenarios**: @REQ-<slug>-NNN, <scenario name> | N/A (<reason>) *(plan_format_version: 2 only)*
 - [ ] Done
 ```
 
@@ -41,3 +42,10 @@ Include enough context that the step makes sense in isolation: what the code sho
 - **Deploy**: include when the step adds, removes, or changes deployment configuration: new environment variables (name + expected value shape), changed ports, new services or processes, container/image changes, nginx/web-server config, secrets, volume mounts, migration commands that must run before startup. Describe what operators need to configure for Docker and for standalone server (Windows and Linux), noting where they differ. Omit when the step has no deployment impact — only harness scripts, tests, or pure UI changes with no server-side configuration effect.
 - **Traces**: include when the step implements a design requirement. Comma-separated REQ IDs from `product-design-as-intended.md` (e.g., `REQ-ENT-001, REQ-PERM-003`). Omit when no REQ markers exist or the step does not trace to one. See `general/shared-definitions.md` for the REQ ID convention.
 - Order steps so dependencies flow forward (Step 2 depends on Step 1, not the reverse).
+- **Scenarios** (`plan_format_version: 2`): list of `@REQ-<slug>-NNN` tags or scenario names, from the `.feature` files of the plan's `Feature: <slug>`, that the step covers. `N/A (<reason>)` is allowed only for steps with no observable behavior (docs, config, harness-only); the reason is mandatory. Required in every step whose `Tests:` is non-N/A.
+
+## Format version
+
+- `plan_format_version: 2` requires `Scenarios:` in every step with non-N/A `Tests:`. A v2 step with non-N/A `Tests:` and no `Scenarios:` is invalid; `/implement` stops execution and does not fix the plan.
+- `plan_format_version: 1` (or absent) remains **valid forever**. `/plan` and `/implement` read v1 plans as before; the absence of `Scenarios:` is at most advisory, never blocking.
+- Rules and rationale: `general/extended-cycle-contract.md`, section "Compatibilidade" (CYC-018). Fixtures: `.claude/skills/scripts/tests/fixtures/plan_format/`.

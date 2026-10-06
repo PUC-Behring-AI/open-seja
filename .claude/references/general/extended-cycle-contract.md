@@ -218,7 +218,23 @@ Ele também não muda o portão, os hooks ou os denies (S2).
 
 ## Compatibilidade
 
-> Seção preenchida pelos Steps 3 e 5.
+Esta seção fixa a versão do formato de plano (CYC-018) e o campo `Scenarios:`. Definição do campo: `.claude/references/template/plan-step.md`.
+
+**Campo `Scenarios:`.** Linha opcional de metadados do step: lista de tags `@REQ-<slug>-NNN` ou nomes de cenário, tirados dos `.feature` da pasta `Feature: <slug>` do plano, que o step cobre. `N/A (motivo)` é permitido só para step sem comportamento observável (documentação, configuração, harness); o motivo é obrigatório.
+
+**Regra de versão.**
+
+| Cabeçalho do plano | `Scenarios:` | Situação |
+|---|---|---|
+| `plan_format_version: 2` | obrigatório em todo step com `Tests:` não-N/A | step sem `Scenarios:` torna o plano **inválido** |
+| `plan_format_version: 2` | `N/A (motivo)` em step com `Tests: N/A` | válido |
+| `plan_format_version: 1` ou ausente | ausente | **válido para sempre**; `/plan` e `/implement` o leem como antes; no máximo advisory, nunca bloqueio |
+
+**O que o `/implement` faz com `Scenarios:` ausente em v2.** Para a execução e informa qual step está sem `Scenarios:`. Não corrige o plano nem inventa cenário: a correção é do `/plan` e do designer. Em v1 não faz nada diferente do que fazia.
+
+**Fato do estado atual (2026-10-06).** O Auto Mode do `/implement` (Phase 0, passo 3, version check) cai para o modo manual quando `plan_format_version` é diferente de `1`. Portanto um plano v2 hoje não roda em Auto Mode. Adaptar isso é do plan-000012 e do plan-000013; este contrato não altera `implement/SKILL.md`.
+
+**Estado da recusa.** Nenhum script lê `plan_format_version` hoje; a recusa executável do v2 inválido é do plan-000012. As fixtures em `.claude/skills/scripts/tests/fixtures/plan_format/` (dois planos v1 reais, um v2 válido, um v2 inválido) documentam os casos.
 
 ## IMPLEMENT
 

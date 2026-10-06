@@ -69,3 +69,17 @@ Mapa de regras:
 - Secoes `## Compatibilidade` (Step 3: campo `Scenarios:`, v1 valido para sempre, v2 invalido) e `## IMPLEMENT` (Step 5: vermelho pelo motivo certo, gate, gate.json, `--pipeline` reservado, runner pendente) estao no fim do arquivo, com a linha "preenchida pelos Steps 3 e 5". Novas regras desses steps devem continuar a numeracao a partir de CYC-020.
 - CYC-002 cita o esquema de intent.md (REQ-<slug>-NNN, "Nas suas palavras", "Fora do escopo", "Premissas"); o Step 4 deve manter coerencia com CYC-015.
 - Referencias a planos 000008 (formula), 000010 (validador Gherkin), 000013 (Cleaner/Hardener) no CYC-019 seguem a numeracao deste ledger.
+
+### Step 3 -- formato de plano v2 (2026-10-06, subagente)
+
+- `plan-step.md` ganhou o campo `Scenarios:` e a secao "Format version"; `## Compatibilidade` do contrato preenchida (regra v1/v2, comportamento do /implement, fato do Auto Mode caindo para manual com version != 1, recusa executavel e do plan-000012). `implement/SKILL.md` nao foi tocado.
+- Fixtures em `.claude/skills/scripts/tests/fixtures/plan_format/`: v1 = plan-000001 e plan-000004 (NAO o 000005: ele cita literalmente a lista de termos do grep de C1 no corpo); v2 valida, v2 invalida, README.
+- Para Step 5: a secao `## IMPLEMENT` do contrato continua vazia. Para plan-000012/13: o version check do implement/SKILL.md (Auto Mode Phase 0 passo 3) precisa aceitar `2`.
+- Cuidado: rodar `check_skill_system.py` ou `check_conventions.py` isolado, sem `</dev/null` e timeout, pode travar; use `run_all_checks.py`.
+- Run_all_checks igual ao baseline (15 PASS / 14 FAIL); pytest 626 passed / 12 failed.
+
+### Step 3 -- reflection-on-action | 2026-10-06 15:24 UTC | Definir o formato de plano com steps ligados a cenarios e a retrocompatibilidade
+- happened: Acrescentei o campo Scenarios e a regra de versao ao plan-step.md, preenchi a secao Compatibilidade do contrato e criei 4 fixtures (2 planos v1 reais, 1 v2 valida, 1 v2 invalida) com README. run_all_checks e pytest ficaram iguais ao baseline.
+- deviated: Usei o plano 000004 no lugar do 000005 como fixture v1, porque o 000005 traz no corpo a lista de termos do grep de C1.
+- less-sure: Se a recusa do v2 invalido, so descrita, sera verificavel ate o plan-000012 criar o validador; e se o Auto Mode em manual para v2 vira surpresa antes do plan-000013.
+- gate: not-installed
