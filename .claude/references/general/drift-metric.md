@@ -317,3 +317,15 @@ Este arquivo **não**:
 | 6 | Quem congela M1 (`--freeze`) não estava fixado entre os planos. | plan-000014 e plan-000015 |
 | 7 | "Cadeia completa" e a população do D3a são definições deste arquivo, não do contrato; o plan-000014 as adota ou emenda. | plan-000014 |
 | 8 | Registrar o oráculo independente como `D-NNN` é decisão do designer (prosa Human); não foi feito. | designer |
+
+## Emendas do item 9 (emenda 000015)
+
+Acréscimos que o plan-000014 propôs e o `drift_report.py` já aplica. Nenhuma regra acima é removida; onde o texto anterior diz outra coisa, vale a emenda e a contradição fica registrada aqui.
+
+1. **DRM-002 (REQ retirado).** REQ com `Estado: retirado` fica **fora do denominador** do D1 (o relatório o lista em `reqs_retirados`). A frase do GRL-011 "o D1 conta o REQ retirado como descoberto até a reaprovação" não tem efeito prático: até a reaprovação o D1 já é `não medido` (`NM-INTENCAO-NAO-APROVADA` com a grill aberta; `NM-CENARIOS-STALE` depois, até a specify reaprovar).
+2. **DRM-004 (população e ordem do D3a).** A população do D3a são os cenários com D2 `coberto` **e** os com D2 `não medido` (estes ficam `não medido` no D3a, com a razão do D2). Ordem de avaliação por cenário: teste vermelho, `full` FAIL, `PASS_WITH_BASELINE` ou `red_reason_ok` falso = `descoberto`; senão, `full` ausente (`NM-SEM-GATE`) ou registro de vermelho ausente (`NM-SEM-REGISTRO-VERMELHO`) = `não medido`; senão `coberto`. Sem rodada `full` (projeto sem `GATE_FULL_CMD`: `full: null`), o D3a é `não medido` mesmo com todos os testes verdes (ITF-019).
+3. **DRM-006 (`baseline_moved` e `red_reason_ok`: fonte).** `baseline_moved` vem de `build_checks.py baseline` (hash de `quality-baseline.json` na base do step ou do plano contra o arquivo atual) e é gravado em `gate.json.build.steps[N].baseline_moved`, `gate.json.build.feature.baseline_moved` e `gate.json.baseline_moved` (ITF-017). Ausente no `gate.json`: não desclassifica; o relatório traz a ressalva "baseline não verificado". `red_reason_ok` vem de `build_checks.py red-check` (R1 a R8), gravado em `gate.json.build.scenarios[<chave>].red.reason_ok` e exportado para `drift/red-reason.json` (ITF-005, ITF-023).
+4. **DRM-008 (cadeia indeterminada).** Com D3a `não medido` para algum cenário do REQ, a cadeia desse REQ é **indeterminada**: o relatório traz `cadeia_indeterminada` ao lado de `cadeia_completa` e escreve "não medida". O `cadeia_completa: 0` do golden `nada-medido` nunca é lido como "nenhum REQ tem cadeia" (DRP-006 item 6).
+5. **DRM-009 (dois códigos de leitura, fora do D).** `NM-SEM-RETRADUCAO-POS-CODIGO`: "Eu não medi: ainda não escrevi o que entendi depois do código." `NM-SEM-MARCA-ADOCAO`: "Eu não medi o que ficou sem feature: não sei desde quando o projeto usa features." Os dois são leituras (DRP-010, DRP-014), não degraus.
+6. **DRM-003 (unidade do D2).** Um `Scenario Outline` é **um** cenário e vale o pior estado das suas linhas (`gherkin-spec-format.md` seção 8; decisão 6 do plan-000010).
+7. **Lacuna 6 acima (quem congela o M1): fechada** pelo CYC-031 (o `/implement`, no fim do plano v2).

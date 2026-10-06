@@ -18,6 +18,35 @@ features/
     └── gate.json        (IMPLEMENT; resultado do portão por feature)
 ```
 
+> **Emenda 000015 (aditiva): a árvore completa.** Os planos 000011, 000013 e 000014 acrescentaram arquivos à pasta; nada do esquema acima muda ou é removido. A árvore inteira, com quem escreve cada arquivo:
+>
+> ```
+> features/
+> ├── adoption.json            (marca de adoção; a grill escreve uma vez, CYC-034)
+> └── <slug>/
+>     ├── intent.md            (grill; campos scenarios_* só por check_specify.py)
+>     ├── <nome>.feature       (specify)
+>     ├── scenarios.lock.json  (specify; só check_specify.py --approve escreve)
+>     ├── gate.json            (IMPLEMENT; chaves aditivas baseline_moved, adapter, build)
+>     ├── runner/
+>     │   ├── cucumber.json    (build_checks.py export; relatório do runner)
+>     │   └── adapter.json     (opcional; ausente = o adaptador existe)
+>     └── drift/
+>         ├── M1.json          (drift_report.py --freeze no fim do IMPLEMENT; nunca sobrescrito)
+>         ├── M2-<at>.json     (drift_report.py --freeze --moment M2 no REFLECT)
+>         ├── red-reason.json  (build_checks.py export)
+>         ├── coverage.json    (build_checks.py export)
+>         ├── audit.json       (palavras do humano; /reflect)
+>         ├── oracle-result.json        (piloto)
+>         ├── retraducao-pos-codigo.md  (agente do /reflect, CYC-034)
+>         └── <slug>-<momento>.html     (drift_report.py --html)
+> ```
+>
+> - `features/adoption.json`: `{"schema_version": 1, "adopted_at": "AAAA-MM-DD"}`. Escrito uma vez, quando a grill cria a primeira pasta `features/<slug>/` do projeto; nunca reescrito. Sem ele, a leitura reversa do relatório fica `NM-SEM-MARCA-ADOCAO` (DRP-014).
+> - Nada em `drift/` é apagado nem reescrito à mão: `M1.json` é imutável (DRP-008), cada `M2-<at>.json` é um novo arquivo, e a correção é um novo instantâneo (Q2, T3). O git é a recuperação.
+> - `runner/` e `drift/` são do `/implement` e do `/reflect`; nenhum papel do teste-primeiro (Tester, Coder, Cleaner, Hardener) os escreve (ITF-008, classe `record`).
+> - Validadores ignoram arquivo e chave que não conhecem: `check_features.py`, `check_intent.py` e `check_specify.py` só leem `intent.md`, `*.feature` e o lock.
+
 ## Regras de pasta
 
 - `<slug>` em kebab-case (`[a-z0-9]+(-[a-z0-9]+)*`); uma pasta por feature.
@@ -58,6 +87,8 @@ Tabela de requisitos:
 
 `NNN` tem três dígitos, sequencial dentro da feature, nunca reutilizado. Todo REQ tem texto e critério (CYC-002).
 
+> **Emenda 000015 (aditiva): campos da specify no frontmatter e seção Retradução.** Só `check_specify.py --approve` escreve os cinco campos `scenarios: approved`, `scenarios_approved_at`, `scenarios_approved_by`, `scenarios_contract_by` (`ninguem` quando ninguém lê código) e `scenarios_rev` (SPC-010). Uma única escrita a mais é permitida: `check_specify.py --reconcile` troca `scenarios: approved` por `scenarios: draft` quando a aprovação ficou velha (a grill reabriu ou o lock não bate), sem tocar nos outros campos nem no lock (CYC-032). Os leitores aceitam `approved`, `draft` ou ausente; o estado confiável é sempre o de `check_specify.py --status` (`approved`, `stale`, `draft`, `missing`), nunca o campo. Seção opcional `## Retradução` (SPC-017): a mensagem ao citizen, com `rev`.
+
 > **Emenda 000009 (aditiva).** A fase grill escreve um superconjunto deste esquema: índice das frases do pedido (`F<n>`) e das respostas (`A<n>`) em "Nas suas palavras"; colunas `Tipo`, `Nas suas palavras`, `Para que`, `rev` e `Estado` (a coluna `Texto` também pode se chamar `Requisito`); seções "Dimensões", "Modelo e termos", "Perguntas abertas" e "Mudanças"; frontmatter `approved_at`, `approved_by` e `serve:`. Nada deste esquema mínimo muda ou é removido. Regras: `.claude/references/general/grill-phase.md` (GRL-005); modelo completo: `.claude/references/template/intent.md`; verificador: `.claude/skills/scripts/check_intent.py`. O campo `serve:` aceita IDs do as-intended (`REQ-<TIPO>-NNN` em maiúsculas, `JM-TB-NNN`, `D-NNN`); o `REQ-<slug>-NNN` de feature (minúsculas) não é alvo de `serve:` e gera warning.
 
 ## `*.feature`
@@ -86,6 +117,8 @@ Resultado do portão por feature. Escrito pelo IMPLEMENT (CYC-007); nunca editad
 - `fast`, `full`: resultado da última rodada `--fast` e `--full`, ou `null` se nunca rodou (isso é `não medido`, não falha, CYC-012). `exit_code` segue as categorias de CYC-012 (0 PASS; 1 a 7 por categoria); `ref` aponta para o JSON do portão no diretório `QUALITY_DIR` do projeto (variável do portão; o valor vem de `product-design/conventions.md` via `project_config.py`).
 - `ts`: data e hora UTC da última escrita.
 - Projeto sem portão (`GATE_FAST_CMD` ausente): o arquivo pode faltar ou ter `fast: null`; D3 fica `não medido` com a razão dita (CYC-012).
+
+> **Emenda 000015 (aditiva): chaves opcionais do `gate.json`.** O esquema acima continua válido; leitores ignoram chave desconhecida. Chaves aditivas: `baseline_moved` (bool; fonte `build_checks.py baseline`, ITF-017; ausente = ressalva "baseline não verificado", não desclassifica), `adapter` (bool; `false` quando a stack não tem portão; ausente = o adaptador existe) e `build` (registro do teste-primeiro: `scenarios`, `steps`, `feature`; esquema em `.claude/references/general/implement-test-first.md`, ITF-015). Todas são escritas pelo `/implement`, nunca à mão (S2). Um `Scenario Outline` é **um** cenário em todo registro: coberto só se todas as linhas de `Examples` rodaram e nenhuma foi `skip` ou `xfail` (DRM-003, GHK decisão 6).
 
 ## Tabela de rastreabilidade (esquema)
 

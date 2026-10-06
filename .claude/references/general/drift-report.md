@@ -403,3 +403,20 @@ Foram poucos requisitos para tirar uma conclusão.
 2. `drift-metric.md` DRM-008: dizer que, com D3a `não medido` para algum cenário do REQ, a cadeia do REQ é indeterminada (o golden `nada-medido` continua com `cadeia_completa: 0`).
 3. `drift-metric.md` DRM-004: a população do D3a inclui os cenários com D2 `não medido` (com a razão do D2).
 4. `feature-layout.md`: `features/<slug>/drift/` (instantâneos, `audit.json`, `red-reason.json`, `coverage.json`, `oracle-result.json`, `retraducao-pos-codigo.md`), `features/<slug>/runner/` (`cucumber.json`, `adapter.json`), `features/adoption.json`, e os campos opcionais `adapter` e `baseline_moved` de `gate.json`.
+
+## Emendas do item 9 (emenda 000015)
+
+### DRP-020 -- Em que registro o relatório fala, e quem escreve a retradução depois do código (emenda 000015)
+
+O `/reflect` (Step B1) e o `/explain drift` (A.2b) escolhem o registro assim:
+
+| Condição no `intent.md` da feature | Registro | Flag |
+|---|---|---|
+| `scenarios_contract_by: ninguem` (ninguém lê código: polo citizen, retradução obrigatória, H-003) | citizen | `--citizen` |
+| o designer pede o registro sem número técnico | citizen | `--citizen` |
+| qualquer outro caso | power dev | `--md`, e o `/reflect` oferece o `--citizen` em uma frase |
+
+Antes do Step B1, o agente do `/reflect` escreve `features/<slug>/drift/retraducao-pos-codigo.md`: em primeira pessoa, uma linha por REQ terminada por `(REQ-<slug>-NNN)`, **a partir da matriz** (o que ficou demonstrado, não demonstrado, não medido), sem inventar comportamento (DRP-010). Se já existe um arquivo do mesmo M2, não o reescreve. O `run_all_checks.py` não roda este relatório: `drift_report.py` não é um `check_*` e não bloqueia (DRP-019). A marca de adoção `features/adoption.json` é escrita pela grill, uma vez (CYC-034).
+
+- **Quem decide**: o designer (pedido explícito); senão o campo `scenarios_contract_by`.
+- **Critério de aceitação**: uma feature com `scenarios_contract_by: ninguem` recebe o relatório do citizen sem número técnico; as outras recebem o do power dev com a oferta do citizen.

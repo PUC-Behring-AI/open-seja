@@ -48,3 +48,19 @@ Decisao: **seguir**. Os planos 000007 a 000014 executaram (todos DONE). Nada foi
 - deviated: A chave de cenario, o proxy do skip e a fiacao do M1 ja existiam; os Steps 2, 5 e 6 encolhem; o arquivo de versao real e .seja-version.
 - less-sure: Se o designer quer que check_version_changelog_sync passe a cobrir .seja-version.
 - gate: not-installed
+
+### Step 2 -- emendas aditivas (2026-10-06)
+
+- `feature-layout.md` (+33, 0 remoções): árvore completa com `adoption.json`, `scenarios.lock.json`, `runner/`, `drift/` (M1.json imutável, `M2-<at>.json`, `red-reason.json`, `coverage.json`, `audit.json`, `oracle-result.json`, `retraducao-pos-codigo.md`, HTML) e quem escreve cada um; regra "nada em `drift/` é apagado"; campos `scenarios_*` e o valor `draft` gravado por `--reconcile`; chaves opcionais do `gate.json` (`baseline_moved`, `adapter`, `build`); Outline = um cenário.
+- `extended-cycle-contract.md` (+59, 0 remoções): seção "Emendas do item 9" com a tabela das decisões 1-8 no default, ponteiros para CYC-028 (chave) e CYC-029 (proxy do skip), regras novas **CYC-031** (quem congela o M1), **CYC-032** (reconciliação de `scenarios:`), **CYC-033** (ciclo default por upgrade de tag, sem chave), **CYC-034** (quem escreve `adoption.json`, `retraducao-pos-codigo.md`, e quando o relatório usa `--citizen`) e a tabela da ordem de edição dos `SKILL.md`.
+- `plan-step.md` (+1): exemplo do campo `Scenarios:` com chave real das fixtures e com `N/A (motivo)`.
+- `drift-metric.md` (+12) e `drift-report.md` (+17): fora dos Files do plano (pedido do orquestrador). DRM: REQ retirado fora do denominador, população e ordem do D3a, fonte de `baseline_moved`/`red_reason_ok`, cadeia indeterminada, os dois códigos de leitura, Outline = um cenário, lacuna 6 fechada. DRP-020 (nova): registro `--citizen` quando `scenarios_contract_by: ninguem` ou a pedido; o agente do `/reflect` escreve `retraducao-pos-codigo.md` antes do Step B1.
+- **Contradição registrada**: GRL-011 diz "o D1 conta o REQ retirado como descoberto até a reaprovação"; o `drift_report.py` o tira do denominador. Sem efeito prático (até a reaprovação o D1 já é `não medido`); a emenda ao `drift-metric.md` registra isso. GRL-011 não foi reescrito.
+- **Para o orquestrador**: anexar ao plan-000007 um "Plan Amendment" dizendo que o texto do Step 3 sobre `Scenarios:` ("`@REQ-...` ou nomes de cenário") foi substituído pela chave `<slug>/<arquivo>.feature::<nome>` (CYC-028, emenda 000012; apontado no contrato pela emenda 000015).
+- Verify: `git diff --numstat` só adições (122 linhas, 0 remoções); `grep -c "emenda 000015"` = 7 no contrato, 3 no layout, 1 em `plan-step.md`, 1 em cada arquivo de drift; `run_all_checks.py` 19 PASS / 14 FAIL (mesmo conjunto), 17/2/9; pytest 1440 passed / 12 failed (mesmo conjunto). `check_docs.py` foi de 633 para 639 warnings ("Specific plan ID" nas linhas novas; padrão já presente nessas referências; check_docs já falha no baseline). C1: nenhum nome de parceiro, instituição ou pessoa nas linhas novas.
+
+### Step 2 -- reflection-on-action | 2026-10-06 19:29 UTC | Emendas aditivas ao contrato, ao layout e ao formato de plano
+- happened: Acrescentei a arvore completa ao layout, CYC-031 a CYC-034 e a tabela de ordem ao contrato, um exemplo de Scenarios: e as emendas do drift-metric e do drift-report (DRP-020).
+- deviated: A chave e o proxy do skip ja existiam (CYC-028/029): so apontei; drift-metric e drift-report entraram fora dos Files; 6 warnings novos de ID de plano no check_docs.
+- less-sure: Se escolher o registro citizen pelo campo scenarios_contract_by e o sinal certo do polo citizen.
+- gate: not-installed

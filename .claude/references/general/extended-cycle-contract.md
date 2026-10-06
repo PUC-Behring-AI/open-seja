@@ -330,3 +330,62 @@ O teste-primeiro de CYC-020 a CYC-025 roda pela norma `.claude/references/genera
 - **Quem decide**: as ferramentas (T1); o humano nas escaladas e no baseline (S2).
 - **Critério de aceitação**: um step dono só sai do vermelho com `red-check` exit 0; o `gate.json` de uma feature construída tem `build.scenarios[<chave>].red.reason_ok`; plano v1 tem a mesma rota de antes (`build_checks.py route`).
 - **Ruptura que pode provocar** (CYC-014): ao citizen, a demonstração por cenário ("não demonstrado") e o mutante recontado como pergunta ("isso importa para você?"); ao power dev, "meu teste vermelho foi recusado por R3".
+
+---
+
+## Emendas do item 9 (emenda 000015)
+
+Integração do ciclo default (plan-000015). Só acréscimos: nenhuma regra anterior é removida ou renumerada. Decisões pendentes do plan-000015, todas `[default; aceito 2026-10-06]`: 1 = A (o `/implement` congela o M1), 2 = A (`--reconcile` grava `draft`), 3 = A (nenhuma chave nova), 4 = B (um guia pt-BR e ponteiros), 5 = A (bump minor), 6 = C (o upgrade só atualiza o plugin já instalado), 7 = A com gatilho para B (o Stop hook não muda agora), 8 = A (os checks rodam sem argumentos, sem agregador).
+
+**Já fixado antes (emenda 000015 só aponta).** (a) O campo `Scenarios:` usa a chave `<slug>/<arquivo>.feature::<nome>` (CYC-028, emenda 000012): o texto "lista de `@REQ-...` ou nomes de cenário" do plan-000007 fica substituído; a tag `@REQ-` continua sendo a tag do cenário e a ligação REQ-cenário, não a chave de step. (b) O proxy do skip: a classificação da grill decide antes, `PFS-013` confere depois (CYC-029). O texto do próprio plano 000007 (artefato aprovado, imutável) recebe só um adendo do orquestrador.
+
+### CYC-031 -- Quem congela o M1 e quando (emenda 000015) `[default; aceito 2026-10-06]` (decisão pendente 1 = A)
+
+O `/implement` congela o M1 **uma vez, no fim do plano v2** com `Feature: <slug>` e `Specify: approved`, depois da rodada `full` (ou registrando `full: null` quando não há `GATE_FULL_CMD`): `drift_report.py --feature <slug> --plan <plano> --moment M1 --freeze --at <UTC>` (procedimento: `implement-test-first.md`, item 9 e seção "Congelar o M1"). Se o `M1.json` já existe, o script recusa (exit 2) e o `/implement` só avisa "M1 já congelado"; se o script falta ou falha por outro motivo, avisa e segue. O freeze **nunca** reprova o `/implement`. Plano v1, plano sem `Feature:` e `Specify: skipped` não congelam nada. Alternativas rejeitadas: o `/reflect` congelar (dias depois, a árvore já mudou: o M1 deixaria de ser M1); o designer congelar à mão (depende de memória; o piloto perde dados comparáveis).
+
+- **Quem decide**: o `/implement` executa; o script recusa a sobrescrita.
+- **Critério de aceitação**: depois de um plano v2 com `Feature: <slug>`, existe `features/<slug>/drift/M1.json`; rodar o freeze de novo sai 2 e deixa o arquivo igual byte a byte; plano v1 não cria `drift/`.
+- **Ruptura que pode provocar** (CYC-014): ao power dev, "o M1 já existia e eu queria outro". Registro do power dev; ao citizen, nada.
+
+### CYC-032 -- Reconciliação de `scenarios:` quando a aprovação fica velha (emenda 000015) `[default; aceito 2026-10-06]` (decisão pendente 2 = A)
+
+Quando a grill reabre a intenção (`status: grilling`) ou o lock deixa de bater (`check_specify.py --status` = `stale`), `check_specify.py --reconcile [<slug>]` troca `scenarios: approved` por `scenarios: draft` **só** no `intent.md` daquela feature, preservando o resto do arquivo byte a byte e o `scenarios.lock.json`. A escrita é atômica, idempotente e confinada a `features/<slug>/`. A grill chama `--reconcile <slug>` logo depois de voltar o `status` a `grilling` (GRL-011); qualquer consumidor que veja `stale` pode chamá-lo. O `--status` continua a fonte de verdade: depois da reconciliação ele segue dizendo `stale` (com a razão `sem-campo` e as razões de antes) até a specify reaprovar. Nenhum consumidor decide pelo campo: `check_features.py --matrix` expõe `scenarios_state` (do `--status`) ao lado de `scenarios_approved` (o valor do disco). Alternativas rejeitadas: gravar um valor novo `stale` (emenda aos esquemas de três planos para um valor a mais); não gravar nada (o campo mentiria para quem lê o arquivo sem rodar script).
+
+- **Quem decide**: o verificador (`check_specify.py`); a grill o chama.
+- **Critério de aceitação**: depois de editar um `.feature` aprovado, `--reconcile <slug>` grava `scenarios: draft` e muda só essa linha; a segunda execução não muda nada; um slug fora de `features/` sai 2 sem escrever.
+- **Ruptura que pode provocar** (CYC-014): ao citizen, "os cenários que eu aprovei voltaram a rascunho". A grill diz isso em uma frase ao reabrir; é o aviso que o citizen precisa para pedir nova aprovação.
+
+### CYC-033 -- O ciclo default entra por upgrade de tag (emenda 000015) `[default; aceito 2026-10-06]` (decisão pendente 3 = A)
+
+O ciclo default (grill, specify, plano v2, teste-primeiro, relatório por degrau) chega pela tag nova do harness e **só age onde há `features/<slug>/intent.md` ou plano v2**. Plano v1 é válido para sempre (CYC-018, D-008). Não há chave de ligar ou desligar (`CYCLE_MODE`, `--no-grill`): uma chave global seria um preset com outro nome (decisão fechada "sem preset") e contaminaria a medida de H-009. A saída para quem não quer a escada é a que já existe: `--light`, tarefa sem código (`Specify: skipped -- <motivo>`) e `--roadmap`. O braço de controle do piloto usa a **tag anterior pinada**, não uma chave. Os quatro checks do ciclo (`check_intent.py`, `check_features.py`, `check_specify.py`, `check_plan_scenarios.py`) rodam sem argumentos no `run_all_checks.py` e saem 0 com "nada a verificar" quando não há `features/` nem plano v2.
+
+- **Quem decide**: designer.
+- **Critério de aceitação**: num projeto sem `features/` e só com planos v1, atualizar para a tag nova não muda nenhum arquivo do projeto, e o `run_all_checks.py` devolve o mesmo conjunto de falhas de antes, com os quatro checks em PASS.
+- **Ruptura que pode provocar** (CYC-014): ao citizen, "o /plan agora me faz perguntas antes de escrever o plano". O guia pt-BR (`docs/how-to/ciclo-default.pt-BR.md`) explica o porquê e a saída.
+
+### CYC-034 -- Quem escreve os registros de leitura e em que registro o relatório fala (emenda 000015)
+
+- `features/adoption.json` (`{"schema_version": 1, "adopted_at": "AAAA-MM-DD"}`): a grill o escreve **uma vez**, quando cria a primeira pasta `features/<slug>/` do projeto e o arquivo não existe; nunca o reescreve. É a marca da leitura reversa (DRP-014).
+- `features/<slug>/drift/retraducao-pos-codigo.md`: o agente do `/reflect`, em primeira pessoa, **a partir da matriz** (cenários demonstrados, não demonstrados, não medidos), antes de rodar o relatório do Step B1, uma linha por REQ terminada por `(REQ-<slug>-NNN)` (DRP-010). Sem ele: `NM-SEM-RETRADUCAO-POS-CODIGO`.
+- Registro do relatório de divergência: `--citizen` quando o `intent.md` da feature tem `scenarios_contract_by: ninguem` (ninguém lê código: a retradução é obrigatória, H-003) ou quando o designer pede; nos outros casos `--md`, e o `/reflect` oferece o `--citizen` (DRP-020).
+- O `run_all_checks.py` não roda o relatório de divergência: `drift_report.py` não é um `check_*` e não bloqueia (DRP-019).
+
+- **Quem decide**: designer; a grill, o `/reflect` e o `/implement` escrevem cada um o seu.
+- **Critério de aceitação**: num projeto com uma feature, `features/adoption.json` existe com a data da primeira grill; um REQ com `scenarios_contract_by: ninguem` recebe o relatório no registro do citizen.
+- **Ruptura que pode provocar** (CYC-014): ao citizen, a retradução depois do código lida ao lado da de antes ("eu pedi isso, ele entendeu aquilo").
+
+### Ordem de edição dos `SKILL.md` (emenda 000015)
+
+Seis planos editaram os mesmos arquivos, nesta ordem. A medida final está no Step 7 do plan-000015 e em `.claude/skills/scripts/check_docs_skill_body_length_baseline.md`.
+
+| Ordem | Plano | `SKILL.md` de corpo que ele toca | Natureza |
+|---|---|---|---|
+| 1 | 000007 | `_internal/plan/standard`, `implement` | uma linha de ponteiro para este contrato |
+| 2 | 000009 | `_internal/plan/standard`, `plan` | fase grill, flag `--grill` |
+| 3 | 000011 | `_internal/plan/standard`, `plan` | fase specify, flag `--specify`, `Specify: skipped` |
+| 4 | 000012 | `plan`, `_internal/plan/standard`, `implement` | `plan_format_version: 2`, recusa de step sem cenário, parada do `/implement` |
+| 5 | 000013 | `implement` | `--pipeline`, ramo v2 (teste-primeiro), fim do plano com o freeze do M1 |
+| 6 | 000014 | `reflect`, `explain`, `_internal/explain/drift` | relatório por degrau |
+| 7 | 000015 | nenhum corpo novo | a fiação do M1 já estava no passo 12 do `/implement` (000013); o detalhe vai para as referências |
+
+Regra para o próximo plano que tocar estes arquivos: ler esta tabela, acrescentar a sua linha e manter o detalhe nas referências normativas (`grill-phase.md`, `specify-phase.md`, `plan-from-scenarios.md`, `implement-test-first.md`, `drift-report.md`), com uma linha de ponteiro no `SKILL.md`.

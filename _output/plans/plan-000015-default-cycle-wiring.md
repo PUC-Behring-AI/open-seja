@@ -160,7 +160,7 @@ Três arquivos, só acréscimos com a marca "emenda 000015": (1) `feature-layout
 - **Verify**: `git diff` dos três arquivos mostra só linhas adicionadas (`git diff --numstat` com 0 remoções, exceto o trecho do `Scenarios:` em `plan-step.md`, que o diff mostra como substituição do exemplo); `grep -c "emenda 000015"` >= 5; `grep -n "drift/" feature-layout.md` e `grep -n "scenarios.lock.json" feature-layout.md` acham as linhas; os checks do 000010 (`check_features.py`) e do 000012 (`check_plan_scenarios.py`) sobre os exemplos do layout continuam com o mesmo resultado; `git grep -i` dos termos de C1 sobre o diff devolve zero; `run_all_checks.py` igual ao baseline.
 - **Tests**: N/A (documento normativo; os validadores têm os testes)
 - **Docs**: as três referências.
-- [ ] Done
+- [x] Done
 
 ### Step 3: Reconciliar `scenarios:` no disco quando a grill reabre
 Teste primeiro. Em `check_specify.py`, acrescentar `--reconcile <slug|--all> [--json]` (Decisão pendente 2, default A): para cada feature em que `--status` calcula `stale` (lock não bate com os `.feature` ou com os `rev` dos REQs) **ou** em que o `intent.md` voltou a `status: grilling`, reescrever `scenarios: approved` para `scenarios: draft` **só** no `intent.md` daquela feature, preservando o resto byte a byte e o `scenarios.lock.json`; escrita atômica; caminho resolvido sob `features/<slug>/` sem seguir `..`; idempotente (segunda execução não muda nada, exit 0); saída lista o que mudou e o motivo em frase curta. Em `grill-phase.md`, acrescentar ao passo "reabrir a intenção" uma linha: depois de voltar `status` a `grilling`, rodar `check_specify.py --reconcile <slug>`. Não alterar `--status`, `--approve` nem o formato do lock.
