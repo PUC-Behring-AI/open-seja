@@ -1,0 +1,14 @@
+{
+  "descricao": "approved sem Feature:",
+  "root": "_raizes/aprovada",
+  "exit_code": 1,
+  "status": null,
+  "findings": [
+    [
+      "PFS-002",
+      "error",
+      3
+    ]
+  ],
+  "matrix": null
+}

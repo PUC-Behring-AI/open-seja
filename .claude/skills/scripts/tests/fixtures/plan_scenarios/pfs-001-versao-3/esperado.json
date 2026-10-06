@@ -1,0 +1,14 @@
+{
+  "descricao": "versao desconhecida: exit 2",
+  "root": "_raizes/aprovada",
+  "exit_code": 2,
+  "status": null,
+  "findings": [
+    [
+      "PFS-001",
+      "fatal",
+      2
+    ]
+  ],
+  "matrix": null
+}

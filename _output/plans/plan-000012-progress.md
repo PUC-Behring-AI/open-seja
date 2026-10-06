@@ -58,3 +58,16 @@ Decisoes de implementacao tomadas aqui (para os Steps 2-6):
 - deviated: N/A com motivo vale tambem com Tests nao-N/A (contrato); PFS-006 recusa so o campo ausente; PFS-014 e info.
 - less-sure: Se o contrato aceita N/A com motivo em step com teste sem virar fuga.
 - gate: not-installed
+
+## Step 3 -- fixtures golden de plano (2026-10-06, executor)
+
+38 casos em `.claude/skills/scripts/tests/fixtures/plan_scenarios/` (README lista um por um): 6 v1/v2 validos de base (`v1-real-1`, `v1-real-2` = copias literais das fixtures de `plan_format/`, `v1-minimo`, `v1-corpo-quebrado`, `v2-completo`, `v2-outline`, `v2-skipped`, `v2-cabecalho-livre`) e um disparo por regra PFS-001 a PFS-014 (PFS-015 e "nao faz": o teste checa que o diff e vazio, nao ha achado). Raizes de projeto compartilhadas em `_raizes/` (`aprovada`, `rev2`, `stale`, `draft`, `missing`: copias das fixtures de `specify/`). Fixtures SIMULADAS: escritas por mim a partir do projeto ficticio `contas-da-semana`, sem pessoa real.
+
+Convencao de linha dos achados fixada no README (campo quando o achado e do campo; titulo do step quando o campo falta; `Feature:` para PFS-009; `Specify:` para PFS-011/012/014). As linhas de `esperado.json` foram calculadas na geracao (o gerador conhece o layout) e conferidas a mao em `pfs-006-sem-campo-com-testes` (linha 36 = `### Step 4:`).
+Desvio: o plano pedia um `status.txt` por caso lido por stub; usei o campo `status` do `esperado.json` (o teste injeta o stub) e raizes reais em `_raizes/` para o Step 7 chamar o `check_specify.py` de verdade.
+
+### Step 3 -- reflection-on-action | 2026-10-06 18:18 UTC | Fixtures golden de plano
+- happened: Criei 38 casos com plan.md e esperado.json sobre 5 raizes compartilhadas, um disparo por regra.
+- deviated: O status simulado vai no esperado.json e nao em status.txt por caso.
+- less-sure: Se as linhas esperadas sobrevivem ao primeiro teste real do script.
+- gate: not-installed

@@ -1,0 +1,14 @@
+{
+  "descricao": "skipped com Tests nao-N/A e N/A (motivo): passa com info",
+  "root": null,
+  "exit_code": 0,
+  "status": null,
+  "findings": [
+    [
+      "PFS-013",
+      "info",
+      16
+    ]
+  ],
+  "matrix": null
+}
