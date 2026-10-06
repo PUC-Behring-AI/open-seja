@@ -1,0 +1,168 @@
+[
+  {
+    "elements": [
+      {
+        "id": "x",
+        "keyword": "Cenário",
+        "line": 1,
+        "name": "Acrescentar uma tarefa",
+        "steps": [
+          {
+            "keyword": "Dado",
+            "line": 1,
+            "name": "x",
+            "result": {
+              "duration": 0,
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "Quando",
+            "line": 1,
+            "name": "x",
+            "result": {
+              "duration": 0,
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "Então",
+            "line": 1,
+            "name": "x",
+            "result": {
+              "duration": 0,
+              "status": "passed"
+            }
+          }
+        ],
+        "tags": [
+          {
+            "line": 1,
+            "name": "REQ-task-list-001"
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "id": "x",
+        "keyword": "Cenário",
+        "line": 1,
+        "name": "Acrescentar tarefas de nomes diferentes",
+        "steps": [
+          {
+            "keyword": "Dado",
+            "line": 1,
+            "name": "x",
+            "result": {
+              "duration": 0,
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "Quando",
+            "line": 1,
+            "name": "x",
+            "result": {
+              "duration": 0,
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "Então",
+            "line": 1,
+            "name": "x",
+            "result": {
+              "duration": 0,
+              "status": "passed"
+            }
+          }
+        ],
+        "tags": [
+          {
+            "line": 1,
+            "name": "REQ-task-list-001"
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "id": "x",
+        "keyword": "Cenário",
+        "line": 1,
+        "name": "Acrescentar tarefas de nomes diferentes",
+        "steps": [
+          {
+            "keyword": "Dado",
+            "line": 1,
+            "name": "x",
+            "result": {
+              "duration": 0,
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "Quando",
+            "line": 1,
+            "name": "x",
+            "result": {
+              "duration": 0,
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "Então",
+            "line": 1,
+            "name": "x",
+            "result": {
+              "duration": 0,
+              "status": "passed"
+            }
+          }
+        ],
+        "tags": [
+          {
+            "line": 1,
+            "name": "REQ-task-list-001"
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "id": "x",
+        "keyword": "Cenário",
+        "line": 1,
+        "name": "Marcar uma tarefa como feita",
+        "steps": [
+          {
+            "keyword": "Dado",
+            "line": 22,
+            "name": "que a lista tem a tarefa pendente \"tarefa de compras\"",
+            "result": {
+              "duration": 0,
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "Quando",
+            "line": 23,
+            "name": "eu marco a tarefa \"tarefa de compras\" como feita",
+            "result": {
+              "duration": 0,
+              "status": "passed"
+            }
+          }
+        ],
+        "tags": [
+          {
+            "line": 1,
+            "name": "REQ-task-list-002"
+          }
+        ],
+        "type": "scenario"
+      }
+    ],
+    "keyword": "Funcionalidade",
+    "name": "Gerenciar tarefas",
+    "uri": "task-list/manage-tasks.feature"
+  }
+]

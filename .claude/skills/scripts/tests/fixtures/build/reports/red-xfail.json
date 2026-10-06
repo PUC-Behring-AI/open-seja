@@ -1,0 +1,67 @@
+{
+  "generated_at": "2026-10-06T18:00:00Z",
+  "pytest_bdd_version": "9.0.0",
+  "scenarios": {
+    "task-list/manage-tasks.feature::Acrescentar tarefas de nomes diferentes": {
+      "duration": 0.0,
+      "exception": null,
+      "failing_step": null,
+      "failing_step_type": null,
+      "feature_file": "features/task-list/manage-tasks.feature",
+      "outcome": "passed",
+      "reason": "",
+      "req": [
+        "REQ-task-list-001"
+      ],
+      "rows": [
+        {
+          "index": 0,
+          "outcome": "passed"
+        },
+        {
+          "index": 1,
+          "outcome": "passed"
+        }
+      ],
+      "scenario_key": "task-list/manage-tasks.feature::Acrescentar tarefas de nomes diferentes",
+      "step_func": null,
+      "undefined": false
+    },
+    "task-list/manage-tasks.feature::Acrescentar uma tarefa": {
+      "duration": 0.0,
+      "exception": null,
+      "failing_step": null,
+      "failing_step_type": null,
+      "feature_file": "features/task-list/manage-tasks.feature",
+      "outcome": "passed",
+      "reason": "",
+      "req": [
+        "REQ-task-list-001"
+      ],
+      "rows": null,
+      "scenario_key": "task-list/manage-tasks.feature::Acrescentar uma tarefa",
+      "step_func": null,
+      "undefined": false
+    },
+    "task-list/manage-tasks.feature::Marcar uma tarefa como feita": {
+      "duration": 0.0,
+      "exception": null,
+      "failing_step": null,
+      "failing_step_type": null,
+      "feature_file": "features/task-list/manage-tasks.feature",
+      "outcome": "xfailed",
+      "reason": "",
+      "req": [
+        "REQ-task-list-002"
+      ],
+      "rows": null,
+      "scenario_key": "task-list/manage-tasks.feature::Marcar uma tarefa como feita",
+      "step_func": null,
+      "undefined": false
+    }
+  },
+  "schema_version": 1,
+  "tests": {
+    "tests/test_unit.py::test_existing": "passed"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "files": {
+    "src/tasks.py": {
+      "excluded_lines": [],
+      "executed_branches": [],
+      "executed_lines": [
+        1,
+        4,
+        5,
+        8,
+        11
+      ],
+      "missing_branches": [],
+      "missing_lines": [
+        6,
+        9,
+        12
+      ]
+    }
+  },
+  "meta": {
+    "version": "7.6.0"
+  }
+}

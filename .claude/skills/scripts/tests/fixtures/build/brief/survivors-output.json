@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "survivors": [
+    {
+      "diff": "-        self.tasks[title] = True\n+        self.tasks[title] = False",
+      "key": "src/tasks.py::TaskList.mark_done",
+      "mutant": "tasks.xǁTaskListǁmark_done__mutmut_2"
+    }
+  ]
+}

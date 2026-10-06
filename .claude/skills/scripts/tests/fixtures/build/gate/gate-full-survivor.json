@@ -1,0 +1,18 @@
+{
+  "baseline": "quality-baseline.json",
+  "exit_code": 6,
+  "findings": [
+    {
+      "category": 6,
+      "key": "src/tasks.py::TaskList.mark_done",
+      "limit": null,
+      "message": "surviving mutant tasks.xǁTaskListǁmark_done__mutmut_2 in a touched function; kill it or mark `# pragma: no mutate  # equivalent: <reason>`",
+      "severity": "error",
+      "value": null
+    }
+  ],
+  "level": "full",
+  "stages": [],
+  "status": "FAIL",
+  "version": 1
+}

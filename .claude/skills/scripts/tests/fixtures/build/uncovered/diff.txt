@@ -1,0 +1,25 @@
+diff --git a/src/tasks.py b/src/tasks.py
+index 1111111..2222222 100644
+--- a/src/tasks.py
++++ b/src/tasks.py
+@@ -11,1 +11,4 @@ class TaskList:
+-    def mark_done(self, title):
++    def mark_done(self, title):
++        if title not in self.tasks:
++            raise KeyError(title)
++        self.tasks[title] = True
+@@ -20,0 +24,2 @@ class TaskList:
++    def count(self):
++        return len(self.tasks)
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -1,0 +2,1 @@
++texto
+diff --git a/src/new.py b/src/new.py
+new file mode 100644
+--- /dev/null
++++ b/src/new.py
+@@ -0,0 +1,2 @@
++def f():
++    return 1

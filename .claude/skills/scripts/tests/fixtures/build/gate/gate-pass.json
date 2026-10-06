@@ -1,0 +1,9 @@
+{
+  "baseline": "quality-baseline.json",
+  "exit_code": 0,
+  "findings": [],
+  "level": "fast",
+  "stages": [],
+  "status": "PASS",
+  "version": 1
+}

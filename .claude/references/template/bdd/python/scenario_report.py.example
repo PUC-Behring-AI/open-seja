@@ -1,0 +1,37 @@
+"""Stub (plan-000013 step 3): functions pending; implemented in step 4."""
+
+
+def scenario_key(slug, path, name):
+    return None
+
+
+def key_for(feature_path, name):
+    return None
+
+
+def req_tags(tags):
+    return []
+
+
+def item_outcome(when, outcome, wasxfail, exception):
+    return None
+
+
+def aggregate(outcomes):
+    return None
+
+
+def short_reason(text, limit=200):
+    return None
+
+
+def add_row(records, key, data, index):
+    return None
+
+
+def build_report(scenarios, tests, version, generated_at):
+    return {}
+
+
+def selected(key, include, exclude):
+    return None

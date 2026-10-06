@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites><testsuite name="pytest" errors="0" failures="1" skipped="1" tests="5">
+<testcase classname="test_task_list" name="test_acrescentar_uma_tarefa" time="0.001"/>
+<testcase classname="test_task_list" name="test_acrescentar_tarefas_de_nomes_diferentes[tarefa de estudo]" time="0.001"/>
+<testcase classname="test_task_list" name="test_acrescentar_tarefas_de_nomes_diferentes[tarefa de casa]" time="0.001"/>
+<testcase classname="test_task_list" name="test_marcar_uma_tarefa_como_feita" time="0.001"><failure message="pytest_bdd.exceptions.StepDefinitionNotFoundError: Step definition is not found">StepDefinitionNotFoundError</failure></testcase>
+<testcase classname="test_task_list" name="test_desfazer_a_marcacao_de_uma_tarefa" time="0.000"><skipped type="pytest.skip" message="skip">skip</skipped></testcase>
+</testsuite></testsuites>

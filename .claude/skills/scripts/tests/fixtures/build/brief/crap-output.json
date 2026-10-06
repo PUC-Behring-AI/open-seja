@@ -1,0 +1,15 @@
+{
+  "findings": [
+    {
+      "cc": 26,
+      "cov": 0.92,
+      "crap": 26.4,
+      "file": "src/tasks.py",
+      "function": "TaskList.mark_done",
+      "key": "src/tasks.py::TaskList.mark_done",
+      "target": 8
+    }
+  ],
+  "schema_version": 1,
+  "target": 8
+}
