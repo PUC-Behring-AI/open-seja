@@ -146,7 +146,8 @@ Contrato de dados (JSON com `schema_version: 1`):
     "cenarios_orfaos": 0,
     "cenarios_sem_tag": 0,
     "escada_fechou_sem_capturar": false,
-    "d0": {"estado": "nao_medido", "razao_nm": ["NM-SEM-INDICE-BRIEF"]}
+    "d0": {"estado": "nao_medido", "razao_nm": ["NM-SEM-INDICE-BRIEF"]},
+    "o1": null
   },
   "ressalvas": []
 }

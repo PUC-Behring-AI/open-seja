@@ -1,3 +1,4 @@
+# DONE | 2026-10-06 17:11 UTC |
 # Plan 000008 | FEATURE-O | 2026-10-05 02:05 UTC | drift-metric: divergência por degrau e controle com o ciclo padrão | Review: standard
 
 > **Origem**: movido do ledger do Doutourado em 2026-10-05 (proposal-000088; la era `plan-000077`). Os IDs roadmap-000006 e plan-000007..000016 sao deste ledger (tabela no roadmap). Referencias a research-NNNNNN, reflection-NNNNNN, communication-NNNNNN, roadmap-000062 e plan-000064..000074 apontam para o ledger do Doutourado (repositorio do pesquisador). Caminhos `open-seja/...` em Files passam a ser relativos a raiz deste repositorio.
@@ -241,3 +242,19 @@ Rodar `run_all_checks.py` e `/critique validate` nos arquivos novos; conferir qu
 - Lista de lacunas contra o plano 000007 e a frase sugerida para H-009.
 
 smoke: false
+
+## Implementation summary (2026-10-06)
+
+- Steps: 7/7 SUCCESS, todos por um unico subagente Sonnet (um commit por step); orquestrador Opus revisou e fechou.
+- Arquivos: `.claude/references/general/drift-metric.md` (DRM-001..014), `.claude/references/general/drift-control-protocol.md`, `.claude/references/template/pilot-run-record.md`, `.claude/skills/scripts/tests/fixtures/drift/casos.json` + README (6 golden); ponteiro em CYC-016.
+- Nada escrito em `product-design/`; texto sugerido ao designer para H-009 (§2.9) no progress, Step 7.
+- Quality gate: run_all_checks e pytest no baseline. `/critique review` (code-reviewer light): 0 critical, 7 advisory; 4 golden recalculados a mao sem erro. Corrigidos no fechamento: advisory 1 (equivalencia D3 = D3a + D3b no CYC-016) e 3 (`o1: null` no exemplo do DRM-007). Deferidos para os planos que os consomem: 2, 4, 5, 6 (plan-000010/000013/000014: NM-SEM-ADAPTADOR-GATE vs NM-SEM-GATE, cadeia_completa com D3a nao medido, mapeamento de estados para Cucumber JSON, golden de baseline aceito) e 7 (limiares de orcamento do controle a fixar antes do piloto, Q3 -- plan-000016).
+
+### Generator-Critic Iterations
+- Iteration count: 0/2
+- Findings per iteration: [0 critical, 7 advisory]
+- Resolution status: all resolved (no critical); 5 advisory deferred
+
+## Reflection
+
+- 2026-10-06: O executor fechou escolhas que o plano deixava abertas (populacao do D3a, cadeia_completa, razao_nm) e o 000014 herda essas escolhas; a revisao achou cobertura de golden incompleta para a regra anti-gaming e limiares de orcamento sem numero. (notes 7, with deviation 7, with gate 0)

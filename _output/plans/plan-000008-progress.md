@@ -137,3 +137,4 @@ Nada escrito fora do ledger. `git status` limpo no inicio.
 - deviated: Nenhum.
 - less-sure: A lista de termos de C1 nao esta comigo; a varredura e do orquestrador.
 - gate: not-installed
+- drift: not-measured
