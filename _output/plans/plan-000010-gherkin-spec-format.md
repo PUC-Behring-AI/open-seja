@@ -147,7 +147,7 @@ Criar o documento com: (1) objetivo e leitor (o citizen aprova; o power dev revi
 - **Verify**: o arquivo existe; as 16 regras têm severidade e "Critério de aceitação"; `grep -c "GHK-0" ` >= 16; os exemplos (pt e en) passam no validador quando o Step 4 existir (re-executado no Step 9); nenhum termo de C1 (`git grep -i` com a lista do Step 1 devolve zero); `run_all_checks.py` igual ao baseline do Step 1.
 - **Tests**: N/A (documento normativo; os testes são as fixtures do Step 3)
 - **Docs**: o próprio documento; o quickguide pt-BR é do item 9.
-- [ ] Done
+- [x] Done
 
 ### Step 3: Criar as fixtures golden (teste primeiro)
 Criar, no diretório de fixtures do Step 1, uma árvore `features/` por caso, todas fictícias (sem parceiro, sem dado real): `ok-minimo` (1 REQ, 1 cenário), `ok-completo` (3 REQs, Outline com 3 linhas, Background curto, tag em pt e em en, múltiplas tags num cenário), e um caso mínimo por regra `GHK-001..016` (disparo) mais os **negativos** que não devem disparar (por exemplo mesmo texto de step em dois cenários diferentes **não** é duplicata; `And` herdando o tipo anterior). Casos extras de retrocompatibilidade: `sem-features` (diretório sem `features/`), `features-de-terceiros` (um `features/` estilo behave com `steps/`, `environment.py` e `.feature` sem tags e sem `intent.md`), `pasta-sem-intent` (pasta com `.feature` e sem `intent.md`). Cada caso traz `esperado.json` com a lista exata `[{rule, severity, file, line}]`, o exit code e, para os casos válidos, a matriz esperada. Incluir os casos que alimentam o 000008: "cenário sem tag" (GHK-002) e "tag sem REQ" (GHK-004) com contagem esperada 1 cada.

@@ -43,3 +43,9 @@ Baseline confirmado: `run_all_checks.py` 16 PASS / 14 FAIL; `git status` limpo.
 - deviated: Runner contract e Cucumber JSON, nao JUnit; as tags ja vem no JSON, sem propriedade req.
 - less-sure: Se o formato de falha do Cucumber JSON do pytest-bdd distingue assercao de erro (vai para o Step 8).
 - gate: not-installed
+
+### Step 2 -- reflection-on-action | 2026-10-06 17:32 UTC | Convencao normativa gherkin-spec-format.md
+- happened: Escrevi a convencao com GHK-001..019 (as 16 do plano mais termos, Rule como jornada e @nao-faz), a tabela de mapeamento Cucumber JSON para os estados do DRM-003 e a chave de cenario.
+- deviated: Tres regras acrescentadas pelas emendas do adendo (GHK-017..019); runner contract em Cucumber JSON em vez de JUnit.
+- less-sure: A heuristica de GHK-017 (aspas e maiuscula) pode gerar ruido; fica como aviso.
+- gate: not-installed
