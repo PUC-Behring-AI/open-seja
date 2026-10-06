@@ -118,3 +118,26 @@ Baseline confirmado: `run_all_checks.py` 16 PASS / 14 FAIL; `git status` limpo.
 - deviated: Nao existe estado pulado no run_all_checks; a condicional e interna ao script, e o arquivo run_all_checks.py ficou intacto.
 - less-sure: Um projeto real que adotar features/ com intent aprovado vera o health check falhar por erro GHK; e o comportamento pretendido, mas muda o resultado dele.
 - gate: not-installed
+
+## Step 8 -- prova no runner (pytest-bdd) (2026-10-06)
+
+Decisao pendente 7 = B executada. Versoes: **pytest-bdd 9.0.0**, pytest 9.1.1, Python 3.14 do `uvx` (rede e instalacao funcionaram; nenhuma dependencia entrou no harness; `uvx --with pytest-bdd`). pytest-bdd **tem `--cucumberjson`** e le `# language: pt`.
+Exemplo em `.claude/references/template/feature-example/` (README, `features/task-list/{intent.md,manage-tasks.feature}`, `conftest.py.example`, `test_task_list.py.example`, `cucumber_states.py.example`). Os `.py` levam sufixo `.example` (desvio do plano, que pedia `conftest.py` e `test_login.py`): um `test_*.py` ou `conftest.py` real na pasta seria coletado por um `pytest` rodado na raiz do repo e falharia sem pytest-bdd; `test_feature_example.py` garante que a pasta nao tem `*.py`.
+Saida do pytest (copiando a pasta e tirando o sufixo, `--strict-markers --cucumberjson --junitxml`): `1 failed, 3 passed, 1 skipped`. Falha: `assert False is True` / `AssertionError` do cenario REQ-task-list-002 (nao `ERROR` de coleta). Coleta limpa tambem com `-W error::pytest.PytestUnknownMarkWarning`. `check_features.py <pasta copiada> --steps <pasta>` sem achado GHK-015. `check_features.py` sobre o exemplo no repo: exit 0 (1 aviso GHK-014 do `@skip` e 1 info GHK-019, esperados).
+
+Descobertas do runner (todas em `gherkin-spec-format.md` secoes 8 e 10; fixture real em `.claude/skills/scripts/tests/fixtures/runner/pytest-bdd-cucumber.json`):
+1. Tags vem no Cucumber JSON por cenario, **sem `@`**; nao ha propriedade `req` a gravar (o plano falava de JUnit/propriedade).
+2. `uri` e relativo a pasta `features/` (ou a raiz): a chave de cenario usa os **dois ultimos componentes** do `uri`.
+3. `Scenario Outline`: um elemento por linha de `Examples`, mesmo `name` e mesma chave; agregar pelo pior estado.
+4. `@skip` **nao aparece** no Cucumber JSON (so no JUnit e no resumo do pytest). Tambem **nao aparece** o cenario cujo primeiro step e indefinido, e o step indefinido de um cenario que falha no meio fica fora (so os steps anteriores, `passed`). `--junitxml` do mesmo pytest traz todos (`skipped`, `failure` com `StepDefinitionNotFoundError`).
+5. `@xfail` e uma tag no relatorio: o step que falha vem `skipped`; xpass vem todo `passed`. `xfail` nao e nativo: sai da tag.
+6. Falha de asserção: `error_message` termina em `AssertionError`; excecao de fixture ou de step (`RuntimeError`) tambem vem `failed`, sem `AssertionError` -> `error`. Nao ha `ambiguous` nem `pending` no pytest-bdd.
+7. `pytest_bdd_apply_tag` devolvendo `True` para `REQ-*` e `nao-faz` basta para `--strict-markers`; `skip` e `xfail` ficam nativos.
+
+Tabela de mapeamento Cucumber JSON -> estados do DRM-003 escrita (secao 8) e executavel (`cucumber_states.py.example`, testada em `test_feature_example.py`, 18 testes, inclusive sobre o relatorio real). Nova regra **CYC-027** (estados e chave do runner contract) em `extended-cycle-contract.md`, mais uma linha "Implementacao" em CYC-026. Verificacao: pytest do harness 861 passed / 12 failed; `run_all_checks.py` 17 PASS / 14 FAIL (17/2/9); ruff limpo.
+
+### Step 8 -- reflection-on-action | 2026-10-06 17:46 UTC | Prova no runner pytest-bdd
+- happened: Provei o exemplo no pytest-bdd 9.0.0 (3 passed, 1 failed por AssertionError, 1 skipped), com Cucumber JSON real e a tabela de mapeamento de estados executavel e testada; criei CYC-027.
+- deviated: Os .py do exemplo levam sufixo .example para o pytest do harness nao os coletar; o JSON nao precisa de propriedade req; o JSON do pytest-bdd omite o cenario @skip e o primeiro step indefinido.
+- less-sure: Se o complemento com --junitxml sera aceito pelo plan-000013 ou se ele prefere outro runner; o relatorio Cucumber do pytest-bdd e incompleto.
+- gate: not-installed

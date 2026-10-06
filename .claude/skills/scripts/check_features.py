@@ -718,7 +718,7 @@ def _check_coverage(fd: FeatureDir) -> list[Finding]:
                              "Escreva um cenário com a tag desse requisito, ou retire o requisito."))
     if intent.out_of_scope and not nao_faz and files:
         out.append(_find("GHK-019", "info", fd.intent_path, intent.out_line,
-                         f"Fora do escopo tem {intent.out_of_scope} itens e nenhum cenário @{NAO_FAZ_TAG}.",
+                         f"Fora do escopo tem {_plural(intent.out_of_scope, 'item', 'itens')} e nenhum cenário @{NAO_FAZ_TAG}.",
                          "Opcional: um cenário @nao-faz prova o que o sistema não faz."))
     return out
 
@@ -932,7 +932,7 @@ def _check_style(ff: FeatureFile, feature: Feature) -> list[Finding]:
 def term_candidates(text: str) -> list[str]:
     """Words GHK-017 checks: quoted text without digits, and capitalized words after the first."""
     text = PLACEHOLDER_RE.sub(" ", text)
-    out = [q for q in re.findall(r'"([^"]+)"', text) if not re.search(r"\d", q)]
+    out = [q for q in re.findall(r'"([^"]+)"', text) if q.strip() and not re.search(r"\d", q)]
     rest = re.sub(r'"[^"]*"', " ", text)
     words = re.findall(r"[^\W\d_][\w-]*", rest)
     out += [w for i, w in enumerate(words) if i > 0 and w[0].isupper()]

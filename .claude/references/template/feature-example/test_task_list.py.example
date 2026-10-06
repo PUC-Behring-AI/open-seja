@@ -1,0 +1,68 @@
+"""Step definitions of the example feature (pytest-bdd).
+
+Copy as `test_task_list.py` next to `conftest.py` and `features/`. The toy `TaskList`
+does not implement "mark as done" yet: that is on purpose, so the scenario of
+REQ-task-list-002 is red for the right reason (a failed assertion of the scenario, not an
+import error or an undefined step), as CYC-022 requires before any production code.
+"""
+
+import pytest
+from pytest_bdd import given, parsers, scenarios, then, when
+
+scenarios("features/task-list/manage-tasks.feature")
+
+
+class TaskList:
+    def __init__(self):
+        self.tasks = {}
+
+    def add(self, title, done=False):
+        self.tasks[title] = done
+
+    def mark_done(self, title):
+        pass  # not implemented yet (the red scenario)
+
+
+@pytest.fixture
+def tasks():
+    return TaskList()
+
+
+@given("que a lista de tarefas está vazia")
+def empty_list(tasks):
+    assert tasks.tasks == {}
+
+
+@given(parsers.parse('que a lista tem a tarefa pendente "{title}"'))
+def pending_task(tasks, title):
+    tasks.add(title)
+
+
+@given(parsers.parse('que a lista tem a tarefa feita "{title}"'))
+def done_task(tasks, title):
+    tasks.add(title, done=True)
+
+
+@when(parsers.parse('eu acrescento a tarefa "{title}"'))
+def add_task(tasks, title):
+    tasks.add(title)
+
+
+@when(parsers.parse('eu marco a tarefa "{title}" como feita'))
+def mark_done(tasks, title):
+    tasks.mark_done(title)
+
+
+@when(parsers.parse('eu desfaço a marcação da tarefa "{title}"'))
+def undo_done(tasks, title):
+    tasks.add(title)
+
+
+@then(parsers.parse('a lista mostra a tarefa "{title}" como pendente'))
+def shows_pending(tasks, title):
+    assert tasks.tasks[title] is False
+
+
+@then(parsers.parse('a lista mostra a tarefa "{title}" como feita'))
+def shows_done(tasks, title):
+    assert tasks.tasks[title] is True

@@ -307,6 +307,7 @@ def test_normalization_and_candidates() -> None:
     assert normalize_step('O saldo é "10".') == normalize_step("o saldo é 20")
     assert light_key("  Um  Passo ") == "um passo"
     assert term_candidates('o usuário abre a Fatura e vê "Premium" e "1 conta"') == ["Premium", "Fatura"]
+    assert term_candidates('a lista mostra "<titulo>"') == []
 
 
 def test_term_missing_from_model_returns_ghk017_and_present_term_does_not(tmp_path: Path) -> None:

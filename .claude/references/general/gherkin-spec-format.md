@@ -98,25 +98,27 @@ O validador **reutiliza** `parse` e `table` de `check_intent.py` (um parser só 
 
 O runner contract do ciclo é o **Cucumber JSON** (CYC-012, CYC-027). Este arquivo não nomeia ferramenta como requisito; a recomendação de primeiro adaptador para Python é pytest-bdd (`--cucumberjson`), marcada como recomendação (CYC-026). Os planos 000010 e 000014 falavam em JUnit XML: o desvio está registrado no progress do plan-000010.
 
-**Chave de cenário.** `<slug>/<arquivo>::<nome>`, onde `<slug>` e `<arquivo>` saem do `uri` do `.feature` (`features/<slug>/<arquivo>.feature`) e `<nome>` é o `name` do elemento. É única porque GHK-010 exige nome único por arquivo. Para `Scenario Outline` a chave é a mesma para todas as linhas; o D2 agrega as linhas (decisão pendente 6 = A).
+**Chave de cenário.** `<slug>/<arquivo>::<nome>`, onde `<slug>/<arquivo>` são os **dois últimos componentes** do `uri` do `.feature` no relatório (o `uri` pode vir relativo à pasta `features/` ou à raiz; os dois últimos componentes são estáveis) e `<nome>` é o `name` do elemento. É única porque GHK-010 exige nome único por arquivo. Para `Scenario Outline` cada linha de `Examples` vira um elemento com o **mesmo** nome e a mesma chave; o D2 agrega as linhas (decisão pendente 6 = A) pelo pior estado.
 
-**Tag no relatório.** Cada cenário do Cucumber JSON traz a lista `tags`; a ligação cenário -> REQ é essa lista (a convenção do runner pode gravá-la com ou sem `@`; o consumidor normaliza). Não há propriedade extra.
+**Tag no relatório.** Cada cenário do Cucumber JSON traz a lista `tags`; a ligação cenário -> REQ é essa lista (o pytest-bdd grava sem o `@`; o consumidor normaliza). Não há propriedade extra: as tags já vêm no relatório, o que torna desnecessária a "propriedade `req`" de que o plano falava para o JUnit.
 
-**Estado do cenário.** Os estados do DRM-003 (`passed`, `failed`, `error`, `skipped`, `xfail`, `undefined`, `absent`) não são todos nativos do Cucumber. Mapeamento:
+**Estado do cenário.** Os estados do DRM-003 (`passed`, `failed`, `error`, `skipped`, `xfail`, `undefined`, `absent`) não são todos nativos do Cucumber (que tem `passed`, `failed`, `skipped`, `pending`, `undefined`, `ambiguous` por step). Mapeamento, verificado no Step 8 contra pytest-bdd 9.0.0 (`cucumber_states.py.example` o executa):
 
-| No relatório (status dos steps e tags) | Estado do DRM-003 | Observação |
+| No relatório (status dos steps e tags do cenário) | Estado do DRM-003 | Observação |
 |---|---|---|
-| todos os steps `passed` | `passed` | |
-| algum step `failed` e a mensagem de erro é de **asserção** | `failed` | é o único "vermelho pelo motivo certo" (CYC-022) |
-| algum step `failed` e a mensagem **não** é de asserção (importação, sintaxe, fixture, configuração) | `error` | |
-| algum step `ambiguous` | `error` | duas definições casam o mesmo step |
-| algum step `undefined` | `undefined` | passo sem definição; normal no teste-primeiro, nunca vermelho |
-| algum step `pending` | `undefined` | passo declarado e não implementado |
-| todos os steps `skipped` e o cenário não tem tag `xfail` | `skipped` | `@skip` e afins |
-| cenário com tag `xfail` e status `failed` ou `skipped` | `xfail` | `xfail` não é nativo: sai da tag |
-| cenário do `.feature` sem elemento no relatório | `absent` | o relatório ausente inteiro é `NM-SEM-RUNNER` (DRM-003) |
+| cenário com a tag `xfail`, qualquer resultado | `xfail` | `xfail` não é nativo: sai da tag. O pytest-bdd mostra o step que falha como `skipped`, ou tudo `passed` (xpass); em ambos o cenário não é verde (DRM-003) |
+| algum step `failed` e o `error_message` termina em `AssertionError` | `failed` | único "vermelho pelo motivo certo" (CYC-022) |
+| algum step `failed` sem `AssertionError` (importação, fixture, exceção, configuração) | `error` | |
+| algum step `ambiguous` | `error` | o pytest-bdd não emite `ambiguous`; outros runners emitem |
+| algum step `undefined` ou `pending` | `undefined` | passo sem definição; normal no teste-primeiro, nunca vermelho |
+| todos os steps `skipped` | `skipped` | |
+| todos os steps `passed`, mas menos steps no relatório que no `.feature` | `undefined` | o pytest-bdd deixa o passo indefinido **fora** do relatório |
+| todos os steps `passed` e todos presentes | `passed` | |
+| cenário do `.feature` sem elemento no relatório e com tag `skip`, `wip` ou `ignore` | `skipped` | o pytest-bdd **omite** o cenário `@skip` do Cucumber JSON |
+| cenário do `.feature` sem elemento no relatório, sem essas tags | `absent` | |
+| relatório ausente inteiro | `NM-SEM-RUNNER` (DRM-003) | não é estado de cenário |
 
-O Step 8 do plan-000010 verifica este mapeamento contra pytest-bdd e registra o que o runner de fato emite (seção 10).
+**Limite do relatório no pytest-bdd (lacuna para os planos 000013 e 000014).** O Cucumber JSON do pytest-bdd 9.0.0 não mostra o cenário `@skip` nem o cenário cujo **primeiro** step é indefinido (`absent`), e não mostra o step indefinido de um cenário que falha no meio (só os steps anteriores, `passed`). O mapeamento acima recupera `skipped` pela tag e `undefined` pelo número de steps, mas não separa "primeiro step indefinido" de "cenário nunca coletado". O complemento barato é o `--junitxml` do mesmo pytest: nele todo teste aparece, com `skipped` ou `failure` e a exceção (`StepDefinitionNotFoundError`). O contrato do ciclo continua sendo o Cucumber JSON (CYC-012); um adaptador pode juntar o JUnit do runner sem mudar o contrato.
 
 ## 9. Regras `GHK-NNN`
 
@@ -176,7 +178,21 @@ Candidatos: texto entre aspas retas (exceto o que tem dígito: valor) e palavra 
 
 ## 10. Rodando no pytest-bdd
 
-Seção preenchida no Step 8 do plan-000010 (exemplo executável em `.claude/references/template/feature-example/`).
+Primeiro adaptador de runner para Python, **recomendação** (CYC-026), `pytest-bdd` 9.0.0 sobre pytest 9.1.1 (verificado em 2026-10-06 com `uvx --with pytest-bdd`; o harness não depende dele). Exemplo executável e fictício em `.claude/references/template/feature-example/` (README, `intent.md`, `.feature`, `conftest.py.example`, `test_task_list.py.example`; o sufixo `.example` impede o pytest do harness de coletá-los).
+
+```bash
+cp -r .claude/references/template/feature-example/. /tmp/exemplo && cd /tmp/exemplo
+for f in *.example; do mv "$f" "${f%.example}"; done
+uvx --with pytest-bdd pytest --strict-markers --cucumberjson=report.json --junitxml=junit.xml
+```
+
+Resultado verificado: 3 testes passam (o cenário comum e as 2 linhas do `Scenario Outline`), 1 falha por `AssertionError` do cenário (REQ-task-list-002, vermelho pelo motivo certo, CYC-022) e 1 fica `skipped` (`@skip`).
+
+- **Idioma.** O pytest-bdd lê `# language: pt` (`Funcionalidade`, `Cenário`, `Dado`, `Quando`, `Então`): a decisão pendente 1 = C se sustenta.
+- **Tags sob `--strict-markers`.** Sem tratamento, `@REQ-...` falha na coleta (`'REQ-demo-001' not found in markers`). O `conftest` modelo implementa `pytest_bdd_apply_tag` e devolve `True` para `REQ-*` e `nao-faz`; `@skip` e `@xfail` ficam com o pytest-bdd (marcas nativas do pytest). Com isto a coleta roda limpa mesmo com `-W error::pytest.PytestUnknownMarkWarning`.
+- **Relatório.** `--cucumberjson=report.json` traz `tags` por cenário (sem `@`), `uri` relativo a `features/` e um elemento por linha de `Examples`. O `@skip` não aparece nele (seção 8).
+- **`--steps`.** `check_features.py <raiz> --steps <pasta>` sobre o exemplo copiado não acusa definição duplicada nem sem uso (as definições usam `parsers.parse`).
+- Ligar o runner ao `/implement` é do plan-000013; este arquivo só prova que a convenção roda no runner escolhido.
 
 ## 11. Saída do validador
 

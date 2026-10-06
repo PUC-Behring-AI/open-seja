@@ -293,3 +293,12 @@ O runner que executa os `.feature` e emite o relatório do runner contract é **
 
 - **Quem decide**: designer, no plan-000010.
 - **Critério de aceitação**: nenhuma regra desta seção exige uma ferramenta específica; um projeto sem runner produz relatório com `não medido` e a razão dita.
+- **Implementação**: plan-000010 descreve o relatório e prova o primeiro adaptador (`gherkin-spec-format.md`, seções 8 e 10; CYC-027).
+
+### CYC-027 -- Estados e chave de cenário do runner contract (emenda 000010)
+
+O relatório do runner é o Cucumber JSON (CYC-012). Ele liga o `Scenario` ao teste pela **chave de cenário** `<slug>/<arquivo>::<nome>` (os dois últimos componentes do `uri` do `.feature` e o `name` do cenário; nome único por arquivo, GHK-010) e traz as tags `@REQ-` do cenário na lista `tags`. Os estados do DRM-003 (`passed`, `failed`, `error`, `skipped`, `xfail`, `undefined`, `absent`) não são todos nativos do Cucumber (`passed`, `failed`, `skipped`, `pending`, `undefined`, `ambiguous` por step): a tabela de mapeamento está em `.claude/references/general/gherkin-spec-format.md`, seção 8. Regras: `failed` exige mensagem de asserção (senão é `error`); `xfail` vem da tag; `Scenario Outline` é uma unidade e vale o pior estado das suas linhas; cenário que o runner não emite fica `absent` (ou `skipped` se tem tag de desativação). Um adaptador pode juntar outro relatório do mesmo runner (por exemplo o JUnit) quando o Cucumber JSON omite casos; o contrato não muda.
+
+- **Quem decide**: designer; o adaptador do runner (plan-000013) e a junção (plan-000014) aplicam.
+- **Critério de aceitação**: dado o mesmo Cucumber JSON, dois consumidores obtêm os mesmos estados por chave; nenhum cenário `skip`, `xfail` ou sem teste é contado como verde; nenhum `error` ou `undefined` é contado como vermelho pelo motivo certo (CYC-022).
+- **Ruptura que pode provocar** (CYC-014): ao power dev, "meu cenário aparece como `undefined` e eu achava que estava vermelho". Registro do power dev; nada novo ao citizen.
