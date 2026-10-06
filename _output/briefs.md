@@ -4,6 +4,8 @@ Execution log of all skill invocations.
 
 ---
 
+DONE | 2026-10-06 22:47 UTC | STARTED | 2026-10-06 22:34 UTC | research | source: reflection-000017. Upgrade multi-dev do SEJA: IDs computados localmente (reserve_id.py single-writer) colidem entre maquinas; esquema de ID (sequencial vs hash vs commit sha vs ULID), pontos de colisao, fronteira front/core, relacao com plan-000004/H-007
+
 DONE | 2026-10-06 22:30 UTC | STARTED | 2026-10-06 22:25 UTC | reflect | o open-seja está sendo usado por times de desenvolvimento. mas o uso tem de ser síncrono, em alguma medida, pois os ids são computados localmente e podem ter conflito, caso 2 devs invoquem uma skill ao mesmo tempo em maquinas diferentes. vamos refletir sobre iisso e bolar um plano para um upgrade do seja: multi-dev
 
 DONE | 2026-10-03 16:02 UTC | STARTED | 2026-10-03 15:10 UTC | implement | 5 --manual | PLAN | 000005
