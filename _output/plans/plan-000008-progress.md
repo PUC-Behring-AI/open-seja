@@ -14,6 +14,7 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 - Portao nao instalado no open-seja: notas com `--gate not-installed`.
 - Commits: `git -c user.name=arodrigues-puc-rio -c user.email=arodrigues-puc-rio@users.noreply.github.com commit ...`; nunca `--no-verify`.
 - Decisoes pendentes do plano: o designer aceitou todas as recomendacoes em 2026-10-06; marcar como `[default; aceito 2026-10-06]`.
+- `run_all_checks.py` deve rodar com `< /dev/null` (sem isso `check_skill_system` pode travar 120 s e dar ERROR; com isso leva ~3,5 s).
 
 ## Iteration Log
 
@@ -80,4 +81,15 @@ Nada escrito fora do ledger. `git status` limpo no inicio.
 - happened: Gerei seis casos com entrada e esperado, calculados a mao, e recontei por script independente: zero divergencias.
 - deviated: Esclareci em drift-metric.md arredondamento, populacao do D2, cadeia_completa e forma nao_aplicavel, que o desenho dos casos exigiu.
 - less-sure: O esquema de entrada e meu; o plano 000014 le JUnit XML e pode precisar mapear.
+- gate: not-installed
+
+### Step 4 -- drift-control-protocol.md (2026-10-06, executor)
+- Criado `.claude/references/general/drift-control-protocol.md` com as 10 secoes numeradas; regra de comparacao `D_B >= D_A` com empate < 1 item; condicao de refutacao "em dois ou mais dos degraus comparaveis"; tabela de resultados com uma linha por degrau mais O1, tempo, `t_verde`, auditoria e medidores do citizen.
+- A secao 6 (tempo) ja traz as fontes de cada timestamp; o Step 5 acrescenta o template e o exemplo.
+- Padrao: `run_all_checks.py` trava 120 s em `check_skill_system` quando roda sem stdin redirecionado dentro de script; usar `< /dev/null` (3,5 s). Promovido para Codebase Patterns.
+
+### Step 4 -- reflection-on-action | 2026-10-06 17:08 UTC | Desenho do controle
+- happened: Escrevi drift-control-protocol.md com as dez secoes: bracos, oraculo, O1, retrofit, replicas, tempo, regra de comparacao, covariaveis, ameacas e parada.
+- deviated: A secao de tempo ja saiu com as fontes de timestamp, que o Step 5 previa acrescentar.
+- less-sure: A condicao de refutacao por dois ou mais degraus comparaveis e minha leitura do texto do 000007.
 - gate: not-installed

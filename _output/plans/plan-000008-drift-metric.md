@@ -154,7 +154,7 @@ Criar o protocolo com: (1) objetivo e a pergunta (H-009: o ciclo estendido reduz
 - **Verify**: o arquivo existe com as 10 seções numeradas; a regra de comparação cita os mesmos nomes de degrau do `drift-metric.md` (`grep -c "D1\|D2\|D3a\|D3b"` em ambos >= 4); tabela de resultados tem uma linha por degrau mais O1 e tempo; nenhum termo de C1; `run_all_checks.py` igual ao baseline.
 - **Tests**: N/A (protocolo documental)
 - **Docs**: o próprio documento.
-- [ ] Done
+- [x] Done
 
 ### Step 5: Template de registro de execução e captura do tempo
 Criar `pilot-run-record.md` (template): feature, braço (A/B), ordem sorteada, réplica, commit inicial, versão do harness e do modelo, hash do oráculo, `t0`, `t_verde`, `t_aprovada`, tempo atendido, nº de iterações até PASS, nº de perguntas do grill, caminho da matriz M1 e M2, relatório de D por degrau, O1, notas do designer (verbatim). No `drift-control-protocol.md`, a seção de tempo aponta de onde sai cada timestamp (conforme o que o Step 1 achou: `briefs.md`, `telemetry.jsonl`, `conversation-trace.jsonl` e `gate.json`.ts). Se a fonte de `t_aprovada` não existir no open-seja, a linha de aceitação do designer vira campo do registro e fica declarado que o tempo atendido dessa execução é calculado a partir de `t0` e `t_aprovada` apenas.
