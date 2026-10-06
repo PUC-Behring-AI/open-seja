@@ -93,13 +93,59 @@ O git resolve nada disso por conta propria: nao ha `merge=union`, e dois arquivo
 
 ## Recommendations summary
 
-1. **[HIGH] Adotar D'**: reserva por push na branch compartilhada, um marcador por ID em `_output/ids/`, INDEX.md 100% derivado, `provisional: true` offline, post-skill recusa push de provisorio. Custo: um commit pequeno por reserva e uma ida a rede no inicio de `/plan`, `/research` etc.
+1. **[HIGH] Adotar D'** *(SUPERSEDED por R2-1, ver follow-up Q2-Q5: a restricao do numero global caiu)*: reserva por push na branch compartilhada, um marcador por ID em `_output/ids/`, INDEX.md 100% derivado, `provisional: true` offline, post-skill recusa push de provisorio. Custo: um commit pequeno por reserva e uma ida a rede no inicio de `/plan`, `/research` etc.
 2. **[HIGH] `check_ledger_ids.py`** antes de tudo: IDs de 6 digitos duplicados em `_output/**`, RESERVED orfaos ha mais de N dias, `pa-`/`D-NNN` duplicados, apelidos repetidos (aviso). Registrar em `check_plugin_registry.json`, rodar no pre-skill e no `run_all_checks.py`, com caso positivo e negativo. E o unico item que torna a colisao de hoje visivel, e custa quase nada. Manter um reparo **manual** (sucessor com escopo de `migrate_to_global_ids.py`, renumera um artefato e reescreve suas referencias) para o duplicado raro pos-push; nunca automatico.
 3. **[MEDIUM] Arquivos compartilhados merge-friendly**: `.gitattributes` com `merge=union` para `_output/*.jsonl` e `briefs.md`; `spawned:` append-only (uma linha por filho) em `update_cross_refs.py`; redutor do pending passa a **falhar** quando um segundo registro de criacao chega com id existente (`pending.py:158-160`); `pa-<utc-compacto>-<4 hex do autor>` e `qa-<sessao-curta>-NNNNNN` para os ids secundarios.
-4. **[MEDIUM] `uid:`** (ULID ou sha256 do registro de nascimento) como linha de header aditiva em todo artefato novo, escrita pela mesma reserva. Nenhuma regex a usa hoje; e a identidade de core que o servico e o resolvedor de apelidos vao chavear. Sem retrofit.
+4. **[MEDIUM] `uid:`** *(REFINED por R2-1: o ULID passa a ser a identidade primaria, nao secundaria)* (ULID ou sha256 do registro de nascimento) como linha de header aditiva em todo artefato novo, escrita pela mesma reserva. Nenhuma regex a usa hoje; e a identidade de core que o servico e o resolvedor de apelidos vao chavear. Sem retrofit.
 5. **[LOW] Apelido como signo de front-end**: `alias:` opcional, `resolve_artifact.py`, unicidade como aviso, sanitizacao antes de uso em caminho.
 6. **[LOW] Registrar como D-NNN** a rejeicao de A, B, C e do SHA de commit, para a questao nao reabrir quando o plan-000004 / H-007 retomar.
 
-Recorte sugerido para o `/plan "upgrade multi-dev"`: recs 2 e 3 (prevencao visivel e merge-friendliness, sem mudar formato) num primeiro plano; recs 1 e 4 (D' e `uid:`) num segundo; rec 5 num terceiro, ligado a retraducao do citizen (D-004 do open-seja).
+Recorte sugerido para o `/plan "upgrade multi-dev"` *(SUPERSEDED, ver recorte revisado no fim)*: recs 2 e 3 (prevencao visivel e merge-friendliness, sem mudar formato) num primeiro plano; recs 1 e 4 (D' e `uid:`) num segundo; rec 5 num terceiro, ligado a retraducao do citizen (D-004 do open-seja).
 
 Fontes externas consultadas: [git-bug data model](https://git.secluded.site/git-bug/blob/v0.8.1/doc/design/data-model.md?source=1) (entidades como CRDTs por operacao, IDs por hash, merge por uniao); [Mercurial: revision numbers vs changeset IDs](https://www.mercurial-scm.org/pipermail/mercurial/2006-May/008006.html) (numero local nao e portavel entre clones).
+
+
+## Follow-up Q&A (2026-10-06, mesma sessao)
+
+### Q2
+
+> qual a desvantagem de ser offline?
+
+### A2
+
+No esquema D', offline perde so a garantia de que o numero e global: a reserva e local e `provisional: true`; o numero pode ja ter sido tomado por outro dev; o post-skill recusa o push ate sincronizar; na sincronizacao, so o artefato provisorio e renumerado (T3 intacto), e referencias locais a ele precisam ser reescritas. Citar o numero provisorio em conversa e arriscado. O apelido e o `uid:` nao mudam, so o inteiro. Hash como ID visivel nao tem essa desvantagem, mas perde a citacao "plan 7" entre maquinas; um servico central tem a mesma limitacao offline.
+
+### Q3
+
+> nao sei se o id é tao importante, os devs podem usar uma liniguagem maiis proxiima do que eles precisam fazer, devs podem usar um apelido derivado da sha por ex
+
+### A3
+
+A restricao "cito o plan 7 entre maquinas" era o unico motivo para precisar de um ponto de serializacao. Sem ela, o esquema B volta a ser o mais simples: hash do registro de nascimento no core (o SHA de commit segue inviavel pela circularidade), apelido pronunciavel e deterministico derivado do hash (estilo nomes do Docker ou proquints: qualquer maquina deriva o mesmo apelido), e apelido livre em linguagem natural por cima. Tres camadas sem coordenacao. Perde-se a ordem cronologica implicita no numero e muda o formato visivel `plan-\d{6}` (~30 regexes e marcadores), mas de forma aditiva: artefatos antigos ficam, regexes aceitam os dois formatos, nada e renumerado. Ganha-se: nenhum push na reserva, nenhum modo provisorio, nenhuma renumeracao nunca; o seja-mcp reusa o mesmo uid.
+
+### Q4
+
+> o que perderíiamos é a ordenação na arvore no sistema de arquivos
+
+### A4
+
+Resolvido com ULID em vez de hash puro: timestamp de milissegundos mais 80 bits aleatorios, 26 caracteres que ordenam lexicograficamente por tempo. Nome de arquivo com prefixo de data legivel e sufixo curto do ULID: `plan-20261006-q8zrj4-default-cycle-contract.md`. Mantem a ordem na arvore e nos globs ordenados do harness, a nocao de "veio antes" (mais legivel do que o numero), zero coordenacao e zero renumeracao. Dois artefatos no mesmo dia, de devs diferentes, ordenam entre si pelo sufixo, nao pela hora; se a ordem intradia importasse, o prefixo incluiria a hora.
+
+### Q5
+
+> a ordem iintradiia nao importa tanto. pode reescrever
+
+### A5
+
+Recomendacao reescrita abaixo (R2). D' fica registrado como alternativa rejeitada.
+
+## Recommendations summary (revised, R2)
+
+- **R2-1 [HIGH] Identidade por ULID, sem coordenacao.** Todo artefato novo nasce com `uid:` ULID gerado localmente (registro de nascimento: tipo, titulo, autor, timestamp UTC, origem). Nome de arquivo `<tipo>-<YYYYMMDD>-<6 chars do ULID>-<slug>.md`; header `# Plan 20261006-q8zrj4 | ...`. Sem push na reserva, sem modo provisorio, sem renumeracao. `reserve_id.py` deixa de ler INDEX.md e passa a gerar o ULID e gravar o registro de nascimento em `_output/ids/<uid>.json` (um arquivo por artefato, merge trivial). INDEX.md fica 100% derivado.
+- **R2-2 [HIGH] Gramatica aditiva.** Regexes do macro-index, `check_plan_coverage`, `human_markers_registry` (STATUS, ESTABLISHED, INCORPORATED, CHANGELOG_APPEND), `update_cross_refs`, `step_notes`, `summarize_artifacts`, `check_docs`, `pending.py` passam a aceitar `\d{6}` **ou** `\d{8}-[0-9a-z]{6}`. Artefatos antigos nao sao tocados (T3). `report-conventions.md:9` e os textos "6-digit ID" nas skills e agentes sao atualizados.
+- **R2-3 [HIGH] `check_ledger_ids.py`** (mantida da R1-2): IDs duplicados (ambos formatos), RESERVED orfaos enquanto existirem, `pa-`/`D-NNN` duplicados, apelidos livres repetidos como aviso. Pre-skill e `run_all_checks.py`, com caso positivo e negativo.
+- **R2-4 [MEDIUM] Apelido derivado e apelido livre.** `alias_derived` = nome pronunciavel deterministico do ULID (petname ou proquint), gravado no registro de nascimento e exibido pelo front-end como rotulo padrao ("o brisk-otter"). `alias:` livre opcional em pt-BR ("o plano do Criar Projeto"), unicidade como aviso, nunca em caminho. `resolve_artifact.py "<id | uid | apelido>"` usado por `/explain`, `/communicate` e pela retraducao ao citizen (D-004).
+- **R2-5 [MEDIUM] Arquivos compartilhados merge-friendly** (mantida da R1-3): `.gitattributes merge=union` para `_output/*.jsonl` e `briefs.md`; `spawned:` append-only; `pa-` e `qa-` viram sufixo curto de ULID; redutor do pending falha em id duplicado. `D-NNN` fica como esta.
+- **R2-6 [LOW] Registrar D-NNN** com a decisao e as alternativas rejeitadas: SHA de commit (circular), prefixo por dev, numero global por push (D'), renumeracao pos-merge.
+
+Recorte revisado para o `/plan "upgrade multi-dev"`: primeiro plano = R2-1 + R2-2 + R2-3 (identidade, gramatica aditiva, verificador); segundo = R2-5 (merge-friendliness e ids secundarios); terceiro = R2-4 (apelidos e resolvedor, ligado a retraducao do citizen).
