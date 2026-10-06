@@ -104,3 +104,17 @@ Baseline confirmado: `run_all_checks.py` 16 PASS / 14 FAIL; `git status` limpo.
 - deviated: Erro falha por padrao (exit 1), diferente do check_intent.py que so falha com --strict.
 - less-sure: O JSON e a matriz sao a entrada do plan-000014; o formato pode precisar de ajuste quando ele consumir.
 - gate: not-installed
+
+## Step 7 -- integracao com run_all_checks e retrocompatibilidade (2026-10-06)
+
+`run_all_checks.py` **nao foi modificado**: ele descobre `check_*.py` por glob e so conhece PASS/FAIL/ERROR (sem estado "pulado"); a condicionalidade esta no proprio script (sem `features/<slug>/intent.md` imprime "nada a verificar" e sai 0), como `check_intent.py`. Isto cumpre o Verify do plano na substancia (o conjunto de falhas pre-existentes nao muda; a lista ganha uma linha `check_features.py PASS`), mas nao ha rotulos `features: pulado/ok/falhou`: desvio registrado. Erro GHK (exit 1) reprova o check; aviso nao.
+- Testes (7 novos, 152 em `test_check_features.py`): check descoberto e registrado; `sem-features`, `features-de-terceiros` e `pasta-sem-intent` rodam como check (`run_script` do proprio `run_all_checks`) com PASS e exit 0; o repositorio atual (sem `features/`) passa dizendo "nada a verificar"; `ok-completo` PASS, `ghk-002-sem-tag` FAIL com o nome `check_features.py`; so aviso (`ghk-013-detalhe`) continua PASS.
+- Retrocompatibilidade: `run_all_checks.py` real 17 PASS / 14 FAIL (os mesmos 14 FAIL do baseline; +1 PASS = este check), contadores 17 undefined / 2 error(s) / 9 error(s); nenhum SKILL.md, gate, hook ou settings alterado; `git diff` do step so mexe no teste.
+- Nota: `run_all_checks.py --root <fixture>` nao serve para provar o check por raiz (nao imprime nada util fora de um repo com `.claude`); por isso os testes usam `run_script`.
+- pytest do harness: 843 passed / 12 failed (os mesmos 12).
+
+### Step 7 -- reflection-on-action | 2026-10-06 17:42 UTC | Integracao com run_all_checks
+- happened: Provei por testes que o check e descoberto, nao afeta projetos sem features/ e reprova so com erro; nao foi preciso editar o run_all_checks.
+- deviated: Nao existe estado pulado no run_all_checks; a condicional e interna ao script, e o arquivo run_all_checks.py ficou intacto.
+- less-sure: Um projeto real que adotar features/ com intent aprovado vera o health check falhar por erro GHK; e o comportamento pretendido, mas muda o resultado dele.
+- gate: not-installed

@@ -433,3 +433,44 @@ def test_feature_option_validates_only_that_feature(tmp_path: Path, capsys: pyte
 def test_no_features_prints_a_line_and_exits_0(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     assert main([str(tmp_path)]) == 0
     assert "nada a verificar" in capsys.readouterr().out
+
+
+# ---------------------------------------------------------------------------
+# run_all_checks integration and backward compatibility
+# ---------------------------------------------------------------------------
+
+
+def _run_as_check(root: Path):
+    from run_all_checks import run_script
+
+    return run_script(_SCRIPT, root, False)
+
+
+def test_check_is_discovered_and_registered() -> None:
+    from run_all_checks import discover_scripts, load_registry
+
+    scripts_dir = _SCRIPT.parent
+    assert _SCRIPT in discover_scripts(scripts_dir)
+    registry = load_registry(scripts_dir) or []
+    assert any(entry["script"] == "check_features.py" for entry in registry)
+
+
+@pytest.mark.parametrize("case", ["sem-features", "features-de-terceiros", "pasta-sem-intent"])
+def test_projects_without_a_feature_intent_are_not_affected(case: str) -> None:
+    result = _run_as_check(_FIXTURES / case)
+    assert result.status == "PASS" and result.returncode == 0
+
+
+def test_repository_without_features_passes_and_says_nothing_to_check() -> None:
+    result = _run_as_check(_TESTS_DIR.parents[2].parent)
+    assert result.status == "PASS" and "nada a verificar" in result.stdout
+
+
+def test_valid_feature_passes_and_an_error_fails_the_check() -> None:
+    assert _run_as_check(_FIXTURES / "ok-completo").status == "PASS"
+    failed = _run_as_check(_FIXTURES / "ghk-002-sem-tag")
+    assert failed.status == "FAIL" and failed.script == "check_features.py" and "GHK-002" in failed.stdout
+
+
+def test_a_warning_alone_does_not_fail_the_check() -> None:
+    assert _run_as_check(_FIXTURES / "ghk-013-detalhe").status == "PASS"
