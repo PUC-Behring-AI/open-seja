@@ -107,3 +107,15 @@ Repositorio de execucao: este (sem prefixo `open-seja/`); fixtures em `.claude/s
 - deviated: Cenario sem tag e orfao vem dos achados GHK-002/004, nao da matriz.
 - less-sure: Os formatos de red-reason.json e coverage.json sao propostos; ninguem os produz ainda.
 - gate: not-installed
+
+## Step 6 -- instantaneos, delta, auditoria e CLI (2026-10-06)
+- `freeze` (escrita atomica; `M1.json` nunca sobrescrito: `FileExistsError` -> exit 2, arquivo intacto), `compare` (numerador e denominador dos dois lados, `denominador` por escrito, `mudou` por hash, `NM-SEM-M1`), `read_audit` (valor fora de sim/parcial/nao -> erro com o REQ), `audit_sample` (sha1, `ceil(30%)`, ordem independente da entrada) e a CLI (`--feature --plan --moment --freeze --compare --audit-sample --json --md --citizen --html --as-coded --out --at`). Sem `--feature`: todas as pastas de `features/` em ordem alfabetica; sem `features/`: uma linha, exit 0.
+- Decisao 2 (quem congela o M1): so a CLI `--freeze` e a degradacao `NM-SEM-M1`; a fiacao no `/implement` e do 000013/000015 (texto sugerido ao fim).
+- `--md`, `--citizen` e `--html` ainda respondem exit 2 com aviso "chegam no Step 7"; so `--json` (padrao) funciona neste commit.
+- 96 testes passam; `run_all_checks` igual ao baseline.
+
+### Step 6 -- reflection-on-action | 2026-10-06 18:45 UTC | Instantaneos, delta, auditoria e CLI
+- happened: Escrevi freeze, compare, audit_sample e a CLI; M1 existente e recusado e o arquivo fica intacto.
+- deviated: Os renderizadores ainda nao existem; --md/--citizen/--html saem com aviso neste commit.
+- less-sure: Se o delta deve aparecer sempre no M2 ou so com --compare; segui o plano (--compare).
+- gate: not-installed

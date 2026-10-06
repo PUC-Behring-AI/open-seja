@@ -68,11 +68,14 @@ Usage
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
+import tempfile
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -908,12 +911,194 @@ def build_report(matrix: dict, *, m1: dict | None = None) -> dict[str, Any]:
     return report
 
 
+def _degree_side(deg: dict) -> dict[str, Any]:
+    return {"num": deg["descobertos"], "den": deg["cobertos"] + deg["descobertos"], "D": deg["D"]}
+
+
+def compare(m1: dict | None, m2: dict) -> dict[str, Any]:
+    """M2 - M1 (DRP-007): numerator and denominator of both sides; the change only when both D are numbers."""
+    if m1 is None:
+        return {"estado": "nao_medido", "razao_nm": ["NM-SEM-M1"]}
+    old = m1.get("report", {}).get("degraus", {})
+    out: dict[str, Any] = {"estado": "medido", "razao_nm": []}
+    for step in STEPS:
+        if step not in old or step not in m2["degraus"]:
+            continue
+        a, b = _degree_side(old[step]), _degree_side(m2["degraus"][step])
+        both = isinstance(a["D"], (int, float)) and isinstance(b["D"], (int, float))
+        out[step] = {
+            "m1": a, "m2": b,
+            "mudanca": round(b["D"] - a["D"], 4) if both else None,
+            "denominador": f"o denominador mudou de {a['den']} para {b['den']}" if a["den"] != b["den"] else None,
+        }
+    before = m1.get("entradas", {})
+    now = m2.get("entradas", {})
+    out["mudou"] = sorted(k for k in set(before) | set(now) if before.get(k) != now.get(k))
+    return out
+
+
+def snapshot(report: dict, at: str) -> dict[str, Any]:
+    """The frozen form of a report (DRP-008): the report, the hash of every input, the given time."""
+    body = {k: v for k, v in report.items() if k not in ("delta", "entradas")}
+    return {"schema_version": SCHEMA_VERSION, "feature": report["feature"], "momento": report["momento"],
+            "at": at, "report": body, "entradas": report.get("entradas", {})}
+
+
+def snapshot_path(root: Path, slug: str, moment: str, at: str) -> Path:
+    name = "M1.json" if moment == "M1" else f"M2-{at[:10]}.json"
+    return Path(root) / "features" / slug / "drift" / name
+
+
+def load_snapshot(root: Path, slug: str, moment: str = "M1") -> dict | None:
+    path = snapshot_path(root, slug, moment, "")
+    if moment != "M1" or not path.is_file():
+        return None
+    data = read_json(path)
+    if not isinstance(data, dict) or "report" not in data:
+        raise DriftInputError(str(path), "não é um instantâneo")
+    return data
+
+
+def freeze(report: dict, root: Path, slug: str, moment: str, at: str) -> Path:
+    """Write the snapshot atomically; an existing M1 is never overwritten (DRP-008)."""
+    if report.get("nao_aplicavel"):
+        raise DriftInputError(slug, "não há o que congelar: relatório não aplicável")
+    path = snapshot_path(root, slug, moment, at)
+    if moment == "M1" and path.exists():
+        raise FileExistsError(f"{path}: o M1 já foi congelado e não se sobrescreve")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    text = json.dumps(snapshot(report, at), ensure_ascii=False, indent=2) + "\n"
+    fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=".snap-", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(text)
+        os.replace(tmp, path)
+    except OSError:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+    return path
+
+
+def audit_sample(reqs: list[str], slug: str, pct: int = AUDIT_PCT) -> list[str]:
+    """Deterministic blind sample (DRP-009): order by sha1(slug:req), take ceil(pct%)."""
+    ordered = sorted(reqs, key=lambda r: hashlib.sha1(f"{slug}:{r}".encode()).hexdigest())
+    return ordered[: -(-len(reqs) * pct // 100)]
+
+
 def generate(
-    root: Path, slug: str, *, plan: Path | None = None, moment: str = "M2",
+    root: Path, slug: str, *, plan: Path | None = None, moment: str = "M2", compare_m1: bool = False,
     status_fn: StatusFn | None = None, run_fn: RunFn | None = None, scripts_dir: Path | None = None,
-    m1: dict | None = None,
 ) -> dict[str, Any]:
-    """load_matrix -> build_report (the whole pipeline of one feature)."""
+    """load_matrix -> build_report, with the M2 - M1 delta when asked (the whole pipeline of one feature)."""
     matrix = load_matrix(root, slug, plan=plan, moment=moment, status_fn=status_fn, run_fn=run_fn,
                          scripts_dir=scripts_dir)
-    return build_report(matrix, m1=m1)
+    report = build_report(matrix)
+    if compare_m1 and moment == "M2" and not report.get("nao_aplicavel"):
+        report["delta"] = compare(load_snapshot(root, slug, "M1"), report)
+    return report
+
+
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
+
+
+def _slugs(root: Path, feature: str | None) -> list[str]:
+    if feature:
+        return [feature]
+    base = root / "features"
+    return sorted(p.name for p in base.iterdir() if p.is_dir()) if base.is_dir() else []
+
+
+EXAMPLES = """examples:
+  drift_report.py --feature task-list --moment M1 --freeze --at 2026-10-06T18:00:00Z   # write features/task-list/drift/M1.json
+  drift_report.py --feature task-list --plan plan.md --moment M2 --compare --md         # report with the M2 - M1 delta
+  drift_report.py --feature task-list --citizen                                         # words only, no technical number
+  drift_report.py --feature task-list --json                                            # JSON, schema_version 1
+  drift_report.py --feature task-list --html --out out/                                 # self-contained HTML file
+  drift_report.py --feature task-list --audit-sample                                    # REQs for the blind audit
+  drift_report.py --feature task-list --md --as-coded                                   # add the table regenerated from the matrix
+  drift_report.py                                                                       # every feature, alphabetical order
+"""
+
+
+def _parser() -> argparse.ArgumentParser:
+    ap = argparse.ArgumentParser(
+        prog="drift_report.py", description="Divergence report per step of the ladder (DRP-001 to DRP-019).",
+        formatter_class=argparse.RawDescriptionHelpFormatter, epilog=EXAMPLES)
+    ap.add_argument("root", nargs="?", default=".", help="project root (default: current directory)")
+    ap.add_argument("--feature", help="slug of features/<slug>/; omit to report every feature in alphabetical order")
+    ap.add_argument("--plan", help="plan file (a v1 plan or Specify: skipped is reported as not applicable)")
+    ap.add_argument("--moment", choices=("M1", "M2"), default="M2", help="M1 = end of IMPLEMENT, M2 = REFLECT")
+    ap.add_argument("--freeze", action="store_true", help="write the snapshot (M1.json refuses to overwrite); needs --at")
+    ap.add_argument("--compare", action="store_true", help="add the M2 - M1 delta")
+    ap.add_argument("--audit-sample", action="store_true", help="list the REQs of the blind audit sample and stop")
+    ap.add_argument("--json", action="store_true", help="the report as JSON (schema_version 1)")
+    ap.add_argument("--md", action="store_true", help="the report in Markdown, power dev register (default)")
+    ap.add_argument("--citizen", action="store_true", help="the report in the citizen register: no technical number")
+    ap.add_argument("--html", action="store_true", help="the report as a self-contained HTML file")
+    ap.add_argument("--as-coded", action="store_true", help="add the as-coded table regenerated from the matrix")
+    ap.add_argument("--out", help="folder for --html (default features/<slug>/drift/)")
+    ap.add_argument("--at", help="UTC time of the snapshot (ISO), given by the caller; the script never reads the clock")
+    return ap
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _parser().parse_args(argv)
+    root = Path(args.root)
+    if not root.is_dir():
+        print(f"drift_report: {root}: não é uma pasta", file=sys.stderr)
+        return 2
+    if args.freeze and not args.at:
+        print("drift_report: --freeze pede --at <UTC ISO>", file=sys.stderr)
+        return 2
+    plan = Path(args.plan) if args.plan else None
+    slugs = _slugs(root, args.feature)
+    try:
+        if not slugs:
+            report = {"schema_version": SCHEMA_VERSION, "nao_aplicavel": True, "motivo": "sem-features", "razao_nm": []}
+            print(json.dumps(report, ensure_ascii=False, indent=2) if args.json else NA_LINES["sem-features"])
+            return 0
+        reports = []
+        for slug in slugs:
+            report = generate(root, slug, plan=plan, moment=args.moment, compare_m1=args.compare)
+            if args.audit_sample:
+                active = [p["req"] for p in report.get("retraducao", {}).get("itens", [])]
+                print("\n".join(audit_sample(active, slug)))
+                continue
+            if args.freeze:
+                if report.get("nao_aplicavel"):
+                    print(NA_LINES.get(report.get("motivo", ""), NA_LINES["sem-features"]))
+                    continue
+                print(f"Congelei {args.moment}: {freeze(report, root, slug, args.moment, args.at)}")
+                continue
+            reports.append(report)
+    except DriftInputError as exc:
+        print(f"drift_report: {exc}", file=sys.stderr)
+        return 2
+    except FileExistsError as exc:
+        print(f"drift_report: {exc}", file=sys.stderr)
+        return 2
+    if args.audit_sample or args.freeze:
+        return 0
+    if args.json or not (args.md or args.citizen or args.html):
+        body = reports[0] if len(reports) == 1 else {"schema_version": SCHEMA_VERSION, "relatorios": reports}
+        print(json.dumps(body, ensure_ascii=False, indent=2))
+        return 0
+    print("drift_report: os renderizadores Markdown, citizen e HTML chegam no Step 7", file=sys.stderr)
+    return 2
+
+
+NA_LINES = {
+    "sem-features": "Não aplicável: este projeto não tem features.",
+    "plano-v1": "Não aplicável: este plano é do formato antigo.",
+    "feature-sem-pasta": "Não aplicável: esta feature não tem pasta.",
+    "feature-sem-matriz": "Não aplicável: esta feature não tem matriz.",
+}
+
+
+if __name__ == "__main__":
+    sys.exit(main())

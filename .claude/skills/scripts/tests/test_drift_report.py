@@ -37,7 +37,7 @@ def make_report(name, **kw):
     plan = root / "plan.md"
     return exp, dr.generate(
         root, SLUG, plan=plan if plan.is_file() else None, moment=exp.get("momento", "M2"),
-        status_fn=kw.pop("status_fn", stub_status), **kw)
+        compare_m1=True, status_fn=kw.pop("status_fn", stub_status), **kw)
 
 
 def check_case(rep, exp):
@@ -335,3 +335,110 @@ def test_integration_with_the_three_real_scripts():
     assert rep["degraus"]["D1"]["cobertos"] == 3
     assert rep["degraus"]["D2"]["razao_nm"] == ["NM-SEM-RUNNER"]
     assert rep["degraus"]["D3a"]["razao_nm"] == ["NM-SEM-RUNNER", "NM-SEM-GATE"]
+
+
+# ---- Step 6: snapshots, delta, audit sample, CLI
+
+def copy_tree(src, dst):
+    for p in Path(src).rglob("*"):
+        if p.is_file():
+            out = Path(dst) / p.relative_to(src)
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_bytes(p.read_bytes())
+    return Path(dst)
+
+
+def test_freeze_refuses_to_overwrite_m1_and_leaves_the_file_intact(tmp_path):
+    root = copy_tree(_FIX / "ok-m1", tmp_path / "p")
+    report = dr.generate(root, SLUG, moment="M1", status_fn=stub_status)
+    path = dr.freeze(report, root, SLUG, "M1", "2026-10-06T18:00:00Z")
+    before = path.read_bytes()
+    with pytest.raises(FileExistsError):
+        dr.freeze(report, root, SLUG, "M1", "2026-10-07T18:00:00Z")
+    assert path.read_bytes() == before
+
+
+def test_freeze_writes_only_under_drift(tmp_path):
+    root = copy_tree(_FIX / "ok-m1", tmp_path / "p")
+    before = {p.relative_to(root) for p in root.rglob("*") if p.is_file()}
+    report = dr.generate(root, SLUG, moment="M1", status_fn=stub_status)
+    dr.freeze(report, root, SLUG, "M1", "2026-10-06T18:00:00Z")
+    after = {p.relative_to(root) for p in root.rglob("*") if p.is_file()}
+    assert [str(p) for p in after - before] == [f"features/{SLUG}/drift/M1.json"]
+
+
+def test_compare_without_m1_says_so_and_has_no_numeric_delta():
+    rep = dr.generate(_FIX / "ok-m1", SLUG, moment="M2", compare_m1=True, status_fn=stub_status)
+    assert rep["delta"] == {"estado": "nao_medido", "razao_nm": ["NM-SEM-M1"]}
+
+
+def test_delta_notes_the_changed_denominator_and_keeps_both_sides():
+    _, rep = make_report("denominador-muda")
+    d1 = rep["delta"]["D1"]
+    assert d1["denominador"] == "o denominador mudou de 3 para 4"
+    assert (d1["m1"]["den"], d1["m2"]["den"]) == (3, 4)
+
+
+def test_delta_change_is_none_when_a_side_is_not_a_number():
+    m1 = {"report": {"degraus": {"D1": {"cobertos": 0, "descobertos": 0, "D": "n/a"}}}, "entradas": {}}
+    m2 = {"degraus": {"D1": {"cobertos": 3, "descobertos": 1, "D": 0.25}}, "entradas": {}}
+    assert dr.compare(m1, m2)["D1"]["mudanca"] is None
+
+
+def test_audit_sample_is_deterministic_and_is_thirty_percent_rounded_up():
+    reqs = [f"REQ-x-{n:03d}" for n in range(1, 11)]
+    a = dr.audit_sample(reqs, "x")
+    assert len(a) == 3 and a == dr.audit_sample(list(reversed(reqs)), "x")
+    assert dr.audit_sample(reqs[:1], "x") == reqs[:1]
+
+
+def test_audit_sample_changes_no_d():
+    _, rep = make_report("ok-m1")
+    before = json.dumps(rep["degraus"])
+    dr.audit_sample(["REQ-x-001"], "x")
+    assert json.dumps(rep["degraus"]) == before
+
+
+def run_cli(args, capsys):
+    code = dr.main(args)
+    out = capsys.readouterr()
+    return code, out.out, out.err
+
+
+def test_cli_json_twice_is_identical(capsys):
+    root = str(_FIX / "ok-m2-deriva")
+    argv = [root, "--feature", SLUG, "--moment", "M2", "--compare", "--json"]
+    # status comes from the real check_specify: use a project it can read
+    a = run_cli(argv, capsys)
+    b = run_cli(argv, capsys)
+    assert a == b and a[0] == 0
+
+
+def test_cli_freeze_needs_at(capsys):
+    code, _, err = run_cli([str(_FIX / "ok-m1"), "--feature", SLUG, "--freeze", "--moment", "M1"], capsys)
+    assert code == 2 and "--at" in err
+
+
+def test_cli_without_feature_flag_reports_each_folder_in_alphabetical_order(tmp_path, capsys):
+    base = _TESTS_DIR / "fixtures" / "plan_scenarios" / "_raizes" / "aprovada"
+    root = copy_tree(base, tmp_path / "p")
+    copy_tree(base / "features" / SLUG, root / "features" / "outra-feature")
+    code, out, _ = run_cli([str(root), "--moment", "M1", "--json"], capsys)
+    names = [r["feature"] for r in json.loads(out)["relatorios"]]
+    assert code == 0 and names == sorted(names) and len(names) == 2
+
+
+def test_cli_invalid_gate_exits_2_naming_the_file(capsys):
+    code, _, err = run_cli([str(_FIX / "entrada-corrompida"), "--feature", SLUG, "--json"], capsys)
+    assert code == 2 and "gate.json" in err and "Traceback" not in err
+
+
+def test_cli_project_without_features_is_one_line_and_exit_0(tmp_path, capsys):
+    code, out, _ = run_cli([str(tmp_path)], capsys)
+    assert code == 0 and out.strip() == "Não aplicável: este projeto não tem features."
+
+
+def test_cli_audit_sample_lists_reqs_and_exits_0(capsys):
+    base = _TESTS_DIR / "fixtures" / "plan_scenarios" / "_raizes" / "aprovada"
+    code, out, _ = run_cli([str(base), "--feature", SLUG, "--audit-sample"], capsys)
+    assert code == 0 and len(out.split()) == 1
