@@ -72,3 +72,9 @@ Repositorio de execucao: este (sem prefixo `open-seja/`); fixtures em `.claude/s
 - deviated: O runner e Cucumber JSON, nao JUnit como o plano diz.
 - less-sure: Os caminhos aditivos de runner, vermelho e cobertura sao minha proposta, nao contrato.
 - gate: not-installed
+
+### Step 2 -- reflection-on-action | 2026-10-06 18:36 UTC | Referencia normativa drift-report.md
+- happened: Escrevi DRP-001..019 com fontes, estado x efeito do --status, frases NM, auditoria, retradução lado a lado e leitura reversa.
+- deviated: Acrescentei dois codigos de leitura e caminhos aditivos de runner, vermelho e cobertura; runner e Cucumber JSON.
+- less-sure: A marca de adocao e o formato de red-reason.json e coverage.json sao propostas minhas.
+- gate: not-installed
