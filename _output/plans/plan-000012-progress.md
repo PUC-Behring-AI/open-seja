@@ -125,7 +125,7 @@ Lacuna nova: o fluxo `--roadmap` Modo 1/2 executa o `standard/SKILL.md` por item
 (b) tarefa sem codigo (README ficticio): `Specify: skipped -- tarefa sem codigo: atualizar um README`, todos `Tests: N/A`, nenhum `Scenarios:` necessario -> exit 0; variante com um step de teste -> `plan.md:22: PFS-013 erro: A tarefa muda comportamento no passo 2, mas a specify foi pulada` (exit 1).
 (c) cenarios reaprovados depois do plano: `.feature` editado sem reaprovar -> `PFS-011 ... (estado: stale; feature, retraducao)` (exit 1); reaprovado com rev 2 e cenario renomeado -> `PFS-012` (rev 1 contra rev 2), `PFS-005` (chave antiga no passo 2) e `PFS-009` (a chave nova sem step) (exit 1); plano atualizado a mao (rev 2 e a chave nova) -> exit 0.
 
-Compatibilidade: (1) o `check_specify.py` real devolve o mesmo `status` que o stub nos 41 casos com status (teste `test_real_check_specify_gives_the_status_the_stub_gives`); (2) planos v1: os 3 (`v1-real-1`, `v1-real-2`, `v1-minimo`) mais `v1-corpo-quebrado` saem 0 sem leitura do corpo; o `/plan` nao muda para v1 (o passo 4c e "plan v2 only") e o `/implement` mantem v1 e a versao ausente identicos (so o ramo `2` e novo); (3) `run_all_checks.py` sem plano v2 em `_output/plans/`: 19 PASS / 14 FAIL (o conjunto dos 14 do baseline, contadores 17/2/9; o PASS novo e `check_plan_scenarios.py` com "nada a verificar"); `check_plan_scenarios.py` sem argumentos na raiz do open-seja: exit 0.
+Compatibilidade: (1) o `check_specify.py` real devolve o mesmo `status` que o stub nos 29 casos com status (teste `test_real_check_specify_gives_the_status_the_stub_gives`); (2) planos v1: os 3 (`v1-real-1`, `v1-real-2`, `v1-minimo`) mais `v1-corpo-quebrado` saem 0 sem leitura do corpo; o `/plan` nao muda para v1 (o passo 4c e "plan v2 only") e o `/implement` mantem v1 e a versao ausente identicos (so o ramo `2` e novo); (3) `run_all_checks.py` sem plano v2 em `_output/plans/`: 19 PASS / 14 FAIL (o conjunto dos 14 do baseline, contadores 17/2/9; o PASS novo e `check_plan_scenarios.py` com "nada a verificar"); `check_plan_scenarios.py` sem argumentos na raiz do open-seja: exit 0.
 
 **Calibracao** (simulada, um plano; o piloto do 000016 e que vale): correcoes automaticas antes de passar: 1 (execucao a); fracao de steps `N/A` no plano final: 2/5 = 40% (a migracao e o refactor); steps por cenario: 1,0 (dono unico); achados por rascunho: 2 (a) e 1 (b, variante). Nao medido: reacao de pessoa real a recusa; se `N/A (motivo)` vira fuga (so a fracao e o `info` PFS-006/013 medem).
 Pytest: 161 testes no modulo; harness 1120 passed / 12 failed (os 12 pre-existentes). `uvx ruff check` limpo.
@@ -134,4 +134,49 @@ Pytest: 161 testes no modulo; harness 1120 passed / 12 failed (os 12 pre-existen
 - happened: Simulei tres execucoes do /plan como fixtures (rascunho recusado e corrigido, tarefa sem codigo, cenarios reaprovados) e comparei o status real com o stub.
 - deviated: A raiz reaprovada saiu de check_specify --approve real; as execucoes sao simuladas, sem pessoa.
 - less-sure: Se uma recusa em plano real parece tao simples quanto na simulacao.
+- gate: not-installed
+
+## Step 8 -- contrato com os itens vizinhos (2026-10-06, executor)
+
+**O que este plano entrega a quem**
+
+| Item | Plano | Recebe | Regra |
+|---|---|---|---|
+| 7 | plan-000013 (teste-primeiro por cenario) | `Scenarios:` define o step **dono** do teste; a chave e a do `index` do lock (a mesma do relatorio do runner, CYC-027); `check_plan_scenarios.py <plano> --json` devolve, por step, `tests`, `tests_na` e `scenarios` (lista de chaves) e a `matrix` cenario -> steps; PFS-010 garante um unico ponto onde o teste fica verde; o `/implement` Auto Mode ja aceita v2 e para (sem corrigir) se o verificador reprova: o ramo teste-primeiro e do 000013 e deve estender o passo 3 do Phase 0, nao refaze-lo | PFS-008, PFS-010, PFS-011 |
+| 8 | plan-000014 (relatorio de divergencia) | a coluna "step" do D1/D2: `matrix` do `--json`; plano velho (PFS-011 cenarios `stale`, PFS-012 `rev` velho) **nunca** conta como coberto (`não medido`); `Specify: skipped` = `NM-SPECIFY-PULADA` (PFS-013 garante que o plano pulado nao tem teste sem justificativa) | PFS-009, PFS-011, PFS-012, PFS-013 |
+| 8 | plan-000008 (metrica, vetor D) | `check_features.py --matrix` continua lendo so `scenarios: approved` (lacuna 1 do 000011); quem calcula D1 deve ler `check_specify.py --status`, como o verificador deste plano | PFS-011 |
+| 9 | plan-000015 (integracao e quickguide) | `/help` e quickguide pt-BR do `/plan`: formato do cabecalho (`Feature:`, `Specify:`), campo `Scenarios:` por chave, `N/A (motivo)`, as mensagens de recusa (PFS-006, PFS-009, PFS-011, PFS-013, em voz controlada), o passo 4c; atualizar GRL-014 ("`--specify` continua reservada"); `run_all_checks` dos projetos que adotarem v2 reprova plano v2 aberto com cenarios velhos (plano `# DONE` fica de fora) | PFS-001, PFS-011, PFS-012 |
+| 10 | plan-000016 (piloto) | linha de base de friccao: correcoes automaticas por plano, fracao de steps `N/A` (40% na simulacao), achados `info` PFS-006/013 (`N/A (motivo)` em step com teste), steps por cenario (1,0) e quantas vezes a recusa chegou ao citizen (apos 3 tentativas); calibrar `N/A` usado para fugir de cenario e o dono unico (opcao B da decisao 2 se o piloto pedir) | PFS-006, PFS-007, PFS-010, PFS-013 |
+
+Reexecutado: pytest do harness **1120 passed / 12 failed** (os 12 pre-existentes; 161 testes no modulo novo); `check_features.py --strict`, `check_specify.py` e `check_intent.py` sem argumentos: exit 0; `run_all_checks.py` **19 PASS / 14 FAIL** (o conjunto de 14 do baseline; contadores 17/2/9; PASS novo = `check_plan_scenarios.py`); `uvx ruff check` limpo nos dois .py; pyright nao medido (sem `libatomic.so.1`). Vocabulario conferido com 000007 a 000011: `CYC-NNN`, `Scenarios:`, `plan_format_version: 2`, `Specify: skipped -- <motivo>`, `Feature: <slug>`, `scenarios.lock.json` (`index`, `rev`), chave `<slug>/<arquivo>::<nome>`, `check_specify.py --status` (`approved|stale|draft|missing`), `SPC-NNN`, `GHK-NNN`, `NM-SPECIFY-PULADA`. C1: `grep -i` de `tecgraf|petrobras|puc-rio|behring` sobre arquivos novos e alterados: zero (fora da copia literal dos planos v1 reais, que ja os tinham limpos).
+
+**Decisoes pendentes e o default em uso** (todas `[default; aceito 2026-10-06]`): 1 = A (script novo; `critique_plan_coverage.py` nem existe aqui); 2 = A (dono unico, PFS-010); 3 = A (so a chave, nunca `@REQ-`; PFS-004); 4 = A (o `/implement` repete a parada; version check do Auto Mode e uma frase no Manual); 5 = A (uma feature por plano, PFS-002); 6 = A (infra com `N/A (motivo)` e `Tests:` tambem N/A, PFS-007/008).
+
+**Desvios do plano (para o designer)**
+1. PFS-006 e PFS-013 seguem o contrato, nao a tabela do plano: `Scenarios: N/A (motivo)` em step com `Tests:` nao-N/A **passa** (achado `info`, nao bloqueia; `--strict` o faz reprovar). A ferramenta nao julga "comportamento observavel"; so recusa o campo ausente e o N/A sem motivo que se leia.
+2. Cabecalho = linhas antes da primeira secao `## `, em qualquer ordem (o plano dizia "ate a primeira linha em branco"; planos reais trazem `> **Origem**` no meio).
+3. `run_all_checks.py` nao foi editado (glob); varredura sem argumentos ignora planos `# DONE | ...` (T3).
+4. O contrato recebeu CYC-028 e CYC-029 e tres trocas de vocabulario (`@REQ-` -> chave em CYC-005, CYC-020 e na Compatibilidade), nao so um ponteiro; o Verify de "no maximo uma linha por arquivo de ponteiro" vale so para `specify-phase.md` (1 linha).
+5. O teste do Step 4 foi escrito junto com o script, nao antes (as fixtures vieram antes).
+
+**Lacunas (estado ao fim do plano)**
+1. `Specify: approved (rev N)`: o `rev` do lock e a revisao da retradução. Se o designer reaprova mudando o corpo de um cenario sem subir o `rev` e sem renomear, o plano nao e invalidado (PFS-012 igual; PFS-005/009 nao veem). `stale` do `--status` pega a edicao **antes** da reaprovacao; depois dela o plano segue "valido". Sugestao ao 000014/000015: o lock ganhar um identificador de aprovacao (ex.: `approved_at`) e o cabecalho citar `Specify: approved (rev N, <approved_at>)`; exige emenda ao SPC-010 e ao formato do cabecalho. Nao resolvido aqui.
+2. `--roadmap` Modos 1/2 executam o `standard/SKILL.md` por item inline: o plano de cada item passa a sair v2 como qualquer plano standard (o documento do roadmap segue v1). Sem fixture nem teste.
+3. Nome de cenario com crase nao pode ser citado (PFS-004 no lock); `check_features.py` nao o proibe. Emenda sugerida ao GHK (nova regra) se o piloto encontrar um.
+4. Campo `Tests:`/`Scenarios:` numa linha so; valor em varias linhas e ignorado alem da primeira.
+5. `N/A (motivo)` com teste e um buraco medido, nao fechado (info). Se o piloto mostrar fuga, a opcao B da decisao 6 (recusar para step de codigo novo) e a reabertura.
+6. O health check (`run_all_checks`) de um projeto que adotar v2 reprova plano v2 aberto com cenarios velhos; plano `# DONE` e ignorado. Plano `REVOKED`/`SUPERSEDED` tambem.
+7. `check_docs` ganhou ~34 WARNING (IDs de plano nas copias dos planos v1 e no README das fixtures); nao falha nenhum check.
+8. pyright nao medido; D-NNN proposta abaixo; `product-design/` nao foi editado.
+9. `critique_plan_coverage.py` do upstream nao existe neste repositorio: a distincao "rastreabilidade de design" x "cobertura de cenarios" esta so em `plan-from-scenarios.md`.
+
+**Texto sugerido ao designer** (prosa Human; NAO escrito em `product-design/`; os arquivos de referencia via `/implement --manual`):
+- `plan-step.md` e contrato (Compatibilidade): ja aplicados neste plano (CYC-028, CYC-029); se o designer preferir so ponteiro, o texto equivalente e: "`Scenarios:` -- lista de chaves `<slug>/<arquivo>.feature::<nome>` entre crases, tiradas de `index` do `scenarios.lock.json` da `Feature: <slug>`, ou `N/A (<motivo>)`; a tag `@REQ-` nao vale no lugar da chave".
+- Decisao **D-012** (proposta, via `apply_marker.py --marker DECISION_APPEND`, com confirmacao): "**D-012: o plano v2 liga cada step aos cenarios aprovados e e recusado por ferramenta nos dois sentidos.** Context: o D1 e o teste-primeiro precisam de uma ligacao step-cenario confiavel; a regra do 000007 so recusava step de teste sem `Scenarios:`. Decision: o plano v2 traz `Feature:` e `Specify: approved (rev N)` (ou `skipped -- <motivo>`); cada step lista as chaves de cenario que entrega (dono unico do teste) ou `N/A (<motivo>)`; `check_plan_scenarios.py` recusa step de comportamento sem cenario, cenario aprovado sem step, chave inexistente, cenarios `stale` e `rev` velho, e plano pulado com teste; plano v1 nunca e recusado. Consequences: mais um script e um campo por step; `N/A (motivo)` com teste passa com `info` e e medido no piloto; plano velho precisa de atualizacao a mao. Rejected: estender `critique_plan_coverage.py` (outro dominio); aceitar a tag `@REQ-` (esconde cenario sem step); validar so no `/implement` (o erro apareceria depois da revisao)."
+- §14, linha `[intended] Grill e specify no /plan` (REQ-MC-011): com o plano a partir dos cenarios entregue, as tres fases (grill, specify, escrita do plano) tem mecanismo; um marcador `STATUS: implemented` cabe depois do 000015 (integracao) e do piloto (000016), nao agora.
+
+### Step 8 -- reflection-on-action | 2026-10-06 18:27 UTC | Contrato com os itens vizinhos
+- happened: Registrei o que vai aos itens 7-10 e ao plano 000008, os desvios, nove lacunas, as seis decisoes no default e a proposta D-012.
+- deviated: O contrato levou CYC-028/029 e trocas de vocabulario, mais que um ponteiro.
+- less-sure: Se o rev do lock basta para invalidar plano velho depois de reaprovar.
 - gate: not-installed

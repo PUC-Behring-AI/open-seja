@@ -235,7 +235,7 @@ Registrar no progress a tabela "o que este plano entrega a quem": item 7 (o camp
 - **Interface**: N/A
 - **Verify**: a tabela cobre os itens 7, 8, 9, 10 e o plano 000008, cada linha citando uma regra `PFS-NNN`; suíte verde; `run_all_checks.py` com o mesmo conjunto de falhas pré-existentes do baseline; `git diff --stat` dos arquivos de ponteiro mostra no máximo uma linha adicionada cada; zero termos de C1; o progress lista as 6 decisões pendentes com o default em uso.
 - **Tests**: N/A (verificação final; a suíte dos Steps 4 a 7 é o teste)
-- [ ] Done
+- [x] Done
 
 ## Coverage (advisory)
 
