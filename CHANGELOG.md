@@ -16,6 +16,27 @@ Format: loosely based on [Keep a Changelog](https://keepachangelog.com/). SemVer
 
 ## [Unreleased]
 
+## [v0.11.0] - 2026-10-06
+
+### Added
+
+- **Default cycle**: `/plan` now runs the whole ladder before any code: a short interview in your own words (grill), requirements and scenarios you approve (specify), a plan in format v2 with a `Scenarios:` list on every step that has tests, and then `/implement` builds test first: red for the right reason, then green, with the gate at each step. When the plan ends, `/implement` freezes the first measurement (M1) so `/reflect` and `/explain drift` can compare it with what was delivered, step by step on the ladder, and say what was not measured. The new feature folder is `features/<slug>/` (`intent.md`, `*.feature`, `gate.json`, `scenarios.lock.json`, `drift/`).
+- **`/plan --grill` and `/plan --specify`**: run one phase alone. A task that needs no code (documentation, chore, research) skips specify with a recorded reason (`Specify: skipped -- <reason>`); the grill is never skipped but can be short.
+- **`/implement --pipeline`** (opt-in): adds the Cleaner and Hardener roles after the green step. Without the flag the default build is unchanged.
+- **`scenarios: draft`** in `intent.md`: when the interview is reopened and the requirements change, `check_specify.py --reconcile` sets the field to `draft` instead of leaving a stale `approved`. `check_features.py --matrix` reports the true state (`approved`, `stale`, `draft`, `missing`).
+- **Four checks in `run_all_checks.py`**: `check_intent`, `check_features`, `check_specify` and `check_plan_scenarios`. They print "nada a verificar" and pass where the project has no `features/` and no v2 plan.
+- **Guide**: `docs/how-to/ciclo-default.pt-BR.md` (pt-BR) explains the ladder, the commands, how to skip, what to do when something blocks, and how to update.
+- **Test-first plugin** (`tests/scenario_report.py`, pytest): an upgrade updates it only if the project already installed it; it never creates it, and it never overwrites a copy edited by hand.
+
+### Changed
+
+- **Upgrading is safe for existing projects and needs no switch**: the new cycle acts only where the project has `features/` with an `intent.md` or a plan in format v2. **Plans in v1 stay valid** and are never rewritten; `--light` and the task type remain the way out. `/seja-setup --upgrade` does not touch `product-design/`, `conventions.md`, settings, `CLAUDE.md`, `_output/` or `features/`. Running the upgrade twice changes nothing the second time.
+- `/seja-setup --upgrade` runs the `upgrade_harness.py` of the release it installs, not the one already in the project.
+
+### Fixed
+
+- **`upgrade_harness.py` now copies every file of `.claude/references/template/`** (`gate.py`, `*.example`, `*.toml`, `*.yaml`), not only `.md` and `.json`. Before, an upgraded project kept an old quality-gate template and could not install the test-first plugin, because its template never arrived.
+
 ## [v0.10.1] - 2026-10-04
 
 ### Fixed

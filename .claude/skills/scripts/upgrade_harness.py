@@ -238,7 +238,11 @@ def collect_source_files(source: Path) -> list[Path]:
             subdir = ar_dir / subdir_name
             if subdir.is_dir():
                 for sub in sorted(subdir.rglob("*")):
-                    if sub.is_file() and sub.suffix in (".md", ".json"):
+                    if not sub.is_file() or "__pycache__" in sub.parts:
+                        continue
+                    # general/ holds only .md/.json; template/ also holds gate.py, *.example, *.toml, *.yaml
+                    # (plan-000015 Step 9: the test-first plugin template must reach upgraded projects).
+                    if subdir_name == "template" or sub.suffix in (".md", ".json"):
                         files.append(sub)
 
     # Metadata

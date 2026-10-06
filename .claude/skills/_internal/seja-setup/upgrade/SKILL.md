@@ -46,7 +46,9 @@ Runs from the **target project** (not the source repo). Applies safe updates to 
 
 4b. **Quality gate check (before step 5)**: if the project has `gate.py` at its root, compare it with the project's own template copy (`.claude/references/template/quality-gate/python/gate.py`) BEFORE the auto-update of `.claude/references/template/**` overwrites it. Identical -> after the upgrade, replace the project's `gate.py` with the new template. Different (local changes) -> show the diff and ask whether to replace, keep, or merge. Never touch `.baseline` files in `QUALITY_DIR`.
 
-5. **Run upgrade script**: `python .claude/skills/scripts/upgrade_harness.py --from <source-path> --target . --new-version <resolved-tag>`. Add `--dry-run` for preview. Omit `--new-version` only on the pre-release HEAD fallback path. The script reads existing `.seja-version` for the banner's "from" half and writes the resolved tag on success.
+5. **Run upgrade script**: `python <source-path>/.claude/skills/scripts/upgrade_harness.py --from <source-path> --target . --new-version <resolved-tag>` -- the script of the release being installed, not the copy already in the project (the new release may copy files the old script skips). Add `--dry-run` for preview. Omit `--new-version` only on the pre-release HEAD fallback path. The script reads existing `.seja-version` for the banner's "from" half and writes the resolved tag on success.
+
+5b. **Test-first plugin (only if already installed)**: if the project has `tests/scenario_report.py`, run `python .claude/skills/scripts/build_checks.py install-plugin .` after step 5. It is idempotent and refuses a copy edited by hand (show that message). If the file is absent, do nothing: an upgrade never creates the plugin; `/implement` installs it on the first red step.
 
 6. **Review summary**: highlight public-release pin change (e.g., `v0.1.0 -> v0.2.0`), internal harness version change, old-layout migration if any, new convention variables, files auto-updated vs needing manual merge.
 

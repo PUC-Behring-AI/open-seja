@@ -334,3 +334,23 @@ def test_collect_source_files_excludes_non_py_colocated_files(tmp_path):
     assert "helper.py" in names
     assert "NOTES.md" not in names
     assert "data.json" not in names
+
+
+def test_collect_source_files_includes_every_template_file(tmp_path):
+    """Template files that are not .md/.json (gate.py, *.example, *.toml) reach upgraded projects.
+
+    plan-000015 Step 9: the test-first plugin template is `scenario_report.py.example`; without it an
+    upgraded project cannot run `build_checks.py install-plugin`.
+    """
+    template = tmp_path / ".claude" / "references" / "template"
+    (template / "bdd" / "python").mkdir(parents=True)
+    (template / "quality-gate" / "python").mkdir(parents=True)
+    (template / "__pycache__").mkdir()
+    for rel in ("conventions.md", "bdd/python/scenario_report.py.example",
+                "quality-gate/python/gate.py", "quality-gate/python/pyproject-dev.example.toml"):
+        (template / rel).write_text("x\n", encoding="utf-8")
+    (template / "__pycache__" / "gate.cpython-312.pyc").write_bytes(b"\0")
+    names = {p.relative_to(template).as_posix() for p in upgrade_harness.collect_source_files(tmp_path)
+             if template in p.parents}
+    assert names == {"conventions.md", "bdd/python/scenario_report.py.example",
+                     "quality-gate/python/gate.py", "quality-gate/python/pyproject-dev.example.toml"}
