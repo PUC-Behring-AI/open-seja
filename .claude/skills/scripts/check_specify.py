@@ -40,6 +40,7 @@ Exit codes:
   0 = no error and no warning (infos do not fail); --status always 0;
       scan mode (no --feature) fails only on a `scenarios: approved` feature that is stale.
   1 = at least one error or warning (nothing is written by --approve); scan: a stale approval.
+      --reconcile never exits 1.
   2 = usage error, unreadable file, missing folder, unknown lock schema_version,
       or the scenario validator (check_features.py) not found. Never a traceback.
 
@@ -50,6 +51,13 @@ Usage
     python .claude/skills/scripts/check_specify.py <root> --feature <slug> --status --json
     python .claude/skills/scripts/check_specify.py <root> --feature <slug> --approve \\
         --at 2026-10-06T15:00Z --by usuario --contract-by usuario
+    python .claude/skills/scripts/check_specify.py <root> --reconcile [<slug>] [--json]
+
+`--reconcile` (CYC-032, emenda 000015): when the approval is old (`--status` is
+`stale`, including an intent.md back in `grilling`), turn `scenarios: approved` into
+`scenarios: draft` in that intent.md only; every other byte, the other `scenarios_*`
+fields and the lock stay. Atomic, idempotent, confined to features/<slug>/. Without a
+slug it sweeps every features/*/intent.md. Exit 0 when nothing to do or reconciled.
 
 CHECK_PLUGIN_MANIFEST:
   name: Specify Approval
@@ -628,6 +636,73 @@ def approve(root: Path, slug: str, *, at: str, by: str, contract_by: str) -> Rep
 
 
 # ---------------------------------------------------------------------------
+# CYC-032: reconcile the field with the status (emenda 000015)
+# ---------------------------------------------------------------------------
+
+DRAFT = "draft"
+RECONCILE_ALL = "\0all"
+_RECONCILE_WORDS = {"reopened": "a intenção foi reaberta", "stale": "os cenários mudaram depois da aprovação"}
+
+
+def _feature_folder(root: Path, slug: str) -> Path:
+    """features/<slug>/ of this root, refusing a slug or a symlink that leads outside features/."""
+    if not SLUG_RE.match(slug):
+        raise UsageError(f"o nome {slug} não é um slug (letras minúsculas, números e hífen)")
+    base = (root / "features").resolve()
+    folder = root / "features" / slug
+    if not folder.is_dir():
+        raise UsageError(f"não há features/{slug}/. A entrevista vem antes: rode /plan --grill.")
+    if not folder.resolve().is_relative_to(base):
+        raise UsageError(f"features/{slug}/ aponta para fora de features/; não escrevo nada")
+    return folder
+
+
+def reconcile(root: Path, slug: str) -> dict:
+    """Turn `scenarios: approved` into `draft` when the status is not approved; nothing else changes."""
+    intent_path = _feature_folder(root, slug) / "intent.md"
+    if not intent_path.is_file():
+        raise UsageError(f"não há features/{slug}/intent.md")
+    current = parse_intent(_read(intent_path)).frontmatter.get("scenarios")
+    status = compute_status(root, slug)
+    result = {"schema_version": SCHEMA_VERSION, "slug": slug, "changed": False, "from": current, "to": current,
+              "reason": None, "reasons": status.reasons}
+    if current != "approved" or status.status == "approved":
+        return result
+    try:
+        raw = intent_path.read_bytes()
+    except OSError as exc:
+        raise UsageError(f"não consegui ler {intent_path.as_posix()}: {exc.__class__.__name__}") from None
+    _atomic_write(intent_path, set_frontmatter(raw, [("scenarios", DRAFT)]))
+    reason = "reopened" if "intencao-reaberta" in status.reasons else "stale"
+    result.update({"changed": True, "from": "approved", "to": DRAFT, "reason": reason})
+    return result
+
+
+def _reconcile_line(result: dict) -> str:
+    if not result["changed"]:
+        return f"features/{result['slug']}: nada a fazer."
+    return (f"features/{result['slug']}: os cenários voltaram a rascunho, porque "
+            f"{_RECONCILE_WORDS[result['reason']]}. Peça nova aprovação.")
+
+
+def _run_reconcile(root: Path, slug: str, as_json: bool) -> int:
+    if slug != RECONCILE_ALL:
+        result = reconcile(root, slug)
+        print(json.dumps(result, ensure_ascii=False, indent=2) if as_json else _reconcile_line(result))
+        return 0
+    folders = sorted(p.parent for p in (root / "features").glob("*/intent.md")) if (root / "features").is_dir() else []
+    results = [reconcile(root, folder.name) for folder in folders]
+    if as_json:
+        print(json.dumps({"schema_version": SCHEMA_VERSION, "features": results}, ensure_ascii=False, indent=2))
+    elif not results:
+        print("check_specify: nenhum features/<slug>/intent.md; nada a verificar.")
+    else:
+        for result in results:
+            print(_reconcile_line(result))
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 
@@ -709,6 +784,15 @@ def _run(args: argparse.Namespace) -> int:
     root = Path(args.root)
     if not root.is_dir():
         raise UsageError(f"pasta não encontrada: {root}")
+    if args.reconcile is not None:
+        if args.approve or args.status:
+            raise UsageError("--reconcile não se combina com --approve nem com --status")
+        slug = args.reconcile
+        if args.feature is not None:
+            if slug not in (RECONCILE_ALL, args.feature):
+                raise UsageError("--reconcile e --feature citam features diferentes")
+            slug = args.feature
+        return _run_reconcile(root, slug, args.json)
     if args.feature is None:
         if args.approve or args.status:
             raise UsageError("--approve e --status pedem --feature <slug>")
@@ -755,6 +839,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--at", help="UTC date and time of the approval, given by the caller")
     parser.add_argument("--by", help="who approved the message (the citizen)")
     parser.add_argument("--contract-by", dest="contract_by", help=f"who approved the .feature contract, or {CONTRACT_NOBODY}")
+    parser.add_argument("--reconcile", nargs="?", const=RECONCILE_ALL, metavar="SLUG",
+                        help="turn an old `scenarios: approved` into `draft` (one slug, or every feature)")
     parser.add_argument("--json", action="store_true", help="one JSON object with schema_version")
     args = parser.parse_args(argv)
     try:

@@ -382,3 +382,111 @@ def test_example_at_column_zero_counts_for_the_item(tmp_path: Path, capsys) -> N
 
 def test_max_autofix_constant_is_gone() -> None:
     assert not hasattr(check_specify, "SPECIFY_MAX_AUTOFIX")
+
+
+# ---------------------------------------------------------------------------
+# --reconcile (CYC-032, emenda 000015): the field stops lying when the approval is old
+# ---------------------------------------------------------------------------
+
+
+def _intent(root: Path) -> Path:
+    return root / "features" / SLUG / "intent.md"
+
+
+def _approved_then_edited(tmp_path: Path, capsys) -> Path:
+    root = _copy("ok-completo", tmp_path)
+    assert _run(root, APPROVE, capsys)[0] == 0
+    feature = root / "features" / SLUG / f"{SLUG}.feature"
+    feature.write_text(feature.read_text(encoding="utf-8").replace("opção de desfazer", "botão de desfazer"),
+                       encoding="utf-8")
+    return root
+
+
+def test_reconcile_stale_feature_turns_field_to_draft_and_keeps_the_rest(tmp_path: Path, capsys) -> None:
+    root = _approved_then_edited(tmp_path, capsys)
+    before = _snapshot(root)
+    code, data = _run_json(root, ["--reconcile", SLUG], capsys)
+    assert code == 0
+    assert data == {"schema_version": 1, "slug": SLUG, "changed": True, "from": "approved", "to": "draft",
+                    "reason": "stale", "reasons": ["feature"]}
+    after = _snapshot(root)
+    intent_key = f"features/{SLUG}/intent.md"
+    assert after[intent_key] == before[intent_key].replace(b"scenarios: approved", b"scenarios: draft")
+    assert {k: v for k, v in after.items() if k != intent_key} == {k: v for k, v in before.items() if k != intent_key}
+    status = compute_status(root, SLUG)
+    assert status.status == "stale" and "feature" in status.reasons
+
+
+def test_reconcile_intact_approval_changes_nothing(tmp_path: Path, capsys) -> None:
+    root = _copy("spc-013-aprovado", tmp_path)
+    path = _intent(root)
+    stat_before, bytes_before = path.stat().st_mtime_ns, path.read_bytes()
+    code, out = _run(root, ["--reconcile", SLUG], capsys)
+    assert code == 0 and "nada a fazer" in out
+    assert path.read_bytes() == bytes_before and path.stat().st_mtime_ns == stat_before
+
+
+def test_reconcile_twice_second_run_changes_nothing(tmp_path: Path, capsys) -> None:
+    root = _approved_then_edited(tmp_path, capsys)
+    assert _run(root, ["--reconcile", SLUG], capsys)[0] == 0
+    once = _snapshot(root)
+    code, data = _run_json(root, ["--reconcile", SLUG], capsys)
+    assert code == 0 and data["changed"] is False
+    assert _snapshot(root) == once
+
+
+def test_reconcile_reopened_intent_reports_reopened(tmp_path: Path, capsys) -> None:
+    root = _copy("spc-013-intencao-reaberta", tmp_path)
+    code, data = _run_json(root, ["--reconcile", SLUG], capsys)
+    assert code == 0
+    assert (data["changed"], data["to"], data["reason"]) == (True, "draft", "reopened")
+    assert "scenarios: draft" in _intent(root).read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("slug", ["../x", "../../etc", "a/b"])
+def test_reconcile_outside_features_exits_2_and_writes_nothing(slug: str, tmp_path: Path, capsys) -> None:
+    root = _approved_then_edited(tmp_path, capsys)
+    before = _snapshot(root)
+    assert main([str(root), "--reconcile", slug]) == 2
+    assert _snapshot(root) == before
+
+
+def test_reconcile_symlinked_feature_outside_root_is_refused(tmp_path: Path, capsys) -> None:
+    outside = _approved_then_edited(tmp_path / "outside", capsys)
+    root = tmp_path / "proj"
+    (root / "features").mkdir(parents=True)
+    (root / "features" / SLUG).symlink_to(outside / "features" / SLUG)
+    before = _intent(outside).read_bytes()
+    assert main([str(root), "--reconcile", SLUG]) == 2
+    assert _intent(outside).read_bytes() == before
+
+
+def test_reconcile_without_slug_sweeps_every_feature(tmp_path: Path, capsys) -> None:
+    root = _approved_then_edited(tmp_path, capsys)
+    code, data = _run_json(root, ["--reconcile"], capsys)
+    assert code == 0
+    assert [(f["slug"], f["changed"]) for f in data["features"]] == [(SLUG, True)]
+
+
+def test_reconcile_then_scan_passes_and_status_stays_stale(tmp_path: Path, capsys) -> None:
+    root = _approved_then_edited(tmp_path, capsys)
+    assert _run(root, [], capsys)[0] == 1  # the scan flags the old approval
+    assert _run(root, ["--reconcile", SLUG], capsys)[0] == 0
+    assert _run(root, [], capsys)[0] == 0  # the field no longer claims approval
+    assert compute_status(root, SLUG).status == "stale"
+
+
+def test_reconcile_keeps_crlf_bom_and_mode(tmp_path: Path, capsys) -> None:
+    root = _approved_then_edited(tmp_path, capsys)
+    path = _intent(root)
+    raw = b"\xef\xbb\xbf" + path.read_bytes().replace(b"\n", b"\r\n")
+    path.write_bytes(raw)
+    path.chmod(0o640)
+    assert _run(root, ["--reconcile", SLUG], capsys)[0] == 0
+    assert path.read_bytes() == raw.replace(b"scenarios: approved", b"scenarios: draft")
+    assert path.stat().st_mode & 0o777 == 0o640
+
+
+def test_reconcile_cannot_be_combined_with_approve(tmp_path: Path, capsys) -> None:
+    root = _approved_then_edited(tmp_path, capsys)
+    assert main([str(root), "--reconcile", SLUG, "--approve", "--at", AT, "--by", "u", "--contract-by", "u"]) == 2

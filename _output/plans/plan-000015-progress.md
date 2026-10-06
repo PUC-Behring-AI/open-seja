@@ -64,3 +64,18 @@ Decisao: **seguir**. Os planos 000007 a 000014 executaram (todos DONE). Nada foi
 - deviated: A chave e o proxy do skip ja existiam (CYC-028/029): so apontei; drift-metric e drift-report entraram fora dos Files; 6 warnings novos de ID de plano no check_docs.
 - less-sure: Se escolher o registro citizen pelo campo scenarios_contract_by e o sinal certo do polo citizen.
 - gate: not-installed
+
+### Step 3 -- `check_specify.py --reconcile` (2026-10-06)
+
+- Teste primeiro: 12 casos novos em `test_check_specify.py` (`-k reconcile`); vermelho 12/12 por `SystemExit: 2` (argparse: opção desconhecida), o motivo certo.
+- `check_specify.py --reconcile [<slug>] [--json]` (CYC-032): com o campo `scenarios: approved` e `--status` diferente de `approved`, troca só essa linha por `scenarios: draft` (`set_frontmatter` + `_atomic_write`: BOM, CRLF e permissão do arquivo mantidos; lock e campos `scenarios_*` intactos). Motivo `reopened` quando a razão inclui `intencao-reaberta`, senão `stale`. JSON: `{schema_version, slug, changed, from, to, reason, reasons}`; sem slug, varre `features/*/intent.md` (`{schema_version, features: [...]}`). Recusa (exit 2, nada escrito): slug fora do padrão (`../x`, `a/b`), pasta que é symlink para fora de `features/`, combinação com `--approve`/`--status`, `--feature` diferente do slug. Nunca exit 1. Frase ao humano: "os cenários voltaram a rascunho, porque <motivo>. Peça nova aprovação."
+- Interface conferida contra o JSON real do `--status` (`status`, `reasons`, `reqs`): o `--reconcile` repete `reasons` do status antes da escrita.
+- Efeito no `run_all_checks`: a varredura do `check_specify` reprova `scenarios: approved` velho; depois do `--reconcile` a varredura volta a 0 e o `--status` segue `stale` (com `sem-campo` mais as razões de antes) até a specify reaprovar (teste `test_reconcile_then_scan_passes_and_status_stays_stale`).
+- Docs: `grill-phase.md` GRL-011 (+1 linha: rodar `--reconcile` ao reabrir e avisar o citizen) e GRL-001 (+1 linha: a grill escreve `features/adoption.json` uma vez, CYC-034); `specify-phase.md` tabela "Entrada e saída" (+1 linha).
+- Verify: `test_check_specify.py` 101 passed (os 89 antigos sem edição); `uvx ruff check check_specify.py` limpo; no arquivo de teste há um I001 **pré-existente** (ordem de imports, já no HEAD; não mexi nos imports); pyright não medido (sem `libatomic.so.1`). `run_all_checks.py` 19/14, mesmo conjunto, 17/2/9; pytest 1452 passed / 12 failed (mesmo conjunto).
+
+### Step 3 -- reflection-on-action | 2026-10-06 19:32 UTC | Reconciliar scenarios: no disco quando a grill reabre
+- happened: Escrevi 12 testes vermelhos e o --reconcile; o campo vira draft so na feature indicada, lock e resto intactos, idempotente; GRL-011, GRL-001 e specify-phase ganharam uma linha cada.
+- deviated: Sem slug o --reconcile varre todas as features; recusa tambem symlink para fora de features/; a linha da marca de adocao foi para GRL-001.
+- less-sure: Se a frase ao citizen ao reabrir e o bastante para ele entender que precisa aprovar de novo.
+- gate: not-installed

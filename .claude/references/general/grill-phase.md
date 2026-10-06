@@ -33,6 +33,7 @@ MAX_SENTENCES_PER_PARAGRAPH = 6
 - **Saída**: `features/<slug>/intent.md`. Tarefa sem código não cria pasta (GRL-012).
 - A fase nunca é pulada (CYC-002). Ela pode durar uma rodada quando o brief já traz intenção detalhada.
 - O `intent.md` nasce na primeira rodada com `status: grilling` e cresce a cada rodada. Se a sessão cair, o arquivo guarda o que já foi dito (git é a recuperação).
+- Ao criar a **primeira** pasta `features/<slug>/` do projeto, a grill escreve `features/adoption.json` (`{"schema_version": 1, "adopted_at": "AAAA-MM-DD"}`) se ele não existe, e nunca o reescreve: é a marca da leitura reversa do relatório (emenda 000015, CYC-034).
 
 - **Quem decide**: designer (CYC-002); o `/plan` conduz.
 - **Critério de aceitação**: depois da primeira rodada de uma feature com código existe `features/<slug>/intent.md` com `status: grilling`; ao fim da fase o mesmo arquivo está em `status: approved` ou a decisão voltou ao citizen (GRL-007).
@@ -226,6 +227,7 @@ Glossário fixo de termos (pt-BR / en-US):
 - REQ retirado fica na tabela com `Estado: retirado`; nunca é apagado, e o número nunca é reusado;
 - cada mudança ganha uma linha em "Mudanças" (data, REQ, o que mudou, `rev`);
 - a reaprovação (GRL-008) é exigida.
+- depois de voltar o `status` a `grilling`, rodar `python .claude/skills/scripts/check_specify.py --reconcile <slug>` e dizer ao citizen, em uma frase, que os cenários aprovados voltaram a rascunho (emenda 000015, CYC-032).
 
 Enquanto a reaprovação não vem, o D1 conta o REQ retirado como descoberto (plan-000008). Um `rev` novo marca os cenários do REQ como desatualizados até o specify reaprovar (lacuna para `drift-metric.md`, registrada no progress do plan-000009).
 

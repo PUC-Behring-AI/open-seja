@@ -30,6 +30,7 @@ LOCK_SCHEMA_VERSION = 1       # scenarios.lock.json
 | Saída | seção `## Retradução` do `intent.md`, com `rev` | o `/plan` (LLM), conferida por `check_specify.py` |
 | Saída | campos `scenarios`, `scenarios_approved_at`, `scenarios_approved_by`, `scenarios_contract_by`, `scenarios_rev` no frontmatter do `intent.md` | só `check_specify.py --approve` |
 | Saída | `features/<slug>/scenarios.lock.json` | só `check_specify.py --approve` |
+| Correção | `scenarios: approved` -> `scenarios: draft` no `intent.md` quando `--status` diz `stale` (inclusive grill reaberta); nada mais muda | só `check_specify.py --reconcile [<slug>]` (emenda 000015, CYC-032) |
 | Saída | linhas em "Mudanças" do `intent.md` (ajuste, renomeação de cenário) | o `/plan` |
 
 A fase não escreve o plano. Ela termina com a aprovação registrada (ou com a decisão devolvida ao citizen), e só então o `/plan` escreve o plano (CYC-005, CYC-008).
