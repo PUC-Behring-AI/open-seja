@@ -69,6 +69,7 @@ O validador **reutiliza** `parse` e `table` de `check_intent.py` (um parser só 
 - `status` do frontmatter: `grilling` ou `approved` (feature-layout.md). Só `approved` torna REQ sem cenário um **erro** (GHK-005); em `grilling` é informação (`não medido`).
 - Campo opcional `scenarios: approved` no frontmatter `[default; aceito 2026-10-06]` (decisão pendente 5 = A): o validador só o **lê** e expõe `scenarios_approved: true | false | null` na matriz (`null` = campo ausente). Quem o escreve é o ponto de aprovação do plan-000011. Sem o campo, o D1 não separa cenário rascunho de aprovado (`NM-CENARIOS-STALE`, DRM-002).
 - Fase specify e aprovação dos cenários: ver `.claude/references/general/specify-phase.md` (quem escreve `scenarios: approved`, o `scenarios.lock.json` e o estado `stale` de `check_specify.py --status`).
+- Emenda 000015: `scenarios_approved` na matriz é só o valor do campo no disco; o estado confiável é `scenarios_state` (`approved`, `stale`, `draft`, `missing`, ou `desconhecido` sem `check_specify.py`), que `--matrix` pede a `check_specify.py --status` (CYC-032). Nenhum consumidor decide pelo campo.
 - A seção "Modelo e termos" (coluna `Termo`) alimenta GHK-017; "Fora do escopo" alimenta o aviso de GHK-019; `serve:` alimenta GHK-018.
 
 ## 5. Um cenário por comportamento
@@ -195,6 +196,7 @@ Resultado verificado: 3 testes passam (o cenário comum e as 2 linhas do `Scenar
 - **Relatório.** `--cucumberjson=report.json` traz `tags` por cenário (sem `@`), `uri` relativo a `features/` e um elemento por linha de `Examples`. O `@skip` não aparece nele (seção 8).
 - **`--steps`.** `check_features.py <raiz> --steps <pasta>` sobre o exemplo copiado não acusa definição duplicada nem sem uso (as definições usam `parsers.parse`).
 - Ligar o runner ao `/implement` é do plan-000013; este arquivo só prova que a convenção roda no runner escolhido.
+- Emenda 000015: com o teste-primeiro, o plugin `scenario_report` (ITF-016; `build_checks.py install-plugin <projeto>`) substitui o `conftest` modelo: ele traz o mesmo `pytest_bdd_apply_tag` e grava a chave de cenário e o relatório por cenário. O `conftest` modelo continua valendo para rodar este exemplo sozinho.
 
 ## 11. Saída do validador
 

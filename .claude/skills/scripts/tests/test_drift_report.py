@@ -726,3 +726,40 @@ def test_voice_rule_documents_that_quotes_are_not_word_limited():
     text = (Path(dr.__file__).resolve().parents[2] / "references" / "general" / "drift-report.md").read_text(
         encoding="utf-8")
     assert "check_voice" in text and "verbatim" in text
+
+
+# ---------------------------------------------------------------------------
+# Emenda 000015 (CYC-032): with the real scripts, a stale feature whose field still
+# says approved never counts as approved in D1
+# ---------------------------------------------------------------------------
+
+
+def _real_report(case: str, tmp_path: Path) -> tuple[dict, dict]:
+    import shutil
+    import subprocess
+    import sys
+
+    root = tmp_path / case
+    shutil.copytree(_TESTS_DIR / "fixtures" / "specify" / case, root)
+    scripts = _TESTS_DIR.parent
+    matrix = json.loads(subprocess.run(
+        [sys.executable, str(scripts / "check_features.py"), str(root), "--json", "--matrix"],
+        capture_output=True, text=True, timeout=60, check=False).stdout)
+    run = subprocess.run([sys.executable, str(scripts / "drift_report.py"), str(root), "--feature", SLUG, "--json"],
+                         capture_output=True, text=True, timeout=60, check=False)
+    assert run.returncode == 0, run.stderr
+    return matrix["matrix"][SLUG], json.loads(run.stdout)
+
+
+def test_real_stale_feature_with_approved_field_is_not_measured_in_d1(tmp_path: Path):
+    entry, rep = _real_report("spc-013-hash-mudou", tmp_path)
+    assert (entry["scenarios_approved"], entry["scenarios_state"]) == (True, "stale")
+    d1 = rep["degraus"]["D1"]
+    assert d1["razao_nm"] == ["NM-CENARIOS-STALE"] and d1["cobertos"] == 0
+
+
+def test_real_intact_feature_is_measured_in_d1(tmp_path: Path):
+    entry, rep = _real_report("spc-013-aprovado", tmp_path)
+    assert entry["scenarios_state"] == "approved"
+    d1 = rep["degraus"]["D1"]
+    assert d1["cobertos"] + d1["descobertos"] == d1["n"] and d1["n"] > 0

@@ -79,3 +79,17 @@ Decisao: **seguir**. Os planos 000007 a 000014 executaram (todos DONE). Nada foi
 - deviated: Sem slug o --reconcile varre todas as features; recusa tambem symlink para fora de features/; a linha da marca de adocao foi para GRL-001.
 - less-sure: Se a frase ao citizen ao reabrir e o bastante para ele entender que precisa aprovar de novo.
 - gate: not-installed
+
+### Step 4 -- `scenarios_state` na matriz (2026-10-06)
+
+- Teste primeiro: 5 casos em `test_check_features.py` e 2 de integração real em `test_drift_report.py`; vermelho por `KeyError: 'scenarios_state'`, `AttributeError` (`SPECIFY_SCRIPT`, `scenarios_state` ainda não existiam) e o texto sem "estado confiável".
+- `check_features.py --matrix`: cada feature ganha `scenarios_state` (`approved|stale|draft|missing`, ou `desconhecido` quando `check_specify.py` falta, falha, ou devolve JSON fora do `schema_version: 1`), pedido por subprocesso a `check_specify.py <raiz> --feature <slug> --status --json` (acoplamento por CLI e JSON versionado; `check_specify` importa `check_features`, então o caminho inverso por import faria ciclo). `scenarios_approved` não mudou de significado (valor do campo). O estado só é pedido com `--matrix` (a varredura simples do `run_all_checks` não abre subprocesso; teste `test_plain_scan_does_not_ask_check_specify`). Texto: "estado confiável: <estado>" na linha da matriz. Chave nova no JSON, nenhuma removida; `schema_version` continua 1 (acréscimo).
+- Consumidores: `git grep scenarios_approved` em `drift_report.py`, `check_plan_scenarios.py` e `build_checks.py`: **zero** ocorrências (os três já usam `--status`). Integração real (sem stub): feature `spc-013-hash-mudou` (campo `approved`, `.feature` editado) -> matriz `scenarios_approved: true`, `scenarios_state: "stale"`, e `drift_report.py --json` dá D1 `NM-CENARIOS-STALE` com 0 cobertos; `spc-013-aprovado` -> `approved` e D1 medido.
+- Docs: `gherkin-spec-format.md` seção 4 (+1 linha: o campo é o valor do disco; o estado confiável é `scenarios_state`) e seção 10 (+1 linha, texto 6 do 000013: o plugin `scenario_report` substitui o `conftest` modelo no teste-primeiro).
+- Verify: `test_check_features.py` 167 passed, `test_drift_report.py`, `test_check_specify.py` e `test_check_plan_scenarios.py` verdes sem edição dos testes antigos (645 nos quatro); `uvx ruff check check_features.py` e `test_check_features.py` limpos; `test_drift_report.py` tem um I001 **pré-existente** (já no HEAD). pyright não medido. `run_all_checks.py` 19/14, mesmo conjunto, 17/2/9; pytest 1459 passed / 12 failed (mesmo conjunto).
+
+### Step 4 -- reflection-on-action | 2026-10-06 19:35 UTC | Matriz e consumidores usam --status, nao o campo
+- happened: check_features --matrix ganhou scenarios_state pedido por CLI ao check_specify; a integracao real mostra campo approved com estado stale e D1 nao medido; nenhum consumidor le o campo.
+- deviated: O estado so e pedido com --matrix, para a varredura do run_all_checks nao abrir subprocessos; a secao 10 do gherkin-spec-format ganhou a linha do plugin (texto 6 do 000013).
+- less-sure: Se o custo de um subprocesso por feature pesa em projetos com muitas features.
+- gate: not-installed

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -561,3 +562,59 @@ def test_spec_examples_pass_the_validator(tmp_path: Path, index: int) -> None:
     root = _write(tmp_path, {"features/task-list/intent.md": intent,
                              "features/task-list/a.feature": _spec_examples()[index]})
     assert validate(discover(root)) == []
+
+
+# ---------------------------------------------------------------------------
+# scenarios_state in --matrix (emenda 000015, CYC-032): the trusted state comes from
+# check_specify.py --status, the field stays the value on disk
+# ---------------------------------------------------------------------------
+
+_SPECIFY_FIXTURES = _TESTS_DIR / "fixtures" / "specify"
+_SLUG = "contas-da-semana"
+
+
+def _matrix_json(case: str, tmp_path: Path, capsys) -> tuple[int, dict]:
+    root = tmp_path / case
+    shutil.copytree(_SPECIFY_FIXTURES / case, root)
+    code = main([str(root), "--json", "--matrix"])
+    return code, json.loads(capsys.readouterr().out)
+
+
+def test_matrix_stale_feature_keeps_field_and_reports_stale_state(tmp_path: Path, capsys) -> None:
+    _, data = _matrix_json("spc-013-hash-mudou", tmp_path, capsys)
+    entry = data["matrix"][_SLUG]
+    assert entry["scenarios_approved"] is True
+    assert entry["scenarios_state"] == "stale"
+    assert [f["scenarios_state"] for f in data["features"]] == ["stale"]
+
+
+def test_matrix_intact_approval_reports_approved_state(tmp_path: Path, capsys) -> None:
+    _, data = _matrix_json("spc-013-aprovado", tmp_path, capsys)
+    assert data["matrix"][_SLUG]["scenarios_state"] == "approved"
+
+
+def test_matrix_without_check_specify_reports_unknown_and_exits_0(tmp_path: Path, capsys, monkeypatch) -> None:
+    import check_features
+
+    monkeypatch.setattr(check_features, "SPECIFY_SCRIPT", tmp_path / "nao-existe" / "check_specify.py")
+    code, data = _matrix_json("spc-013-aprovado", tmp_path, capsys)
+    assert code == 0
+    assert data["matrix"][_SLUG]["scenarios_state"] == "desconhecido"
+
+
+def test_matrix_text_shows_the_trusted_state(tmp_path: Path, capsys) -> None:
+    root = tmp_path / "proj"
+    shutil.copytree(_SPECIFY_FIXTURES / "spc-013-hash-mudou", root)
+    main([str(root), "--matrix"])
+    assert "estado confiável: stale" in capsys.readouterr().out
+
+
+def test_plain_scan_does_not_ask_check_specify(tmp_path: Path, capsys, monkeypatch) -> None:
+    import check_features
+
+    calls = []
+    monkeypatch.setattr(check_features, "scenarios_state", lambda root, slug: calls.append(slug) or "approved")
+    root = tmp_path / "proj"
+    shutil.copytree(_SPECIFY_FIXTURES / "spc-013-aprovado", root)
+    main([str(root), "--json"])
+    assert calls == []

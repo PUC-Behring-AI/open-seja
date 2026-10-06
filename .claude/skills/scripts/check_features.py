@@ -33,6 +33,11 @@ Usage
     python .claude/skills/scripts/check_features.py
     python .claude/skills/scripts/check_features.py <root> --feature <slug>
     python .claude/skills/scripts/check_features.py <root> --json --matrix
+
+With --matrix each feature also carries `scenarios_state` (approved, stale, draft,
+missing, or desconhecido when check_specify.py is missing or fails), asked of
+`check_specify.py --feature <slug> --status --json`. `scenarios_approved` stays the
+value of the field on disk; consumers decide by `scenarios_state` (emenda 000015).
     python .claude/skills/scripts/check_features.py <root> --steps <dir> --strict
 
 CHECK_PLUGIN_MANIFEST:
@@ -50,6 +55,7 @@ import argparse
 import ast
 import json
 import re
+import subprocess
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -763,6 +769,35 @@ def scenario_key(slug: str, path: str, name: str) -> str:
     return f"{slug}/{Path(path).name}::{name}"
 
 
+# Emenda 000015 (CYC-032): the trusted scenario state is check_specify.py --status, asked
+# through its CLI and versioned JSON (never its internals; check_specify imports this module).
+SPECIFY_SCRIPT = Path(__file__).resolve().parent / "check_specify.py"
+SCENARIO_STATES = ("approved", "stale", "draft", "missing")
+UNKNOWN_STATE = "desconhecido"
+
+
+def scenarios_state(root: Path, slug: str) -> str:
+    """`check_specify.py --feature <slug> --status --json` -> approved|stale|draft|missing, or desconhecido."""
+    if not SPECIFY_SCRIPT.is_file():
+        return UNKNOWN_STATE
+    try:
+        run = subprocess.run([sys.executable, str(SPECIFY_SCRIPT), str(root), "--feature", slug, "--status", "--json"],
+                             capture_output=True, text=True, timeout=60, check=False)
+        data = json.loads(run.stdout) if run.returncode == 0 else None
+    except (OSError, subprocess.TimeoutExpired, json.JSONDecodeError):
+        return UNKNOWN_STATE
+    if not isinstance(data, dict) or data.get("schema_version") != 1:
+        return UNKNOWN_STATE
+    state = data.get("status")
+    return state if state in SCENARIO_STATES else UNKNOWN_STATE
+
+
+def add_scenarios_state(root: Path, matrix: dict) -> None:
+    """Add `scenarios_state` next to `scenarios_approved` (the value on disk, unchanged) for each feature."""
+    for slug, data in matrix.items():
+        data["scenarios_state"] = scenarios_state(root, slug)
+
+
 def build_matrix(fds: list[FeatureDir]) -> dict:
     """Matrix per feature: every REQ of intent.md (empty list when uncovered) with its scenarios."""
     matrix: dict = {}
@@ -1295,7 +1330,8 @@ def _print_text(findings: list[Finding], summary: dict, matrix: dict | None, qui
     if matrix is not None:
         for slug, data in matrix.items():
             aprovado = {True: "sim", False: "não", None: "não declarado"}[data["scenarios_approved"]]
-            print(f"matriz {slug}: status {data['status']}, cenários aprovados: {aprovado}")
+            state = f", estado confiável: {data['scenarios_state']}" if "scenarios_state" in data else ""
+            print(f"matriz {slug}: status {data['status']}, cenários aprovados: {aprovado}{state}")
             for req, info in data["reqs"].items():
                 print(f"  {req} ({info['state']}): {len(info['scenarios'])} cenário(s)")
                 for entry in info["scenarios"]:
@@ -1315,6 +1351,10 @@ def _report(root: Path, fds: list[FeatureDir], findings: list[Finding], matrix: 
             if fd.intent is not None
         ],
     }
+    if with_matrix:
+        for entry in report["features"]:
+            if "scenarios_state" in matrix.get(entry["slug"], {}):
+                entry["scenarios_state"] = matrix[entry["slug"]]["scenarios_state"]
     if with_matrix:
         report["matrix"] = matrix
     return report
@@ -1345,6 +1385,8 @@ def _run(args: argparse.Namespace) -> int:
     defs = load_step_defs(Path(args.steps), root) if args.steps else None
     findings = validate(fds, defs)
     matrix = build_matrix(fds)
+    if args.matrix:
+        add_scenarios_state(root, matrix)
     if args.json:
         print(json.dumps(_report(root, fds, findings, matrix, args.matrix), ensure_ascii=False, indent=2))
     else:
