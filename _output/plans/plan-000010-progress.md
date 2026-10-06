@@ -19,3 +19,27 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 - Planos ja entregues neste roadmap: ver a coluna Status da Wave Summary em `_output/roadmaps/roadmap-000006-*.md` e os `## Implementation summary` dos planos DONE; os progress files deles listam lacunas que este plano deve absorver no Step 1.
 
 ## Iteration Log
+
+## Step 1 -- terreno e pontos de integracao (2026-10-06)
+
+Decisoes pendentes 1 a 7 aceitas nos defaults (1=C, 2=A, 3=A, 4=B, 5=A, 6=A, 7=B) `[default; aceito 2026-10-06]`.
+
+| item | resultado |
+|---|---|
+| (a) contrato e medida | existem: `extended-cycle-contract.md` (CYC-001..026; proximo livre CYC-027), `feature-layout.md`, `drift-metric.md` (DRM-001..014; lacuna 5 = formato do relatorio do runner e do 000010), `grill-phase.md`, `template/intent.md`, `check_intent.py` |
+| (b) `run_all_checks.py` | descobre `check_*.py` por glob (scripts/ e subpastas de skill) e roda `python <script>` com `cwd=raiz`, sem argumentos, timeout 120 s; PASS = exit 0. Nao ha "pulado": o check condicional e o proprio script (sem `features/<slug>/intent.md` imprime "nada a verificar" e sai 0, como `check_intent.py`). Registro em `check_plugin_registry.json` (so filtro por stack). Python 3.12.3 local; sem requisito minimo declarado |
+| (c) testes e fixtures | `.claude/skills/scripts/tests/test_<modulo>.py`; fixtures em `.claude/skills/scripts/tests/fixtures/<tema>/` (a pasta nova e `fixtures/features/`); testes importam `from check_intent import ...` (scripts/ no sys.path) |
+| (d) colisao de regex | `critique_plan_coverage.py` nao existe neste repo; `REQ-TYPE-NNN` aparece em `human_markers_registry.py` como `REQ-[A-Z0-9]+-\d{3}` em maiusculas, dentro de comentario HTML. A tag `@REQ-<slug>-NNN` (slug minusculo) e o prefixo reservado em GHK-016 nao colidem |
+| (e) spike pytest-bdd | pytest-bdd **9.0.0** (pytest 9.1.1), via `uvx --with pytest-bdd`. Le `# language: pt` (Funcionalidade/Cenario/Dado/Quando/Entao). `--cucumberjson=<arquivo>` **existe** e emite Cucumber JSON. Tag `REQ-demo-001` com `--strict-markers` falha na coleta ate o `conftest` tratar `pytest_bdd_apply_tag`; com o hook retornando `True` coleta limpo. No JSON: `tags` ja vem por feature e por cenario (nome **sem** `@`), `uri` e relativo a rootdir, `elements[].id` e o nome da funcao de teste, `steps[].result.status` (passed/failed/...) e `error_message` e o traceback |
+
+Fecha: decisao 1 (C viavel: pytest-bdd le `# language: pt`), decisao 3 (A: harness sem dependencia opcional; parser proprio), decisao 7 (B: rede e instalacao funcionam).
+
+Desvio registrado (emenda do adendo): o runner contract e **Cucumber JSON** (CYC-012), nao JUnit XML. O plano fala em "propriedade `req` no relatorio JUnit/JSON"; como o Cucumber JSON ja traz `tags` por cenario, nao ha propriedade extra: a ligacao cenario -> REQ e a lista `tags`, e a chave de cenario `<slug>/<arquivo>::<nome>` e derivada de `uri` + `name`. O Step 8 prova isto.
+
+Baseline confirmado: `run_all_checks.py` 16 PASS / 14 FAIL; `git status` limpo.
+
+### Step 1 -- reflection-on-action | 2026-10-06 17:31 UTC | Terreno e pontos de integracao
+- happened: Confirmei contrato, esquema e metrica no repositorio, o mecanismo de descoberta do run_all_checks e o spike do pytest-bdd 9.0.0 (le language pt, tem --cucumberjson).
+- deviated: Runner contract e Cucumber JSON, nao JUnit; as tags ja vem no JSON, sem propriedade req.
+- less-sure: Se o formato de falha do Cucumber JSON do pytest-bdd distingue assercao de erro (vai para o Step 8).
+- gate: not-installed
