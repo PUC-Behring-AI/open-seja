@@ -39,7 +39,7 @@
     "cadeia_indeterminada": 0,
     "cenarios_orfaos": 0,
     "cenarios_sem_tag": 0,
-    "escada_fechou_sem_capturar": false,
+    "escada_fechou_sem_capturar": true,
     "nao_faz": {
       "itens": 2,
       "cenarios": 0,

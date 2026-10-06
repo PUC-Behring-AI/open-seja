@@ -96,3 +96,14 @@ Repositorio de execucao: este (sem prefixo `open-seja/`); fixtures em `.claude/s
 - deviated: compute_report devolve so o DRM-007; cadeia indeterminada e as leituras novas ficam em analyze/build_report.
 - less-sure: Populacao do D3a com D2 nao medido e minha leitura do DRM-004; esta nas propostas.
 - gate: not-installed
+
+## Step 5 -- carregador `load_matrix` (2026-10-06)
+- `load_matrix` junta `check_features --matrix --json` (por subprocesso, lista de argumentos, sem shell), `check_specify --status --json` (sempre; `status_fn` injetavel; ausente -> ressalva "aprovação não verificada"), runner Cucumber JSON (mapeamento copiado de `cucumber_states.py.example`; contagem de steps do `.feature` para o "step indefinido omitido"), `gate.json`, `drift/*.json`, `check_intent --d0`, `check_plan_scenarios --json` (coluna `step_dono`, fora do vetor), hashes SHA-256 das entradas e a leitura reversa. `DriftInputError(arquivo, motivo)` para JSON invalido; fonte ausente e `nao medido`.
+- Achados: (1) a matriz do `check_features` nao lista cenario sem tag nem com tag orfa; vem dos achados `GHK-002` e `GHK-004` do mesmo JSON. (2) `check_features.py` importa `check_intent.py`: copiar um sem o outro quebra. (3) Plano v1 e `Specify: skipped` sao lidos so pelo cabecalho, antes de qualquer fonte.
+- Testes: 81 passam; os 2 que falham (`ok-m2-deriva`, `denominador-muda`) esperam o delta do Step 6. Integracao com os tres scripts reais sobre `plan_scenarios/_raizes/aprovada`: verde.
+
+### Step 5 -- reflection-on-action | 2026-10-06 18:43 UTC | Carregador load_matrix
+- happened: Liguei os tres checks por subprocesso, o runner Cucumber, gate, registros e a leitura reversa; testes de ausencia e de arquivo corrompido.
+- deviated: Cenario sem tag e orfao vem dos achados GHK-002/004, nao da matriz.
+- less-sure: Os formatos de red-reason.json e coverage.json sao propostos; ninguem os produz ainda.
+- gate: not-installed

@@ -68,6 +68,13 @@ Usage
 
 from __future__ import annotations
 
+import hashlib
+import json
+import re
+import subprocess
+import sys
+from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = 1
@@ -364,3 +371,549 @@ def analyze(matrix: dict) -> dict[str, Any]:
 def compute_report(matrix: dict) -> dict[str, Any]:
     """Pure function: matrix -> the DRM-007 report (vector per step). No I/O, no LLM."""
     return analyze(matrix)["report"]
+
+
+# ---------------------------------------------------------------------------
+# Layer 1 -- loader (sources -> matrix). Missing source = not measured, never error.
+# ---------------------------------------------------------------------------
+
+_SCRIPTS_DIR = Path(__file__).resolve().parent
+_ID_ANY = r"REQ-[a-z0-9]+(?:-[a-z0-9]+)*-\d{3}"
+_STEP_WORDS = ("given", "when", "then", "and", "but", "dado", "quando", "então", "e", "mas", "*")
+_SCENARIO_STOP = ("@", "scenario", "cenário", "cenario", "esquema", "examples", "exemplos",
+                  "rule", "regra", "feature", "funcionalidade", "background", "contexto")
+_DISABLED_TAGS = ("skip", "wip", "ignore")
+_CUCUMBER_PRIORITY = ("error", "failed", "undefined", "skipped", "passed")
+
+RunFn = Callable[[list[str]], tuple[int, str, str]]
+StatusFn = Callable[[Path, str], "str | None"]
+
+
+def read_text(path: Path) -> str:
+    """UTF-8 (BOM tolerated). Unreadable -> DriftInputError, never a traceback."""
+    try:
+        return path.read_text(encoding="utf-8-sig")
+    except (OSError, UnicodeDecodeError) as exc:
+        raise DriftInputError(str(path), f"não consegui ler ({type(exc).__name__})") from exc
+
+
+def read_json(path: Path) -> Any:
+    text = read_text(path)
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise DriftInputError(str(path), f"JSON inválido (linha {exc.lineno})") from exc
+
+
+def sha256_file(path: Path) -> str:
+    try:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+    except OSError as exc:
+        raise DriftInputError(str(path), "não consegui ler") from exc
+
+
+def run_script(argv: list[str], timeout: int = 60) -> tuple[int, str, str]:
+    """Run a sibling script with the current interpreter: list of args, no shell."""
+    try:
+        done = subprocess.run(
+            [sys.executable, *argv], capture_output=True, text=True, timeout=timeout, check=False, encoding="utf-8")
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return 2, "", f"{type(exc).__name__}: {exc}"
+    return done.returncode, done.stdout, done.stderr
+
+
+def _frontmatter(text: str) -> dict[str, str]:
+    lines = text.splitlines()
+    out: dict[str, str] = {}
+    if not lines or lines[0].strip() != "---":
+        return out
+    for line in lines[1:]:
+        if line.strip() == "---":
+            break
+        if ":" in line:
+            k, _, v = line.partition(":")
+            out[k.strip()] = v.strip()
+    return out
+
+
+def _sections(text: str) -> dict[str, list[str]]:
+    """Level-2 sections by lowercase title; fenced blocks do not start a section."""
+    out: dict[str, list[str]] = {}
+    cur: list[str] | None = None
+    fence = False
+    for line in text.splitlines():
+        if line.lstrip().startswith(("```", "~~~")):
+            fence = not fence
+        if not fence and line.startswith("## "):
+            cur = out.setdefault(line[3:].strip().lower(), [])
+            continue
+        if cur is not None:
+            cur.append(line)
+    return out
+
+
+def _cells(line: str) -> list[str]:
+    parts = [c.strip() for c in line.strip().strip("|").split("|")]
+    return parts
+
+
+def _table(lines: list[str]) -> list[dict[str, str]]:
+    rows = [ln for ln in lines if ln.strip().startswith("|")]
+    if len(rows) < 2:
+        return []
+    head = [h.lower() for h in _cells(rows[0])]
+    out = []
+    for ln in rows[2:]:
+        cells = _cells(ln)
+        out.append({head[i]: cells[i] for i in range(min(len(head), len(cells)))})
+    return out
+
+
+def parse_intent(text: str) -> dict[str, Any]:
+    """The few parts of intent.md the report shows (DRP-010, DRP-011, DRP-014)."""
+    fm = _frontmatter(text)
+    sec = _sections(text)
+    phrases: dict[str, str] = {}
+    for line in sec.get("nas suas palavras", []):
+        m = re.match(r'^\s*-\s*([FA]\d+)\b[^:]*:\s*"?(.*?)"?\s*$', line)
+        if m:
+            phrases[m.group(1)] = m.group(2)
+    reqs: dict[str, dict[str, Any]] = {}
+    for row in _table(sec.get("requisitos", [])):
+        rid = row.get("req", "").strip("` ")
+        if not re.fullmatch(_ID_ANY, rid):
+            continue
+        refs = re.findall(r"\bF\d+\b", row.get("nas suas palavras", ""))
+        reqs[rid] = {"texto": row.get("requisito") or row.get("texto", ""), "frases": refs,
+                     "estado": row.get("estado", "ativo") or "ativo"}
+    retr: dict[str, str] = {}
+    for line in sec.get("retradução", []):
+        m = re.match(rf"^\s*-\s+(.*)\s\(({_ID_ANY})\)\s*$", line)
+        if m:
+            retr[m.group(2)] = m.group(1).strip()
+    scope = [ln for ln in sec.get("fora do escopo", []) if re.match(r"^\s*-\s+\S", ln)]
+    serve = [s.strip() for s in fm.get("serve", "").strip("[]").split(",") if s.strip()]
+    return {"status": fm.get("status", ""), "serve": serve, "frases": phrases, "reqs": reqs,
+            "retraducao": retr, "fora_escopo": len(scope)}
+
+
+def parse_post_code(text: str) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for line in text.splitlines():
+        m = re.match(rf"^\s*-\s+(.*)\s\(({_ID_ANY})\)\s*$", line)
+        if m:
+            out[m.group(2)] = m.group(1).strip()
+    return out
+
+
+def _plan_header(plan: Path) -> dict[str, Any]:
+    lines = read_text(plan).splitlines()
+    head = []
+    for ln in lines[1:]:
+        if ln.startswith("## "):
+            break
+        head.append(ln)
+    version, specify = 1, ""
+    for ln in head:
+        m = re.match(r"^plan_format_version:\s*(\d+)", ln)
+        if m:
+            version = int(m.group(1))
+        m = re.match(r"^Specify:\s*(.*)$", ln)
+        if m and not specify:
+            specify = m.group(1).strip()
+    return {"version": version, "skipped": specify.startswith("skipped")}
+
+
+def _count_steps(feature_file: Path, line: int) -> int:
+    try:
+        lines = feature_file.read_text(encoding="utf-8-sig").splitlines()
+    except (OSError, UnicodeDecodeError):
+        return 0
+    n = 0
+    for ln in lines[line:]:
+        s = ln.strip()
+        if not s:
+            continue
+        low = s.lower()
+        if low.startswith(_SCENARIO_STOP):
+            break
+        if low.split(" ", 1)[0] in _STEP_WORDS:
+            n += 1
+    return n
+
+
+def scenario_key(uri: str, name: str) -> str:
+    """`<slug>/<file>::<name>` from the last two components of the report uri (CYC-027)."""
+    parts = [p for p in uri.replace("\\", "/").split("/") if p]
+    return f"{'/'.join(parts[-2:])}::{name}"
+
+
+def _element_state(element: dict, n_steps: int, tags: list[str]) -> str:
+    """Cucumber JSON element -> DRM-003 state (gherkin-spec-format.md section 8)."""
+    names = {t.lstrip("@").lower() for t in tags}
+    names |= {str(t.get("name", "")).lstrip("@").lower() for t in element.get("tags", [])}
+    if "xfail" in names:
+        return "xfail"
+    steps = element.get("steps", [])
+    statuses = [s.get("result", {}).get("status") for s in steps]
+    failed = [s for s in steps if s.get("result", {}).get("status") == "failed"]
+    if failed:
+        message = failed[0]["result"].get("error_message", "")
+        return "failed" if "AssertionError" in message else "error"
+    if "ambiguous" in statuses:
+        return "error"
+    if "undefined" in statuses or "pending" in statuses:
+        return "undefined"
+    if statuses and all(s == "skipped" for s in statuses):
+        return "skipped"
+    if len(statuses) < n_steps:
+        return "undefined"
+    return "passed"
+
+
+def runner_states(report: Any, expected: dict[str, dict]) -> tuple[dict[str, str], list[str]]:
+    """State of every expected scenario key, and the keys the runner ran that no scenario owns."""
+    rows: dict[str, list[str]] = {}
+    orphans: list[str] = []
+    if not isinstance(report, list):
+        raise DriftInputError("cucumber.json", "o relatório deveria ser uma lista de features")
+    for feature in report:
+        for element in feature.get("elements", []):
+            key = scenario_key(feature.get("uri", ""), element.get("name", ""))
+            info = expected.get(key)
+            if info is None:
+                if key not in orphans:
+                    orphans.append(key)
+                continue
+            rows.setdefault(key, []).append(_element_state(element, info["steps"], info["tags"]))
+    states: dict[str, str] = {}
+    for key, info in expected.items():
+        if key not in rows:
+            states[key] = "skipped" if {t.lower() for t in info["tags"]} & set(_DISABLED_TAGS) else "absent"
+        elif "xfail" in rows[key]:
+            states[key] = "xfail"
+        else:
+            states[key] = min(rows[key], key=_CUCUMBER_PRIORITY.index)
+    return states, orphans
+
+
+def default_status(root: Path, slug: str, *, scripts_dir: Path | None = None, run_fn: RunFn | None = None) -> str | None:
+    """`check_specify.py --feature <slug> --status --json` -> approved|stale|draft|missing (DRP-003).
+
+    None when check_specify.py does not exist (the caller adds the caveat).
+    """
+    script = (scripts_dir or _SCRIPTS_DIR) / "check_specify.py"
+    if not script.is_file():
+        return None
+    rc, out, err = (run_fn or run_script)([str(script), str(root), "--feature", slug, "--status", "--json"])
+    try:
+        status = json.loads(out)["status"]
+    except (json.JSONDecodeError, KeyError, TypeError) as exc:
+        raise DriftInputError("check_specify.py", f"saída inválida (exit {rc}): {err.strip()[:80]}") from exc
+    if status not in ("approved", "stale", "draft", "missing"):
+        raise DriftInputError("check_specify.py", f"estado desconhecido: {status}")
+    return status
+
+
+def _matrix_from_features(root: Path, slug: str, scripts_dir: Path, run_fn: RunFn) -> dict[str, Any]:
+    script = scripts_dir / "check_features.py"
+    if not script.is_file():
+        raise DriftInputError("check_features.py", "não achei o validador de features")
+    rc, out, err = run_fn([str(script), str(root), "--feature", slug, "--json", "--matrix"])
+    if rc not in (0, 1):
+        raise DriftInputError("check_features.py", f"exit {rc}: {err.strip()[:80]}")
+    try:
+        return json.loads(out)
+    except json.JSONDecodeError as exc:
+        raise DriftInputError("check_features.py", "saída não é JSON") from exc
+
+
+def _gate(path: Path) -> dict[str, Any] | None:
+    if not path.is_file():
+        return None
+    raw = read_json(path)
+    if not isinstance(raw, dict):
+        raise DriftInputError(str(path), "deveria ser um objeto")
+    full_raw = raw.get("full")
+    full: str | None
+    if full_raw is None:
+        full = None
+    else:
+        category = full_raw.get("category") if isinstance(full_raw, dict) else str(full_raw)
+        code = full_raw.get("exit_code") if isinstance(full_raw, dict) else None
+        if category == "PASS_WITH_BASELINE":
+            full = "PASS_WITH_BASELINE"
+        elif category == "PASS" or code == 0:
+            full = "PASS"
+        else:
+            full = "FAIL"
+    out: dict[str, Any] = {"full": full, "baseline_moved": raw.get("baseline_moved")}
+    if raw.get("adapter") is False:
+        out["adaptador"] = False
+    return out
+
+
+def _source_files(fdir: Path) -> list[Path]:
+    names = ["scenarios.lock.json", "intent.md", *sorted(p.name for p in fdir.glob("*.feature")), "gate.json",
+             "runner/cucumber.json", "drift/red-reason.json", "drift/coverage.json", "drift/audit.json",
+             "drift/oracle-result.json", "drift/retraducao-pos-codigo.md"]
+    return [fdir / n for n in names if (fdir / n).is_file()]
+
+
+def read_audit(path: Path) -> list[dict[str, Any]]:
+    """audit.json -> items; a value outside {sim, parcial, nao} is an error naming the REQ (DRP-009)."""
+    raw = read_json(path)
+    items = raw.get("itens") if isinstance(raw, dict) else None
+    if not isinstance(items, list):
+        raise DriftInputError(str(path), "falta a lista `itens`")
+    out = []
+    for item in items:
+        req = item.get("req", "?") if isinstance(item, dict) else "?"
+        if not isinstance(item, dict) or item.get("adequado") not in ("sim", "parcial", "nao"):
+            raise DriftInputError(str(path), f"{req}: `adequado` deve ser sim, parcial ou nao")
+        if item.get("por", "humano") not in ("humano", "juiz"):
+            raise DriftInputError(str(path), f"{req}: `por` deve ser humano ou juiz")
+        out.append({"req": req, "adequado": item["adequado"], "por": item.get("por", "humano"),
+                    "objeto": item.get("objeto", "cenario"), "nota": item.get("nota", "")})
+    return out
+
+
+def _reverse_reading(root: Path) -> dict[str, Any]:
+    """DRP-014: intentions born after the adoption mark that no approved feature serves."""
+    mark = root / "features" / "adoption.json"
+    intended = root / "product-design" / "product-design-as-intended.md"
+    if not mark.is_file() or not intended.is_file():
+        return {"estado": "nao_medido", "ids": [], "razao_nm": ["NM-SEM-MARCA-ADOCAO"]}
+    adopted = str(read_json(mark).get("adopted_at", ""))
+    born: dict[str, str] = {}
+    for line in read_text(intended).splitlines():
+        m = re.match(r"^(\d{4}-\d{2}-\d{2})\s*\|\s*([A-Z0-9-]+)\s*\|\s*added\b", line)
+        if m and re.fullmatch(r"REQ-[A-Z0-9]+-\d{3}|JM-TB-\d{3}", m.group(2)):
+            born.setdefault(m.group(2), m.group(1))
+    served: set[str] = set()
+    for intent in sorted((root / "features").glob("*/intent.md")):
+        info = parse_intent(read_text(intent))
+        if info["status"] == "approved":
+            served |= set(info["serve"])
+    ids = sorted(i for i, d in born.items() if d >= adopted and i not in served)
+    return {"estado": "medido", "ids": ids, "razao_nm": []}
+
+
+def _na(slug: str, moment: str, motivo: str, razao: list[str] | None = None) -> dict[str, Any]:
+    return {"feature": slug, "momento": moment, "nao_aplicavel": True, "motivo": motivo, "razao_nm": razao or []}
+
+
+def load_matrix(
+    root: Path, slug: str, *, plan: Path | None = None, moment: str = "M2",
+    status_fn: StatusFn | None = None, run_fn: RunFn | None = None, scripts_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Join the sources of `features/<slug>/` into the matrix `compute_report` reads (DRP-001)."""
+    root = Path(root)
+    scripts = Path(scripts_dir) if scripts_dir else _SCRIPTS_DIR
+    run = run_fn or run_script
+    if plan is not None:
+        head = _plan_header(Path(plan))
+        if head["version"] < 2:
+            return _na(slug, moment, "plano-v1")
+        if head["skipped"]:
+            return {"feature": slug, "momento": moment, "intent": {"status": "skipped"}}
+    if not (root / "features").is_dir():
+        return _na(slug, moment, "sem-features")
+    fdir = root / "features" / slug
+    if not fdir.is_dir():
+        return _na(slug, moment, "feature-sem-pasta")
+
+    data = _matrix_from_features(root, slug, scripts, run)
+    fmat = (data.get("matrix") or {}).get(slug)
+    if fmat is None:
+        return _na(slug, moment, "feature-sem-matriz")
+    intent_info = parse_intent(read_text(fdir / "intent.md")) if (fdir / "intent.md").is_file() else parse_intent("")
+
+    # requirements and scenarios from the matrix; one scenario may sit under several requirements
+    reqs: list[str] = []
+    retired: list[str] = []
+    by_key: dict[str, dict[str, Any]] = {}
+    for rid in sorted(fmat.get("reqs", {})):
+        entry = fmat["reqs"][rid]
+        (retired if entry.get("state") == "retirado" else reqs).append(rid)
+        for sc in entry.get("scenarios", []):
+            item = by_key.setdefault(sc["key"], {"id": sc["key"], "tags": [], "name": sc.get("name", ""),
+                                                 "file": sc.get("file", ""), "line": sc.get("line", 0),
+                                                 "disabled": bool(sc.get("disabled")),
+                                                 "nao_faz": bool(sc.get("nao_faz"))})
+            item["tags"].append(rid)
+    for finding in data.get("findings", []):  # scenarios the matrix does not list under a requirement
+        if finding.get("rule") in ("GHK-002", "GHK-004") and finding.get("scenario"):
+            where = f"{finding.get('file')}:{finding.get('line')}"
+            by_key.setdefault(where, {"id": where, "tags": [] if finding["rule"] == "GHK-002" else ["REQ-?-000"],
+                                      "name": finding["scenario"], "file": finding.get("file", ""),
+                                      "line": finding.get("line", 0), "disabled": False, "nao_faz": False})
+
+    # DRP-003: the approval is always asked of check_specify, never read from the frontmatter
+    ressalvas: list[str] = []
+    asked = (status_fn or (lambda r, s: default_status(r, s, scripts_dir=scripts, run_fn=run)))(root, slug)
+    if asked is None:
+        scen_status = "approved"
+        ressalvas.append("aprovação não verificada")
+    else:
+        scen_status = asked
+        extra = {"stale": "cenários desatualizados", "draft": "cenários não aprovados",
+                 "missing": "sem cenários aprovados"}.get(asked)
+        if extra:
+            ressalvas.append(extra)
+
+    # runner
+    adapter_file = fdir / "runner" / "adapter.json"
+    runner = {"adaptador": True, "relatorio": False}
+    if adapter_file.is_file() and read_json(adapter_file).get("adapter") is False:
+        runner["adaptador"] = False
+    report_file = fdir / "runner" / "cucumber.json"
+    states: dict[str, str] = {}
+    orphan_tests: list[str] = []
+    if report_file.is_file():
+        runner["relatorio"] = True
+        expected = {}
+        for key, sc in by_key.items():
+            if "/" not in key or "::" not in key:
+                continue
+            steps = _count_steps(root / sc["file"], sc["line"]) if sc["file"] else 0
+            expected[key] = {"steps": steps, "tags": ["skip"] if sc["disabled"] else []}
+        try:
+            states, orphan_tests = runner_states(read_json(report_file), expected)
+        except DriftInputError as exc:
+            raise DriftInputError(str(report_file), exc.motivo) from exc
+
+    red_file = fdir / "drift" / "red-reason.json"
+    red = read_json(red_file).get("scenarios", {}) if red_file.is_file() else {}
+    scenarios = []
+    for key, sc in by_key.items():
+        scenarios.append({"id": key, "tags": sc["tags"], "test_result": states.get(key, "absent"),
+                          "red_reason_ok": red.get(key), "disabled": sc["disabled"], "nao_faz": sc["nao_faz"],
+                          "name": sc["name"]})
+
+    cov_file = fdir / "drift" / "coverage.json"
+    touched = None
+    if cov_file.is_file():
+        cov = read_json(cov_file)
+        touched = {"total": cov.get("touched_total") if cov.get("base") else None,
+                   "uncovered": cov.get("touched_uncovered")}
+    oracle_file = fdir / "drift" / "oracle-result.json"
+    oracle = None
+    if oracle_file.is_file():
+        raw = read_json(oracle_file)
+        oracle = {"n": raw.get("n", 0), "falham": raw.get("falham", 0)}
+    audit_file = fdir / "drift" / "audit.json"
+    audit = read_audit(audit_file) if audit_file.is_file() else []
+
+    d0: dict[str, Any] | None = None
+    check_intent = scripts / "check_intent.py"
+    if check_intent.is_file() and (fdir / "intent.md").is_file():
+        rc, out, _ = run([str(check_intent), str(fdir / "intent.md"), "--d0"])
+        try:
+            d0 = json.loads(out)["d0"] if rc == 0 else None
+        except (json.JSONDecodeError, KeyError, TypeError):
+            d0 = None
+
+    step_owner: dict[str, int] | None = None
+    check_plan = scripts / "check_plan_scenarios.py"
+    if plan is not None and check_plan.is_file():  # informative column; never part of the vector
+        rc, out, _ = run([str(check_plan), str(plan), "--root", str(root), "--json"])
+        try:
+            parsed = json.loads(out) if rc in (0, 1) else {}
+            step_owner = {k: s["n"] for s in parsed.get("steps", []) for k in s.get("scenarios", [])}
+        except (json.JSONDecodeError, KeyError, TypeError):
+            step_owner = None
+
+    post_file = fdir / "drift" / "retraducao-pos-codigo.md"
+    post = parse_post_code(read_text(post_file)) if post_file.is_file() else None
+    entradas = {p.relative_to(root).as_posix(): sha256_file(p) for p in _source_files(fdir)}
+    matrix: dict[str, Any] = {
+        "feature": slug, "momento": moment,
+        "intent": {"status": intent_info["status"] or fmat.get("status", "")},
+        "scenarios_status": scen_status, "runner": runner, "gate": _gate(fdir / "gate.json"),
+        "reqs": reqs, "reqs_retirados": retired, "scenarios": scenarios, "touched": touched,
+        "oraculo": oracle, "auditoria": audit, "ressalvas": ressalvas,
+        "extras": {"intent": intent_info, "post_codigo": post, "testes_orfaos": orphan_tests,
+                   "entradas": entradas, "reversa": _reverse_reading(root),
+                   "step_dono": step_owner},
+    }
+    if d0 is not None:
+        matrix["d0"] = d0
+    return matrix
+
+
+# ---------------------------------------------------------------------------
+# Report assembly: compute_report + what lives beside the vector (DRP-015)
+# ---------------------------------------------------------------------------
+
+
+def _audit_block(matrix: dict, reqs: list[str]) -> dict[str, Any]:
+    items = matrix.get("auditoria", [])
+    count = {k: sum(1 for i in items if i.get("adequado") == k) for k in ("sim", "parcial", "nao")}
+    done = {i.get("req") for i in items if i.get("objeto", "cenario") == "cenario"}
+    return {**count, "nao_auditados": [r for r in reqs if r not in done]}
+
+
+def _retranslation_block(matrix: dict, reqs: list[str]) -> dict[str, Any]:
+    extras = matrix.get("extras", {})
+    intent = extras.get("intent", {"reqs": {}, "frases": {}, "retraducao": {}})
+    post = extras.get("post_codigo")
+    items = []
+    for r in reqs:
+        info = intent["reqs"].get(r, {})
+        asked = [intent["frases"].get(f, "") for f in info.get("frases", []) if f in intent["frases"]]
+        items.append({"req": r, "pedido": asked, "antes": intent["retraducao"].get(r, ""),
+                      "depois": (post or {}).get(r, "")})
+    if post is None:
+        return {"estado": "nao_medido", "razao_nm": ["NM-SEM-RETRADUCAO-POS-CODIGO"], "itens": items}
+    return {"estado": "medido", "razao_nm": [], "itens": items}
+
+
+def build_report(matrix: dict, *, m1: dict | None = None) -> dict[str, Any]:
+    """`compute_report` plus the blocks that sit beside the vector, never inside it (DRP-015)."""
+    analysis = analyze(matrix)
+    core = analysis["report"]
+    if core.get("nao_aplicavel"):
+        return core
+    states = analysis["states"]
+    extras = matrix.get("extras", {})
+    reqs = list(matrix.get("reqs", []))
+    names = {s["id"]: s.get("name", s["id"]) for s in matrix.get("scenarios", [])}
+    intent = extras.get("intent", {"reqs": {}})
+    degraus = {k: {**v, "prova": PROOF[k]} for k, v in core["degraus"].items()}
+    scope_items = (extras.get("intent") or {}).get("fora_escopo", 0)
+    n_nao_faz = sum(1 for s in matrix.get("scenarios", []) if s.get("nao_faz"))
+    leituras = dict(core["leituras"])
+    leituras["cadeia_indeterminada"] = len(states["undecided"])
+    leituras["testes_orfaos"] = len(extras.get("testes_orfaos", []))
+    leituras["nao_faz"] = {"itens": scope_items, "cenarios": n_nao_faz, "sem_evidencia": max(0, scope_items - n_nao_faz)}
+    leituras["intencao_sem_feature"] = extras.get(
+        "reversa", {"estado": "nao_medido", "ids": [], "razao_nm": ["NM-SEM-MARCA-ADOCAO"]})
+    report: dict[str, Any] = {
+        "schema_version": SCHEMA_VERSION, "feature": core["feature"], "momento": core["momento"],
+        "degraus": degraus, "leituras": leituras, "ressalvas": core["ressalvas"],
+        "itens": {
+            "reqs_descobertos": [{"req": r, "texto": intent["reqs"].get(r, {}).get("texto", "")}
+                                 for r, v in states["D1"].items() if v == "desc"],
+            "cenarios_descobertos": {
+                "D2": [{"chave": k, "nome": names.get(k, k)} for k, v in states["D2"].items() if v == "desc"],
+                "D3a": [{"chave": k, "nome": names.get(k, k)} for k, v in states["D3a"].items() if v == "desc"],
+            },
+        },
+        "auditoria": _audit_block(matrix, reqs),
+        "retraducao": _retranslation_block(matrix, reqs),
+        "delta": None,
+        "entradas": dict(sorted(extras.get("entradas", {}).items())),
+    }
+    return report
+
+
+def generate(
+    root: Path, slug: str, *, plan: Path | None = None, moment: str = "M2",
+    status_fn: StatusFn | None = None, run_fn: RunFn | None = None, scripts_dir: Path | None = None,
+    m1: dict | None = None,
+) -> dict[str, Any]:
+    """load_matrix -> build_report (the whole pipeline of one feature)."""
+    matrix = load_matrix(root, slug, plan=plan, moment=moment, status_fn=status_fn, run_fn=run_fn,
+                         scripts_dir=scripts_dir)
+    return build_report(matrix, m1=m1)

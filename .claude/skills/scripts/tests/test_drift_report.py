@@ -236,3 +236,102 @@ def test_calculator_module_layer_has_no_io_imports_in_compute():
     block = src[start:end]
     for word in ("subprocess", "socket", "anthropic", "open(", "os.environ"):
         assert word not in block
+
+
+# ---- Step 5: loader behaviors
+
+def test_audit_never_changes_any_d():
+    _, with_audit = make_report("auditoria")
+    _, without = make_report("ok-m1")
+    assert with_audit["degraus"] == without["degraus"]
+
+
+def test_missing_check_specify_adds_caveat_and_never_silent_approved(tmp_path):
+    root = tmp_path / "p"
+    (root).mkdir()
+    for p in (_FIX / "ok-m1").rglob("*"):
+        if p.is_file() and p.name not in ("esperado.json", "status.txt"):
+            dest = root / p.relative_to(_FIX / "ok-m1")
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_bytes(p.read_bytes())
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    real = Path(dr.__file__).resolve().parent
+    for name in ("check_features.py", "check_intent.py"):
+        (scripts / name).write_bytes((real / name).read_bytes())
+    # check_specify.py is not in the copy: the approval is not verified
+    rep = dr.generate(root, SLUG, moment="M1", scripts_dir=scripts)
+    assert "aprovação não verificada" in rep["ressalvas"]
+
+
+def test_missing_check_features_is_an_input_error(tmp_path):
+    (tmp_path / "features" / SLUG).mkdir(parents=True)
+    with pytest.raises(dr.DriftInputError):
+        dr.load_matrix(tmp_path, SLUG, scripts_dir=tmp_path / "vazio", status_fn=lambda r, s: "approved")
+
+
+def test_project_without_features_is_not_applicable_and_touches_no_file(tmp_path):
+    matrix = dr.load_matrix(tmp_path, SLUG)
+    assert matrix["nao_aplicavel"] and matrix["motivo"] == "sem-features"
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_v1_plan_is_not_applicable_and_reads_nothing_else(tmp_path):
+    plan = tmp_path / "plan.md"
+    plan.write_text((_FIX / "plano-v1" / "plan.md").read_text(encoding="utf-8"), encoding="utf-8")
+    called = []
+    matrix = dr.load_matrix(tmp_path, SLUG, plan=plan, run_fn=lambda a: called.append(a) or (0, "", ""))
+    assert matrix["motivo"] == "plano-v1" and called == []
+
+
+def test_runner_orphan_test_stays_outside_every_d(tmp_path):
+    root = tmp_path / "p"
+    src = _FIX / "ok-m1"
+    for p in src.rglob("*"):
+        if p.is_file():
+            dest = root / p.relative_to(src)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_bytes(p.read_bytes())
+    path = root / "features" / SLUG / "runner" / "cucumber.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    ghost = json.loads(json.dumps(data[0]["elements"][0]))
+    ghost["name"] = "Cenário que não existe mais"
+    data[0]["elements"].append(ghost)
+    path.write_text(json.dumps(data), encoding="utf-8")
+    rep = dr.generate(root, SLUG, moment="M1", status_fn=stub_status)
+    assert rep["leituras"]["testes_orfaos"] == 1
+    assert rep["degraus"]["D2"]["n"] == 4
+
+
+def test_invalid_audit_value_is_an_error_naming_the_req(tmp_path):
+    path = tmp_path / "audit.json"
+    path.write_text(json.dumps({"itens": [{"req": "REQ-x-001", "adequado": "talvez"}]}), encoding="utf-8")
+    with pytest.raises(dr.DriftInputError) as err:
+        dr.read_audit(path)
+    assert "REQ-x-001" in str(err.value)
+
+
+def test_plan_step_mapping_is_not_part_of_the_vector():
+    # a v2 plan is accepted and does not change any D
+    root = _FIX / "ok-m1"
+    with_plan = dr.generate(root, SLUG, plan=root / "plan.md", moment="M1", status_fn=stub_status)
+    without = dr.generate(root, SLUG, moment="M1", status_fn=stub_status)
+    assert with_plan["degraus"] == without["degraus"]
+
+
+def test_loader_has_no_shell_true():
+    assert "shell=True" not in Path(dr.__file__).read_text(encoding="utf-8")
+
+
+def test_integration_with_the_three_real_scripts():
+    """check_features, check_specify and check_plan_scenarios run for real over a committed fixture."""
+    base = _TESTS_DIR / "fixtures" / "plan_scenarios"
+    root = base / "_raizes" / "aprovada"
+    matrix = dr.load_matrix(root, SLUG, plan=base / "v2-completo" / "plan.md", moment="M1")
+    assert matrix["scenarios_status"] == "approved"
+    assert len(matrix["reqs"]) == 3 and len(matrix["scenarios"]) == 4
+    assert len(matrix["extras"]["step_dono"]) == 4
+    rep = dr.build_report(matrix)
+    assert rep["degraus"]["D1"]["cobertos"] == 3
+    assert rep["degraus"]["D2"]["razao_nm"] == ["NM-SEM-RUNNER"]
+    assert rep["degraus"]["D3a"]["razao_nm"] == ["NM-SEM-RUNNER", "NM-SEM-GATE"]
