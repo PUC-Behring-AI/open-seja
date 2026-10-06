@@ -125,3 +125,40 @@ Nada escrito fora do ledger. `git status` limpo no inicio (branch `dev`, HEAD 6c
 - deviated: Fixtures em .claude/skills/scripts/tests/fixtures/grill; dry-run do /plan --grill e a transcricao simulada, nao uma sessao; (b) nao tem intent.md.
 - less-sure: Os numeros de calibracao sao do roteiro, nao de pessoa real; nao servem para o teto 5x4.
 - gate: not-installed
+
+### Step 7 -- contrato com os itens vizinhos (2026-10-06, executor)
+
+**O que este plano entrega a quem**
+
+| Item | Plano | Recebe | Regra |
+|---|---|---|---|
+| 4 | plan-000010 (formato Gherkin) | `REQ-<slug>-NNN` estáveis e contíguos em `intent.md` aprovado; seção "Modelo e termos" para o aviso de substantivo de step ausente; `Tipo: restrição` também vira cenário | GRL-005, GRL-009, GRL-011 |
+| 5 | plan-000011 (specify) | portão de entrada: `check_intent.py <intent.md> --require-approved --strict` (exit 0) e recusa de `status: grilling` (CYC-008); coluna "Para que" e índice `F`/`A` como matéria da retradução; "Fora do escopo" citado por índice; `--specify` continua reservada | GRL-006, GRL-008, GRL-014 |
+| 6 | plan-000012 (plano a partir de cenários) | `Feature: <slug>` sob o cabeçalho do plano depois da grill; tarefa sem código com `## Intenção` e `Specify: skipped -- <motivo>`; o plano segue v1 até a specify existir | GRL-012 |
+| 8 | plan-000014 (relatório no REFLECT) e plan-000008 (métrica) | D1 conta os REQs `ativo` de `intent.md` aprovado; REQ `retirado` sai do denominador depois da reaprovação e conta como descoberto até lá; `rev` > 1 marca cenários desatualizados; **D0 sai de `NM-SEM-INDICE-BRIEF`**: `check_intent.py --d0` devolve `{"estado": "medido", "frases": n, "residuo": [...]}` ou `nao_medido` com `NM-SEM-INDICE-BRIEF`; `serve:` no frontmatter para a leitura reversa "intenção sem feature" | GRL-011, GRL-015, GRL-005 |
+| 9 | plan-000015 (integração) | quickguide pt-BR e `/help` descrevem `--grill` (o que o citizen aprova: a lista e o "não faz"; o que o power dev aprova: o `intent.md` e a rastreabilidade) | GRL-014, GRL-008 |
+| 10 | plan-000016 (piloto) | tempo de grill entra no tempo até a primeira feature aprovada (`approved_at` é o fim); linha de base simulada do Step 6 (a: 3 rodadas, 9 perguntas, 0 avisos de voz); calibrar `GRILL_MAX_ROUNDS` e `GRILL_MAX_QUESTIONS_PER_ROUND` com sessões reais; contar "Ajustar" na aprovação ao lado dos ajustes no specify | GRL-007, GRL-003 |
+
+**Lacunas com os planos 000007 e 000008 (estado ao fim do plano)**
+
+1. Esquema de `intent.md`: resolvido como superconjunto (GRL-005, decisão 1 = B); `feature-layout.md` ganhou só o ponteiro "Emenda 000009". Risco que continua: um validador do item 4 que leia só o esquema mínimo; ele deve importar `check_intent.parse`/`table` em vez de reescrever o parse.
+2. `rev` no D1: `drift-metric.md` ainda não tem a linha "REQ com `rev` novo deixa os cenários desatualizados (`NM-CENARIOS-STALE`) até o specify reaprovar". Dono: plan-000014 (ou emenda do 000011, que escreve o estado dos cenários).
+3. Tipo `restrição`: contado igual no D1 (sem mudança no 000008).
+4. Tarefa sem código: consistente com o 000008 (`NM-SPECIFY-PULADA`, relatório não aplicável).
+5. Voz controlada: o 000074 não existe no open-seja; `check_intent.py` confere só os dois limites numéricos e devolve a ressalva `voz: não verificada`. Quando o lint chegar, ele é importado (as constantes já vêm dele se existir).
+6. Ordem de aprovação: o verificador agora existe e é o portão que o item 5 deve usar (CYC-002 aponta para ele).
+7. `--grill` implementada; `--specify` reservada (ponteiro em CYC-006).
+8. Novo: `features/` versionado com o pedido verbatim (nota C1, GRL-005). A troca por marcador depende do citizen; nenhum verificador procura nome sensível.
+9. Novo: `check_intent.py` roda sem argumento no `run_all_checks.py` (varre `features/*/intent.md`): num projeto real, uma intenção aprovada que perder uma seção faz o health check falhar. É o comportamento pretendido (aprovado = completo), mas muda o resultado do `run_all_checks` dos projetos que adotarem `features/`.
+
+**Decisões pendentes e o default em uso**: 1 = B (GRL-005), 2 = B (GRL-007), 3 = B (GRL-009), 4 = B (GRL-010), 5 = A (GRL-002), todas `[default; aceito 2026-10-06]`.
+
+**Texto sugerido ao designer** (prosa Human; NÃO escrito em `product-design/`):
+- Decisão D-009 (proposta, via `apply_marker.py --marker DECISION_APPEND` com confirmação): "**D-009: A grill indexa o pedido e as respostas, e a regra de parada é um verificador.** Context: o D0 ficava `não medido` sem índice do pedido, e a parada por impressão do agente não é verificável. Decision: o `intent.md` numera as frases do pedido (`F<n>`) e as respostas (`A<n>`); requisitos, fora do escopo e premissas citam esses índices. A regra de parada P1 a P6 é conferida por `check_intent.py`, sem LLM; só a aprovação do citizen grava `approved`. Consequences: o D0 passa a ser medido; o specify usa o verificador como portão. Rejected: parar por julgamento do agente; brief no frontmatter."
+- §14, linha `[intended] Grill e specify no /plan` (REQ-MC-011): a metade grill está entregue; um marcador `STATUS` só cabe quando o specify (plan-000011) também estiver. Sugestão: não marcar agora.
+
+### Step 7 -- reflection-on-action | 2026-10-06 17:27 UTC | Contrato com os itens vizinhos
+- happened: Registrei a tabela do que o plano entrega aos itens 4, 5, 6, 8, 9 e 10, nove lacunas e o texto sugerido ao designer.
+- deviated: Duas lacunas novas: brief verbatim em features/ e check_intent no run_all_checks dos projetos.
+- less-sure: Se a linha de rev no drift-metric.md deve vir do 000011 ou do 000014.
+- gate: not-installed

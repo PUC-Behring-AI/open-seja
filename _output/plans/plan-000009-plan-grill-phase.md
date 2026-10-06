@@ -197,7 +197,7 @@ Registrar no progress uma tabela "o que este plano entrega a quem": item 4 (conv
 - **Interface**: N/A
 - **Verify**: a tabela cobre os itens 4, 5, 6, 8, 9, 10; cada linha cita uma regra `GRL-NNN`; lista as 5 decisões pendentes com o default em uso.
 - **Tests**: N/A (registro)
-- [ ] Done
+- [x] Done
 
 ## Lacunas e conflitos com os planos 000007 e 000008
 
