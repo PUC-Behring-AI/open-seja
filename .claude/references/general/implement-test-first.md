@@ -278,6 +278,30 @@ Variáveis: `Q` = `QUALITY_DIR` do projeto (padrão `_output/quality`); `BC` = `
 
 Teto de invocações: no máximo 10 subagentes por step (ITF-013). A escalada (ITF-014) é a saída de qualquer teto.
 
+## Congelar o M1 (emenda 000015)
+
+Detalhe do último comando do item 9 (CYC-031, decisão pendente 1 do plan-000015 = A `[default; aceito 2026-10-06]`). O `implement/SKILL.md` já o cita na Phase 2, passo 12 ("M1 freeze"); esta seção é a norma, o `SKILL.md` não ganha linha nova.
+
+**Quando.** Uma vez, no fim de um plano com `plan_format_version: 2`, `Feature: <slug>` e `Specify: approved`, depois da rodada `full` (ou de registrar `full: null` quando não há `GATE_FULL_CMD`), do `export` e do `demo`. Plano v1 (ou sem versão), plano sem `Feature:` e plano com `Specify: skipped` **não** congelam nada e não criam `drift/`.
+
+**Comando** (`<plano>` é o arquivo do plano; `<UTC>` é a hora de agora, em ISO-8601 UTC, dada por quem chama):
+
+```bash
+python .claude/skills/scripts/drift_report.py --feature <slug> --plan <plano> --moment M1 --freeze --at <UTC>
+```
+
+**O que o `/implement` faz com o resultado.** O freeze **nunca** reprova o `/implement` nem muda o status do plano.
+
+| Resultado | O `/implement` |
+|---|---|
+| exit 0, "Congelei M1: <caminho>" | registra no progress file: `- m1: features/<slug>/drift/M1.json` |
+| exit 2 e a mensagem diz que o M1 já foi congelado | avisa "M1 já congelado; não sobrescrevo" e segue; o arquivo fica igual byte a byte (DRP-008) |
+| `drift_report.py` ausente, ou exit 2 por outro motivo | avisa "não congelei o M1: <primeira linha do erro>" e segue; o `/reflect` dirá `NM-SEM-M1` |
+| exit 0 com uma linha "não aplicável" (plano v1 ou `Specify: skipped` passado por engano) | nada a registrar; nenhum arquivo criado |
+
+- **Quem decide**: o `/implement` executa; `drift_report.py` recusa a sobrescrita.
+- **Critério de aceitação**: depois do fluxo roteirizado de um plano v2 com `Feature:`, existe `features/<slug>/drift/M1.json`; a segunda chamada sai 2 e o arquivo não muda; um plano v1 não cria `drift/`; sem `drift_report.py`, o fluxo termina com aviso e sem erro. Teste: `.claude/skills/scripts/tests/test_default_cycle_wiring.py` (lê o comando desta seção).
+
 ## Decisões pendentes do plan-000013 e o default adotado
 
 | # | Decisão | Default adotado | Regra |

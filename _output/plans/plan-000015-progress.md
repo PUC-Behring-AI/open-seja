@@ -93,3 +93,16 @@ Decisao: **seguir**. Os planos 000007 a 000014 executaram (todos DONE). Nada foi
 - deviated: O estado so e pedido com --matrix, para a varredura do run_all_checks nao abrir subprocessos; a secao 10 do gherkin-spec-format ganhou a linha do plugin (texto 6 do 000013).
 - less-sure: Se o custo de um subprocesso por feature pesa em projetos com muitas features.
 - gate: not-installed
+
+### Step 5 -- congelar o M1 (2026-10-06)
+
+- Terreno (Step 1, achado 2): a fiação já existia no `implement/SKILL.md` (Phase 2, passo 12: "M1 freeze") e no Procedimento, item 9, de `implement-test-first.md` (plan-000013). **Desvio**: `implement/SKILL.md` **não** ganhou linha (seria a segunda menção; `git diff --numstat` do SKILL.md = 0/0, não 1/0 como o Verify do plano supunha).
+- `implement-test-first.md` (+24): seção "Congelar o M1 (emenda 000015)" com quando (v2, `Feature:`, `Specify: approved`, depois de `full`/`full: null`, `export`, `demo`), o comando exato com `--plan` (o texto sugerido do 000014 traz `--plan`; o item 9 do 000013 não; com `--plan`, um plano v1 passado por engano sai "não aplicável" sem arquivo) e a tabela do que fazer com cada resultado: exit 0 registra `- m1: ...` no progress; exit 2 "já foi congelado" avisa e segue; script ausente ou outro erro avisa e segue (o `/reflect` dirá `NM-SEM-M1`). Nunca reprova o `/implement`.
+- `test_default_cycle_wiring.py` (novo, 6 testes): o orquestrador roteirizado lê o comando **da própria norma** e roda o `drift_report.py` real sobre uma cópia de `fixtures/drift_report/ok-m1`. Casos: o comando da norma é o freeze; plano v2 cria `M1.json` com `momento`, `at`, `feature` e o SHA-256 de cada entrada; a segunda chamada avisa e deixa o arquivo igual byte a byte; plano v1 não cria nada em `drift/`; sem `drift_report.py`, aviso e fim sem erro; `Specify: skipped` não congela. Ordem: a seção da norma foi escrita antes do teste (o teste a lê); prova do vermelho: com a norma do HEAD, 3 dos 6 falham por `IndexError` (seção ausente) e os 3 que não dependem do comando passam.
+- Verify: `grep -n "drift_report.py --feature <slug> --plan <plano> --moment M1 --freeze"` acha a seção; `test_default_cycle_wiring.py` 6 passed; os testes do 000013 sem edição; `check_docs.py --plugins skill-body-length` 0 erros (implement 254/500, sem mudança); `uvx ruff` limpo; `run_all_checks.py` 19/14, mesmo conjunto, 17/2/9; pytest 1465 passed / 12 failed (mesmo conjunto).
+
+### Step 5 -- reflection-on-action | 2026-10-06 19:37 UTC | Fiacao do /implement para congelar o M1
+- happened: A norma ganhou a secao Congelar o M1 com o comando e a tabela de resultados; um teste de costura le o comando da norma e roda o drift_report real: cria, recusa a sobrescrita, ignora v1 e degrada sem o script.
+- deviated: O implement/SKILL.md nao ganhou linha: o passo 12 ja cita o freeze (000013); o comando da norma passou a levar --plan.
+- less-sure: Se um orquestrador real le esta secao no fim do plano ou para no item 9 do Procedimento.
+- gate: not-installed
