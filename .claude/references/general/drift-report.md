@@ -152,7 +152,7 @@ O delta traz, por degrau, numerador e denominador **dos dois lados** (o denomina
 
 ### DRP-008 -- Instantâneos `[default; aceito 2026-10-06]` (decisão pendente 1 = A)
 
-`features/<slug>/drift/M1.json` e `features/<slug>/drift/M2-<AAAA-MM-DD>.json`, versionados com a feature. Aditivo ao layout do plan-000007; a emenda ao `feature-layout.md` é do designer. Esquema:
+`features/<slug>/drift/M1.json` e `features/<slug>/drift/M2-<at>.json`, onde `<at>` é o `--at` sem pontuação (`2026-10-06T18:00:00Z` vira `M2-20261006T180000Z.json`; dois M2 no mesmo dia coexistem), versionados com a feature. Aditivo ao layout do plan-000007; a emenda ao `feature-layout.md` é do designer. Esquema:
 
 ```json
 {"schema_version": 1, "feature": "<slug>", "momento": "M1", "at": "<UTC ISO>",
@@ -160,7 +160,7 @@ O delta traz, por degrau, numerador e denominador **dos dois lados** (o denomina
  "entradas": {"features/<slug>/gate.json": "<sha256>"}}
 ```
 
-Regras: escrita atômica (arquivo temporário e `os.replace`); `--freeze` **recusa** sobrescrever um M1 existente (exit 2, mensagem curta, arquivo intacto); `at` vem de `--at`, nunca do relógio; o instantâneo grava o SHA-256 de cada entrada lida.
+Regras: escrita atômica e exclusiva (arquivo temporário e `os.link` para o destino, que falha se o destino existe, sem janela entre checar e criar); `--freeze` **recusa** sobrescrever um M1 existente, e também um M2 com o mesmo `--at` (exit 2, mensagem curta, arquivo intacto); falha de escrita (`OSError`) também sai com 2, sem traceback; `--at` deve ser ISO-8601 UTC e `--feature` um slug kebab-case, senão exit 2; nenhum caminho é derivado de `--at` além do nome do arquivo de instantâneo, e `--out` é escolha explícita do usuário; `at` vem de `--at`, nunca do relógio; o instantâneo grava o SHA-256 de cada entrada lida.
 
 - **Quem decide**: designer.
 - **Critério de aceitação**: `--freeze` duas vezes na mesma feature recusa na segunda e deixa o arquivo com o mesmo hash.
@@ -241,7 +241,7 @@ O relatório tem dois registros (CYC-013, CYC-014, D-004).
 - **Registro do power dev** (padrão): o vetor completo com `n`, cobertos, descobertos, não medido com razão, `D`, M1, M2, mudança, rótulo de prova, ressalvas, leituras e a frase "O que o D não vê".
 - **Registro do citizen** (`--citizen`): sem número técnico. Contagens de requisito, cenário e teste **em palavras** ("oito de dez requisitos"); as ausências **enumeradas** pelo nome do requisito, não por percentual; nenhum `D`, nenhum "PASS", nenhum "gate", nenhum percentual, nenhum nome de ferramenta. O teste da surpresa vale: item que só confirma não entra; entram o que falta, o que mudou depois da entrega e o que não foi medido.
 
-Voz controlada nos dois: até 25 palavras por frase, até 6 frases por parágrafo, termos fixos (requisito, cenário, teste, entrega), primeira pessoa do designer ("eu").
+Voz controlada nos dois: até 25 palavras por frase, até 6 frases por parágrafo, termos fixos (requisito, cenário, teste, entrega), primeira pessoa do designer ("eu"). O `check_voice` do script **não** verifica o limite de palavras do conteúdo citado entre aspas (frases do pedido, da retradução, `nota`): é texto verbatim do humano e não se reescreve para caber no limite; só a voz do relatório é medida.
 
 - **Quem decide**: designer.
 - **Critério de aceitação**: o texto do citizen de qualquer fixture não contém dígito, `%`, `PASS`, `gate` nem a sigla `D1`..`D3b`; toda frase tem até 25 palavras.

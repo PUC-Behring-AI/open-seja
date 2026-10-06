@@ -188,3 +188,11 @@ Repositorio de execucao: este (sem prefixo `open-seja/`); fixtures em `.claude/s
 - deviated: Nao rodei /critique validate nem /explain drift como skills; so os scripts.
 - less-sure: Se o agente que seguir o texto do Step B1 escolhe o registro certo; o ensaio e simulado.
 - gate: not-installed
+
+### Correcoes da revisao (orquestrador)
+1. (critical) JSON nao-objeto: `read_obj` levanta `DriftInputError` ("deveria ser um objeto"); usado em adapter, red-reason, coverage, oracle-result e adoption. Testes parametrizados, exit 2 sem traceback.
+2. (critical) `OSError` em freeze, mkdir e escrita do HTML sai com 2 e mensagem curta em stderr.
+3. M1 criado de forma exclusiva: temporario e `os.link` para o destino (falha se existe, sem janela de corrida). Instantaneo M2 passa a `M2-<at sem pontuacao>.json` (ex.: `M2-20261006T180000Z.json`); mesmo `--at` recusa. DRP-008 atualizado.
+4. `--at` validado como ISO-8601 UTC e `--feature` como slug kebab-case (exit 2). `--out` segue escolha explicita do usuario, documentado.
+5. DRP-013: `check_voice` nao mede o limite de palavras do conteudo citado (verbatim do humano).
+6. Removidos `HtmlUnavailable` e o `if ...: pass`; os `except OSError: pass` viraram `contextlib.suppress`.

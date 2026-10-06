@@ -69,6 +69,7 @@ Usage
 from __future__ import annotations
 
 import argparse
+import contextlib
 import hashlib
 import html
 import json
@@ -135,6 +136,10 @@ RED_STATES = ("failed", "error", "undefined")
 UNCOVERED_D2 = ("absent", "skipped", "xfail")
 
 
+AT_RE = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?Z?")
+SLUG_RE = re.compile(r"[a-z0-9]+(-[a-z0-9]+)*")
+
+
 class DriftInputError(Exception):
     """An input file exists but cannot be read or is invalid (exit 2)."""
 
@@ -142,10 +147,6 @@ class DriftInputError(Exception):
         super().__init__(f"{arquivo}: {motivo}")
         self.arquivo = arquivo
         self.motivo = motivo
-
-
-class HtmlUnavailable(Exception):
-    """Kept for the interface of the plan; the HTML renderer is built in."""
 
 
 # ---------------------------------------------------------------------------
@@ -407,6 +408,14 @@ def read_json(path: Path) -> Any:
         return json.loads(text)
     except json.JSONDecodeError as exc:
         raise DriftInputError(str(path), f"JSON inválido (linha {exc.lineno})") from exc
+
+
+def read_obj(path: Path) -> dict[str, Any]:
+    """read_json that insists on a JSON object at the top (a list or a scalar is invalid input)."""
+    raw = read_json(path)
+    if not isinstance(raw, dict):
+        raise DriftInputError(str(path), "deveria ser um objeto")
+    return raw
 
 
 def sha256_file(path: Path) -> str:
@@ -688,7 +697,7 @@ def _reverse_reading(root: Path) -> dict[str, Any]:
     intended = root / "product-design" / "product-design-as-intended.md"
     if not mark.is_file() or not intended.is_file():
         return {"estado": "nao_medido", "ids": [], "razao_nm": ["NM-SEM-MARCA-ADOCAO"]}
-    adopted = str(read_json(mark).get("adopted_at", ""))
+    adopted = str(read_obj(mark).get("adopted_at", ""))
     born: dict[str, str] = {}
     for line in read_text(intended).splitlines():
         m = re.match(r"^(\d{4}-\d{2}-\d{2})\s*\|\s*([A-Z0-9-]+)\s*\|\s*added\b", line)
@@ -769,7 +778,7 @@ def load_matrix(
     # runner
     adapter_file = fdir / "runner" / "adapter.json"
     runner = {"adaptador": True, "relatorio": False}
-    if adapter_file.is_file() and read_json(adapter_file).get("adapter") is False:
+    if adapter_file.is_file() and read_obj(adapter_file).get("adapter") is False:
         runner["adaptador"] = False
     report_file = fdir / "runner" / "cucumber.json"
     states: dict[str, str] = {}
@@ -788,7 +797,7 @@ def load_matrix(
             raise DriftInputError(str(report_file), exc.motivo) from exc
 
     red_file = fdir / "drift" / "red-reason.json"
-    red = read_json(red_file).get("scenarios", {}) if red_file.is_file() else {}
+    red = read_obj(red_file).get("scenarios", {}) if red_file.is_file() else {}
     scenarios = []
     for key, sc in by_key.items():
         scenarios.append({"id": key, "tags": sc["tags"], "test_result": states.get(key, "absent"),
@@ -798,13 +807,13 @@ def load_matrix(
     cov_file = fdir / "drift" / "coverage.json"
     touched = None
     if cov_file.is_file():
-        cov = read_json(cov_file)
+        cov = read_obj(cov_file)
         touched = {"total": cov.get("touched_total") if cov.get("base") else None,
                    "uncovered": cov.get("touched_uncovered")}
     oracle_file = fdir / "drift" / "oracle-result.json"
     oracle = None
     if oracle_file.is_file():
-        raw = read_json(oracle_file)
+        raw = read_obj(oracle_file)
         oracle = {"n": raw.get("n", 0), "falham": raw.get("falham", 0)}
     audit_file = fdir / "drift" / "audit.json"
     audit = read_audit(audit_file) if audit_file.is_file() else []
@@ -976,7 +985,8 @@ def snapshot(report: dict, at: str) -> dict[str, Any]:
 
 
 def snapshot_path(root: Path, slug: str, moment: str, at: str) -> Path:
-    name = "M1.json" if moment == "M1" else f"M2-{at[:10]}.json"
+    stamp = re.sub(r"[^0-9A-Za-z]", "", at)  # 2026-10-06T18:00:00Z -> 20261006T180000Z
+    name = "M1.json" if moment == "M1" else f"M2-{stamp}.json"
     return Path(root) / "features" / slug / "drift" / name
 
 
@@ -995,21 +1005,20 @@ def freeze(report: dict, root: Path, slug: str, moment: str, at: str) -> Path:
     if report.get("nao_aplicavel"):
         raise DriftInputError(slug, "não há o que congelar: relatório não aplicável")
     path = snapshot_path(root, slug, moment, at)
-    if moment == "M1" and path.exists():
-        raise FileExistsError(f"{path}: o M1 já foi congelado e não se sobrescreve")
     path.parent.mkdir(parents=True, exist_ok=True)
     text = json.dumps(snapshot(report, at), ensure_ascii=False, indent=2) + "\n"
     fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=".snap-", suffix=".tmp")
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
             handle.write(text)
-        os.replace(tmp, path)
-    except OSError:
         try:
+            os.link(tmp, path)  # exclusive: fails if the destination exists, never replaces
+        except FileExistsError:
+            what = "o M1 já foi congelado" if moment == "M1" else "este instante já foi congelado"
+            raise FileExistsError(f"{path}: {what} e não se sobrescreve") from None
+    finally:
+        with contextlib.suppress(OSError):
             os.unlink(tmp)
-        except OSError:
-            pass
-        raise
     return path
 
 
@@ -1428,6 +1437,12 @@ def main(argv: list[str] | None = None) -> int:
     if not root.is_dir():
         print(f"drift_report: {root}: não é uma pasta", file=sys.stderr)
         return 2
+    if args.at is not None and not AT_RE.fullmatch(args.at):
+        print("drift_report: --at deve ser um instante UTC ISO-8601 (AAAA-MM-DDTHH:MM[:SS]Z)", file=sys.stderr)
+        return 2
+    if args.feature is not None and not SLUG_RE.fullmatch(args.feature):
+        print("drift_report: --feature deve ser um slug kebab-case (a-z, 0-9, hífen)", file=sys.stderr)
+        return 2
     if args.freeze and not args.at:
         print("drift_report: --freeze pede --at <UTC ISO>", file=sys.stderr)
         return 2
@@ -1455,7 +1470,7 @@ def main(argv: list[str] | None = None) -> int:
     except DriftInputError as exc:
         print(f"drift_report: {exc}", file=sys.stderr)
         return 2
-    except FileExistsError as exc:
+    except OSError as exc:  # includes FileExistsError
         print(f"drift_report: {exc}", file=sys.stderr)
         return 2
     if args.audit_sample or args.freeze:
@@ -1467,8 +1482,6 @@ def main(argv: list[str] | None = None) -> int:
     chosen_md = args.md or not (args.citizen or args.html)
     chunks = []
     for report in reports:
-        if args.as_coded and not report.get("nao_aplicavel"):
-            pass  # as_coded rows are already in the report: generate(as_coded=True)
         if chosen_md:
             chunks.append(render_markdown(report, at=args.at))
         if args.citizen:
@@ -1478,9 +1491,13 @@ def main(argv: list[str] | None = None) -> int:
                 chunks.append(_na_line(report) + "\n")
                 continue
             folder = Path(args.out) if args.out else root / "features" / report["feature"] / "drift"
-            folder.mkdir(parents=True, exist_ok=True)
             target = folder / f"{report['feature']}-{report['momento']}.html"
-            target.write_text(render_html(report, citizen=args.citizen), encoding="utf-8")
+            try:
+                folder.mkdir(parents=True, exist_ok=True)
+                target.write_text(render_html(report, citizen=args.citizen), encoding="utf-8")
+            except OSError as exc:
+                print(f"drift_report: {target}: não consegui escrever ({type(exc).__name__})", file=sys.stderr)
+                return 2
             print(f"HTML: {target}", file=sys.stderr)
     print("\n".join(chunks), end="")
     return 0

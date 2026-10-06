@@ -14,8 +14,9 @@ import json
 import re
 from pathlib import Path
 
-import drift_report as dr
 import pytest
+
+import drift_report as dr
 
 _TESTS_DIR = Path(__file__).resolve().parent
 _FIX = _TESTS_DIR / "fixtures" / "drift_report"
@@ -635,3 +636,93 @@ def test_retranslation_judgement_is_not_counted_as_scenario_audit(tmp_path):
     assert "Você disse: não é isso." in dr.render_citizen(rep)
     assert "Há requisitos em que o cenário não captura" not in dr.render_citizen(rep)
     assert "Julgamento do citizen sobre REQ-contas-da-semana-002: não é isso" in dr.render_markdown(rep)
+
+
+# ---- Review fixes (plan-000014)
+
+@pytest.mark.parametrize("rel", [
+    "runner/adapter.json", "drift/red-reason.json", "drift/coverage.json", "drift/oracle-result.json"])
+def test_non_object_json_input_is_a_clean_input_error(tmp_path, capsys, rel):
+    root = copy_tree(_FIX / "ok-m1", tmp_path / "p")
+    target = root / "features" / SLUG / rel
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text("[]", encoding="utf-8")
+    code, _, err = run_cli([str(root), "--feature", SLUG, "--moment", "M1", "--json"], capsys)
+    assert code == 2 and "Traceback" not in err and "objeto" in err
+
+
+def test_non_object_adoption_mark_is_a_clean_input_error(tmp_path):
+    (tmp_path / "features").mkdir()
+    (tmp_path / "features" / "adoption.json").write_text("[]", encoding="utf-8")
+    (tmp_path / "product-design").mkdir()
+    (tmp_path / "product-design" / "product-design-as-intended.md").write_text("x\n", encoding="utf-8")
+    with pytest.raises(dr.DriftInputError):
+        dr._reverse_reading(tmp_path)
+
+
+def test_oserror_on_freeze_exits_2_without_traceback(tmp_path, capsys):
+    root = copy_tree(_FIX / "ok-m1", tmp_path / "p")
+    import shutil
+    drift = root / "features" / SLUG / "drift"
+    shutil.rmtree(drift, ignore_errors=True)
+    drift.write_text("not a folder", encoding="utf-8")
+    code, _, err = run_cli([str(root), "--feature", SLUG, "--moment", "M1", "--freeze",
+                            "--at", "2026-10-06T18:00:00Z"], capsys)
+    assert code == 2 and "Traceback" not in err and err.strip()
+
+
+def test_oserror_on_html_exits_2_without_traceback(tmp_path, capsys):
+    root = copy_tree(_FIX / "ok-m1", tmp_path / "p")
+    blocker = tmp_path / "blocker"
+    blocker.write_text("x", encoding="utf-8")
+    code, _, err = run_cli([str(root), "--feature", SLUG, "--moment", "M1", "--html", "--out", str(blocker)], capsys)
+    assert code == 2 and "Traceback" not in err and err.strip()
+
+
+def test_m1_is_created_exclusively_even_if_it_appears_after_the_check(tmp_path, monkeypatch):
+    root = copy_tree(_FIX / "ok-m1", tmp_path / "p")
+    report = dr.generate(root, SLUG, moment="M1", status_fn=stub_status)
+    path = dr.snapshot_path(root, SLUG, "M1", "2026-10-06T18:00:00Z")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    real_exists = Path.exists
+    monkeypatch.setattr(Path, "exists", lambda self: False if self == path else real_exists(self))
+    path.write_text("rival\n", encoding="utf-8")
+    with pytest.raises(FileExistsError):
+        dr.freeze(report, root, SLUG, "M1", "2026-10-06T18:00:00Z")
+    assert path.read_text(encoding="utf-8") == "rival\n"
+    assert not list(path.parent.glob(".snap-*"))
+
+
+def test_m2_same_day_does_not_overwrite_silently(tmp_path):
+    root = copy_tree(_FIX / "ok-m1", tmp_path / "p")
+    report = dr.generate(root, SLUG, moment="M2", status_fn=stub_status)
+    a = dr.freeze(report, root, SLUG, "M2", "2026-10-06T18:00:00Z")
+    b = dr.freeze(report, root, SLUG, "M2", "2026-10-06T19:30:00Z")
+    assert a != b and a.is_file() and b.is_file()
+    assert ":" not in a.name
+    with pytest.raises(FileExistsError):
+        dr.freeze(report, root, SLUG, "M2", "2026-10-06T18:00:00Z")
+
+
+@pytest.mark.parametrize("at", ["../../x", "2026-10-06", "ontem", "2026-10-06T18:00:00Z/../a", ""])
+def test_cli_rejects_bad_at(capsys, at):
+    code, _, err = run_cli([str(_FIX / "ok-m1"), "--feature", SLUG, "--moment", "M1", "--at", at], capsys)
+    assert code == 2 and "--at" in err
+
+
+@pytest.mark.parametrize("slug", ["../x", "A_b", "a/b", "a-", "a--b"])
+def test_cli_rejects_bad_feature_slug(capsys, slug):
+    code, _, err = run_cli([str(_FIX / "ok-m1"), "--feature", slug, "--json"], capsys)
+    assert code == 2 and "--feature" in err
+
+
+def test_dead_code_is_gone():
+    text = Path(dr.__file__).read_text(encoding="utf-8")
+    assert "HtmlUnavailable" not in text
+    assert not re.search(r":\n\s+pass\b", text)
+
+
+def test_voice_rule_documents_that_quotes_are_not_word_limited():
+    text = (Path(dr.__file__).resolve().parents[2] / "references" / "general" / "drift-report.md").read_text(
+        encoding="utf-8")
+    assert "check_voice" in text and "verbatim" in text
