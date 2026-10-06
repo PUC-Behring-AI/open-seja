@@ -257,7 +257,7 @@ Em `implement-test-first.md`, acrescentar a seção "Quem alimenta e quem consom
 - **Interface**: N/A
 - **Verify**: a tabela de costura cobre itens 8, 9, 10 e o plano 000008, cada linha citando uma regra `TFB-NNN`; suíte, `ruff`, `pyright` verdes; `run_all_checks.py` retorna o mesmo conjunto de falhas pré-existentes do Step 1; `git diff --stat` dos arquivos de ponteiro mostra no máximo uma linha adicionada cada; nenhum arquivo de gate, hook ou `settings` no diff total; zero termos de C1; o progress lista as 7 decisões pendentes com o default em uso.
 - **Tests**: N/A (verificação final; a suíte dos Steps 3 a 6 é o teste)
-- [ ] Done
+- [x] Done
 
 ## Costura com o 000008 (colunas derivadas e fontes)
 

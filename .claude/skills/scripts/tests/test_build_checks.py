@@ -208,6 +208,7 @@ def test_green_not_passed(case: str) -> None:
     result = bc.green_check(_report(case), [K3])
     assert result["ok"] is False
     assert {f["rule"] for f in result["findings"]} == {"ITF-009"}
+    assert result["final"][K3]["test_result"] in ("skipped", "failed", "xfail", "absent")  # DRM-006 names
 
 
 # ---------------------------------------------------------------------------

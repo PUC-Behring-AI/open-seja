@@ -62,6 +62,7 @@ PIPELINE_MAX_TRIES = 3
 PIPELINE_MAX_INVOCATIONS = 10
 PRIORITY = ("error", "failed", "xpassed", "skipped", "xfailed", "passed")  # worst first
 CATEGORY = {0: "PASS", 1: "CONFIG", 2: "STATIC", 3: "TESTS", 4: "CRAP", 5: "ARCH", 6: "MUTATION", 7: "MARKERS"}
+DRM_RESULT = {"xfailed": "xfail", "xpassed": "xfail", "missing": "absent"}  # runner names -> DRM-006 test_result
 REFUSAL_V1 = "`--pipeline` é do plano v2; este plano roda como antes."
 ROLES = ("tester", "coder", "cleaner", "hardener")
 PLUGIN_SOURCE = (Path(__file__).resolve().parents[2] / "references" / "template" / "bdd" / "python"
@@ -528,7 +529,7 @@ def green_check(report: dict, owned) -> dict:
         outcome = (scenarios.get(key) or {}).get("outcome", "missing")
         if (scenarios.get(key) or {}).get("undefined"):
             outcome = "undefined"
-        final[key] = {"test_result": outcome}
+        final[key] = {"test_result": DRM_RESULT.get(outcome, outcome)}  # DRM-006 vocabulary
         if outcome != "passed":
             findings.append(_f("ITF-009", "error", f"O cenário {key} não está verde: o resultado foi {outcome}.",
                                "Só passed conta como verde; skip, xfail e erro não contam.", scenario=key))

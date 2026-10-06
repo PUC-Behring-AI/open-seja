@@ -185,3 +185,39 @@ Achados do ensaio (corrigidos neste step):
 - deviated: Achei e corrigi: scope contra o comeco do step (virou base por fase), skeleton com arquivo ausente, baseline do humano dentro da fase, estado do demo; a feature tinha 4 cenarios, nao 5; pipeline so no step 2.
 - less-sure: n = 1 e papeis roteirizados: os numeros de tentativas e findings nao dizem nada sobre um subagente real; o pyright foi esbocado.
 - gate: not-installed
+
+### Step 9 -- fechamento: costura, consistencia, C1 e pendencias (2026-10-06)
+
+- `implement-test-first.md` ganhou "Quem alimenta e quem consome" (planos 000007-000012, item 8 = 000014, item 9 = 000015, item 10 = 000016, cada linha com regra ITF); a tabela "Costura com o 000008" ja estava desde o Step 2.
+- Vocabulario conferido contra 000007-000012: degraus D1/D2/D3a/D3b, estados coberto/descoberto/nao medido, chave `<slug>/<arquivo>.feature::<nome>` (igual ao `index` do lock, provado no ensaio), `stale` e `rev` (lidos de `check_specify.py --status`, nunca recalculados), `PASS_WITH_BASELINE` (DRM-004), `red_reason_ok`, `baseline_moved`, `touched_uncovered` (DRM-006). Uma divergencia corrigida: `final.test_result` passou a usar os nomes do DRM-006 (`xfail`, `absent`) em vez dos do pytest (`xfailed`, `missing`).
+- Checks finais: `test_build_checks.py` 71, `test_scenario_report.py` 20, `test_build_brief.py` 10, `test_step_notes.py` 26 passed; pytest do harness 12 failed (os pre-existentes) / 1437 passed; `uvx ruff check` limpo nos arquivos novos (os 2 achados antigos de `step_notes.py` ficam); `pyright` **nao provado** (ambiente); `run_all_checks.py` 14 FAIL, contadores 17/2/9, igual ao baseline; `skill-body-length` do `/implement` 254/500. `/critique validate` como skill nao rodou dentro deste executor; o nucleo deterministico dele (`run_all_checks.py`) rodou a cada step.
+- Diff total sem arquivo de portao, hook, `settings` nem `product-design/`. C1: nenhum nome de parceiro, instituicao ou pessoa nos arquivos novos (varredura do diff; sem lista de termos registrada). Ponteiros: `extended-cycle-contract.md` +9 linhas (uma linha de "Implementacao" no CYC-025 e a regra nova CYC-030 -- desvio do "no maximo uma linha", pedido pela instrucao de numerar regras CYC novas); `conftest.py.example` +6 linhas de docstring.
+
+Decisoes pendentes (todas no default, `[default; aceito 2026-10-06]`): 1 = A (`--pipeline` opt-in; vermelho sempre no v2), 2 = A (`gate.json.build` + exportacao), 3 = A (3 por fase, 10 por step), 4 = A (`full` no fim quando `GATE_FULL_CMD` existe), 5 = B (alvo 8, piso 6), 6 = A (ja verde = escalada), 7 = B (`--pipeline` em v1 recusado).
+
+Textos sugeridos ao designer (aplicar com `/implement --manual` ou `/design`, nao aplicados aqui):
+1. **Contrato do 000007** -- ja feito como CYC-030 (o registro do build mora em `gate.json.build` e e exportado). Nada a acrescentar.
+2. **`drift-metric.md` (arquivo do 000008; reservado ao plan-000014 nesta rodada)**, no DRM-006, coluna `baseline_moved`: "Fonte: `build_checks.py baseline` (hash de `quality-baseline.json` na base do step ou do plano contra o arquivo atual), gravado em `gate.json.build.steps[N].baseline_moved`, `gate.json.build.feature.baseline_moved` e `gate.json.baseline_moved` (implement-test-first.md, ITF-017)." Coluna `red_reason_ok`: "Fonte: `build_checks.py red-check` (R1 a R8), gravado em `gate.json.build.scenarios[<chave>].red.reason_ok` e exportado para `drift/red-reason.json` (ITF-005, ITF-023)."
+3. **Aviso do D3a**: "Plano v2 sem `GATE_FULL_CMD` grava `full: null`; o D3a fica `nao medido` (`NM-SEM-GATE`) mesmo com todos os testes verdes (ITF-019)." -- cabe no DRM-004 ou na lacuna 4 do `drift-metric.md`.
+4. **`feature-layout.md` § `gate.json`** (emenda aditiva): "Chaves aditivas: `baseline_moved` (bool) e `build` (registro do teste-primeiro, esquema em implement-test-first.md, ITF-015). Leitores ignoram chave desconhecida."
+5. **`.claude/rules/harness-structure.md` § Subagent Prompts**: "19 subagent prompts" e uma linha "**Test-first role agents** (3): scenario-tester, cleaner, hardener -- one job each, fed by `build_brief.py`; the Coder stays the dynamic executor."
+6. **`gherkin-spec-format.md` secao 10**: uma linha "Com o teste-primeiro, o plugin `scenario_report` (ITF-016) substitui o `conftest` modelo."
+
+Propostas ao designer (proximo D livre: **D-014**; D-013 pode ser usada pelo plan-000014):
+- **D-014 (proposta)**: "Base por fase no teste-primeiro: como o vermelho nao e commitado (o hook de commit o recusaria), o escopo de cada papel e medido contra um instantaneo da arvore no inicio da sua fase (`git write-tree`), e o humano so move baseline ou limiar entre fases." Contexto: achado 1 e 3 do ensaio. Alternativa rejeitada: commitar o vermelho com `--no-verify` (negado, S2).
+- **Proposta de follow-up no gate (plano do portao, fora deste)**: o lint de teste do gate (`def test_*` sem assert) recusa a forma idiomatica `@scenario` do pytest-bdd; aceitar funcao decorada com `scenario` ou documentar o padrao `test_x = scenario(...)(_vincular)` no README do gate.
+
+Lacunas para os proximos planos:
+- **plan-000014**: (a) `runner/adapter.json` e `gate.json.adapter` nao sao escritos (ausente = adaptador existe; certo para Python/pytest-bdd); (b) o relatorio le so `runner/cucumber.json`; o relatorio do plugin (`scenario_report`) tem tambem `undefined`, local da funcao do step e `collect_errors` -- se o 000014 quiser o JUnit/plugin para o `@skip` e o step indefinido que o Cucumber JSON omite, o `export` pode copiar o relatorio do plugin para `runner/`; (c) no ensaio, full FAIL + baseline aceito deixaram o D3a todo `descoberto` (4/4) mesmo com 3 cenarios demonstrados -- e o DRM-004 aplicado como esta; o 000014/designer decide se `full` FAIL por mutante de outro step deve contar contra todos os cenarios; (d) os textos 2 e 3 acima.
+- **plan-000015**: quickguide pt-BR do `--pipeline`, da escalada (4 opcoes) e da demonstracao por cenario; `/seja-setup` oferecer `install-plugin`; o `pytest_plugins` em `tests/conftest.py` falha se o projeto tiver `conftest.py` de topo com outra raiz (Step 4); textos 4, 5 e 6 acima; o modo `review` do `scenario-tester` ainda nao e chamado pelo `/plan` (SPC-009): falta uma linha no `_internal/plan/standard/SKILL.md` (nao editada aqui para nao abrir a ordem de edicao dos SKILL.md).
+- **plan-000016 (piloto)**: os numeros do Step 8 sao de papeis roteirizados (n = 1): medir com subagentes reais invocacoes, tentativas, findings do Cleaner e do Hardener por step e tempo por fase para fechar a Decisao 1; medir se o teto de 24 000 caracteres corta algo; medir o custo da mutacao cumulativa (`--files` restringe a mutacao a todas as funcoes dos arquivos tocados, nao so as do step: lacuna 10 do plano).
+
+Achados (resumo do plano):
+- O motor esta inteiro e foi ensaiado de ponta a ponta com ferramentas reais; quatro defeitos so apareceram no ensaio (base por fase, esqueleto ausente, baseline do humano, estado do demo) e foram corrigidos com teste.
+- O vermelho pelo motivo certo e decidido por forma (R1-R8); a adequacao semantica continua com a auditoria humana do 000008 (lacuna 12 do plano).
+
+### Step 9 -- reflection-on-action | 2026-10-06 19:17 UTC | Fechar: costura com os vizinhos, consistencia, C1 e pendencias
+- happened: Acrescentei quem alimenta e quem consome, alinhei test_result aos nomes do DRM-006, rodei os checks finais (iguais ao baseline) e registrei decisoes, textos sugeridos, a proposta D-014 e as lacunas para 000014-000016.
+- deviated: O contrato recebeu uma regra nova (CYC-030) em vez de uma linha so; o modo review do scenario-tester ficou sem chamada no /plan.
+- less-sure: Se o designer quer o D3a inteiro descoberto quando o full falha por mutante de um step que nao teve --pipeline.
+- gate: not-installed

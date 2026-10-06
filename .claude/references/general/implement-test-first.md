@@ -185,7 +185,7 @@ Mensagem de escalada em primeira pessoa, frases curtas, com a regra e a dica da 
 }
 ```
 
-`category` é o nome da categoria do exit do portão (`PASS`, `CONFIG`, `STATIC`, `TESTS`, `CRAP`, `ARCH`, `MUTATION`, `MARKERS`); com baseline movido e exit 0 a categoria é `PASS_WITH_BASELINE`. `record` escreve atômico (temporário + rename), preserva chaves desconhecidas e é idempotente; o tempo vem de `--at`.
+`category` é o nome da categoria do exit do portão (`PASS`, `CONFIG`, `STATIC`, `TESTS`, `CRAP`, `ARCH`, `MUTATION`, `MARKERS`); com baseline movido e exit 0 a categoria é `PASS_WITH_BASELINE`. `final.test_result` usa os nomes do DRM-006 (`xfailed`/`xpassed` do runner viram `xfail`; cenário fora do relatório vira `absent`). `record` escreve atômico (temporário + rename), preserva chaves desconhecidas e é idempotente; o tempo vem de `--at`.
 
 - **Quem decide**: `build_checks.py record`.
 - **Critério de aceitação**: `record` sobre um `gate.json` com chave desconhecida a mantém; repetir o mesmo payload dá bytes iguais.
@@ -304,6 +304,20 @@ Teto de invocações: no máximo 10 subagentes por step (ITF-013). A escalada (I
 | linhas **e** ramos | idem | `kind: line\|branch` | ITF-018 |
 
 Estado "descoberto por baseline": `status = PASS_WITH_BASELINE` (leitura do 000008: "PASS só com baseline aceito").
+
+## Quem alimenta e quem consome
+
+| Item | Plano | Entrega para esta norma / recebe desta norma | Regra |
+|---|---|---|---|
+| contrato do ciclo | plan-000007 | CYC-017, CYC-020 a CYC-025; recebe CYC-030 (o motor e onde grava) | ITF-001, ITF-015 |
+| medida | plan-000008 | DRM-003, DRM-004, DRM-005, DRM-006, DRM-011; recebe `red_reason_ok`, `baseline_moved`, `touched_uncovered`, `test_result` e `full` | ITF-005, ITF-015, ITF-017, ITF-018, ITF-019 |
+| grill | plan-000009 | `intent.md`, REQ IDs; nada direto | -- |
+| formato Gherkin | plan-000010 | chave de cenário, `conftest` modelo, mapeamento Cucumber JSON (CYC-027); recebe o plugin `scenario_report` | ITF-016 |
+| specify | plan-000011 | `check_specify.py --status`, `stale`, `scenarios.lock.json`; recebe o `scenario-tester` em modo `review` (informativo) | ITF-002, ITF-025 |
+| plano a partir de cenários | plan-000012 | `Scenarios:` (dono único), `check_plan_scenarios.py`, parada do `/implement`; recebe `route` | ITF-001, ITF-003 |
+| item 8, relatório de divergência | plan-000014 | lê `gate.json`, `runner/cucumber.json`, `drift/red-reason.json`, `drift/coverage.json`, congela o M1 | ITF-019, ITF-023 |
+| item 9, ligação do ciclo | plan-000015 | quickguide pt-BR do `--pipeline`, da escalada e da demonstração; oferta do plugin pelo `/seja-setup` | ITF-014, ITF-016, ITF-024 |
+| item 10, piloto | plan-000016 | mede invocações, tentativas, findings por step do Cleaner e do Hardener e o tempo por fase (Decisão pendente 1) | ITF-010, ITF-011, ITF-013 |
 
 ## Ferramentas: subcomando e regra
 
