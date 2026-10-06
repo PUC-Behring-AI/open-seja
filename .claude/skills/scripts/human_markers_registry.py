@@ -45,17 +45,12 @@ from pathlib import Path
 # ux-research-results.md and product-design-as-intended.md are both registered
 # via the dual-path pattern (template + project). A future _paths_for(file_stem)
 # helper could return both forms automatically; deferred.
-#
-# seja-as-intended.md is a single-path entry: it is this fork's own design-intent
-# document (the theoretical grounding the product intent derives from; see Q-006
-# in the file itself) and has no template counterpart under .claude/references/.
 HUMAN_MARKERS_FILES: list[str] = [
     ".claude/skills/scripts/tests/fixtures/marker_fixture.md",
     ".claude/references/template/ux-research-results.md",
     "product-design/ux-research-results.md",
     ".claude/references/template/product-design-as-intended.md",
     "product-design/product-design-as-intended.md",
-    "product-design/seja-as-intended.md",
 ]
 
 

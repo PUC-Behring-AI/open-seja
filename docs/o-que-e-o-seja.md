@@ -1,6 +1,6 @@
 # O que é o SEJA
 
-> Apresentação do estado atual de `product-design/seja-as-intended.md` § 1.
+> Apresentação do estado atual da fundamentação (parte 1) em `product-design/product-design-as-intended.md` § 3.
 > Este documento **não decide nada**: ele expõe o que já está codificado como
 > intenção, e mantém visível a diferença entre o que é princípio, o que é
 > hipótese e o que ainda é pergunta.
@@ -485,6 +485,6 @@ Dez questões seguem abertas. Duas travam trabalho real.
 
 ---
 
-> Fonte: `product-design/seja-as-intended.md` § 1. Este documento é derivado e deve ser
+> Fonte: `product-design/product-design-as-intended.md` § 3, Fundamentação, parte 1. Este documento é derivado e deve ser
 > regerado quando a fonte mudar. As notas de origem estão preservadas verbatim no
 > `Apêndice A` da fonte; a leitura elemento a elemento dos desenhos, no `Apêndice B`.

@@ -21,7 +21,7 @@ Revisit if `/mob` ever comes to orchestrate a single skill only.
 
 ## Orchestrate, do not duplicate
 
-`/mob` calls `/plan`, `/implement` and `/reflect` as they are, and never rewrites their instructions. Each one runs its own pre-skill/post-skill cycle and commits its own artifact. The only channel from `/mob` into a chained skill is the conversation context (`parent_skill: mob (session mob-session-<id>)`, and the stop reason for a partial `/implement`), the same channel `--roadmap` and `skip_qa_log` already use. This is the "orchestrator that calls skills" pattern that H-004 of `product-design/seja-as-intended.md` hypothesizes (textual citation: that file lives on the `seja-intention-docs` branch): what assists the group is the composition, and the orchestrator decides it.
+`/mob` calls `/plan`, `/implement` and `/reflect` as they are, and never rewrites their instructions. Each one runs its own pre-skill/post-skill cycle and commits its own artifact. The only channel from `/mob` into a chained skill is the conversation context (`parent_skill: mob (session mob-session-<id>)`, and the stop reason for a partial `/implement`), the same channel `--roadmap` and `skip_qa_log` already use. This is the "orchestrator that calls skills" pattern that H-004 of `product-design/product-design-as-intended.md` §3 hypothesizes (textual citation: `product-design/` is not distributed on `main`): what assists the group is the composition, and the orchestrator decides it.
 
 ## Why `/plan --plan`, not `--light`
 
@@ -65,7 +65,7 @@ The skill records only the facilitator's confirmation and its date, never the co
 
 ## Relation to Schon's three reflection registers
 
-Section 1.2.4 of `product-design/seja-as-intended.md` (textual citation; `seja-intention-docs` branch) maps Schon's (1983) registers onto the harness: reflection-in-action (the short rationale on every AskUserQuestion option), reflection-on-action (the note at the end of `/implement`, `/plan`, `/design`, `/document`) and reflection-on-practice (`/reflect`, recording the designer's words verbatim). `/mob` extends the third register from one designer to a group: the REFLECT phase anchors `/reflect` on the session's plan and records each participant's words verbatim, labelled per participant. It also adds a timebox to reflection-on-action -- REFLECT happens right after BUILD, within the same slot, while the experience is still fresh -- and the planned-vs-actual agenda gives the group a concrete fact to reflect on.
+Section 1.2.4 of `product-design/product-design-as-intended.md` §3 (textual citation; `product-design/` is not distributed on `main`) maps Schon's (1983) registers onto the harness: reflection-in-action (the short rationale on every AskUserQuestion option), reflection-on-action (the note at the end of `/implement`, `/plan`, `/design`, `/document`) and reflection-on-practice (`/reflect`, recording the designer's words verbatim). `/mob` extends the third register from one designer to a group: the REFLECT phase anchors `/reflect` on the session's plan and records each participant's words verbatim, labelled per participant. It also adds a timebox to reflection-on-action -- REFLECT happens right after BUILD, within the same slot, while the experience is still fresh -- and the planned-vs-actual agenda gives the group a concrete fact to reflect on.
 
 ## References
 

@@ -235,13 +235,13 @@ def test_open_seja_distribution_clone_is_fresh_download():
 
 
 def test_open_seja_clone_with_design_record_is_partial_init():
-    """Why main carries no product-design/: seja-as-intended.md alone flips a clone to partial-init."""
+    """Why main carries no product-design/: a lone design record flips a clone to partial-init."""
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
         init_git_with_remote(tmp, url=OPEN_SEJA_SSH, branch="main")
         make_claude_skills(tmp)
         (tmp / "product-design").mkdir()
-        (tmp / "product-design" / "seja-as-intended.md").write_text("# record\n", encoding="utf-8")
+        (tmp / "product-design" / "design-record.md").write_text("# record\n", encoding="utf-8")
         result = detect_state(tmp)
         assert result["state"] == State.PARTIAL_INIT
 
