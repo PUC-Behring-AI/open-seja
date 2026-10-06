@@ -73,3 +73,23 @@ Desvios de nome decididos aqui:
 - deviated: Marquei os tres arquivos com xfail de modulo (com motivo) para nao quebrar a suite do harness entre os Steps 3 e 6; os v1 do golden sao lidos de fixtures/plan_format por hash, nao copiados.
 - less-sure: Se 14 falhas por TypeError contam como vermelho pelo motivo certo no sentido do plano; elas vem de esboco que devolve None, nao de import.
 - gate: not-installed
+
+### Step 4 -- plugin de relatorio do runner (2026-10-06)
+
+- `.claude/references/template/bdd/python/scenario_report.py.example` (sufixo `.example`, ver Step 1): funcoes puras (`scenario_key` copiada de `check_features.py` com teste de igualdade, `key_for`, `req_tags`, `item_outcome`, `aggregate`, `short_reason`, `add_row`, `build_report`, `selected`) e hooks (`pytest_addoption`, `pytest_configure` com o marker `scenario`, `pytest_bdd_apply_tag` para `REQ-*`/`nao-faz`, `pytest_collection_modifyitems` com a chave via `scenario_wrapper_template_registry` do pytest-bdd, propriedades JUnit `scenario_key` e `req`, selecao `--scenario-key`/`--scenario-exclude-key`, `pytest_bdd_step_error` e `pytest_bdd_step_func_lookup_error` para tipo efetivo, texto e local da funcao do step, `pytest_runtest_makereport` (hookwrapper), `pytest_collectreport` para erro de coleta, `pytest_sessionfinish` grava o JSON). pytest-bdd 9.0.0 nao expoe `__scenario__` no item: a chave vem do registro `scenario_wrapper_template_registry.get(item.obj)`, o mesmo que o pytest-bdd usa em `generation.py`.
+- `build_checks.py install-plugin <projeto>`: copia para `tests/scenario_report.py`, grava o hash em `tests/.scenario_report.sha256`, acrescenta `pytest_plugins = ["scenario_report"]` ao `tests/conftest.py` (cria se falta), idempotente; copia editada a mao -> exit 1 sem sobrescrever. Os demais subcomandos seguem esboco ate o Step 5.
+- `conftest.py.example` do exemplo do 000010: **nao** passou a importar o plugin (desvio). Motivo: o exemplo roda sozinho com as instrucoes da secao 10 de `gherkin-spec-format.md` e `test_feature_example.py` exige a pasta sem `*.py`; importar o plugin quebraria a receita documentada. A docstring agora aponta o plugin como a forma completa; o hook e o mesmo nos dois (o pytest-bdd usa o primeiro resultado).
+- Prova no runner (scratchpad, `uvx --with pytest-bdd`, pytest-bdd 9.0.0 / pytest 9.1.1), exemplo copiado + um teste comum:
+  - `--scenario-report --cucumberjson --junitxml`: 1 failed, 4 passed, 1 skipped. Relatorio: Outline `passed` com 2 linhas; "Acrescentar uma tarefa" `passed`; `@skip` `skipped`; "Marcar uma tarefa como feita" `failed`, `AssertionError`, `failing_step_type: then`, `step_func {file: test_task_list.py, line: 66, name: shows_done}`; teste comum em `tests`. JUnit com `scenario_key` e `req` em todo teste de cenario.
+  - `--scenario-key <Marcar...>`: 1 failed, 5 deselected; so essa chave no relatorio, `tests` vazio.
+  - Given quebrado: `failed`/`AssertionError`/`given` (o red-check o barra por R3); step `Entao` sem definicao: `error`, `StepDefinitionNotFoundError`, `undefined: true`, tipo `then`; Outline com uma linha vermelha: `failed` com linhas `[passed, failed]`; arquivo com erro de sintaxe: `collect_errors` no relatorio (nao some).
+  - Chaves do relatorio == chaves de `check_features.py --matrix` (as 4).
+  - `install-plugin` num projeto com `tests/`: `--strict-markers -W error::pytest.PytestUnknownMarkWarning` roda limpo (1 failed, 3 passed, 1 skipped).
+- Lacuna: `pytest_plugins` em `tests/conftest.py` funciona quando `tests/` esta sob a raiz do pytest; em projeto com `conftest.py` na raiz e `rootdir` diferente, o pytest pode recusar `pytest_plugins` fora do conftest de topo. O `install-plugin` nao trata isso (fica para o piloto).
+- Verify: `test_scenario_report.py` 20 passed (xfail retirado); `uvx ruff` limpo (plugin conferido numa copia `.py`); `pyright` nao provado (ambiente); `run_all_checks.py` igual ao baseline; pytest do harness 12 failed (pre-existentes).
+
+### Step 4 -- reflection-on-action | 2026-10-06 18:51 UTC | Implementar o plugin de relatorio do runner (scenario_report)
+- happened: Escrevi o plugin e o install-plugin; no pytest-bdd real o relatorio deu a chave igual a do check_features, failed por AssertionError no Entao, given quebrado, step indefinido, Outline agregado, erro de coleta e selecao por chave.
+- deviated: A chave vem do registro interno do pytest-bdd (nao ha __scenario__); o conftest do exemplo nao passou a importar o plugin para nao quebrar a receita documentada.
+- less-sure: O registro scenario_wrapper_template_registry e interno do pytest-bdd e pode mudar de nome; pytest_plugins em conftest fora do topo pode ser recusado em alguns layouts.
+- gate: not-installed

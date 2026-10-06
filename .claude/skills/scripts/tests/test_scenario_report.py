@@ -19,10 +19,6 @@ from pathlib import Path
 import pytest
 from check_features import scenario_key as features_key
 
-# Contract written before the code (plan-000013 step 3); removed when the module goes green (steps 4-6).
-pytestmark = pytest.mark.xfail(reason="plan-000013 step 3: contrato antes do codigo", strict=False)
-
-
 _PLUGIN = (Path(__file__).resolve().parents[3] / "references" / "template" / "bdd" / "python"
            / "scenario_report.py.example")
 

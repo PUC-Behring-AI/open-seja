@@ -7,6 +7,12 @@ The tags are not turned into pytest markers; they stay in the Cucumber JSON repo
 scenario -> REQ (gherkin-spec-format.md, section 8). Everything else (`@skip`,
 `@xfail`) is left to pytest-bdd.
 
+In a project built with the test-first branch of /implement, the runner report plugin
+(`.claude/references/template/bdd/python/scenario_report.py.example`, installed by
+`build_checks.py install-plugin <project>` as `tests/scenario_report.py` and loaded with
+`pytest_plugins = ["scenario_report"]`) implements this same hook and also writes the scenario
+report (implement-test-first.md, ITF-016); this model stays as the minimal, plugin-free form.
+
 Not run by the harness tests: the file has the suffix `.example` on purpose.
 """
 
