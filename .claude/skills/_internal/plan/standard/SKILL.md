@@ -32,18 +32,18 @@ This mode is the reference prose -- other modes delta off of its shape. Steps 1,
    - With code: propose the slug and let the user confirm (GRL-002); give the C1 notice before recording the brief verbatim (GRL-005); index the brief as `F1..Fn`. Interview in rounds of at most 4 questions, one idea each (GRL-003, GRL-004). Write `features/<slug>/intent.md` with `status: grilling` after every round (model: `.claude/references/template/intent.md`). Never fill in an answer the user did not give: record it as an assumption.
    - After each round run `python3 .claude/skills/scripts/check_intent.py features/<slug>/intent.md --json` and continue while it reports any `error`. After 5 rounds, hand the decision back (GRL-007).
    - With no `error`: show the summary in controlled voice (short sentences, fixed terms; no technical numbers) and ask Approve / Adjust / Discard (AskUserQuestion, C4; GRL-008). Only Approve writes `status: approved`, `approved_at` (UTC) and `approved_by: usuario`; then `check_intent.py <intent.md> --require-approved --strict` must exit 0 before step 3. Add `Feature: <slug>` under the plan header.
-   - Without code (DOCUMENT, CHORE, RESEARCH, or a plan only of config/harness): the grill is a single question confirming the intent. Do not create `features/<slug>/intent.md` and no `features/` folder. Write a `## Intenção` section (4 lines, GRL-012) and the line `Specify: skipped -- <reason>` (CYC-004) in the plan; the user approves it with the plan, and the plan stays v1.
+   - Without code (DOCUMENT, CHORE, RESEARCH, or a plan only of config/harness): the grill is a single question confirming the intent. Do not create `features/<slug>/intent.md` and no `features/` folder. Write a `## Intenção` section (4 lines, GRL-012) and the line `Specify: skipped -- <reason>` (CYC-004) in the plan (the only place this line is written, PFS-013); the user approves it with the plan. The plan is v2 and every step has `Tests: N/A`.
    - Metacomm framing: questions and summary use I/you.
    - `--grill`: run only this step and stop; write only `features/<slug>/intent.md`, never a plan (GRL-014). Re-entry follows GRL-011.
    - Existing v1 plans, and projects that do not use `features/`, are read and executed as before (D-008); the grill never rewrites them.
 
-2c. **Specify phase** (CYC-003; runs only when step 2b wrote `features/<slug>/intent.md`; tasks without code keep `Specify: skipped -- <reason>`, and v1 plans and projects without `features/` are unchanged, D-008). Read `.claude/references/general/specify-phase.md` and follow its `SPC-NNN` rules. In short:
+2c. **Specify phase** (CYC-003; runs only when step 2b wrote `features/<slug>/intent.md`; tasks without code skip it (step 2b writes the skip line), and v1 plans and projects without `features/` are unchanged, D-008). Read `.claude/references/general/specify-phase.md` and follow its `SPC-NNN` rules. In short:
    - Gate (SPC-001): `check_intent.py features/<slug>/intent.md --require-approved --strict` exits 0; otherwise refuse in one sentence and offer `/plan --grill <slug>`. If `check_specify.py --feature <slug> --status` says `stale`, rewrite only the scenarios and items of the REQs it lists, keeping the other scenario names (SPC-012, SPC-013).
    - Write `features/<slug>/<slug>.feature` (language of the user's words, declared in `# language:`; scenarios grouped by active REQ, each tagged `@REQ-<slug>-NNN`; a `restrição` REQ has a number) and the `## Retradução` section of `intent.md` (`rev: 1`; first person; one item per active REQ with its "Para que" and an `Exemplo:`; then "O que eu não vou fazer"), in controlled voice.
    - Run `python3 .claude/skills/scripts/check_specify.py --feature <slug>` and fix every finding yourself, at most 3 times, before showing anything to anyone (SPC-008).
    - The message (SPC-009): show the user the Retradução, never the `.feature`, tags or counts; ask Approve / Adjust / Back to the interview / Discard (AskUserQuestion, C4; texts in specify-phase.md). Adjust edits the Retradução and the `.feature` together, bumps `rev` and adds `Retradução rev N: <what changed>` to "Mudanças"; after 3 rounds hand the decision back (SPC-011). A change in *what* is wanted goes back to the grill.
    - The contract (SPC-009): show whoever reads code the `.feature` and the raw checker output; ask Approve the contract / Ask for a change / Nobody here reads code.
-   - Only then run `check_specify.py --feature <slug> --approve --at <now UTC> --by usuario --contract-by <name or ninguem>`; say "approved" only on exit 0 (SPC-010). Add `Specify: approved (rev N)` under the plan header. Linking steps to scenarios is plan-000012.
+   - Only then run `check_specify.py --feature <slug> --approve --at <now UTC> --by usuario --contract-by <name or ninguem>`; say "approved" only on exit 0 (SPC-010). Add `Specify: approved (rev N)` under the plan header (N = `rev` of `scenarios.lock.json`). Step 3 links the steps to the scenarios.
    - `--specify`: run only this step and stop (SPC-016); without `features/<slug>/`, refuse: "A entrevista vem antes: rode /plan --grill." Without `check_features.py`, leave the drafts unapproved and say why (SPC-014).
 
 3. Create a structured, self-contained plan with these sections (header per C3; `<depth>` set in step 5):
@@ -60,7 +60,7 @@ This mode is the reference prose -- other modes delta off of its shape. Steps 1,
      - **User-visible impact**: what changes from the user's perspective (one paragraph).
      - **Trade-offs accepted**: what was gained, what was given up.
      - **Metacommunication impact** (when the plan modifies user-facing communication -- error messages, help, UI copy, CLI output, docs): what the system will now communicate differently. Use I/you phrasing per `shared-definitions.md`. Include regardless of `--framing metacomm`.
-   - *steps*: structured step list -- step format and decomposition guidelines: see `.claude/references/template/plan-step.md`.
+   - *steps*: structured step list -- step format and decomposition guidelines: see `.claude/references/template/plan-step.md`. With approved scenarios, build the steps from `index` of `features/<slug>/scenarios.lock.json` (`.claude/references/general/plan-from-scenarios.md`): every approved scenario is owned by exactly one step (`Scenarios:`), infrastructure steps say `N/A (<reason>)`, and the header is v2 (C3).
    - *review log*: if applicable.
    - *outcomes*: expected outcomes.
    - *smoke*: `true` if any step creates or modifies API route files or frontend page/component files; `false` otherwise. Consumed by `/implement` to decide whether to run `/critique smoke api`.
@@ -69,6 +69,8 @@ This mode is the reference prose -- other modes delta off of its shape. Steps 1,
 4. Save the plan. If not overwriting, proceed without asking for authorization.
 
 4b. **Coverage check (advisory)**: if `product-design/product-design-as-intended.md` contains REQ markers (`<!-- REQ-*-NNN -->`), run `python .claude/skills/design/critique_plan_coverage.py --mode advisory` and include the coverage summary in the plan after the steps. Skip silently if no REQ markers exist.
+
+4c. **Scenario check** (plan v2 only; v1 plans skip it): run `python3 .claude/skills/scripts/check_plan_scenarios.py <plan file>` before the review. Exit 1: fix the plan yourself and run it again, at most 3 times, never inventing a scenario. If it persists, say the finding in controlled voice and ask (AskUserQuestion, C4): back to the specify (`/plan --specify`) or adjust the plan. Exit 2: say it in one sentence and do not call the plan ready. Optionally append `--table` output as `## Cobertura de cenários`.
 
 5. **Review the plan** using a complexity-gated, two-phase process. Use `general/review-log-template.md` for the review log format.
 
@@ -81,6 +83,7 @@ This mode is the reference prose -- other modes delta off of its shape. Steps 1,
    - Dependencies flow forward (no circular, no backwards references).
    - No step touches >5 files (split if so).
    - Each step description is self-contained.
+   - Plan v2: every step has `Scenarios:` consistent with `Tests:` (step 4c exited 0).
 
    Fix any issues before proceeding.
 

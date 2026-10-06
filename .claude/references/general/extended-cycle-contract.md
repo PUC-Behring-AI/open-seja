@@ -62,7 +62,7 @@ A decisão é por plano, não por step. A specify roda quando algum step do plan
 A terceira fase do PLAN escreve o plano a partir de `intent.md` e dos `.feature` aprovados. O cabeçalho referencia a pasta por `Feature: <slug>`. Todo step com `Tests:` não-N/A declara os cenários que cobre (campo `Scenarios:`; definição do campo e da versão do formato na seção "Compatibilidade").
 
 - **Quem decide**: `/plan` escreve; designer aprova o plano (fluxo existente do `/plan`).
-- **Critério de aceitação**: o plano tem `Feature: <slug>` e todo step com `Tests:` não-N/A tem `Scenarios:` apontando para tags `@REQ-` que existem nos `.feature`. Plano de pesquisa ou documentação não cria pasta nem `Feature:`.
+- **Critério de aceitação**: o plano tem `Feature: <slug>` e todo step com `Tests:` não-N/A tem `Scenarios:` apontando para chaves de cenário que existem em `index` do `scenarios.lock.json` (emenda 000012, CYC-028). Plano de pesquisa ou documentação não cria pasta nem `Feature:`.
 
 ### CYC-006 -- Invocação avulsa `--grill` e `--specify` `[default; aceito 2026-10-06]` (decisão pendente 1 = B)
 
@@ -225,7 +225,7 @@ Ele também não muda o portão, os hooks ou os denies (S2).
 
 Esta seção fixa a versão do formato de plano (CYC-018) e o campo `Scenarios:`. Definição do campo: `.claude/references/template/plan-step.md`.
 
-**Campo `Scenarios:`.** Linha de metadados do step, obrigatória em v2 em todo step com `Tests:` não-N/A e ausente em v1: lista de tags `@REQ-<slug>-NNN` ou nomes de cenário, tirados dos `.feature` da pasta `Feature: <slug>` do plano, que o step cobre. `N/A (motivo)` é permitido só para step sem comportamento observável (documentação, configuração, harness, refactor com cobertura prévia), inclusive quando o step tem `Tests:` não-N/A; o motivo é obrigatório e satisfaz a obrigatoriedade.
+**Campo `Scenarios:`.** Linha de metadados do step, obrigatória em v2 em todo step com `Tests:` não-N/A e ausente em v1: lista de chaves de cenário `<slug>/<arquivo>.feature::<nome>` (emenda 000012, CYC-028; antes: tags `@REQ-` ou nomes), tiradas de `index` do `scenarios.lock.json` da `Feature: <slug>` do plano, que o step entrega. `N/A (motivo)` é permitido só para step sem comportamento observável (documentação, configuração, harness, refactor com cobertura prévia), inclusive quando o step tem `Tests:` não-N/A; o motivo é obrigatório e satisfaz a obrigatoriedade.
 
 **Regra de versão.**
 
@@ -237,9 +237,9 @@ Esta seção fixa a versão do formato de plano (CYC-018) e o campo `Scenarios:`
 
 **O que o `/implement` faz com `Scenarios:` ausente em v2.** Para a execução e informa qual step está sem `Scenarios:`. Não corrige o plano nem inventa cenário: a correção é do `/plan` e do designer. Em v1 não faz nada diferente do que fazia.
 
-**Fato do estado atual (2026-10-06).** O Auto Mode do `/implement` (Phase 0, passo 3, version check) cai para o modo manual quando `plan_format_version` é diferente de `1`. Portanto um plano v2 hoje não roda em Auto Mode. Adaptar isso é do plan-000012 e do plan-000013; este contrato não altera `implement/SKILL.md`.
+**Estado do `/implement` (atualizado pelo plan-000012).** O Auto Mode (Phase 0, passo 3, version check) aceita `plan_format_version: 2`: roda `check_plan_scenarios.py` e **para**, sem corrigir o plano, se o exit for diferente de 0; com exit 0 executa os steps como escritos. O ramo teste-primeiro por cenário (CYC-020 a CYC-024) é do plan-000013.
 
-**Estado da recusa.** Nenhum script lê `plan_format_version` hoje; a recusa executável do v2 inválido é do plan-000012. As fixtures em `.claude/skills/scripts/tests/fixtures/plan_format/` (dois planos v1 reais, um v2 válido, um v2 inválido) documentam os casos.
+**Estado da recusa.** A recusa executável do v2 inválido é `.claude/skills/scripts/check_plan_scenarios.py` (plan-000012; regras `PFS-001..015` em `.claude/references/general/plan-from-scenarios.md`). As fixtures em `.claude/skills/scripts/tests/fixtures/plan_format/` (dois planos v1 reais, um v2 válido, um v2 inválido) documentam os casos.
 
 ## IMPLEMENT
 
@@ -247,10 +247,10 @@ Esta seção fixa a versão do formato de plano (CYC-018) e o campo `Scenarios:`
 
 ### CYC-020 -- Quais steps seguem o teste-primeiro
 
-Seguem o teste-primeiro os steps com `Scenarios:` preenchido por tags `@REQ-` (plano v2, CYC-018). Step sem cenário (infra, configuração, harness, `Tests: N/A`, plano com `Specify: skipped`, plano v1) segue o caminho atual do `/implement`, sem mudança (TDD red-green por `Tests:` quando não-N/A, ou ordem legada).
+Seguem o teste-primeiro os steps com `Scenarios:` preenchido por chaves de cenário (plano v2, CYC-018, CYC-028). Step sem cenário (infra, configuração, harness, `Tests: N/A`, plano com `Specify: skipped`, plano v1) segue o caminho atual do `/implement`, sem mudança (TDD red-green por `Tests:` quando não-N/A, ou ordem legada).
 
 - **Quem decide**: o plano (campo `Scenarios:`); o designer na aprovação do plano.
-- **Critério de aceitação**: um plano v1 e um step com `Scenarios: N/A (motivo)` produzem o mesmo fluxo de `/implement` da v0.10.1; só step com tags `@REQ-` entra em CYC-021 a CYC-023.
+- **Critério de aceitação**: um plano v1 e um step com `Scenarios: N/A (motivo)` produzem o mesmo fluxo de `/implement` da v0.10.1; só step com chaves de cenário entra em CYC-021 a CYC-023.
 
 ### CYC-021 -- O cenário vira teste executável
 
@@ -304,3 +304,19 @@ O relatório do runner é o Cucumber JSON (CYC-012). Ele liga o `Scenario` ao te
 - **Quem decide**: designer; o adaptador do runner (plan-000013) e a junção (plan-000014) aplicam.
 - **Critério de aceitação**: dado o mesmo Cucumber JSON, dois consumidores obtêm os mesmos estados por chave; nenhum cenário `skip`, `xfail` ou sem teste é contado como verde; nenhum `error` ou `undefined` é contado como vermelho pelo motivo certo (CYC-022).
 - **Ruptura que pode provocar** (CYC-014): ao power dev, "meu cenário aparece como `undefined` e eu achava que estava vermelho". Registro do power dev; nada novo ao citizen.
+
+### CYC-028 -- Plano v2 liga cada step aos cenários aprovados (emenda 000012)
+
+O plano v2 traz `Feature: <slug>` e `Specify: approved (rev N)` (ou `Specify: skipped -- <motivo>`, sem `Feature:`). O campo `Scenarios:` de cada step lista as **chaves de cenário** (`<slug>/<arquivo>.feature::<nome>`, as de `index` do `scenarios.lock.json`, CYC-027), ou `N/A (<motivo>)`; a tag `@REQ-` não vale no lugar da chave. O step que lista o cenário é o dono do teste (um dono por cenário). A cobertura vale nos dois sentidos: step que muda comportamento sem cenário e cenário aprovado sem step são recusados; cenários `stale` ou `rev` velho recusam o plano. A recusa é de `check_plan_scenarios.py` (`.claude/references/general/plan-from-scenarios.md`, PFS-001..015); plano v1 nunca é recusado (CYC-018).
+
+- **Quem decide**: designer; o `/plan` escreve e corrige, o verificador recusa.
+- **Critério de aceitação**: `check_plan_scenarios.py` sai 0 sobre todo plano v2 salvo como pronto e sai 1 com PFS-006, PFS-009 ou PFS-011 nos casos dessas regras; um plano v1 sai 0 sem leitura do corpo.
+- **Ruptura que pode provocar** (CYC-014): ao power dev, "meu plano foi recusado porque um cenário não tem step". Registro do power dev; ao citizen só chega o achado em voz controlada se o agente não conseguir corrigir em 3 tentativas.
+
+### CYC-029 -- Proxy do skip: a grill classifica antes, o verificador confere depois (emenda 000012)
+
+A classificação "com código / sem código" da grill (GRL-012) decide **antes** se a specify roda (CYC-004). `check_plan_scenarios.py` (PFS-013) confere **depois**: plano `Specify: skipped` com step de `Tests:` não-N/A e sem `Scenarios: N/A (<motivo>)` é recusado, sem promover a tarefa à specify sozinho; o agente volta à grill ou à specify, ou o designer justifica o `Tests: N/A`.
+
+- **Quem decide**: designer; o verificador recusa.
+- **Critério de aceitação**: plano pulado com step de teste e sem N/A justificado sai 1 com PFS-013; todos os steps `Tests: N/A` saem 0.
+- **Ruptura que pode provocar** (CYC-014): ao power dev, "disse que não tinha código e o plano tem teste". Registro do power dev.

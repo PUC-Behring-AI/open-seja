@@ -96,7 +96,7 @@ Dispatch: `--pending` -> pending; else `--roadmap` -> roadmap; else `--manual` -
 
 1. Run /pre-skill "implement" $ARGUMENTS[0] to add general instructions to the context window.
 
-2. Read the planned item from the plan file.
+2. Read the planned item from the plan file. A `plan_format_version: 2` plan is checked first as in Auto Mode Phase 0 step 3 (`check_plan_scenarios.py`; exit != 0 stops, without fixing the plan).
 
 3. **Load references on demand** based on what the step touches:
 
@@ -133,7 +133,7 @@ Dispatch: `--pending` -> pending; else `--roadmap` -> roadmap; else `--manual` -
 
 2. Read the planned item from the plan file.
 
-3. Parse the Steps section. Each step has structured metadata (title, description, Files, References, Verify, checkbox; optional: Depends on, Docs, Traces). **Version check**: read the plan header for `plan_format_version`; if absent or != `1`, warn and fall back to manual mode (plans without version metadata predate the structured step format). A future v2 must extend this skill or provide a migration path.
+3. Parse the Steps section. Each step has structured metadata (title, description, Files, References, Verify, checkbox; optional: Depends on, Docs, Traces). **Version check**: read the plan header for `plan_format_version`. `1`: proceed as before. `2`: run `python3 .claude/skills/scripts/check_plan_scenarios.py <plan file>`; exit != 0 stops the run -- report the findings, do not fix the plan and do not invent scenarios (the fix is the `/plan`'s; `general/plan-from-scenarios.md`, PFS-011, PFS-012); exit 0 proceeds with the steps as written (the per-scenario test-first branch is plan-000013). Absent or any other value: warn and fall back to manual mode (plans without version metadata predate the structured step format).
 
 4. Create the progress file if missing, with header (verbatim):
    ```markdown

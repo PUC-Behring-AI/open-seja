@@ -102,3 +102,17 @@ Teste novo: `test_orchestrator_style_run_is_skipped_ok_or_failed` (roda o script
 - deviated: Sem estado 'pulado' no orquestrador: aparece como PASS com 'nada a verificar'.
 - less-sure: Se o health check dos projetos que adotarem v2 fica ruidoso com plano velho.
 - gate: not-installed
+
+## Step 6 -- formato e recusa nos SKILL.md e em plan-step.md (2026-10-06, executor)
+
+Arquivos alterados (nenhum de portao, hook ou settings): `.claude/references/template/plan-step.md` (campo `Scenarios:` na forma final: chaves, dono do teste, `N/A (motivo)`; secao "Format version" com o cabecalho v2); `.claude/skills/plan/SKILL.md` (C3: `plan_format_version: 2` + `Feature:`/`Specify:` no modo standard depois da grill; `--light` e roadmap seguem v1 e o `plan_format_version: 1` continua na linha 9 e no C3); `.claude/skills/_internal/plan/standard/SKILL.md` (passo 2b: a linha `Specify: skipped` fica so aqui e o plano e v2; 2c remete ao 2b; passo 3 monta os steps de `index`; **novo passo 4c** roda `check_plan_scenarios.py` entre salvar (4/4b) e a revisao (5), corrige ate 3 vezes e pergunta com AskUserQuestion se persistir; validacao de metadados com a linha "Plan v2"); `.claude/skills/implement/SKILL.md` (decisao 4 = A: version check do Auto Mode aceita `2`, roda `check_plan_scenarios.py` e **para sem corrigir** se exit != 0; v1 como antes; versao ausente/outra continua caindo para manual; o Manual Mode ganhou uma frase com a mesma parada; o ramo teste-primeiro e do 000013 e nao foi implementado); `.claude/references/general/extended-cycle-contract.md` (emenda: CYC-028 plano v2 liga steps a cenarios, CYC-029 proxy do skip; a Compatibilidade, CYC-005 e CYC-020 trocam "tags `@REQ-`" por "chaves de cenario"; os dois paragrafos "Fato do estado atual" e "Estado da recusa" atualizados); `.claude/references/general/specify-phase.md` (um ponteiro no "O que este arquivo nao faz").
+
+Verify: `grep -c "Specify: skipped" standard/SKILL.md` = 1 (linha do 2b); `grep -n "check_plan_scenarios" standard/SKILL.md` acha o 4c entre o passo 4b e o 5; `run_all_checks.py` 19 PASS / 14 FAIL, mesmo conjunto dos 14, contadores 17/2/9; `check_skill_system.py` 9 error(s) como no baseline; pytest 1073 passed / 12 failed (os 12 pre-existentes).
+Desvios: o contrato recebeu mais que "so ponteiro" (CYC-028/029 e tres trocas de vocabulario `@REQ-` -> chave) para nao deixar duas regras contraditorias; cada edicao de SKILL.md e uma ou duas frases, detalhe em `plan-from-scenarios.md`.
+Lacuna nova: o fluxo `--roadmap` Modo 1/2 executa o `standard/SKILL.md` por item inline (nota do cabecalho do proprio SKILL): um plano de item de roadmap passa a sair v2 como qualquer plano standard; o documento do roadmap em si segue v1 (C3). Nao ha fixture nem teste disso.
+
+### Step 6 -- reflection-on-action | 2026-10-06 18:24 UTC | Formato e recusa nos SKILL.md
+- happened: Editei plan-step.md, o C3 do plan, o standard (passo 4c e 2b/2c), o implement (aceita v2 e para se o verificador reprova) e o contrato (CYC-028, CYC-029).
+- deviated: O contrato levou mais que um ponteiro, para nao deixar regras contraditorias sobre @REQ- e chave.
+- less-sure: Se o roadmap inline gera plano v2 sem ter rodado a specify.
+- gate: not-installed

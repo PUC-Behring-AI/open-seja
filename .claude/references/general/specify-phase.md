@@ -396,7 +396,7 @@ Termos fixos (somam-se ao glossário de GRL-010): **cenário** (não "caso de te
 
 ## O que este arquivo não faz
 
-Não define o formato do plano v2 (plan-000012), o runner nem o teste-primeiro (plan-000013), a fórmula de divergência (plan-000014). Não muda `feature-layout.md`, `gherkin-spec-format.md` nem o contrato do ciclo além de uma linha de ponteiro em cada; as emendas aditivas (o lock e os campos `scenarios_*` no esquema; `stale` = `não medido` na métrica) são texto sugerido ao designer no progress do plan-000011.
+Não define o formato do plano v2 (plan-000012; ver `plan-from-scenarios.md`, PFS-001..015), o runner nem o teste-primeiro (plan-000013), a fórmula de divergência (plan-000014). Não muda `feature-layout.md`, `gherkin-spec-format.md` nem o contrato do ciclo além de uma linha de ponteiro em cada; as emendas aditivas (o lock e os campos `scenarios_*` no esquema; `stale` = `não medido` na métrica) são texto sugerido ao designer no progress do plan-000011.
 
 ---
 
