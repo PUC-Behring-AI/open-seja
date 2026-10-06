@@ -93,3 +93,19 @@ Desvios de nome decididos aqui:
 - deviated: A chave vem do registro interno do pytest-bdd (nao ha __scenario__); o conftest do exemplo nao passou a importar o plugin para nao quebrar a receita documentada.
 - less-sure: O registro scenario_wrapper_template_registry e interno do pytest-bdd e pode mudar de nome; pytest_plugins em conftest fora do topo pode ser recusado em alguns layouts.
 - gate: not-installed
+
+### Step 5 -- verificadores deterministicos `build_checks.py` (2026-10-06)
+
+- `build_checks.py` completo (stdlib; `check_plan_scenarios` importado para ler o plano): `route`, `install-plugin`, `skeleton`, `red-check` (relatorio do plugin **ou** Cucumber JSON + JUnit, CYC-027), `green-check`, `freeze`, `scope`, `crap`, `uncovered`, `baseline`, `record` (escrita atomica, chaves desconhecidas mantidas, idempotente), `status`, `export`, `demo`. Exit 0/1/2; erro de leitura -> 2 sem traceback; `--json` com `schema_version: 1`; tempo so de `--at`.
+- `test_build_checks.py`: 70 passed (xfail retirado).
+- Tabela `red-check` sobre as fixtures (dono = "Marcar uma tarefa como feita", baseline `suite-base`): red-ok -> ok; red-import-error, red-collection-error, red-undefined, red-already-green (+ `escalate`), red-skipped, red-xfail, red-missing -> R1; red-wrong-exception -> R2; red-given-failure, red-when-failure -> R3; red-constant-assert, red-raise-assert -> R4; red-conditional-raise -> ok (raise dentro de `if` nao e constante); red-suite-broken, red-suite-broken-test -> R6; red-outline-partial (donos Outline + Marcar) -> ok, `rows_green_in_red = 1`; red-outline-error -> R8. Skeleton invalido -> R5; cobertura sem corpo -> R7.
+- `uncovered` sobre a fixture: 8 linhas + 2 ramos tocados = 10; 3 linhas + 1 ramo descobertos = 4 (conferido a mao: linhas 13, 24, 25 e o ramo 12->13; README.md fora por nao ser executavel).
+- Precedencia no `scope`: `.feature` alterado pelo Coder e ITF-008 mesmo quando esta na lista de congelados (o achado diz o papel, nao o hash). `features/<slug>/gate.json`, `runner/**` e `drift/**` sao do `/implement` (classe `record`), nao contam para nenhum papel.
+- Costura com o plan-000014 (mensagem do coordenador, `drift-report.md` DRP-001 e `drift_report.py` lidos): os formatos que `export` grava batem com o que o calculador le -- `drift/red-reason.json` `{schema_version, scenarios{chave: bool}}`, `drift/coverage.json` `{schema_version, base, touched_total, touched_uncovered}` (o calculador ignora `touched_total` sem `base`: o `export` sempre grava `base`), `gate.json` `full.category`/`full.exit_code` e `baseline_moved` no topo, `runner/cucumber.json`. Fica fora: `runner/adapter.json` e o campo `adapter` (ausente = adaptador existe, que e o caso do Python com pytest-bdd); o congelamento do M1 (`drift_report.py --feature <slug> --moment M1 --freeze --at <UTC>`) entra no fim do plano pelo `/implement` (Step 7), nao no `build_checks.py`.
+- Verify: `uvx ruff` limpo; pyright nao provado (ambiente); `run_all_checks.py` igual ao baseline; pytest do harness 12 failed (pre-existentes) / 1424 passed. Uma rodada intermediaria deu 31 failed por arquivos em edicao do plan-000014 no mesmo worktree; a repeticao logo depois deu as 12 de sempre.
+
+### Step 5 -- reflection-on-action | 2026-10-06 18:58 UTC | Implementar os verificadores deterministicos (build_checks.py)
+- happened: Implementei os 14 subcomandos com funcoes puras e CLI; os 70 testes do Step 3 passaram e cada fixture red-* deu a regra esperada.
+- deviated: Cinco subcomandos alem do plano (route, green-check, crap, export, demo); red-check tambem le Cucumber JSON + JUnit; os formatos do export foram alinhados ao drift_report.py do plan-000014.
+- less-sure: A regra do Hardener (linha acrescentada so com pragma e codigo igual ao removido) pode recusar uma reformatacao legitima; R7 depende de o relatorio de cobertura usar caminhos relativos ou terminar no caminho do step.
+- gate: not-installed

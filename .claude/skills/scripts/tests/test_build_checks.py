@@ -16,10 +16,6 @@ from pathlib import Path
 import build_checks as bc
 import pytest
 
-# Contract written before the code (plan-000013 step 3); removed when the module goes green (steps 4-6).
-pytestmark = pytest.mark.xfail(reason="plan-000013 step 3: contrato antes do codigo", strict=False)
-
-
 _FX = Path(__file__).resolve().parent / "fixtures" / "build"
 _PROJECT = _FX / "project"
 _PF = Path(__file__).resolve().parent / "fixtures" / "plan_format"
