@@ -165,7 +165,7 @@ Criar `pilot-run-record.md` (template): feature, braço (A/B), ordem sorteada, r
 - **Verify**: o template tem todos os campos acima; cada timestamp do protocolo tem a fonte ou "campo manual" ao lado; um registro de exemplo preenchido com dados fictícios existe e seu tempo atendido recalcula pela regra de 10 min (conta feita à mão no progress).
 - **Tests**: N/A (template documental)
 - **Docs**: o próprio template.
-- [ ] Done
+- [x] Done
 
 ### Step 6: Costura com os itens vizinhos e lacunas com o 000007
 Em `drift-metric.md`, acrescentar a tabela "quem alimenta e quem consome": item 3/5 (escreve `intent.md` e REQ IDs), 4/5 (`.feature` e validador de tags), 6 (campo `Scenarios:`), 7 (relatório do runner, `gate.json`, registro "vermelho pelo motivo certo"), 8 (calcula o relatório), 9 (quickguide), 10 (executa o protocolo). Listar as **lacunas** achadas contra o 000007 (as da seção "Lacunas" deste plano) com o item dono de cada uma. Se `extended-cycle-contract.md` existir (Step 1), acrescentar nele **só uma linha de ponteiro** (`Medida: ver drift-metric.md`); se não existir, registrar a linha no progress para o orquestrador. Não editar o esquema do `feature-layout.md` (Decisão pendente 4, default B).

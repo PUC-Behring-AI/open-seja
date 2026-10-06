@@ -93,3 +93,14 @@ Nada escrito fora do ledger. `git status` limpo no inicio.
 - deviated: A secao de tempo ja saiu com as fontes de timestamp, que o Step 5 previa acrescentar.
 - less-sure: A condicao de refutacao por dois ou mais degraus comparaveis e minha leitura do texto do 000007.
 - gate: not-installed
+
+### Step 5 -- pilot-run-record.md e tempo (2026-10-06, executor)
+- Criado `.claude/references/template/pilot-run-record.md` (campos com fonte, modelo, exemplo fictício). A secao 6 do protocolo ja aponta a fonte de cada timestamp (`conversation-trace.jsonl`/`briefs.md` para `t0`; `gate.json` `ts` para `t_verde`; campo manual para `t_aprovada`).
+- Conta do exemplo, a mao: eventos 10:00, 10:04, 10:09, 10:30, 10:34, 10:41, 11:20 -> intervalos 4, 5, 21, 4, 7, 39 min; entram so os < 10 min: 4+5+4+7 = 20 min atendido; parede 80 min. Registro do exemplo traz 20 e 80.
+- Achado: `conversation-trace.jsonl` existe no open-seja, mas `session_id` e quase sempre "null": delimitar a execucao pelo registro, nao por sessao.
+
+### Step 5 -- reflection-on-action | 2026-10-06 17:08 UTC | Template de registro de execucao
+- happened: Criei pilot-run-record.md com campos, fonte de cada timestamp, modelo e exemplo fictício com tempo atendido de 20 min recontado a mao.
+- deviated: A ligacao timestamp-fonte ja estava no protocolo (Step 4); nao editei o protocolo de novo.
+- less-sure: Onde o piloto guarda o registro (features/<slug>/pilot/) e sugestao, nao decisao.
+- gate: not-installed
