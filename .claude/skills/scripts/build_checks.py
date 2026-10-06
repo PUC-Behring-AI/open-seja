@@ -55,6 +55,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import check_plan_scenarios as cps
 
+# the citizen register's technical-token list
+from check_specify import QUOTED, TECH_TOKENS
+
 SCHEMA_VERSION = 1
 CRAP_TARGET_TOUCHED = 8.0
 CRAP_TARGET_FLOOR = 6.0
@@ -906,7 +909,21 @@ _STATE_SENTENCE = {
 }
 
 
+_TECH_EXTRA = re.compile(r"\b(?:linhas?|line)\s+\d|\.py\b|:\d+\b")
+
+
+def split_questions(questions) -> tuple[list[str], list[str]]:
+    """(citizen, technical): a question with a technical token must not reach the citizen register."""
+    ok: list[str] = []
+    technical: list[str] = []
+    for q in questions or []:
+        bad = TECH_TOKENS.search(QUOTED.sub("", q)) or _TECH_EXTRA.search(q)
+        (technical if bad else ok).append(q)
+    return ok, technical
+
+
 def demo_text(gate: dict, steps: dict, questions) -> str:
+    questions, _technical = split_questions(questions)
     scenarios = (gate.get("build") or {}).get("scenarios") or {}
     keys = sorted(set(scenarios) | set(steps))
     lines = ["# O que eu construí e mostrei", "",
@@ -976,8 +993,48 @@ def install_plugin(project: Path, source: Path = PLUGIN_SOURCE) -> tuple[int, st
 # ---------------------------------------------------------------------------
 
 
+SUBPROCESS_TIMEOUT = 60  # seconds; a hung git or tool becomes exit 2, not a stuck run
+
+
+def _run(cmd, **kw):
+    """subprocess.run with a timeout; TimeoutExpired becomes BuildError (exit 2, no traceback)."""
+    kw.setdefault("timeout", SUBPROCESS_TIMEOUT)
+    kw.setdefault("check", False)
+    try:
+        return subprocess.run(cmd, check=kw.pop("check"), **kw)
+    except subprocess.TimeoutExpired as err:
+        raise BuildError(f"{cmd[0]} passou de {kw['timeout']} s e foi interrompido") from err
+
+
+def snapshot_tree(root: Path) -> str:
+    """Tree id of the working tree (tracked + untracked, not ignored) without touching the real index.
+
+    Copies the index to a temp file, runs `git add -A` and `git write-tree` with GIT_INDEX_FILE on it.
+    """
+    import shutil
+
+    root = Path(root)
+    index = Path(_git(root, "rev-parse", "--path-format=absolute", "--git-path", "index").strip())
+    fd, tmp_name = tempfile.mkstemp(prefix="seja-index-")
+    os.close(fd)
+    tmp = Path(tmp_name)
+    try:
+        if index.exists():
+            shutil.copyfile(index, tmp)
+        else:
+            tmp.unlink()
+        env = {**os.environ, "GIT_INDEX_FILE": str(tmp)}
+        for args in (["add", "-A"], ["write-tree"]):
+            res = _run(["git", "-C", str(root), *args], capture_output=True, text=True, check=False, env=env)
+            if res.returncode != 0:
+                raise BuildError(f"git {' '.join(args)} falhou: {res.stderr.strip()[:200]}")
+        return res.stdout.strip()
+    finally:
+        tmp.unlink(missing_ok=True)
+
+
 def _git(root: Path, *args: str) -> str:
-    res = subprocess.run(["git", "-C", str(root), *args], capture_output=True, text=True, check=False)
+    res = _run(["git", "-C", str(root), *args], capture_output=True, text=True, check=False)
     if res.returncode != 0:
         raise BuildError(f"git {' '.join(args)} falhou: {res.stderr.strip()[:200]}")
     return res.stdout
@@ -1005,11 +1062,11 @@ def _changes(root: Path, base: str) -> list[tuple[str, str]]:
 
 def _same_as_base(root: Path, base: str, path: str) -> bool:
     """An untracked file that the base (a commit or a `git write-tree` snapshot) already has, unchanged."""
-    res = subprocess.run(["git", "-C", str(root), "rev-parse", "--verify", "-q", f"{base}:{path}"],
+    res = _run(["git", "-C", str(root), "rev-parse", "--verify", "-q", f"{base}:{path}"],
                          capture_output=True, text=True, check=False)
     if res.returncode != 0:
         return False
-    now = subprocess.run(["git", "-C", str(root), "hash-object", "--", path], capture_output=True, text=True,
+    now = _run(["git", "-C", str(root), "hash-object", "--", path], capture_output=True, text=True,
                          check=False)
     return now.returncode == 0 and now.stdout.strip() == res.stdout.strip()
 
@@ -1155,9 +1212,9 @@ def _cmd_uncovered(a) -> int:
 
 def _cmd_baseline(a) -> int:
     try:
-        shown = subprocess.run(["git", "-C", str(a.root), "show", f"{a.base}:{a.file}"], capture_output=True,
+        shown = _run(["git", "-C", str(a.root), "show", f"{a.base}:{a.file}"], capture_output=True,
                                check=False)
-        known = subprocess.run(["git", "-C", str(a.root), "rev-parse", "--verify", a.base], capture_output=True,
+        known = _run(["git", "-C", str(a.root), "rev-parse", "--verify", a.base], capture_output=True,
                                check=False).returncode == 0
     except OSError:
         known, shown = False, None
@@ -1198,11 +1255,24 @@ def _cmd_export(a) -> int:
 def _cmd_demo(a) -> int:
     questions = read_json(a.questions) if a.questions else []
     text = demo_text(_load_gate(a.root, a.feature), feature_steps(a.root, a.feature), questions)
+    _ok, technical = split_questions(questions)
+    if technical:
+        note = ("# Perguntas do Hardener fora do registro do citizen\n\n"
+                "Pergunta com termo técnico, fora do registro do citizen:\n\n"
+                + "".join(f"- {q}\n" for q in technical))
+        print(note, file=sys.stderr)
+        if a.out:
+            _write_atomic(Path(a.out).with_suffix(".power-dev.md"), note)
     if a.out:
         _write_atomic(Path(a.out), text)
         print(a.out)
     else:
         sys.stdout.write(text)
+    return 0
+
+
+def _cmd_snapshot(a) -> int:
+    print(snapshot_tree(a.root))
     return 0
 
 
@@ -1226,6 +1296,8 @@ def _parser() -> argparse.ArgumentParser:
     p = add("route", _cmd_route, "classify the steps of a plan (ITF-001, ITF-003)")
     p.add_argument("plan", type=Path)
     p.add_argument("--pipeline", action="store_true")
+    p = add("snapshot", _cmd_snapshot, "tree id of the working tree, index untouched (phase base)", json_flag=False)
+    p.add_argument("--root", type=Path, default=Path("."))
     p = add("install-plugin", _cmd_install, "copy the runner report plugin (ITF-016)", json_flag=False)
     p.add_argument("project", type=Path)
     p = add("skeleton", _cmd_skeleton, "neutral skeleton (ITF-004)")

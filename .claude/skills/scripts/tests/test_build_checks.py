@@ -531,3 +531,51 @@ def test_implement_skill_branches_on_the_version_first() -> None:
     assert version_check < text.index("Test-first steps (plan v2)")
     assert "os cenários estão desatualizados: refaça a specify" in text
     assert "never offer to move the baseline" in text
+
+
+# ---------------------------------------------------------------------------
+# plan-000013 review fixes: snapshot, timeout, citizen filter
+# ---------------------------------------------------------------------------
+
+
+def test_snapshot_does_not_touch_the_users_index(tmp_path: Path) -> None:
+    def git(*args: str) -> str:
+        return subprocess.run(["git", *args], cwd=tmp_path, check=True, capture_output=True, text=True).stdout
+
+    git("init", "-q")
+    (tmp_path / "base.txt").write_text("b\n", encoding="utf-8")
+    git("add", "base.txt")
+    git("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "base")
+    (tmp_path / "staged.txt").write_text("s\n", encoding="utf-8")
+    git("add", "staged.txt")
+    (tmp_path / "loose.txt").write_text("l\n", encoding="utf-8")
+    before = git("diff", "--cached", "--name-only")
+    tree = bc.snapshot_tree(tmp_path)
+    names = git("ls-tree", "-r", "--name-only", tree).split()
+    assert {"base.txt", "staged.txt", "loose.txt"} <= set(names)
+    assert git("diff", "--cached", "--name-only") == before == "staged.txt\n"
+    assert bc.main(["snapshot", "--root", str(tmp_path)]) == 0
+    assert git("diff", "--cached", "--name-only") == before
+
+
+def test_subprocess_timeout_is_a_build_error(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys) -> None:
+    def hang(cmd, **kw):
+        assert kw.get("timeout")
+        raise subprocess.TimeoutExpired(cmd, kw["timeout"])
+
+    monkeypatch.setattr(bc.subprocess, "run", hang)
+    with pytest.raises(bc.BuildError):
+        bc.snapshot_tree(tmp_path)
+    assert bc.main(["snapshot", "--root", str(tmp_path)]) == 2
+    assert "build_checks:" in capsys.readouterr().err
+
+
+def test_demo_filters_technical_questions_out_of_the_citizen_text() -> None:
+    good = "Se a tarefa marcada continuasse pendente, nenhum cenário perceberia. Isso importa para você?"
+    bad = ["Se o teste passasse com PASS, ninguém veria. Isso importa?", "Cobertura caiu para 80%?",
+           "O @REQ-x-001 sumiria?", "O arquivo a.feature mudaria?", "Na linha 12 nada falharia?"]
+    text = bc.demo_text(_built_gate(), {}, [good, *bad])
+    assert good in text
+    assert not any(q in text for q in bad)
+    ok, technical = bc.split_questions([good, *bad])
+    assert ok == [good] and technical == bad

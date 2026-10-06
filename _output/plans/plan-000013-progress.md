@@ -221,3 +221,10 @@ Achados (resumo do plano):
 - deviated: O contrato recebeu uma regra nova (CYC-030) em vez de uma linha so; o modo review do scenario-tester ficou sem chamada no /plan.
 - less-sure: Se o designer quer o D3a inteiro descoberto quando o full falha por mutante de um step que nao teve --pipeline.
 - gate: not-installed
+
+### Correções da revisão (orquestrador)
+
+- Snapshot por fase: novo `build_checks.py snapshot` (`snapshot_tree`) copia o índice para um arquivo temporário e roda `git add -A` e `git write-tree` com `GIT_INDEX_FILE`; o índice real e o staging do usuário não mudam. A norma ITF (`implement-test-first.md`) passou a citar `BC snapshot` no lugar de `git add -A && git write-tree` + `git reset -q`. SKILL.md e agentes não citavam o comando. Teste: repo temporário com arquivo em staging e outro solto; a árvore tem os dois e `git diff --cached --name-only` fica igual.
+- Timeouts: todo `subprocess.run` passa por `_run` (60 s); `TimeoutExpired` vira `BuildError` (exit 2, sem traceback). Teste com `subprocess.run` simulado que não termina.
+- Filtro do citizen: `demo_text` descarta pergunta do Hardener com token técnico (`TECH_TOKENS` importado de `check_specify.py`, mais número de linha e `.py`). `demo` imprime essas perguntas em stderr, com a ressalva "Pergunta com termo técnico, fora do registro do citizen", e com `--out` grava `<out>.power-dev.md`. Testes positivo e negativo.
+- Verificação: 130 testes verdes nos quatro arquivos; ruff limpo; `run_all_checks.py`: 14 FAIL de sempre (17 undefined, 2 error(s), 9 error(s)).
