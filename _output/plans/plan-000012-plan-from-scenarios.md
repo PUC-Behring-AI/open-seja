@@ -1,3 +1,4 @@
+# DONE | 2026-10-06 18:29 UTC |
 # Plan 000012 | FEATURE-O | 2026-10-05 13:05 UTC | plan-from-scenarios: formato final do plano v2 (cada step cita os cenários que cobre) e recusa executável nos dois sentidos | Review: standard
 
 > **Origem**: movido do ledger do Doutourado em 2026-10-05 (proposal-000088; la era `plan-000081`). Os IDs roadmap-000006 e plan-000007..000016 sao deste ledger (tabela no roadmap). Referencias a research-NNNNNN, reflection-NNNNNN, communication-NNNNNN, roadmap-000062 e plan-000064..000074 apontam para o ledger do Doutourado (repositorio do pesquisador). Caminhos `open-seja/...` em Files passam a ser relativos a raiz deste repositorio.
@@ -307,3 +308,23 @@ Metacomm contradiction check: nenhuma intenção existente em `product-design-as
 - Texto do `/plan` (C3, escrita a partir dos cenários, verificação antes da revisão), `plan-step.md` e, se aprovado, parada mínima no `/implement`.
 - Fixtures v1 e v2 válidas e inválidas, check condicional no `run_all_checks.py` e três execuções de referência.
 - Planos v1 e projetos sem `features/` inalterados.
+
+## Implementation summary (2026-10-06)
+
+- Steps: 8/8 SUCCESS, executados por um subagente Sonnet (um commit por step); orquestrador revisou e fechou.
+- Arquivos: `.claude/references/general/plan-from-scenarios.md` (PFS-001..015), `.claude/skills/scripts/check_plan_scenarios.py` + `test_check_plan_scenarios.py` (161 testes) + fixtures `tests/fixtures/plan_scenarios/`, CYC-028/029 e trocas de `@REQ-` por chave de cenario no contrato, `plan-step.md`, ramo `2` no version check do `/implement` (Auto e Manual), passos 2b/2c/3/4c do `/plan` standard, C3 do `/plan`.
+- Retrocompatibilidade (D-008): planos v1 e sem versao saem `unverified` (exit 0) sem leitura do corpo; o `/implement` so ganhou o ramo `2`; os planos reais do ledger passam.
+- Desvio: o Step 4 escreveu teste e script na mesma rodada (fixtures antes), sem prova de vermelho. Execucoes de referencia SIMULADAS.
+- Baseline novo: run_all_checks 19 PASS / 14 FAIL (contadores 17/2/9); pytest 1120 passed / 12 failed.
+- C2: o executor gravou a lista de termos de C1 no progress; removida no commit e4ed006 (segue no historico git de `dev`; `_output/` nao vai para `main`, C3).
+- Proposta ao designer: D-012 (o plano v2 liga cada step aos cenarios aprovados e e recusado por ferramenta nos dois sentidos) -- lote do plan-000015 Step 10.
+- Quality gate: `/critique review` (code-reviewer standard): 0 critical, 5 advisory; todos corrigidos no commit 9c285ff (contrato alinhado ao PFS-003, plano `skipped` tambem v2, chave do CYC-027, versao desconhecida para no `/implement`, varredura fail-closed documentada), junto com o advisory 2 pendente do plan-000011 (flags `--grill`/`--specify` implementadas).
+
+### Generator-Critic Iterations
+- Iteration count: 1/2
+- Findings per iteration: [0 critical, 5 advisory]
+- Resolution status: all resolved
+
+## Reflection
+
+- 2026-10-06: O contrato e o verificador divergiram sobre quando Scenarios: e obrigatorio, porque o executor seguiu a tabela do plano e o contrato; a revisao alinhou o texto ao script. O executor tambem vazou a lista de termos de C1 no progress. (notes 8, with deviation 8, with gate 0)

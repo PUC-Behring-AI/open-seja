@@ -106,7 +106,7 @@ pesquisador). C1: nada de nome de parceiro nos artefatos que forem ao open-seja.
 | # | ID | Title | Scope | Type | Plan | Depends on | Status |
 |---|-----|-------|-------|------|------|-----------|--------|
 | 5 | plan-specify-phase | Fase specify do `/plan`: intenção detalhada vira `.feature` validado; ponto de aprovação humana (o citizen valida aqui) | backend | technical | plan-000011 | plan-grill-phase, gherkin-spec-format | done |
-| 6 | plan-from-scenarios | Formato do plano: cada step lista os cenários que cobre; `/plan` recusa step sem cenário | backend | technical | plan-000012 | plan-specify-phase | planned |
+| 6 | plan-from-scenarios | Formato do plano: cada step lista os cenários que cobre; `/plan` recusa step sem cenário | backend | technical | plan-000012 | plan-specify-phase | done |
 
 ### Wave 3 -- IMPLEMENT e REFLECT (parallel)
 | # | ID | Title | Scope | Type | Plan | Depends on | Status |
