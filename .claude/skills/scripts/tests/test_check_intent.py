@@ -359,3 +359,38 @@ def test_d0_cli_prints_json(tmp_path, flag):
     good.write_text(VALID, encoding="utf-8")
     data = json.loads(_run(str(good), flag).stdout)
     assert data["d0"]["estado"] == "medido"
+
+
+# --- reference interviews (Step 6 fixtures; simulated) ----------------------
+
+_GRILL = Path(__file__).resolve().parent / "fixtures" / "grill"
+_EXPECTED = json.loads((_GRILL / "esperado.json").read_text(encoding="utf-8"))
+
+
+@pytest.mark.parametrize("name", sorted(_EXPECTED["intent"]))
+def test_fixture_errors_match_expected_rules(name):
+    text = (_GRILL / name).read_text(encoding="utf-8")
+    rules = sorted({f.regra for f in _errors(check_intent(text, require_approved=True))})
+    assert rules == _EXPECTED["intent"][name]["erros"]
+
+
+@pytest.mark.parametrize("name", sorted(_EXPECTED["intent"]))
+def test_fixture_d0_matches_expected(name):
+    residue = brief_residue((_GRILL / name).read_text(encoding="utf-8"))["residuo"]
+    assert [r["frase"] for r in residue] == _EXPECTED["intent"][name]["d0"]
+
+
+@pytest.mark.parametrize("name", sorted(_EXPECTED["intent"]))
+def test_fixture_strict_exit_code(name):
+    expected = 1 if _EXPECTED["intent"][name]["erros"] else 0
+    proc = _run(str(_GRILL / name), "--require-approved", "--strict")
+    assert proc.returncode == expected
+
+
+def test_fixture_task_without_code_has_short_intent_and_skip_line():
+    text = (_GRILL / _EXPECTED["sem_codigo"]).read_text(encoding="utf-8")
+    assert "\nSpecify: skipped -- " in text
+    section = text.split("## Intenção\n", 1)[1].split("\n\n", 1)[0].splitlines()
+    labels = [line.split(":", 1)[0] for line in section]
+    assert labels == ["- Objetivo", "- O que você vê no fim", "- Não faz", "- Pronto quando"]
+    assert not list((_GRILL / "b-tarefa-sem-codigo").glob("intent*.md"))

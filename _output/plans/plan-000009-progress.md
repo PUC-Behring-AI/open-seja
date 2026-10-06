@@ -100,3 +100,28 @@ Nada escrito fora do ledger. `git status` limpo no inicio (branch `dev`, HEAD 6c
 - deviated: Plano depois da grill segue v1 com Feature: slug ate a specify existir; --specify listada como reservada.
 - less-sure: Se o passo 2b curto basta para um agente conduzir a entrevista sem ler grill-phase.md inteiro.
 - gate: not-installed
+
+### Step 6 -- três entrevistas de referência (2026-10-06, executor) -- SIMULADAS
+- Criado `.claude/skills/scripts/tests/fixtures/grill/` (caminho do Step 1, não `tests/fixtures/grill/`): `README.md` (aviso de simulação, tabela, roteiro manual), `esperado.json` (erros esperados, D0 e calibração por versão), (a) `a-feature-com-codigo/` transcrição + `intent-rodada-1.md`, `intent-rodada-2.md`, `intent-final.md`; (b) `b-tarefa-sem-codigo/` transcrição + `plano-trecho.md` (`## Intenção` de 4 linhas e `Specify: skipped`); (c) `c-brief-detalhado/` transcrição + `intent-rodada-0.md`, `intent-final.md`.
+- **As entrevistas são simuladas**: escritas pelo executor, sem pessoa real; o "citizen" é um papel. A execução real de `/plan --grill` em dry-run também é a transcrição simulada de (a), não uma sessão; "o citizen entendeu sem reformular" é **não observado**.
+- Saída de `check_intent.py --require-approved --strict` (pares negativos):
+
+| Versão | Errors | Exit | D0 (`--d0`) |
+|---|---|---|---|
+| (a) rodada 1 | P1 (não faz, erros e limites), P3 (pergunta aberta), P6 | 1 | F2 |
+| (a) rodada 2 | P2 ("rápido" sem número em REQ-004), P3 (premissa não confirmada), P6 | 1 | -- |
+| (a) final | nenhum | 0 | -- |
+| (c) rodada 0 | P1 (gatilho, erros e limites), P3, P6 | 1 | F3 (só em premissa) |
+| (c) final | nenhum | 0 | F3 (só em premissa) |
+| (b) | sem `intent.md` (GRL-012); teste confere `## Intenção` e `Specify: skipped` | n/a | n/a |
+
+- Calibração de (a) (roteiro simulado): 3 rodadas; perguntas 4 + 3 + 2 = 9; avisos de voz 0 nas três versões; reformulações não observadas. (b): 1 rodada, 4 perguntas. (c): 1 rodada, 3 perguntas. Nenhum caso chegou perto do teto 5x4; o dado não serve para calibrar o teto (fica para o piloto, plan-000016).
+- Testes: `test_check_intent.py` ganhou 16 testes parametrizados sobre `esperado.json` (regras por versão, D0, exit code do `--strict`, forma da tarefa sem código): 56 passed.
+- Plano v1: o passo 2b só atua ao escrever plano novo; nenhuma linha que lê plano existente mudou (`implement/SKILL.md` intocado; fixtures v1 de `plan_format/` intocadas). A "leitura de um plano v1 antigo no `/plan`" não foi executada como sessão; a prova é o diff (nenhum texto de leitura de plano mudou) e a varredura `check_intent.py` sem argumento na raiz sair 0.
+- `run_all_checks.py` 16 PASS / 14 FAIL, 17 / 2 / 9, mesmos FAIL. pytest 682 passed / 12 failed (626 + 56). Sem travessão tipográfico nem aspas curvas; nomes fictícios genéricos (sala, lista de compras), nenhum termo de C1 (a lista de termos é do orquestrador, que roda o `git grep`).
+
+### Step 6 -- reflection-on-action | 2026-10-06 17:27 UTC | Tres entrevistas de referencia (simuladas)
+- happened: Escrevi tres entrevistas simuladas com versoes intermediarias e finais; check_intent falha nas intermediarias pela regra esperada e passa nas finais; 16 testes novos.
+- deviated: Fixtures em .claude/skills/scripts/tests/fixtures/grill; dry-run do /plan --grill e a transcricao simulada, nao uma sessao; (b) nao tem intent.md.
+- less-sure: Os numeros de calibracao sao do roteiro, nao de pessoa real; nao servem para o teto 5x4.
+- gate: not-installed

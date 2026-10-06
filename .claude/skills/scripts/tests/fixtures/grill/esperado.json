@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "simulado": true,
+  "intent": {
+    "a-feature-com-codigo/intent-rodada-1.md": {"erros": ["P1", "P3", "P6"], "d0": ["F2"]},
+    "a-feature-com-codigo/intent-rodada-2.md": {"erros": ["P2", "P3", "P6"], "d0": []},
+    "a-feature-com-codigo/intent-final.md": {"erros": [], "d0": []},
+    "c-brief-detalhado/intent-rodada-0.md": {"erros": ["P1", "P3", "P6"], "d0": ["F3"]},
+    "c-brief-detalhado/intent-final.md": {"erros": [], "d0": ["F3"]}
+  },
+  "sem_codigo": "b-tarefa-sem-codigo/plano-trecho.md",
+  "calibracao": {
+    "a-feature-com-codigo": {"rodadas": 3, "perguntas": [4, 3, 2], "avisos_voz": 0, "reformulacoes": "nao observado (simulado)"},
+    "b-tarefa-sem-codigo": {"rodadas": 1, "perguntas": [4], "avisos_voz": "nao se aplica", "reformulacoes": "nao observado (simulado)"},
+    "c-brief-detalhado": {"rodadas": 1, "perguntas": [3], "avisos_voz": 0, "reformulacoes": "nao observado (simulado)"}
+  }
+}

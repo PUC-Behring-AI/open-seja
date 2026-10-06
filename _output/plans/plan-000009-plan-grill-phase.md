@@ -187,7 +187,7 @@ Criar três fixtures (transcrição curta + `intent.md` final esperado) e um rot
 - **Interface**: N/A
 - **Verify**: `check_intent.py --require-approved --strict` sai 0 nas três versões finais e sai 1 nas versões intermediárias marcadas; o progress tem rodadas, perguntas e avisos de voz de (a); `run_all_checks.py` retorna o mesmo conjunto de falhas pré-existentes que o baseline (nenhuma nova); nenhum termo de C1 no diff (`git grep -i` com a lista do Step 1).
 - **Tests**: when `check_intent.py` roda sobre cada versão intermediária das fixtures, returns o `error` esperado (P1, P2, P3 conforme a fixture); sobre cada versão final, returns lista sem `error`. Reusa os testes do Step 4 com as fixtures como entrada.
-- [ ] Done
+- [x] Done
 
 ### Step 7: Fechar o contrato com os itens vizinhos
 Registrar no progress uma tabela "o que este plano entrega a quem": item 4 (convenção `.feature` lê `REQ-<slug>-NNN` e `intent.md` aprovado), item 5 (specify recusa `intent.md` sem `status: approved`, usa `check_intent.py --require-approved` como portão), item 6 (o plano v2 cita `Feature: <slug>`), item 8 e plano 000008 (D1 conta os REQs `ativo` de `intent.md` aprovado; REQ `retirado` não entra no denominador depois de reaprovado, e conta como descoberto até a reaprovação, como o 000008 já define), item 9 (quickguide e `/help` descrevem `--grill`), item 10 (tempo de grill é parte do tempo até a primeira feature aprovada; usar os dados do Step 6 como linha de base). Listar as lacunas com os planos 000007 e 000008 (abaixo) e as decisões pendentes que ficaram no default.
