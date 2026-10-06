@@ -1,7 +1,7 @@
 ---
 name: plan
 description: "Make a plan to add a feature, fix a bug, or refactor code. Supports metacomm framing for design-intent briefs."
-argument-hint: "<brief> [--review <light|standard|deep>] [--framing metacomm] [--light] [--plan | --roadmap [--from-spec <path>] [--auto] [--only-unimplemented]]"
+argument-hint: "<brief> [--review <light|standard|deep>] [--framing metacomm] [--light] [--grill [<slug>]] [--plan | --roadmap [--from-spec <path>] [--auto] [--only-unimplemented]]"
 compatibility: "Designed for Claude Code with the SEJA harness"
 metadata:
   last-updated: 2026-03-29 00:15 UTC
@@ -47,6 +47,8 @@ metadata:
 | `--only-unimplemented` | No | Scope the roadmap's requirements-extraction pass to REQ items whose section lacks a `STATUS: implemented` / `STATUS: established` marker (legacy uppercase `STATUS: IMPLEMENTED` also honored). Use with `--roadmap --auto`. Useful on established projects where a fresh roadmap should cover only the open-item delta. |
 | `--framing metacomm` | No | Frame the brief as a designer's metacommunication message (I/you phrasing) |
 | `--review <level>` | No | Override complexity-gated review depth. Valid: `light`, `standard`, `deep` |
+| `--grill [<slug>]` | No | Run only the grill phase and stop: interview, then write only `features/<slug>/intent.md`; re-entry allowed (see `general/grill-phase.md`, GRL-014) |
+| `--specify` | No | Reserved for the specify phase (CYC-006 in `general/extended-cycle-contract.md`); not implemented |
 
 # Make a plan
 
@@ -62,7 +64,7 @@ If there are no arguments, ask for the brief.
 
 ## Mode Detection
 
-1. **Explicit override**: `--light` -> [Lightweight Proposal Workflow](#lightweight-proposal-workflow); `--roadmap` -> [Roadmap Workflow](#roadmap-workflow); `--plan` -> standard workflow below. Skip auto-detection.
+1. **Explicit override**: `--grill` -> standard internal, step 2b only (grill phase); `--light` -> [Lightweight Proposal Workflow](#lightweight-proposal-workflow); `--roadmap` -> [Roadmap Workflow](#roadmap-workflow); `--plan` -> standard workflow below. Skip auto-detection.
 
 2. **Auto-detection** (neither `--plan` nor `--roadmap` present): score the brief against signals.
 

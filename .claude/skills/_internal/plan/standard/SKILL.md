@@ -27,6 +27,16 @@ This mode is the reference prose -- other modes delta off of its shape. Steps 1,
    | Before Phase 1 review | `general/review-perspectives.md` |
    | Before writing the review log | `general/review-log-template.md` |
 
+2b. **Grill phase** (always; never skipped -- CYC-002). Read `.claude/references/general/grill-phase.md` and follow its `GRL-NNN` rules. In short:
+   - Classify the task (GRL-012): with code (some step will have non-N/A `Tests:`), without code, or brief already detailed. More than 12 likely requirements: propose two features first.
+   - With code: propose the slug and let the user confirm (GRL-002); give the C1 notice before recording the brief verbatim (GRL-005); index the brief as `F1..Fn`. Interview in rounds of at most 4 questions, one idea each (GRL-003, GRL-004). Write `features/<slug>/intent.md` with `status: grilling` after every round (model: `.claude/references/template/intent.md`). Never fill in an answer the user did not give: record it as an assumption.
+   - After each round run `python3 .claude/skills/scripts/check_intent.py features/<slug>/intent.md --json` and continue while it reports any `error`. After 5 rounds, hand the decision back (GRL-007).
+   - With no `error`: show the summary in controlled voice (short sentences, fixed terms; no technical numbers) and ask Approve / Adjust / Discard (AskUserQuestion, C4; GRL-008). Only Approve writes `status: approved`, `approved_at` (UTC) and `approved_by: usuario`; then `check_intent.py <intent.md> --require-approved --strict` must exit 0 before step 3. Add `Feature: <slug>` under the plan header.
+   - Without code: short interview; write a `## Intenção` section (4 lines, GRL-012) and the line `Specify: skipped -- <reason>` (CYC-004) in the plan; the user approves it with the plan. No `features/` folder.
+   - Metacomm framing: questions and summary use I/you.
+   - `--grill`: run only this step and stop; write only `features/<slug>/intent.md`, never a plan (GRL-014). Re-entry follows GRL-011. `--specify` stays reserved.
+   - Plan v1 and projects that do not use `features/` read and run as before.
+
 3. Create a structured, self-contained plan with these sections (header per C3; `<depth>` set in step 5):
    - If default framing: *user brief*, *agent interpretation*, *files* -- per `general/report-conventions.md`.
    - If metacomm framing: *designer's metacommunication message* (the brief verbatim), *agent interpretation*, *files*.

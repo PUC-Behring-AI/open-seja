@@ -177,7 +177,7 @@ Em `_internal/plan/standard/SKILL.md`, inserir a fase **antes** da criação das
 - **Verify**: `git diff --stat` mostra só os três arquivos listados; `python .claude/skills/scripts/check_skill_system.py` e `run_all_checks.py` com resultado igual ao baseline; `grep -n "grill" .claude/skills/plan/SKILL.md` acha `--grill` na tabela; `grep -n "skipped" .claude/skills/_internal/plan/standard/SKILL.md` acha a linha `Specify: skipped`; nenhum arquivo de gate, hook ou `settings` no diff.
 - **Tests**: N/A (instruções de skill; a prova de comportamento é o Step 6)
 - **Docs**: SKILL-quickguide do `/plan` fica para o item 9.
-- [ ] Done
+- [x] Done
 
 ### Step 6: Provar a fase com três entrevistas de referência
 Criar três fixtures (transcrição curta + `intent.md` final esperado) e um roteiro de execução manual: (a) **feature com código** fictícia, 3 rodadas, termina em `approved`; (b) **tarefa sem código** (atualizar um README fictício): entrevista curta, sem pasta, com `Specify: skipped`; (c) **brief já detalhado**: uma rodada de confirmação. Para cada uma, anexar a saída de `check_intent.py` e provar a regra de parada com pares negativos (a versão da rodada anterior falha com a regra certa). Rodar a fase real (`/plan --grill`) uma vez em modo dry-run sobre (a) e registrar no progress: número de rodadas, número de perguntas, avisos de voz, e se o citizen fictício (o designer) entendeu cada pergunta sem pedir reformulação (observação manual; é dado de calibração para os números 5 e 4). Rodar `run_all_checks.py` e a leitura de um plano v1 antigo no `/plan` para provar que nada mudou para quem não usa a fase.

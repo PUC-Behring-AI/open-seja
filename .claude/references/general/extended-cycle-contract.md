@@ -39,6 +39,7 @@ O ciclo é PLAN, IMPLEMENT, REFLECT. O PLAN contém, nesta ordem, as fases grill
 - **Aprovação**: o designer aprova a lista de requisitos e o "não faz" antes de o `intent.md` ir a `status: approved`.
 - **Quem decide**: designer (aprova o `intent.md`); o `/plan` conduz a entrevista.
 - **Critério de aceitação**: existe `features/<slug>/intent.md` com `status: approved` e todo REQ tem texto em linguagem natural e um critério; o texto do citizen usa voz controlada (frases curtas, termos fixos; §10).
+- **Protocolo**: ver `.claude/references/general/grill-phase.md` (GRL-001..015) e o verificador `.claude/skills/scripts/check_intent.py` (regra de parada P1 a P6).
 
 ### CYC-003 -- Fase specify
 
@@ -68,6 +69,7 @@ As fases são internas ao `/plan`. Cada uma também poderá ser invocada avulsa 
 
 - **Quem decide**: designer, no plano que implementar as fases.
 - **Critério de aceitação**: nenhum texto executável das flags existe em `SKILL.md` até a implementação; as flags aparecem neste contrato como "reservada".
+- **Implementação**: `--grill` implementada pelo plan-000009 (`grill-phase.md`, GRL-014); `--specify` segue reservada.
 
 ### CYC-007 -- O que cada fase lê, escreve e quem aprova
 

@@ -87,3 +87,16 @@ Nada escrito fora do ledger. `git status` limpo no inicio (branch `dev`, HEAD 6c
 - deviated: Regras extras ESQUEMA, TAMANHO, SERVE; modo minimo para o esquema do 000007; ressalva de voz fora da lista de findings; pyright substituido por basedpyright.
 - less-sure: Se a varredura sem argumento no run_all_checks deve falhar em intent aprovado incompleto num projeto real.
 - gate: not-installed
+
+### Step 5 -- fase grill no /plan e flag --grill (2026-10-06, executor)
+- `_internal/plan/standard/SKILL.md`: novo passo `2b. Grill phase` antes do passo 3 (criação das seções), 10 linhas em en-US que apontam para `grill-phase.md` e `check_intent.py`: classificar, slug, aviso C1, índice `F`, rodadas, `intent.md` em `grilling` por rodada, `check_intent.py --json` por rodada, teto, aprovação Approve/Adjust/Discard (C4), `--require-approved --strict` antes do passo 3, `Feature: <slug>`, tarefa sem código com `## Intenção` e `Specify: skipped -- <reason>`, metacomm I/you, `--grill` só a fase. Passos de revisão (5) e `/implement` intocados.
+- `plan/SKILL.md`: `--grill [<slug>]` no `argument-hint`, na tabela de argumentos e em Mode Detection (despacho ao passo 2b); `--specify` como linha "reservada" (cita CYC-006, sem ID de plano, para não gerar warning de citação privada).
+- `extended-cycle-contract.md`: duas linhas de ponteiro (CYC-002 "Protocolo"; CYC-006 "Implementação": `--grill` implementada, `--specify` reservada).
+- Escolha: enquanto a specify não existe, o plano depois da grill continua v1 com a linha `Feature: <slug>` sob o cabeçalho (CYC-005 pede `Feature:`; CYC-018 só pede v2 quando a specify roda).
+- Verify: `git diff --stat` só nos três arquivos; nenhum arquivo de gate, hook ou settings; `grep` acha `--grill` na tabela e `Specify: skipped` no internal. `run_all_checks.py` 16 PASS / 14 FAIL, 17 / 2 / 9 (os 9 de `check_skill_system` são os mesmos: `product-design-as-coded.md` ausente). pytest 666 / 12.
+
+### Step 5 -- reflection-on-action | 2026-10-06 17:24 UTC | Fase grill no /plan e flag --grill
+- happened: Inseri o passo 2b no internal standard, --grill no wrapper e dois ponteiros no contrato; checks e pytest no baseline.
+- deviated: Plano depois da grill segue v1 com Feature: slug ate a specify existir; --specify listada como reservada.
+- less-sure: Se o passo 2b curto basta para um agente conduzir a entrevista sem ler grill-phase.md inteiro.
+- gate: not-installed
