@@ -106,3 +106,18 @@ Decisao: **seguir**. Os planos 000007 a 000014 executaram (todos DONE). Nada foi
 - deviated: O implement/SKILL.md nao ganhou linha: o passo 12 ja cita o freeze (000013); o comando da norma passou a levar --plan.
 - less-sure: Se um orquestrador real le esta secao no fim do plano ou para no item 9 do Procedimento.
 - gate: not-installed
+
+### Step 6 -- os quatro checks no `run_all_checks` (2026-10-06)
+
+- Terreno (Step 1, achado 3): o modo sem argumentos e as entradas do registro já existiam (planos 000009-000012). Nenhum `check_*.py`, nem o registro, nem `run_all_checks.py` foram editados. Decisão 8 = A `[default; aceito 2026-10-06]`.
+- `test_default_cycle_checks.py` (novo, 8 testes): projetos descartáveis em `tmp_path` com `.claude` ligado a este harness e dois planos v1 reais (`fixtures/plan_format/`). Uma rodada **completa** de `run_all_checks.py --root <projeto>` por forma de projeto (sem `features/` e só v1; `features/` de terceiros sem `intent.md`; feature aprovada e íntegra): os quatro em PASS nas três, e o conjunto inteiro de resultados (33 checks) **idêntico** entre as três formas. Casos de falha por script, sem argumentos e com cwd na raiz (o mesmo caminho do orquestrador): `.feature` sem `@REQ-` -> `check_features` exit 1 com GHK-002; plano v2 com cenário sem step -> `check_plan_scenarios` exit 1 com PFS-009; plano v1 com corpo quebrado -> exit 0, "nada a verificar", `--json` com `plans: []`; `features/` de terceiros intacta byte a byte; os quatro no registro com `stack: any`, `critical: false`. Tempo: ~6 s.
+- Teste primeiro sem vermelho: o comportamento já existia (Step 1); o teste é a prova agregada pedida pelo plano, não a especificação de código novo.
+- Palavra impressa: "nada a verificar" (não "pulado"); mantida.
+- Docs: não há README de scripts com lista de checks (`.claude/skills/scripts/README*` ausente); nada a atualizar.
+- Verify: 8 passed; `uvx ruff` limpo; `git diff --stat` não toca `run_all_checks.py`; `run_all_checks.py` do open-seja 19/14, mesmo conjunto, 17/2/9; pytest 1473 passed / 12 failed (mesmo conjunto).
+
+### Step 6 -- reflection-on-action | 2026-10-06 19:40 UTC | Os checks novos no run_all_checks, condicionais a features/
+- happened: Escrevi o teste agregado: tres formas de projeto com run_all_checks completo dao o mesmo conjunto de resultados e os quatro em PASS; feature sem tag e plano v2 com cenario sem step falham pelo nome.
+- deviated: Nenhum script nem o registro mudou: o modo sem argumentos ja existia; o teste nao teve vermelho.
+- less-sure: Se um projeto real com conftest e pyproject proprios muda algum dos outros 29 checks ao ganhar features/.
+- gate: not-installed
