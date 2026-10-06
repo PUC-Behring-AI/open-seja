@@ -19,3 +19,36 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 - Planos ja entregues neste roadmap: ver a coluna Status da Wave Summary em `_output/roadmaps/roadmap-000006-*.md` e os `## Implementation summary` dos planos DONE; os progress files deles listam lacunas que este plano deve absorver no Step 1.
 
 ## Iteration Log
+
+## Step 1 -- terreno e dependencias no open-seja (2026-10-06, executor)
+
+Decisoes pendentes 1-6: o designer aceitou todas as recomendacoes (A); todas `[default; aceito 2026-10-06]`. Decisao 3 = so a chave `<slug>/<arquivo>::<nome>` na lista de `Scenarios:`.
+
+Este repositorio e o open-seja (branch `dev`); caminhos `open-seja/X` do plano valem como `X`; fixtures em `.claude/skills/scripts/tests/fixtures/plan_scenarios/`.
+
+| Item | Estado | Onde / fato |
+|---|---|---|
+| (a) 000007, 000009, 000011 | existem (executados) | CYC-001..027 em `.claude/references/general/extended-cycle-contract.md` (maior = CYC-027; as regras novas deste plano: CYC-028, CYC-029); GRL-001..015 em `grill-phase.md`; SPC-001..018 em `specify-phase.md`; GHK-001..019 em `gherkin-spec-format.md`; DRM em `drift-metric.md`. Ordem de edicao dos SKILL.md 000007 -> 000009 -> 000011 -> este plano: cumprida, nao ha o que esperar. |
+| (b) `check_specify.py --status` | existe | `python3 .claude/skills/scripts/check_specify.py <root> --feature <slug> --status [--json]`; exit 0 sempre (exit 2 so para uso, pasta ausente, schema desconhecido). JSON: `schema_version: 1`, `slug`, `status` (`missing\|draft\|approved\|stale`), `reasons`, `reqs`, `findings`, `ressalvas`. Sem `--feature` e a varredura (nao serve ao plano). |
+| (b) `scenarios.lock.json` | existe, `schema_version: 1` | chaves ordenadas: `approved_at`, `approved_by`, `basis` (REQ -> rev), `contract_by`, `files` (sha256), `index` (chaves de cenario ordenadas), `retraducao` (sha256), `rev` (int, rev da retradução), `schema_version`, `slug`. O `rev` NAO entra no calculo de `stale` (so `basis`, `files`, `retraducao`): PFS-012 compara so o numero do cabecalho com o `rev` do lock. |
+| (c) `plan-step.md` | existe | campo `**Scenarios**: @REQ-<slug>-NNN, <scenario name> \| N/A (<reason>)` + secao "Format version" (texto provisorio do 000007). Substituido no Step 6. |
+| (c) `plan/SKILL.md` | C3, linha 90 | "follow with `plan_format_version: 1` on the next line". O C3 e o ponto do cabecalho; ganha o ramo v2 no Step 6. |
+| (c) `_internal/plan/standard/SKILL.md` | passos 2b (grill) e 2c (specify) existem | **Ponto unico da linha `Specify: skipped`**: o passo 2b, ponto "Without code" (linha 35). O passo 2c cita a mesma frase so como lembrete ("tasks without code keep `Specify: skipped -- <reason>`"); para o `grep -c` do Step 6 dar 1, o 2c passa a remeter ao 2b sem repetir a linha literal. O 2b hoje diz "the plan stays v1": o Step 6 troca por v2. O 2c termina com "Linking steps to scenarios is plan-000012." |
+| (d) validador de formato de plano | ausente | nenhum `.py` le `plan_format_version` (000007 progress, linha 36). `critique_plan_coverage.py` **nao existe neste repositorio** (so no upstream); nao ha parser de steps a reaproveitar. Decisao 1 = A, sem condicao a verificar. |
+| (e) scripts, testes, fixtures | `.claude/skills/scripts/`, `.claude/skills/scripts/tests/`, `.claude/skills/scripts/tests/fixtures/<tema>/` | `run_all_checks.py` executa cada `check_*.py` com `cwd=<raiz>` e **sem argumentos**, le so o exit code; registro em `check_plugin_registry.json` (lista; acrescentar no fim). Check condicional = o proprio script (varredura de `_output/plans/` sem argumentos). |
+| (f) nome de cenario com crase ou `::` | `check_features.py` NAO proibe | GHK-010 so exige nome unico por arquivo. Nome com crase quebra a lista entre crases; nome com `::` e inofensivo (a chave se corta no primeiro `::` depois de `.feature`). Decisao: PFS-004 recusa, com dica de renomear na specify, quando o `index` do lock tem chave com crase (nao da para cita-la). Registrado como lacuna. |
+| (g) termos de C1 | sem lista no repositorio | conferencia por `git grep -i` de `tecgraf\|petrobras\|puc-rio\|behring` sobre o diff. No repo, os unicos acertos pre-existentes estao em `_output/briefs.md` e nos planos 000005 (nao tocados). |
+
+Baseline (Q1, medido agora): `run_all_checks.py` 18 PASS / 14 FAIL (contadores 17/2/9 inalterados); apos o Step 4 o esperado e 19 PASS / 14 FAIL (PASS novo = `check_plan_scenarios.py`).
+
+Decisoes de implementacao tomadas aqui (para os Steps 2-6):
+1. Cabecalho = linhas antes da primeira secao `## ` (nao "ate a primeira linha em branco"): os planos reais trazem um bloco `> **Origem**` e `source:` antes ou entre as linhas de versao. A ordem das tres linhas segue livre.
+2. Contrato (Compatibilidade) permite `Scenarios: N/A (motivo)` em step com `Tests:` nao-N/A quando o step nao tem comportamento observavel. Logo PFS-006 recusa so o campo **ausente** (ou o `N/A` sem motivo, PFS-007); `N/A (motivo)` com `Tests:` nao-N/A passa, com achado `info` (nao bloqueia) para o piloto contar. Isto muda a tabela do plano ("N/A (...)" recusado) para seguir o contrato.
+3. Pela mesma razao, PFS-013 (skip coerente) recusa step com `Tests:` nao-N/A que nao traga `Scenarios: N/A (motivo)` justificado; com o motivo, passa com `info`.
+4. Varredura sem argumentos ignora plano cujo titulo comeca com `# DONE |` (historia imutavel, T3; um plano concluido nao pode reprovar o health check porque os cenarios foram reaprovados depois).
+
+### Step 1 -- reflection-on-action | 2026-10-06 18:15 UTC | Terreno e dependencias
+- happened: Confirmei que 000007-000011 existem, a CLI de check_specify --status e o lock, e que critique_plan_coverage.py nao existe neste repo.
+- deviated: O cabecalho passa a ser as linhas antes da primeira secao; PFS-006 e PFS-013 aceitam N/A com motivo, como o contrato.
+- less-sure: Se N/A com motivo vira fuga; fica medido como info.
+- gate: not-installed
