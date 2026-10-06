@@ -103,7 +103,7 @@ Na tag/branch `dev` do open-seja (submodule `open-seja`; `git submodule update -
 - **Interface**: N/A
 - **Verify**: o progress lista D-NNN e H-NNN livres e todos os caminhos de "Files" marcados como "existe" ou corrigidos; `git -C open-seja status` limpo.
 - **Tests**: N/A (verificação de estado, sem código)
-- [ ] Done
+- [x] Done
 
 ### Step 2: Escrever o contrato normativo do ciclo estendido
 Criar `extended-cycle-contract.md` com regras `CYC-NNN` cobrindo: (1) fases do `/plan` -- grill (entrada: brief; saída: `features/<slug>/intent.md` com REQ IDs `REQ-<slug>-NNN`, em linguagem que o citizen valida; nunca pulada), specify (entrada: `intent.md`; saída: `*.feature` com tag `@REQ-...` por cenário; ponto de aprovação humana antes de escrever o plano; pulada por tipo de tarefa com a linha `Specify: skipped -- <motivo>`), escrita do plano; (2) invocação avulsa `--grill`/`--specify` como interface **reservada**; (3) o que cada fase lê e escreve e quem aprova; (4) ordem e portões: sem `intent.md` aprovado não há specify, sem `.feature` aprovado não há plano v2; (5) os três degraus e os artefatos de cada par (intenção→cenário, cenário→teste, teste→código+gate); (6) o que o contrato **não** faz: não define validador de Gherkin (item 4), fórmula de divergência (item 2), nem Cleaner/Hardener (item 7). Cada regra com campo "Quem decide" e "Critério de aceitação". Incluir, para as decisões pendentes 1 a 5, o default adotado marcado `[default; pendente]`.
