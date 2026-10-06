@@ -74,3 +74,16 @@ Nada escrito fora do ledger. `git status` limpo no inicio (branch `dev`, HEAD 6c
 - deviated: Brief indexado na secao, nao no frontmatter; frontmatter com designer_description; checagem pelo verificador fica no Step 4.
 - less-sure: Se o specify do 000011 aceita o indice F/A como origem suficiente da retraducao.
 - gate: not-installed
+
+### Step 4 -- check_intent.py (2026-10-06, executor)
+- Teste primeiro: `test_check_intent.py` (40 testes) rodado contra um stub com as assinaturas da Interface; 29 vermelhos por asserção (nenhum ImportError), 11 verdes triviais (os negativos). Depois o verificador: 40 passed.
+- Criado `.claude/skills/scripts/check_intent.py`: `check_intent(text, *, require_approved=False) -> list[Finding]`, `Finding(regra, linha, mensagem, severidade)`, `brief_residue(text)` (D0, GRL-015), `ressalvas()`; constantes `GRILL_*`, `VAGUE_WORDS`, `MAX_SENTENCE_WORDS`, `MAX_SENTENCES_PER_PARAGRAPH` (importadas do lint do 000074 se ele existir). CLI: `<intent.md> [--require-approved] [--strict] [--json] [--d0]`; sem argumento varre `features/*/intent.md` (intenção aprovada com error -> exit 1; `grilling` só relata). Exit 2 para arquivo ausente. Registrado em `check_plugin_registry.json` (append no fim, formato preservado).
+- Regras além de P1..P6: `ESQUEMA` (error: slug, status, seção Requisitos, tipo, estado; warning: esquema mínimo sem regra de parada, falta "Modelo e termos"), `VOZ`, `TAMANHO` (> 12 REQs ativos), `SERVE` (forma dos IDs), todas warning exceto ESQUEMA estrutural.
+- Escolhas: (a) modo mínimo -- arquivo sem nenhuma extensão da grill e sem `--require-approved` recebe só as regras do mínimo do 000007 (IDs, texto, critério presente) e um warning; é o que faz o exemplo de `feature-layout.md` passar; (b) P4 inclui contiguidade 001..N e "REQ com rev > 1 ou retirado tem linha em Mudanças"; (c) a ressalva `voz: não verificada` vai num campo `ressalvas`, não como Finding, para não poluir a lista; (d) `grill-phase.md` GRL-006 ganhou uma frase sobre quais seções `--require-approved` exige e sobre a varredura.
+- Verify: `check_intent.py .claude/references/template/intent.md --require-approved --strict` sai 0; ruff limpo; `pyright` do PyPI não roda neste WSL (falta `libatomic.so.1` para o node que ele baixa) -- usei `uvx basedpyright --level error`: 0 errors. `run_all_checks.py`: 16 PASS / 14 FAIL (o PASS a mais é `check_intent.py` sem `features/`), contadores 17 / 2 / 9; mesmos 14 FAIL. pytest: 666 passed / 12 failed (626 + 40).
+
+### Step 4 -- reflection-on-action | 2026-10-06 17:23 UTC | Verificador deterministico check_intent.py
+- happened: Escrevi 40 testes, vi 29 vermelhos por assercao contra um stub, e implementei check_intent.py com P1-P6, voz, D0 e varredura; 40 verdes.
+- deviated: Regras extras ESQUEMA, TAMANHO, SERVE; modo minimo para o esquema do 000007; ressalva de voz fora da lista de findings; pyright substituido por basedpyright.
+- less-sure: Se a varredura sem argumento no run_all_checks deve falhar em intent aprovado incompleto num projeto real.
+- gate: not-installed

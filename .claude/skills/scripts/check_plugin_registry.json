@@ -189,5 +189,15 @@
     },
     "scope": "harness",
     "critical": false
+  },
+  {
+    "script": "check_intent.py",
+    "name": "Intent Stop Rule",
+    "stack": {
+      "backend": ["any"],
+      "frontend": ["any"]
+    },
+    "scope": "intent",
+    "critical": false
   }
 ]
