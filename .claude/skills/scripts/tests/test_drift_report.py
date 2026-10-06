@@ -617,3 +617,21 @@ def test_skill_edits_are_forbidden_phrase_free_and_stay_small():
     for parts in (("reflect", "SKILL.md"), ("explain", "SKILL.md"), ("_internal", "explain", "drift", "SKILL.md")):
         text = skill_text(*parts)
         assert "Divergência por degrau" in text or "ladder" in text
+
+
+# ---- Step 9 findings: the citizen's judgement of the retranslation is its own object
+
+def test_retranslation_judgement_is_not_counted_as_scenario_audit(tmp_path):
+    root = copy_tree(_FIX / "retraducao-pos-codigo", tmp_path / "p")
+    audit = root / "features" / SLUG / "drift" / "audit.json"
+    audit.parent.mkdir(parents=True, exist_ok=True)
+    audit.write_text(json.dumps({"schema_version": 1, "itens": [
+        {"req": f"REQ-{SLUG}-002", "adequado": "nao", "por": "humano", "objeto": "retraducao",
+         "nota": "Não é isso: eu queria no topo."}]}), encoding="utf-8")
+    rep = dr.generate(root, SLUG, moment="M1", status_fn=stub_status)
+    assert (rep["auditoria"]["nao"], rep["auditoria"]["sim"]) == (0, 0)
+    item = next(i for i in rep["retraducao"]["itens"] if i["req"].endswith("002"))
+    assert (item["julgamento"], item["nota"]) == ("nao", "Não é isso: eu queria no topo.")
+    assert "Você disse: não é isso." in dr.render_citizen(rep)
+    assert "Há requisitos em que o cenário não captura" not in dr.render_citizen(rep)
+    assert "Julgamento do citizen sobre REQ-contas-da-semana-002: não é isso" in dr.render_markdown(rep)

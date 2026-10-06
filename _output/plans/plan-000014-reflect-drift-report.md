@@ -224,7 +224,7 @@ Sobre uma feature fictícia descartável (sem parceiro): rodar `--freeze` no est
 - **Interface**: N/A
 - **Verify**: `pytest .claude/skills/scripts/tests/test_drift_report.py` todo verde e os seis golden do 000008 passam; `run_all_checks.py` mostra o mesmo conjunto de falhas pré-existentes do baseline; os quatro casos de compatibilidade têm saída vazia ou de uma linha e exit 0; `git grep -n "D3a"` aparece em `drift-metric.md`, `drift-report.md`, no script e nas fixtures; zero termos de C1; `git -C open-seja status` só com os arquivos previstos; progress lista as pendências.
 - **Tests**: N/A (ensaio e verificação; os testes automáticos são dos Steps 3 a 8)
-- [ ] Done
+- [x] Done
 
 ## Coverage (advisory)
 

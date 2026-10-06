@@ -852,9 +852,9 @@ def load_matrix(
 
 
 def _audit_block(matrix: dict, reqs: list[str]) -> dict[str, Any]:
-    items = matrix.get("auditoria", [])
+    items = [i for i in matrix.get("auditoria", []) if i.get("objeto", "cenario") == "cenario"]
     count = {k: sum(1 for i in items if i.get("adequado") == k) for k in ("sim", "parcial", "nao")}
-    done = {i.get("req") for i in items if i.get("objeto", "cenario") == "cenario"}
+    done = {i.get("req") for i in items}
     return {**count, "nao_auditados": [r for r in reqs if r not in done]}
 
 
@@ -862,12 +862,14 @@ def _retranslation_block(matrix: dict, reqs: list[str]) -> dict[str, Any]:
     extras = matrix.get("extras", {})
     intent = extras.get("intent", {"reqs": {}, "frases": {}, "retraducao": {}})
     post = extras.get("post_codigo")
+    judged = {i["req"]: i for i in matrix.get("auditoria", []) if i.get("objeto") == "retraducao"}
     items = []
     for r in reqs:
         info = intent["reqs"].get(r, {})
         asked = [intent["frases"].get(f, "") for f in info.get("frases", []) if f in intent["frases"]]
         items.append({"req": r, "texto": info.get("texto", ""), "pedido": asked, "antes": intent["retraducao"].get(r, ""),
-                      "depois": (post or {}).get(r, "")})
+                      "depois": (post or {}).get(r, ""),
+                      "julgamento": judged.get(r, {}).get("adequado", ""), "nota": judged.get(r, {}).get("nota", "")})
     if post is None:
         return {"estado": "nao_medido", "razao_nm": ["NM-SEM-RETRADUCAO-POS-CODIGO"], "itens": items}
     return {"estado": "medido", "razao_nm": [], "itens": items}
@@ -1220,6 +1222,12 @@ def render_markdown(report: dict, *, at: str | None = None) -> str:
         for i in retr["itens"]:
             out.append(f"| {i['req']} | {' / '.join(i['pedido']) or '-'} | {i['antes'] or '-'} | {i['depois'] or '-'} |")
         out.append("")
+        said = {"sim": "é isso", "parcial": "é isso em parte", "nao": "não é isso"}
+        for i in retr["itens"]:
+            if i["julgamento"]:
+                out.append(f"- Julgamento do citizen sobre {i['req']}: {said[i['julgamento']]} (prova: humano).")
+        if any(i["julgamento"] for i in retr["itens"]):
+            out.append("")
     else:
         out += [NM_SENTENCE["NM-SEM-RETRADUCAO-POS-CODIGO"], ""]
     if report["ressalvas"]:
@@ -1306,7 +1314,7 @@ def render_citizen(report: dict) -> str:
                 if n_nf == 1 else f"Eu disse que não faria {what}. Nenhum cenário prova que eu não os faço.", ""]
     aud = report["auditoria"]
     if aud["nao"]:
-        out += ["Há requisitos em que o cenário não captura o que você pediu. Peça para ver quais.", ""]
+        out += ["Há requisitos em que o cenário não captura o que você pediu. Eu posso mostrar quais.", ""]
     retr = report["retraducao"]
     if retr["estado"] == "medido":
         out += ["Eu escrevi o que entendi depois do código. Para cada requisito, diga: é isso, ou não é isso.", ""]
@@ -1316,7 +1324,11 @@ def render_citizen(report: dict) -> str:
             out += [f'Requisito: "{i.get("texto") or i["req"]}"', ""]
             out += [f'- Você pediu: "{" / ".join(i["pedido"]) or "sem frase ligada"}"',
                     f'- Eu entendi antes do código: "{i["antes"] or "sem texto"}"',
-                    f'- Eu entendi depois do código: "{i["depois"]}"', ""]
+                    f'- Eu entendi depois do código: "{i["depois"]}"']
+            if i["julgamento"]:
+                said = {"sim": "é isso", "parcial": "é isso em parte", "nao": "não é isso"}[i["julgamento"]]
+                out.append(f'- Você disse: {said}. "{i["nota"]}"' if i["nota"] else f"- Você disse: {said}.")
+            out.append("")
     else:
         out += [NM_SENTENCE["NM-SEM-RETRADUCAO-POS-CODIGO"], ""]
     for r in report["ressalvas"]:
