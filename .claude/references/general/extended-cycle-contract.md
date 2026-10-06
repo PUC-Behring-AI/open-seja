@@ -161,7 +161,7 @@ Toda emenda a este ciclo e todo signo devolvido ao citizen devem passar pelo tes
 
 ### CYC-015 -- Layout por feature `[default; aceito 2026-10-06]` (decisão pendente 3 = A)
 
-Cada feature vive em `features/<slug>/` na raiz do projeto: `intent.md`, `*.feature` e `gate.json`. Slug em kebab-case; requisitos `REQ-<slug>-NNN`; uma pasta por feature; tarefas sem código não criam pasta. Alternativa rejeitada: arquivos soltos em `_output/` (perde a ligação com o código versionado). O esquema detalhado é do Step 4 (`.claude/references/template/feature-layout.md`).
+Cada feature vive em `features/<slug>/` na raiz do projeto: `intent.md`, `*.feature` e `gate.json`. Slug em kebab-case; requisitos `REQ-<slug>-NNN`; uma pasta por feature; tarefas sem código não criam pasta. Alternativa rejeitada: arquivos soltos em `_output/` (perde a ligação com o código versionado). O esquema normativo (frontmatter e seções do `intent.md`, convenção de tags `@REQ-`, esquema do `gate.json`, tabela de rastreabilidade) é `.claude/references/template/feature-layout.md`.
 
 - **Quem decide**: designer.
 - **Critério de aceitação**: a pasta de uma feature aprovada contém `intent.md` com `status: approved` e pelo menos um `.feature`; todo REQ citado em plano existe no `intent.md` da pasta.

@@ -83,3 +83,14 @@ Mapa de regras:
 - deviated: Usei o plano 000004 no lugar do 000005 como fixture v1, porque o 000005 traz no corpo a lista de termos do grep de C1.
 - less-sure: Se a recusa do v2 invalido, so descrita, sera verificavel ate o plan-000012 criar o validador; e se o Auto Mode em manual para v2 vira surpresa antes do plan-000013.
 - gate: not-installed
+
+### Step 4 -- reflection-on-action | 2026-10-06 15:27 UTC | Definir o layout por feature
+- happened: Criado template/feature-layout.md: estrutura features/<slug>/, esquema de intent.md (frontmatter slug/status, secoes, tabela de REQ), convencao de tags @REQ- nos .feature, esquema de gate.json, esquema da tabela de rastreabilidade (estados de CYC-010, perimetro de CYC-011) e exemplo task-list com 2 REQs e 3 cenarios. CYC-015 aponta para o arquivo como esquema normativo.
+- deviated: gate.json ganhou schema_version e campos exit_code/category/ref por rodada, alem de {fast, full, ts}; QUALITY_DIR escrito sem ${} para nao subir o check_conventions.
+- less-sure: Forma exata de fast/full em gate.json (exit_code/category/ref) pode precisar de ajuste quando o gate real for integrado no Step 5 e no plan-000010.
+- gate: not-installed
+
+### Step 4 -- layout por feature (2026-10-06)
+- Esquema normativo em `.claude/references/template/feature-layout.md`; CYC-015 aponta para ele.
+- Para o Step 5: `gate.json` tem `{schema_version, fast, full, ts}`, com `fast`/`full` = `{exit_code, category, ref}` ou `null` (null = `nao medido`). O IMPLEMENT escreve esse arquivo (CYC-007); `ref` aponta para o JSON do gate em QUALITY_DIR (escrito sem `${}`).
+- `run_all_checks.py` demora mais de 120 s no foreground; rode em background gravando em arquivo. Nao use `pkill -f run_all_checks` (mata o proprio shell).
