@@ -53,3 +53,19 @@ Executado no contexto do orquestrador (os dados ja tinham sido levantados na ses
 - deviated: O step rodou inline e nao em subagente, porque os dados ja estavam levantados. O Step 6 perdeu metade do escopo: H-009 ja tinha sido registrada pelo /design.
 - less-sure: Se a refutacao por comparacao com o controle, rascunhada no plano, ainda cabe no §2.9 depois do ajuste do /design; e se o baseline de testes e estavel ou varia por ambiente.
 - gate: not-installed
+
+### Step 2 -- reflection-on-action | 2026-10-06 15:20 UTC | Escrever o contrato normativo do ciclo estendido
+- happened: Criei extended-cycle-contract.md com 19 regras CYC-001..019, cada uma com Quem decide e Criterio de aceitacao, a tabela das decisoes pendentes 1 a 6 no default aceito e as secoes Compatibilidade e IMPLEMENT como cabecalhos vazios. run_all_checks ficou em 15 PASS e 14 FAIL, igual ao baseline.
+- deviated: Acrescentei regras alem do minimo (perimetro, fronteira de stack, degrau x receptor, teste da surpresa, decisoes 3 a 6 como regras proprias) e cobri tambem a decisao 6, que o texto do passo nao listava (1 a 5).
+- less-sure: Se o teto de 5 rodadas x 4 perguntas da grill e 3 ajustes da specify, citados do §10 como intended, devem ficar no contrato; e se o criterio de CYC-008 (recusa) e verificavel antes de existir validador.
+- gate: not-installed
+
+### Step 2 -- contrato normativo (2026-10-06, subagente)
+
+Arquivo criado: `.claude/references/general/extended-cycle-contract.md` (frontmatter `designer_description`, como shared-definitions.md). 19 regras `CYC-001..019`, todas com "Quem decide" e "Critério de aceitação". Run_all_checks: 15 PASS / 14 FAIL (iguais ao baseline); check_skill_system=9, check_conventions=17.
+
+Mapa de regras:
+- CYC-001 ciclo; 002 grill; 003 specify; 004 pular specify (dec. 2); 005 escrita do plano; 006 flags avulsas reservadas (dec. 1); 007 tabela le/escreve/aprova; 008 ordem e portoes; 009 tres degraus + D0; 010 estados coberto/descoberto/nao medido; 011 perimetro; 012 fronteira agnostica (gate contract, runner contract, T6); 013 degrau x receptor; 014 teste da surpresa; 015 layout features/<slug>/ (dec. 3); 016 divergencia composta (dec. 4); 017 teste-primeiro no /implement (dec. 5); 018 versao do formato v2 (dec. 6); 019 o que o contrato nao faz.
+- Secoes `## Compatibilidade` (Step 3: campo `Scenarios:`, v1 valido para sempre, v2 invalido) e `## IMPLEMENT` (Step 5: vermelho pelo motivo certo, gate, gate.json, `--pipeline` reservado, runner pendente) estao no fim do arquivo, com a linha "preenchida pelos Steps 3 e 5". Novas regras desses steps devem continuar a numeracao a partir de CYC-020.
+- CYC-002 cita o esquema de intent.md (REQ-<slug>-NNN, "Nas suas palavras", "Fora do escopo", "Premissas"); o Step 4 deve manter coerencia com CYC-015.
+- Referencias a planos 000008 (formula), 000010 (validador Gherkin), 000013 (Cleaner/Hardener) no CYC-019 seguem a numeracao deste ledger.
