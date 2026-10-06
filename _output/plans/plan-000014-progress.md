@@ -119,3 +119,16 @@ Repositorio de execucao: este (sem prefixo `open-seja/`); fixtures em `.claude/s
 - deviated: Os renderizadores ainda nao existem; --md/--citizen/--html saem com aviso neste commit.
 - less-sure: Se o delta deve aparecer sempre no M2 ou so com --compare; segui o plano (--compare).
 - gate: not-installed
+
+## Step 7 -- renderizadores (2026-10-06)
+- `render_markdown` (registro do power dev: tabela por degrau com `n`, cobertos, descobertos, nao medido com razao na mesma linha, `D`, M1, M2, mudanca e rotulo de prova; destaque textual com empate dito; leituras fora do D; auditoria "A auditoria nao entra no D."; retradução lado a lado; ressalvas; "O que o D nao ve"), `render_citizen` (so ausencias e mudancas, contagens em palavras, sem digito fora das palavras dele, sem `%`, `PASS`, `gate`, `D1`..; teste da surpresa: contagem que so confirma nao entra), `render_html` (autocontido, sem recurso externo, tudo escapado, o numero tambem no texto da barra). `--as-coded` regenera a tabela "Como ficou" da matriz. Frases: modelo fixo, sem LLM; `check_voice` (25 palavras, 6 frases por paragrafo; texto entre aspas e do citizen e nao conta) e `FORBIDDEN_PHRASES` cobertos por teste em todas as fixtures.
+- Voz: nao existe `lint_controlled_language.py`; registro `voz: nao verificada pelo lint` (so a contagem propria; "uma ideia por frase" e termos fixos nao foram conferidos).
+- Decisao 3 = B: o HTML e proprio (o gerador do 000074 nao existe aqui); `--html` escreve `features/<slug>/drift/<slug>-<momento>.html` (ou `--out`) e diz o caminho em stderr.
+- Tamanho: o relatorio de `ok-m2-deriva` tem 37 linhas (alvo <= 40; teste fixa <= 45 sem a linha de fontes). Exemplo dos dois registros em `drift-report.md`.
+- 189 testes passam; `run_all_checks` igual ao baseline.
+
+### Step 7 -- reflection-on-action | 2026-10-06 18:49 UTC | Renderizadores
+- happened: Escrevi os registros power, citizen e HTML por frase fixa; testes de voz, frases proibidas e numeros no citizen.
+- deviated: O registro do citizen traz so ausencias e mudancas; contagem que so confirma foi retirada (teste da surpresa).
+- less-sure: A voz controlada so foi conferida pela contagem propria; nao ha lint do 000074.
+- gate: not-installed

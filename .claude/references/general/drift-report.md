@@ -321,6 +321,73 @@ Não bloqueia (exit 0 quando produzido). Não calcula com LLM. Não grava `scena
 
 ---
 
+## Exemplo (caso `ok-m2-deriva` das fixtures, feature fictícia)
+
+Registro do power dev (`--md`, `--compare`):
+
+````markdown
+## Divergência por degrau (contas-da-semana, M2)
+
+| Degrau | n | Cobertos | Descobertos | Não medido (razão) | D | M1 | M2 | Mudança | Prova |
+|---|---|---|---|---|---|---|---|---|---|
+| D1 intenção para cenário | 3 | 3 | 0 | 0 | 0.00 | 0.00 | 0.00 | +0.00 | prova: arquivo |
+| D2 cenário para teste | 4 | 4 | 0 | 0 | 0.00 | 0.00 | 0.00 | +0.00 | prova: ferramenta |
+| D3a teste para código (verdade) | 4 | 3 | 1 | 0 | 0.25 | 0.00 | 0.25 | +0.25 | prova: ferramenta |
+| D3b teste para código (excesso) | 20 | 15 | 5 | 0 | 0.25 | 0.10 | 0.25 | +0.15 | prova: ferramenta |
+
+Empate entre D3a e D3b.
+
+- Mudaram depois da entrega: features/contas-da-semana/drift/coverage.json, features/contas-da-semana/runner/cucumber.json.
+
+Cenários com teste que não passa no código entregue (D3a):
+
+- Desfazer uma conta marcada como paga por engano
+
+Leituras fora do D:
+
+- Cadeia completa: 2 requisitos.
+- Fora do escopo: 2 itens e 0 cenários @nao-faz; 2 sem evidência (contagem por total, prova: arquivo).
+- Do pedido: 5 frases; sem requisito e sem fora do escopo: nenhuma (prova: arquivo).
+- Eu não medi o que ficou sem feature: não sei desde quando o projeto usa features.
+
+Auditoria (prova: humano): sim 0, parcial 0, não 0; sem auditar: REQ-contas-da-semana-001, REQ-contas-da-semana-002, REQ-contas-da-semana-003. A auditoria não entra no D.
+
+Eu não medi: ainda não escrevi o que entendi depois do código.
+
+Ressalvas:
+
+- Poucos requisitos: os números valem como contagem, não como tendência.
+
+O que o D não vê: o que o pedido pediu e nunca virou requisito.
+Ele também não vê o cenário que tem a tag e não captura o requisito.
+Ele não vê o porquê, o modelo e a preferência de forma.
+
+Medido em M1 2026-10-06T18:00:00Z e M2 2026-10-07T10:00:00Z. Fontes: features/contas-da-semana/contas-da-semana.feature, features/contas-da-semana/drift/coverage.json, features/contas-da-semana/drift/red-reason.json, features/contas-da-semana/gate.json, features/contas-da-semana/intent.md, features/contas-da-semana/runner/cucumber.json.
+````
+
+Registro do citizen (`--citizen`):
+
+````markdown
+## O que ficou entre o seu pedido e o que existe (contas-da-semana)
+
+Eu comparei o que você pediu com o que ficou pronto. Eu só descrevo; a decisão é sua.
+
+Um de quatro cenários com teste não mostrou o comportamento pedido.
+
+- "Desfazer uma conta marcada como paga por engano"
+
+Parte do código que mudou não tem nenhum cenário que a confira.
+
+Depois da entrega, mais cenários deixaram de passar.
+Depois da entrega, mais código ficou sem cenário que o confira.
+
+Eu disse que não faria dois itens. Nenhum cenário prova que eu não os faço.
+
+Eu não medi: ainda não escrevi o que entendi depois do código.
+
+Foram poucos requisitos para tirar uma conclusão.
+````
+
 ## Quem alimenta e quem consome
 
 | Item | Plano | Alimenta | Consome |

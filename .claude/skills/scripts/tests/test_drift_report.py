@@ -11,6 +11,7 @@ Golden: fixtures/drift/casos.json (plan-000008; read-only). Trees: fixtures/drif
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import drift_report as dr
@@ -442,3 +443,145 @@ def test_cli_audit_sample_lists_reqs_and_exits_0(capsys):
     base = _TESTS_DIR / "fixtures" / "plan_scenarios" / "_raizes" / "aprovada"
     code, out, _ = run_cli([str(base), "--feature", SLUG, "--audit-sample"], capsys)
     assert code == 0 and len(out.split()) == 1
+
+
+# ---- Step 7: renderers (voice, non-prescriptive, citizen register, HTML)
+
+RENDER_CASES = [c for c in CASES if c not in ("entrada-corrompida",)]
+
+
+def reports_for_render():
+    for name in RENDER_CASES:
+        _, rep = make_report(name)
+        yield name, rep
+
+
+@pytest.mark.parametrize("name", RENDER_CASES)
+def test_no_forbidden_phrase_in_any_register(name):
+    _, rep = make_report(name)
+    for text in (dr.render_markdown(rep), dr.render_citizen(rep), dr.render_html(rep), dr.render_html(rep, citizen=True)):
+        low = text.lower()
+        assert not [p for p in dr.FORBIDDEN_PHRASES if p in low]
+
+
+@pytest.mark.parametrize("name", RENDER_CASES)
+def test_voice_limits_hold_for_both_registers(name):
+    _, rep = make_report(name)
+    assert dr.check_voice(dr.render_markdown(rep)) == []
+    assert dr.check_voice(dr.render_citizen(rep)) == []
+
+
+@pytest.mark.parametrize("name", RENDER_CASES)
+def test_citizen_register_has_no_technical_number_or_tool_word(name):
+    _, rep = make_report(name)
+    text = dr.render_citizen(rep)
+    plain = re.sub(r'"[^"]*"', "", text)  # the citizen's own words may carry domain numbers
+    assert not re.search(r"\d", plain), plain
+    assert "%" not in text
+    for word in ("PASS", "gate", "CRAP", "D1", "D2", "D3a", "D3b", "baseline", "NM-"):
+        assert word not in text
+
+
+def test_not_measured_reason_sits_on_the_same_table_row():
+    _, rep = make_report("sem-gate")
+    row = next(ln for ln in dr.render_markdown(rep).splitlines() if ln.startswith("| D3a"))
+    assert "NM-SEM-GATE" in row
+
+
+def test_all_na_has_no_highlight_and_says_nothing_to_measure():
+    rep = dr.compute_report(small(reqs=[], scenarios=[], touched=None))
+    full = dr.build_report({**small(reqs=[], scenarios=[], touched=None), "extras": {}})
+    text = dr.render_markdown(full)
+    assert "Nenhum degrau tinha itens para medir." in text and "O maior D" not in text
+    assert rep["degraus"]["D1"]["D"] == "n/a"
+
+
+def test_tie_is_said_as_a_tie():
+    _, rep = make_report("ok-m2-deriva")
+    assert dr.highlight(rep) == "Empate entre D3a e D3b."
+
+
+def test_highlight_names_the_step_and_the_count():
+    _, rep = make_report("ok-m1")
+    assert dr.highlight(rep).startswith("O maior D está em D3b: 2 de 20 linhas")
+
+
+def test_audit_sentence_is_present_when_there_is_an_audit():
+    _, rep = make_report("auditoria")
+    assert "A auditoria não entra no D." in dr.render_markdown(rep)
+
+
+@pytest.mark.parametrize("name,line", [("sem-features", "Não aplicável: este projeto não tem features."),
+                                       ("plano-v1", "Não aplicável: este plano é do formato antigo."),
+                                       ("specify-pulado", "Não aplicável: esta tarefa não teve cenários.")])
+def test_not_applicable_is_exactly_one_line_in_every_register(name, line):
+    _, rep = make_report(name)
+    assert dr.render_markdown(rep) == line + "\n" and dr.render_citizen(rep) == line + "\n"
+
+
+def test_citizen_lists_only_absences_and_what_changed():
+    _, rep = make_report("ok-m2-deriva")
+    text = dr.render_citizen(rep)
+    assert "Desfazer uma conta marcada como paga por engano" in text
+    assert "Depois da entrega, mais cenários deixaram de passar." in text
+    assert "têm teste que rodou" not in text  # a count that only confirms does not enter
+
+
+def test_citizen_counts_are_in_words():
+    assert [dr.words(n) for n in (0, 1, 2, 12, 21, 40, 99, 100)] == [
+        "zero", "um", "dois", "doze", "vinte e um", "quarenta", "noventa e nove", "muitos"]
+
+
+def test_md_of_the_deriva_case_fits_one_screen_apart_from_the_sources_line():
+    _, rep = make_report("ok-m2-deriva")
+    lines = [ln for ln in dr.render_markdown(rep, at="2026-10-07T10:00:00Z").splitlines() if not ln.startswith("Medido em")]
+    assert len(lines) <= 45, len(lines)
+
+
+def test_markdown_is_deterministic():
+    _, a = make_report("ok-m2-deriva")
+    _, b = make_report("ok-m2-deriva")
+    assert dr.render_markdown(a) == dr.render_markdown(b)
+
+
+def test_html_is_self_contained_and_escaped():
+    _, rep = make_report("ok-m1")
+    rep["itens"]["cenarios_descobertos"]["D2"] = [{"chave": "k", "nome": "<script>alert(1)</script>"}]
+    text = dr.render_html(rep)
+    assert "<script" not in text and "&lt;script&gt;" in text
+    for ext in ("http://", "https://", "src=", "<link", "@import", "url("):
+        assert ext not in text
+    assert "2 de 20" in text  # the number is in the text, not only in the bar
+
+
+def test_html_option_writes_the_file_and_exits_0(tmp_path, capsys):
+    root = copy_tree(_FIX / "ok-m1", tmp_path / "p")
+    code = dr.main([str(root), "--feature", SLUG, "--moment", "M1", "--html", "--out", str(tmp_path / "out")])
+    capsys.readouterr()
+    assert code == 0 and (tmp_path / "out" / f"{SLUG}-M1.html").is_file()
+
+
+def test_as_coded_table_is_regenerated_from_the_matrix():
+    rep = dr.generate(_FIX / "ok-m2-deriva", SLUG, moment="M2", status_fn=stub_status, as_coded=True)
+    text = dr.render_markdown(rep)
+    assert "### Como ficou (regenerado da matriz)" in text
+    assert "| REQ-contas-da-semana-002 | Desfazer uma conta marcada como paga por engano | falhou | não |" in text
+
+
+def test_retranslation_side_by_side_has_three_columns_for_each_requirement():
+    _, rep = make_report("retraducao-pos-codigo")
+    text = dr.render_markdown(rep)
+    assert "| Requisito | Você pediu | Eu entendi antes do código | Eu entendi depois do código |" in text
+    assert dr.render_citizen(rep).count("Eu entendi depois do código:") == 2
+
+
+def test_missing_post_code_retranslation_says_so_and_invents_nothing():
+    _, rep = make_report("ok-m1")
+    assert rep["retraducao"]["estado"] == "nao_medido"
+    assert dr.NM_SENTENCE["NM-SEM-RETRADUCAO-POS-CODIGO"] in dr.render_markdown(rep)
+
+
+def test_every_nm_sentence_fits_the_voice_limit():
+    for code, sentence in dr.NM_SENTENCE.items():
+        assert len(sentence.split()) <= dr.MAX_SENTENCE_WORDS, code
+    assert set(dr.NM_SENTENCE) == set(dr.NM_CATALOG)

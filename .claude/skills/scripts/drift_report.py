@@ -70,6 +70,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import html
 import json
 import os
 import re
@@ -865,14 +866,34 @@ def _retranslation_block(matrix: dict, reqs: list[str]) -> dict[str, Any]:
     for r in reqs:
         info = intent["reqs"].get(r, {})
         asked = [intent["frases"].get(f, "") for f in info.get("frases", []) if f in intent["frases"]]
-        items.append({"req": r, "pedido": asked, "antes": intent["retraducao"].get(r, ""),
+        items.append({"req": r, "texto": info.get("texto", ""), "pedido": asked, "antes": intent["retraducao"].get(r, ""),
                       "depois": (post or {}).get(r, "")})
     if post is None:
         return {"estado": "nao_medido", "razao_nm": ["NM-SEM-RETRADUCAO-POS-CODIGO"], "itens": items}
     return {"estado": "medido", "razao_nm": [], "itens": items}
 
 
-def build_report(matrix: dict, *, m1: dict | None = None) -> dict[str, Any]:
+_TEST_WORD = {"passed": "passou", "failed": "falhou", "error": "deu erro", "undefined": "sem passo definido",
+              "skipped": "pulado", "xfail": "falha esperada", "absent": "sem teste"}
+
+
+def _as_coded_rows(matrix: dict, states: dict) -> list[dict[str, Any]]:
+    """The as-coded of the feature, regenerated from the matrix (DRP-015): never edited by hand."""
+    intent = matrix.get("extras", {}).get("intent", {"reqs": {}})
+    rows = []
+    for req in matrix.get("reqs", []):
+        scs = [s for s in matrix.get("scenarios", []) if req in s.get("tags", [])]
+        rows.append({
+            "req": req, "texto": intent["reqs"].get(req, {}).get("texto", ""),
+            "cenarios": [{"nome": s.get("name", s["id"]),
+                          "teste": "desativado" if s.get("disabled") else _TEST_WORD.get(s.get("test_result"), "sem teste"),
+                          "conferido": {"cob": "sim", "desc": "não", "nm": "não medido"}.get(
+                              states["D3a"].get(s["id"]), "não se aplica")} for s in scs],
+        })
+    return rows
+
+
+def build_report(matrix: dict, *, as_coded: bool = False) -> dict[str, Any]:
     """`compute_report` plus the blocks that sit beside the vector, never inside it (DRP-015)."""
     analysis = analyze(matrix)
     core = analysis["report"]
@@ -882,11 +903,16 @@ def build_report(matrix: dict, *, m1: dict | None = None) -> dict[str, Any]:
     extras = matrix.get("extras", {})
     reqs = list(matrix.get("reqs", []))
     names = {s["id"]: s.get("name", s["id"]) for s in matrix.get("scenarios", [])}
-    intent = extras.get("intent", {"reqs": {}})
+    intent = extras.get("intent", {"reqs": {}, "frases": {}})
     degraus = {k: {**v, "prova": PROOF[k]} for k, v in core["degraus"].items()}
     scope_items = (extras.get("intent") or {}).get("fora_escopo", 0)
     n_nao_faz = sum(1 for s in matrix.get("scenarios", []) if s.get("nao_faz"))
     leituras = dict(core["leituras"])
+    d0 = dict(leituras["d0"])
+    if d0.get("estado") == "medido":
+        phrases = intent.get("frases", {})
+        d0["residuo"] = [{**r, "texto": phrases.get(r.get("frase"), "")} for r in d0.get("residuo", [])]
+    leituras["d0"] = d0
     leituras["cadeia_indeterminada"] = len(states["undecided"])
     leituras["testes_orfaos"] = len(extras.get("testes_orfaos", []))
     leituras["nao_faz"] = {"itens": scope_items, "cenarios": n_nao_faz, "sem_evidencia": max(0, scope_items - n_nao_faz)}
@@ -908,6 +934,8 @@ def build_report(matrix: dict, *, m1: dict | None = None) -> dict[str, Any]:
         "delta": None,
         "entradas": dict(sorted(extras.get("entradas", {}).items())),
     }
+    if as_coded:
+        report["as_coded"] = _as_coded_rows(matrix, states)
     return report
 
 
@@ -920,7 +948,7 @@ def compare(m1: dict | None, m2: dict) -> dict[str, Any]:
     if m1 is None:
         return {"estado": "nao_medido", "razao_nm": ["NM-SEM-M1"]}
     old = m1.get("report", {}).get("degraus", {})
-    out: dict[str, Any] = {"estado": "medido", "razao_nm": []}
+    out: dict[str, Any] = {"estado": "medido", "razao_nm": [], "m1_em": m1.get("at")}
     for step in STEPS:
         if step not in old or step not in m2["degraus"]:
             continue
@@ -929,7 +957,8 @@ def compare(m1: dict | None, m2: dict) -> dict[str, Any]:
         out[step] = {
             "m1": a, "m2": b,
             "mudanca": round(b["D"] - a["D"], 4) if both else None,
-            "denominador": f"o denominador mudou de {a['den']} para {b['den']}" if a["den"] != b["den"] else None,
+            "denominador": (f"o denominador mudou de {a['den']} para {b['den']}"
+                            if a["den"] and b["den"] and a["den"] != b["den"] else None),
         }
     before = m1.get("entradas", {})
     now = m2.get("entradas", {})
@@ -991,14 +1020,349 @@ def audit_sample(reqs: list[str], slug: str, pct: int = AUDIT_PCT) -> list[str]:
 def generate(
     root: Path, slug: str, *, plan: Path | None = None, moment: str = "M2", compare_m1: bool = False,
     status_fn: StatusFn | None = None, run_fn: RunFn | None = None, scripts_dir: Path | None = None,
+    as_coded: bool = False,
 ) -> dict[str, Any]:
     """load_matrix -> build_report, with the M2 - M1 delta when asked (the whole pipeline of one feature)."""
     matrix = load_matrix(root, slug, plan=plan, moment=moment, status_fn=status_fn, run_fn=run_fn,
                          scripts_dir=scripts_dir)
-    report = build_report(matrix)
+    report = build_report(matrix, as_coded=as_coded)
     if compare_m1 and moment == "M2" and not report.get("nao_aplicavel"):
         report["delta"] = compare(load_snapshot(root, slug, "M1"), report)
     return report
+
+
+# ---------------------------------------------------------------------------
+# Layer 3 -- renderers: fixed sentences, no LLM (DRP-012, DRP-013, DRP-016)
+# ---------------------------------------------------------------------------
+
+STEP_LABEL = {"D1": "D1 intenção para cenário", "D2": "D2 cenário para teste",
+              "D3a": "D3a teste para código (verdade)", "D3b": "D3b teste para código (excesso)"}
+STEP_FACT = {
+    "D1": "{d} de {n} requisitos sem cenário",
+    "D2": "{d} de {n} cenários sem teste executado",
+    "D3a": "{d} de {n} cenários com teste que não passa no código entregue",
+    "D3b": "{d} de {n} linhas ou ramos tocados sem cenário que os exercite (código sem cenário: excesso)",
+}
+NA_LINES = {
+    "sem-features": "Não aplicável: este projeto não tem features.",
+    "plano-v1": "Não aplicável: este plano é do formato antigo.",
+    "feature-sem-pasta": "Não aplicável: esta feature não tem pasta.",
+    "feature-sem-matriz": "Não aplicável: esta feature não tem matriz.",
+    "specify-pulado": "Não aplicável: esta tarefa não teve cenários.",
+}
+CAVEAT_TEXT = {
+    "amostra pequena": "Poucos requisitos: os números valem como contagem, não como tendência.",
+    "D3a sem prova de vermelho": "Não há prova de que o teste falhou antes do código, pelo motivo certo.",
+    "baseline aceito": "Um limite de qualidade foi relaxado para o portão passar.",
+    "baseline não verificado": "Eu não conferi se algum limite de qualidade foi relaxado.",
+    "cenários desatualizados": "Os cenários mudaram depois da aprovação.",
+    "cenários não aprovados": "Os cenários ainda não foram aprovados.",
+    "sem cenários aprovados": "Ainda não há cenários aprovados.",
+    "aprovação não verificada": "Eu não conferi se a aprovação dos cenários ainda vale.",
+}
+CITIZEN_CAVEAT = {
+    "amostra pequena": "Foram poucos requisitos para tirar uma conclusão.",
+    "D3a sem prova de vermelho": "Eu não tenho prova de que o teste falhou antes do código, pelo motivo certo.",
+    "baseline aceito": "Um limite de qualidade foi relaxado para o teste passar.",
+    "baseline não verificado": "Eu não conferi se algum limite de qualidade foi relaxado.",
+    "cenários desatualizados": "Os cenários mudaram depois da aprovação.",
+    "cenários não aprovados": "Os cenários ainda não foram aprovados.",
+    "sem cenários aprovados": "Ainda não há cenários aprovados.",
+    "aprovação não verificada": "Eu não conferi se a aprovação dos cenários ainda vale.",
+}
+_UNITS = ("zero", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove", "dez", "onze", "doze",
+          "treze", "quatorze", "quinze", "dezesseis", "dezessete", "dezoito", "dezenove")
+_TENS = {2: "vinte", 3: "trinta", 4: "quarenta", 5: "cinquenta", 6: "sessenta", 7: "setenta", 8: "oitenta",
+         9: "noventa"}
+
+
+def words(n: int) -> str:
+    """A count in words (masculine), for the citizen register; 100 or more is "muitos"."""
+    if n < 20:
+        return _UNITS[n]
+    if n < 100:
+        tens, unit = divmod(n, 10)
+        return _TENS[tens] + (f" e {_UNITS[unit]}" if unit else "")
+    return "muitos"
+
+
+def check_voice(text: str) -> list[str]:
+    """Voice limits (DRP-013): sentence <= 25 words, paragraph <= 6 sentences. Table rows are skipped."""
+    problems = []
+    for block in re.split(r"\n\s*\n", text):
+        lines = [ln for ln in block.splitlines() if ln.strip() and not ln.lstrip().startswith(("|", "#"))]
+        sentences = [s for ln in lines for s in re.split(r"(?<=[.!?])\s+", re.sub(r'"[^"]*"', "Q", re.sub(r"^\s*[-*]\s+", "", ln))) if s.strip()]
+        if len(sentences) > MAX_SENTENCES_PER_PARAGRAPH and not any(ln.lstrip().startswith("-") for ln in lines):
+            problems.append(f"parágrafo com {len(sentences)} frases: {sentences[0][:40]}")
+        for s in sentences:
+            if len(s.split()) > MAX_SENTENCE_WORDS:
+                problems.append(f"frase com {len(s.split())} palavras: {s[:40]}")
+    return problems
+
+
+def _fd(value: Any) -> str:
+    return f"{value:.2f}" if isinstance(value, (int, float)) else "n/a"
+
+
+def _na_line(report: dict) -> str:
+    motivo = report.get("motivo") or ""
+    if not motivo and "NM-SPECIFY-PULADA" in report.get("razao_nm", []):
+        motivo = "specify-pulado"
+    return NA_LINES.get(motivo, "Não aplicável: não há o que medir aqui.")
+
+
+def highlight(report: dict) -> str:
+    """The step with the largest D, by text; a tie is said as a tie; never a sum (DRP-015)."""
+    numeric = {s: report["degraus"][s] for s in STEPS if isinstance(report["degraus"][s]["D"], (int, float))}
+    if not numeric:
+        return "Nenhum degrau tinha itens para medir."
+    top = max(d["D"] for d in numeric.values())
+    if top == 0:
+        return "Nenhum degrau tem divergência medida."
+    winners = [s for s, d in numeric.items() if d["D"] == top]
+    if len(winners) > 1:
+        return f"Empate entre {' e '.join(winners)}."
+    d = numeric[winners[0]]
+    fact = STEP_FACT[winners[0]].format(d=d["descobertos"], n=d["cobertos"] + d["descobertos"])
+    return f"O maior D está em {winners[0]}: {fact}."
+
+
+def _nm_cell(deg: dict) -> str:
+    if not deg["nao_medidos"] and not deg["razao_nm"]:
+        return "0"
+    return f"{deg['nao_medidos']} ({', '.join(deg['razao_nm'])})" if deg["razao_nm"] else str(deg["nao_medidos"])
+
+
+def render_markdown(report: dict, *, at: str | None = None) -> str:
+    """Power dev register: the whole vector, with proof labels and what was not measured (DRP-013)."""
+    if report.get("nao_aplicavel"):
+        return _na_line(report) + "\n"
+    delta = report.get("delta") or {}
+    measured = delta.get("estado") == "medido"
+    out = [f"## Divergência por degrau ({report['feature']}, {report['momento']})", ""]
+    out += ["| Degrau | n | Cobertos | Descobertos | Não medido (razão) | D | M1 | M2 | Mudança | Prova |",
+            "|---|---|---|---|---|---|---|---|---|---|"]
+    for step in STEPS:
+        d = report["degraus"][step]
+        m1 = m2 = chg = "-"
+        if report["momento"] == "M1":
+            m1 = _fd(d["D"])
+        else:
+            m2 = _fd(d["D"])
+            if measured and step in delta:
+                m1 = _fd(delta[step]["m1"]["D"])
+                chg = f"{delta[step]['mudanca']:+.2f}" if delta[step]["mudanca"] is not None else "n/a"
+        out.append(f"| {STEP_LABEL[step]} | {d['n']} | {d['cobertos']} | {d['descobertos']} | {_nm_cell(d)} "
+                   f"| {_fd(d['D'])} | {m1} | {m2} | {chg} | prova: {d['prova']} |")
+    out += ["", highlight(report), ""]
+    nm_codes = [c for s in STEPS for c in report["degraus"][s]["razao_nm"]]
+    for code in dict.fromkeys(nm_codes):
+        out.append(f"- {NM_SENTENCE[code]}")
+    if nm_codes:
+        out.append("")
+    if report["momento"] == "M2":
+        if measured:
+            for step in STEPS:
+                if step in delta and delta[step]["denominador"]:
+                    out.append(f"- {step}: {delta[step]['denominador']}.")
+            if delta.get("mudou"):
+                out.append("- Mudaram depois da entrega: " + ", ".join(delta["mudou"]) + ".")
+            out.append("")
+        elif delta:
+            out += [NM_SENTENCE["NM-SEM-M1"], ""]
+    items = report["itens"]
+    if items["reqs_descobertos"]:
+        out += ["Requisitos sem cenário: " + ", ".join(i["req"] for i in items["reqs_descobertos"]) + ".", ""]
+    for step in ("D2", "D3a"):
+        if items["cenarios_descobertos"][step]:
+            label = "sem teste executado" if step == "D2" else "com teste que não passa no código entregue"
+            out += [f"Cenários {label} ({step}):", ""]
+            out += [f"- {i['nome']}" for i in items["cenarios_descobertos"][step]]
+            out.append("")
+    lei = report["leituras"]
+    out += ["Leituras fora do D:", ""]
+    if lei["cadeia_indeterminada"]:
+        out.append(f"- Cadeia completa: {lei['cadeia_completa']} requisitos; {lei['cadeia_indeterminada']} "
+                   "requisitos não medidos (falta teste ou portão).")
+    else:
+        out.append(f"- Cadeia completa: {lei['cadeia_completa']} requisitos.")
+    for key, label in (("cenarios_orfaos", "Cenários com tag de requisito inexistente"),
+                       ("cenarios_sem_tag", "Cenários sem tag"), ("testes_orfaos", "Testes sem cenário")):
+        if lei[key]:
+            out.append(f"- {label}: {lei[key]}.")
+    if lei["escada_fechou_sem_capturar"]:
+        out.append("- A escada fechou sem capturar a intenção: D1, D2 e D3a são zero e a auditoria ou o oráculo discorda.")
+    nf = lei["nao_faz"]
+    if nf["itens"]:
+        out.append(f"- Fora do escopo: {nf['itens']} itens e {nf['cenarios']} cenários @nao-faz; "
+                   f"{nf['sem_evidencia']} sem evidência (contagem por total, prova: arquivo).")
+    d0 = lei["d0"]
+    if d0["estado"] == "medido":
+        left = ", ".join(r["frase"] for r in d0["residuo"]) or "nenhuma"
+        out.append(f"- Do pedido: {d0['frases']} frases; sem requisito e sem fora do escopo: {left} (prova: arquivo).")
+    else:
+        out.append(f"- {NM_SENTENCE[d0['razao_nm'][0]]}")
+    rev = lei["intencao_sem_feature"]
+    if rev["estado"] == "medido":
+        out.append("- Intenção nascida depois da adoção e sem feature: " + (", ".join(rev["ids"]) or "nenhuma") + ".")
+    else:
+        out.append(f"- {NM_SENTENCE['NM-SEM-MARCA-ADOCAO']}")
+    if lei["o1"]:
+        out.append(f"- Oráculo: {lei['o1']['falham']} de {lei['o1']['n']} falham (O1 {_fd(lei['o1']['O1'])}).")
+    out.append("")
+    aud = report["auditoria"]
+    out += [(f"Auditoria (prova: humano): sim {aud['sim']}, parcial {aud['parcial']}, não {aud['nao']}; "
+             f"sem auditar: {', '.join(aud['nao_auditados']) or 'nenhum'}. A auditoria não entra no D."), ""]
+    retr = report["retraducao"]
+    if retr["estado"] == "medido":
+        out += ["Retradução depois do código, lado a lado (prova: humano julga):", "",
+                "| Requisito | Você pediu | Eu entendi antes do código | Eu entendi depois do código |", "|---|---|---|---|"]
+        for i in retr["itens"]:
+            out.append(f"| {i['req']} | {' / '.join(i['pedido']) or '-'} | {i['antes'] or '-'} | {i['depois'] or '-'} |")
+        out.append("")
+    else:
+        out += [NM_SENTENCE["NM-SEM-RETRADUCAO-POS-CODIGO"], ""]
+    if report["ressalvas"]:
+        out += ["Ressalvas:", ""] + [f"- {CAVEAT_TEXT.get(r, r)}" for r in report["ressalvas"]] + [""]
+    if "as_coded" in report:
+        out += ["### Como ficou (regenerado da matriz)", "", "| Requisito | Cenário | Teste | Conferido |", "|---|---|---|---|"]
+        for row in report["as_coded"]:
+            if not row["cenarios"]:
+                out.append(f"| {row['req']} | sem cenário | - | - |")
+            for sc in row["cenarios"]:
+                out.append(f"| {row['req']} | {sc['nome']} | {sc['teste']} | {sc['conferido']} |")
+        out.append("")
+    out += ["O que o D não vê: o que o pedido pediu e nunca virou requisito.",
+            "Ele também não vê o cenário que tem a tag e não captura o requisito.",
+            "Ele não vê o porquê, o modelo e a preferência de forma.", ""]
+    when = f"M1 {delta['m1_em']} e M2 {at}" if measured and delta.get("m1_em") and at else (f"{report['momento']} {at}" if at else report["momento"])
+    out.append(f"Medido em {when}. Fontes: {', '.join(report['entradas']) or 'nenhuma lida'}.")
+    return "\n".join(out) + "\n"
+
+
+def render_citizen(report: dict) -> str:
+    """Citizen register (DRP-013): counts in words, absences by name, no D, no percent, no tool word."""
+    if report.get("nao_aplicavel"):
+        return _na_line(report) + "\n"
+    deg, items, lei = report["degraus"], report["itens"], report["leituras"]
+    out = [f"## O que ficou entre o seu pedido e o que existe ({report['feature']})", "",
+           "Eu comparei o que você pediu com o que ficou pronto. Eu só descrevo; a decisão é sua.", ""]
+
+    def absence(step: str, template: str, one: str) -> str | None:
+        """Only an absence enters the citizen register; what only confirms does not (D-004, CYC-014)."""
+        d = deg[step]
+        den = d["cobertos"] + d["descobertos"]
+        if not d["descobertos"]:
+            return None
+        head = words(d["descobertos"]).capitalize()
+        return (one if d["descobertos"] == 1 else template).format(k=head, n=words(den))
+
+    found = False
+    s1 = absence("D1", "{k} de {n} requisitos não têm cenário.", "{k} de {n} requisitos não tem cenário.")
+    if s1:
+        found = True
+        out += [s1, ""] + [f'- "{i["texto"] or i["req"]}"' for i in items["reqs_descobertos"]] + [""]
+    s2 = absence("D2", "{k} de {n} cenários não têm teste que rodou.", "{k} de {n} cenários não tem teste que rodou.")
+    if s2:
+        found = True
+        out += [s2, ""] + [f'- "{i["nome"]}"' for i in items["cenarios_descobertos"]["D2"]] + [""]
+    s3 = absence("D3a", "{k} de {n} cenários com teste não mostraram o comportamento pedido.",
+                 "{k} de {n} cenários com teste não mostrou o comportamento pedido.")
+    if s3:
+        found = True
+        out += [s3, ""] + [f'- "{i["nome"]}"' for i in items["cenarios_descobertos"]["D3a"]] + [""]
+    if deg["D3b"]["descobertos"]:
+        found = True
+        out += ["Parte do código que mudou não tem nenhum cenário que a confira.", ""]
+    nm_codes = list(dict.fromkeys(c for s in STEPS for c in deg[s]["razao_nm"]))
+    if nm_codes:
+        out += [NM_SENTENCE[c] for c in nm_codes] + [""]
+    if not found and not nm_codes:
+        out += ["Eu não achei nada que falte entre o seu pedido e o que existe, no que eu medi.", ""]
+    delta = report.get("delta") or {}
+    if report["momento"] == "M2" and delta:
+        if delta.get("estado") != "medido":
+            out += [NM_SENTENCE["NM-SEM-M1"], ""]
+        else:
+            moved = []
+            more = {"D1": "mais requisitos ficaram sem cenário", "D2": "mais cenários ficaram sem teste",
+                    "D3a": "mais cenários deixaram de passar", "D3b": "mais código ficou sem cenário que o confira"}
+            less = {"D1": "menos requisitos ficaram sem cenário", "D2": "menos cenários ficaram sem teste",
+                    "D3a": "menos cenários deixaram de passar", "D3b": "menos código ficou sem cenário que o confira"}
+            for step in STEPS:
+                chg = delta.get(step, {}).get("mudanca")
+                if chg:
+                    moved.append(f"Depois da entrega, {(more if chg > 0 else less)[step]}.")
+            out += moved + ([""] if moved else [])
+    if lei["d0"]["estado"] != "medido":
+        out += [NM_SENTENCE["NM-SEM-INDICE-BRIEF"], ""]
+    elif lei["d0"]["residuo"]:
+        out += ["Estas frases do seu pedido não viraram requisito nem fora do escopo:", ""]
+        out += [f'- "{r.get("texto") or r["frase"]}"' for r in lei["d0"]["residuo"]] + [""]
+    n_nf = lei["nao_faz"]["sem_evidencia"]
+    if n_nf:
+        what = "um item" if n_nf == 1 else f"{words(n_nf)} itens"
+        out += [f"Eu disse que não faria {what}. Nenhum cenário prova que eu não o faço."
+                if n_nf == 1 else f"Eu disse que não faria {what}. Nenhum cenário prova que eu não os faço.", ""]
+    aud = report["auditoria"]
+    if aud["nao"]:
+        out += ["Há requisitos em que o cenário não captura o que você pediu. Peça para ver quais.", ""]
+    retr = report["retraducao"]
+    if retr["estado"] == "medido":
+        out += ["Eu escrevi o que entendi depois do código. Para cada requisito, diga: é isso, ou não é isso.", ""]
+        for i in retr["itens"]:
+            if not i["depois"]:
+                continue
+            out += [f'Requisito: "{i.get("texto") or i["req"]}"', ""]
+            out += [f'- Você pediu: "{" / ".join(i["pedido"]) or "sem frase ligada"}"',
+                    f'- Eu entendi antes do código: "{i["antes"] or "sem texto"}"',
+                    f'- Eu entendi depois do código: "{i["depois"]}"', ""]
+    else:
+        out += [NM_SENTENCE["NM-SEM-RETRADUCAO-POS-CODIGO"], ""]
+    for r in report["ressalvas"]:
+        out += [CITIZEN_CAVEAT.get(r, r), ""]
+    return "\n".join(out).rstrip() + "\n"
+
+
+_HTML_CSS = """:root{--bg:#fff;--fg:#1c1c1c;--mut:#555;--bar:#2b6cb0;--trk:#e2e8f0;--line:#cbd5e0}
+@media (prefers-color-scheme:dark){:root{--bg:#171717;--fg:#eee;--mut:#aaa;--bar:#63b3ed;--trk:#333;--line:#444}}
+body{background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,sans-serif;max-width:56rem;margin:0 auto;padding:1rem}
+table{border-collapse:collapse;width:100%}th,td{border:1px solid var(--line);padding:.35rem .5rem;text-align:left;vertical-align:top}
+.bar{background:var(--trk);height:.7rem;border-radius:.35rem;min-width:6rem}.bar>i{display:block;height:100%;background:var(--bar);border-radius:.35rem}
+details{margin:.6rem 0}summary{cursor:pointer;font-weight:600}.mut{color:var(--mut)}"""
+
+
+def render_html(report: dict, *, citizen: bool = False) -> str:
+    """One self-contained file, no external resource, every text escaped; the number is also in the text."""
+    esc = html.escape
+    title = f"Divergência por degrau ({report.get('feature', '')}, {report.get('momento', '')})"
+    body = [f"<h1>{esc(title)}</h1>"]
+    if report.get("nao_aplicavel"):
+        body.append(f"<p>{esc(_na_line(report))}</p>")
+    elif citizen:
+        for para in render_citizen(report).split("\n\n")[1:]:
+            lines = [ln for ln in para.splitlines() if ln.strip()]
+            if lines and all(ln.startswith("- ") for ln in lines):
+                body.append("<ul>" + "".join(f"<li>{esc(ln[2:])}</li>" for ln in lines) + "</ul>")
+            elif lines:
+                body.append("<p>" + "<br>".join(esc(ln) for ln in lines) + "</p>")
+    else:
+        body.append(f"<p>{esc(highlight(report))}</p>")
+        body.append("<table><tr><th>Degrau</th><th>Barra</th><th>Descobertos</th><th>Não medido (razão)</th><th>D</th><th>Prova</th></tr>")
+        for step in STEPS:
+            d = report["degraus"][step]
+            den = d["cobertos"] + d["descobertos"]
+            width = round(100 * d["descobertos"] / den) if den else 0
+            text = f"{d['descobertos']} de {den}" if den else "sem itens medidos"
+            body.append(f"<tr><td>{esc(STEP_LABEL[step])}</td><td><div class='bar'><i style='width:{width}%'></i></div>"
+                        f"<span class='mut'>{esc(text)}</span></td><td>{d['descobertos']}</td><td>{esc(_nm_cell(d))}</td>"
+                        f"<td>{esc(_fd(d['D']))}</td><td>{esc(d['prova'])}</td></tr>")
+        body.append("</table>")
+        md = render_markdown(report)
+        body.append(f"<details><summary>Relatório completo</summary><pre>{esc(md)}</pre></details>")
+    return ("<!doctype html>\n<html lang='pt-BR'><head><meta charset='utf-8'>"
+            "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+            f"<title>{esc(title)}</title><style>{_HTML_CSS}</style></head><body>" + "\n".join(body) + "</body></html>\n")
 
 
 # ---------------------------------------------------------------------------
@@ -1064,7 +1428,7 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         reports = []
         for slug in slugs:
-            report = generate(root, slug, plan=plan, moment=args.moment, compare_m1=args.compare)
+            report = generate(root, slug, plan=plan, moment=args.moment, compare_m1=args.compare, as_coded=args.as_coded)
             if args.audit_sample:
                 active = [p["req"] for p in report.get("retraducao", {}).get("itens", [])]
                 print("\n".join(audit_sample(active, slug)))
@@ -1084,20 +1448,30 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     if args.audit_sample or args.freeze:
         return 0
-    if args.json or not (args.md or args.citizen or args.html):
+    if args.json:
         body = reports[0] if len(reports) == 1 else {"schema_version": SCHEMA_VERSION, "relatorios": reports}
         print(json.dumps(body, ensure_ascii=False, indent=2))
         return 0
-    print("drift_report: os renderizadores Markdown, citizen e HTML chegam no Step 7", file=sys.stderr)
-    return 2
-
-
-NA_LINES = {
-    "sem-features": "Não aplicável: este projeto não tem features.",
-    "plano-v1": "Não aplicável: este plano é do formato antigo.",
-    "feature-sem-pasta": "Não aplicável: esta feature não tem pasta.",
-    "feature-sem-matriz": "Não aplicável: esta feature não tem matriz.",
-}
+    chosen_md = args.md or not (args.citizen or args.html)
+    chunks = []
+    for report in reports:
+        if args.as_coded and not report.get("nao_aplicavel"):
+            pass  # as_coded rows are already in the report: generate(as_coded=True)
+        if chosen_md:
+            chunks.append(render_markdown(report, at=args.at))
+        if args.citizen:
+            chunks.append(render_citizen(report))
+        if args.html:
+            if report.get("nao_aplicavel"):
+                chunks.append(_na_line(report) + "\n")
+                continue
+            folder = Path(args.out) if args.out else root / "features" / report["feature"] / "drift"
+            folder.mkdir(parents=True, exist_ok=True)
+            target = folder / f"{report['feature']}-{report['momento']}.html"
+            target.write_text(render_html(report, citizen=args.citizen), encoding="utf-8")
+            print(f"HTML: {target}", file=sys.stderr)
+    print("\n".join(chunks), end="")
+    return 0
 
 
 if __name__ == "__main__":
