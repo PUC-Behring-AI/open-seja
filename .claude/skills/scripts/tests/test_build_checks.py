@@ -510,3 +510,20 @@ def test_install_plugin_refuses_a_hand_edited_copy(tmp_path: Path) -> None:
     plugin.write_text(plugin.read_text(encoding="utf-8") + "\n# editado\n", encoding="utf-8")
     assert bc.main(["install-plugin", str(tmp_path)]) == 1
     assert plugin.read_text(encoding="utf-8").endswith("# editado\n")
+
+
+# ---------------------------------------------------------------------------
+# Step 7: the /implement text routes by version before any test-first action (dry run of the text)
+# ---------------------------------------------------------------------------
+
+_SKILL = Path(__file__).resolve().parents[2] / "implement" / "SKILL.md"
+
+
+def test_implement_skill_branches_on_the_version_first() -> None:
+    text = _SKILL.read_text(encoding="utf-8")
+    assert "`--pipeline`" in text and "general/implement-test-first.md" in text
+    assert "build_checks.py route" in text
+    version_check = text.index("**Version check**")
+    assert version_check < text.index("Test-first steps (plan v2)")
+    assert "os cenários estão desatualizados: refaça a specify" in text
+    assert "never offer to move the baseline" in text

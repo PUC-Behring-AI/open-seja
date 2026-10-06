@@ -289,6 +289,7 @@ A flag `/implement --pipeline`, com os papéis Cleaner e Hardener depois do Code
 
 - **Quem decide**: designer, no plan-000013.
 - **Critério de aceitação**: nenhum `SKILL.md` contém texto executável de `--pipeline`, Cleaner ou Hardener até o plan-000013.
+- **Implementação**: `.claude/references/general/implement-test-first.md` (ITF-010, ITF-011; papéis `cleaner` e `hardener`), plan-000013; ver CYC-030.
 
 ### CYC-026 -- Runner de Gherkin pendente
 
@@ -321,3 +322,11 @@ A classificação "com código / sem código" da grill (GRL-012) decide **antes*
 - **Quem decide**: designer; o verificador recusa.
 - **Critério de aceitação**: plano pulado com step de teste e sem N/A justificado sai 1 com PFS-013; todos os steps `Tests: N/A` saem 0.
 - **Ruptura que pode provocar** (CYC-014): ao power dev, "disse que não tinha código e o plano tem teste". Registro do power dev.
+
+### CYC-030 -- O motor do teste-primeiro e onde ele grava (emenda 000013)
+
+O teste-primeiro de CYC-020 a CYC-025 roda pela norma `.claude/references/general/implement-test-first.md` (`ITF-001..025`): vermelho pelo motivo certo decidido por `build_checks.py red-check` (R1 a R8; `failed` só com `AssertionError` no `Então`, `undefined` e `error` não contam, CYC-022), papéis com contexto curto (`scenario-tester`, Coder, `cleaner`, `hardener`), teto de 3 tentativas por fase e escalada ao humano. O registro do build mora em `features/<slug>/gate.json`, chave aditiva `build` (os campos `schema_version`, `fast`, `full` e `ts` de CYC-024 não mudam), e é exportado para os arquivos que o relatório de divergência lê (`runner/cucumber.json`, `drift/red-reason.json`, `drift/coverage.json`, `baseline_moved`). Plano v2 com `GATE_FULL_CMD` roda `full` uma vez no fim; sem ele o D3a fica `não medido`.
+
+- **Quem decide**: as ferramentas (T1); o humano nas escaladas e no baseline (S2).
+- **Critério de aceitação**: um step dono só sai do vermelho com `red-check` exit 0; o `gate.json` de uma feature construída tem `build.scenarios[<chave>].red.reason_ok`; plano v1 tem a mesma rota de antes (`build_checks.py route`).
+- **Ruptura que pode provocar** (CYC-014): ao citizen, a demonstração por cenário ("não demonstrado") e o mutante recontado como pergunta ("isso importa para você?"); ao power dev, "meu teste vermelho foi recusado por R3".

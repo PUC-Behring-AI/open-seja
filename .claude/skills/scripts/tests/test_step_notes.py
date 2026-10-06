@@ -225,3 +225,20 @@ def test_parse_cli_stats_shows_gate_attempts(plans, capsys):
     assert step_notes.main(["parse", str(path), "--stats"]) == 0
     out = capsys.readouterr().out
     assert "attempts 2" in out
+
+
+def test_pipeline_and_red_reason_fields(plans):
+    """plan-000013 (ITF): test-first steps add `pipeline` and `red-reason-ok` lines to the note."""
+    path = _append(pipeline="on", red_reason_ok="true")
+    text = path.read_text()
+    assert "- pipeline: on\n- red-reason-ok: true\n" in text
+    note = step_notes.parse_notes(text)[0]
+    assert note.pipeline == "on" and note.red_reason_ok == "true"
+    assert note.gate_status == "not-installed"
+
+
+def test_pipeline_fields_are_optional_and_validated(plans):
+    text = _append().read_text()
+    assert "- pipeline:" not in text and "- red-reason-ok:" not in text
+    with pytest.raises(step_notes.StepNotesError):
+        _append(red_reason_ok="maybe")

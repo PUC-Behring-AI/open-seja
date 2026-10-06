@@ -18,6 +18,8 @@ Writes and reads a fixed-form note block in ``${PLANS_DIR}/plan-<id>-progress.md
     - less-sure: <txt|none>
     - gate: <PASS|FAIL|ERROR> (exit <n>, attempts <k>, <path>) | not-installed | not-run | not-applicable (plan phase only)
     - human: "<verbatim>"            (only with --human)
+    - pipeline: on|off               (only with --pipeline; test-first steps, implement-test-first.md)
+    - red-reason-ok: true|false|null (only with --red-reason-ok; ITF-005)
 
 Subcommands:
     append        append one note (creates the progress file when missing)
@@ -56,12 +58,14 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 GATE_FLAGS = ("not-installed", "not-run")
 PLAN_GATE_FLAG = "not-applicable"
 PHASES = ("plan", "build")
+PIPELINE_VALUES = ("on", "off")
+RED_REASON_VALUES = ("true", "false", "null")
 RECORD_KINDS = {"communication": "declined", "drift": "not-measured"}
 _NOTE_HEADER_RE = re.compile(
     r"^### (?:Step (?P<step>\d+)|(?P<plan>Plan)) -- reflection-on-action"
     r" \| (?P<dt>[^|]+?) \| (?P<title>.*)$"
 )
-_FIELD_RE = re.compile(r"^- (happened|deviated|less-sure|gate|human): ?(.*)$")
+_FIELD_RE = re.compile(r"^- (happened|deviated|less-sure|gate|human|pipeline|red-reason-ok): ?(.*)$")
 _GATE_LINE_RE = re.compile(
     r"^(?P<status>[A-Z]+) \(exit (?P<exit>-?\d+), attempts (?P<att>\d+), (?P<path>.*)\)$"
 )
@@ -85,6 +89,8 @@ class StepNote:
     gate_path: str | None = None
     human: str | None = None
     phase: str = "build"  # plan|build
+    pipeline: str | None = None  # on|off (test-first steps)
+    red_reason_ok: str | None = None  # true|false|null (ITF-005)
 
 
 # ---------------------------------------------------------------------------
@@ -170,6 +176,8 @@ def append_note(
     plans_dir: Path | None = None,
     now: str | None = None,
     phase: str = "build",
+    pipeline: str | None = None,
+    red_reason_ok: str | None = None,
 ) -> Path:
     """Append a note block to the plan's progress file and return its path."""
     happened, deviated, less_sure = (_one_line(x) for x in (happened, deviated, less_sure))
@@ -182,6 +190,10 @@ def append_note(
         raise StepNotesError(f"--phase must be one of {', '.join(PHASES)}")
     if phase == "plan" and gate_json is not None:
         raise StepNotesError("plan-phase notes take no --gate-json (use --gate not-applicable)")
+    if pipeline is not None and pipeline not in PIPELINE_VALUES:
+        raise StepNotesError(f"--pipeline must be one of {', '.join(PIPELINE_VALUES)}")
+    if red_reason_ok is not None and red_reason_ok not in RED_REASON_VALUES:
+        raise StepNotesError(f"--red-reason-ok must be one of {', '.join(RED_REASON_VALUES)}")
     if (gate_json is None) == (gate is None):
         raise StepNotesError("give exactly one of --gate-json or --gate")
     if gate is not None:
@@ -202,6 +214,10 @@ def append_note(
         f"- less-sure: {less_sure}",
         f"- gate: {gate_line}",
     ]
+    if pipeline is not None:
+        lines.append(f"- pipeline: {pipeline}")
+    if red_reason_ok is not None:
+        lines.append(f"- red-reason-ok: {red_reason_ok}")
     if human is not None:
         lines.append(f'- human: "{_one_line(human)}"')
     block = "\n".join(lines) + "\n"
@@ -271,6 +287,10 @@ def parse_notes(text: str) -> list[StepNote]:
             current.deviated = val
         elif key == "less-sure":
             current.less_sure = val
+        elif key == "pipeline":
+            current.pipeline = val
+        elif key == "red-reason-ok":
+            current.red_reason_ok = val
         elif key == "human":
             current.human = val[1:-1] if len(val) >= 2 and val[0] == val[-1] == '"' else val
         elif key == "gate":
@@ -375,6 +395,8 @@ def _build_parser() -> argparse.ArgumentParser:
     a.add_argument("--gate", choices=GATE_FLAGS + (PLAN_GATE_FLAG,))
     a.add_argument("--gate-attempts", type=int)
     a.add_argument("--human")
+    a.add_argument("--pipeline", choices=PIPELINE_VALUES)
+    a.add_argument("--red-reason-ok", choices=RED_REASON_VALUES, dest="red_reason_ok")
 
     c = sub.add_parser("record", help="append a communication/drift registry line")
     c.add_argument("--plan", required=True)
@@ -401,7 +423,8 @@ def main(argv: list[str] | None = None) -> int:
             path = append_note(
                 args.plan, args.step, args.title, args.happened, args.deviated,
                 args.less_sure, args.gate_json, args.gate_attempts, args.human,
-                gate=args.gate, phase=args.phase,
+                gate=args.gate, phase=args.phase, pipeline=args.pipeline,
+                red_reason_ok=args.red_reason_ok,
             )
             print(path)
         elif args.cmd == "record":
