@@ -1,3 +1,4 @@
+# DONE | 2026-10-06 17:51 UTC |
 # Plan 000010 | FEATURE-O | 2026-10-05 11:35 UTC | gherkin-spec-format: convenção de .feature (tag @REQ-) e validador determinístico | Review: standard
 
 > **Origem**: movido do ledger do Doutourado em 2026-10-05 (proposal-000088; la era `plan-000079`). Os IDs roadmap-000006 e plan-000007..000016 sao deste ledger (tabela no roadmap). Referencias a research-NNNNNN, reflection-NNNNNN, communication-NNNNNN, roadmap-000062 e plan-000064..000074 apontam para o ledger do Doutourado (repositorio do pesquisador). Caminhos `open-seja/...` em Files passam a ser relativos a raiz deste repositorio.
@@ -282,3 +283,21 @@ Metacomm contradiction check: nenhuma intenção existente em `product-design-as
 - Lista de lacunas contra os planos 000007 e 000008 e texto sugerido para o designer.
 
 smoke: false
+
+## Implementation summary (2026-10-06)
+
+- Steps: 9/9 SUCCESS, executados por um subagente Sonnet (um commit por step); orquestrador revisou e fechou.
+- Arquivos: `.claude/references/general/gherkin-spec-format.md` (GHK-001..019; mapeamento Cucumber JSON -> estados DRM-003), `.claude/skills/scripts/check_features.py` (+ `test_check_features.py`, `test_feature_example.py`, 36 fixtures golden, relatorio real do runner), exemplo `.claude/references/template/feature-example/` (.py com sufixo `.example`), CYC-027 no contrato, ponteiros em `feature-layout.md` e `drift-metric.md`.
+- Runner: pytest-bdd 9.0.0 tem `--cucumberjson` e le `# language: pt`; o relatorio omite cenario `@skip` e cenario com step indefinido, por isso `--junitxml` entra como complemento (lacuna para o 000013).
+- Baseline novo: run_all_checks 17 PASS / 14 FAIL (contadores 17/2/9); pytest 863 passed / 12 failed antes das correcoes.
+- Proposta ao designer: D-010 (o `.feature` e conferido por validador deterministico; runner contract em Cucumber JSON) -- lote de marcadores do plan-000015 Step 10.
+- Quality gate: `/critique review` (code-reviewer standard): 0 critical, 7 advisory; todos corrigidos com teste primeiro no commit 4059b71 (BOM, bloco aberto, `.py` ilegivel em `--steps`, `intent.md` ilegivel -> exit 2, decorator so de `pytest_bdd`, Background em Rule documentado, `\|` em celula); 179 testes no modulo.
+
+### Generator-Critic Iterations
+- Iteration count: 1/2
+- Findings per iteration: [0 critical, 7 advisory]
+- Resolution status: all resolved
+
+## Reflection
+
+- 2026-10-06: O executor trocou JUnit XML por Cucumber JSON conforme o contrato e descobriu que o relatorio do pytest-bdd omite cenarios skip e indefinidos; a revisao achou falhas de robustez de leitura, corrigidas. (notes 9, with deviation 9, with gate 0)

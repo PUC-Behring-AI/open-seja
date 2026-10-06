@@ -214,3 +214,4 @@ Entregue: convencao `gherkin-spec-format.md` (GHK-001..019, saida, mapeamento Cu
 - 6. Doc: linha em `gherkin-spec-format.md` (limite do `Background` dentro de `Rule`, tratado como o da Feature).
 - 7. `_split_row`: `\|` fica dentro da célula.
 - Testes: 7 novos (8 casos) em `test_check_features.py`, vermelhos antes, verdes depois.
+- drift: not-measured

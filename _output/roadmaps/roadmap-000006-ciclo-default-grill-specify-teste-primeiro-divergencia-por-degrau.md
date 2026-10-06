@@ -100,7 +100,7 @@ pesquisador). C1: nada de nome de parceiro nos artefatos que forem ao open-seja.
 | # | ID | Title | Scope | Type | Plan | Depends on | Status |
 |---|-----|-------|-------|------|------|-----------|--------|
 | 3 | plan-grill-phase | Fase grill do `/plan`: entrevista até intenção detalhada com REQ IDs, em linguagem que o citizen valida (voz controlada do item 11 do 62) | backend | design | plan-000009 | default-cycle-contract | done |
-| 4 | gherkin-spec-format | Convenção de `.feature` (tag `@REQ-`) + validador (steps sem duplicata/ambiguidade, rastreabilidade) | backend | technical | plan-000010 | default-cycle-contract | planned |
+| 4 | gherkin-spec-format | Convenção de `.feature` (tag `@REQ-`) + validador (steps sem duplicata/ambiguidade, rastreabilidade) | backend | technical | plan-000010 | default-cycle-contract | done |
 
 ### Wave 2 -- Specify e plano rastreável (parallel)
 | # | ID | Title | Scope | Type | Plan | Depends on | Status |
