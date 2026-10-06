@@ -1,28 +1,151 @@
-# SEJA -- DESIGN INTENT
+# DESIGN INTENT -- open-seja
 
 <!-- maintained-by: human (designer) -->
 
-> Documento de intenção do SEJA: o que o SEJA **é para ser**, antes e acima do que ele
-> hoje **é**. Registra a fundamentação teórica, os fluxos e os agentes que a materializam.
+> Arquivo unificado de intenção do open-seja: a intenção de trabalho (§0-§17), a fundamentação teórica de que ela decorre (dentro do §3), as decisões validadas com a justificativa preservada (`## Decisions`, formato DDR) e o changelog cronológico (`## CHANGELOG`).
 >
-> **Classificação**: `Human (markers)`. A prosa é de autoria humana. Agentes podem
-> escrever marcadores `STATUS` sobre as seções e apensar linhas ao `## CHANGELOG`
-> via `apply_marker.py`, após confirmação explícita no mesmo turno.
+> **Classificação**: `Human (markers)`. A prosa é de autoria humana. Agentes podem escrever marcadores `STATUS` nas seções §1-§17, nas jornadas JM-TB-NNN do §15 e nas entradas `### D-NNN:`, e apensar linhas ao `## CHANGELOG`, sempre via `apply_marker.py` e após confirmação explícita no mesmo turno.
 >
-> **Postura epistêmica**: tudo aqui é leitura corrente e provisória, no registro
-> abdutivo que o próprio SEJA adota (ver `docs/foundations.md`). Hipóteses são
-> marcadas como tal (`H-NNN`) e carregam o que as confirmaria ou refutaria.
-> Não confundir hipótese registrada com decisão tomada.
+> **Postura epistêmica**: tudo aqui é leitura corrente e provisória, no registro abdutivo que o próprio SEJA adota (ver `docs/foundations.md`). Hipóteses são marcadas como tal (`H-NNN`) e carregam o que as confirmaria ou refutaria. Não confundir hipótese registrada com decisão tomada: hipóteses vivem no §3; só decisões entram em `## Decisions`.
 >
-> **IDs estáveis**: princípios `P-NNN`, hipóteses `H-NNN`, questões abertas `Q-NNN`,
-> decisões `D-NNN`.
+> **IDs estáveis**: princípios `P-NNN`, hipóteses `H-NNN`, questões abertas `Q-NNN`, decisões `D-NNN`, jornadas `JM-TB-NNN`, requisitos `REQ-TYPE-NNN` (REQ-ENT, REQ-PERM, REQ-UX, REQ-MC, REQ-JM, REQ-I18N, REQ-VAL, REQ-DELTA). D-NNN e REQ-TYPE-NNN são ortogonais: decisões registram *por que*; REQs identificam *o que* precisa existir.
 >
-> **Idioma**: pt-BR, língua de trabalho das sessões de design. A documentação pública
-> em `docs/` é en-US; a tradução é preocupação posterior (ver `Q-005`).
+> **Máquina de estados STATUS**: `proposed -> implemented -> established -> superseded`.
+>
+> **Idioma**: pt-BR, língua de trabalho das sessões de design. A documentação pública em `docs/` é en-US; a tradução desta fundamentação segue aberta (`Q-005`).
+>
+> **Origem**: semeado por `/design` em 2026-10-05 a partir de `_output/tmp/design-rascunho-as-intended-2026-10-05.md`, fundindo `product-design/seja-as-intended.md` neste arquivo (`Q-006` fechada: fundir). A fundamentação está no §3 com a numeração original (1.x, 2.x) preservada, para que citações externas como "1.2.4" e "2.8" continuem resolvendo.
 
 ---
 
-## 1. Princípios da engenharia semiótica
+## 0. Planned Changes
+
+| Target Version | Change Summary | Motivation / Rationale |
+|---|---|---|
+| v0.11 | Ciclo default com fases grill e specify dentro do `/plan`, teste-primeiro por cenário no `/implement`, divergência por degrau no `/reflect` (roadmap-000006, H-009) -- STATUS: intended | Decompor a intenção em representações progressivamente formais (intenção detalhada -> cenários -> testes -> código) para que o as-coded divirja menos do as-intended, com a divergência medida por degrau e não só no fim. |
+| v0.11 | Retradução em primeira pessoa como objeto de aprovação do citizen no specify e no REFLECT; `.feature` como contrato aprovado pelo power dev -- STATUS: intended | Features são contratos endereçáveis, não signos; o citizen aprova a mensagem (D-004). |
+| v0.11 | Voz controlada (STE100) como voz padrão de `/explain`, `/communicate`, `/document`; `--html` autocontido -- STATUS: intended (plan-000074 do ledger do pesquisador) | O citizen lê em frases curtas e termos fixos. |
+| v0.12+ | Preset `apprentice` (iniciantes em programa de formação) gerado a partir do open-seja pinado, dependência unidirecional preset -> open-seja -- STATUS: intended (D-003) | Ponto discreto da escala H-001 (Q-002) sem bifurcar o ciclo; comparabilidade de artefatos entre instâncias. |
+| futuro | SEJA como serviço (`seja-mcp`, H-007) -- STATUS: intended, parado | Rumo de arquitetura; o ciclo consome o harness como ele estiver. |
+
+---
+
+## 1. Platform Purpose
+
+O open-seja é a distribuição de acesso aberto do SEJA (Semiotic Engineering Journeys with Agents). Instalado num projeto de software, ele dá ao Claude Code um ciclo curto, PLAN -> BUILD -> REFLECT, em que a intenção é escrita antes do código e comparada com o que foi construído, cada passo de implementação só conta como feito quando um portão determinístico responde PASS, e cada fase termina com um espelho oferecido ao designer.
+
+É para dois públicos. O primeiro são desenvolvedores ao longo de uma escala contínua de literacia de código (H-001): do citizen dev, que tem a intenção e o domínio do problema mas não lê código, ao power dev, que lê código fluentemente e quer aceleração, controle e rastreabilidade. O segundo são pesquisadores que estudam o harness como objeto: a pergunta que ele serve é como o sistema comunica ao humano as intenções que realizou, e se essa comunicação é reconstruível por quem a recebe.
+
+O problema que resolve: desenvolvimento assistido por IA é um problema de comunicação projetada (P-001, P-002). Quando um agente produz o código a partir de uma intenção dita em linguagem natural, a tradução pode estar errada sem estar quebrada, e o humano que não lê código não tem como saber. O open-seja torna a intenção um signo endereçável (H-002), mede a deriva entre o que se pretendia e o que existe, e devolve ao humano, no registro que ele decodifica, o que o preposto entendeu e construiu (P-003).
+
+O SEJA não é um gerenciador de tarefas para agentes, nem uma camada de processo sobre o Claude Code. Ele é uma aposta teórica: a de que os métodos da engenharia semiótica, construídos para a interação humano-computador, se transferem para a interação humano-agente-código com poder explicativo intacto. A fundamentação dessa aposta está no §3; quem lê o SEJA de fora tende a ver uma coleção de convenções arbitrárias, e quem lê a partir dela vê um sistema de signos desenhado.
+
+### Design Philosophy
+
+- **O artefato é uma mensagem, não um produto** (P-001): cada arquivo que o harness ajuda a produzir é andaime para a comunicação designer -> usuário.
+- **O dev fala, o robô produz, as ferramentas apoiam o robô** (P-002): o preposto do designer deixou de ser estático e compõe a fala no momento do uso.
+- **O receptor não é único** (H-001): para o citizen dev, o código não pode ser a mensagem; o harness produz os signos metalinguísticos que falam sobre ele.
+- **Há um caminho de volta** (P-003): o robô devolve ao humano o que entendeu e construiu; a retradução é obrigatória no polo citizen e eletiva no polo power (H-003).
+- **As convenções são um sistema de signos projetado, não estilo** (P-004): marcadores, classificações de autoria e IDs dizem de quem é a voz em cada arquivo.
+- **Validar antes de comunicar** (P-005): `/critique` sempre precede `/document` e `/communicate`.
+- **Skill orquestra, agente executa** (P-006, P-007, H-004): o orquestrador é o preposto; os agentes são o vocabulário; a composição varia com a posição do humano na escala.
+- **PASS é resultado de ferramenta, não frase** (H-008): prosa no prompt não é plano de controle; o limiar só se move por mão humana.
+- **Tudo aqui é hipótese numerada com condição de refutação**: o SEJA aplica a si mesmo o raciocínio abdutivo que declara adotar.
+
+---
+
+## 2. Entity Hierarchy
+
+Duas hierarquias paralelas: a **estrutura do harness** (o que existe) e a **escada de representações** (intended, roadmap-000006).
+
+```
+Projeto com o harness instalado
+└── Intenção (product-design/)
+    ├── product-design-as-intended.md   (voz humana; agentes marcam; inclui a fundamentação P, H, Q)
+    ├── constitution.md, standards.md, conventions.md
+    └── product-design-as-coded.md      (voz do agente; regenerado)
+└── Ledger (_output/)
+    └── Artefato com ID global (research, plan, roadmap, proposal, reflection, communication, qa-log)
+        └── Plano
+            └── Step (Files, Verify, Tests, Traces; Scenarios em v2 [intended])
+                └── Resultado do portão (gate JSON por step)
+└── Harness (.claude/)
+    ├── Skill (orquestra; pre-skill e post-skill envolvem toda invocação)
+    │   └── Agente (avaliador | gerador | executor; contexto isolado)
+    └── Scripts de verificação (check_*.py, run_all_checks.py, gate)
+```
+
+```
+[intended] Feature (features/<slug>/)
+└── intent.md         (REQ-<slug>-NNN; "Nas suas palavras"; Fora do escopo; Premissas; Para que; Modelo e termos; serve:)
+    └── *.feature     (cenário com @REQ-<slug>-NNN; contrato)
+        └── teste executável (vermelho pelo motivo certo, depois verde)
+            └── código + gate.json (perímetro da feature)
+```
+
+<!-- REQ-ENT-001 -->
+### Projeto
+
+- **Representa**: um repositório de software onde o open-seja foi instalado por `/seja-setup`.
+- **Regra de domínio**: sem `product-design-as-intended.md` não há ciclo; `/design` precede o primeiro `/plan` (D-002).
+
+<!-- REQ-ENT-002 -->
+### Intenção
+
+- **Representa**: o que o designer quer, em arquivo. Três estados: as-conceived (na cabeça, sem artefato), as-intended (registrado), as-coded (o que existe) (H-005).
+- **Regra**: as-intended e as-coded ficam separados de propósito; a distância é a deriva, e `/explain drift` a reconcilia.
+
+<!-- REQ-ENT-003 -->
+### Artefato do ledger
+
+- **Representa**: a saída de uma skill, com ID sequencial global reservado por `reserve_id.py`.
+- **Regra**: imutável depois de criado; correção é por apensamento (revoked/superseded com motivo), nunca por reescrita.
+
+<!-- REQ-ENT-004 -->
+### Plano e Step
+
+- **Representa**: compromisso de construção; cada step declara arquivos, verificação, testes e intenções que atende (`Traces:`).
+- **Regra**: em BUILD, step só conta como feito com PASS do portão; o `/critique` do fim mede o que escapou.
+
+<!-- REQ-ENT-005 -->
+### Skill e Agente
+
+- **Representa**: a skill conduz a conversa e decide a composição; o agente executa um papel sobre um tipo de artefato, em contexto isolado.
+- **Regra**: o usuário nunca invoca um agente diretamente (P-006).
+
+<!-- REQ-ENT-006 -->
+### Feature [intended]
+
+- **Representa**: a unidade de medida da divergência por degrau; nunca apagada (git é a recuperação).
+- **Regra**: a feature é o perímetro de medição; fora dele é `legado: não medido`.
+
+---
+
+## 3. Domain-Specific Concepts
+
+### Glossário
+
+- **Preposto do designer**: a voz do designer atravessando o sistema no momento do uso; aqui, generativo (P-002).
+- **Mensagem de metacomunicação**: "eis meu entendimento de quem você é, o que quer, de que modo, por quê; eis o sistema que projetei e como usá-lo".
+- **Retradução (mão de volta)**: o preposto devolve ao humano o que entendeu e construiu, no registro que ele decodifica (P-003).
+- **Escala citizen <-> power**: eixo de literacia de código, ortogonal a BLD/SHP/GRD e L1-L3 (H-001, Q-002).
+- **Deriva**: distância entre as-intended e as-coded; cidadã de primeira classe (H-002).
+- **Portão determinístico**: lint, tipos, testes com cobertura por ramo, CRAP nas funções tocadas, contratos de dependência e, na rodada lenta, mutação; PASS é resultado de ferramenta (H-008).
+- **Ratchet e baseline**: o limiar só se move por mão humana; o agente não aceita baseline nem pula o portão.
+- **Espelhos por fase**: o plano contado a uma audiência (PLAN) e a deriva medida (BUILD), oferecidos, nunca impostos.
+- **Três registros de Schön**: na-ação (justificativa de cada opção), sobre-a-ação (nota por step e por skill), sobre-a-prática (`/reflect`, palavras literais).
+- **Hipótese H-NNN**: enunciado com o que a confirmaria e o que a refutaria; não é decisão.
+- **Classificações de autoria**: Human, Human (markers), Human/Agent, Agent; dizem de quem é a voz em cada arquivo (P-004, Q-007).
+- **Escada de representações [intended]**: brief -> intent.md -> .feature -> teste -> código + gate, com divergência por degrau (H-009).
+- **Degrau zero [intended]**: resíduo do brief que não virou requisito nem fora-do-escopo; leitura fora do vetor D.
+- **Contrato endereçável [intended]**: o `.feature` é um par expressão-conteúdo convencionalizado entre humano e preposto; REQ IDs e chaves de cenário são endereços, não signos (D-004).
+- **Preset [intended]**: perfil gerado a partir do open-seja pinado, com dependência unidirecional preset -> open-seja; não é fork (D-003).
+
+### Fundamentação
+
+> Texto migrado literalmente de `product-design/seja-as-intended.md` (seções 1 e 2) em 2026-10-05. A numeração 1.x e 2.x é a original. As figuras ficam em `docs/`.
+
+### Parte 1 -- Princípios da engenharia semiótica
 
 O SEJA não é um gerenciador de tarefas para agentes, nem uma camada de processo sobre
 o Claude Code. Ele é uma aposta teórica: a de que **desenvolvimento de software assistido
@@ -38,9 +161,9 @@ desenhado.
 
 ---
 
-### 1.1 Conceitos fundamentais
+#### 1.1 Conceitos fundamentais
 
-#### 1.1.1 Software como comunicação projetada
+##### 1.1.1 Software como comunicação projetada
 
 <!-- P-001 -->
 **P-001 -- O artefato é uma mensagem, não um produto.**
@@ -62,7 +185,7 @@ A consequência para o SEJA é direta: cada artefato que o harness ajuda a produ
 para essa comunicação. Não é sobrecarga de gestão. É um modo de ser mais deliberado
 sobre a mensagem que se está entregando.
 
-#### 1.1.2 O terceiro interlocutor: o robô entra na cena
+##### 1.1.2 O terceiro interlocutor: o robô entra na cena
 
 <!-- P-002 -->
 **P-002 -- A relação dev↔código passou a ser mediada por um agente que produz código.**
@@ -113,7 +236,7 @@ desenvolvimento já havia sido feita em SigniFYI (de Souza et al. 2016, *Softwar
 Developers as Users*); o que acrescentamos é que o desenvolvedor agora tem um preposto
 próprio, generativo, entre ele e o artefato.
 
-#### 1.1.3 O receptor não é único: a escala citizen dev ↔ power dev
+##### 1.1.3 O receptor não é único: a escala citizen dev ↔ power dev
 
 <!-- H-001 -->
 **H-001 (hipótese) -- Existe uma escala contínua de desenvolvedores, ancorada em
@@ -159,7 +282,7 @@ Fica aberto: (a) se o eixo é de fato ortogonal ou se colapsa parcialmente em BL
 (b) quantos pontos discretos a escala precisa ter para ser operacional -- um contínuo não
 é implementável, e dois polos provavelmente são grosseiros demais.
 
-#### 1.1.4 A mão de volta: metacomunicação em dois sentidos
+##### 1.1.4 A mão de volta: metacomunicação em dois sentidos
 
 <!-- P-003 -->
 **P-003 -- O SEJA tem um caminho de retorno, e ele é parte da mensagem.**
@@ -192,7 +315,7 @@ segmentos de audiência, `/document`), mas hoje ela é **eletiva**: o usuário p
 pedir. A intenção registrada aqui é que, para posições baixas da escala H-001, a
 retradução deixe de ser eletiva.
 
-#### 1.1.5 Sistemas de signos e o sistema de marcadores
+##### 1.1.5 Sistemas de signos e o sistema de marcadores
 
 <!-- P-004 -->
 **P-004 -- As convenções do SEJA são um sistema de significação projetado, não estilo.**
@@ -220,7 +343,7 @@ As quatro classificações de arquivo -- `Human`, `Human (markers)`, `Agent`,
 `Human / Agent` -- são o mesmo mecanismo aplicado à **autoria**: elas dizem de quem é
 a voz em cada arquivo do repositório, e impedem que as vozes se misturem.
 
-#### 1.1.6 Computabilidade da intenção
+##### 1.1.6 Computabilidade da intenção
 
 <!-- H-002 -->
 **H-002 (hipótese) -- O SEJA pode ser um bom instrumento para embasar a computabilidade
@@ -254,9 +377,9 @@ contra os andaimes de reflexão.
 
 ---
 
-### 1.2 Fluxos de trabalho
+#### 1.2 Fluxos de trabalho
 
-#### 1.2.1 O caminho canônico
+##### 1.2.1 O caminho canônico
 
 <!-- P-005 -->
 **P-005 -- Validar antes de comunicar.**
@@ -289,7 +412,7 @@ se a intenção está assentada e o que falta é construir. A única exceção �
 iteração de um projeto novo, em que `/seja-setup` instala o harness e entrega a
 `/design`.
 
-#### 1.2.2 O par as-intended / as-coded e a deriva
+##### 1.2.2 O par as-intended / as-coded e a deriva
 
 O harness mantém dois documentos em tensão deliberada:
 
@@ -303,7 +426,7 @@ que a reconcilia. Manter os dois arquivos separados é uma escolha: fundir inten
 implementação num documento só apaga precisamente a informação mais valiosa -- *o que
 ainda não é*.
 
-#### 1.2.3 Os fluxos precisam variar ao longo da escala H-001
+##### 1.2.3 Os fluxos precisam variar ao longo da escala H-001
 
 <!-- H-003 -->
 **H-003 (hipótese, decorrente de H-001) -- O caminho canônico é o mesmo, mas a
@@ -325,7 +448,7 @@ O ciclo não se bifurca. O que muda é **onde o humano toca nele** e **em que re
 preposto fala de volta**. Essa é a formulação concreta de "o harness e seus agentes
 precisam se adequar ao dev que estão assistindo".
 
-#### 1.2.4 Os três registros de reflexão
+##### 1.2.4 Os três registros de reflexão
 
 O SEJA carrega os três registros de Schön (1983) como andaimes concretos, deliberadamente
 mínimos para que a encenação não compense o esforço:
@@ -347,9 +470,9 @@ aplicado a si mesmo.
 
 ---
 
-### 1.3 Agentes principais
+#### 1.3 Agentes principais
 
-#### 1.3.1 Skill orquestra, agente executa
+##### 1.3.1 Skill orquestra, agente executa
 
 <!-- P-006 -->
 **P-006 -- A skill é o orquestrador; o agente é a responsabilidade única.**
@@ -368,7 +491,7 @@ Duas skills internas -- `pre-skill` e `post-skill` -- envolvem toda invocação 
 de usuário. São elas que fazem os andaimes de reflexão de 1.2.4 acontecerem de forma
 consistente e auditável, em vez de dependerem de disciplina.
 
-#### 1.3.2 Os três papéis
+##### 1.3.2 Os três papéis
 
 <!-- P-007 -->
 **P-007 -- Todo agente é avaliador, gerador ou executor.**
@@ -409,7 +532,7 @@ especialistas rodando leituras abdutivas concorrentes sobre a mesma questão, po
 desacordo estruturado, para que a síntese entregue carregue as contra-leituras visíveis.
 A intenção é não fingir que uma recomendação é a única plausível.
 
-#### 1.3.3 O orquestrador que compõe
+##### 1.3.3 O orquestrador que compõe
 
 ![Design do harness](../docs/designt-harnerss.png)
 
@@ -448,7 +571,7 @@ orquestrador não é o ponto de variação certo.
 
 ---
 
-## 2. De AI-assisted a AI-Native: a hipótese
+### Parte 2 -- De AI-assisted a AI-Native: a hipótese
 
 A literatura sobre desenvolvimento assistido por IA investiga majoritariamente a
 comunicação humano -> IA: como o desenvolvedor instrui, corrige e restringe o modelo.
@@ -464,7 +587,7 @@ lê cada elemento contra a seção 1: o que já estava lá, o que se refina, o q
 Os termos *AI-assisted* e *AI-native* seguem Hassan et al. (2026), que os usam para
 nomear SE 2.0 e SE 3.0.
 
-### 2.1 Três fases como grão grosso do caminho canônico
+#### 2.1 Três fases como grão grosso do caminho canônico
 
 PLAN, BUILD e REFLECT não são um ciclo novo; são o caminho canônico de P-005 em grão
 mais grosso:
@@ -484,7 +607,7 @@ para leitor e continua vindo depois de `/critique`.
 Isto responde Q-008: o `Agent WF` de quatro itens da Figura 2 era este grão grosso, não
 uma proposta de ciclo sem validação. Registrado em D-001.
 
-### 2.2 A faixa transversal EXPLAIN / COMMUNICATE
+#### 2.2 A faixa transversal EXPLAIN / COMMUNICATE
 
 Atravessando as três fases corre uma faixa de retorno, e ela não é uma coisa só:
 
@@ -510,7 +633,7 @@ Duas distinções mantêm a faixa coerente com o que a seção 1 já fixou:
 A faixa é uma resposta *candidata* a Q-004 (etapa do post-skill que compara e devolve).
 Q-004 permanece aberta até o mecanismo rodar. Abre Q-011.
 
-### 2.3 A seta REDESIGN: deriva como detecção precoce
+#### 2.3 A seta REDESIGN: deriva como detecção precoce
 
 Quando o EXPLAIN surpreende -- o que voltou não é o que se pretendia -- a seta REDESIGN
 volta da faixa ao PLAN. Isto já existe em H-002 (deriva como cidadã de primeira classe,
@@ -519,7 +642,7 @@ periódica (verificação a cada 14 dias) e eletiva; detecção precoce pede que
 por evento, ao fim de cada `/implement`. Esta é a consequência verificável desta
 subseção -- e é estado intencional, não atual.
 
-### 2.4 As-conceived / as-intended / as-coded: duas lacunas
+#### 2.4 As-conceived / as-intended / as-coded: duas lacunas
 
 <!-- H-005 -->
 **H-005 (hipótese) -- Há três estados da intenção, não dois, e só a segunda lacuna
@@ -549,7 +672,7 @@ Nota de nomenclatura: o termo "as-conceived" para o estado tácito é escolha de
 documento; formulações anteriores usaram outro nome para o termo do meio. O arquivo
 as-intended mantém o sentido que tem em 1.2.2 e H-002.
 
-### 2.5 Governança, proveniência, rastreabilidade
+#### 2.5 Governança, proveniência, rastreabilidade
 
 A terceira perna da hipótese -- quem altera o quê, de onde veio cada item, cada decisão
 ligada à sua intenção -- não acrescenta princípio novo. É P-004 (o sistema de marcadores
@@ -560,7 +683,7 @@ a hipótese faz é nomeá-la como condição: sem rastreabilidade, o EXPLAIN de 
 voz quando duas vias de autoria escrevem no mesmo texto) continua sendo a questão
 aberta desta perna.
 
-### 2.6 Os três registros de Schön relidos nas três fases
+#### 2.6 Os três registros de Schön relidos nas três fases
 
 A seção 1.2.4 localizou os três registros de Schön em andaimes concretos. A hipótese os
 relê sobre o desenho das três fases:
@@ -575,7 +698,7 @@ Isto refina 1.2.4 em dois pontos: a reflexão-na-ação deixa de ser só a justi
 da `AskUserQuestion` e passa a incluir os microloops de PLAN e BUILD; e o `/reflect`
 se desdobra pelas duas lentes que a skill já oferece.
 
-### 2.7 O harness que evolui da reflexão do time
+#### 2.7 O harness que evolui da reflexão do time
 
 <!-- H-006 -->
 **H-006 (hipótese) -- As skills e regras do harness podem evoluir a partir dos
@@ -602,7 +725,7 @@ origem (rastreabilidade de P-004). O que a refutaria: reflexões acumuladas sem 
 plano que as cite -- a crítica de Eraut (1994) a andaimes que viram ritual, já
 registrada em H-002. Abre Q-013.
 
-### 2.8 As três fases com validação por passo: o portão determinístico
+#### 2.8 As três fases com validação por passo: o portão determinístico
 
 D-001 leu o `Agent WF` de quatro itens como o grão grosso do caminho canônico, com o
 `/critique` dentro de BUILD. Curto é a superfície que o leitor vê, não o conteúdo.
@@ -682,24 +805,33 @@ correção, não intenção, e o ciclo curto precisa do espelho como passo fixo,
 oferta.
 Registrado em D-002 o que o release faz enquanto a hipótese está em teste.
 
----
+#### 2.9 A escada de representações (proposta)
 
-## Questões abertas
+<!-- H-009 -->
+**H-009 (proposta, filha de H-008) -- se o SEJA decompõe a intenção em linguagem natural em representações progressivamente mais formais (intenção detalhada com REQ IDs -> cenários Gherkin -> testes executáveis -> código) e só implementa depois, o *as-coded* diverge menos do *as-intended* do que no ciclo PLAN -> BUILD -> REFLECT de H-008. A divergência é medida por degrau da escada, não só no fim.**
+
+Texto de origem: roadmap-000006. O ajuste que D-004 fixa: H-009 declara o próprio alcance. A escada é completa para comportamento operacionalizado, com perda declarada de racional, modelo, preferência e crença sobre o usuário; essas categorias são objeto do degrau zero (D0), da auditoria semântica e da retradução julgada pelo citizen, não do vetor D.
+
+O que a refutaria: se, no piloto, ajustes e recusas no specify, escapes de intenção antes do código e mutantes virados em REQ forem todos zero, a aprovação virou ritual, H-009 cai e H-001 volta a pedir adequação por posição na escala.
+
+> **Nota sobre H-007.** O CHANGELOG da fundamentação registra que a hipótese de SEJA como serviço passou a ser H-007 (2026-09-18), mas o texto dela não está neste arquivo nem estava no de origem. Fica como lacuna a redigir; o rumo está no §0 (`seja-mcp`, parado).
+
+### Questões abertas
 
 | ID | Questão | Bloqueia |
 |---|---|---|
 | `Q-001` | Referência bibliográfica exata do artigo de Abrahão de que partiu o desenho de 1.1.2 -- autor(es), título, veículo, ano. Não foi inventada aqui de propósito. | citação de P-002 |
-| `Q-002` | A escala H-001 é ortogonal a BLD/SHP/GRD e L1-L3, ou colapsa parcialmente? Quantos pontos discretos ela precisa para ser operacional? | operacionalização de H-001 |
+| `Q-002` | A escala H-001 é ortogonal a BLD/SHP/GRD e L1-L3, ou colapsa parcialmente? Quantos pontos discretos ela precisa para ser operacional? D-003 registra um ponto concreto (`apprentice`) sem fechá-la. | operacionalização de H-001 |
 | `Q-003` | Como o harness **detecta** a posição do humano na escala? Declaração explícita no `conventions.md`? Inferência a partir da interação? Escolha por sessão? **Sustentada em aberto por decisão de 2026-08-26 -- ver nota abaixo.** | H-003 |
-| `Q-004` | A retradução obrigatória (P-003) é um novo artefato, um novo modo de `/explain`, ou uma etapa do `post-skill`? | P-003 |
-| `Q-005` | Este documento fica em pt-BR ou é traduzido para en-US junto com `docs/`? O SEJA é publicado publicamente. | publicação |
-| `Q-006` | Relação entre este documento e o `product-design-as-intended.md` no formato §0-§17 do template -- ver nota abaixo. | estrutura |
+| `Q-004` | A retradução obrigatória (P-003) é um novo artefato, um novo modo de `/explain`, ou uma etapa do `post-skill`? **Fechada por D-004 (2026-10-05):** é etapa do specify e do REFLECT, não artefato novo nem modo de `/explain`. | P-003 |
+| `Q-005` | Este documento fica em pt-BR ou é traduzido para en-US junto com `docs/`? O SEJA é publicado publicamente. **Mantida aberta em 2026-10-05**; o texto segue em pt-BR. | publicação |
+| `Q-006` | Relação entre a fundamentação e o `product-design-as-intended.md` no formato §0-§17 do template. **Fechada em 2026-10-05 (`/design`): fundir.** A fundamentação vive no §3 deste arquivo; as hipóteses ficam no §3, e só as decisões entram em `## Decisions`. | estrutura |
 | `Q-007` | Duas vias de autoria escrevem no mesmo `</>` (Figura 1). De quem é a voz que o leitor do código está lendo? O harness precisa distinguir trecho de autoria humana de trecho de autoria do preposto? | `P-002a` |
 | `Q-008` | O `Agent WF` da Figura 2 lista **Research → Plan → Implement → Reflect** -- um ciclo **reduzido**, sem `/design`, `/critique`, `/document` e `/communicate`. É simplificação do desenho, ou é uma proposta deliberada de ciclo mais curto para o agente de workflow? Se for deliberada, colide com `P-005` (validar antes de comunicar). **Fechada por D-001 (2026-09-18).** Reforçada por H-008 (2026-10-03): o ciclo curto internaliza `/communicate` e `/explain` como espelhos de fase. | `P-005`, `H-004` |
 | `Q-009` | "Orquestrador" aparece **duas vezes** na Figura 2: dentro da lista do `Agent WF` e de novo, solto, fora da caixa. São dois níveis de orquestração (um por-workflow e um global), ou é repetição de ênfase? | `H-004` |
 | `Q-010` | O círculo com figura no alto à esquerda da Figura 1, alimentado por um humano e ligado ao `</>`, não foi identificado com segurança. O que representa? | leitura da Figura 1 |
 | `Q-011` | Como a faixa contínua de EXPLAIN (2.2) respeita o portão de P-005 sem virar ritual -- o que é "preparar" um COMMUNICATE sem emiti-lo? | 2.2, Q-004 |
-| `Q-012` | O `semiotic-inspector` avalia signos de interface via SIM. Avaliar a retradução (se a mensagem IA -> humano é reconstruível pelo receptor) pede um modo novo. Qual método -- CEM adaptado? | pergunta de pesquisa da seção 2 |
+| `Q-012` | O `semiotic-inspector` avalia signos de interface via SIM. Avaliar a retradução (se a mensagem IA -> humano é reconstruível pelo receptor) pede um modo novo. Qual método -- CEM adaptado? **Resposta parcial (D-004, 2026-10-05):** a retradução é julgada pelo receptor ("é isso / não é isso" por requisito), lógica CEM, registrada em `audit.json`. | pergunta de pesquisa da seção 2 |
 | `Q-013` | Qual skill consome os registros de `/reflect` como entrada, e com que regra de escrita sobre `.claude/skills` (reversível? proposta + confirmação humana?) | H-006 |
 
 > **Nota sobre `Q-003`.** Esta questão está **deliberadamente sustentada em aberto**, e
@@ -710,35 +842,364 @@ Registrado em D-002 o que o release faz enquanto a hipótese está em teste.
 > indireta uma resposta a `Q-002` que ainda não temos. Fechar `Q-002` primeiro é o
 > caminho; até lá, `H-003` permanece como leitura, sem implementação.
 
-> **Nota sobre `Q-006`.** O esqueleto do template (`§0 Planned Changes`, `§1 Platform
-> Purpose`, `§2 Entity Hierarchy`, ... `§17`) é moldado para produto: hierarquia de
-> entidades, modelo de permissões, jornadas. Este documento é de outro nível -- é a
-> fundamentação teórica de que o produto decorre. A leitura corrente é que ele é
-> **anterior** ao as-intended no formato do template, e que este último ainda precisa ser
-> semeado. Se a decisão for fundir, esta seção 1 vira a base de `§1 Platform Purpose` e
-> `§3 Domain-Specific Concepts`, e as hipóteses migram para `## Decisions`.
+---
+
+## 4. Permission Model
+
+Não há login. O modelo de permissão do open-seja é sobre **quem pode escrever em que arquivo** e **o que o agente não pode fazer**.
+
+### System-Level Roles
+
+<!-- REQ-PERM-001 -->
+| Role | Level | Capabilities |
+|---|---|---|
+| Designer (humano) | owner | Escreve prosa em arquivos Human e Human (markers); aprova marcadores; move o ratchet do portão; aceita ou recusa espelhos |
+| Agente (skills e subagentes) | agent | Escreve em `_output/` e em arquivos Agent (as-coded, índices); aplica marcadores via `apply_marker.py` após confirmação; nunca edita prosa Human (markers) |
+| Leitor da distribuição | reader | Clona `main` (manifesto exclui `_output/**` e `product-design/conventions.md`), roda `/seja-setup --here` |
+
+### Resource-Level Access
+
+<!-- REQ-PERM-002 -->
+| Access Level | Level | Capabilities |
+|---|---|---|
+| `main` (distribuição) | public-org | Só o que o `tools/publish-manifest.txt` inclui; sem ledger, sem conventions do próprio open-seja |
+| `dev` (desenvolvimento) | restricted | Ledger `_output/`, `product-design/` completo, planos do ciclo default |
+| Denies ao agente | enforced | `git commit --no-verify` e `gate --accept-baseline` negados por permissão; hooks `Stop` e `PreToolUse` rodam o portão |
+
+> **Rationale:** a única fronteira que importa é a da voz (P-004, Q-007) e a do ratchet (H-008): o humano é o dono das restrições; o agente fica no laço interno.
 
 ---
 
-## Decisions
+## 5. Content Authoring & Attribution
 
-> Decisões registradas por `apply_marker.py --marker DECISION_APPEND` (formato DDR:
-> Context / Decision / Consequences / Rejected Alternatives). Uma decisão fecha ou
-> reencaminha uma questão aberta; hipóteses não entram aqui até serem decididas.
+Duas vias de autoria escrevem no mesmo código (P-002a, Q-007 aberta). O harness distingue a voz por classificação de arquivo e por marcador, não por sistema de atribuição em app. Regras: palavras do designer são registradas literalmente (regra do verbatim); a mensagem de metacomunicação usa "eu" (designer) e "você" (usuário), nunca terceira pessoa; agentes marcam `source: agent (...)` no que escrevem. O open-seja é derivado do SEJA sob CC BY-NC 4.0; a atribuição e o uso do nome estão em `README.md` e `TRADEMARKS.md`.
 
-### D-001: O Agent WF de três fases é o grão grosso do caminho canônico; Q-008 fechada
+---
 
-**Context**: A Figura 2 lista Research -> Plan -> Implement -> Reflect, mais curto que o ciclo de P-005. Q-008 perguntava se era simplificação do desenho ou proposta de ciclo sem validação.
-**Decision**: PLAN / BUILD / REFLECT são o caminho canônico em grão grosso: PLAN = investigar + dar forma; BUILD = `/implement` com `/critique` dentro; REFLECT = `/reflect`. O portão "validar antes de comunicar" permanece.
-**Consequences**: Q-008 fechada por testemunho do autor do desenho. `/document` e `/communicate` continuam depois de `/critique`; o "documentar" interno a BUILD é a voz do agente (nota do post-skill, as-coded), não artefato para leitor. Ver seção 2.1.
-**Rejected Alternatives**: tratar o Agent WF como ciclo reduzido sem `/critique` -- colide com o único invariante rígido do harness.
+## 6. Content Import & Export
 
-### D-002: O release apresenta PLAN -> BUILD -> REFLECT como caminho de entrada, condicionado ao portão determinístico (H-008)
+### Import Formats
 
-**Context**: D-001 leu o ciclo curto como grão grosso de P-005. O release precisa dizer sob que condição o oferece a quem instala, enquanto H-008 não foi medida.
-**Decision**: O caminho de entrada documentado é PLAN -> BUILD -> REFLECT. Dentro de BUILD, o `/implement` roda o portão determinístico por passo quando o projeto o instalou; o `/critique` do fim de BUILD continua obrigatório e seus achados críticos são cruzados com os passos que tiveram PASS (taxa de escape de H-008). `/critique` antes de `/document` e `/communicate` não muda (P-005). O `/plan` oferece ao fim o `/communicate` do plano e o `/implement` oferece no wrap-up o `/explain drift` com o as-coded regenerado; nenhum dos dois é obrigatório, e o `/reflect` registra quando não foram medidos. O ciclo exige as-intended: o `/seja-setup` entrega ao `/design`, e o `/plan` recusa partir sem `product-design-as-intended.md`.
-**Consequences**: Projetos sem portão instalado ficam fora da medida de H-008; neles o `/critique` dentro de BUILD continua sendo a primeira validação, como em 2.1 e D-001. O primeiro ciclo real com portão gera a primeira medida, contra limiares fixados antes dele. A medida de escapes de intenção só existe nos ciclos em que o designer aceitou a deriva; a taxa de aceitação dos espelhos é ela própria registrada.
-**Rejected Alternatives**: apresentar o ciclo curto sem condição; tornar o portão obrigatório na instalação; espelhos obrigatórios (um agente gerador por plano, contra H-003); modo degradado sem as-intended (a deriva não teria referência).
+| Format | Source | Features |
+|---|---|---|
+| Codebase existente (brownfield) | repositório do usuário | `/seja-setup --here` instala o harness; `/design` registra a intenção a partir do que existe |
+| Questionário de design | `/design` | Gera as-intended, constitution, standards, conventions |
+| Spec de roadmap | `--from-spec <path>` | Roadmap com waves a partir de arquivo preenchido |
+| Palavras do designer | `/reflect`, `--framing metacomm` | Registradas verbatim |
+
+### Export Formats
+
+| Format | Output | Use Case |
+|---|---|---|
+| Markdown | `_output/**` | Todo artefato do ledger |
+| HTML autocontido | `--html` em `/explain`, `/communicate`, `/document` [intended] | Leitura fora do terminal |
+| Material por segmento | `/communicate` (EVL, CLT, USR, ACD) | O plano contado a uma audiência (espelho do PLAN) |
+| Release | `main` pelo manifesto; tag `vX.Y.Z`; instalador `npx` (não publicado) | Distribuição |
+
+---
+
+## 7. User Community & Localization
+
+### Target Community
+
+Times de desenvolvimento ao longo da escala H-001, do citizen ao power dev, cruzada com as famílias de papel (BLD Builders, SHP Shapers, GRD Guardians) e os níveis L1-L3. Segundo público: pesquisadores de engenharia semiótica e de engenharia de software que estudam o harness como objeto. Instância prevista [intended]: programa de formação de iniciantes (`apprentice`, D-003).
+
+### Localization Design
+
+<!-- REQ-I18N-001 -->
+| Aspect | Primary | Secondary |
+|---|---|---|
+| Sessões de design e fundamentação (§3) | pt-BR | -- |
+| `docs/` e README públicos | en-US | pt-BR (Q-005 aberta) |
+| Voz ao citizen | voz controlada (frases curtas, termos fixos) [intended] | -- |
+
+> Código, identificadores e mensagens de log em en-US. Q-005 segue aberta: a fundamentação fica em pt-BR até a decisão sobre a publicação.
+
+---
+
+## 8. User Experience Patterns (Domain-Driven)
+
+A interface é a conversa no Claude Code. Padrões próprios:
+
+<!-- REQ-UX-001 -->
+- **Decisão com justificativa**: toda `AskUserQuestion` traz, por opção, "Recommended when" e "NOT recommended when" (reflexão-na-ação). Nenhuma opção é pré-aceita por enquadramento.
+<!-- REQ-UX-002 -->
+- **Files for review** antes de qualquer pergunta que cite artefato já gerado.
+<!-- REQ-UX-003 -->
+- **Espelho oferecido, nunca imposto**: `/communicate` do plano ao fim do PLAN; `/explain drift` ao fim do BUILD; o `/reflect` registra quando não foram medidos.
+<!-- REQ-UX-004 -->
+- **PASS como resultado**: o portão devolve achados por função, nunca resumo em prosa.
+<!-- REQ-UX-005 -->
+- **Progress file** por plano, com nota por step.
+<!-- REQ-UX-006 -->
+- [intended] **Grill e specify**: entrevista em rodadas curtas, uma ideia por pergunta; aprovação em voz controlada; o citizen aprova a mensagem, o power dev aprova o contrato.
+
+---
+
+## 9. Administrative Domain
+
+### Activity Logging
+
+`_output/briefs.md` (toda invocação de skill), `telemetry.jsonl` (um registro por skill), `conversation-trace.jsonl`, `pending.jsonl` (ações humanas pendentes), `INDEX.md` (catálogo). Git é o log de mudanças.
+
+### Backup & Restore
+
+Git. Artefatos do ledger são imutáveis; não há soft-delete.
+
+### Terms & Conditions
+
+CC BY-NC 4.0 (derivado do SEJA), uso não comercial, sem garantias; nome usado com permissão do detentor da marca.
+
+---
+
+## 10. Validation Constants (Domain)
+
+<!-- REQ-VAL-001 -->
+| Constant | Value | Domain Rationale |
+|---|---|---|
+| CRAP máximo em funções tocadas / teto absoluto | 10 / 30 (`DEFAULT_MAX_TOUCHED`, `DEFAULT_MAX_ABS` do `gate.py`; ratchet a partir do baseline) | Funções minúsculas e cobertas; o limiar desce por mão humana |
+| `--fast` do portão | <= 90 s, sem mutação | Portão por step tem de caber no laço interno |
+| Rodadas do portão por step | 3, depois PARTIAL com os achados no progress file (`/implement`) | O agente não insiste indefinidamente |
+| Pendência vencida / escalada de plano / auto-dismiss | 14 / 30 / 90 dias | Conforme `conventions.md` |
+| [intended] Grill: rodadas x perguntas | 5 x 4 | Teto, não alvo; depois devolve a decisão ao citizen |
+| [intended] Specify: rodadas de ajuste | 3 | Ajuste repetido indica REQ vago; volta à grill |
+| [intended] Voz controlada | 25 palavras por frase; 6 frases por parágrafo | Legibilidade para o citizen |
+
+> CRAP 10/30 e as 3 rodadas conferidos em `gate.py` e em `.claude/skills/implement/SKILL.md` em 2026-10-05. Os 90 s do `--fast` são meta, não valor imposto pelo script.
+
+---
+
+# Part II -- Metacommunication
+
+## 11. Global Metacommunication Vision
+
+"Eu sei que você quer construir software com um agente que escreve mais rápido do que você consegue revisar, e que talvez você não leia o código que ele escreve. Por isso eu peço que você me diga o que quer antes de qualquer código, nas suas palavras, e eu o registro como intenção que uma máquina consegue endereçar. Eu só considero um passo feito quando uma ferramenta, e não uma frase, diz que passou. Ao fim de cada fase eu lhe ofereço um espelho: o plano contado a quem você escolher, e a distância entre o que você pediu e o que existe. E eu lhe devolvo, no registro que você lê, o que entendi, o que construí e o que não construí, para que você exerça autoria sem precisar ler código. Tudo isso é uma aposta que eu numero e me comprometo a refutar se os dados disserem o contrário."
+
+---
+
+## 12. Extended Metacommunication Template Guiding Questions
+
+1. Análise
+   1.1. **O que sei sobre você.** Sei que você está em algum ponto de uma escala de literacia de código (H-001), e que isso decide em que sistema de signos eu posso lhe falar de volta. Aprendi isso observando que, para quem não lê código, entregar o código não é comunicar. Não sei ainda quantos pontos a escala tem nem como detectar o seu (Q-002, Q-003, deliberadamente abertas).
+   > Personas e cenários de problema: `product-design/ux-research-results.md §1-§4`.
+   1.2. **Sobre os outros afetados.** Sei que o seu time, os revisores e os leitores da documentação recebem o que você comunica; por isso nada sai do envelope sem `/critique`. Sei que pesquisadores estudam o que eu faço; por isso registro tudo com ID e proveniência.
+   1.3. **Contextos de uso.** Dentro do Claude Code, num repositório seu, local; em `dev` para quem me desenvolve, em `main` para quem me instala.
+   1.4. **Questões éticas.** Duas vias de autoria no mesmo código (Q-007): de quem é a voz que o leitor lê? E o risco de delegação cega no polo citizen e de ritual no polo power (H-003).
+2. Design
+   2.1. **O que projetei para você.** Um ciclo PLAN -> BUILD -> REFLECT com portão determinístico por passo, espelhos por fase e um caminho de volta.
+   2.2. **Que objetivos apoio.** Dizer a intenção antes do código; construir com validação por passo; saber o que escapou; refletir antes do próximo turno.
+   2.3. **Em que situações.** Em qualquer engajamento de desenvolvimento, do primeiro `/design` ao `/reflect`; com portão quando a stack o tem, sem portão quando não (e eu digo que não medi).
+   2.4. **Como usar.** `/seja-setup`, depois `/design` uma vez, depois `/plan`, `/implement`, `/reflect`; aceite ou recuse os espelhos.
+   2.5. **Para que não quero que use.** Para pular o portão (`--no-verify`, `--accept-baseline` pelo agente), para editar prosa humana por agente, para tratar hipótese como decisão, para publicar sem `/critique`.
+   2.6. **Princípios éticos.** A voz pertence a quem a emitiu; o humano é dono das restrições; o que não foi medido é dito como não medido.
+   2.7. **Alinhamento.** Classificações de autoria e marcadores (P-004); ratchet só por mão humana; estados `não medido` sempre visíveis.
+3. Prototipação, implementação e avaliação formativa
+   3.1. **Como construí.** Skills em Markdown que orquestram agentes em contexto isolado; scripts Python determinísticos de verificação; template de portão por stack.
+   3.2. **O que construí para prevenir mau uso.** Hooks `Stop` e `PreToolUse`, denies de permissão, verificador de marcadores humanos, imutabilidade de artefatos.
+   3.3. **Para identificar efeitos não antecipados.** Deriva as-intended/as-coded, taxa de escape do `/critique`, notas por step, `/reflect` com palavras literais.
+   3.4. **Cenários éticos avaliados.** Agente aceitando baseline; agente editando intenção humana; aprovação do citizen virando ritual ("parece bem").
+4. Avaliação contínua
+   4.1. **Quanto da visão se reflete no uso.** H-008 ainda não medida; o primeiro ciclo real com portão gera a primeira medida.
+   4.2. **Usos não antecipados.** A registrar.
+   4.3. **Efeitos.** A registrar.
+   4.4. **Questões a tratar por redesign.** Se escapes de intenção forem frequentes com PASS, o espelho deixa de ser oferta e vira passo fixo (refutação iv de H-008).
+
+---
+
+## 13. Solution Representations
+
+### Option A: Solution Scenarios
+
+#### SS-001: O power dev roda um ciclo com portão
+
+- **Persona:** power dev (R-P-001; lê código; quer aceleração e rastreabilidade)
+- **Goals:** construir uma feature com validação por passo e saber o que escapou
+- **Setting:** repositório Python com o portão instalado; `/design` já feito
+- **Design Rationale:** o portão ocupa o lugar da validação dentro de BUILD (H-008); o `/critique` final mede o escape
+
+O dev escreve o brief, o `/plan` gera e revisa o plano, o `/implement` em modo auto roda o portão `--fast` a cada step (até 3 tentativas), o `/critique` cruza achados com steps em PASS, o `/explain drift` é oferecido com o as-coded regenerado, e o `/reflect` registra o que o episódio ensinou e o que não foi medido.
+
+#### SS-002 [intended]: O citizen dev aprova a mensagem, não o código
+
+- **Persona:** citizen dev (R-P-002; tem a intenção; não lê código)
+- **Goals:** exercer autoria sem ler código; reconhecer a própria intenção no que voltou
+- **Setting:** mesma escada, sem perfil; muda o objeto de aprovação
+- **Design Rationale:** para o citizen o código não pode ser a mensagem (H-001); features são contratos, a mensagem é a retradução (D-004)
+
+O citizen responde à grill nas próprias palavras; aprova a lista de requisitos; recebe a retradução em primeira pessoa com exemplos narrados e a lista do que não será feito, e aprova a mensagem; o power dev (ou ele mesmo, em outro papel) aprova o `.feature` como contrato; ao fim, recebe a demonstração por cenário, os mutantes sobreviventes recontados como perguntas e o que ficou `não medido`.
+
+### Option B: User Stories
+
+#### US-001: Intenção antes do código
+
+- **Story:** Como designer, quero registrar a intenção antes do código para que a deriva tenha contra o que ser medida.
+- **Acceptance Criteria:**
+  - `/plan` recusa partir sem as-intended
+  - todo step declara `Traces:`
+
+#### US-002: Passo feito só com PASS
+
+- **Story:** Como power dev, quero que cada passo só conte como feito com PASS para que a validação não dependa da minha velocidade de revisão.
+- **Acceptance Criteria:**
+  - portão por step
+  - no máximo 3 rodadas
+  - denies de `--no-verify` e `--accept-baseline`
+
+#### US-003 [intended]: Aprovar o que reconheço
+
+- **Story:** Como citizen dev, quero aprovar o que vai ser construído num texto que eu reconheça, e saber o que não foi construído, para não delegar às cegas.
+- **Acceptance Criteria:**
+  - retradução com "Nas suas palavras" ao lado
+  - ausências enumeradas
+  - nenhum número técnico no meu registro
+
+---
+
+## 14. Per-Feature Metacommunication Intentions
+
+| Feature / Flow | Designer Intent | Priority | Source | Last Synced |
+|---|---|---|---|---|
+<!-- REQ-MC-001 -->
+| `/seja-setup` | Eu instalo o harness no seu repositório e lhe entrego ao `/design`, porque sem intenção registrada não há ciclo. | P0 | human | 2026-10-05 00:00 UTC |
+<!-- REQ-MC-002 -->
+| `/design` | Eu registro, nas suas palavras, quem você é, o que quer e por quê, e os princípios que não negocio, porque tudo o que vem depois é medido contra isso. | P0 | human | 2026-10-05 00:00 UTC |
+<!-- REQ-MC-003 -->
+| `/plan` | Eu transformo o seu brief num plano com passos rastreáveis à intenção, reviso-o em perspectivas e lhe ofereço contá-lo a uma audiência antes de construir. | P0 | human | 2026-10-05 00:00 UTC |
+<!-- REQ-MC-004 -->
+| `/implement` com portão por step | Eu só considero um passo feito quando o portão responde PASS, e paro na terceira falha; eu não movo o limiar, você move. | P0 | human | 2026-10-05 00:00 UTC |
+<!-- REQ-MC-005 -->
+| `/critique` | Eu valido antes de qualquer coisa sair para um leitor, e no fim do BUILD meço o que escapou do portão. | P0 | human | 2026-10-05 00:00 UTC |
+<!-- REQ-MC-006 -->
+| `/explain drift` (espelho do BUILD) | Eu lhe mostro a distância entre o que você pediu e o que existe, com o as-coded regenerado, e digo o que não medi. | P1 | human | 2026-10-05 00:00 UTC |
+<!-- REQ-MC-007 -->
+| `/communicate` (espelho do PLAN) | Eu conto o plano a quem você escolher, porque plano que não sobrevive a ser contado não está claro. | P1 | human | 2026-10-05 00:00 UTC |
+<!-- REQ-MC-008 -->
+| `/reflect` | Eu registro as suas palavras literalmente, sem prescrever mudança, e anoto o que não foi medido. | P1 | human | 2026-10-05 00:00 UTC |
+<!-- REQ-MC-009 -->
+| Marcadores e classificações de autoria | Eu digo de quem é a voz em cada arquivo e nunca escrevo prosa no lugar de você. | P0 | human | 2026-10-05 00:00 UTC |
+<!-- REQ-MC-010 -->
+| Hooks e denies | Eu não deixo o agente pular o portão nem aceitar baseline; isso é seu. | P0 | human | 2026-10-05 00:00 UTC |
+<!-- REQ-MC-011 -->
+| [intended] Grill e specify no `/plan` | Eu pergunto o que você quer, um pouco de cada vez e nas suas palavras, escrevo de volta como requisitos e só sigo para os cenários depois que você aprovar. | P1 | human | 2026-10-05 00:00 UTC |
+<!-- REQ-MC-012 -->
+| [intended] Retradução como objeto de aprovação | Eu lhe mostro o que entendi e o que vou construir em primeira pessoa, com exemplos; você aprova a mensagem, e o contrato fica para quem lê código. | P1 | human | 2026-10-05 00:00 UTC |
+<!-- REQ-MC-013 -->
+| [intended] Divergência por degrau | Eu mostro onde a sua intenção se perdeu, degrau a degrau, com o que não medi ao lado, em vez de uma nota única. | P1 | human | 2026-10-05 00:00 UTC |
+<!-- REQ-MC-014 -->
+| [intended] Preset `apprentice` | Eu me ofereço num perfil gerado a partir de mim, sem bifurcar o ciclo, para quem está aprendendo e precisa de outro registro. | P2 | human | 2026-10-05 00:00 UTC |
+
+---
+
+## 15. Designed User Journeys
+
+> **One-directional flow:** achados de pesquisa em `product-design/ux-research-results.md §5` informam esta seção; esta seção não volta para o arquivo de pesquisa.
+
+<!-- REQ-JM-001 -->
+### JM-TB-001: Primeiro ciclo de um power dev com portão
+
+- **Persona:** power dev (R-P-001)
+- **Solution Scenario:** SS-001
+- **Goal:** uma feature construída com validação por passo e deriva medida
+- **Pre-conditions:** `/seja-setup --here` feito; `/design` feito; portão instalado e baseline aceito pelo humano
+
+#### Steps
+
+| # | Action | Touchpoint | User Emotion | Pain Point | Opportunity |
+|---|---|---|---|---|---|
+| 1 | Escreve o brief e roda `/plan` | Claude Code | focado | brief vago gera plano vago | revisão por perspectivas; espelho do PLAN |
+| 2 | Aceita ou recusa contar o plano (`/communicate`) | AskUserQuestion | avaliando | fricção se o plano é trivial | espelho oferecido, nunca imposto |
+| 3 | Roda `/implement` em modo auto | subagente por step | confiante | esperar o portão | `--fast` <= 90 s; nota por step |
+| 4 | Lê os achados do `/critique` cruzados com PASS | relatório | surpreso ou aliviado | achado crítico em step com PASS | taxa de escape de H-008 |
+| 5 | Aceita ou recusa a deriva (`/explain drift`) | AskUserQuestion | curioso | relatório longo | `não medido` sempre visível |
+| 6 | `/reflect` | conversa | reflexivo | parecer ritual | palavras literais; o que não foi medido |
+
+#### Post-conditions / Outcomes
+
+Feature em PASS, achados do `/critique` registrados, deriva medida ou registrada como não medida, reflexão gravada.
+
+<!-- REQ-JM-002 -->
+### JM-TB-002 [intended]: O citizen dev na escada, aprovando a mensagem
+
+- **Persona:** citizen dev (R-P-002)
+- **Solution Scenario:** SS-002
+- **Goal:** reconhecer a própria intenção no que foi construído, sem ler código
+- **Pre-conditions:** ciclo default do roadmap-000006 entregue; `features/` no projeto
+
+#### Steps
+
+| # | Action | Touchpoint | User Emotion | Pain Point | Opportunity |
+|---|---|---|---|---|---|
+| 1 | Responde à grill, nas próprias palavras | rodadas curtas | ouvido | perguntas demais | teto de rodadas; "Nas suas palavras" |
+| 2 | Aprova a lista de requisitos e o "não faz" | resumo em voz controlada | seguro | aprovar o que não entendeu | critério por requisito em uma frase |
+| 3 | Aprova a retradução com exemplos narrados | mensagem em primeira pessoa | reconhecendo | "parece bem" sem ler | exemplos narrados; teste da surpresa |
+| 4 | Recebe demonstração por cenário e mutantes recontados | superfície do produto; perguntas | surpreso | mais coisas para olhar | só sobreviventes e cenários marcados por padrão |
+| 5 | Marca "é isso / não é isso" por requisito | REFLECT | autor | fricção | alimenta a auditoria semântica |
+
+#### Post-conditions / Outcomes
+
+Requisitos com estado demonstrado / não demonstrado / não medido / fora do escopo; "não é isso" com endereço para a máquina agir.
+
+---
+
+# Part III -- Delta from As-Coded
+
+## 16. Conceptual Design Delta
+
+### New (in as-intended but not in as-coded)
+
+| Section | Element | Description |
+|---|---|---|
+<!-- REQ-DELTA-001 -->
+| §0, §2, §3 | Escada de representações, feature, degrau zero, contrato endereçável | intended; roadmap-000006, H-009, D-004 |
+<!-- REQ-DELTA-002 -->
+| §0, §3, §14 | Preset `apprentice` | intended; D-003; sem roadmap |
+<!-- REQ-DELTA-003 -->
+| todas | as-coded | não existe ainda; o primeiro `/implement` após este `/design` o instancia |
+
+### Changed (differs between as-coded and as-intended)
+
+| Section | Element | As-Coded | As-Intended |
+|---|---|---|---|
+| -- | -- | -- | -- |
+
+### Removed (in as-coded but not in as-intended)
+
+| Section | Element | Reason for Removal |
+|---|---|---|
+| -- | -- | -- |
+
+---
+
+## 17. Metacommunication Delta
+
+### New Intentions (not yet implemented)
+
+| Feature / Flow | Designer Intent | Priority |
+|---|---|---|
+<!-- REQ-DELTA-004 -->
+| Grill e specify | ver §14 (REQ-MC-011) | P1 |
+<!-- REQ-DELTA-005 -->
+| Retradução como objeto de aprovação | ver §14 (REQ-MC-012) | P1 |
+<!-- REQ-DELTA-006 -->
+| Divergência por degrau | ver §14 (REQ-MC-013) | P1 |
+<!-- REQ-DELTA-007 -->
+| Voz controlada | Eu falo com você em frases curtas e termos fixos. | P1 |
+<!-- REQ-DELTA-008 -->
+| Preset `apprentice` | ver §14 (REQ-MC-014) | P2 |
+
+### Changed Intentions (implementation differs from intent)
+
+| Feature / Flow | As-Coded | As-Intended | Priority |
+|---|---|---|---|
+| -- | -- | -- | -- |
+
+### Deprecated Intentions (implemented but no longer desired)
+
+| Feature / Flow | Current Implementation | Reason for Deprecation |
+|---|---|---|
+| -- | -- | -- |
+
+---
 
 ## Referências
 
@@ -868,7 +1329,62 @@ ausência não é cosmética. Registrada em `Q-008`.
 
 ---
 
+## Decisions
+
+> Decisões validadas com a justificativa preservada, em formato DDR (Context / Decision / Consequences / Rejected Alternatives). Cada entrada é um heading `### D-NNN:` com um marcador `STATUS` na linha imediatamente acima. Uma decisão fecha ou reencaminha uma questão aberta; hipóteses não entram aqui até serem decididas.
+>
+> **Append-only**: seção imposta como append-only por `check_changelog_append_only.py` (regra prose-only). Novas entradas entram no fim, via `apply_marker.py --marker DECISION_APPEND`.
+
+<!-- STATUS: implemented | 2026-10-05 -->
+### D-001: O Agent WF de três fases é o grão grosso do caminho canônico; Q-008 fechada
+
+**Context**: A Figura 2 lista Research -> Plan -> Implement -> Reflect, mais curto que o ciclo de P-005. Q-008 perguntava se era simplificação do desenho ou proposta de ciclo sem validação.
+**Decision**: PLAN / BUILD / REFLECT são o caminho canônico em grão grosso: PLAN = investigar + dar forma; BUILD = `/implement` com `/critique` dentro; REFLECT = `/reflect`. O portão "validar antes de comunicar" permanece.
+**Consequences**: Q-008 fechada por testemunho do autor do desenho. `/document` e `/communicate` continuam depois de `/critique`; o "documentar" interno a BUILD é a voz do agente (nota do post-skill, as-coded), não artefato para leitor. Ver seção 2.1.
+**Rejected Alternatives**: tratar o Agent WF como ciclo reduzido sem `/critique` -- colide com o único invariante rígido do harness.
+
+*Source: migrada de seja-as-intended.md, decidida em 2026-09-18 (2026-10-05)*
+
+<!-- STATUS: implemented | 2026-10-05 -->
+### D-002: O release apresenta PLAN -> BUILD -> REFLECT como caminho de entrada, condicionado ao portão determinístico (H-008)
+
+**Context**: D-001 leu o ciclo curto como grão grosso de P-005. O release precisa dizer sob que condição o oferece a quem instala, enquanto H-008 não foi medida.
+**Decision**: O caminho de entrada documentado é PLAN -> BUILD -> REFLECT. Dentro de BUILD, o `/implement` roda o portão determinístico por passo quando o projeto o instalou; o `/critique` do fim de BUILD continua obrigatório e seus achados críticos são cruzados com os passos que tiveram PASS (taxa de escape de H-008). `/critique` antes de `/document` e `/communicate` não muda (P-005). O `/plan` oferece ao fim o `/communicate` do plano e o `/implement` oferece no wrap-up o `/explain drift` com o as-coded regenerado; nenhum dos dois é obrigatório, e o `/reflect` registra quando não foram medidos. O ciclo exige as-intended: o `/seja-setup` entrega ao `/design`, e o `/plan` recusa partir sem `product-design-as-intended.md`.
+**Consequences**: Projetos sem portão instalado ficam fora da medida de H-008; neles o `/critique` dentro de BUILD continua sendo a primeira validação, como em 2.1 e D-001. O primeiro ciclo real com portão gera a primeira medida, contra limiares fixados antes dele. A medida de escapes de intenção só existe nos ciclos em que o designer aceitou a deriva; a taxa de aceitação dos espelhos é ela própria registrada.
+**Rejected Alternatives**: apresentar o ciclo curto sem condição; tornar o portão obrigatório na instalação; espelhos obrigatórios (um agente gerador por plano, contra H-003); modo degradado sem as-intended (a deriva não teria referência).
+
+*Source: migrada de seja-as-intended.md, decidida em 2026-10-03 (2026-10-05)*
+
+<!-- STATUS: proposed | 2026-10-05 -->
+### D-003: Presets são perfis gerados a partir do open-seja pinado, não forks nem bifurcações do ciclo
+
+**Context**: Um ponto da escala H-001 pede outro registro de contato: iniciantes num programa de formação, em duas fases (agente-tutor com o aprendiz escrevendo o código, depois desenvolver com agentes). Q-002 pergunta quantos pontos discretos a escala precisa.
+
+**Decision**: Um preset é um perfil gerado a partir do open-seja numa tag pinada, com dependência unidirecional preset -> open-seja, comandos e voz próprios, e artefatos no formato SEJA. O ciclo não bifurca (H-003): muda a superfície de contato e a obrigatoriedade da retradução. O preset pretendido é o `apprentice`. A fase do aprendiz é atribuída pelo tutor por marcador Human (markers); enforcement (settings) é separado de instrução (CLAUDE.md).
+
+**Consequences**: Artefatos comparáveis entre instâncias; upgrade por tag; registra um ponto concreto para Q-002 sem fechá-la. Exige que o orquestrador aceite a posição na escala como entrada (H-004). Fica como intenção até haver roadmap.
+
+**Rejected Alternatives**: fork por instância (sem canal de upgrade, dados incomparáveis); harness novo mínimo; tratar o aprendiz como citizen dev com retradução obrigatória (a fase 1 pede o inverso: o humano escreve o código); ciclo bifurcado por perfil.
+
+*Source: /design a partir de design-rascunho-as-intended-2026-10-05 (2026-10-05)*
+
+<!-- STATUS: proposed | 2026-10-05 -->
+### D-004: Features Gherkin são contratos endereçáveis, não signos; o citizen aprova a mensagem, não o .feature
+
+**Context**: O ciclo default pretendido (roadmap-000006, H-009) decompõe a intenção em intent.md -> .feature -> teste -> código e mede a divergência por degrau. A análise da lacuna da intenção mostrou que o Gherkin representa comportamento observável e deixa sem signo o porquê, o modelo conceitual, as preferências e as crenças sobre o usuário; que D1 mede presença de tag, não fidelidade; e que o ponto de aprovação do specify mostrava o texto do .feature ao citizen, tratando contrato como mensagem.
+
+**Decision**: O .feature é um contrato endereçável entre o humano e o preposto (par expressão-conteúdo convencionalizado, P-004), não a mensagem de metacomunicação. REQ IDs e chaves de cenário são os endereços para onde os signos apontam; os signos são a retradução em primeira pessoa, os exemplos narrados, os mutantes recontados e as ausências declaradas. O objeto de aprovação muda por receptor, sem perfil: o citizen aprova a mensagem; o .feature é derivado dela e aprovado como contrato pelo power dev. Toda emenda ao ciclo e todo signo devolvido ao citizen passam pelo teste da surpresa: deve poder provocar uma ruptura decodificável pelo receptor; item que só confirma (PASS, percentuais) não entra no registro do citizen. H-009 declara o próprio alcance: completa para comportamento operacionalizado, com perda declarada de racional, modelo e preferência; o degrau zero (resíduo do brief) é leitura fora do vetor D.
+
+**Consequences**: Emenda ao ponto de aprovação do specify (plan-000011); tabela degrau x receptor no contrato do ciclo (plan-000007); H-009 com limite declarado e três medidores de ganho do citizen na condição de refutação (ajustes no specify; escapes antes vs depois do código; mutantes virados em requisito). A aposta "um caminho sem perfis" se mantém. Fecha Q-004 (a retradução é etapa do specify e do REFLECT) e responde em parte Q-012 (julgamento pelo receptor, lógica CEM, em `audit.json`).
+
+**Rejected Alternatives**: tratar o .feature como mensagem (ruptura "parece bem"; conformidade no lugar de reflexão); medir semântica com LLM dentro do D; perfil citizen com cadeia própria (contra H-003); sétima dimensão na grill para porquê e modelo (o lugar é uma seção não-cenário do intent.md).
+
+*Source: /design a partir de design-rascunho-as-intended-2026-10-05 (2026-10-05)*
+
 ## CHANGELOG
+
+<!-- Append-only. Format: YYYY-MM-DD | <id> | added|revised|revoked|superseded | plan-NNNNNN | <note>
+     Linhas até 2026-10-03 migradas literalmente de product-design/seja-as-intended.md (Q-006: fundir). -->
 
 2026-08-26 | § 1 | added | - | Seção 1 (Princípios da engenharia semiótica) redigida a partir das notas da sessão de design; P-001..P-007 registrados, H-001..H-004 registradas como hipóteses abdutivas, Q-001..Q-006 abertas
 2026-08-26 | Q-003 | held-open | - | detecção da posição na escala sustentada deliberadamente em aberto: depende de Q-002 (granularidade da escala), que precede
@@ -884,3 +1400,5 @@ ausência não é cosmética. Registrada em `Q-008`.
 2026-09-18 | H-007 | renumbered | - | a hipótese de SEJA como serviço passa a ser H-007, e a próxima questão aberta é Q-014
 2026-10-03 | H-008 | added | - | PLAN -> BUILD -> REFLECT de 2.1 como entrada, com portão determinístico por passo, reflexão transversal e espelho oferecido ao fim de cada fase (comunicação do plano, deriva do BUILD); fecha Q-008 por internalização; caso de H-004, dá condição operacional a D-001
 2026-10-03 | D-002 | added | - | o release apresenta as três fases como entrada, com o portão como condição, a taxa de escape do /critique final e os escapes de intenção como medidas, e /design obrigatório antes do ciclo; projetos sem portão ficam fora da medida
+2026-10-05 | JM-TB-001 | added | - | seed do as-intended por /design; fusao da fundamentacao (Q-006 fundir); D-001 e D-002 migradas, D-003 apprentice e D-004 contrato Gherkin adicionadas
+2026-10-05 | JM-TB-002 | added | - | jornada intended do citizen dev aprovando a mensagem (SS-002, D-004)

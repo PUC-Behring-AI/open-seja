@@ -34,3 +34,14 @@ After responding to any user message that is NOT within an active skill invocati
 - **Documentation**: run `/document` after implementation to generate or update user and developer documentation based on plan Docs: fields or auto-detected changes.
 - **Spec drift**: run `/explain drift` to compare and align design specs.
 - **Release (for maintainers)**: see [`docs/reference/release-process.md`](docs/reference/release-process.md) for the A2 release discipline and sync runbook summary.
+
+## Project design
+
+Design intent, standards and constitution of open-seja (seeded via `/design` on 2026-10-05; the theoretical grounding formerly in `seja-as-intended.md` now lives in `product-design-as-intended.md §3`):
+
+@product-design/product-design-as-intended.md
+@product-design/ux-research-results.md
+@product-design/standards.md
+@product-design/design-standards.md
+@product-design/security-checklists.md
+@product-design/constitution.md
