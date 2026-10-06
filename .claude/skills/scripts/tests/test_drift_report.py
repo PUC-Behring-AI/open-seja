@@ -158,7 +158,7 @@ def test_stale_status_is_consulted_even_when_frontmatter_says_approved():
 
     text = (_FIX / "stale" / "features" / SLUG / "intent.md").read_text(encoding="utf-8")
     assert "scenarios: approved" in text
-    exp, rep = make_report("stale", status_fn=spy)
+    _, rep = make_report("stale", status_fn=spy)
     assert calls == [SLUG]
     d1 = rep["degraus"]["D1"]
     assert (d1["razao_nm"], d1["cobertos"], d1["descobertos"]) == (["NM-CENARIOS-STALE"], 0, 0)
@@ -173,3 +173,66 @@ def test_corrupted_gate_is_an_input_error_naming_the_file():
     with pytest.raises(dr.DriftInputError) as err:
         make_report("entrada-corrompida")
     assert "gate.json" in str(err.value)
+
+
+# ---- Step 4: calculator cases built from small matrices
+
+def small(**over):
+    base = {
+        "feature": "t", "momento": "M1", "intent": {"status": "approved"}, "scenarios_status": "approved",
+        "runner": {"adaptador": True, "relatorio": True}, "gate": {"full": "PASS", "baseline_moved": False},
+        "reqs": ["REQ-t-001"], "scenarios": [], "touched": {"total": 4, "uncovered": 1}, "oraculo": None, "auditoria": [],
+    }
+    base.update(over)
+    return base
+
+
+def scen(i, test_result="passed", red=True, tags=("REQ-t-001",), **kw):
+    return dict({"id": i, "tags": list(tags), "test_result": test_result, "red_reason_ok": red}, **kw)
+
+
+def test_three_covered_one_uncovered_two_not_measured_gives_a_quarter():
+    reqs = [f"REQ-t-00{n}" for n in range(1, 7)]
+    scenarios = [scen("S1", tags=(reqs[0],)), scen("S2", tags=(reqs[1],)), scen("S3", tags=(reqs[2],)),
+                 scen("S4", "absent", None, tags=(reqs[3],))]
+    rep = dr.compute_report(small(reqs=reqs, scenarios=scenarios, scenarios_status="stale"))
+    d1 = rep["degraus"]["D1"]
+    assert (d1["nao_medidos"], d1["razao_nm"], d1["D"]) == (6, ["NM-CENARIOS-STALE"], "n/a")
+    d2 = rep["degraus"]["D2"]
+    assert (d2["cobertos"], d2["descobertos"], d2["D"]) == (3, 1, 0.25)
+
+
+def test_zero_denominator_is_na_not_zero():
+    rep = dr.compute_report(small(reqs=[], scenarios=[], touched={"total": 0, "uncovered": 0}))
+    assert all(rep["degraus"][s]["D"] == "n/a" for s in dr.STEPS)
+
+
+def test_baseline_accepted_makes_d3a_descoberto_with_caveat():
+    rep = dr.compute_report(small(scenarios=[scen("S1")], gate={"full": "PASS", "baseline_moved": True}))
+    assert rep["degraus"]["D3a"]["descobertos"] == 1
+    assert "baseline aceito" in rep["ressalvas"]
+
+
+def test_d3a_population_excludes_scenarios_without_test():
+    rep = dr.compute_report(small(scenarios=[scen("S1"), scen("S2", "absent", None)]))
+    assert rep["degraus"]["D3a"]["n"] == 1
+
+
+def test_error_and_undefined_are_covered_in_d2_and_uncovered_in_d3a():
+    rep = dr.compute_report(small(scenarios=[scen("S1", "error"), scen("S2", "undefined")]))
+    assert (rep["degraus"]["D2"]["cobertos"], rep["degraus"]["D3a"]["descobertos"]) == (2, 2)
+
+
+def test_not_measured_never_enters_the_denominator():
+    rep = dr.compute_report(small(scenarios=[scen("S1"), scen("S2", red=None)]))
+    d3a = rep["degraus"]["D3a"]
+    assert (d3a["cobertos"], d3a["nao_medidos"], d3a["D"]) == (1, 1, 0.0)
+
+
+def test_calculator_module_layer_has_no_io_imports_in_compute():
+    src = Path(dr.__file__).read_text(encoding="utf-8")
+    start = src.index("def analyze(")
+    end = src.index("def compute_report(")
+    block = src[start:end]
+    for word in ("subprocess", "socket", "anthropic", "open(", "os.environ"):
+        assert word not in block

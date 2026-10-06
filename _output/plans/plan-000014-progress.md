@@ -90,3 +90,9 @@ Repositorio de execucao: este (sem prefixo `open-seja/`); fixtures em `.claude/s
 - deviated: esperado.json e parcial por caso, nao o relatorio inteiro.
 - less-sure: O formato de delta e das leituras novas nos testes fixa a API que o Step 4-6 vai seguir.
 - gate: not-installed
+
+### Step 4 -- reflection-on-action | 2026-10-06 18:40 UTC | Calculador puro compute_report
+- happened: Implementei analyze e compute_report; os 6 golden e os casos de calculo passam.
+- deviated: compute_report devolve so o DRM-007; cadeia indeterminada e as leituras novas ficam em analyze/build_report.
+- less-sure: Populacao do D3a com D2 nao medido e minha leitura do DRM-004; esta nas propostas.
+- gate: not-installed
