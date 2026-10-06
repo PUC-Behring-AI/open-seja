@@ -70,6 +70,8 @@ If `--deep` is present in the arguments, route to the [Deep workflow](#deep-work
 
 5. **Step B -- Summarize chosen artifacts.** Run `python .claude/skills/reflect/summarize_artifacts.py <id1> <id2> ...` to produce the narrative summary block. Capture the stdout output. Present it to the user so they can see what they are reflecting on. For plans, the summary also carries the per-step reflection-on-action notes, the plan-phase note, the quality-gate evidence and, when the designer accepted them, the communication of the plan and the drift report recorded by `/plan` and `/implement`; name explicitly which of the four were not measured. Present them before the lens question, as recorded, without interpreting them; agent words appear quoted and attributed, never as the skill's voice.
 
+   **Step B1 -- Divergence per step (only with `features/`).** If a chosen artifact is a plan whose header has `Feature: <slug>`, run `python .claude/skills/scripts/drift_report.py --feature <slug> --plan <plan file> --moment M2 --compare --md` (add `--citizen` for the register without technical numbers) and present the output as is, without interpreting it. If M1 was not frozen the output says so and the reflection goes on. A "not applicable" line (v1 plan, no `features/`, `Specify: skipped`) adds nothing: skip this step and the section in Step D. If `drift_report.py --feature <slug> --audit-sample` lists REQs, show them to the designer; record an answer in `features/<slug>/drift/audit.json` only with the designer's own words in `nota` (reference: `.claude/references/general/drift-report.md`, DRP-009).
+
 6. **Step B2 -- Pick lens.** Ask the user which lens they are reflecting through via AskUserQuestion:
 
    > "Are you reflecting on the product (what you built), your practice (how you worked), or both?"
@@ -105,6 +107,10 @@ If `--deep` is present in the arguments, route to the [Deep workflow](#deep-work
    ## Summary
 
    <narrative summaries from Step B>
+
+   ## Divergência por degrau
+
+   <output of Step B1, verbatim; omit this whole section when Step B1 did not run>
 
    ## Reflection
 

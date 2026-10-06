@@ -132,3 +132,18 @@ Repositorio de execucao: este (sem prefixo `open-seja/`); fixtures em `.claude/s
 - deviated: O registro do citizen traz so ausencias e mudancas; contagem que so confirma foi retirada (teste da surpresa).
 - less-sure: A voz controlada so foi conferida pela contagem propria; nao ha lint do 000074.
 - gate: not-installed
+
+## Step 8 -- integracao minima em `/reflect` e `/explain drift` (2026-10-06)
+- `reflect/SKILL.md`: Step B1 (so com `Feature: <slug>` no cabecalho do plano; apresenta a saida sem interpretar; linha "nao aplicavel" nao acrescenta nada; amostra de auditoria so com as palavras do designer em `nota`) e a secao `## Divergência por degrau` entre `## Summary` e `## Reflection`, omitida sem B1. `explain/SKILL.md`: escopo `ladder [<slug>]` na tabela. `_internal/explain/drift/SKILL.md`: passo A.2b so com `features/` e escopo `all` ou `ladder`; nada na tabela `Drift Summary` nem nos prompts de sync/promote. Decisao 4 = B.
+- `git diff --stat` dos tres: 11 insercoes, 3 linhas editadas no lugar (sem remocao de `--deep`, `--telemetry`, `--promote`, cabecalho `# Reflection`); alvo <= 40 linhas somadas. Versoes dos SKILL.md nao mexidas.
+- `test_generate_reflection_report.py` verde; `run_all_checks` igual ao baseline (contadores 17/2/9). 199 testes (drift_report + reflection).
+
+**Texto sugerido (NAO aplicado; e do plan-000013/000015) para o `/implement` congelar o M1**, ao fim do plano, depois da rodada `full` do portao:
+
+> "Se o plano tem `Feature: <slug>` e `Specify: approved`, depois da rodada `full` do gate rodar `python .claude/skills/scripts/drift_report.py --feature <slug> --plan <plano> --moment M1 --freeze --at <UTC agora>`. Se o M1 ja existe, o script recusa (exit 2): nao sobrescrever; registrar no progress file. Antes disso, escrever em `features/<slug>/`: `runner/cucumber.json` (o relatorio do runner), `gate.json` com `baseline_moved` (diff de `quality-baseline.json`) e `adapter: false` quando a stack nao tem portao, `drift/red-reason.json` (`{"schema_version":1,"scenarios":{"<chave>":true|false}}`, `true` so para `failed` por asserção, CYC-022) e `drift/coverage.json` (`{"schema_version":1,"base":"<ref git>","touched_total":n,"touched_uncovered":m}`, cobertura so dos testes de cenario sobre o diff da feature)."
+
+### Step 8 -- reflection-on-action | 2026-10-06 18:50 UTC | Integracao em /reflect e /explain drift
+- happened: Acrescentei o Step B1 e a secao em /reflect, o escopo ladder em /explain e o passo A.2b no drift; tudo condicionado a features/.
+- deviated: Nenhum.
+- less-sure: Se o texto do Step B1 em ingles basta para o agente decidir quando omitir a secao; o ensaio do Step 9 mede isso.
+- gate: not-installed

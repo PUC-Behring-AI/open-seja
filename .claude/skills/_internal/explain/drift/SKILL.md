@@ -12,19 +12,21 @@ metadata:
 
 ### drift (reference prose)
 
-Combines read-only drift analysis with an optional sync workflow. Scope argument: `all` (default), `conceptual-design`, `metacomm`, `--promote` (promotion-only; skip to Step C), or `--promote --apply-markers plan-NNNNNN` (Phase 3b). C3 saves the drift report; C4 closes each terminal branch (sync-No, Phase 3a end, Phase 3b end).
+Combines read-only drift analysis with an optional sync workflow. Scope argument: `all` (default), `conceptual-design`, `metacomm`, `ladder [<slug>]`, `--promote` (promotion-only; skip to Step C), or `--promote --apply-markers plan-NNNNNN` (Phase 3b). C3 saves the drift report; C4 closes each terminal branch (sync-No, Phase 3a end, Phase 3b end).
 
 #### Step A -- Drift Analysis
 
 If scope is `--promote` or `--promote --apply-markers ...`, skip Steps A-B and go to Step C.
 
-1. Determine scope from the argument (default: `all`). Accepted variants: `all`, `conceptual-design`, `metacomm`, `--promote`, `--promote --apply-markers plan-NNNNNN`, `--scope since-plan plan-NNNNNN`. If scope is `since-plan plan-NNNNNN`, validate the plan ID format against `^plan-\d{6}$`. If invalid, emit `ERROR: --scope since-plan expects plan-NNNNNN (6-digit ID). Got: <value>` and abort.
+1. Determine scope from the argument (default: `all`). Accepted variants: `all`, `conceptual-design`, `metacomm`, `ladder [<slug>]`, `--promote`, `--promote --apply-markers plan-NNNNNN`, `--scope since-plan plan-NNNNNN`. If scope is `since-plan plan-NNNNNN`, validate the plan ID format against `^plan-\d{6}$`. If invalid, emit `ERROR: --scope since-plan expects plan-NNNNNN (6-digit ID). Got: <value>` and abort.
 
 2. Read the as-intended/as-coded registry from `product-design/conventions.md` (fallback `template/conventions.md`). Use the Section column to narrow scans. For each row in scope: if the as-coded counterpart is `-` (research-only) or either file is missing, report and skip. Journey-ID locations: JM-TB-NNN -> `product-design-as-intended.md §15`; JM-E-NNN -> `ux-research-results.md §5`.
 
    For each in-scope as-intended file, also scan for `STATUS: implemented` markers (legacy `STATUS: IMPLEMENTED` also detected) lacking an `ESTABLISHED:` stamp. Collect as "pending promotion" items.
 
    **--scope since-plan narrowing**: when the scope is `since-plan plan-NNNNNN`, read `_output/plans/plan-<id>-*.md` to extract the Files section (all Modified + Created paths). Then filter the in-scope registry rows to those whose as-intended OR as-coded path appears in the plan's Files. For rows not touched by the plan, emit a one-line note (`Skipped N registry rows not touched by plan-<id>`) and skip the scan for those rows. Log the narrowed scope in the drift report header. Disjoint from `--promote`: if both appear, treat `since-plan` as a Step A narrowing filter only; `--promote` Phase 3a/3b operates on STATUS markers (a discovery mechanism orthogonal to registry-row scan) and ignores `since-plan`.
+
+2b. **Divergence per step** (only if `features/` exists and the scope is `all` or `ladder [<slug>]`): run `python .claude/skills/scripts/drift_report.py [--feature <slug>] --moment M2 --compare --md` and include the output as a section `## Divergência por degrau` of the drift report, verbatim (rules: `.claude/references/general/drift-report.md`). A "not applicable" line adds nothing. Do not add rows to the `Drift Summary` table or to the Step B and `--promote` prompts. With scope `ladder`, stop after this step and apply C3 and C4.
 
 3. **Conceptual Design Drift** (if in scope) -- compare `${AS_CODED} § Conceptual Design` with Part I of `${DESIGN_INTENT}` section by section:
 

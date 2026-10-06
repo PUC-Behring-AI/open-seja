@@ -29,7 +29,7 @@ metadata:
 | `behavior-evolution [brief]` | -- | Explain current behavior AND how it evolved over time |
 | `code [brief]` | -- | Explain how code works, aimed at junior developers |
 | `data-model [brief]` | -- | Explain data model, pitfalls, and refactoring opportunities |
-| `drift [scope]` | -- | Compare as-coded and as-intended design specs, with optional sync. Scope: `all`, `conceptual-design`, `metacomm`, `--promote`, `--scope since-plan plan-NNNNNN` |
+| `drift [scope]` | -- | Compare as-coded and as-intended design specs, with optional sync. Scope: `all`, `conceptual-design`, `metacomm`, `ladder [<slug>]` (divergence per step of the feature ladder; needs `features/`), `--promote`, `--scope since-plan plan-NNNNNN` |
 
 > One type is required. Types are mutually exclusive.
 

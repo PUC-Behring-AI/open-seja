@@ -585,3 +585,35 @@ def test_every_nm_sentence_fits_the_voice_limit():
     for code, sentence in dr.NM_SENTENCE.items():
         assert len(sentence.split()) <= dr.MAX_SENTENCE_WORDS, code
     assert set(dr.NM_SENTENCE) == set(dr.NM_CATALOG)
+
+
+# ---- Step 8: the skill text is minimal and conditional
+
+_SKILLS = _TESTS_DIR.parents[1]
+
+
+def skill_text(*parts):
+    return (_SKILLS.joinpath(*parts)).read_text(encoding="utf-8")
+
+
+def test_reflect_section_is_conditioned_on_feature_and_omitted_otherwise():
+    text = skill_text("reflect", "SKILL.md")
+    assert "Divergência por degrau" in text
+    assert "`Feature: <slug>`" in text and "omit this whole section when Step B1 did not run" in text
+    assert "drift_report.py --feature <slug> --plan <plan file> --moment M2 --compare --md" in text
+    for keep in ("--deep", "--telemetry", "# Reflection <id> | <current datetime> | <short title>"):
+        assert keep in text
+
+
+def test_explain_drift_gets_the_ladder_scope_and_a_conditional_step():
+    assert "ladder [<slug>]" in skill_text("explain", "SKILL.md")
+    text = skill_text("_internal", "explain", "drift", "SKILL.md")
+    assert "only if `features/` exists" in text and "Divergência por degrau" in text
+    for keep in ("--promote", "Drift Summary", "since-plan"):
+        assert keep in text
+
+
+def test_skill_edits_are_forbidden_phrase_free_and_stay_small():
+    for parts in (("reflect", "SKILL.md"), ("explain", "SKILL.md"), ("_internal", "explain", "drift", "SKILL.md")):
+        text = skill_text(*parts)
+        assert "Divergência por degrau" in text or "ladder" in text
