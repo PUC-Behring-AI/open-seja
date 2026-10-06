@@ -71,3 +71,23 @@ Desvio: o plano pedia um `status.txt` por caso lido por stub; usei o campo `stat
 - deviated: O status simulado vai no esperado.json e nao em status.txt por caso.
 - less-sure: Se as linhas esperadas sobrevivem ao primeiro teste real do script.
 - gate: not-installed
+
+## Step 4 -- check_plan_scenarios.py (2026-10-06, executor)
+
+Entregue: `.claude/skills/scripts/check_plan_scenarios.py` (PFS-001..014, `--json`, `--table`, `--strict`, `--status-cmd`, varredura sem argumentos; exit 0/1/2), `tests/test_check_plan_scenarios.py` (117 testes; goldens sobre as 38 fixtures, CLI com o `check_specify.py` real, stub por `--status-cmd`, BOM, erro de leitura, varredura, "nunca escreve", registro). Registrado no fim de `check_plugin_registry.json`. `uvx ruff check` limpo nos dois .py; pyright nao medido (sem `libatomic.so.1`, como nos planos 000010/000011).
+Medidas: pytest do harness 1072 passed / 12 failed (os 12 pre-existentes); `run_all_checks.py` 19 PASS / 14 FAIL (o mesmo conjunto de 14; PASS novo = `check_plan_scenarios.py`), contadores 17/2/9. Os WARNING de `check_docs` subiram (618 -> 652) por IDs de plano nas fixtures v1 reais e no README; sao avisos, nao falha (as fixtures `plan_format/` ja os geram).
+
+Decisoes de implementacao:
+- Teste primeiro: as fixtures (Step 3) vieram antes; escrevi o script e o arquivo de teste na mesma rodada e rodei o teste so depois (a ordem teste-antes-do-codigo nao foi estrita; a prova de vermelho nao existe). Registrado.
+- A tabela de linhas por regra esta no README das fixtures; `PFS-006`/`PFS-013` com `N/A (motivo)` em step com `Tests:` nao-N/A sao `info` (nao bloqueiam); `--strict` faz o `info` reprovar.
+- Chave que falha PFS-004 (sem crases, slug trocado, duplicata) NAO conta como citacao: o cenario fica sem step (PFS-009 junto). Chave bem formada fora do lock: PFS-005, tambem sem contar na matriz (a matriz e por `index`).
+- Cabecalho com erro que torna o modo indeterminavel (sem `Specify:`, formato, `Feature:` ausente, slug ruim, pasta inexistente) para ali (so PFS-002); `Specify:`/`Feature:` duplicados e `Feature:` em plano pulado continuam a checagem.
+- `check_specify.py --status` so e chamado em plano v2 `approved` com cabecalho valido (v1 e `skipped` nunca precisam do validador).
+- Chave de `index` com crase no nome: PFS-004 na linha de `Feature:`.
+- Nao tocei `check_specify.py`, `check_features.py`, `check_intent.py` nem os testes deles.
+
+### Step 4 -- reflection-on-action | 2026-10-06 18:22 UTC | check_plan_scenarios.py
+- happened: Implementei o verificador com PFS-001..014, matriz em --json e 117 testes sobre as fixtures; 1072 passed e 12 failed pre-existentes.
+- deviated: Escrevi script e teste na mesma rodada; N/A com motivo em step com teste vale como info.
+- less-sure: Se as linhas esperadas e o N/A com motivo sobrevivem a planos reais.
+- gate: not-installed

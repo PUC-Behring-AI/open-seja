@@ -219,5 +219,15 @@
     },
     "scope": "features",
     "critical": false
+  },
+  {
+    "script": "check_plan_scenarios.py",
+    "name": "Plan Scenario Coverage",
+    "stack": {
+      "backend": ["any"],
+      "frontend": ["any"]
+    },
+    "scope": "plans",
+    "critical": false
   }
 ]
