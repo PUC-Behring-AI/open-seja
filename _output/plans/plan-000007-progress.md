@@ -107,3 +107,10 @@ Mapa de regras:
 - Para plan-000010: o runner precisa expor estado `failed` distinto de `ERROR`/`undefined` por chave de cenario (CYC-022).
 - Para plan-000013: `--pipeline` entra entre CYC-023 e CYC-024; o Auto Mode do implement/SKILL.md (Phase 1 passo 8) ja tem a cadeia red-green-gate que CYC-020..024 reutilizam sem mudar.
 - Cuidado: nao rode dois run_all_checks ao mesmo tempo (um deu timeout em check_skill_system). Rodado isolado: ~1,4 s.
+
+### Step 6 -- reflection-on-action | 2026-10-06 16:39 UTC | Registrar H-009 e as D-NNN no as-intended do open-seja
+- happened: D-005 a D-008 foram aplicadas no product-design-as-intended.md via apply_marker.py DECISION_APPEND, cada uma com STATUS proposed acima, depois da confirmacao do designer no turno.
+- deviated: H-009 nao foi criada: ja estava no §2.9 pelo /design de 2026-10-05; a refutacao por comparacao com o controle ficou para o designer colar no §2.9, porque e prosa Human. O CHANGELOG nao ganhou linhas: o regex do CHANGELOG_APPEND recusa IDs D-NNN.
+- less-sure: Se a ausencia de linhas no CHANGELOG para D-NNN quebra alguma leitura posterior (decision digest, /explain drift).
+- gate: not-installed
+- human: "sim, aplique o oerquestre"

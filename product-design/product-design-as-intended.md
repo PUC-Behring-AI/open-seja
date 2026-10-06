@@ -1381,6 +1381,46 @@ ausência não é cosmética. Registrada em `Q-008`.
 
 *Source: /design a partir de design-rascunho-as-intended-2026-10-05 (2026-10-05)*
 
+<!-- STATUS: proposed | plan-000007 | 2026-10-06 -->
+### D-005: Grill e specify são fases do /plan, não skills
+
+**Context**: H-009 pede decompor a intenção antes do código. O rascunho de 2026-09-30 propunha /grill, /specify e /build como skills separadas, o que bifurca o ciclo de H-008 e exige ativação.
+**Decision**: O /plan tem três fases: grill, specify e escrita do plano. É o comportamento padrão, igual para citizen e power dev. --grill e --specify ficam reservadas como entrada avulsa. A specify é pulada por tipo de tarefa (DOCUMENT, CHORE, RESEARCH, steps só de config ou harness), com a linha `Specify: skipped -- <motivo>` no plano; a grill nunca é pulada, mas pode ser curta.
+**Consequences**: O ciclo continua PLAN -> BUILD -> REFLECT (D-001, D-002); o orquestrador compõe as fases (H-004). As regras estão em `.claude/references/general/extended-cycle-contract.md` (CYC-001 a CYC-008). A fricção antes do código é medida no piloto (plan-000016).
+**Rejected Alternatives**: skills separadas antes do /plan (bifurcam o ciclo); specify nunca pulada (obriga Gherkin para um README); specify por escolha livre (H-009 não mede o que é opcional).
+
+*Source: plan-000007 Step 6 (2026-10-06)*
+
+<!-- STATUS: proposed | plan-000007 | 2026-10-06 -->
+### D-006: Uma pasta por feature, features/<slug>/, é o perímetro de medida
+
+**Context**: As representações da escada precisam sobreviver ao plano que as criou e ser lidas por /reflect e /explain drift; _output/ é ledger e, em vários projetos, local.
+**Decision**: Cada feature vive em features/<slug>/ na raiz do projeto: intent.md, *.feature com @REQ-<slug>-NNN em cada cenário e gate.json. A pasta nunca é apagada (git é a recuperação); tarefa sem código não cria pasta. A feature é a unidade de medida; fora dela é `legado: não medido`.
+**Consequences**: Greenfield e brownfield seguem a mesma regra com perímetros diferentes; mutação e CRAP só no perímetro (plan-000013). O esquema está em `.claude/references/template/feature-layout.md`.
+**Rejected Alternatives**: artefatos soltos em _output/ (perdem a ligação com o código versionado); medir o repositório inteiro (deriva legada no denominador).
+
+*Source: plan-000007 Step 6 (2026-10-06)*
+
+<!-- STATUS: proposed | plan-000007 | 2026-10-06 -->
+### D-007: A divergência é composta e reportada por degrau, nunca como número único
+
+**Context**: H-009 diz que a divergência é medida por degrau. Um número único esconde em que degrau a intenção se perde; contar só cenários verdes esconde cenário que não cobre o REQ.
+**Decision**: Três degraus -- intenção -> cenário, cenário -> teste, teste -> código + portão -- cada par com os estados coberto, descoberto e não medido. Fórmulas e o desenho do controle com o ciclo de H-008 ficam para o plan-000008. Stack sem adaptador de runner ou de portão degrada para `não medido`, nunca para falha (T6).
+**Consequences**: /reflect e /explain drift reportam por degrau (plan-000014); o registro do citizen não recebe percentuais (D-004, teste da surpresa). Medida complementar: tempo até a primeira feature aprovada.
+**Rejected Alternatives**: só cenários verdes; rastreabilidade completa como número único; divergência semântica medida por LLM dentro do vetor D.
+
+*Source: plan-000007 Step 6 (2026-10-06)*
+
+<!-- STATUS: proposed | plan-000007 | 2026-10-06 -->
+### D-008: Planos v1 continuam válidos para sempre; o formato v2 exige Scenarios:
+
+**Context**: O ciclo default muda o core e afeta todo projeto que usa o SEJA; o upgrade por tag não pode invalidar planos existentes, e o plan-000012 precisa recusar step sem cenário.
+**Decision**: plan_format_version: 2 acrescenta o campo Scenarios: por step, obrigatório em todo step com Tests: não-N/A. Planos sem versão ou com plan_format_version: 1 são lidos como antes, sem bloqueio. A recusa vale só para v2.
+**Consequences**: Dois formatos em convivência; o /implement hoje cai para manual quando a versão é diferente de 1, e adaptá-lo é dos planos 000012 e 000013; fixtures v1 reais provam a retrocompatibilidade.
+**Rejected Alternatives**: Scenarios: opcional na v1 (o plan-000012 não consegue impor a regra); migrar planos antigos (reescreve artefatos imutáveis, T3).
+
+*Source: plan-000007 Step 6 (2026-10-06)*
+
 ## CHANGELOG
 
 <!-- Append-only. Format: YYYY-MM-DD | <id> | added|revised|revoked|superseded | plan-NNNNNN | <note>
