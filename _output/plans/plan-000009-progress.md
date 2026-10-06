@@ -162,3 +162,15 @@ Nada escrito fora do ledger. `git status` limpo no inicio (branch `dev`, HEAD 6c
 - deviated: Duas lacunas novas: brief verbatim em features/ e check_intent no run_all_checks dos projetos.
 - less-sure: Se a linha de rev no drift-metric.md deve vir do 000011 ou do 000014.
 - gate: not-installed
+
+### Correções da revisão (orquestrador)
+- Item 1: `check_intent.py` lê com `utf-8-sig`; o BOM não esconde mais o frontmatter.
+- Item 2: `OSError` e `UnicodeDecodeError` viram erro sem traceback. Modo arquivo: exit 2. Scan: finding `LEITURA` por arquivo, varredura continua, exit 2 ao fim.
+- Item 3: `_split_row` mantém `\|` e `|` dentro de crases na célula.
+- Item 4: `parse` ignora `## ` dentro de bloco cercado (``` ou ~~~).
+- Item 5: `--d0` sem path, ou com `--strict`/`--require-approved`, sai com 2 e mensagem.
+- Item 6: docstring de exit codes reescrita (scan sai 1 quando um intent `approved` tem erro, sem `--strict`).
+- Item 7: passo 2b do `/plan` standard coerente com CYC-002/CYC-004/D-005/D-008: a grill sempre roda; sem código vira uma pergunta, sem `features/`, `Specify: skipped`, plano v1; planos v1 existentes seguem como antes.
+- Item 8: frase sobre `serve:` em `feature-layout.md` (Emenda 000009) e `intent.md`.
+- Item 9: com `--require-approved`, "Mudanças" é cobrada também no arquivo mínimo (`extended or require`).
+- Testes: 9 novos em `test_check_intent.py` (vermelhos antes, 65 verdes agora).

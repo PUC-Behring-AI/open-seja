@@ -394,3 +394,73 @@ def test_fixture_task_without_code_has_short_intent_and_skip_line():
     labels = [line.split(":", 1)[0] for line in section]
     assert labels == ["- Objetivo", "- O que você vê no fim", "- Não faz", "- Pronto quando"]
     assert not list((_GRILL / "b-tarefa-sem-codigo").glob("intent*.md"))
+
+
+# --- review fixes (plan 000009) ---------------------------------------------
+
+
+def test_bom_utf8_frontmatter_is_read(tmp_path):
+    path = tmp_path / "bom.md"
+    path.write_bytes(b"\xef\xbb\xbf" + VALID.encode("utf-8"))
+    proc = _run(str(path), "--require-approved", "--strict")
+    assert proc.returncode == 0, proc.stdout
+    assert "slug" not in proc.stdout
+
+
+def test_undecodable_file_is_exit_2_in_single_file_mode(tmp_path):
+    path = tmp_path / "bad.md"
+    path.write_bytes(b"---\nslug: \xff\xfe\n---\n")
+    proc = _run(str(path))
+    assert proc.returncode == 2
+    assert "Traceback" not in proc.stderr
+
+
+def test_scan_continues_after_unreadable_file(tmp_path):
+    for name, data in (("a-bad", b"\xff\xfe\x00"), ("b-good", VALID.encode("utf-8"))):
+        feat = tmp_path / "features" / name
+        feat.mkdir(parents=True)
+        (feat / "intent.md").write_bytes(data)
+    proc = _run(cwd=tmp_path)
+    assert proc.returncode == 2
+    assert "Traceback" not in proc.stderr
+    assert "a-bad" in proc.stdout + proc.stderr
+    assert "b-good" in proc.stdout
+
+
+def test_split_row_keeps_escaped_and_backticked_pipes():
+    from check_intent import _split_row
+
+    assert _split_row(r"| a \| b | `c|d` | e |") == [r"a \| b", "`c|d`", "e"]
+
+
+def test_fenced_heading_does_not_open_section():
+    from check_intent import parse
+
+    text = "---\nslug: x\nstatus: grilling\n---\n\n## Requisitos\n\n```\n## Premissas\n```\n"
+    doc = parse(text)
+    assert "premissas" not in doc.sections
+    text = text.replace("```", "~~~")
+    assert "premissas" not in parse(text).sections
+
+
+def test_d0_without_path_is_usage_error(tmp_path):
+    proc = _run("--d0", cwd=tmp_path)
+    assert proc.returncode == 2
+    assert "--d0" in proc.stderr
+
+
+@pytest.mark.parametrize("flag", ["--strict", "--require-approved"])
+def test_d0_with_strict_or_require_is_usage_error(tmp_path, flag):
+    path = tmp_path / "i.md"
+    path.write_text(VALID, encoding="utf-8")
+    assert _run(str(path), "--d0", flag).returncode == 2
+
+
+def test_require_approved_demands_change_row_in_minimal_file():
+    text = (
+        "---\nslug: t\nstatus: approved\n---\n\n## Requisitos\n\n"
+        "| REQ | Texto | Critério | rev |\n|---|---|---|---|\n"
+        "| REQ-t-001 | Texto. | Quando eu abro, o sistema mostra 3 itens. | 2 |\n"
+    )
+    assert any("Mudanças" in f.mensagem for f in _errors(check_intent(text, require_approved=True), "P4"))
+    assert not any("Mudanças" in f.mensagem for f in _errors(check_intent(text), "P4"))

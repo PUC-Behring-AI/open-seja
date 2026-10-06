@@ -17,7 +17,7 @@ Tudo o que está marcado "emenda 000009" abaixo é extensão aditiva (decisão p
 [default; aceito 2026-10-06]): este modelo é um superconjunto do mínimo; um intent.md mínimo
 continua válido em check_intent.py sem --require-approved.
 
-Extensões no frontmatter (emenda 000009): approved_at, approved_by, serve.
+Extensões no frontmatter (emenda 000009): approved_at, approved_by, serve. `serve:` aceita IDs do as-intended (`REQ-<TIPO>-NNN` em maiúsculas, `JM-TB-NNN`, `D-NNN`); `REQ-<slug>-NNN` de feature (minúsculas) não é alvo de `serve:` e gera warning.
 `designer_description` só existe porque este arquivo é uma referência do harness; um intent.md
 de projeto não o usa.
 -->

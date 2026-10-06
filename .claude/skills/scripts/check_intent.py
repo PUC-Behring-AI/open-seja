@@ -31,8 +31,15 @@ the minimal rules plus a warning that the stop rule was not evaluated.
 
 No clock, no network, no LLM. Output is sorted and identical for the same text.
 
-Exit codes: 0 = done (always, unless --strict); 1 = --strict and an error was
-found, or scan mode found an error in an approved intent; 2 = usage error.
+Exit codes:
+  0 = done. File mode exits 0 even with errors, unless --strict is given.
+  1 = file mode with --strict and at least one error; or scan mode and at least
+      one intent with `status: approved` has an error (scan needs no --strict
+      for this; intents in `grilling` never fail the scan).
+  2 = usage error (missing file, --d0 without a path, --d0 with --strict or
+      --require-approved) or a file that could not be read or decoded. In scan
+      mode the unreadable file is reported and the scan continues; exit 2 comes
+      at the end and wins over 1.
 
 Usage
 -----
@@ -189,8 +196,12 @@ def parse(text: str) -> Doc:
     meta, start = _parse_frontmatter(lines)
     sections: dict[str, Section] = {}
     current: list[tuple[int, str]] | None = None
+    fence: str | None = None
     for number, line in enumerate(lines[start:], start=start + 1):
-        if line.startswith("## "):
+        marker = line.strip()[:3]
+        if marker in ("```", "~~~"):
+            fence = None if fence == marker else (fence or marker)
+        if fence is None and line.startswith("## "):
             current = []
             sections[_norm(line[3:])] = Section(number, current)
         elif current is not None:
@@ -199,7 +210,31 @@ def parse(text: str) -> Doc:
 
 
 def _split_row(line: str) -> list[str]:
-    return [cell.strip() for cell in line.strip().strip("|").split("|")]
+    """Split a table row on `|`, keeping `\\|` and pipes inside backticks in the cell."""
+    text = line.strip()
+    text = text.removeprefix("|")
+    cells: list[str] = []
+    buf: list[str] = []
+    in_code = False
+    i = 0
+    while i < len(text):
+        ch = text[i]
+        if ch == "\\" and text[i + 1:i + 2] == "|":
+            buf.append("\\|")
+            i += 2
+            continue
+        if ch == "`":
+            in_code = not in_code
+        if ch == "|" and not in_code:
+            cells.append("".join(buf).strip())
+            buf = []
+        else:
+            buf.append(ch)
+        i += 1
+    tail = "".join(buf).strip()
+    if tail or not cells:
+        cells.append(tail)
+    return cells
 
 
 def table(section: Section | None) -> list[Row]:
@@ -278,7 +313,7 @@ def _check_frontmatter(doc: Doc) -> list[Finding]:
     return out
 
 
-def _check_ids(doc: Doc, reqs: list[Row], extended: bool) -> list[Finding]:
+def _check_ids(doc: Doc, reqs: list[Row], extended: bool, require: bool = False) -> list[Finding]:
     slug = doc.frontmatter.get("slug", "")
     out: list[Finding] = []
     seen: dict[int, int] = {}
@@ -294,7 +329,7 @@ def _check_ids(doc: Doc, reqs: list[Row], extended: bool) -> list[Finding]:
         if number in seen:
             out.append(_err("P4", row.line, f"O ID {raw} aparece duas vezes."))
         seen.setdefault(number, row.line)
-        out.extend(_check_rev(row, raw, doc, extended))
+        out.extend(_check_rev(row, raw, doc, extended, require))
     out.extend(_check_contiguous(seen))
     return out
 
@@ -309,14 +344,14 @@ def _check_contiguous(seen: dict[int, int]) -> list[Finding]:
     return [_err("P4", min(seen.values()), f"Faltam os números {gaps}. Um requisito retirado fica na tabela.")]
 
 
-def _check_rev(row: Row, raw: str, doc: Doc, extended: bool) -> list[Finding]:
+def _check_rev(row: Row, raw: str, doc: Doc, extended: bool, require: bool = False) -> list[Finding]:
     rev_text = _cell(row, "rev")
     if "rev" not in row.cells:
         return []
     if not rev_text.isdigit() or int(rev_text) < 1:
         return [_err("P4", row.line, f"O rev de {raw} precisa ser um número a partir de 1.")]
     changed = int(rev_text) > 1 or not _is_active(row)
-    if extended and changed and raw not in _section_text(doc.sections.get("mudancas")):
+    if (extended or require) and changed and raw not in _section_text(doc.sections.get("mudancas")):
         return [_err("P4", row.line, f"{raw} mudou, mas não tem linha em Mudanças.")]
     return []
 
@@ -532,7 +567,7 @@ def check_intent(text: str, *, require_approved: bool = False) -> list[Finding]:
     reqs = table(doc.sections.get("requisitos"))
     extended = _is_extended(doc, reqs)
     findings = _check_frontmatter(doc)
-    findings += _check_ids(doc, reqs, extended)
+    findings += _check_ids(doc, reqs, extended, require_approved)
     findings += _check_reqs(doc, reqs, extended, require_approved)
     if extended or require_approved:
         findings += _check_dimensions(doc, require_approved)
@@ -599,20 +634,34 @@ def _scan(root: Path, as_json: bool) -> int:
         print("check_intent: nenhum features/*/intent.md; nada a verificar.")
         return 0
     failed = False
+    unreadable = False
     reports = []
     for path in paths:
-        text = path.read_text(encoding="utf-8")
+        rel = str(path.relative_to(root))
+        try:
+            text = _read(path)
+        except (OSError, UnicodeDecodeError) as exc:
+            unreadable = True
+            finding = _err("LEITURA", 1, f"Não consegui ler o arquivo: {exc.__class__.__name__}.")
+            if as_json:
+                reports.append(_as_json(rel, [finding]))
+            else:
+                _print_text(rel, [finding])
+            continue
         approved = parse(text).frontmatter.get("status") == "approved"
         findings = check_intent(text, require_approved=approved)
         failed |= approved and any(f.severidade == "error" for f in findings)
-        rel = str(path.relative_to(root))
         if as_json:
             reports.append(_as_json(rel, findings))
         else:
             _print_text(rel, findings)
     if as_json:
         print(json.dumps({"schema_version": 1, "reports": reports}, ensure_ascii=False, indent=2))
-    return 1 if failed else 0
+    return 2 if unreadable else (1 if failed else 0)
+
+
+def _read(path: Path) -> str:
+    return path.read_text(encoding="utf-8-sig")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -625,13 +674,21 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="project root for scan mode")
     args = parser.parse_args(argv)
 
+    if args.d0 and (args.path is None or args.strict or args.require_approved):
+        print("check_intent: --d0 pede um caminho e não combina com --strict nem --require-approved.",
+              file=sys.stderr)
+        return 2
     if args.path is None:
         return _scan(args.root, args.json)
     path = Path(args.path)
     if not path.is_file():
         print(f"check_intent: arquivo não encontrado: {path}", file=sys.stderr)
         return 2
-    text = path.read_text(encoding="utf-8")
+    try:
+        text = _read(path)
+    except (OSError, UnicodeDecodeError) as exc:
+        print(f"check_intent: não consegui ler {path}: {exc.__class__.__name__}", file=sys.stderr)
+        return 2
     if args.d0:
         print(json.dumps({"schema_version": 1, "path": str(path), "d0": brief_residue(text)},
                          ensure_ascii=False, indent=2))
