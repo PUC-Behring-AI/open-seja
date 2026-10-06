@@ -92,3 +92,15 @@ Baseline confirmado: `run_all_checks.py` 16 PASS / 14 FAIL; `git status` limpo.
 - deviated: GHK-008 ignora steps que diferem em valor; GHK-017 pula steps ja acusados por GHK-013.
 - less-sure: As heuristicas de aviso (012, 013, 017) podem errar nos dois sentidos com texto real.
 - gate: not-installed
+
+## Step 6 -- CLI, saida, `--json`, `--matrix`, exit codes (2026-10-06)
+
+`main` completo: `check_features.py [raiz] [--feature] [--steps] [--json] [--matrix] [--strict] [--quiet]`; relatorio legivel agrupado por feature com `arquivo:linha`, regra, severidade em pt e `Dica:`; resumo `N erros, N avisos, N informacoes; N REQs, N cenarios, N REQ sem cenario`; JSON com `schema_version: 1` (`summary`, `findings`, `features`, `matrix` opcional); exit 0/1/2 como o plano (falha interna vira exit 2 com mensagem curta, nunca traceback; `--feature` sem pasta tambem e 2). Secao "Saida" e "Codigos de saida" escritas em `gherkin-spec-format.md` (secao 11).
+- A convencao de exit code dos `check_*.py` existentes: `check_intent.py` sai 0 sempre (1 so com `--strict`); aqui erro falha por padrao porque o check roda no `run_all_checks.py` e "erro reprova" e o contrato do plano (Step 7). Documentado.
+- Verificacao: 145 testes de `test_check_features.py` passam; pytest do harness 836 passed / 12 failed; `run_all_checks.py` 17 PASS / 14 FAIL (17/2/9); ruff limpo.
+
+### Step 6 -- reflection-on-action | 2026-10-06 17:41 UTC | CLI e saida do validador
+- happened: Escrevi o CLI com saida legivel, JSON versionado, matriz, --strict e --quiet, e documentei a saida e os codigos de saida na convencao.
+- deviated: Erro falha por padrao (exit 1), diferente do check_intent.py que so falha com --strict.
+- less-sure: O JSON e a matriz sao a entrada do plan-000014; o formato pode precisar de ajuste quando ele consumir.
+- gate: not-installed

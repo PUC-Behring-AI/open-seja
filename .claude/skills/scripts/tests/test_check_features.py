@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -21,6 +23,7 @@ from check_features import (
     light_key,
     load_intent,
     load_step_defs,
+    main,
     normalize_step,
     parse_feature,
     term_candidates,
@@ -345,3 +348,88 @@ def test_re_definition_is_not_verified_and_does_not_fail(tmp_path: Path) -> None
     found = _rules(root, "GHK-015", load_step_defs(root / "steps", root))
     assert any("não foi verificado" in f.message for f in found)
     assert all(f.severity != "error" for f in found)
+
+
+# ---------------------------------------------------------------------------
+# CLI: text, --json, --matrix, --strict, exit codes
+# ---------------------------------------------------------------------------
+
+_SCRIPT = _TESTS_DIR.parent / "check_features.py"
+
+
+def _args(case: str) -> list[str]:
+    root = _FIXTURES / case
+    return [a.replace("{root}", str(root)) for a in _expected(case)["args"]]
+
+
+@pytest.mark.parametrize("case", CASES)
+def test_exit_code_golden(case: str, capsys: pytest.CaptureFixture[str]) -> None:
+    code = main([str(_FIXTURES / case), *_args(case)])
+    capsys.readouterr()
+    assert code == _expected(case)["exit_code"]
+
+
+def test_only_warnings_exit_0_and_strict_exits_1(capsys: pytest.CaptureFixture[str]) -> None:
+    root = str(_FIXTURES / "ghk-013-detalhe")
+    assert main([root]) == 0
+    assert main([root, "--strict"]) == 1
+    capsys.readouterr()
+
+
+def test_error_line_has_file_line_rule_and_hint(capsys: pytest.CaptureFixture[str]) -> None:
+    assert main([str(_FIXTURES / "ghk-002-sem-tag")]) == 1
+    out = capsys.readouterr().out
+    line = next(ln for ln in out.splitlines() if "GHK-002" in ln)
+    assert line.startswith("features/login/login.feature:9: GHK-002 erro:") and "Dica:" in line
+    assert out.splitlines()[-1].startswith("1 erro, 0 avisos, 0 informações; 1 REQ, 2 cenários")
+
+
+def test_json_is_one_object_in_the_same_order_as_the_text(capsys: pytest.CaptureFixture[str]) -> None:
+    root = str(_FIXTURES / "ghk-003-tags")
+    main([root])
+    text_lines = [ln for ln in capsys.readouterr().out.splitlines() if ": GHK-" in ln]
+    main([root, "--json"])
+    report = json.loads(capsys.readouterr().out)
+    assert report["schema_version"] == 1 and set(report["summary"]) == {
+        "errors", "warnings", "infos", "reqs", "scenarios", "uncovered_reqs"}
+    assert [f"{f['file']}:{f['line']}: {f['rule']}" for f in report["findings"]] == [
+        ln.split(" ", 2)[0] + " " + ln.split(" ", 2)[1] for ln in text_lines]
+
+
+def test_matrix_lists_every_req_including_the_uncovered(capsys: pytest.CaptureFixture[str]) -> None:
+    main([str(_FIXTURES / "ghk-005-approved"), "--json", "--matrix"])
+    reqs = json.loads(capsys.readouterr().out)["matrix"]["login"]["reqs"]
+    assert reqs["REQ-login-002"]["scenarios"] == [] and len(reqs["REQ-login-001"]["scenarios"]) == 1
+    assert reqs["REQ-login-001"]["scenarios"][0]["key"] == "login/login.feature::Entrar com a senha certa"
+
+
+def test_missing_root_exits_2_without_traceback(tmp_path: Path) -> None:
+    result = subprocess.run([sys.executable, str(_SCRIPT), str(tmp_path / "nao-existe")],
+                            capture_output=True, text=True, check=False)
+    assert result.returncode == 2 and "Traceback" not in result.stderr and result.stderr.strip()
+
+
+def test_invalid_argument_exits_2(capsys: pytest.CaptureFixture[str]) -> None:
+    with pytest.raises(SystemExit) as exc:
+        main(["--nao-existe"])
+    assert exc.value.code == 2
+    capsys.readouterr()
+
+
+def test_feature_option_validates_only_that_feature(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    root = _write(tmp_path, {
+        "features/login/intent.md": INTENT.format(status="approved"),
+        "features/login/a.feature": SCENARIO.format(tag=""),
+        "features/outra/intent.md": INTENT.format(status="approved").replace("login", "outra"),
+        "features/outra/a.feature": SCENARIO.format(tag=""),
+    })
+    main([str(root), "--feature", "login"])
+    out = capsys.readouterr().out
+    assert "features/login/" in out and "features/outra/" not in out
+    assert main([str(root), "--feature", "nenhuma"]) == 2
+    capsys.readouterr()
+
+
+def test_no_features_prints_a_line_and_exits_0(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    assert main([str(tmp_path)]) == 0
+    assert "nada a verificar" in capsys.readouterr().out

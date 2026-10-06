@@ -48,6 +48,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import json
 import re
 import sys
 from dataclasses import dataclass, field
@@ -1199,25 +1200,126 @@ def validate(fds: list[FeatureDir], defs: list[StepDef] | None = None) -> list[F
     return sort_findings(out)
 
 
+_SEVERITY_WORDS = {"error": "erro", "warning": "aviso", "info": "info"}
+
+
+def _plural(count: int, one: str, many: str) -> str:
+    return f"{count} {one if count == 1 else many}"
+
+
+def summarize(fds: list[FeatureDir], findings: list[Finding], matrix: dict) -> dict:
+    """Counts shown in the final line and in the JSON summary."""
+    scenarios = sum(len(ff.feature.scenarios) for fd in fds for ff in _parsed(fd) if ff.feature is not None)
+    reqs = [info for data in matrix.values() for info in data["reqs"].values() if info["state"] == "ativo"]
+    return {
+        "errors": sum(1 for f in findings if f.severity == "error"),
+        "warnings": sum(1 for f in findings if f.severity == "warning"),
+        "infos": sum(1 for f in findings if f.severity == "info"),
+        "reqs": len(reqs),
+        "scenarios": scenarios,
+        "uncovered_reqs": sum(1 for info in reqs if not info["scenarios"]),
+    }
+
+
+def _summary_line(summary: dict) -> str:
+    return (
+        f"{_plural(summary['errors'], 'erro', 'erros')}, "
+        f"{_plural(summary['warnings'], 'aviso', 'avisos')}, "
+        f"{_plural(summary['infos'], 'informação', 'informações')}; "
+        f"{_plural(summary['reqs'], 'REQ', 'REQs')}, "
+        f"{_plural(summary['scenarios'], 'cenário', 'cenários')}, "
+        f"{summary['uncovered_reqs']} REQ sem cenário"
+    )
+
+
+def _group(path: str) -> str:
+    parts = path.split("/")
+    return parts[1] if parts[0] == "features" and len(parts) > 1 else parts[0]
+
+
+def _print_text(findings: list[Finding], summary: dict, matrix: dict | None, quiet: bool) -> None:
+    shown = [f for f in findings if not (quiet and f.severity == "info")]
+    current = None
+    for f in shown:
+        group = _group(f.file)
+        if group != current:
+            print(f"[{group}]")
+            current = group
+        hint = f" Dica: {f.hint}" if f.hint else ""
+        print(f"{f.file}:{f.line}: {f.rule} {_SEVERITY_WORDS[f.severity]}: {f.message}{hint}")
+    if matrix is not None:
+        for slug, data in matrix.items():
+            aprovado = {True: "sim", False: "não", None: "não declarado"}[data["scenarios_approved"]]
+            print(f"matriz {slug}: status {data['status']}, cenários aprovados: {aprovado}")
+            for req, info in data["reqs"].items():
+                print(f"  {req} ({info['state']}): {len(info['scenarios'])} cenário(s)")
+                for entry in info["scenarios"]:
+                    print(f"    {entry['key']} (linha {entry['line']})")
+    print(_summary_line(summary))
+
+
+def _report(root: Path, fds: list[FeatureDir], findings: list[Finding], matrix: dict, with_matrix: bool) -> dict:
+    report = {
+        "schema_version": SCHEMA_VERSION,
+        "root": str(root),
+        "summary": summarize(fds, findings, matrix),
+        "findings": [f._asdict() for f in findings],
+        "features": [
+            {"slug": fd.slug, "status": fd.intent.status, "scenarios_approved": fd.intent.scenarios_approved}
+            for fd in fds
+            if fd.intent is not None
+        ],
+    }
+    if with_matrix:
+        report["matrix"] = matrix
+    return report
+
+
+def _run(args: argparse.Namespace) -> int:
+    root = Path(args.root)
+    if not root.is_dir():
+        print(f"check_features: pasta não encontrada: {root}", file=sys.stderr)
+        return 2
+    if args.steps and not Path(args.steps).is_dir():
+        print(f"check_features: pasta de definições não encontrada: {args.steps}", file=sys.stderr)
+        return 2
+    fds = discover(root, args.feature)
+    if args.feature and not fds:
+        print(f"check_features: não há features/{args.feature}/ neste projeto.", file=sys.stderr)
+        return 2
+    if not any(fd.intent is not None for fd in fds):
+        if args.json:
+            print(json.dumps(_report(root, [], [], {}, args.matrix), ensure_ascii=False, indent=2))
+        else:
+            print("check_features: nenhum features/<slug>/intent.md; nada a verificar.")
+        return 0
+    defs = load_step_defs(Path(args.steps), root) if args.steps else None
+    findings = validate(fds, defs)
+    matrix = build_matrix(fds)
+    if args.json:
+        print(json.dumps(_report(root, fds, findings, matrix, args.matrix), ensure_ascii=False, indent=2))
+    else:
+        _print_text(findings, summarize(fds, findings, matrix), matrix if args.matrix else None, args.quiet)
+    has_error = any(f.severity == "error" for f in findings)
+    has_warning = any(f.severity == "warning" for f in findings)
+    return 1 if has_error or (args.strict and has_warning) else 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate features/<slug>/*.feature (GHK-001 to GHK-019).")
     parser.add_argument("root", nargs="?", default=".", help="project root (default: current directory)")
     parser.add_argument("--feature", help="validate only features/<slug>/")
     parser.add_argument("--steps", help="folder with the step definitions (Python), read with ast")
+    parser.add_argument("--json", action="store_true", help="one JSON object with schema_version")
+    parser.add_argument("--matrix", action="store_true", help="also print the REQ -> scenarios matrix")
+    parser.add_argument("--strict", action="store_true", help="warnings also fail (exit 1)")
+    parser.add_argument("--quiet", action="store_true", help="hide informations")
     args = parser.parse_args(argv)
-    root = Path(args.root)
-    if not root.is_dir():
-        print(f"check_features: pasta não encontrada: {root}", file=sys.stderr)
+    try:
+        return _run(args)
+    except Exception as exc:  # noqa: BLE001 -- never a raw traceback for the user
+        print(f"check_features: erro interno ({type(exc).__name__}): {exc}", file=sys.stderr)
         return 2
-    fds = discover(root, args.feature)
-    if not any(fd.intent is not None for fd in fds):
-        print("check_features: nenhum features/<slug>/intent.md; nada a verificar.")
-        return 0
-    defs = load_step_defs(Path(args.steps), root) if args.steps else None
-    findings = validate(fds, defs)
-    for f in findings:
-        print(f"{f.file}:{f.line}: {f.rule} {f.severity}: {f.message}")
-    return 1 if any(f.severity == "error" for f in findings) else 0
 
 
 if __name__ == "__main__":

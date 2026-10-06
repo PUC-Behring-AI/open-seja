@@ -182,7 +182,57 @@ Seção preenchida no Step 8 do plan-000010 (exemplo executável em `.claude/ref
 
 `python .claude/skills/scripts/check_features.py [raiz] [--feature <slug>] [--steps <dir>] [--json] [--matrix] [--strict] [--quiet]`
 
-Seção preenchida no Step 6 do plan-000010.
+Sem argumentos, a raiz é a pasta atual (é assim que o `run_all_checks.py` o chama). O validador olha só as pastas `features/<slug>/` que têm `intent.md` ou `.feature`; sem nenhum `features/<slug>/intent.md` ele imprime `check_features: nenhum features/<slug>/intent.md; nada a verificar.` e sai 0. Isto é a retrocompatibilidade: projeto sem `features/`, ou com `features/` de outro estilo (por exemplo behave), não é afetado.
+
+### Saída legível
+
+Relatório em stdout, uma linha por achado, agrupada por feature (`[<slug>]`), em frases curtas:
+
+```
+[login]
+features/login/login.feature:9: GHK-002 erro: O cenário Sair da conta não tem tag @REQ-. Dica: Ponha a tag @REQ-<slug>-NNN do requisito na linha acima.
+1 erro, 0 avisos, 0 informações; 1 REQ, 2 cenários, 0 REQ sem cenário
+```
+
+`--quiet` esconde as informações (o resumo continua). `--matrix` acrescenta, por feature, cada REQ com seus cenários e a chave `<slug>/<arquivo>::<nome>`. Diagnóstico de uso vai para stderr. O validador nunca imprime o conteúdo de um arquivo além da linha do achado.
+
+### Saída `--json`
+
+Um único objeto em stdout, com `schema_version: 1`:
+
+```json
+{
+  "schema_version": 1,
+  "root": ".",
+  "summary": {"errors": 0, "warnings": 0, "infos": 0, "reqs": 3, "scenarios": 5, "uncovered_reqs": 0},
+  "findings": [{"rule": "GHK-002", "severity": "error", "file": "features/login/a.feature", "line": 9,
+                "scenario": "Sair da conta", "message": "...", "hint": "..."}],
+  "features": [{"slug": "login", "status": "approved", "scenarios_approved": true}],
+  "matrix": {}
+}
+```
+
+`findings` segue a mesma ordem da saída legível (arquivo, linha, regra). `matrix` só existe com `--matrix`:
+
+```json
+{"login": {"status": "approved", "scenarios_approved": true,
+           "reqs": {"REQ-login-001": {"state": "ativo",
+                                      "scenarios": [{"key": "login/a.feature::Entrar", "file": "...", "name": "Entrar",
+                                                     "line": 4, "rows": null, "disabled": false, "nao_faz": false,
+                                                     "journey": null}]}}}}
+```
+
+Todo REQ de `intent.md` aparece, inclusive o sem cenário (lista vazia) e o retirado (`state: retirado`). `rows` é o número de linhas de `Examples` do `Scenario Outline` (`null` em cenário comum). `journey` é `{rule, jm, order}` dentro de um `Rule`. `scenarios_approved` é `true`, `false` ou `null` (campo ausente). O D1 do plan-000008 lê esta matriz; ela não calcula D.
+
+### Códigos de saída
+
+| Código | Quando |
+|---|---|
+| 0 | sem erros (avisos e informações não falham) |
+| 1 | com erros, ou com avisos sob `--strict` |
+| 2 | uso incorreto, raiz ou pasta de definições ilegível, `--feature` sem pasta, ou falha interna (mensagem curta em stderr, nunca um traceback) |
+
+A convenção 0/1/2 é a dos outros `check_*.py` do harness (`check_intent.py`: 0, e 1 só sob `--strict`; aqui o erro falha por padrão porque o check roda no `run_all_checks.py`).
 
 ## 12. O que a convenção não faz
 
