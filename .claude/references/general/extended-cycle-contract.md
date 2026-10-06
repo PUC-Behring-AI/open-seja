@@ -172,7 +172,7 @@ A divergência é reportada **por degrau** (D1, D2, D3), com os estados de CYC-0
 
 - **Quem decide**: designer; plan-000008 opera.
 - **Critério de aceitação**: nenhum artefato do ciclo apresenta divergência como um único número; todo relatório separa D1, D2, D3.
-- **Medida**: ver `.claude/references/general/drift-metric.md` e `.claude/references/general/drift-control-protocol.md`. O degrau teste -> código + portão (D3) é reportado em duas partes, D3a (teste e portão) e D3b (código tocado sem cobertura), sempre separadas (DRM-001).
+- **Medida**: ver `.claude/references/general/drift-metric.md` e `.claude/references/general/drift-control-protocol.md`. O degrau teste -> código + portão (D3) é reportado em duas partes, D3a (verdade: o cenário com teste passa no código e no portão) e D3b (excesso: linha ou ramo tocado pela feature sem cenário que o cubra), sempre separadas (DRM-001).
 
 ### CYC-017 -- Onde roda o teste-primeiro `[default; aceito 2026-10-06]` (decisão pendente 5 = A)
 
