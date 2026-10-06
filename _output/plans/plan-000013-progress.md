@@ -109,3 +109,17 @@ Desvios de nome decididos aqui:
 - deviated: Cinco subcomandos alem do plano (route, green-check, crap, export, demo); red-check tambem le Cucumber JSON + JUnit; os formatos do export foram alinhados ao drift_report.py do plan-000014.
 - less-sure: A regra do Hardener (linha acrescentada so com pragma e codigo igual ao removido) pode recusar uma reformatacao legitima; R7 depende de o relatorio de cobertura usar caminhos relativos ou terminar no caminho do step.
 - gate: not-installed
+
+### Step 6 -- papeis com contexto curto (2026-10-06)
+
+- `build_brief.py`: le o bloco do step do plano, as chaves de `Scenarios:`, o Gherkin bruto de cada cenario dono (via `check_features.parse_feature`), o indice de definicoes de passo (ast dos decoradores `given/when/then/step`), o corpo das funcoes por `arquivo::Classe.metodo` e a lista de testes; monta secoes obrigatorias (regras do papel, step, Gherkin, saida da ferramenta, escopo, fechamento) e opcionais (indice, corpos, testes), com manifesto (`item`, `chars`, `required`, `included`) e teto (`PIPELINE_BRIEF_MAX = 24000`); acima do teto corta so o opcional e marca `truncated`. Grava `_output/tmp/brief-<plan>-step-<N>-<papel>.md`.
+- Conteudo por papel (ITF-012), conferido nos testes: Tester ve step, Gherkin dono, indice e regras do vermelho, nao ve corpo de codigo nem cenario de outro step; Coder ve step, Gherkin, a mensagem do `red-check` e os congelados, sem regra de CRAP ou pragma; Cleaner ve so `CRAP(src/tasks.py::TaskList.mark_done)=26.4 (CC=26, cov=0.92) > 8: dividir`, o corpo e o escopo (nenhum texto de cenario ou de step); Hardener ve sobreviventes com diff, corpos, testes existentes, a regra do pragma e o pedido da pergunta ao citizen (ITF-024).
+- Agentes novos `.claude/agents/scenario-tester.md` (modos `red` e `review`, este o terceiro amigo informativo da ITF-025), `cleaner.md`, `hardener.md`: frontmatter `name`, `description`, `designer_description`, `tools` (Cleaner: Read, Edit, Bash; Hardener: Read, Write, Edit, Bash; nenhum com busca na web); cabecalho "One job, then destroyed"; fecho "o resultado e o que a ferramenta devolver". `check_skill_system.py` ve 19 agentes e continua com os 9 erros do baseline.
+- Lacuna: `.claude/rules/harness-structure.md` diz "16 subagent prompts" e "Executor agents ... not standalone prompt files"; com os tres papeis isso ficou desatualizado. Nao editei (fora dos Files do plano); texto sugerido no Step 9.
+- Verify: `test_build_brief.py` 10 passed (xfail retirado); `uvx ruff` limpo; `run_all_checks.py` igual ao baseline; pytest do harness 12 failed / 1434 passed (nenhum xfail restante deste plano).
+
+### Step 6 -- reflection-on-action | 2026-10-06 19:01 UTC | Criar os papeis com contexto curto (agentes e montador de briefing)
+- happened: Escrevi build_brief.py com manifesto e teto e os agentes scenario-tester, cleaner e hardener; os 10 testes do briefing passaram e o check de agentes nao subiu.
+- deviated: O scenario-tester ganhou o modo review (terceiro amigo informativo) e o Hardener devolve perguntas ao citizen em JSON; harness-structure.md ficou com a contagem de agentes desatualizada.
+- less-sure: Se 24 000 caracteres e o teto certo; nenhum subagente real leu um briefing ainda (so o piloto mostra se o contexto curto basta).
+- gate: not-installed
