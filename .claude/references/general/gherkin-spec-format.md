@@ -35,8 +35,8 @@ Funcionalidade: Gerenciar tarefas
   @REQ-task-list-001
   Cenário: Acrescentar uma tarefa
     Dado que a lista de tarefas está vazia
-    Quando eu acrescento a tarefa "Comprar pão"
-    Então a lista mostra "Comprar pão" como pendente
+    Quando eu acrescento a tarefa "tarefa de compras"
+    Então a lista mostra "tarefa de compras" como pendente
 ```
 
 Exemplo mínimo em inglês:
@@ -47,8 +47,8 @@ Feature: Manage tasks
   @REQ-task-list-001
   Scenario: Add a task
     Given the task list is empty
-    When I add the task "Buy bread"
-    Then the list shows "Buy bread" as pending
+    When I add the task "shopping task"
+    Then the list shows "shopping task" as pending
 ```
 
 Alternativas rejeitadas: só inglês (o citizen lê e aprova em pt-BR) e só português (o ecossistema de ferramentas está em inglês).

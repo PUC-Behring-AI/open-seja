@@ -66,6 +66,7 @@ Tabela de requisitos:
 - Todo `Scenario` carrega a tag `@REQ-<slug>-NNN` do requisito que cobre, na linha imediatamente acima do `Scenario`. Um cenário pode carregar mais de uma tag; um REQ pode ter vários cenários (CYC-003).
 - Estilo critério de aceitação: `Given` (contexto), `When` (ação do usuário), `Then` (resultado observável). Sem detalhe de implementação: nada de nome de função, tabela, rota, seletor ou tecnologia.
 - O `.feature` é um contrato endereçável, aprovado pelo power dev; o citizen aprova a retradução, não este texto (CYC-013, D-004).
+- Convenção e validador: ver `.claude/references/general/gherkin-spec-format.md` e `.claude/skills/scripts/check_features.py` (plan-000010).
 
 ## `gate.json`
 

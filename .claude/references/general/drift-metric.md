@@ -313,7 +313,7 @@ Este arquivo **não**:
 | 2 | A condição de refutação do plan-000007 fala em "dois dos três degraus", mas o ciclo padrão não tem REQ nem cenário. A regra de comparação em `drift-control-protocol.md` (seção 7) opera isso. O texto de H-009 (prosa Human) pede a ressalva correspondente. | designer (via `/implement --manual`) |
 | 3 | O `gate.json` não traz indicador de baseline aceito; o plan-000013 o deriva do diff de `quality-baseline.json`. Este arquivo cita a fonte (`baseline_moved`, DRM-006). | plan-000013 |
 | 4 | O `/implement` por step só roda `--fast`; D3a exige `full` PASS. Sem a rodada `full` ao fim do plano, D3a fica `NM-SEM-GATE` mesmo com testes verdes. | plan-000013 |
-| 5 | O contrato diz Cucumber JSON com chave de cenário (CYC-012); os planos 000010 e 000014 citam JUnit XML. Este arquivo só exige estados (`passed`, `failed`, `error`, `skipped`, `xfail`, `undefined`, `absent`) e chave de cenário. | plan-000010 |
+| 5 | O contrato diz Cucumber JSON com chave de cenário (CYC-012); os planos 000010 e 000014 citam JUnit XML. Este arquivo só exige estados (`passed`, `failed`, `error`, `skipped`, `xfail`, `undefined`, `absent`) e chave de cenário. **Fechada pelo plan-000010:** formato Cucumber JSON, chave `<slug>/<arquivo>::<nome>` e mapeamento de estados em CYC-027 e `gherkin-spec-format.md` seção 8. | plan-000010 |
 | 6 | Quem congela M1 (`--freeze`) não estava fixado entre os planos. | plan-000014 e plan-000015 |
 | 7 | "Cadeia completa" e a população do D3a são definições deste arquivo, não do contrato; o plan-000014 as adota ou emenda. | plan-000014 |
 | 8 | Registrar o oráculo independente como `D-NNN` é decisão do designer (prosa Human); não foi feito. | designer |

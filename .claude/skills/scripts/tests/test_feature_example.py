@@ -58,11 +58,6 @@ def test_example_passes_the_validator(capsys: pytest.CaptureFixture[str]) -> Non
     assert "0 erros, 1 aviso, 1 informação; 2 REQs, 4 cenários, 0 REQ sem cenário" in out
 
 
-def test_example_has_no_partner_or_person_names() -> None:
-    text = " ".join(p.read_text(encoding="utf-8") for p in _EXAMPLE.rglob("*") if p.is_file()).lower()
-    assert "tecgraf" not in text and "petrobras" not in text
-
-
 # ---------------------------------------------------------------------------
 # Mapping table (gherkin-spec-format.md, section 8)
 # ---------------------------------------------------------------------------

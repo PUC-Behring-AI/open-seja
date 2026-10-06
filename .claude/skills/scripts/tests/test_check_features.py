@@ -475,3 +475,30 @@ def test_valid_feature_passes_and_an_error_fails_the_check() -> None:
 
 def test_a_warning_alone_does_not_fail_the_check() -> None:
     assert _run_as_check(_FIXTURES / "ghk-013-detalhe").status == "PASS"
+
+
+# ---------------------------------------------------------------------------
+# The examples of the convention itself pass the validator (pt and en)
+# ---------------------------------------------------------------------------
+
+
+def _spec_examples() -> list[str]:
+    text = _SPEC.read_text(encoding="utf-8")
+    blocks = re.findall(r"```gherkin\n(.*?)```", text, re.DOTALL)
+    return [b for b in blocks if "@REQ-task-list-001" in b]
+
+
+def test_spec_has_one_example_per_language() -> None:
+    blocks = _spec_examples()
+    assert len(blocks) == 2 and blocks[0].startswith("# language: pt") and blocks[1].startswith("Feature:")
+
+
+@pytest.mark.parametrize("index", [0, 1])
+def test_spec_examples_pass_the_validator(tmp_path: Path, index: int) -> None:
+    intent = INTENT.format(status="approved").replace("login", "task-list").split("| REQ-task-list-002")[0]
+    intent += "\n## Modelo e termos\n\n| Termo | O que quer dizer | Fonte |\n|---|---|---|\n"
+    intent += "| tarefa | Algo a fazer. | F1 |\n| lista | Onde se vê. | F1 |\n| task | Something to do. | F1 |\n"
+    intent += "| list | Where it shows. | F1 |\n"
+    root = _write(tmp_path, {"features/task-list/intent.md": intent,
+                             "features/task-list/a.feature": _spec_examples()[index]})
+    assert validate(discover(root)) == []

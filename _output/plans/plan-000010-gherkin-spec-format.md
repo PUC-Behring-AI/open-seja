@@ -219,7 +219,7 @@ Reexecutar `pytest tests/test_check_features.py`, `check_features.py` sobre os e
 - **Interface**: N/A
 - **Verify**: suíte do validador verde; `run_all_checks.py` com o mesmo conjunto de falhas pré-existentes do baseline do Step 1; `git diff --stat` dos dois arquivos de ponteiro mostra no máximo uma linha adicionada cada e nenhuma alteração em gate, hooks, `settings` ou esquema; zero termos de C1; o progress lista as pendências e a tabela GHK→000008.
 - **Tests**: N/A (verificação final; a suíte dos Steps 4 a 8 é o teste)
-- [ ] Done
+- [x] Done
 
 ## Coverage (advisory)
 

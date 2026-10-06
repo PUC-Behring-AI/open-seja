@@ -141,3 +141,66 @@ Tabela de mapeamento Cucumber JSON -> estados do DRM-003 escrita (secao 8) e exe
 - deviated: Os .py do exemplo levam sufixo .example para o pytest do harness nao os coletar; o JSON nao precisa de propriedade req; o JSON do pytest-bdd omite o cenario @skip e o primeiro step indefinido.
 - less-sure: Se o complemento com --junitxml sera aceito pelo plan-000013 ou se ele prefere outro runner; o relatorio Cucumber do pytest-bdd e incompleto.
 - gate: not-installed
+
+## Step 9 -- fechamento (2026-10-06)
+
+Reexecutados: `test_check_features.py` (155) e `test_feature_example.py` (17) verdes; os exemplos pt e en de `gherkin-spec-format.md` passam no validador (teste `test_spec_examples_pass_the_validator`, extrai os blocos `gherkin` do proprio documento; os exemplos foram trocados para `"tarefa de compras"` / `"shopping task"` para ficarem cobertos por "Modelo e termos"); `check_features.py` sobre `feature-example` sai 0; pytest do harness 863 passed / 12 failed (os mesmos 12); `run_all_checks.py` 17 PASS / 14 FAIL (os mesmos 14; contadores 17 undefined / 2 error(s) / 9 error(s)); ruff limpo. Vocabulario conferido com `extended-cycle-contract.md`, `feature-layout.md` e `drift-metric.md`: `REQ-<slug>-NNN`, `status: grilling|approved`, estados do DRM-003, chave de cenario (CYC-012). C1: grep de nomes de parceiro, instituicao e pessoa sobre os arquivos novos e alterados do `.claude/`: zero (um teste que listava esses nomes foi removido por isso). Nenhum SKILL.md, gate, hook, `settings` ou esquema de `feature-layout.md` alterado.
+Ponteiros: uma linha em `feature-layout.md` (secao `*.feature`) e uma linha "Implementacao" em CYC-019 do contrato. Alem do ponteiro, o plano deste executor acrescentou CYC-027 e uma linha de implementacao em CYC-026 (instrucao do designer: regras CYC novas a partir de CYC-027) e fechou a lacuna 5 da tabela de `drift-metric.md` (formato do relatorio do runner) com uma frase.
+
+### Tabela GHK -> leituras do plan-000008
+
+| Regra | Alimenta |
+|---|---|
+| GHK-002 | D1 / leitura "cenario sem tag" (`ghk-002-sem-tag`: 1 achado) |
+| GHK-003, GHK-004 | D1 / leitura "tag sem REQ" (tag orfa, `ghk-004-orfa`: 1 achado) |
+| GHK-005 | D1: REQ aprovado sem cenario = descoberto (erro); em `grilling` = nao medido (info) |
+| `scenarios_approved` da matriz | D1 `NM-CENARIOS-STALE` (nao aprovado/ausente) |
+| GHK-010 e a chave `<slug>/<arquivo>::<nome>` | D2 (liga cenario ao teste) |
+| GHK-014 e `disabled` da matriz | D2: `skip`/`xfail` = descoberto, avisado antes do runner |
+| `rows` da matriz e o pior estado das linhas | D2: Outline e um cenario (decisao 6 = A) |
+| GHK-006..008, 012, 013, 017 | ruido do Gherkin (risco do roadmap); nao entram no D |
+| GHK-018 e `journey` da matriz | leitura da jornada ordenada (JM-TB-NNN), fora do vetor D |
+| GHK-019 e `nao_faz` da matriz | leitura "nao faz" (opt-in), fora do vetor D |
+| GHK-015 | duplicata de definicao de step (item 7) |
+
+### Decisoes pendentes e o default em uso
+
+1 = C (en e pt; `# language: pt` exigido), 2 = A (tag nao herdada), 3 = A (parser proprio stdlib), 4 = B (`--steps` por `ast`; ambiguidade por casamento fica para o 000013), 5 = A (`scenarios: approved` lido, nao escrito), 6 = A (Outline = um cenario), 7 = B (prova no runner feita), todas `[default; aceito 2026-10-06]`. Emendas do adendo: aviso de substantivo fora de "Modelo e termos" (GHK-017), `Rule:` como jornada com `JM-TB-NNN` (GHK-018), `@nao-faz` opt-in (GHK-019).
+
+### Desvios do plano
+
+- Runner contract em **Cucumber JSON**, nao JUnit XML (o JUnit entra so como complemento, achado 4 do Step 8). Sem propriedade `req`.
+- `.py` do exemplo com sufixo `.example` (nao coletados pelo pytest do harness); exemplo em pt com `task-list`, nao `login`.
+- `run_all_checks.py` nao foi modificado (descoberta por glob; condicional interna; sem estado "pulado").
+- Regras GHK-017..019 (3 alem das 16) e CYC-027.
+- GHK-008 ignora steps que diferem em valor; GHK-017 pula step ja acusado por GHK-013.
+- pyright nao rodou (node do pyright sem `libatomic.so.1`); o open-seja nao tem config de pyright. Nao medido.
+- Fixtures em `.claude/skills/scripts/tests/fixtures/features/` (nao `tests/fixtures/features/`).
+
+### Lacunas para os planos 000011 a 000016
+
+| Plano | Lacuna |
+|---|---|
+| 000011 (specify) | escrever `scenarios: approved` em `intent.md` na aprovacao do `.feature`; usar `check_features.py <raiz> --feature <slug>` como portao de saida da specify (exit 0; avisos sao do power dev); ponto de aprovacao do citizen mostra a retradução, nao o `.feature`; `@nao-faz` e `Rule` com `JM-TB-NNN` sao opt-in a oferecer; `--specify` segue reservada; cenario `@REQ` de REQ `retirado` nao e erro |
+| 000012 (plano v2) | conferir as tags de `Scenarios:` contra `check_features.py --json --matrix` (a tag existe, o REQ esta ativo); chave de cenario `<slug>/<arquivo>::<nome>` como unica referencia por nome |
+| 000013 (teste-primeiro) | produzir o Cucumber JSON (`--cucumberjson`) e, para nao perder `@skip` e step indefinido no primeiro passo, tambem `--junitxml` (achado 4 do Step 8); classificar `failed` so com `AssertionError` (CYC-022, CYC-027); `conftest` modelo (`pytest_bdd_apply_tag`); ambiguidade de definicoes por casamento (decisao 4 = B so cobre duplicata exata); `check_features.py --steps` como parte do passo; `baseline_moved`, rodada `full` (lacunas do 000008) |
+| 000014 (relatorio) | consumir `check_features.py --json --matrix` (`schema_version: 1`) e `cucumber_states.py.example` como referencia do mapeamento; agregar linhas de Outline pelo pior estado; `scenarios_approved` -> `NM-CENARIOS-STALE`; `rev` > 1 do REQ x cenarios (lacuna 2 do 000009); `disabled` -> D2 descoberto |
+| 000015 (integracao) | quickguide pt-BR e `/help` sobre `check_features.py` e a convencao; `features/` entra nas leituras de `/critique` e `/explain drift`; avisar que `check_features.py` no `run_all_checks` dos projetos que adotarem `features/` reprova com erro GHK (aprovado = conferido) |
+| 000016 (piloto) | contar achados por regra GHK nas features reais (calibrar GHK-012, 013, 017, que sao heuristicas); testar o aviso de GHK-017 com texto real (aspas e maiuscula); registrar relatorio real do runner do piloto |
+
+### Texto sugerido ao designer (prosa Human; NAO escrito em `product-design/`)
+
+- `feature-layout.md` (via `/implement --manual`), secao `intent.md`, frontmatter: campo opcional `scenarios: approved` (escrito quando o contrato `.feature` for aprovado; ausente = D1 `NM-CENARIOS-STALE`). Secao `*.feature`: "O `Scenario Outline` e **um** cenario; coberto so se todas as linhas de `Examples` rodaram e nenhuma foi `skip` ou `xfail`."
+- `drift-metric.md` DRM-003: "A unidade do D2 e o `Scenario` com tag; um `Scenario Outline` e uma unidade e vale o pior estado das suas linhas (`gherkin-spec-format.md` secao 8)."
+- Decisao D-010 (proposta, via `apply_marker.py --marker DECISION_APPEND`, com confirmacao): "**D-010: o `.feature` e conferido por um validador deterministico antes da aprovacao, e o relatorio do runner e Cucumber JSON.** Context: o Gherkin vira ruido sem checagem mecanica, e o D1 e o D2 precisam de uma fonte legivel por maquina. Decision: `check_features.py` aplica GHK-001..019 (rastreabilidade REQ-cenario, steps sem duplicata ou ambiguidade, vocabulario do citizen); o runner contract e Cucumber JSON com chave `<slug>/<arquivo>::<nome>`; `xfail`, `error` e `undefined` sao mapeados por regra (CYC-027). Consequences: o D1 e o D2 leem a matriz sem reinterpretar o `.feature`; projetos com `features/` passam a reprovar no `run_all_checks` por erro GHK. Rejected: depender de parser externo (dependencia no harness); validar semantica com LLM; JUnit como contrato (nao traz tags nem steps)."
+- §14, linha `[intended] Grill e specify no /plan`: a metade grill ja esta entregue; com o validador a metade specify tem o portao de saida, mas a aprovacao (000011) ainda falta; marcador `STATUS` so quando o specify existir.
+
+## Implementation summary
+
+Entregue: convencao `gherkin-spec-format.md` (GHK-001..019, saida, mapeamento Cucumber JSON -> DRM-003, rodando no pytest-bdd), validador `check_features.py` (parser en/pt, regras de estrutura, rastreabilidade e steps, `--steps` por `ast`, `--json`, `--matrix`, exit 0/1/2, registrado no plugin registry, sem alterar `run_all_checks.py`), 36 fixtures golden + `esperado.json`, exemplo executavel em `template/feature-example/`, CYC-027. Medidas: 155 + 17 testes novos passam; baseline do harness mantido (14 FAIL, 12 testes falhando, contadores 17/2/9). Nao medido: pyright.
+
+### Step 9 -- reflection-on-action | 2026-10-06 17:48 UTC | Fechamento
+- happened: Reexecutei suites, exemplos da convencao (pt e en, via teste), run_all_checks e C1; acrescentei ponteiros e a tabela GHK para 000008, as lacunas para 000011-000016 e o texto sugerido ao designer.
+- deviated: Alem do ponteiro, fechei a lacuna 5 do drift-metric com uma frase e criei CYC-027 (instrucao do designer); removi um teste que listava nomes de parceiro (C1).
+- less-sure: Se o designer quer D-010 como proposto; e se o complemento JUnit do runner e aceitavel para o plan-000013.
+- gate: not-installed

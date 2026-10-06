@@ -203,6 +203,7 @@ Ele também não muda o portão, os hooks ou os denies (S2).
 
 - **Quem decide**: designer.
 - **Critério de aceitação**: nenhum texto deste arquivo traz fórmula, regex de validador ou prompt executável de Cleaner/Hardener; um plano que precise de um deles cria sua própria regra e a cita aqui por emenda (CYC-014).
+- **Implementação**: convenção e validador de Gherkin em `.claude/references/general/gherkin-spec-format.md` (GHK-001..019) e `.claude/skills/scripts/check_features.py` (plan-000010); o estado e a chave do runner em CYC-027.
 
 ---
 
