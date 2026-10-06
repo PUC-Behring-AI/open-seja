@@ -26,6 +26,8 @@ metadata:
 
 > Overview: see [./SKILL-quickguide.md](./SKILL-quickguide.md)
 
+> Extended cycle (grill, specify, test-first): see .claude/references/general/extended-cycle-contract.md.
+
 ## Arguments
 
 | Argument | Required | Description |

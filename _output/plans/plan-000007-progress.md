@@ -94,3 +94,16 @@ Mapa de regras:
 - Esquema normativo em `.claude/references/template/feature-layout.md`; CYC-015 aponta para ele.
 - Para o Step 5: `gate.json` tem `{schema_version, fast, full, ts}`, com `fast`/`full` = `{exit_code, category, ref}` ou `null` (null = `nao medido`). O IMPLEMENT escreve esse arquivo (CYC-007); `ref` aponta para o JSON do gate em QUALITY_DIR (escrito sem `${}`).
 - `run_all_checks.py` demora mais de 120 s no foreground; rode em background gravando em arquivo. Nao use `pkill -f run_all_checks` (mata o proprio shell).
+
+### Step 5 -- reflection-on-action | 2026-10-06 15:33 UTC | Definir o contrato do teste-primeiro no /implement consumindo gate e hooks
+- happened: Preenchi a secao IMPLEMENT do contrato com CYC-020..026 (escopo por Scenarios, cenario vira teste, vermelho pelo motivo certo, codigo minimo, portao e gate.json, --pipeline reservado, runner pendente do plan-000010) e acrescentei uma linha de ponteiro em implement/SKILL.md e em plan/standard/SKILL.md. run_all_checks ficou em 15 PASS e 14 FAIL com 17 undefined, 2 e 9 errors.
+- deviated: Cada SKILL.md ganhou 2 linhas no diff (a linha de ponteiro mais uma linha em branco antes dela). Uma primeira rodada do run_all_checks concorrente com outra deu 1 timeout e foi descartada; a rodada isolada bateu com o baseline.
+- less-sure: Se a regra CYC-022 e verificavel antes de existir runner (plan-000010), e se a ordem Coder, Cleaner, Hardener antes do portao em CYC-025 sera mantida pelo plan-000013.
+- gate: not-installed
+
+### Step 5 -- contrato do teste-primeiro (2026-10-06, subagente)
+- Regras novas na secao `## IMPLEMENT`: CYC-020 (escopo: so step com `Scenarios:` de tags), 021 (cenario vira teste, chave de cenario), 022 (vermelho = `failed` com asserção; `ERROR`/`ImportError`/`undefined` nao contam), 023 (codigo minimo), 024 (portao `--fast` + 3 tentativas + `gate.json`; portao/hooks/deny nao mudam), 025 (`--pipeline` reservado, plan-000013), 026 (runner pendente do plan-000010; pytest-bdd so recomendacao).
+- Para o Step 7: tabela item->CYC: plan-000010 consome CYC-012, 021, 022, 026; plan-000013 consome CYC-020, 023, 024, 025; plan-000012 consome CYC-018 e o version check do Auto Mode.
+- Para plan-000010: o runner precisa expor estado `failed` distinto de `ERROR`/`undefined` por chave de cenario (CYC-022).
+- Para plan-000013: `--pipeline` entra entre CYC-023 e CYC-024; o Auto Mode do implement/SKILL.md (Phase 1 passo 8) ja tem a cadeia red-green-gate que CYC-020..024 reutilizam sem mudar.
+- Cuidado: nao rode dois run_all_checks ao mesmo tempo (um deu timeout em check_skill_system). Rodado isolado: ~1,4 s.

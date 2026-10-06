@@ -238,4 +238,55 @@ Esta seção fixa a versão do formato de plano (CYC-018) e o campo `Scenarios:`
 
 ## IMPLEMENT
 
-> Seção preenchida pelos Steps 3 e 5.
+> Seção do Step 5 (plan-000007). Regras a partir de CYC-020. Esta seção diz o que o IMPLEMENT exige por step com cenário; ela **cita** o portão e os hooks existentes e não os altera (CYC-024).
+
+### CYC-020 -- Quais steps seguem o teste-primeiro
+
+Seguem o teste-primeiro os steps com `Scenarios:` preenchido por tags `@REQ-` (plano v2, CYC-018). Step sem cenário (infra, configuração, harness, `Tests: N/A`, plano com `Specify: skipped`, plano v1) segue o caminho atual do `/implement`, sem mudança (TDD red-green por `Tests:` quando não-N/A, ou ordem legada).
+
+- **Quem decide**: o plano (campo `Scenarios:`); o designer na aprovação do plano.
+- **Critério de aceitação**: um plano v1 e um step com `Scenarios: N/A (motivo)` produzem o mesmo fluxo de `/implement` da v0.10.1; só step com tags `@REQ-` entra em CYC-021 a CYC-023.
+
+### CYC-021 -- O cenário vira teste executável
+
+Para cada cenário listado em `Scenarios:`, o step cria ou localiza um teste executável ligado ao `Scenario` pela chave de cenário do runner contract (CYC-012). O teste é escrito **antes** de qualquer código de produção do step.
+
+- **Quem decide**: o subagente do step escreve; o designer revisa pelo plano.
+- **Critério de aceitação**: todo cenário do step aparece, pela chave de cenário, no relatório do runner; cenário sem teste fica `descoberto` em D2 (CYC-010), nunca omitido.
+
+### CYC-022 -- Vermelho pelo motivo certo
+
+Antes de escrever código, o teste deve falhar **por comportamento ausente**. Conta como vermelho o estado `failed` do runner contract (CYC-012) com a asserção do cenário falhando. Não contam como vermelho: `ERROR`, `ImportError`, erro de sintaxe, falha de fixture ou de configuração, nem `undefined` (passo sem definição). Teste vermelho por motivo errado é corrigido (o erro de import, sintaxe, fixture ou passo indefinido é resolvido) e a execução repetida até a falha ser a asserção do cenário. Teste que já passa antes do código é relatado como PARTIAL com a nota "test already passes", como no `/implement` atual.
+
+- **Quem decide**: o relatório do runner (resultado de ferramenta, T1); o subagente não declara vermelho por prosa.
+- **Critério de aceitação**: o relatório do runner anexado ao progress file mostra, para cada cenário do step, estado `failed` com mensagem de asserção, e nenhum `ERROR`, `ImportError` ou `undefined`; sem esse relatório o step não passa a CYC-023.
+
+### CYC-023 -- Código mínimo até o verde
+
+O Coder escreve o mínimo de código para os testes do step ficarem verdes. Refatorar, limpar e endurecer além do mínimo não entra aqui (CYC-025).
+
+- **Quem decide**: o runner (verde ou não); o designer revisa o diff.
+- **Critério de aceitação**: o relatório do runner mostra todos os cenários do step em `passed`; o diff do step só toca arquivos declarados em `Files:`.
+
+### CYC-024 -- Portão por step e resultado em `gate.json`
+
+Depois do verde, o portão `--fast` roda por step como já roda no `/implement`: as mesmas 3 tentativas, a falha após a terceira como PARTIAL com os achados no progress file. O resultado da última rodada entra em `features/<slug>/gate.json` (esquema em `.claude/references/template/feature-layout.md`; `fast` com `exit_code`, `category`, `ref`). Projeto sem `GATE_FAST_CMD`: `fast: null` ou arquivo ausente, D3 `não medido` com a razão dita, nota do step com `--gate not-installed` (CYC-012, T1, T6).
+
+O contrato **só cita** o portão e os hooks: o portão (`gate.py` e os adaptadores), os hooks `Stop` e `PreToolUse` em commit, o deny de `--no-verify` e de `--accept-baseline`, o baseline e as linhas `GATE_*` **não mudam** (S2). O agente escreve `gate.json` a partir do JSON do portão, nunca à mão sobre um resultado inventado e nunca para mover limiar.
+
+- **Quem decide**: o portão (T1); o limiar é do humano (S2).
+- **Critério de aceitação**: o diff de um plano que aplica este contrato não toca arquivo de portão, de hook nem de `settings`; `gate.json` de uma feature com step em PASS traz `fast.exit_code` 0 e `ref` que aponta para um JSON existente em `QUALITY_DIR`.
+
+### CYC-025 -- `--pipeline` reservado (Cleaner, Hardener)
+
+A flag `/implement --pipeline`, com os papéis Cleaner e Hardener depois do Coder, é **interface reservada** do plan-000013. Neste contrato o nome e o lugar na cadeia (após CYC-023, antes de CYC-024) ficam fixados; não há prompt, regra de decisão nem texto executável.
+
+- **Quem decide**: designer, no plan-000013.
+- **Critério de aceitação**: nenhum `SKILL.md` contém texto executável de `--pipeline`, Cleaner ou Hardener até o plan-000013.
+
+### CYC-026 -- Runner de Gherkin pendente
+
+O runner que executa os `.feature` e emite o relatório do runner contract é **pendente do plan-000010**. A recomendação é pytest-bdd como primeiro adaptador para Python, apenas como recomendação: o contrato descreve o relatório (Cucumber JSON com chave de cenário, CYC-012) e não nomeia ferramenta como requisito. Enquanto o runner não existe, o projeto declara D2 e D3 `não medido` para os cenários sem runner, nunca como falha (T6).
+
+- **Quem decide**: designer, no plan-000010.
+- **Critério de aceitação**: nenhuma regra desta seção exige uma ferramenta específica; um projeto sem runner produz relatório com `não medido` e a razão dita.
