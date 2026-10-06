@@ -1,3 +1,4 @@
+# DONE | 2026-10-06 18:58 UTC |
 # Plan 000014 | FEATURE-O | 2026-10-05 12:41 UTC | reflect-drift-report: /reflect e /explain drift leem a matriz e reportam divergência por degrau (M1 vs M2) | Review: standard
 
 > **Origem**: movido do ledger do Doutourado em 2026-10-05 (proposal-000088; la era `plan-000083`). Os IDs roadmap-000006 e plan-000007..000016 sao deste ledger (tabela no roadmap). Referencias a research-NNNNNN, reflection-NNNNNN, communication-NNNNNN, roadmap-000062 e plan-000064..000074 apontam para o ledger do Doutourado (repositorio do pesquisador). Caminhos `open-seja/...` em Files passam a ser relativos a raiz deste repositorio.
@@ -289,3 +290,22 @@ Sobre uma feature fictícia descartável (sem parceiro): rodar `--freeze` no est
 - Lista de lacunas contra os planos 000007 a 000012 e texto sugerido para os itens 7 e 9.
 
 smoke: false
+
+## Implementation summary (2026-10-06)
+
+- Steps: 9/9 SUCCESS, executados por um subagente Sonnet (um commit por step), em paralelo com o plan-000013 (arquivos reservados, `git add` explicito); orquestrador revisou e fechou.
+- Arquivos: `.claude/references/general/drift-report.md` (DRP-001..019), `.claude/skills/scripts/drift_report.py` (calculador puro `compute_report`, carregador `load_matrix`, `--freeze` M1/M2, `--compare`, `--audit-sample`, renderizadores power/citizen/HTML) + `test_drift_report.py` + 26 arvores de fixture; edicoes condicionadas a `features/` em `/reflect`, `/explain` e no internal de drift.
+- Os 6 golden do plan-000008 passam. Formatos de entrada propostos (DRP-001) e repassados ao executor do 000013: `runner/cucumber.json`, `runner/adapter.json`, `gate.json` (`baseline_moved`, `adapter`), `drift/red-reason.json`, `drift/coverage.json`, `features/adoption.json`.
+- Ensaio ponta a ponta SIMULADO (scripts, nao skills); achou 3 erros, corrigidos com teste.
+- Baseline novo: run_all_checks 19 PASS / 14 FAIL (contadores 17/2/9); pytest 1333 passed / 12 failed.
+- Propostas ao designer: D-013 (texto no progress) e emendas a `drift-metric.md` (DRM-002/004/006/008/009) e `feature-layout.md` -- para o plan-000015 (emendas aditivas) e o lote de marcadores do Step 10.
+- Quality gate: `/critique review` (code-reviewer standard): 2 critical (JSON nao-objeto e OSError com traceback), 6 advisory; todos corrigidos com teste primeiro no commit d5c1e86 (`read_obj`, exit 2 em OSError, M1 exclusivo via `os.link`, M2 com hora, validacao de `--at`/`--feature` -- o `--at` entrava no caminho do arquivo --, DRP-013 sobre verbatim, codigo morto); 214 testes no modulo.
+
+### Generator-Critic Iterations
+- Iteration count: 1/2
+- Findings per iteration: [2 critical, 6 advisory]
+- Resolution status: all resolved
+
+## Reflection
+
+- 2026-10-06: O calculador teve de devolver cadeia_completa 0 para passar o golden do 000008 e o relatorio passou a dizer cadeia indeterminada; a revisao achou entradas invalidas com traceback e um caminho de arquivo derivado de --at, corrigidos. (notes 9, with deviation 9, with gate 0)

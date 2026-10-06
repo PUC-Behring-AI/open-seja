@@ -112,7 +112,7 @@ pesquisador). C1: nada de nome de parceiro nos artefatos que forem ao open-seja.
 | # | ID | Title | Scope | Type | Plan | Depends on | Status |
 |---|-----|-------|-------|------|------|-----------|--------|
 | 7 | implement-test-first-build | `/implement` por step: cenário vira teste vermelho pelo motivo certo, Coder, Cleaner (CRAP), Hardener (mutação), contexto curto por papel, loop até PASS; consome o gate do 62 | backend | technical | plan-000013 | plan-from-scenarios | planned |
-| 8 | reflect-drift-report | `/reflect` e `/explain drift` leem a matriz intenção-cenário-teste-código-gate e reportam divergência por degrau | backend | technical | plan-000014 | drift-metric, plan-from-scenarios | planned |
+| 8 | reflect-drift-report | `/reflect` e `/explain drift` leem a matriz intenção-cenário-teste-código-gate e reportam divergência por degrau | backend | technical | plan-000014 | drift-metric, plan-from-scenarios | done |
 
 ### Wave 4 -- Integração e prova (sequencial)
 | # | ID | Title | Scope | Type | Plan | Depends on | Status |

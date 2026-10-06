@@ -196,3 +196,4 @@ Repositorio de execucao: este (sem prefixo `open-seja/`); fixtures em `.claude/s
 4. `--at` validado como ISO-8601 UTC e `--feature` como slug kebab-case (exit 2). `--out` segue escolha explicita do usuario, documentado.
 5. DRP-013: `check_voice` nao mede o limite de palavras do conteudo citado (verbatim do humano).
 6. Removidos `HtmlUnavailable` e o `if ...: pass`; os `except OSError: pass` viraram `contextlib.suppress`.
+- drift: not-measured
