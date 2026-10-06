@@ -144,7 +144,7 @@ Criar o documento com regras `GRL-NNN` (cada uma com "Quem decide" e "Critério 
 - **Verify**: o arquivo existe; todo `GRL-NNN` tem "Quem decide" e "Critério de aceitação"; `grep -c "GRL-"` >= 12; cada dimensão tem pergunta-modelo; `git grep -ci` dos termos de C1 devolve zero; `python .claude/skills/scripts/run_all_checks.py` igual ao baseline do Step 1.
 - **Tests**: N/A (documento normativo; a verificação mecânica é o Step 4)
 - **Docs**: o próprio arquivo; o quickguide pt-BR fica para o item 9.
-- [ ] Done
+- [x] Done
 
 ### Step 3: Escrever o modelo de `intent.md` com exemplo fictício
 Criar `template/intent.md`: frontmatter (`slug`, `status: grilling|approved`, `brief` verbatim, `approved_at`, `approved_by`, `rev`), tabela de REQ (colunas: ID, tipo, **Nas suas palavras**, **Requisito**, **Critério**, `rev`, `estado: ativo|retirado`), tabela "Dimensões" (6 linhas), "Fora do escopo", "Perguntas abertas", "Premissas" (com `confirmado`), "Mudanças". Exemplo fictício completo (sem parceiro, sem dado real): feature de 3 REQs, uma restrição, uma premissa confirmada, tudo em voz controlada. Marcar com comentário o que é emenda aditiva ao esquema do 000007 (Decisão pendente 1, default B: o modelo é um **superconjunto** do esquema do 000007; um `intent.md` mínimo do 000007 continua válido).

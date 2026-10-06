@@ -50,3 +50,15 @@ Nada escrito fora do ledger. `git status` limpo no inicio (branch `dev`, HEAD 6c
 - deviated: O 000074 nao existe no open-seja; brief fica indexado na secao Nas suas palavras, nao no frontmatter.
 - less-sure: Se check_intent.py rodado sem argumento pelo run_all_checks deve falhar em intent aprovado incompleto.
 - gate: not-installed
+
+### Step 2 -- grill-phase.md (2026-10-06, executor)
+- Criado `.claude/references/general/grill-phase.md` com GRL-001..015 (15 regras; 16 "Quem decide" e "Critério de aceitação" contando o cabeçalho), bloco de constantes (`GRILL_MAX_ROUNDS=5`, `GRILL_MAX_QUESTIONS_PER_ROUND=4`, `GRILL_DIMENSIONS`, `GRILL_MAX_REQS=12`, `MAX_SENTENCE_WORDS=25`, `MAX_SENTENCES_PER_PARAGRAPH=6`), pergunta-modelo pt-BR e en-US por dimensão, 3 REQs bons e 3 ruins, glossário fixo, tabela de degradação e tabela das 5 decisões pendentes `[default; aceito 2026-10-06]`.
+- Mapa dos 12 itens do plano: (1) GRL-001; (2) GRL-003; (3) GRL-004; (4) GRL-009; (5) GRL-006; (6) GRL-007; (7) GRL-008; (8) GRL-012; (9) GRL-011; (10) GRL-010; (11) GRL-013; (12) GRL-014. Regras a mais: GRL-002 (slug, decisão 5), GRL-005 (extensões do esquema e emendas 1, 2, 3 e nota C1), GRL-015 (D0 via `--d0`).
+- Emendas do roadmap: índice `F<n>`/`A<n>` (GRL-005, GRL-015); "Para que" e "Modelo e termos" (GRL-005, GRL-009); `serve:` (GRL-005); "o que essa pessoa sabe fazer" (GRL-004); nota C1 (GRL-005).
+- `run_all_checks.py` no baseline (15 PASS / 14 FAIL; 17 / 2 / 9). `check_docs` ganha warnings "Specific plan ID" no arquivo novo, como os outros arquivos do contrato; continua FAIL por 0 errors e warnings pré-existentes. Sem travessão tipográfico nem aspas curvas.
+
+### Step 2 -- reflection-on-action | 2026-10-06 17:17 UTC | Protocolo normativo grill-phase.md
+- happened: Escrevi grill-phase.md com GRL-001..015, constantes, perguntas-modelo bilingues, exemplos de REQ, glossario e degradacao.
+- deviated: Tres regras alem dos 12 itens: slug (GRL-002), extensoes do esquema com as emendas (GRL-005) e D0 (GRL-015).
+- less-sure: Se a lista VAGUE_WORDS pega o bastante sem barrar criterio legitimo; calibrar no piloto.
+- gate: not-installed
