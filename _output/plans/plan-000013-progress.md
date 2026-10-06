@@ -46,3 +46,15 @@ Desvios de nome decididos aqui:
 - deviated: O conftest modelo nao grava a propriedade req; o gate nao aceita alvo de CRAP por linha de comando; o plan-000014 ja le arquivos separados (runner/cucumber.json, drift/red-reason.json, drift/coverage.json), entao o registro vai em gate.json.build e e exportado; prefixo ITF no lugar de TFB.
 - less-sure: Se o plan-000014 vai mudar o formato de drift/*.json antes de fechar; pyright nao roda aqui.
 - gate: not-installed
+
+### Step 2 -- norma `implement-test-first.md` (2026-10-06)
+
+- Criada `.claude/references/general/implement-test-first.md` com `ITF-001..025` (25 regras; as 22 do plano com o prefixo trocado e mais tres): ITF-023 exportacao para os arquivos que o `drift_report.py` do plan-000014 le (`runner/cucumber.json`, `drift/red-reason.json`, `drift/coverage.json`, `gate.json.baseline_moved`), ITF-024 demonstracao por cenario e mutantes recontados como perguntas (emenda do adendo, registro do citizen, M1), ITF-025 `scenario-tester` como terceiro amigo informativo antes da aprovacao (emenda do adendo). R1..R8 numeradas em ITF-005. Toda regra tem "Quem decide" e "Criterio de aceitacao". Decisoes 1-7 marcadas `[default; aceito 2026-10-06]`; tabela "Costura com o 000008"; tabela subcomando -> regra.
+- Subcomandos acrescentados a lista do Step 5 (desvio): `route` (classificacao v1/v2 e golden; da dentes ao "v1 nao muda"), `green-check` (ITF-009 por ferramenta), `crap` (o gate nao aceita alvo por CLI), `export` (ITF-023), `demo` (ITF-024).
+- `run_all_checks.py`: igual ao baseline (14 FAIL; 17/2/9). `check_docs.py` da avisos "Specific plan ID" na norma, como nas outras referencias do ciclo (ja FAIL no baseline).
+
+### Step 2 -- reflection-on-action | 2026-10-06 18:41 UTC | Escrever a norma do teste-primeiro (implement-test-first.md)
+- happened: Escrevi a norma com ITF-001..025, R1..R8, constantes, fluxo, decisoes no default, costura com o 000008 e tabela de ferramentas; run_all_checks ficou igual ao baseline.
+- deviated: Prefixo ITF no lugar de TFB; tres regras a mais (exportacao ao plan-000014, demonstracao ao citizen, terceiro amigo) e cinco subcomandos a mais (route, green-check, crap, export, demo).
+- less-sure: Se a frase-modelo da escalada e a narracao do demo passam no teste da surpresa sem um citizen real ler.
+- gate: not-installed
