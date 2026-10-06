@@ -31,7 +31,7 @@ A unidade de cada degrau é o item do degrau de cima. A pergunta é se o degrau 
 | Degrau | Unidade |
 |---|---|
 | D1 intenção -> cenário | REQ (`REQ-<slug>-NNN` de `intent.md`) |
-| D2 cenário -> teste | cenário (`Scenario` de `*.feature` com tag `@REQ-...`) |
+| D2 cenário -> teste | cenário (`Scenario` de `*.feature` com tag `@REQ-...` que aponta para um REQ existente; cenário sem tag ou com tag órfã fica fora do D e vai para as leituras, DRM-008) |
 | D3a teste -> código (verdade) | cenário que tem teste (D2 coberto) |
 | D3b teste -> código (excesso) | linha ou ramo tocado pela feature |
 
@@ -41,7 +41,7 @@ Fórmula do degrau: `D = descobertos / (cobertos + descobertos)`.
 
 - `não medido` fica **fora do denominador** e aparece sempre ao lado, com a razão (DRM-009).
 - Denominador zero: `D` é indefinido e se escreve `"n/a"`, nunca `0`.
-- Os números são brutos: numerador, denominador e `n`; nada de arredondar para "limpar" amostra pequena.
+- Os números são brutos: numerador, denominador e `n`; nada de arredondar para "limpar" amostra pequena. `D` sai arredondado a 4 casas decimais no JSON; as contagens nunca são arredondadas.
 - O cálculo é determinístico e não usa LLM. A mesma matriz dá o mesmo relatório.
 
 - **Quem decide**: designer.
@@ -153,6 +153,10 @@ Contrato de dados (JSON com `schema_version: 1`):
 ```
 
 - `n = cobertos + descobertos + nao_medidos`. `D` é número entre 0 e 1 ou `"n/a"`.
+- `razao_nm` lista **todas** as razões aplicáveis (DRM-009), na ordem do catálogo.
+- `leituras.o1` traz `{n, falham, O1}` quando há oráculo (controle, ver `drift-control-protocol.md`) e `null` caso contrário.
+- `ressalvas` recebe, entre outras, `"amostra pequena"` (menos de 8 REQs) e `"D3a sem prova de vermelho"`.
+- Tarefa sem medida possível (`Specify: skipped`, sem `features/`, plano v1) produz relatório curto: `{"schema_version": 1, "feature": ..., "momento": ..., "nao_aplicavel": true, "razao_nm": ["NM-..."]}`.
 - Texto do relatório em voz controlada: frases curtas, termos fixos. Exemplo: "Intenção para cenário: 8 de 10 requisitos têm cenário. 2 não têm. Nenhum ficou sem medida."
 - O relatório é tempo passado e não prescreve ("deveria", "considere" não entram).
 - Destaque textual do degrau de maior `D` é permitido; empate é dito como empate. Nunca se soma.
@@ -167,7 +171,7 @@ São contagens e alertas que acompanham o vetor. Não entram em nenhum `D`.
 
 | Leitura | O que é |
 |---|---|
-| `cadeia_completa` | REQs com a cadeia inteira: cenário, teste e verde (D1, D2 e D3a `coberto`) |
+| `cadeia_completa` | REQs com a cadeia inteira: tem cenário e **todos** os seus cenários estão `coberto` em D2 e D3a |
 | `cenarios_orfaos` | cenário cuja tag aponta para REQ que não existe |
 | `cenarios_sem_tag` | cenário sem tag `@REQ-` |
 | `escada_fechou_sem_capturar` | alerta quando D1 = D2 = D3a = 0 e (O1 > 0 no controle, ou algum `adequado: nao` na auditoria semântica) |

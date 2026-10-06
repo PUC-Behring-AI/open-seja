@@ -59,3 +59,25 @@ Nada escrito fora do ledger. `git status` limpo no inicio.
 - deviated: Acrescentei regras alem das listadas (catalogo NM, casos limite) para dar IDs estaveis; populacao do D3a definida como D2 coberto.
 - less-sure: Se ausencia de registro de vermelho e nao medido ou ressalva em D3a; li como os dois.
 - gate: not-installed
+
+### Step 3 -- fixtures golden (2026-10-06, executor)
+- Criados `.claude/skills/scripts/tests/fixtures/drift/casos.json` (6 casos: entrada + esperado) e `README.md`.
+- Recontagem independente (script descartavel que le so a `entrada` e conta estados; resultado = esperado calculado a mao): 0 divergencias.
+
+| Caso | D1 (c/d/nm) | D2 | D3a | D3b | Leituras |
+|---|---|---|---|---|---|
+| normal | 8/2/0 D=0.2 | 10/2/0 D=0.1667 | 8/2/0 D=0.2 | 43/7/0 D=0.14 | cadeia 6 |
+| nada-medido | 8/0/0 D=0 | 8/0/0 D=0 | 0/0/8 n/a | 0/0/30 n/a | -- |
+| specify-pulado | nao aplicavel (NM-SPECIFY-PULADA) | | | | |
+| orfao-e-sem-tag | 8/0/0 | 8/0/0 | 8/0/0 | 18/2/0 D=0.1 | orfao 1, sem_tag 1 |
+| escada-fechada | 8/0/0 | 8/0/0 | 8/0/0 | 20/0/0 | O1=0.4; alerta true |
+| amostra-pequena | 4/1/0 D=0.2 | 4/0/0 | 4/0/0 | 9/3/0 D=0.25 | ressalva amostra pequena |
+
+- Decisoes tomadas ao desenhar os casos e refletidas em `drift-metric.md`: D2 so conta cenario com tag para REQ existente; `razao_nm` lista todas as razoes (D3b do caso nada-medido: `NM-SEM-GATE`, `NM-SEM-COBERTURA`); `cadeia_completa` = REQ cujos cenarios estao todos coberto em D2 e D3a; `D` arredondado a 4 casas; forma curta `nao_aplicavel`.
+- Esquema da entrada: `intent.status`, `scenarios_status`, `runner`, `gate{full,baseline_moved}`, `reqs`, `scenarios[{id,tags,test_result,red_reason_ok}]`, `touched{total,uncovered}`, `oraculo{n,falham}`, `auditoria`. O 000014 pode adotar ou mapear.
+
+### Step 3 -- reflection-on-action | 2026-10-06 17:05 UTC | Fixtures golden da matriz e do relatorio
+- happened: Gerei seis casos com entrada e esperado, calculados a mao, e recontei por script independente: zero divergencias.
+- deviated: Esclareci em drift-metric.md arredondamento, populacao do D2, cadeia_completa e forma nao_aplicavel, que o desenho dos casos exigiu.
+- less-sure: O esquema de entrada e meu; o plano 000014 le JUnit XML e pode precisar mapear.
+- gate: not-installed
