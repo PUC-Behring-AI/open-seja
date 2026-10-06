@@ -146,3 +146,27 @@ Dados de calibracao (do roteiro, nao de sessao observada; nao servem para calibr
 - deviated: Troquei o ajuste '3 segundos, nao 2' (que volta a grill pela SPC-011) por um ajuste de forma; GHK-005 deixou de duplicar a SPC-003.
 - less-sure: Os numeros de calibracao sao do roteiro; nada aqui mede se um citizen real entende a retradução.
 - gate: not-installed
+
+## Step 7 -- dry-run da fase e retrocompatibilidade (2026-10-06, executor)
+
+**Dry-run (simulado, descartavel, no scratchpad; nada versionado):** eu, como o agente, segui o texto do passo 2c sobre o `intent.md` aprovado da grill (fixture `grill/a-feature-com-codigo/intent-final.md`, `reserva-de-sala`, 4 REQs, um `restrição`), que nao e o dos fixtures da specify.
+1. Portao: `check_intent.py --require-approved --strict` exit 0; `check_specify.py --status` = `missing`.
+2. Escrevi `reserva-de-sala.feature` e a retradução. Rodada 1 do verificador: **2 erros, 4 avisos** -- SPC-004 (a restrição "em até 3 segundos" virou "Então eu vejo a confirmação rapidamente": palavra vaga, sem numero), SPC-017 (o item do REQ 003 sem `Exemplo:`), 4 x SPC-008/GHK-017 ("Azul", nome proprio com maiuscula, fora de "Modelo e termos").
+3. Autocorrecao 1: numero no `Então`, exemplo no item, "a sala Azul" -> "a primeira sala da lista" no `.feature` (a specify **nao** pode acrescentar termo ao "Modelo e termos": SPC-015). Rodada 2: 0 achados, `draft`.
+4. Aprovacao simulada (mensagem: Aprovar; contrato: Aprovar) e `--approve --at 2026-10-06T18:30Z --by usuario --contract-by usuario`: exit 0, lock gravado, 5 campos no frontmatter; `check_intent --require-approved --strict` e `check_features --strict` continuam limpos; varredura `approved`.
+
+O que o agente errou (para calibrar a SKILL): numero da restrição trocado por palavra vaga (o mesmo erro que P2 pega na grill); exemplo esquecido num item; nome proprio no step. Uma autocorrecao bastou. Observacao: a retradução ficou com "sala Azul" (o registro do citizen nao passa pelo GHK-017) e o contrato com "a primeira sala da lista": mensagem e contrato contam o mesmo comportamento com valores diferentes; nada mecanico confere essa equivalencia (lacuna para a auditoria semantica do plan-000014).
+
+**Retrocompatibilidade:**
+1. `run_all_checks.py` no open-seja: 18 PASS / 14 FAIL (os 14 do baseline; contadores 17/2/9). Num projeto ficticio (pasta temporaria com `.claude` ligado ao harness) em tres estados: sem `features/` -> 18/14, `check_specify` PASS; com a feature do dry-run aprovada -> 18/14, PASS; com o `.feature` editado depois da aprovacao -> 17/15, **so** `check_specify.py` FAIL ("aprovação velha: peça nova aprovação"); todos os outros checks com o mesmo resultado nos tres estados.
+2. Fixtures `sem-features`, `features-de-terceiros`, `pasta-sem-intent`: exit 0, nenhum achado (testes golden).
+3. Plano v1: o 2c abre dizendo que planos v1 e projetos sem `features/` seguem como antes; `implement/SKILL.md`, hooks, `settings` e portao sem diff desde o inicio do plano.
+4. `--specify` sem `features/<slug>/`: `check_specify.py --feature x` sai 2 com uma frase ("não há features/x/. A entrevista vem antes: rode /plan --grill.") e nao escreve nada (teste `test_feature_without_folder_refuses`).
+
+Registro do check: **sem edicao de `run_all_checks.py`** -- ele descobre `check_*.py` por glob; o check condicional e o proprio script (varredura sem argumentos: sem `features/*/intent.md` sai 0; reprova so `scenarios: approved` em `stale`). Entrada no `check_plugin_registry.json` feita no Step 4. Nao ha estado "pulado" no orquestrador: "pulado" aparece como PASS com a linha "nada a verificar" (mesmo padrao de `check_intent.py` e `check_features.py`).
+
+### Step 7 -- reflection-on-action | 2026-10-06 18:10 UTC | Dry-run e retrocompatibilidade
+- happened: Segui o passo 2c sobre a intencao da grill: rodada 1 com 2 erros e 4 avisos, uma autocorrecao, aprovacao gravada; run_all_checks num projeto ficticio so muda o check_specify quando a aprovacao fica velha.
+- deviated: run_all_checks.py nao foi editado: o glob registra o check; dry-run feito por mim, no scratchpad, sem pessoa.
+- less-sure: Se mensagem e contrato com valores diferentes no exemplo confundem quem aprova os dois.
+- gate: not-installed
