@@ -121,3 +121,18 @@ Decisao: **seguir**. Os planos 000007 a 000014 executaram (todos DONE). Nada foi
 - deviated: Nenhum script nem o registro mudou: o modo sem argumentos ja existia; o teste nao teve vermelho.
 - less-sure: Se um projeto real com conftest e pyproject proprios muda algum dos outros 29 checks ao ganhar features/.
 - gate: not-installed
+
+### Step 7 -- ordem dos `SKILL.md` e `skill-body-length` (2026-10-06)
+
+- Medida (`check_docs.py --plugins skill-body-length --verbose`): `plan` 72/500, `implement` 254/500, `explain` 65/300, `reflect` 248/300 (83%), `help` 70/150, `seja-setup` 85/300; 0 erros, 2 warnings de citação pré-existentes. Nenhum SKILL.md do ciclo passa de 90% do tier: **nenhum texto movido**, nenhum limite subido, nenhum WAIVER novo. Único caso perto do teto: `pending` 142/150 (95%), fora do ciclo; registrado como follow-up no baseline. `_internal/plan/standard` (141 linhas no arquivo) e `_internal/explain/drift` (156) não são medidos pelo plugin.
+- Conteúdo: `grep -c "Specify: skipped" _internal/plan/standard/SKILL.md` = 1; `--grill` e `--specify` uma vez cada na tabela de argumentos do `/plan` (linhas 50, 51; também no `argument-hint` e na Mode Detection, como o 000011 registrou); `--pipeline` uma vez na tabela do `/implement` (linha 43); `plan_format_version: 2` só no C3 do modo standard (`--light` e roadmap seguem v1). `check_skill_system.py` 9 erros (os mesmos; 4 infos `AttributeError` também já no baseline); `check_skill_spec.py` PASS (18 skills).
+- `check_docs_skill_body_length_baseline.md` (+41): seção "Re-measure after the default cycle" com a tabela inteira; as tabelas antigas (plan-000458) ficam como registro.
+- `extended-cycle-contract.md` (+2): medida final sob a tabela da ordem de edição.
+- Absorvido de lacunas anteriores (sem tocar corpo de `SKILL.md`): `specify-phase.md` SPC-009 (+2, emenda 000015): o `/plan` chama o `scenario-tester` em modo `review` antes da pergunta do contrato (lacuna do 000013; ITF-025), nota só para quem lê código, informativa. `.claude/rules/harness-structure.md`: "19 subagent prompts" e a linha dos três papéis do teste-primeiro (texto 5 do 000013). Ressalva: o `_internal/plan/standard/SKILL.md` passo 2c não cita o `review`; o agente o encontra pela SPC-009, que o 2c já aponta.
+- Verify: `run_all_checks.py` 19/14, mesmo conjunto, 17/2/9; pytest 1473 passed / 12 failed (mesmo conjunto).
+
+### Step 7 -- reflection-on-action | 2026-10-06 19:42 UTC | Consolidar a ordem dos SKILL.md e o skill-body-length
+- happened: Medi todos os SKILL.md: nenhum do ciclo passa de 90% do tier; atualizei o baseline com a tabela nova e o contrato com os numeros; SPC-009 ganhou a chamada do scenario-tester review e harness-structure os 19 agentes.
+- deviated: Nada foi movido (havia folga); a chamada do review entrou na referencia, nao no SKILL.md do /plan.
+- less-sure: Se o agente do /plan le a SPC-009 inteira no passo 2c e chama o review sem a linha no SKILL.md.
+- gate: not-installed

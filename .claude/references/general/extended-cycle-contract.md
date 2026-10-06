@@ -388,4 +388,6 @@ Seis planos editaram os mesmos arquivos, nesta ordem. A medida final está no St
 | 6 | 000014 | `reflect`, `explain`, `_internal/explain/drift` | relatório por degrau |
 | 7 | 000015 | nenhum corpo novo | a fiação do M1 já estava no passo 12 do `/implement` (000013); o detalhe vai para as referências |
 
+Medida final (2026-10-06, `check_docs.py --plugins skill-body-length --verbose`): `plan` 72/500, `implement` 254/500, `explain` 65/300, `reflect` 248/300, `help` 70/150, `seja-setup` 85/300; nenhum acima de 90% do tier. `_internal/plan/standard/SKILL.md` (141 linhas no arquivo) e `_internal/explain/drift/SKILL.md` (156) não são medidos pelo plugin. `Specify: skipped` aparece uma vez no `_internal/plan/standard/SKILL.md`; `--grill` e `--specify` uma vez cada na tabela de argumentos do `/plan`; `--pipeline` uma vez na do `/implement`; `plan_format_version: 2` só no C3 do modo standard.
+
 Regra para o próximo plano que tocar estes arquivos: ler esta tabela, acrescentar a sua linha e manter o detalhe nas referências normativas (`grill-phase.md`, `specify-phase.md`, `plan-from-scenarios.md`, `implement-test-first.md`, `drift-report.md`), com uma linha de ponteiro no `SKILL.md`.

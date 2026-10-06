@@ -29,10 +29,11 @@ Shared reference files are organized into three groups. `product-design/` (the d
 
 ## Subagent Prompts
 
-16 subagent prompts in `.claude/agents/`, organized by role:
+19 subagent prompts in `.claude/agents/`, organized by role:
 
 - **Evaluator agents** (9): review artifacts against quality perspectives -- code-reviewer, council-debate, harness-health-evaluator (9 built-in checks including harness drift detection via `--source`), migration-validator, plan-reviewer, research-reviewer, semiotic-inspector, standards-checker, test-runner.
 - **Generator agents** (7): produce self-contained artifacts from well-defined inputs -- communication-generator, onboarding-generator, document-generator, test-plan-generator, explanation-generator (produces explanation reports for behavior/code/data-model modes -- invoked by the `/explain` thin-wrapper for non-interactive analysis modes), architecture-explainer (produces architecture explanation reports -- multi-phase survey/identify/write workflow; invoked by the `/explain` thin-wrapper for the architecture mode), evolution-explainer (produces behavior-evolution explanation reports -- plan-history mining + timeline-building + write workflow; invoked by the `/explain` thin-wrapper for the behavior-evolution mode). Invoked by thin-skill wrappers that handle argument parsing, interactive prompts, and lifecycle hooks. Generator agents must receive the project constitution as part of their prompt for trust boundary enforcement.
+- **Test-first role agents** (3): scenario-tester (modes `red` and `review`), cleaner, hardener -- one job each, fed by `build_brief.py` (`general/implement-test-first.md`); the Coder stays the dynamic executor below.
 - **Executor agents** (pattern): execute plan steps in isolated context windows. Used by `/implement` auto mode. Not standalone prompt files -- the implement skill constructs their prompts dynamically from plan step metadata.
 
 ## Path-Scoped Rules

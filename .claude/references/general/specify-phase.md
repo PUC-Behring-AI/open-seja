@@ -104,6 +104,8 @@ Há **dois** objetos de aprovação, sem perfil e sem bifurcar o ciclo (CYC-013)
 
 A mesma pessoa pode responder às duas perguntas, em papéis diferentes (SS-002). A ordem é: mensagem primeiro, contrato depois. Só com as duas respostas positivas a fase vai a SPC-010.
 
+Emenda 000015: antes da pergunta do contrato, o `/plan` chama o agente `scenario-tester` em modo `review` quando ele existe em `.claude/agents/` (ITF-025). A nota dele (cenários que não viram teste vermelho pelo motivo certo, com o motivo em uma frase) entra na apresentação a quem lê código, **nunca** na mensagem ao citizen. É informativa: não bloqueia e não muda o `.feature`. Sem o agente, a fase segue igual.
+
 - **Quem decide**: o citizen (a mensagem); quem lê código (o contrato).
 - **Critério de aceitação**: o ponto de aprovação mostra ao citizen a retradução e o "não faz", nunca o texto do `.feature`; o texto do `.feature` vai a quem lê código; nenhum número técnico entra no registro do citizen (CYC-013).
 

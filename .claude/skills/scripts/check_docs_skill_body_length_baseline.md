@@ -80,3 +80,42 @@ only.
 - 3 citation WARNs (`document`, `qa-log`, `seja-setup`) remain. These are
   addressed by the SKILL-rationale.md sibling pattern adopted in plan-000458
   steps 7-9.
+
+## Re-measure after the default cycle (plan-000015 step 7, 2026-10-06)
+
+Measured on `dev` after plans 000007-000014 (grill, specify, plan v2, test-first,
+drift report) edited `plan`, `_internal/plan/standard`, `implement`, `reflect`,
+`explain` and `_internal/explain/drift`. Same command as above. No limit was
+raised and no new waiver was added; the tables above stay as the plan-000458
+record.
+
+| Skill | Tier | Body lines | Threshold | Delta | Status |
+|---|---|---|---|---|---|
+| communicate | standard | 104 | 300 | -196 | PASS |
+| critique | heavy | 226 | 500 | -274 | PASS |
+| design | standard | 109 | 300 | -191 | PASS (waiver no longer needed) |
+| document | standard | 100 | 300 | -200 | PASS |
+| explain | standard | 65 | 300 | -235 | PASS |
+| help | light | 70 | 150 | -80 | PASS |
+| implement | heavy | 254 | 500 | -246 | PASS |
+| mob | heavy | 100 | 500 | -400 | PASS |
+| onboard | standard | 129 | 300 | -171 | PASS |
+| pending | light | 142 | 150 | -8 | PASS (95% of the tier; not touched by the cycle) |
+| plan | heavy | 72 | 500 | -428 | PASS |
+| post-skill | standard | 221 | 300 | -79 | PASS |
+| pre-skill | standard | 79 | 300 | -221 | PASS |
+| publish | light | 0 | 150 | -150 | PASS |
+| qa-log | light | 55 | 150 | -95 | PASS |
+| reflect | standard | 248 | 300 | -52 | PASS (83%) |
+| research | standard | 143 | 300 | -157 | PASS |
+| seja-setup | standard | 85 | 300 | -215 | PASS (waiver no longer needed) |
+
+Not measured by the plugin (internal skills): `_internal/plan/standard/SKILL.md`
+(141 lines in the file) and `_internal/explain/drift/SKILL.md` (156). The detail of
+each phase lives in the normative references (`grill-phase.md`,
+`specify-phase.md`, `plan-from-scenarios.md`, `implement-test-first.md`,
+`drift-report.md`); the SKILL.md files keep one pointer line each. Order of the
+edits: `extended-cycle-contract.md`, section "Emendas do item 9".
+
+Follow-up: `pending` sits at 142/150 (95%) without any cycle change; the next
+plan that touches it should move text to a reference first.
