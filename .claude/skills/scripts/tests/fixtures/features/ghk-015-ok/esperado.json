@@ -1,0 +1,8 @@
+{
+  "args": [
+    "--steps",
+    "{root}/steps"
+  ],
+  "exit_code": 0,
+  "findings": []
+}

@@ -1,0 +1,27 @@
+{
+  "args": [
+    "--steps",
+    "{root}/steps"
+  ],
+  "exit_code": 0,
+  "findings": [
+    [
+      "GHK-015",
+      "info",
+      "features/login/login.feature",
+      5
+    ],
+    [
+      "GHK-015",
+      "info",
+      "features/login/login.feature",
+      6
+    ],
+    [
+      "GHK-015",
+      "info",
+      "features/login/login.feature",
+      7
+    ]
+  ]
+}

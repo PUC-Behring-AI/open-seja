@@ -1,0 +1,18 @@
+{
+  "args": [],
+  "exit_code": 1,
+  "findings": [
+    [
+      "GHK-016",
+      "error",
+      "features/login/intent.md",
+      8
+    ],
+    [
+      "GHK-004",
+      "error",
+      "features/login/login.feature",
+      3
+    ]
+  ]
+}

@@ -157,7 +157,7 @@ Criar, no diretório de fixtures do Step 1, uma árvore `features/` por caso, to
 - **Interface**: esquema de `esperado.json` (`findings`, `exit_code`, `matrix`).
 - **Verify**: existe um caso de disparo e um negativo para cada `GHK-NNN` (conferido por script que lista as regras citadas nos `esperado.json` e compara com a tabela do Step 2); cada `esperado.json` tem a linha (`line`) conferida à mão contra o arquivo; nenhum termo de C1 no diff.
 - **Tests**: N/A (dados de teste; os testes que os usam são o Step 4 em diante)
-- [ ] Done
+- [x] Done
 
 ### Step 4: Implementar o parser e as regras de estrutura e rastreabilidade
 Em `check_features.py`: (a) `parse_feature(text) -> Feature` (tags com linha, `Feature`, `Rule`, `Background`, `Scenario`, `Scenario Outline`, `Examples` com tabela, steps com tipo efetivo resolvido para `And`/`But`/`*`, doc strings e data tables sem interpretar, comentários, `# language:` en/pt), com erros tipados (`ParseError(linha, mensagem)`); (b) `load_intent(path) -> Intent` (frontmatter `status`, `scenarios`, REQs da tabela); (c) `validate_structure(features, intent)` com GHK-001, 002, 003, 004, 005, 009, 010, 011, 014, 016 e a descoberta de features (só pastas `features/<slug>/` com `intent.md`; o resto vira `info`, nunca erro); (d) `build_matrix(...)` com `{REQ: {status_req, scenarios:[{file, name, line, rows, disabled}]}, scenarios_approved}`. Funções puras, sem I/O dentro de `validate_*`; sem importar nada fora da biblioteca padrão.

@@ -1,0 +1,12 @@
+{
+  "args": [],
+  "exit_code": 1,
+  "findings": [
+    [
+      "GHK-007",
+      "error",
+      "features/login/login.feature",
+      7
+    ]
+  ]
+}

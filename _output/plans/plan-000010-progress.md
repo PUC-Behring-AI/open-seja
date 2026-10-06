@@ -49,3 +49,17 @@ Baseline confirmado: `run_all_checks.py` 16 PASS / 14 FAIL; `git status` limpo.
 - deviated: Tres regras acrescentadas pelas emendas do adendo (GHK-017..019); runner contract em Cucumber JSON em vez de JUnit.
 - less-sure: A heuristica de GHK-017 (aspas e maiuscula) pode gerar ruido; fica como aviso.
 - gate: not-installed
+
+## Step 3 -- fixtures golden (2026-10-06)
+
+36 casos em `.claude/skills/scripts/tests/fixtures/features/` (README com uma linha por caso): `ok-minimo`, `ok-completo`, tres negativos (`neg-*`), um caso de disparo para cada GHK-001..019 (varios com mais de um achado), tres de `--steps` alem do ok, e `sem-features`, `features-de-terceiros`, `pasta-sem-intent`. `esperado.json` por caso: `args`, `exit_code`, `findings` exatos `[regra, severidade, arquivo, linha]` e, nos validos, `matrix`.
+- As linhas esperadas foram escolhidas a partir do texto do fixture (a linha que a regra deve apontar), nao copiadas da saida do validador (que ainda nao existe). Conferencia fina fica para o Step 4.
+- Cascatas assumidas e escritas nos esperados: `ghk-016-sem-req` espera tambem GHK-004 (o REQ da tag nao existe porque a tabela nao tem REQ valido).
+- Contagem do plano 000008: `ghk-002-sem-tag` tem 1 achado GHK-002; `ghk-004-orfa` tem 1 achado GHK-004.
+- O gerador dos fixtures ficou no scratchpad (nao entra no repo); os arquivos sao estaticos.
+
+### Step 3 -- reflection-on-action | 2026-10-06 17:35 UTC | Fixtures golden
+- happened: Criei 36 casos com esperado.json (achados exatos, exit code e matriz), cobrindo GHK-001..019, negativos e retrocompatibilidade.
+- deviated: Casos extras para as tres emendas (GHK-017..019) e para --steps.
+- less-sure: As linhas esperadas dependem da minha leitura das regras; o Step 4 pode revelar divergencia de interpretacao.
+- gate: not-installed

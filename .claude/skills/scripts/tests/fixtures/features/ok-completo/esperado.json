@@ -1,0 +1,16 @@
+{
+  "args": [],
+  "exit_code": 0,
+  "findings": [],
+  "matrix": {
+    "login": {
+      "scenarios_approved": true,
+      "reqs": {
+        "REQ-login-001": 1,
+        "REQ-login-002": 3,
+        "REQ-login-003": 2,
+        "REQ-login-004": 0
+      }
+    }
+  }
+}
