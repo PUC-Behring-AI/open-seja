@@ -1381,8 +1381,7 @@ ausência não é cosmética. Registrada em `Q-008`.
 
 *Source: /design a partir de design-rascunho-as-intended-2026-10-05 (2026-10-05)*
 
-### D-005: D-005: Identidade de artefato por ULID gerado localmente, sem coordenacao; apelido derivado e apelido livre no front-end
-
+### D-005: Identidade de artefato por ULID gerado localmente, sem coordenacao; apelido derivado e apelido livre no front-end
 
 **Context**: O open-seja e usado por times na mesma branch. reserve_id.py aloca IDs por max+1 sobre o INDEX.md local ("single-writer assumed"), e dois devs em maquinas diferentes podem reservar o mesmo numero sem aviso. O designer avaliou que o numero sequencial legivel nao e essencial: devs podem citar artefatos por um apelido proximo do que precisam fazer; o que nao pode se perder e a ordenacao na arvore do sistema de arquivos. A solucao precisa funcionar offline so com git, e um seja-mcp (H-007) deve consumir o mesmo esquema. Ver research-000018.
 
