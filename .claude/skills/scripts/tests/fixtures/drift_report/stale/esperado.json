@@ -1,0 +1,55 @@
+{
+  "momento": "M1",
+  "degraus": {
+    "D1": {
+      "n": 3,
+      "cobertos": 0,
+      "descobertos": 0,
+      "nao_medidos": 3,
+      "D": "n/a",
+      "razao_nm": [
+        "NM-CENARIOS-STALE"
+      ]
+    },
+    "D2": {
+      "n": 4,
+      "cobertos": 4,
+      "descobertos": 0,
+      "nao_medidos": 0,
+      "D": 0.0,
+      "razao_nm": []
+    },
+    "D3a": {
+      "n": 4,
+      "cobertos": 4,
+      "descobertos": 0,
+      "nao_medidos": 0,
+      "D": 0.0,
+      "razao_nm": []
+    },
+    "D3b": {
+      "n": 20,
+      "cobertos": 18,
+      "descobertos": 2,
+      "nao_medidos": 0,
+      "D": 0.1,
+      "razao_nm": []
+    }
+  },
+  "leituras": {
+    "cadeia_completa": 3,
+    "cadeia_indeterminada": 0,
+    "cenarios_orfaos": 0,
+    "cenarios_sem_tag": 0,
+    "escada_fechou_sem_capturar": false,
+    "nao_faz": {
+      "itens": 2,
+      "cenarios": 0,
+      "sem_evidencia": 2
+    }
+  },
+  "ressalvas": [
+    "amostra pequena",
+    "cenários desatualizados"
+  ]
+}

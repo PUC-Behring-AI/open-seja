@@ -78,3 +78,15 @@ Repositorio de execucao: este (sem prefixo `open-seja/`); fixtures em `.claude/s
 - deviated: Acrescentei dois codigos de leitura e caminhos aditivos de runner, vermelho e cobertura; runner e Cucumber JSON.
 - less-sure: A marca de adocao e o formato de red-reason.json e coverage.json sao propostas minhas.
 - gate: not-installed
+
+## Step 3 -- fixtures e testes que falham (2026-10-06)
+- 26 arvores em `.claude/skills/scripts/tests/fixtures/drift_report/<caso>/` (todas fictícias, feature `contas-da-semana`; `README.md` com uma linha por caso) + `test_drift_report.py` (6 golden de `casos.json`, determinismo, consistencia de cada `esperado.json`, um teste por arvore, stale com spy, skip/xfail, gate corrompido). `esperado.json` por caso foi escrito a mao, nao gerado pelo calculador.
+- Falha esperada: `pytest test_drift_report.py` -> `ModuleNotFoundError: No module named 'drift_report'` (1 error na coleta).
+- Recontagem independente (script solto, sem o calculador): os 26 `esperado.json` fecham `n = cobertos + descobertos + nao_medidos`, `D = descobertos/(cobertos+descobertos)` (4 casas) ou `n/a`, e todo `nao_medido` traz razao: 0 divergencias. Recontagem do D2 dos golden a partir de `entrada` (cenarios com tag valida e `absent/skipped/xfail`): `normal` 12/2, os demais 0, igual ao `esperado`.
+- Desvio: `esperado.json` e parcial (degraus completos + as leituras e ressalvas que o caso exercita), nao o relatorio inteiro; o plano previa o inteiro. Fixtures em `.claude/skills/scripts/tests/fixtures/` (nao `tests/fixtures/`).
+
+### Step 3 -- reflection-on-action | 2026-10-06 18:39 UTC | Fixtures e testes que falham
+- happened: Criei 26 arvores de projeto e o modulo de testes; falha por ModuleNotFoundError.
+- deviated: esperado.json e parcial por caso, nao o relatorio inteiro.
+- less-sure: O formato de delta e das leituras novas nos testes fixa a API que o Step 4-6 vai seguir.
+- gate: not-installed
