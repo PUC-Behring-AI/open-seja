@@ -114,3 +114,34 @@ Mapa de regras:
 - less-sure: Se a ausencia de linhas no CHANGELOG para D-NNN quebra alguma leitura posterior (decision digest, /explain drift).
 - gate: not-installed
 - human: "sim, aplique o oerquestre"
+
+### Step 7 -- prova de retrocompatibilidade e fechamento (2026-10-06, orquestrador, inline)
+
+- `run_all_checks.py`: 15 PASS / 14 FAIL, os mesmos 14 do baseline; contadores 17 undefined (check_conventions), 2 error(s) (check_i18n_keys), 9 error(s) (check_skill_system). Nenhum FAIL novo.
+- pytest (sem os 2 modulos com erro de coleta pre-existente): 626 passed / 12 failed, igual ao baseline.
+- Fixtures: `v1-plan-with-tests.md` e `v1-plan-doc-only.md` declaram `plan_format_version: 1` -> o Auto Mode do `/implement` (Phase 0 step 3) os aceita como antes; `v2-valid.md` e `v2-invalid-missing-scenarios.md` declaram 2 -> hoje caem para manual (documentado na secao Compatibilidade do contrato; adaptar e do 000012/000013).
+- C1: `git grep` dos termos (lista fora do ledger) sobre `pre-plan-000007..HEAD`: zero linhas acrescentadas (o unico acerto e linha de contexto pre-existente de briefs.md).
+- Contrato: 26 regras `CYC-001..026`.
+- Decisoes pendentes: as 6 com default aceito pelo designer em 2026-10-06; nenhuma segue pendente.
+
+**Tabela item do roadmap -> regras do contrato que consome**
+
+| Item | Plano | Consome |
+|---|---|---|
+| 2 drift-metric | plan-000008 | CYC-009, 010, 011, 012, 016 (+ D-007) |
+| 3 plan-grill-phase | plan-000009 | CYC-002, 006, 007, 008, 013, 014, 015 |
+| 4 gherkin-spec-format | plan-000010 | CYC-003, 012, 015, 021, 022, 026 |
+| 5 plan-specify-phase | plan-000011 | CYC-003, 004, 006, 007, 008, 013, 014 (+ D-004) |
+| 6 plan-from-scenarios | plan-000012 | CYC-005, 008, 018, secao Compatibilidade (+ D-008) |
+| 7 implement-test-first-build | plan-000013 | CYC-017, 020, 021, 022, 023, 024, 025, secao IMPLEMENT |
+| 8 reflect-drift-report | plan-000014 | CYC-009, 010, 011, 013, 014, 016 |
+| 9 default-cycle-wiring | plan-000015 | todas (quickguide pt-BR; /help; run_all_checks), CYC-019 |
+| 10 default-cycle-pilot | plan-000016 | CYC-009..016 (medida), CYC-013 (quem aprova o que) |
+
+**Para os planos seguintes (terreno)**: `seja-as-intended.md` -> `product-design/product-design-as-intended.md` (§3); numeracao D-NNN do Doutourado nao vale (D-004 aqui = contrato Gherkin; D-005..D-008 = este plano; proximo livre D-009); `CHANGELOG_APPEND` recusa IDs D-NNN (lacuna do regex, registrada desde 2026-09-18).
+
+### Step 7 -- reflection-on-action | 2026-10-06 16:40 UTC | Provar a retrocompatibilidade e fechar o contrato
+- happened: Checks e testes repetiram o baseline sem falha nova; as fixtures v1 declaram versao 1 e seguem aceitas pelo Auto Mode; a tabela item x CYC foi escrita no progress.
+- deviated: Rodou inline no orquestrador; o dry-run do /implement sobre as fixtures foi substituido pela leitura da regra de versao do Auto Mode, porque nao ha validador executavel.
+- less-sure: Se o /critique review encontraria inconsistencia entre CYC-018 e a secao Compatibilidade, que foram escritas por executores diferentes.
+- gate: not-installed
