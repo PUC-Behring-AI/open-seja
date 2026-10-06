@@ -16,8 +16,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-import check_specify
 import pytest
+
+import check_specify
 from check_specify import compute_status, main
 
 _TESTS_DIR = Path(__file__).resolve().parent
@@ -339,3 +340,45 @@ def test_header_and_registry() -> None:
     assert re.search(r"^Lifecycle: active$", source, re.MULTILINE)
     names = [entry["script"] for entry in json.loads(_REGISTRY.read_text(encoding="utf-8"))]
     assert "check_specify.py" in names
+
+
+# ---------------------------------------------------------------------------
+# Review fixes (plan-000011): hash normalization, file mode, example forms
+# ---------------------------------------------------------------------------
+
+
+def test_feature_hash_ignores_bom_and_crlf(tmp_path: Path, capsys) -> None:
+    root = _copy("ok-completo", tmp_path)
+    assert _run(root, APPROVE, capsys)[0] == 0
+    feature = root / "features" / SLUG / f"{SLUG}.feature"
+    text = feature.read_text(encoding="utf-8")
+    feature.write_bytes(b"\xef\xbb\xbf" + text.replace("\n", "\r\n").encode("utf-8"))
+    assert compute_status(root, SLUG).status == "approved"
+
+
+def test_approve_keeps_file_mode(tmp_path: Path, capsys) -> None:
+    root = _copy("ok-completo", tmp_path)
+    folder = root / "features" / SLUG
+    assert _run(root, APPROVE, capsys)[0] == 0
+    (folder / "intent.md").chmod(0o640)
+    (folder / "scenarios.lock.json").chmod(0o600)
+    assert _run(root, APPROVE, capsys)[0] == 0
+    assert (folder / "intent.md").stat().st_mode & 0o777 == 0o640
+    assert (folder / "scenarios.lock.json").stat().st_mode & 0o777 == 0o600
+
+
+def test_example_at_column_zero_counts_for_the_item(tmp_path: Path, capsys) -> None:
+    root = _copy("spc-017-req-sem-exemplo", tmp_path)
+    intent = root / "features" / SLUG / "intent.md"
+    text = intent.read_text(encoding="utf-8")
+    marker = "deixo você desfazer, para que você não pague duas vezes. (REQ-contas-da-semana-002)\n"
+    assert marker in text
+    intent.write_text(text.replace(marker, marker + "- Exemplo: você marca a conta de luz como paga e ela some.\n"),
+                      encoding="utf-8")
+    _, report = _run_json(root, ["--feature", SLUG], capsys)
+    messages = [f["message"] for f in report["findings"] if f["rule"] == "SPC-017"]
+    assert not any("REQ-contas-da-semana-002" in m or "exemplo" in m.lower() for m in messages), messages
+
+
+def test_max_autofix_constant_is_gone() -> None:
+    assert not hasattr(check_specify, "SPECIFY_MAX_AUTOFIX")

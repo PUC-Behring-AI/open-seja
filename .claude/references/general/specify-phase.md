@@ -14,7 +14,6 @@ designer_description: "After you approve the list of requirements, I'm the proto
 
 ```
 SPECIFY_MAX_ROUNDS = 3        # rodadas de ajuste pedidas pelo citizen (SPC-011)
-SPECIFY_MAX_AUTOFIX = 3       # correções automáticas antes de mostrar qualquer coisa (SPC-008)
 MAX_SENTENCE_WORDS = 25       # importada de check_intent.py (voz controlada, §10 do as-intended)
 MAX_SENTENCES_PER_PARAGRAPH = 6
 LOCK_SCHEMA_VERSION = 1       # scenarios.lock.json
@@ -90,7 +89,7 @@ Cada step tem no máximo `MAX_SENTENCE_WORDS` (25) palavras, contadas no texto d
 
 ### SPC-008 -- Validação mecânica
 
-`check_specify.py` roda as regras de `check_features.py` sobre a feature, em modo estrito: cada **erro** GHK vira um achado SPC-008 erro e cada **aviso** GHK (por exemplo GHK-013, detalhe técnico; GHK-014, tag de desativação) vira um achado SPC-008 aviso, com a regra GHK na mensagem e a mesma linha. Informações GHK não entram, nem o GHK-005 (requisito sem cenário), que a SPC-003 já diz com o ID do requisito. Antes de mostrar qualquer coisa a alguém, o agente corrige sozinho os achados, em no máximo `SPECIFY_MAX_AUTOFIX` (3) tentativas; se ainda restar achado, ele o mostra em voz controlada e pergunta.
+`check_specify.py` roda as regras de `check_features.py` sobre a feature, em modo estrito: cada **erro** GHK vira um achado SPC-008 erro e cada **aviso** GHK (por exemplo GHK-013, detalhe técnico; GHK-014, tag de desativação) vira um achado SPC-008 aviso, com a regra GHK na mensagem e a mesma linha. Informações GHK não entram, nem o GHK-005 (requisito sem cenário), que a SPC-003 já diz com o ID do requisito. Antes de mostrar qualquer coisa a alguém, o agente corrige sozinho os achados, em no máximo 3 tentativas (limite que vive só aqui, neste SPC e no SKILL do `/plan`; o verificador não o conhece nem o aplica); se ainda restar achado, ele o mostra em voz controlada e pergunta.
 
 - **Quem decide**: o verificador (resultado de ferramenta, T1).
 - **Critério de aceitação**: um `.feature` com aviso GHK-013 devolve SPC-008 aviso e `--approve` sai 1; um com `@skip` devolve SPC-008 aviso; um sem achado GHK de erro ou aviso não dispara.
@@ -109,12 +108,12 @@ A mesma pessoa pode responder às duas perguntas, em papéis diferentes (SS-002)
 
 ### SPC-010 -- Registro da aprovação
 
-`check_specify.py --approve --at <UTC> --by <quem aprovou a mensagem> --contract-by <quem aprovou o contrato | ninguem>` grava, nesta ordem e com escrita atômica (arquivo temporário e `rename`):
+`check_specify.py --approve --at <UTC> --by <quem aprovou a mensagem> --contract-by <quem aprovou o contrato | ninguem>` grava, nesta ordem e com escrita atômica **por arquivo** (arquivo temporário e `rename`, mantendo a permissão do original):
 
 1. `features/<slug>/scenarios.lock.json` (esquema abaixo);
 2. no frontmatter do `intent.md`: `scenarios: approved`, `scenarios_approved_at`, `scenarios_approved_by`, `scenarios_contract_by`, `scenarios_rev` (= `rev` da retradução).
 
-O resto do `intent.md` fica igual byte a byte. `--at` vem de quem chama (o verificador não lê relógio): o mesmo comando com os mesmos argumentos produz os mesmos bytes. Se **qualquer** regra devolve erro ou aviso, nada é escrito e a saída é 1. Aprovar é um comando que sai 0 e grava, nunca uma frase do agente.
+O resto do `intent.md` fica igual byte a byte. `--at` vem de quem chama (o verificador não lê relógio): o mesmo comando com os mesmos argumentos produz os mesmos bytes. Se **qualquer** regra devolve erro ou aviso, nada é escrito e a saída é 1. A atomicidade não cobre o par: se a execução falhar entre a escrita do lock e a do frontmatter, o `intent.md` fica sem `scenarios: approved`, o estado cai em `stale` com a razão `sem-campo`, e rodar `--approve` de novo recupera. Aprovar é um comando que sai 0 e grava, nunca uma frase do agente.
 
 - **Quem decide**: o verificador grava; o humano aprova (SPC-009). A aprovação humana é necessária, não suficiente.
 - **Critério de aceitação**: depois de `--approve` com tudo verde, o frontmatter tem os cinco campos e o lock tem `basis`, `index`, `files` e `retraducao`; repetir o comando produz arquivos idênticos; com qualquer achado de erro ou aviso, nenhum dos dois arquivos muda.
@@ -141,10 +140,10 @@ Cenário aprovado não muda de nome nem some sem uma linha em "Mudanças" que ci
 |---|---|
 | `missing` | a pasta não tem `*.feature` |
 | `draft` | há `*.feature`, sem lock e sem `scenarios: approved` |
-| `approved` | o lock existe, `scenarios: approved` no frontmatter, `status: approved`, e o lock **bate**: mesmos REQs `ativo` com o mesmo `rev`, mesmo sha256 de cada `.feature`, mesmo sha256 da retradução |
+| `approved` | o lock existe, `scenarios: approved` no frontmatter, `status: approved`, e o lock **bate**: mesmos REQs `ativo` com o mesmo `rev`, mesmo sha256 de cada `.feature` (sem BOM, com fim de linha LF), mesmo sha256 da retradução |
 | `stale` | o lock existe e não bate; ou `scenarios: approved` sem lock (aprovação sem prova); ou o `intent.md` voltou a `grilling` |
 
-`stale` traz as razões (`req-rev`, `req-novo`, `req-retirado`, `feature`, `retraducao`, `intencao-reaberta`, `sem-lock`, `sem-campo`) e a lista de REQs afetados, para a fase reescrever **só** os cenários desses REQs, mantendo o nome dos demais. O D1 trata `stale`, `draft` e `missing` como `não medido` (`NM-CENARIOS-STALE`), nunca como `coberto`.
+`stale` traz as razões (`req-rev`, `req-novo`, `req-retirado`, `feature`, `retraducao`, `intencao-reaberta`, `sem-lock`, `sem-campo`) e a lista de REQs afetados, para a fase reescrever **só** os cenários desses REQs, mantendo o nome dos demais. `stale` observa apenas três coisas: a tabela de REQs (id e `rev`), os `.feature` e a seção Retradução. Editar "Fora do escopo", "Nas suas palavras" ou "Mudanças" não invalida a aprovação. É decisão de design: o que o citizen aprovou foi a mensagem e o contrato, e essas seções não os mudam; o que muda o sentido de um requisito sobe o `rev`, e isso o lock vê. Invalidar por edição de prosa faria o citizen reaprovar sem mudança de sentido, e a aprovação viraria ritual. O D1 trata `stale`, `draft` e `missing` como `não medido` (`NM-CENARIOS-STALE`), nunca como `coberto`.
 
 - **Quem decide**: o verificador.
 - **Critério de aceitação**: depois de editar o `.feature` aprovado, `--status` devolve `stale` com a razão `feature`; depois de subir o `rev` de um REQ, `stale` com `req-rev`; com tudo igual, `approved`.
@@ -165,7 +164,7 @@ A fase **não**: escreve o plano nem o campo `Scenarios:` (plan-000012); liga ru
 
 ### SPC-016 -- Interface `--specify` (implementa CYC-006 para a specify)
 
-`/plan --specify [<slug>]` roda só a specify e para. Lê o `intent.md` aprovado; escreve só os `*.feature`, a retradução, o lock, os campos `scenarios_*` e as linhas em "Mudanças"; nunca escreve plano. Reentrada é permitida (por exemplo depois de `stale`). Sem `features/<slug>/`, recusa em uma frase ("A entrevista vem antes: rode /plan --grill.") e não escreve nada.
+`/plan --specify [<slug>]` roda só a specify e para. Lê o `intent.md` aprovado; escreve só os `*.feature`, a retradução, o lock, os campos `scenarios_*` e as linhas em "Mudanças"; nunca escreve plano. Reentrada é permitida (por exemplo depois de `stale`). Sem a pasta `features/`, a varredura (sem `--feature`) sai 0; com `--feature <slug>` e sem a pasta, sai 2. Sem `features/<slug>/`, recusa em uma frase ("A entrevista vem antes: rode /plan --grill.") e não escreve nada.
 
 - **Quem decide**: designer (CYC-006).
 - **Critério de aceitação**: depois de `/plan --specify`, o diff do projeto só toca a pasta `features/<slug>/`; sem a pasta, nenhum arquivo é criado.

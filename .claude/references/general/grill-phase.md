@@ -272,7 +272,7 @@ A fase grill **não**:
 
 ### GRL-014 -- Interface `--grill` (implementa CYC-006 para a grill)
 
-`/plan --grill [<slug>]` roda só a fase grill e para. Lê e escreve só `features/<slug>/intent.md`; nunca escreve plano, `.feature` nem `gate.json`. Reentrada é permitida (GRL-011). Sem `<slug>`, o agente propõe um (GRL-002). `--specify` continua reservada para o plan-000011.
+`/plan --grill [<slug>]` roda só a fase grill e para. Lê e escreve só `features/<slug>/intent.md`; nunca escreve plano, `.feature` nem `gate.json`. Reentrada é permitida (GRL-011). Sem `<slug>`, o agente propõe um (GRL-002). `--specify` deixou de ser reservada: o plan-000011 a implementa (`specify-phase.md`, SPC-016, passo 2c do `/plan`).
 
 - **Quem decide**: designer (CYC-006).
 - **Critério de aceitação**: depois de `/plan --grill`, o diff do projeto só toca `features/<slug>/intent.md`.

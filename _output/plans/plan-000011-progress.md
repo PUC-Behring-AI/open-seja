@@ -215,3 +215,10 @@ Entregue: protocolo `specify-phase.md` (SPC-001..018, com a emenda D-004: mensag
 - deviated: Reescrevi uma linha deste progress que listava os termos de C1 (C2 proibe nomes em _output).
 - less-sure: Se o designer quer o aviso GHK bloqueando a aprovacao, ou so no registro do contrato.
 - gate: not-installed
+
+### Correções da revisão (orquestrador)
+- Item 3: o hash do `.feature` agora vem de `_normalized` (BOM fora, CRLF para LF), em `_current`, logo em `build_lock` e no status. Os locks das fixtures não mudaram de hash (todas LF, sem BOM), então nenhuma foi regenerada. Teste novo: aprovar, regravar o `.feature` com BOM e CRLF, status segue `approved`.
+- Item 5: `_atomic_write` aplica `shutil.copymode` do original, quando existe, antes do `os.replace`. Teste novo confere 0640 no `intent.md` e 0600 no lock.
+- Item 8: `- Exemplo:` na coluna 0 logo depois do item conta como exemplo; a forma indentada continua valendo. O ramo antigo, inalcançável para coluna 0, foi fundido num só `elif`. Teste novo.
+- Item 9: `SPECIFY_MAX_AUTOFIX` removida (sem consumidor). O SPC-008 diz que o limite de 3 tentativas vive só no SPC e no SKILL do `/plan`.
+- Docs: GRL-014 (`--specify` implementada, não reservada); SPC-013 (o que `stale` observa e por que, mais a normalização do hash); SPC-010 e docstring (atomicidade por arquivo, falha entre as duas escritas cai em `sem-campo`, recuperável); SPC-016 (sem `features/`: varredura 0, `--feature` sai 2).

@@ -29,7 +29,10 @@ check_features.py (both imported; one parser per format).
 | SPC-018 | Retradução: no technical token, sentence and paragraph size         | warning         |
 
 `--approve` (SPC-010) writes scenarios.lock.json and then the five `scenarios_*`
-fields of the intent.md frontmatter, atomically, only when no error and no
+fields of the intent.md frontmatter. Each file is written atomically (temp file,
+then replace, keeping the original mode); the pair is not. A failure between the two
+writes leaves a lock without the frontmatter field, which reads as `stale` (reason
+`sem-campo`) and is fixed by running --approve again. Writes only when no error and no
 warning is found. `--at` comes from the caller: no clock, no network, no LLM.
 Output is sorted and identical for the same files.
 
@@ -64,6 +67,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -91,7 +95,6 @@ except ImportError:  # pragma: no cover - exercised by monkeypatching _cf
 SCHEMA_VERSION = 1
 LOCK_SCHEMA_VERSION = 1
 SPECIFY_MAX_ROUNDS = 3
-SPECIFY_MAX_AUTOFIX = 3
 LOCK_NAME = "scenarios.lock.json"
 CONTRACT_NOBODY = "ninguem"
 REASON_ORDER = ("intencao-reaberta", "sem-lock", "sem-campo", "req-novo", "req-retirado", "req-rev",
@@ -152,6 +155,11 @@ def _read(path: Path) -> str:
 
 def _sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def _normalized(path: Path) -> bytes:
+    """File bytes with the BOM dropped and CRLF turned into LF (same rule as the Retradução hash)."""
+    return _read(path).replace("\r\n", "\n").encode("utf-8")
 
 
 def _rel(path: Path, root: Path) -> str:
@@ -232,7 +240,7 @@ def _current(folder: Path, doc, slug: str) -> dict:
     text = retraducao_text(doc) if doc is not None else None
     return {
         "basis": {r.id: r.rev for r in reqs if r.active},
-        "files": {p.name: _sha(p.read_bytes()) for p in _feature_files(folder)},
+        "files": {p.name: _sha(_normalized(p)) for p in _feature_files(folder)},
         "retraducao": _sha((text or "").encode("utf-8")),
     }
 
@@ -384,13 +392,13 @@ def _retraducao_items(section) -> tuple[list[_Item], int | None, list[_Item]]:
         stripped = line.strip()
         if header is None and _norm(stripped).startswith(NAO_FAZ_HEADERS):
             header = number
-        elif line.startswith("- "):
-            target = nao_faz if header is not None else items
-            target.append(_Item(number, stripped[2:].strip(), 0))
-        elif (stripped.startswith("- ") and items and header is None
+        elif (items and header is None and stripped.startswith("- ")
               and _norm(stripped[2:]).startswith(EXAMPLE_PREFIXES)):
             last = items[-1]
             items[-1] = last._replace(examples=last.examples + 1)
+        elif line.startswith("- "):
+            target = nao_faz if header is not None else items
+            target.append(_Item(number, stripped[2:].strip(), 0))
     return items, header, nao_faz
 
 
@@ -585,6 +593,8 @@ def _atomic_write(path: Path, data: bytes) -> None:
     try:
         with os.fdopen(fd, "wb") as handle:
             handle.write(data)
+        if path.exists():
+            shutil.copymode(path, tmp)
         os.replace(tmp, path)
     except BaseException:
         if os.path.exists(tmp):
