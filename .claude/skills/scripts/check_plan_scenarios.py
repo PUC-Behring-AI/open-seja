@@ -42,7 +42,8 @@ Exit codes:
   1 = at least one error (or an info with --strict).
   2 = usage error, unreadable file, unknown plan_format_version, unknown lock
       schema_version, or the scenario validator (check_specify.py) not found.
-      Never a traceback.
+      Never a traceback. The no-argument scan is fail-closed: an unreadable
+      v2 plan or an invalid lock aborts the whole scan with exit 2.
 
 Usage
 -----

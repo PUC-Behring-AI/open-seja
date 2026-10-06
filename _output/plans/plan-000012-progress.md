@@ -180,3 +180,11 @@ Reexecutado: pytest do harness **1120 passed / 12 failed** (os 12 pre-existentes
 - deviated: O contrato levou CYC-028/029 e trocas de vocabulario, mais que um ponteiro.
 - less-sure: Se o rev do lock basta para invalidar plano velho depois de reaprovar.
 - gate: not-installed
+
+### Correções da revisão (orquestrador)
+- Item 1: contrato (CYC-018, Compatibilidade, tabela de versão) e plan-step.md alinhados ao PFS-003: v2 approved exige Scenarios: em todo step; v2 skipped sem Tests: não-N/A de comportamento observável.
+- Item 2: CYC-018 e CYC-008 dizem que plano novo sai v2 em approved e skipped; v1 válido para sempre (D-008).
+- Item 3: CYC-027 usa <slug>/<arquivo>.feature::<nome>.
+- Item 4: implement/SKILL.md Auto Mode Phase 0 step 3: versão desconhecida PARA com "plan_format_version N não suportada"; ramos 1, ausente e 2 intactos.
+- Item 5: varredura sem argumentos fail-closed (exit 2) documentada em PFS e na docstring de check_plan_scenarios.py.
+- Item 6: CYC-006, critério e tabela de decisões dizem "reservadas em 2026-10-06; implementadas pelos planos 000009 e 000011".

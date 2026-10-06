@@ -224,7 +224,7 @@ Reaprovar os cenários invalida o plano até ele ser atualizado, sem migração 
 | Projeto sem `features/` e sem plano v2 | varredura sem argumentos: "nada a verificar" | 0 |
 | Harness antigo, sem `check_specify.py` | só plano v2 `approved` recebe "validador de cenários não encontrado" (PFS-011) | 2 |
 
-Uso sem argumentos (o `run_all_checks.py` roda assim, na raiz do projeto): varre `_output/plans/plan-*.md`, ignora `*-progress.md`, `*-qa-*.md` e plano cujo título começa com `# DONE |` (história imutável, T3), e reprova só plano v2. Plano v1 nunca entra.
+Uso sem argumentos (o `run_all_checks.py` roda assim, na raiz do projeto): varre `_output/plans/plan-*.md`, ignora `*-progress.md`, `*-qa-*.md` e plano cujo título começa com `# DONE |` (história imutável, T3), e reprova só plano v2. Plano v1 nunca entra. A varredura é **fail-closed**: um plano v2 ilegível, ou com lock inválido, aborta a varredura inteira com exit 2 (não é pulado).
 
 ## Esquema de `--json`
 

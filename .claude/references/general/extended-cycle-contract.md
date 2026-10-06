@@ -66,10 +66,10 @@ A terceira fase do PLAN escreve o plano a partir de `intent.md` e dos `.feature`
 
 ### CYC-006 -- Invocação avulsa `--grill` e `--specify` `[default; aceito 2026-10-06]` (decisão pendente 1 = B)
 
-As fases são internas ao `/plan`. Cada uma também poderá ser invocada avulsa (`/plan --grill`, `/plan --specify`) para repetir só a entrevista ou só o Gherkin depois de mudança de intenção. Neste contrato as flags são **interface reservada**: o nome e o sentido ficam fixados, a implementação é decidida pelos planos que tratam das fases. Alternativa rejeitada: skills `/grill` e `/specify` separadas (bifurca o ciclo de H-008).
+As fases são internas ao `/plan`. Cada uma também poderá ser invocada avulsa (`/plan --grill`, `/plan --specify`) para repetir só a entrevista ou só o Gherkin depois de mudança de intenção. Neste contrato as flags foram **reservadas em 2026-10-06 e implementadas pelos planos 000009 e 000011** (`grill-phase.md` GRL-014, `specify-phase.md` SPC-016, `plan/SKILL.md`): o nome e o sentido ficaram fixados aqui, a implementação vive nesses arquivos. Alternativa rejeitada: skills `/grill` e `/specify` separadas (bifurca o ciclo de H-008).
 
 - **Quem decide**: designer, no plano que implementar as fases.
-- **Critério de aceitação**: nenhum texto executável das flags existe em `SKILL.md` até a implementação; as flags aparecem neste contrato como "reservada".
+- **Critério de aceitação**: na data deste contrato nenhum texto executável das flags existia em `SKILL.md`; hoje existe (planos 000009 e 000011) e este contrato as registra como "reservadas em 2026-10-06; implementadas".
 - **Implementação**: `--grill` implementada pelo plan-000009 (`grill-phase.md`, GRL-014); `--specify` implementada pelo plan-000011 (`specify-phase.md`, SPC-016).
 
 ### CYC-007 -- O que cada fase lê, escreve e quem aprova
@@ -88,7 +88,7 @@ As fases são internas ao `/plan`. Cada uma também poderá ser invocada avulsa 
 ### CYC-008 -- Ordem e portões
 
 1. Sem `intent.md` aprovado não há specify.
-2. Sem `.feature` aprovado não há plano v2 (plano v1 e plano com `Specify: skipped` seguem o fluxo existente).
+2. Sem `.feature` aprovado não há plano v2 (plano v1 segue o fluxo existente; plano com `Specify: skipped` é v2 sem `Feature:`, CYC-018).
 3. Sem plano aprovado não há IMPLEMENT.
 4. Sem as-intended não há ciclo (T2, D-002).
 
@@ -186,10 +186,10 @@ O teste-primeiro roda dentro do `/implement`, por step, consumindo o portão `--
 
 ### CYC-018 -- Versão do formato de plano `[default; aceito 2026-10-06]` (decisão pendente 6 = B)
 
-O plano com fase specify rodada usa `plan_format_version: 2`, com `Scenarios:` obrigatório em todo step de `Tests:` não-N/A. Plano v1 (ou sem versão) permanece **válido para sempre**; a recusa vale só para v2. Detalhes na seção "Compatibilidade".
+Plano novo sai `plan_format_version: 2` nos dois casos (`Specify: approved` ou `Specify: skipped`, PFS-013). Em v2 com `Specify: approved`, todo step declara `Scenarios:` (chaves de cenário, ou `N/A (motivo)` para step sem comportamento observável); em v2 com `Specify: skipped`, nenhum step tem `Tests:` não-N/A de comportamento observável. Plano v1 (ou sem versão) permanece **válido para sempre** (D-008); a recusa vale só para v2. Detalhes na seção "Compatibilidade".
 
 - **Quem decide**: designer.
-- **Critério de aceitação**: um plano v1 existente é lido pelo `/plan` e pelo `/implement` sem mudança de resultado; só um plano v2 sem `Scenarios:` em step de `Tests:` não-N/A é classificado como inválido.
+- **Critério de aceitação**: um plano v1 existente é lido pelo `/plan` e pelo `/implement` sem mudança de resultado; só um plano v2 `approved` com step sem `Scenarios:` (inclusive `Tests: N/A`, PFS-003) é classificado como inválido.
 
 ### CYC-019 -- O que o contrato não faz
 
@@ -212,7 +212,7 @@ Ele também não muda o portão, os hooks ou os denies (S2).
 
 | # | Decisão | Default adotado | Regra |
 |---|---|---|---|
-| 1 | Forma das fases grill e specify | B: internas ao `/plan`, flags avulsas reservadas `[default; aceito 2026-10-06]` | CYC-006 |
+| 1 | Forma das fases grill e specify | B: internas ao `/plan`, flags avulsas (reservadas em 2026-10-06; implementadas pelos planos 000009 e 000011) `[default; aceito 2026-10-06]` | CYC-006 |
 | 2 | Quando a specify é pulada | A: por tipo de tarefa, com `Specify: skipped -- <motivo>` `[default; aceito 2026-10-06]` | CYC-004 |
 | 3 | Layout por feature | A: `features/<slug>/` `[default; aceito 2026-10-06]` | CYC-015 |
 | 4 | Definição de divergência | C: composta, por degrau `[default; aceito 2026-10-06]` | CYC-016 |
@@ -225,13 +225,14 @@ Ele também não muda o portão, os hooks ou os denies (S2).
 
 Esta seção fixa a versão do formato de plano (CYC-018) e o campo `Scenarios:`. Definição do campo: `.claude/references/template/plan-step.md`.
 
-**Campo `Scenarios:`.** Linha de metadados do step, obrigatória em v2 em todo step com `Tests:` não-N/A e ausente em v1: lista de chaves de cenário `<slug>/<arquivo>.feature::<nome>` (emenda 000012, CYC-028; antes: tags `@REQ-` ou nomes), tiradas de `index` do `scenarios.lock.json` da `Feature: <slug>` do plano, que o step entrega. `N/A (motivo)` é permitido só para step sem comportamento observável (documentação, configuração, harness, refactor com cobertura prévia), inclusive quando o step tem `Tests:` não-N/A; o motivo é obrigatório e satisfaz a obrigatoriedade.
+**Campo `Scenarios:`.** Linha de metadados do step, obrigatória em v2 com `Specify: approved` em todo step (com ou sem `Tests:`) e ausente em v1: lista de chaves de cenário `<slug>/<arquivo>.feature::<nome>` (emenda 000012, CYC-028; antes: tags `@REQ-` ou nomes), tiradas de `index` do `scenarios.lock.json` da `Feature: <slug>` do plano, que o step entrega. `N/A (motivo)` é permitido só para step sem comportamento observável (documentação, configuração, harness, refactor com cobertura prévia), inclusive quando o step tem `Tests:` não-N/A; o motivo é obrigatório e satisfaz a obrigatoriedade. Em v2 com `Specify: skipped` não há `Feature:` nem chaves: nenhum step tem `Tests:` não-N/A de comportamento observável (PFS-013), e `Scenarios: N/A (motivo)` justifica a exceção.
 
 **Regra de versão.**
 
 | Cabeçalho do plano | `Scenarios:` | Situação |
 |---|---|---|
-| `plan_format_version: 2` | obrigatório em todo step com `Tests:` não-N/A | step sem `Scenarios:` torna o plano **inválido** |
+| `plan_format_version: 2` com `Specify: approved` | obrigatório em todo step (chaves, ou `N/A (motivo)`) | step sem `Scenarios:` torna o plano **inválido** (PFS-003, PFS-006) |
+| `plan_format_version: 2` com `Specify: skipped` | sem chaves; nenhum step com `Tests:` não-N/A de comportamento observável | PFS-013 recusa o contrário |
 | `plan_format_version: 2` | `N/A (motivo)` em step sem comportamento observável (com ou sem `Tests:`) | válido |
 | `plan_format_version: 1` ou ausente | ausente | **válido para sempre**; `/plan` e `/implement` o leem como antes; no máximo advisory, nunca bloqueio |
 
@@ -299,7 +300,7 @@ O runner que executa os `.feature` e emite o relatório do runner contract é **
 
 ### CYC-027 -- Estados e chave de cenário do runner contract (emenda 000010)
 
-O relatório do runner é o Cucumber JSON (CYC-012). Ele liga o `Scenario` ao teste pela **chave de cenário** `<slug>/<arquivo>::<nome>` (os dois últimos componentes do `uri` do `.feature` e o `name` do cenário; nome único por arquivo, GHK-010) e traz as tags `@REQ-` do cenário na lista `tags`. Os estados do DRM-003 (`passed`, `failed`, `error`, `skipped`, `xfail`, `undefined`, `absent`) não são todos nativos do Cucumber (`passed`, `failed`, `skipped`, `pending`, `undefined`, `ambiguous` por step): a tabela de mapeamento está em `.claude/references/general/gherkin-spec-format.md`, seção 8. Regras: `failed` exige mensagem de asserção (senão é `error`); `xfail` vem da tag; `Scenario Outline` é uma unidade e vale o pior estado das suas linhas; cenário que o runner não emite fica `absent` (ou `skipped` se tem tag de desativação). Um adaptador pode juntar outro relatório do mesmo runner (por exemplo o JUnit) quando o Cucumber JSON omite casos; o contrato não muda.
+O relatório do runner é o Cucumber JSON (CYC-012). Ele liga o `Scenario` ao teste pela **chave de cenário** `<slug>/<arquivo>.feature::<nome>` (os dois últimos componentes do `uri` do `.feature` e o `name` do cenário; nome único por arquivo, GHK-010) e traz as tags `@REQ-` do cenário na lista `tags`. Os estados do DRM-003 (`passed`, `failed`, `error`, `skipped`, `xfail`, `undefined`, `absent`) não são todos nativos do Cucumber (`passed`, `failed`, `skipped`, `pending`, `undefined`, `ambiguous` por step): a tabela de mapeamento está em `.claude/references/general/gherkin-spec-format.md`, seção 8. Regras: `failed` exige mensagem de asserção (senão é `error`); `xfail` vem da tag; `Scenario Outline` é uma unidade e vale o pior estado das suas linhas; cenário que o runner não emite fica `absent` (ou `skipped` se tem tag de desativação). Um adaptador pode juntar outro relatório do mesmo runner (por exemplo o JUnit) quando o Cucumber JSON omite casos; o contrato não muda.
 
 - **Quem decide**: designer; o adaptador do runner (plan-000013) e a junção (plan-000014) aplicam.
 - **Critério de aceitação**: dado o mesmo Cucumber JSON, dois consumidores obtêm os mesmos estados por chave; nenhum cenário `skip`, `xfail` ou sem teste é contado como verde; nenhum `error` ou `undefined` é contado como vermelho pelo motivo certo (CYC-022).
