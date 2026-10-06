@@ -11,7 +11,7 @@ One job, then destroyed. You receive a short briefing built by `build_brief.py -
 
 ## Mode `red` (default, spawned by /implement)
 
-1. For each scenario in the briefing, write the pytest-bdd test and the step definitions. Reuse the step definitions listed in the briefing; never duplicate one.
+1. For each scenario in the briefing, write the pytest-bdd test and the step definitions. Reuse the step definitions listed in the briefing; never duplicate one. Bind only the owned scenarios, one by one: `test_<name> = scenario(FEATURE, "<scenario name>")(_bind)` with `def _bind(): return None`. `scenarios(FEATURE)` would bind the scenarios of other steps (they fail as undefined and break the rest of the suite, R6), and a `def test_...: pass` fails the gate's test lint (every `def test_*` must assert).
 2. In the code files of the step, write only a neutral skeleton: signatures with a body of `pass`, `...`, a docstring, `return <literal>`, or `raise NotImplementedError`. No logic.
 3. Each test must fail in a `Then` step, by an assertion about the result. Never `assert False`, an unconditional `raise AssertionError`, or `pytest.fail`. The test must call the skeleton.
 4. Run the command the briefing gives (pytest with `--scenario-report`, `--cucumberjson`, `--junitxml`). Do not judge the result yourself: the orchestrator runs `build_checks.py red-check` and sends you its finding if you must try again.

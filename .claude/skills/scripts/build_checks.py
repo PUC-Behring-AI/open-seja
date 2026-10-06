@@ -189,8 +189,11 @@ def check_skeleton_source(text: str, file: str) -> list[dict]:
 
 
 def check_skeleton(paths) -> list[dict]:
+    """ITF-004 over the files that exist (a code file the Tester did not create yet has nothing to check)."""
     findings: list[dict] = []
     for path in paths:
+        if not Path(path).is_file():
+            continue
         findings.extend(check_skeleton_source(read_text(Path(path)), _norm(str(path))))
     return findings
 
@@ -890,14 +893,14 @@ def _state(entry: dict) -> str:
     red_ok = (entry.get("red") or {}).get("reason_ok")
     if final == "passed" and red_ok:
         return "demonstrado"
-    if final is not None and final != "passed":
+    if (final is not None and final != "passed") or red_ok is False:
         return "não demonstrado"
     return "não medido"
 
 
 _STATE_SENTENCE = {
     "demonstrado": "Eu vi o teste falhar antes do código e passar depois.",
-    "não demonstrado": "O teste deste cenário não passou. Eu não o dou como feito.",
+    "não demonstrado": "Eu não consegui mostrar este cenário: o teste não falhou antes do código ou não passou depois.",
     "não medido": "Eu não tenho registro de que o teste falhou antes do código. Eu não medi.",
 }
 
@@ -983,12 +986,31 @@ def _changes(root: Path, base: str) -> list[tuple[str, str]]:
     out = []
     for line in _git(root, "diff", "--name-status", "--no-renames", base).splitlines():
         parts = line.split("\t")
-        if len(parts) >= 2:
-            out.append((parts[0], parts[-1]))
+        if len(parts) < 2:
+            continue
+        status, path = parts[0], parts[-1]
+        if status == "D" and (Path(root) / path).is_file():
+            # a file of a `git write-tree` snapshot that is untracked again: unchanged or modified, not deleted
+            if _same_as_base(root, base, path):
+                continue
+            status = "M"
+        out.append((status, path))
     for path in _git(root, "ls-files", "--others", "--exclude-standard").splitlines():
-        if path.strip():
-            out.append(("A", path.strip()))
+        path = path.strip()
+        if path and not any(p == path for _s, p in out) and not _same_as_base(root, base, path):
+            out.append(("A", path))
     return out
+
+
+def _same_as_base(root: Path, base: str, path: str) -> bool:
+    """An untracked file that the base (a commit or a `git write-tree` snapshot) already has, unchanged."""
+    res = subprocess.run(["git", "-C", str(root), "rev-parse", "--verify", "-q", f"{base}:{path}"],
+                         capture_output=True, text=True, check=False)
+    if res.returncode != 0:
+        return False
+    now = subprocess.run(["git", "-C", str(root), "hash-object", "--", path], capture_output=True, text=True,
+                         check=False)
+    return now.returncode == 0 and now.stdout.strip() == res.stdout.strip()
 
 
 def _diff_lines(root: Path, base: str, path: str) -> tuple[list[str], list[str]]:

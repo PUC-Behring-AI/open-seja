@@ -479,8 +479,11 @@ def test_demo_is_the_citizen_register() -> None:
              K1: ["Dado que a lista de tarefas está vazia"],
              K2: ["Dado que a lista de tarefas está vazia"]}
     questions = ["Se a tarefa marcada continuasse pendente, nenhum cenário perceberia. Isso importa para você?"]
-    text = bc.demo_text(_built_gate(), steps, questions)
-    assert "demonstrado" in text and "não medido" in text and "Isso importa para você?" in text
+    gate = bc.record(_built_gate(), 4, {"scenarios": {K2: {"red": {"reason_ok": False}, "final": {"test_result": "passed"}}}}, at="t")
+    text = bc.demo_text(gate, steps, questions)
+    assert "Estado: demonstrado." in text and "Isso importa para você?" in text
+    assert text.count("Estado: não demonstrado.") == 1  # K2: already green before the code
+    assert text.count("Estado: não medido.") == 1  # K1: no record of the red
     stripped = text
     for lines in steps.values():
         for line in lines:

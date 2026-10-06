@@ -138,3 +138,50 @@ Desvios de nome decididos aqui:
 - deviated: O roteamento do SKILL.md virou uma ferramenta (build_checks.py route) com golden, em vez de so texto; o fim do plano roda mesmo com --skip-checks para o D3a nao ficar sem full.
 - less-sure: Se um orquestrador real segue nove itens de Procedimento sem se perder; isso so o piloto mostra.
 - gate: not-installed
+
+### Step 8 -- ensaio ponta a ponta (2026-10-06)
+
+**Ensaio, nao piloto.** Projeto descartavel no scratchpad (fora do repositorio), venv descartavel (`uv venv` + pytest 9.1.1, pytest-bdd 9.0.0, pytest-cov 7.1.0, ruff 0.16.10, radon 6.0.1, mutmut 3.8.0). **Simulado**: os papeis (Tester, Coder, Cleaner, Hardener) sao arquivos escritos por um roteiro (como no ensaio do plano de hooks); as acoes humanas (baseline inicial, aceitar baseline, subir o teto uma vez) tambem; o `pyright` e um esboco que sai 0 (o pyright real nao roda neste ambiente: node sem `libatomic.so.1`). **Rodou de verdade**: pytest-bdd com o plugin instalado por `install-plugin`, `build_checks.py` (route, red-check, freeze, scope, green-check, crap, uncovered, baseline, record, status, export, demo), `build_brief.py`, `gate.py --fast/--full` (ruff, pytest+cobertura de ramos, radon/CRAP, marcadores, **mutmut real** com `--files`), `check_plan_scenarios.py`, `check_specify.py --status`, o hook `Stop` real e o `drift_report.py` do plan-000014 (congelamento do M1 e relatorio). Feature: `contas-da-semana` (a raiz aprovada das fixtures do 000012: 3 REQs, 4 cenarios, um Outline; o plano tinha 5 cenarios no texto -- desvio: 4) e o plano `v2-completo` (5 steps: 1 infra `no-scenario`, 3 `test-first`, 1 refactor `no-scenario`). `--pipeline` ligado so no step 2 (caso a).
+
+| Caso | Esperado | Obtido |
+|---|---|---|
+| (a) feliz com `--pipeline` (step 2) | vermelho certo, verde, Cleaner dispara, Hardener mata sobrevivente | RED try 1 ok; GREEN try 1 (scope 0, freeze 0, green-check 0, gate fast PASS); `crap` acha `contas_da_semana` CRAP 9.0 > 8 (CC 9, coberta) -> Cleaner refatora para uma compreensao; depois, nenhuma acima do alvo; gate `--full --files` acha **4 sobreviventes** (categoria 6) -> Hardener escreve 5 testes de limite (-1, 0, 7, 8 dias; conta paga) e 2 perguntas ao citizen; gate full PASS, 0 sobreviventes; scope do Hardener 0; status PASS |
+| (b) vermelho por import | R1, o Tester corrige | step 3 RED try 1: `R1` (+ `R7`, nenhum codigo do step executado); try 2 ok |
+| (c) Coder edita `.feature` | scope/freeze barram | step 3 GREEN try 1: `ITF-008` (scope) e `ITF-007` (freeze) no `.feature` |
+| (d) cenario `skipped` | step nao passa | GREEN try 2: `ITF-009`, `Desfazer...` = `skipped`, `Marcar...` = `passed` |
+| (e) teto | `ESCALATED`, progress, retomada | try 3 falha de novo -> `ESCALATED` gravado no `gate.json` e linha `- itf: ... ESCALATED` no progress; `status` = `ESCALATED`; o humano "sobe o teto uma vez" -> `status` = `GREEN`; try 4 PASS |
+| (f) baseline movido pelo humano | `PASS_WITH_BASELINE`, `baseline_moved = true` | step 3 REC: `PASS_WITH_BASELINE`, `baseline_moved: true`; no fim `full.category` nao virou PASS_WITH_BASELINE porque o `full` falhou (categoria 6, `MUTATION`) |
+| (g) cenario ja verde | escalada | step 4 (Outline "A lista abre logo"): `R1`, `already_green: true`, `escalate: true` -- o cenario ja era entregue pelo codigo do step 2 (o `Quando` e o mesmo); status `ESCALATED` |
+| (h) `stale` no meio | parada | `.feature` editado: `--status` = `stale` (`feature`); o run para (revertido em seguida) |
+| (i) `Stop` hook com arvore vermelha | ate 3 barras e liberacao | chamadas 1-3: exit 2 ("Quality gate FAIL (exit 3)"); chamada 4: exit 0 ("released after 3 blocks; the human decides") |
+| (j) plano v1 | rota igual ao golden | `route`: v1 com testes = legacy, tdd, legacy, tdd, legacy; v1 de documentacao = 7 x legacy; `--pipeline` em v1 = a frase, exit 1 |
+
+Medidas (n = 1 ensaio, 5 steps; numeros brutos; tempos de parede das ferramentas nesta maquina):
+
+| Step | Modo | Invocacoes de papel | Tentativas RED / GREEN | Cleaner (funcoes acima do alvo) | Hardener (sobreviventes) | Tempo por fase (s) | Status |
+|---|---|---|---|---|---|---|---|
+| 1 | no-scenario | 1 | -- | -- | -- | gate 0.37 | PASS |
+| 2 | test-first `--pipeline` | 4 (tester, coder, cleaner, hardener) | 1 / 1 | 1 | 4 | pre 0.21, red 0.34, green 0.81, clean 0.90, hard 2.91, rec 0.27 | PASS |
+| 3 | test-first | 6 (tester x2, coder x4) | 2 / 4 (teto + 1) | nao rodou | nao rodou | pre 0.22, red 0.68, green 2.18, rec 0.28 | PASS_WITH_BASELINE |
+| 4 | test-first | 1 | 1 / -- | -- | -- | pre 0.21, red 0.33 | ESCALATED |
+| 5 | no-scenario | 1 | -- | -- | -- | gate 0.42 | PASS |
+| fim | -- | -- | -- | -- | -- | full 1.55 | full FAIL (1 sobrevivente em `pagamento.desfazer`, step sem `--pipeline`) |
+
+- Briefings (caracteres): tester 2198, 2418, 2876, 2800; coder 1485, 1672, 1706, 1706, 1706; cleaner 1292; hardener 3291. Nenhum cortado (`truncated: false`; teto 24 000).
+- Passes pulados: com `--pipeline` (1 step), Cleaner e Hardener dispararam ambos (0 de 1 pulados). Sem `--pipeline` o `full` do fim achou 1 sobrevivente no step 3: leitura a favor de rodar o Hardener (Decisao 1 fica em A ate o piloto; dado de n = 1).
+- `gate.json` resultante conferido contra a costura com o 000008: `fast`, `full` (`MUTATION`, exit 6), `ts`, `baseline_moved: true`, `build.scenarios` com as 4 chaves **iguais ao `index` do lock**, `build.steps` 1-5 com modo e status, `build.feature {touched_total 10, touched_uncovered 1, base, baseline_moved}`. `export` gravou `runner/cucumber.json`, `drift/red-reason.json` (3 true, Outline false) e `drift/coverage.json`; `drift_report.py --moment M1 --freeze` gravou `drift/M1.json`; o relatorio leu tudo: D1 3/0/0, D2 4/0/0, D3a 0/4/0 (full FAIL e baseline aceito tornam o D3a todo descoberto, como o DRM-004 manda), D3b 9/1/0 (cobertos/descobertos/nao medidos).
+- `demo` (registro do citizen): 3 cenarios "demonstrado", o Outline "nao demonstrado" (ja passava antes do codigo) e as 2 perguntas; nenhum numero tecnico fora do texto dos cenarios.
+
+Achados do ensaio (corrigidos neste step):
+1. **`scope` contra o comeco do step acusava os arquivos do Tester** (ITF-007 no proprio teste congelado): o vermelho nao e commitado, entao o diff do Coder incluia o trabalho do Tester. Correcao: base por fase (`git add -A && git write-tree && git reset -q`) no Procedimento; `_changes` trata o arquivo do instantaneo que voltou a ser nao rastreado (o `git diff <tree>` o mostrava como `D`).
+2. **`check_skeleton` falhava com arquivo de codigo ainda inexistente** (vermelho por import, antes do esqueleto): exit 2 sem achado. Correcao: arquivo ausente e pulado (R7 cobre o caso).
+3. **Baseline aceito pelo humano dentro da fase do Coder** era acusado pelo `scope` (ITF-008). Regra no Procedimento: o humano age entre fases; o REC le o baseline.
+4. **`demo`** mostrava "nao medido" para cenario com registro de vermelho falso; passou a "nao demonstrado".
+5. **Lint de teste do gate x pytest-bdd**: `def test_x(): pass` com `@scenario` falha o lint (todo `def test_*` precisa afirmar) e `scenarios(FEATURE)` vincula os cenarios dos outros steps (indefinidos -> R6). Padrao adotado no agente `scenario-tester`: `test_<nome> = scenario(FEATURE, "<nome>")(_vincular)`. Candidato a follow-up no gate (aceitar funcao de cenario do pytest-bdd), fora deste plano.
+6. **Plugin e o `ruff` do projeto**: a configuracao de lint de cada projeto pode acusar o plugin copiado; o template ganhou `# ruff: noqa` e foi formatado com `ruff format --isolated` (o gate roda `ruff format --check .`).
+
+### Step 8 -- reflection-on-action | 2026-10-06 19:14 UTC | Ensaiar o ciclo ponta a ponta em um projeto descartavel e medir
+- happened: Rodei os casos (a) a (j) com papeis roteirizados e ferramentas reais (pytest-bdd, gate com mutmut, hook Stop, drift_report); todos deram o esperado depois de quatro correcoes; o gate.json e os arquivos do plan-000014 foram lidos pelo relatorio de divergencia.
+- deviated: Achei e corrigi: scope contra o comeco do step (virou base por fase), skeleton com arquivo ausente, baseline do humano dentro da fase, estado do demo; a feature tinha 4 cenarios, nao 5; pipeline so no step 2.
+- less-sure: n = 1 e papeis roteirizados: os numeros de tentativas e findings nao dizem nada sobre um subagente real; o pyright foi esbocado.
+- gate: not-installed

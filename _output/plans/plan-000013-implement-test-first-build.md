@@ -247,7 +247,7 @@ Criar um projeto Python descartável (um pacote pequeno, pytest-bdd, gate instal
 - **Interface**: N/A
 - **Verify**: o progress registra, por caso (a) a (j), a saída das ferramentas e o resultado esperado/obtido; o `gate.json` do caso (a) tem `fast`, `full`, `ts` e `build` com `scenarios{}` (cada chave igual à do lock) e `steps{}`; no caso (f) `baseline_moved = true`; no (d) o step não é `PASS`; o progress lista o que foi simulado; a tabela de medidas existe com números brutos e `n`; nada foi escrito no repositório do Doutourado além dos arquivos de `_output/plans/`.
 - **Tests**: N/A (ensaio; os testes automáticos são dos Steps 3 a 6)
-- [ ] Done
+- [x] Done
 
 ### Step 9: Fechar: costura com os vizinhos, consistência, C1 e pendências
 Em `implement-test-first.md`, acrescentar a seção "Quem alimenta e quem consome" e a tabela "Costura com o 000008" (abaixo). Reexecutar `pytest` dos três arquivos, `ruff`, `pyright`, `run_all_checks.py` e `/critique validate` nos arquivos novos; conferir vocabulário contra 000007 a 000012 (nomes de degrau, chaves, estados, `rev`, `stale`) e C1 (`git grep -i` dos termos do Step 1 sobre o diff). Registrar no progress: o resultado dos checks, as lacunas (seção "Lacunas e conflitos"), as decisões pendentes que ficaram no default, e os textos sugeridos ao designer via `/implement --manual`: (i) uma frase no contrato do 000007 dizendo que o registro do build mora em `gate.json.build` (ou em `build-record.json`); (ii) uma frase no `drift-metric.md` do 000008 definindo `baseline_moved` e a fonte de `red_reason_ok`; (iii) o aviso de que o ciclo sem `full` deixa o D3a `não medido`.
