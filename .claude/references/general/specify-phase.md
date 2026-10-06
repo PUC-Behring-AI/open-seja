@@ -83,7 +83,7 @@ Itens de "Fora do escopo" **não** geram cenário obrigatório. Eles aparecem na
 
 ### SPC-007 -- Voz dos steps
 
-Cada step tem no máximo `MAX_SENTENCE_WORDS` (25) palavras, fora os valores entre aspas; uma ideia por step; presente; o papel nomeado como na dimensão "quem" (ou "eu", na voz de quem usa); sem detalhe técnico (GHK-013). As tabelas `Exemplos` ficam fora da regra.
+Cada step tem no máximo `MAX_SENTENCE_WORDS` (25) palavras, contadas no texto depois da palavra-chave (`Dado`, `Quando`, ...) e fora os valores entre aspas; uma ideia por step; presente; o papel nomeado como na dimensão "quem" (ou "eu", na voz de quem usa); sem detalhe técnico (GHK-013). As tabelas `Exemplos` ficam fora da regra.
 
 - **Quem decide**: o verificador (tamanho); quem lê código (uma ideia por step, papel).
 - **Critério de aceitação**: step de 26 palavras devolve SPC-007 (aviso, bloqueia a aprovação); step de 25 não dispara. Sem o lint de voz controlada, a saída traz a ressalva `voz: não verificada`.
@@ -369,7 +369,7 @@ Campos inseridos antes do `---` de fechamento, nesta ordem, quando não existem;
 - `basis`: cada REQ `ativo` e o seu `rev` (1 quando a coluna `rev` não existe).
 - `index`: chaves de cenário `<slug>/<arquivo>::<nome>`, ordenadas.
 - `files`: sha256 dos bytes de cada `*.feature` da pasta.
-- `retraducao`: sha256 das linhas da seção `## Retradução` (sem o título; espaços finais removidos; unidas por `\n`).
+- `retraducao`: sha256 das linhas da seção `## Retradução` (sem o título; comentários HTML apagados, como no parser de `check_intent.py`; espaços finais removidos; sem linhas vazias no começo e no fim; unidas por `\n`).
 - `schema_version` desconhecido: `check_specify.py` sai 2.
 
 ## Degradação

@@ -86,3 +86,25 @@ Desvio: as tres execucoes de referencia (`ref-a-ajuste`, `ref-b-sem-codigo`, `re
 - deviated: Execucoes de referencia movidas para o Step 6; casos novos para SPC-017/018 (emenda D-004) e para a varredura do run_all_checks.
 - less-sure: Se a contagem de palavras do step deve excluir a palavra-chave (decidi que sim).
 - gate: not-installed
+
+## Step 4 -- `check_specify.py` (2026-10-06, executor)
+
+Teste primeiro: `test_check_specify.py` escrito antes do script e vermelho pelo motivo certo (coleta falhou: modulo ausente). Depois `check_specify.py` (stdlib, `main()` argparse, exit 0/1/2, bloco `# designer:`, docstring com `Invocation`/`Lifecycle` e tabela de regras, manifesto) e a entrada no fim de `check_plugin_registry.json` ("Specify Approval", scope `features`).
+
+Interface real (difere do plano onde a emenda D-004 pediu):
+- `check_specify(root, slug) -> Report(slug, findings, status)`; `approve(root, slug, *, at, by, contract_by) -> Report`; `compute_status(root, slug) -> Status(status, reasons, reqs)` (o plano previa `status() -> Literal`; aqui volta tambem as razoes e os REQs afetados, para a fase reescrever so os cenarios deles); `Finding(rule, severity, file, line, message, hint)`.
+- CLI: `check_specify.py [raiz] [--feature <slug>] [--status] [--approve --at <UTC> --by <nome> --contract-by <nome|ninguem>] [--json]`. Sem `--feature`: varredura de `features/*/intent.md` que so reprova `scenarios: approved` com estado `stale` (e o check condicional do `run_all_checks`, Step 7).
+- Reuso por **importacao** (nao subprocesso, como o plano dizia): `check_intent.check_intent/parse/table/_norm/ressalvas/MAX_SENTENCE_WORDS/MAX_SENTENCES_PER_PARAGRAPH` e `check_features.discover/validate/cited_reqs/scenario_key`. Sem validador (`ImportError` ou `_cf = None`): exit 2 "validador de cenarios nao encontrado", nada escrito; `--status` e a varredura funcionam sem ele (so hash e tabela). `check_intent.py` e `check_features.py` nao foram editados.
+- Leitura com `utf-8-sig`; arquivo ilegivel, slug invalido (`../x`), pasta ausente, `--at` fora do formato, lock com `schema_version` desconhecido: exit 2 com uma frase em stderr, sem traceback. `--approve` preserva BOM e `\r\n` do `intent.md` e so troca/insere as 5 linhas do frontmatter.
+
+Verify: `pytest test_check_specify.py` 74 passed (44 casos golden + 30 unitarios: idempotencia, so o frontmatter muda, CRLF/BOM, argumentos obrigatorios, aviso nao grava, validador ausente, stale apos edicao, `rev` nomeia o REQ, lock desconhecido, sem `features/`, slug ruim, ilegivel sem traceback, determinismo, linha `arquivo:linha: regra erro: ... Dica:`, ressalva de voz, constantes vindas de `check_intent`, exemplos de `specify-phase.md` passam em `check_features.py --strict` (pt em 3 arquivos, en), 18 regras com "Quem decide"/"Critério", cabecalho e registro). `uvx ruff check` limpo. pyright: **nao medido** (node do pyright sem `libatomic.so.1`, como no 000010). `run_all_checks.py`: **18 PASS** / 14 FAIL (o mesmo conjunto de 14; PASS novo = `check_specify.py`), contadores 17/2/9. pytest do harness: **944 passed / 12 failed** (os mesmos 12).
+
+Correcao de contagem: o Step 3 tem **44** casos (nao 41).
+
+Ajustes em `specify-phase.md`: o hash da retradução apaga comentarios HTML e linhas vazias de borda (como o parser de `check_intent`); SPC-007 conta palavras depois da palavra-chave.
+
+### Step 4 -- reflection-on-action | 2026-10-06 18:05 UTC | check_specify.py
+- happened: Escrevi os testes antes, depois o verificador com status, approve atomico e varredura; 74 testes passam, ruff limpo, 18 PASS no run_all_checks.
+- deviated: Reuso por importacao em vez de subprocesso; compute_status devolve razoes e REQs; quinto campo contract_by e hash da retraducao no lock (D-004).
+- less-sure: Se a varredura do run_all_checks deve reprovar projetos reais com aprovacao velha (e o pretendido, mas muda o health check deles).
+- gate: not-installed

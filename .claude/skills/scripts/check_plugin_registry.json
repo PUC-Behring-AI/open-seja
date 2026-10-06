@@ -209,5 +209,15 @@
     },
     "scope": "features",
     "critical": false
+  },
+  {
+    "script": "check_specify.py",
+    "name": "Specify Approval",
+    "stack": {
+      "backend": ["any"],
+      "frontend": ["any"]
+    },
+    "scope": "features",
+    "critical": false
   }
 ]
