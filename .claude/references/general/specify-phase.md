@@ -90,7 +90,7 @@ Cada step tem no máximo `MAX_SENTENCE_WORDS` (25) palavras, contadas no texto d
 
 ### SPC-008 -- Validação mecânica
 
-`check_specify.py` roda as regras de `check_features.py` sobre a feature, em modo estrito: cada **erro** GHK vira um achado SPC-008 erro e cada **aviso** GHK (por exemplo GHK-013, detalhe técnico; GHK-014, tag de desativação) vira um achado SPC-008 aviso, com a regra GHK na mensagem e a mesma linha. Informações GHK não entram. Antes de mostrar qualquer coisa a alguém, o agente corrige sozinho os achados, em no máximo `SPECIFY_MAX_AUTOFIX` (3) tentativas; se ainda restar achado, ele o mostra em voz controlada e pergunta.
+`check_specify.py` roda as regras de `check_features.py` sobre a feature, em modo estrito: cada **erro** GHK vira um achado SPC-008 erro e cada **aviso** GHK (por exemplo GHK-013, detalhe técnico; GHK-014, tag de desativação) vira um achado SPC-008 aviso, com a regra GHK na mensagem e a mesma linha. Informações GHK não entram, nem o GHK-005 (requisito sem cenário), que a SPC-003 já diz com o ID do requisito. Antes de mostrar qualquer coisa a alguém, o agente corrige sozinho os achados, em no máximo `SPECIFY_MAX_AUTOFIX` (3) tentativas; se ainda restar achado, ele o mostra em voz controlada e pergunta.
 
 - **Quem decide**: o verificador (resultado de ferramenta, T1).
 - **Critério de aceitação**: um `.feature` com aviso GHK-013 devolve SPC-008 aviso e `--approve` sai 1; um com `@skip` devolve SPC-008 aviso; um sem achado GHK de erro ou aviso não dispara.

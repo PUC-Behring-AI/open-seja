@@ -1,0 +1,12 @@
+{
+  "descricao": "(c) specify aprovada",
+  "args": [
+    "--feature",
+    "contas-da-semana",
+    "--status"
+  ],
+  "exit_code": 0,
+  "status": "approved",
+  "reasons": [],
+  "findings": []
+}

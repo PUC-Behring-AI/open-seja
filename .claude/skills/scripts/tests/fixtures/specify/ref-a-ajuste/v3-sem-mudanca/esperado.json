@@ -1,5 +1,5 @@
 {
-  "descricao": "REQ 002 ativo sem cenário (dispara SPC-003; o GHK-005 do validador fica com ela)",
+  "descricao": "(a) ajuste sem a linha em Mudanças",
   "args": [
     "--feature",
     "contas-da-semana"
@@ -8,10 +8,10 @@
   "status": "draft",
   "findings": [
     [
-      "SPC-003",
+      "SPC-011",
       "error",
       "features/contas-da-semana/intent.md",
-      34
+      73
     ]
   ]
 }

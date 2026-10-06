@@ -1,0 +1,5 @@
+$ check_specify.py --feature contas-da-semana
+features/contas-da-semana/intent.md:73: SPC-011 erro: A retradução está no rev 2 sem linha em Mudanças. Dica: Acrescente em Mudanças: Retradução rev 2: o que mudou.
+check_specify contas-da-semana: 1 erro, 0 avisos, 0 informações; estado dos cenários: draft
+ressalva: voz: não verificada -- eu só conferi o tamanho das frases e dos parágrafos; uma ideia por frase e os termos fixos não foram conferidos.
+exit 1

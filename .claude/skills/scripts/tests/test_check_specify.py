@@ -27,7 +27,8 @@ _FIXTURES = _TESTS_DIR / "fixtures" / "specify"
 _SPEC = _TESTS_DIR.parents[2] / "references" / "general" / "specify-phase.md"
 _REGISTRY = _SCRIPTS / "check_plugin_registry.json"
 
-CASES = sorted(p.name for p in _FIXTURES.iterdir() if p.is_dir() and (p / "esperado.json").is_file())
+CASES = sorted(p.parent.relative_to(_FIXTURES).as_posix()
+               for p in [*_FIXTURES.glob("*/esperado.json"), *_FIXTURES.glob("ref-*/*/esperado.json")])
 SLUG = "contas-da-semana"
 AT = "2026-10-06T15:00Z"
 
@@ -96,6 +97,25 @@ def test_every_checkable_rule_has_a_firing_case() -> None:
     fired = {f[0] for case in CASES for f in _expected(case).get("findings", [])}
     assert {"SPC-001", "SPC-003", "SPC-004", "SPC-007", "SPC-008", "SPC-011", "SPC-012", "SPC-017",
             "SPC-018"} <= fired
+
+
+def test_reference_runs_cover_the_three_scripts() -> None:
+    refs = {c.split("/")[0] for c in CASES if c.startswith("ref-")}
+    assert refs == {"ref-a-ajuste", "ref-b-sem-codigo", "ref-c-stale"}
+    assert _expected("ref-a-ajuste/v1-proposta")["exit_code"] == 1
+    assert _expected("ref-a-ajuste/v3-ajustada")["exit_code"] == 0
+
+
+def test_reference_c_scan_flags_the_old_approval(tmp_path: Path, capsys) -> None:
+    root = _copy("ref-c-stale/v2-intencao-mudou", tmp_path)
+    code, out = _run(root, [], capsys)
+    assert code == 1 and "aprovação velha" in out
+
+
+def test_reference_b_creates_no_features(tmp_path: Path, capsys) -> None:
+    root = _copy("ref-b-sem-codigo", tmp_path)
+    assert not (root / "features").exists()
+    assert "Specify: skipped -- " in (root / "plano-trecho.md").read_text(encoding="utf-8")
 
 
 # ---------------------------------------------------------------------------

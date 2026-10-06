@@ -1,0 +1,4 @@
+$ check_specify.py --feature contas-da-semana
+check_specify contas-da-semana: 0 erros, 0 avisos, 0 informações; estado dos cenários: draft
+ressalva: voz: não verificada -- eu só conferi o tamanho das frases e dos parágrafos; uma ideia por frase e os termos fixos não foram conferidos.
+exit 0

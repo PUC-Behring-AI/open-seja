@@ -304,13 +304,13 @@ def _check_entry(intent_rel: str, text: str | None) -> list[Finding]:
 
 
 def _check_ghk(fds) -> list[Finding]:
-    """SPC-008: errors and warnings of check_features, strict."""
+    """SPC-008: errors and warnings of check_features, strict. GHK-005 is left to SPC-003 (same fact)."""
     words = {"error": "erro", "warning": "aviso"}
     return [
         _f("SPC-008", f.severity, f.file, f.line, f"{f.rule} ({words[f.severity]}): {f.message}",
            f.hint or "Corrija o cenário antes de mostrar a alguém.")
         for f in _cf.validate(fds)
-        if f.severity in words
+        if f.severity in words and f.rule != "GHK-005"
     ]
 
 

@@ -14,7 +14,7 @@ Cada pasta é uma raiz de projeto. `esperado.json`: `args` (argumentos do verifi
 | `spc-001-grilling` | intent.md em grilling: recusa (dispara SPC-001) |
 | `spc-001-sem-intent` | pasta só com .feature, --feature: recusa (dispara SPC-001) |
 | `spc-001-intent-com-erro` | intent.md aprovado mas com erro P2 em check_intent (dispara SPC-001) |
-| `spc-003-sem-cenario` | REQ 002 ativo sem cenário (dispara SPC-003 e SPC-008/GHK-005) |
+| `spc-003-sem-cenario` | REQ 002 ativo sem cenário (dispara SPC-003; o GHK-005 do validador fica com ela) |
 | `spc-003-retirado-sem-cenario` | REQ 003 retirado sem cenário (não dispara) |
 | `spc-003-retirado-com-cenario` | REQ 003 retirado ainda com cenário (dispara SPC-003) |
 | `spc-004-sem-numero` | restrição sem número no Então nem em Exemplos (dispara SPC-004) |

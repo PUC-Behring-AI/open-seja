@@ -124,3 +124,25 @@ Verify: `git diff --stat` so os 3 arquivos; `grep --specify plan/SKILL.md` acha 
 - deviated: Duas perguntas de aprovacao (mensagem e contrato) em vez de um resumo com o .feature, pela emenda D-004.
 - less-sure: Se o agente vai separar bem a pergunta do contrato quando a mesma pessoa e citizen e power dev.
 - gate: not-installed
+
+## Step 6 -- execucoes de referencia (2026-10-06, executor)
+
+**Simuladas**: roteiros escritos pelo executor; nenhuma pessoa real respondeu; "usuario" e um papel (citizen e, em outro papel, quem le codigo). Pastas em `.claude/skills/scripts/tests/fixtures/specify/`, cada versao com `esperado.json` e `saida.txt` (saida real do verificador):
+
+- `ref-a-ajuste/` (feature com codigo, 3 REQs, um `restrição`): `v1-proposta` (step com URL e REQ 002 sem cenario nem item) -> exit 1 com SPC-003, SPC-008 (GHK-013) e SPC-017; `v2-mostrada` (uma autocorrecao) -> exit 0, `draft`, e o que o citizen ve (a retradução); `v3-sem-mudanca` (ajuste sem a linha em Mudancas) -> exit 1, SPC-011; `v3-ajustada` (retradução `rev: 2` + linha) -> `--approve` exit 0, grava lock e frontmatter identicos aos calculados a parte.
+- `ref-b-sem-codigo/`: plano com `## Intenção` e `Specify: skipped -- tarefa sem código (só documentação)`; nenhuma pasta `features/`; a varredura sai 0 com "nada a verificar".
+- `ref-c-stale/`: `v1-aprovado` (`approved`); `v2-intencao-mudou` (REQ 002 `rev` 2, intencao reaprovada) -> `--status`/checagem completa `stale (req-rev)` com o REQ 002 nomeado, exit 0; a **varredura** sai 1 ("aprovacao velha"); `v3-reescrito` (so os cenarios e o item do REQ 002 reescritos, nomes mantidos, retradução `rev: 2`) -> `--approve` exit 0, lock regravado com o REQ 002 em `rev` 2.
+
+Testes: `test_golden_case` passou a descobrir tambem `ref-*/*/esperado.json`; 3 testes novos (cobertura das tres execucoes, varredura de `ref-c` sai 1, `ref-b` sem `features/`). `pytest test_check_specify.py` 85 passed; ruff limpo.
+
+Desvios:
+- O ajuste do roteiro do plano ("o limite é 3 segundos, não 2") muda **o que** se quer (o criterio do REQ 003) e, pela SPC-011, volta a grill. Troquei por um ajuste de forma (o exemplo do REQ 001 contava a semana a partir de segunda-feira). Isto e um achado sobre o proprio plano: o exemplo dele violava a regra que ele escreveu.
+- Ajuste de UX no verificador: o GHK-005 (requisito sem cenario) deixou de virar SPC-008, porque repetia na mesma linha o que a SPC-003 ja diz com o ID do REQ (o leitor via dois achados para um fato). `specify-phase.md` (SPC-008) diz isso; `spc-003-sem-cenario/esperado.json` atualizado.
+
+Dados de calibracao (do roteiro, nao de sessao observada; nao servem para calibrar o teto): (a) 1 rodada de ajuste; 1 autocorrecao antes do resumo; 1 aviso de estilo na proposta (GHK-013) e 0 avisos de voz na versao mostrada; entendimento do citizen sem pedir reformulacao: **nao medido**. (c) 1 REQ afetado; 2 cenarios reescritos de 4; 0 nomes de cenario mudados.
+
+### Step 6 -- reflection-on-action | 2026-10-06 18:08 UTC | Execucoes de referencia
+- happened: Escrevi as tres execucoes simuladas com versoes intermediarias, esperado.json e a saida real do verificador; 85 testes passam.
+- deviated: Troquei o ajuste '3 segundos, nao 2' (que volta a grill pela SPC-011) por um ajuste de forma; GHK-005 deixou de duplicar a SPC-003.
+- less-sure: Os numeros de calibracao sao do roteiro; nada aqui mede se um citizen real entende a retradução.
+- gate: not-installed

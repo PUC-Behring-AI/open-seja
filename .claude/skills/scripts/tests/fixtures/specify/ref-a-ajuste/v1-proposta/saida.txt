@@ -1,0 +1,7 @@
+$ check_specify.py --feature contas-da-semana
+features/contas-da-semana/contas-da-semana.feature:8: SPC-008 aviso: GHK-013 (aviso): O step fala de uma URL. Diga o que o usuário vê, não como o sistema faz. Dica: Troque o detalhe técnico por uma frase do domínio.
+features/contas-da-semana/intent.md:34: SPC-003 erro: O requisito REQ-contas-da-semana-002 não tem cenário. Dica: Escreva um cenário com a tag @REQ-contas-da-semana-002.
+features/contas-da-semana/intent.md:71: SPC-017 erro: O requisito REQ-contas-da-semana-002 não aparece na retradução. Dica: Acrescente um item com o que eu vou fazer e um exemplo.
+check_specify contas-da-semana: 2 erros, 1 aviso, 0 informações; estado dos cenários: draft
+ressalva: voz: não verificada -- eu só conferi o tamanho das frases e dos parágrafos; uma ideia por frase e os termos fixos não foram conferidos.
+exit 1
