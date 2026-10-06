@@ -148,7 +148,7 @@ Na branch `dev` do open-seja (`git submodule update --init open-seja` se vazio),
 - **Interface**: N/A
 - **Verify**: o progress lista cada item (a) a (h) como "existe", "rascunho" ou "ausente" com o caminho; a decisão de parar ou seguir está escrita; `git -C open-seja status` limpo.
 - **Tests**: N/A (verificação de estado)
-- [ ] Done
+- [x] Done
 
 ### Step 2: Escrever a norma do teste-primeiro (`implement-test-first.md`)
 Criar o documento com as regras `TFB-001..022`, cada uma com "Quem decide" e "Critério de aceitação" (molde de `CYC-NNN` e `PFS-NNN`). Conteúdo mínimo:
