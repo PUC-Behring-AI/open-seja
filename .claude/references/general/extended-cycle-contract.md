@@ -29,7 +29,7 @@ A escada tem cinco representações: brief -> `intent.md` -> `.feature` -> teste
 O ciclo é PLAN, IMPLEMENT, REFLECT. O PLAN contém, nesta ordem, as fases grill, specify e escrita do plano. O IMPLEMENT contém, por step, teste vermelho por cenário, código e gate. O REFLECT lê a divergência por degrau. Não há skill nova, preset nem perfil: o comportamento é igual para o citizen e para o power dev; muda quem olha cada degrau (CYC-013).
 
 - **Quem decide**: designer (D-001; decisão fechada 1 do plan-000007).
-- **Critério de aceitação**: nenhuma skill `/grill`, `/specify` ou `/build` existe; `grep -rn "grill" .claude/skills/*/SKILL.md` só acha menção dentro do `/plan`.
+- **Critério de aceitação**: nenhuma skill `/grill`, `/specify` ou `/build` existe: `ls -d .claude/skills/grill .claude/skills/specify .claude/skills/build` falha nos três.
 
 ### CYC-002 -- Fase grill
 
@@ -44,20 +44,20 @@ O ciclo é PLAN, IMPLEMENT, REFLECT. O PLAN contém, nesta ordem, as fases grill
 
 - **Entrada**: `intent.md` aprovado.
 - **Saída**: um ou mais `features/<slug>/*.feature`; todo `Scenario` carrega a tag `@REQ-<slug>-NNN` do requisito que cobre.
-- **Ponto de aprovação humana**: antes de escrever o plano, o designer aprova o resultado da specify (CYC-013 diz o que cada receptor aprova). No máximo 3 rodadas de ajuste; ajuste repetido indica REQ vago e a conversa volta à grill (§10, `[intended]`).
-- **Quem decide**: designer aprova; o `/plan` escreve.
+- **Ponto de aprovação humana**: antes de escrever o plano, o designer aprova a mensagem e quem lê código aprova o `.feature` como contrato (CYC-013). No máximo 3 rodadas de ajuste; ajuste repetido indica REQ vago e a conversa volta à grill (§10, `[intended]`).
+- **Quem decide**: designer (a mensagem) e quem lê código (o contrato) aprovam; o `/plan` escreve.
 - **Critério de aceitação**: todo `Scenario` do `.feature` tem tag `@REQ-`; todo REQ aprovado do `intent.md` aparece em pelo menos um cenário, ou consta como descoberto (CYC-010); o registro da aprovação consta no plano.
 
 ### CYC-004 -- Quando a specify é pulada `[default; aceito 2026-10-06]` (decisão pendente 2 = A)
 
-A specify roda quando algum step do plano tem `Tests:` não-N/A (cria ou muda código com comportamento observável). Ela é pulada, por tipo de tarefa, nos prefixos DOCUMENT, CHORE e RESEARCH e nos steps só de configuração ou de harness. Ao pular, o plano traz a linha `Specify: skipped -- <motivo>`. A grill continua valendo (CYC-002). Alternativas rejeitadas: nunca pular (obriga Gherkin para um README) e pular por escolha livre (vira opcional, o que H-009 não mede).
+A decisão é por plano, não por step. A specify roda quando algum step do plano cria ou muda código com comportamento observável e tem `Tests:` não-N/A. Ela é pulada, por tipo de tarefa, nos prefixos DOCUMENT, CHORE e RESEARCH e nos planos só de configuração ou de harness; num plano que roda a specify, os steps de configuração ou de harness usam `Scenarios: N/A (motivo)` (seção "Compatibilidade"). Ao pular, o plano traz a linha `Specify: skipped -- <motivo>`. A grill continua valendo (CYC-002). Alternativas rejeitadas: nunca pular (obriga Gherkin para um README) e pular por escolha livre (vira opcional, o que H-009 não mede).
 
 - **Quem decide**: o `/plan` aplica a regra e registra o motivo; o designer pode contestar na revisão do plano.
-- **Critério de aceitação**: plano sem `*.feature` aprovado contém a linha `Specify: skipped -- <motivo>`; plano com algum step de `Tests:` não-N/A e sem essa linha tem pasta `features/<slug>/` com `.feature` aprovado.
+- **Critério de aceitação**: plano sem `*.feature` aprovado contém a linha `Specify: skipped -- <motivo>`; plano com algum step de comportamento observável e `Tests:` não-N/A, e sem essa linha, tem pasta `features/<slug>/` com `.feature` aprovado.
 
 ### CYC-005 -- Escrita do plano
 
-A terceira fase do PLAN escreve o plano a partir de `intent.md` e dos `.feature` aprovados. O cabeçalho referencia a pasta por `Feature: <slug>`. Todo step com `Tests:` não-N/A declara os cenários que cobre (campo `Scenarios:`; definição do campo e da versão do formato em "Compatibilidade", preenchida pelo Step 3).
+A terceira fase do PLAN escreve o plano a partir de `intent.md` e dos `.feature` aprovados. O cabeçalho referencia a pasta por `Feature: <slug>`. Todo step com `Tests:` não-N/A declara os cenários que cobre (campo `Scenarios:`; definição do campo e da versão do formato na seção "Compatibilidade").
 
 - **Quem decide**: `/plan` escreve; designer aprova o plano (fluxo existente do `/plan`).
 - **Critério de aceitação**: o plano tem `Feature: <slug>` e todo step com `Tests:` não-N/A tem `Scenarios:` apontando para tags `@REQ-` que existem nos `.feature`. Plano de pesquisa ou documentação não cria pasta nem `Feature:`.
@@ -120,7 +120,7 @@ Cada elemento de um degrau está em um destes estados:
 
 ### CYC-011 -- Regra do perímetro
 
-A feature (`features/<slug>/`) é a unidade de medida da divergência. Código, testes e requisitos fora de uma feature são `legado: não medido`, não descobertos. A pasta de feature nunca é apagada (Q2: git é a recuperação).
+A feature (`features/<slug>/`) é a unidade de medida da divergência. Código, testes e requisitos fora de uma feature são `legado: não medido`, não descobertos. A pasta de feature nunca é apagada (git é a recuperação; `product-design-as-intended.md` §2 e D-006).
 
 - **Quem decide**: designer.
 - **Critério de aceitação**: relatório de divergência de um projeto com código fora de `features/` marca esse código como `legado: não medido` e não o conta como descoberto.
@@ -135,7 +135,7 @@ O ciclo consome **contratos**, nunca a ferramenta (constituição T6):
 Stack sem adaptador (portão ou runner ausente) degrada para `não medido`, nunca para falha. Dizer "não medido" é a declaração explícita que T1 exige quando o projeto não tem portão.
 
 - **Quem decide**: designer.
-- **Critério de aceitação**: projeto sem `GATE_FAST_CMD` produz relatório com D3 `não medido` e a razão dita, e não produz erro; nenhum texto deste ciclo nomeia uma ferramenta de linguagem como requisito do contrato.
+- **Critério de aceitação**: projeto sem `GATE_FAST_CMD` produz relatório com D3 `não medido` e a razão dita, e não produz erro; nenhum texto deste ciclo nomeia uma ferramenta de linguagem como requisito do contrato (recomendação de primeiro adaptador é permitida quando marcada como recomendação, como em CYC-026).
 
 ### CYC-013 -- Degrau x receptor
 
@@ -175,14 +175,14 @@ A divergência é reportada **por degrau** (D1, D2, D3), com os estados de CYC-0
 
 ### CYC-017 -- Onde roda o teste-primeiro `[default; aceito 2026-10-06]` (decisão pendente 5 = A)
 
-O teste-primeiro roda dentro do `/implement`, por step, consumindo o portão `--fast` e os hooks existentes sem mudá-los. Alternativa rejeitada: skill separada `/build`. A seção "IMPLEMENT" abaixo (Step 5) detalha o primeiro degrau em código: teste vermelho pelo motivo certo, por cenário, antes do código. Cleaner e Hardener ficam fora (CYC-019).
+O teste-primeiro roda dentro do `/implement`, por step, consumindo o portão `--fast` e os hooks existentes sem mudá-los. Alternativa rejeitada: skill separada `/build`. A seção "IMPLEMENT" abaixo detalha o primeiro degrau em código: teste vermelho pelo motivo certo, por cenário, antes do código. Cleaner e Hardener ficam fora (CYC-019).
 
 - **Quem decide**: designer.
 - **Critério de aceitação**: nenhuma skill `/build` existe; o `/implement` aponta para este contrato; gate, hooks e `settings` não aparecem em diff de plano que só altera este contrato.
 
 ### CYC-018 -- Versão do formato de plano `[default; aceito 2026-10-06]` (decisão pendente 6 = B)
 
-O plano com fase specify rodada usa `plan_format_version: 2`, com `Scenarios:` obrigatório em todo step de `Tests:` não-N/A. Plano v1 (ou sem versão) permanece **válido para sempre**; a recusa vale só para v2. Detalhes na seção "Compatibilidade" (Step 3).
+O plano com fase specify rodada usa `plan_format_version: 2`, com `Scenarios:` obrigatório em todo step de `Tests:` não-N/A. Plano v1 (ou sem versão) permanece **válido para sempre**; a recusa vale só para v2. Detalhes na seção "Compatibilidade".
 
 - **Quem decide**: designer.
 - **Critério de aceitação**: um plano v1 existente é lido pelo `/plan` e pelo `/implement` sem mudança de resultado; só um plano v2 sem `Scenarios:` em step de `Tests:` não-N/A é classificado como inválido.
@@ -220,14 +220,14 @@ Ele também não muda o portão, os hooks ou os denies (S2).
 
 Esta seção fixa a versão do formato de plano (CYC-018) e o campo `Scenarios:`. Definição do campo: `.claude/references/template/plan-step.md`.
 
-**Campo `Scenarios:`.** Linha opcional de metadados do step: lista de tags `@REQ-<slug>-NNN` ou nomes de cenário, tirados dos `.feature` da pasta `Feature: <slug>` do plano, que o step cobre. `N/A (motivo)` é permitido só para step sem comportamento observável (documentação, configuração, harness); o motivo é obrigatório.
+**Campo `Scenarios:`.** Linha de metadados do step, obrigatória em v2 em todo step com `Tests:` não-N/A e ausente em v1: lista de tags `@REQ-<slug>-NNN` ou nomes de cenário, tirados dos `.feature` da pasta `Feature: <slug>` do plano, que o step cobre. `N/A (motivo)` é permitido só para step sem comportamento observável (documentação, configuração, harness, refactor com cobertura prévia), inclusive quando o step tem `Tests:` não-N/A; o motivo é obrigatório e satisfaz a obrigatoriedade.
 
 **Regra de versão.**
 
 | Cabeçalho do plano | `Scenarios:` | Situação |
 |---|---|---|
 | `plan_format_version: 2` | obrigatório em todo step com `Tests:` não-N/A | step sem `Scenarios:` torna o plano **inválido** |
-| `plan_format_version: 2` | `N/A (motivo)` em step com `Tests: N/A` | válido |
+| `plan_format_version: 2` | `N/A (motivo)` em step sem comportamento observável (com ou sem `Tests:`) | válido |
 | `plan_format_version: 1` ou ausente | ausente | **válido para sempre**; `/plan` e `/implement` o leem como antes; no máximo advisory, nunca bloqueio |
 
 **O que o `/implement` faz com `Scenarios:` ausente em v2.** Para a execução e informa qual step está sem `Scenarios:`. Não corrige o plano nem inventa cenário: a correção é do `/plan` e do designer. Em v1 não faz nada diferente do que fazia.
@@ -238,7 +238,7 @@ Esta seção fixa a versão do formato de plano (CYC-018) e o campo `Scenarios:`
 
 ## IMPLEMENT
 
-> Seção do Step 5 (plan-000007). Regras a partir de CYC-020. Esta seção diz o que o IMPLEMENT exige por step com cenário; ela **cita** o portão e os hooks existentes e não os altera (CYC-024).
+> Regras CYC-020 a CYC-026. Esta seção diz o que o IMPLEMENT exige por step com cenário; ela **cita** o portão e os hooks existentes e não os altera (CYC-024).
 
 ### CYC-020 -- Quais steps seguem o teste-primeiro
 

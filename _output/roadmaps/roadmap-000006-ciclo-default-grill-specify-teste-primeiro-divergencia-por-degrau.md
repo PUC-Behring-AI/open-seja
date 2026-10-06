@@ -93,7 +93,7 @@ pesquisador). C1: nada de nome de parceiro nos artefatos que forem ao open-seja.
 ### Wave 0 -- Fundação (sequencial)
 | # | ID | Title | Scope | Type | Plan | Status |
 |---|-----|-------|-------|------|------|--------|
-| 1 | default-cycle-contract | Contrato do ciclo estendido: fases grill e specify dentro do `/plan`, plano com steps ligados a cenários, teste-primeiro no `/implement`, layout por feature, D-NNN e H-009 (filha de H-008) com condição de refutação; retrocompatibilidade com planos antigos | backend | design | plan-000007 | planned |
+| 1 | default-cycle-contract | Contrato do ciclo estendido: fases grill e specify dentro do `/plan`, plano com steps ligados a cenários, teste-primeiro no `/implement`, layout por feature, D-NNN e H-009 (filha de H-008) com condição de refutação; retrocompatibilidade com planos antigos | backend | design | plan-000007 | done |
 | 2 | drift-metric | Definição operacional de divergência **por degrau** (intenção→cenário, cenário→teste, teste→código) e desenho do controle com o ciclo padrão | backend | technical | plan-000008 | planned |
 
 ### Wave 1 -- Fases do PLAN (parallel)

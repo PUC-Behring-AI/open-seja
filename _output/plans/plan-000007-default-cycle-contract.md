@@ -1,3 +1,4 @@
+# DONE | 2026-10-06 16:59 UTC |
 # Plan 000007 | FEATURE-O | METACOMM | 2026-10-05 02:00 UTC | default-cycle-contract: contrato do ciclo estendido (grill e specify no /plan, teste-primeiro no /implement, H-009) | Review: standard
 
 > **Origem**: movido do ledger do Doutourado em 2026-10-05 (proposal-000088; la era `plan-000076`). Os IDs roadmap-000006 e plan-000007..000016 sao deste ledger (tabela no roadmap). Referencias a research-NNNNNN, reflection-NNNNNN, communication-NNNNNN, roadmap-000062 e plan-000064..000074 apontam para o ledger do Doutourado (repositorio do pesquisador). Caminhos `open-seja/...` em Files passam a ser relativos a raiz deste repositorio.
@@ -115,7 +116,7 @@ Criar `extended-cycle-contract.md` com regras `CYC-NNN` cobrindo: (1) fases do `
 - **Tests**: N/A (documento normativo)
 - **Docs**: o próprio contrato; o quickguide pt-BR fica para o item 9.
 - **Traces**: (sem REQ no as-intended; ver Coverage)
-- [ ] Done
+- [x] Done
 
 ### Step 3: Definir o formato de plano com steps ligados a cenários e a retrocompatibilidade
 Em `plan-step.md`, acrescentar o campo `Scenarios:` (lista de `@REQ-...` ou nomes de cenário que o step cobre; `N/A (motivo)` permitido só para steps sem comportamento observável) e a regra de versão: `plan_format_version: 2` exige `Scenarios:` em todo step com `Tests:` não-N/A; `plan_format_version: 1` (ou ausente) permanece **válido para sempre** e o `/plan` e o `/implement` os leem como antes, sem warning de bloqueio (no máximo advisory). Documentar a regra no contrato (secção "Compatibilidade") e o que `/implement` faz com `Scenarios:` ausente em v2 (para a execução, não corrige). Criar fixtures de plano v1 reais (copiar 2 planos antigos do open-seja, sem dado privado) e 1 fixture v2 e 1 v2 inválido (step sem cenário). Se o Step 1 achou um validador de formato, estendê-lo só para distinguir versões; se não achou, **não criar validador** (item 6).
@@ -126,7 +127,7 @@ Em `plan-step.md`, acrescentar o campo `Scenarios:` (lista de `@REQ-...` ou nome
 - **Verify**: os 2 planos v1 reais passam pela checagem existente (ou pela leitura do `/implement`) sem mudança de resultado em relação ao v0.10.1; o v2 válido passa; o v2 inválido é descrito no contrato como recusado (a recusa executável é do item 6); `run_all_checks.py` com o mesmo resultado de antes do plano.
 - **Tests**: when um plano `plan_format_version: 1` é lido pelo validador existente, returns o mesmo resultado que na tag v0.10.1; when um plano v2 tem step com `Tests:` não-N/A e sem `Scenarios:`, o contrato o classifica como inválido (fixture marcada). Só roda como teste se o Step 1 achou validador; senão, `N/A (sem validador; fixtures documentadas)`.
 - **Docs**: `plan-step.md` e seção "Compatibilidade" do contrato.
-- [ ] Done
+- [x] Done
 
 ### Step 4: Definir o layout por feature
 Criar `feature-layout.md`: `features/<slug>/intent.md` (frontmatter `slug`, `status: grilling|approved`, tabela de `REQ-<slug>-NNN` com texto em linguagem natural e critério), `features/<slug>/*.feature` (tag `@REQ-<slug>-NNN` em cada `Scenario`; Gherkin Uncle Bob: critério de aceitação em Given/When/Then, sem detalhe de implementação), `features/<slug>/gate.json` (resultado do gate por feature: `{fast, full, ts}` + ponteiros para os JSONs do gate em `_output/quality/`). Regras: slug em kebab-case, uma pasta por feature, nunca apagada (Q2: git é a recuperação); tarefas sem código não criam pasta; o plano referencia `features/<slug>/` no cabeçalho (`Feature: <slug>`); `features/` entra na lista de diretórios que `/critique` e `/explain drift` leem (a leitura é dos itens 8 e 9). Definir a tabela de rastreabilidade (colunas: REQ, cenário, teste, código, gate) que o item 8 vai ler, **só como esquema**.
@@ -137,7 +138,7 @@ Criar `feature-layout.md`: `features/<slug>/intent.md` (frontmatter `slug`, `sta
 - **Verify**: o esquema tem exemplo completo de uma feature fictícia (sem parceiro, sem dado real) com 2 REQs e 3 cenários; todo cenário do exemplo tem tag `@REQ-`; `run_all_checks.py` igual ao baseline.
 - **Tests**: N/A (esquema documental; o validador é do item 4)
 - **Docs**: o próprio arquivo de layout.
-- [ ] Done
+- [x] Done
 
 ### Step 5: Definir o contrato do teste-primeiro no `/implement` consumindo gate e hooks
 No contrato, seção "IMPLEMENT": para cada step com `Scenarios:`, (a) o cenário vira teste executável; (b) o teste precisa ficar **vermelho pelo motivo certo** (falha por comportamento ausente, não por erro de import, sintaxe ou fixture) antes de qualquer código -- critério verificável: o relatório do runner mostra a asserção do cenário falhando e não `ERROR`/`ImportError`; (c) o Coder escreve o mínimo para ficar verde; (d) o gate `--fast` por step do plan-000068 roda, com as 3 tentativas e a falha no progress file já existentes; (e) o resultado entra em `features/<slug>/gate.json`. Declarar que o gate e os hooks (`Stop`, `PreToolUse` em commit, deny de `--no-verify` e `--accept-baseline`) **não mudam**: o contrato só os cita. Reservar `--pipeline` (Cleaner, Hardener) como interface do item 7, sem texto executável. Declarar o runner de Gherkin como **pendente do item 4** (recomendação do roadmap: pytest-bdd), sem acoplar o contrato a ele. Em `implement/SKILL.md` e `_internal/plan/standard/SKILL.md`, acrescentar **apenas** uma linha que aponta para o contrato (`See extended-cycle-contract.md`), sem mudar comportamento.
@@ -147,7 +148,7 @@ No contrato, seção "IMPLEMENT": para cada step com `Scenarios:`, (a) o cenári
 - **Interface**: N/A
 - **Verify**: `git diff --stat` mostra só a linha de ponteiro nos dois SKILL.md; nenhum arquivo de gate, hook ou `settings` aparece no diff; `run_all_checks.py` (inclui o check de estrutura dos SKILL.md) com resultado igual ao baseline.
 - **Tests**: N/A (contrato e ponteiros; comportamento é do item 7)
-- [ ] Done
+- [x] Done
 
 ### Step 6: Registrar H-009 e as D-NNN no as-intended do open-seja
 Redigir (prosa do designer, `/implement --manual`, como no plan-000064) e aplicar via `apply_marker.py` após confirmação: **H-009** filha de H-008 (subseção ao lado da 2.8): enunciado do roadmap; medida **por degrau** (intenção→cenário, cenário→teste, teste→código) com os estados coberto/descoberto/não medido; medida complementar: tempo até a primeira feature aprovada; **condição de refutação (rascunho para o designer ajustar)**: H-009 é refutada se, no piloto do item 10, a mesma feature construída no ciclo estendido e no ciclo padrão mostrar divergência composta igual ou maior no ciclo estendido em ao menos dois dos três degraus, **ou** se a divergência no degrau teste→código só cair por o gate ter sido o único filtro (os cenários aprovados não mudarem o que o código faz), **ou** se o tempo até a primeira feature aprovada aumentar sem queda em qualquer degrau. Com poucas features é estudo de caso, não teste estatístico (declarar). Mais as D-NNN (número livre do Step 1): D-A "grill e specify são fases do `/plan`, não skills"; D-B "layout por feature `features/<slug>/`"; D-C "divergência composta por degrau, não número único"; D-D "retrocompatibilidade: planos v1 válidos para sempre". Cada D em forma DDR (Context, Decision, Consequences, Rejected Alternatives), citando H-008 e H-004. Usar o nome do projeto, nunca nome de parceiro (C1).
@@ -158,7 +159,7 @@ Redigir (prosa do designer, `/implement --manual`, como no plan-000064) e aplica
 - **Verify**: `grep -n "H-009" open-seja/product-design/seja-as-intended.md` acha a hipótese com subseção "Condição de refutação" e a medida por degrau; existem 4 entradas `### D-NNN` novas com os quatro campos DDR e linha `STATUS` acima; CHANGELOG ganhou 5 linhas; `python .claude/skills/scripts/run_all_checks.py` passa; nenhum termo de C1 (`git grep -i` com a lista do Step 1) no diff.
 - **Tests**: N/A (documento de design; escrita Human (markers))
 - **Docs**: `seja-as-intended.md`.
-- [ ] Done
+- [x] Done
 
 ### Step 7: Provar a retrocompatibilidade e fechar o contrato
 Rodar, no open-seja com as mudanças dos Steps 2 a 6: `run_all_checks.py`; a leitura do `/implement` em dry-run sobre as fixtures v1 (não executa step: confirma que o plano é aceito e que os campos lidos são os mesmos da v0.10.1); `/critique validate` nos arquivos novos. Registrar no progress o resultado e uma tabela "item do roadmap consome qual CYC-NNN" para os itens 2 a 10, para o orquestrador atualizar o roadmap. Listar as decisões pendentes que ainda estão no default.
@@ -168,7 +169,7 @@ Rodar, no open-seja com as mudanças dos Steps 2 a 6: `run_all_checks.py`; a lei
 - **Interface**: N/A
 - **Verify**: `run_all_checks.py` retorna o mesmo conjunto de falhas pré-existentes que a v0.10.1 (nenhuma nova); fixtures v1 aceitas; a tabela cobre os itens 2 a 10; o contrato não cita nenhum nome de parceiro.
 - **Tests**: N/A (verificação; fixtures do Step 3 são o teste)
-- [ ] Done
+- [x] Done
 
 ## Coverage (advisory)
 
@@ -219,3 +220,19 @@ Metacomm contradiction check: nenhuma intenção existente em `product-design-as
 - Tabela item-do-roadmap x regra do contrato, para os itens 2 a 10.
 
 smoke: false
+
+## Implementation summary (2026-10-06)
+
+- Steps: 7/7 concluidos; 4 por subagente Sonnet (2, 3, 4, 5), 3 pelo orquestrador Opus (1 terreno, 6 marcadores Human com confirmacao do designer, 7 verificacao). Iteracoes: 7 de 20; nenhum PARTIAL/FAILED.
+- Arquivos: `.claude/references/general/extended-cycle-contract.md` (create; CYC-001..026, secoes Compatibilidade e IMPLEMENT); `.claude/references/template/plan-step.md` (campo `Scenarios:`, regra de versao); `.claude/references/template/feature-layout.md` (create); fixtures `.claude/skills/scripts/tests/fixtures/plan_format/` (2 v1 reais, v2 valida, v2 invalida, README); uma linha de ponteiro em `.claude/skills/implement/SKILL.md` e `.claude/skills/_internal/plan/standard/SKILL.md`; D-005..D-008 (`STATUS: proposed`) em `product-design/product-design-as-intended.md`.
+- Desvios: `seja-as-intended.md` nao existe mais (fundido no as-intended §3); H-009 ja estava registrada (§2.9) e nao foi recriada; a refutacao por comparacao com o controle ficou para o designer colar no §2.9; o CHANGELOG nao ganhou linhas porque o regex do `CHANGELOG_APPEND` recusa IDs D-NNN; o portao nao esta instalado no open-seja (`--gate not-installed` em todas as notas).
+- Quality gate: `run_all_checks.py` e pytest iguais ao baseline (14 FAIL pre-existentes; 626 passed / 12 failed). `/critique review` (code-reviewer, light) achou 4 critical e 8 advisory no contrato; os 4 critical e os advisory 5-8 foram corrigidos no contexto do orquestrador (1 rodada de 2); advisory 9-11 (criterios prospectivos sem comando) e 12 (CHANGELOG) ficam como deferidos.
+
+### Generator-Critic Iterations
+- Iteration count: 1/2
+- Findings per iteration: [4 critical, 8 advisory]
+- Resolution status: all resolved (critical); 4 advisory deferred
+
+## Reflection
+
+- 2026-10-06: O Step 6 encolheu porque o /design ja tinha registrado H-009, e o Step 1 absorveu a fusao do as-intended; a revisao achou contradicoes entre regras escritas por executores diferentes (CYC-018 x Compatibilidade, CYC-012 x CYC-026), corrigidas no fechamento. (notes 7, with deviation 7, with gate 0)

@@ -145,3 +145,4 @@ Mapa de regras:
 - deviated: Rodou inline no orquestrador; o dry-run do /implement sobre as fixtures foi substituido pela leitura da regra de versao do Auto Mode, porque nao ha validador executavel.
 - less-sure: Se o /critique review encontraria inconsistencia entre CYC-018 e a secao Compatibilidade, que foram escritas por executores diferentes.
 - gate: not-installed
+- drift: not-measured
