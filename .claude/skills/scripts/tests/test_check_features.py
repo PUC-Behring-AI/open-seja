@@ -437,6 +437,65 @@ def test_no_features_prints_a_line_and_exits_0(tmp_path: Path, capsys: pytest.Ca
 
 
 # ---------------------------------------------------------------------------
+# Review fixes (plan-000010)
+# ---------------------------------------------------------------------------
+
+
+def test_feature_with_utf8_bom_is_parsed_without_ghk001(tmp_path: Path) -> None:
+    root = _feature_root(tmp_path, SCENARIO.format(tag="@REQ-login-001"))
+    (root / "features" / "login" / "a.feature").write_bytes(
+        b"\xef\xbb\xbf" + SCENARIO.format(tag="@REQ-login-001").encode("utf-8"))
+    assert _rules(root, "GHK-001") == []
+
+
+@pytest.mark.parametrize("delim", ['"""', "```"])
+def test_unclosed_doc_string_is_a_parse_error_with_the_opening_line(delim: str) -> None:
+    text = f"Feature: X\n\n  Scenario: Y\n    Given algo\n      {delim}\n      texto\n    Then fim\n"
+    with pytest.raises(ParseError) as err:
+        parse_feature(text)
+    assert err.value.line == 5
+
+
+def test_unreadable_step_definition_file_is_a_ghk015_info(tmp_path: Path) -> None:
+    root = _feature_root(tmp_path, SCENARIO.format(tag="@REQ-login-001"))
+    (root / "steps").mkdir()
+    (root / "steps" / "broken.py").write_text("def x(:\n")
+    found = _rules(root, "GHK-015", load_step_defs(root / "steps", root))
+    assert [(f.severity, f.file, f.line) for f in found] == [("info", "steps/broken.py", 1)]
+
+
+def test_unreadable_intent_exits_2_without_traceback(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    root = _feature_root(tmp_path, SCENARIO.format(tag="@REQ-login-001"))
+    (root / "features" / "login" / "intent.md").write_bytes(b"\xff\xfe\x00bad")
+    assert main([str(root)]) == 2
+    err = capsys.readouterr().err
+    assert "intent.md" in err and "Traceback" not in err
+
+
+def test_step_decorator_not_from_pytest_bdd_is_not_a_definition() -> None:
+    from check_features import parse_step_defs
+
+    other = 'from mylib import given\n\n@given("um usuário")\ndef a(): pass\n'
+    assert parse_step_defs(other, "s.py") == []
+    own = 'import pytest_bdd as bdd\nfrom pytest_bdd import then as t\n\n@bdd.given("a")\ndef a(): pass\n\n@t("b")\ndef b(): pass\n'
+    assert [(d.type, d.pattern) for d in parse_step_defs(own, "s.py")] == [("given", "a"), ("then", "b")]
+
+
+def test_escaped_pipe_stays_inside_the_table_cell() -> None:
+    text = """Feature: X
+
+  @REQ-login-001
+  Scenario Outline: Y
+    Given um valor <v>
+    Examples:
+      | v |
+      | a\\|b |
+"""
+    feature = parse_feature(text)
+    assert feature.scenarios[0].examples[0].rows == [["a|b"]]
+
+
+# ---------------------------------------------------------------------------
 # run_all_checks integration and backward compatibility
 # ---------------------------------------------------------------------------
 

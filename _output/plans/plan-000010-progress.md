@@ -204,3 +204,13 @@ Entregue: convencao `gherkin-spec-format.md` (GHK-001..019, saida, mapeamento Cu
 - deviated: Alem do ponteiro, fechei a lacuna 5 do drift-metric com uma frase e criei CYC-027 (instrucao do designer); removi um teste que listava nomes de parceiro (C1).
 - less-sure: Se o designer quer D-010 como proposto; e se o complemento JUnit do runner e aceitavel para o plan-000013.
 - gate: not-installed
+
+### Correções da revisão (orquestrador)
+- 1. BOM: `_read` lê com `utf-8-sig`; `.feature` com BOM não gera mais GHK-001 falso.
+- 2. Bloco de texto (`"""` ou crases) aberto e não fechado: o parser guarda a linha de abertura e levanta erro GHK-001 com ela ao fim do arquivo.
+- 3. `--steps`: arquivo `.py` ilegível ou com erro de sintaxe vira achado info GHK-015 "Não consegui ler este arquivo de definições de step" com `arquivo:linha`; ele também suprime o info de "step sem definição".
+- 4. `intent.md` ilegível: `IntentReadError`, mensagem em stderr e exit 2, sem GHK-016 enganoso.
+- 5. `_DEF_TYPES`: só conta decorator vindo de `pytest_bdd` (`from pytest_bdd import given [as x]`, `import pytest_bdd [as x]` + `x.given`). Limite registrado em comentário: decorator reexportado por outro módulo não é visto.
+- 6. Doc: linha em `gherkin-spec-format.md` (limite do `Background` dentro de `Rule`, tratado como o da Feature).
+- 7. `_split_row`: `\|` fica dentro da célula.
+- Testes: 7 novos (8 casos) em `test_check_features.py`, vermelhos antes, verdes depois.

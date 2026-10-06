@@ -75,6 +75,7 @@ O validador **reutiliza** `parse` e `table` de `check_intent.py` (um parser só 
 - Uma ação `When` por cenário; 3 a 7 steps típicos; no máximo 10 (GHK-012).
 - Não encadear `When`, `Then`, `When` (dois comportamentos: dois cenários).
 - `Background` com no máximo 3 steps, sem ação (`When`).
+- Limite conhecido: no subset do validador, um `Background` dentro de um `Rule` é tratado como o `Background` da `Feature` (o `check_features.py` não o anexa ao `Rule`).
 - `Scenario Outline` só para variar **dados** do mesmo comportamento. A unidade do D2 é o `Outline` inteiro `[default; aceito 2026-10-06]` (decisão pendente 6 = A): coberto só se **todas** as linhas de `Examples` foram executadas e nenhuma foi `skip` ou `xfail`. A matriz traz `rows` por `Outline` para o relatório detalhar. Linhas de `Examples` que expressam comportamentos distintos pedem cenários separados.
 - Nome de cenário único dentro do arquivo (GHK-010): a chave do relatório é `<slug>/<arquivo>::<nome>` (seção 8).
 

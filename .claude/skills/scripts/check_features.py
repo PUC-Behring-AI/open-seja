@@ -237,6 +237,10 @@ class Intent:
     invalid_rows: int
 
 
+class IntentReadError(Exception):
+    """intent.md exists but cannot be read as UTF-8 text."""
+
+
 @dataclass
 class FeatureDir:
     slug: str
@@ -261,7 +265,10 @@ def _parse_tags(raw: str, line: int) -> list[Tag]:
 
 
 def _split_row(line: str) -> list[str]:
-    return [cell.strip() for cell in line.strip().strip("|").split("|")]
+    body = line.strip()
+    body = body.removeprefix("|")
+    body = body[:-1] if body.endswith("|") and not body.endswith("\\|") else body
+    return [cell.replace("\\|", "|").strip() for cell in re.split(r"(?<!\\)\|", body)]
 
 
 def _effective_type(kind: str, previous: str | None) -> str | None:
@@ -283,12 +290,15 @@ class _Parser:
         self.sink: list[Step] | None = None
         self.pending_tags: list[Tag] = []
         self.in_doc: str | None = None
+        self.doc_line = 0
         self.last_type: str | None = None
         self.seen_content = False
 
     def run(self) -> Feature:
         for number, raw in enumerate(self.lines, start=1):
             self._line(number, raw)
+        if self.in_doc is not None:
+            raise ParseError(self.doc_line, "O bloco de texto aberto nesta linha não foi fechado.")
         if self.feature is None:
             raise ParseError(1, "Não encontrei a linha Feature: neste arquivo.")
         return self.feature
@@ -393,7 +403,7 @@ class _Parser:
             raise ParseError(number, "Um bloco de texto precisa vir logo depois de um step.")
         delim = line[:3]
         if not line[3:].strip().endswith(delim):
-            self.in_doc = delim
+            self.in_doc, self.doc_line = delim, number
 
     def _doc_line(self, line: str) -> None:
         if line.startswith(self.in_doc or ""):
@@ -1008,7 +1018,7 @@ def validate_steps(fd: FeatureDir) -> list[Finding]:
 @dataclass
 class StepDef:
     type: str  # given, when, then, any
-    kind: str  # literal, parse, unverified
+    kind: str  # literal, parse, unverified, unreadable
     pattern: str
     file: str
     line: int
@@ -1016,6 +1026,8 @@ class StepDef:
 
 
 _DEF_TYPES = {"given": "given", "when": "when", "then": "then", "step": "any"}
+# Known limit: only decorators imported from pytest_bdd are recognised (from-import,
+# `import pytest_bdd [as x]`); a decorator re-exported by another module is not seen.
 _PARSE_NAMES = ("parse",)
 
 
@@ -1032,10 +1044,32 @@ def _parse_to_regex(pattern: str) -> re.Pattern[str]:
     return re.compile("(.+?)".join(re.escape(part) for part in parts))
 
 
-def _decorator_def(node: ast.expr, file: str) -> StepDef | None:
+def _bdd_imports(tree: ast.AST) -> tuple[dict[str, str], set[str]]:
+    """Local names bound to pytest_bdd step decorators, and local aliases of the pytest_bdd module."""
+    names: dict[str, str] = {}
+    modules: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module == "pytest_bdd":
+            for alias in node.names:
+                if alias.name in _DEF_TYPES:
+                    names[alias.asname or alias.name] = alias.name
+        elif isinstance(node, ast.Import):
+            modules.update(a.asname or a.name for a in node.names if a.name == "pytest_bdd")
+    return names, modules
+
+
+def _decorator_type(func: ast.expr, names: dict[str, str], modules: set[str]) -> str | None:
+    if isinstance(func, ast.Name) and func.id in names:
+        return _DEF_TYPES[names[func.id]]
+    if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name) and func.value.id in modules:
+        return _DEF_TYPES.get(func.attr)
+    return None
+
+
+def _decorator_def(node: ast.expr, file: str, names: dict[str, str], modules: set[str]) -> StepDef | None:
     if not isinstance(node, ast.Call):
         return None
-    step_type = _DEF_TYPES.get(_call_name(node.func))
+    step_type = _decorator_type(node.func, names, modules)
     if step_type is None:
         return None
     arg = node.args[0] if node.args else None
@@ -1050,14 +1084,12 @@ def _decorator_def(node: ast.expr, file: str) -> StepDef | None:
 
 def parse_step_defs(source: str, file: str) -> list[StepDef]:
     """Step definitions (@given, @when, @then, @step) found in one Python source; never executed."""
-    try:
-        tree = ast.parse(source)
-    except SyntaxError:
-        return []
+    tree = ast.parse(source)  # SyntaxError is handled by load_step_defs (GHK-015 info)
+    names, modules = _bdd_imports(tree)
     defs = []
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            defs += [d for d in (_decorator_def(dec, file) for dec in node.decorator_list) if d is not None]
+            defs += [d for d in (_decorator_def(dec, file, names, modules) for dec in node.decorator_list) if d is not None]
     return sorted(defs, key=lambda d: (d.file, d.line))
 
 
@@ -1075,7 +1107,7 @@ def _expanded_texts(step: Step, scenario: Scenario | None) -> list[str]:
 
 
 def _matches(definition: StepDef, step: Step, scenario: Scenario | None) -> bool:
-    if definition.type not in (step.type, "any") or definition.kind == "unverified":
+    if definition.type not in (step.type, "any") or definition.kind in ("unverified", "unreadable"):
         return False
     for text in _expanded_texts(step, scenario):
         if definition.kind == "literal" and text.strip() == definition.pattern.strip():
@@ -1090,6 +1122,11 @@ def validate_step_defs(fds: list[FeatureDir], defs: list[StepDef]) -> list[Findi
     out: list[Finding] = []
     first: dict[tuple[str, str, str], StepDef] = {}
     for definition in defs:
+        if definition.kind == "unreadable":
+            out.append(_find("GHK-015", "info", definition.file, definition.line,
+                             "Não consegui ler este arquivo de definições de step.",
+                             "Corrija o erro de sintaxe ou a codificação; as definições dele não foram verificadas."))
+            continue
         if definition.kind == "unverified":
             out.append(_find("GHK-015", "info", definition.file, definition.line,
                              "Este padrão de step não é um texto nem parsers.parse; não foi verificado.",
@@ -1105,7 +1142,7 @@ def validate_step_defs(fds: list[FeatureDir], defs: list[StepDef]) -> list[Findi
         else:
             first[key] = definition
     used: set[int] = set()
-    unverified_types = {d.type for d in defs if d.kind == "unverified"}
+    unverified_types = {d.type for d in defs if d.kind in ("unverified", "unreadable")}
     for fd in fds:
         if fd.intent is None:
             continue
@@ -1120,7 +1157,7 @@ def validate_step_defs(fds: list[FeatureDir], defs: list[StepDef]) -> list[Findi
                                      "Escreva a definição junto do teste do cenário.",
                                      scenario.name if scenario else ""))
     for i, definition in enumerate(defs):
-        if definition.kind != "unverified" and i not in used and first.get(
+        if definition.kind not in ("unverified", "unreadable") and i not in used and first.get(
                 (definition.type, definition.kind, definition.pattern)) is definition:
             out.append(_find("GHK-015", "warning", definition.file, definition.line,
                              f"A definição {definition.pattern} não casa com nenhum step.",
@@ -1135,7 +1172,7 @@ def validate_step_defs(fds: list[FeatureDir], defs: list[StepDef]) -> list[Findi
 
 def _read(path: Path) -> str | None:
     try:
-        return path.read_text(encoding="utf-8")
+        return path.read_text(encoding="utf-8-sig")
     except (OSError, UnicodeDecodeError):
         return None
 
@@ -1153,7 +1190,9 @@ def load_dir(root: Path, folder: Path) -> FeatureDir:
     if intent_file.is_file():
         fd.intent_path = _rel(intent_file, root)
         text = _read(intent_file)
-        fd.intent = load_intent(text or "", folder.name)
+        if text is None:
+            raise IntentReadError(f"não consegui ler {fd.intent_path} como texto UTF-8.")
+        fd.intent = load_intent(text, folder.name)
     for feature_file in sorted(folder.glob("*.feature")):
         ff = FeatureFile(path=_rel(feature_file, root))
         text = _read(feature_file)
@@ -1185,9 +1224,15 @@ def discover(root: Path, only: str | None = None) -> list[FeatureDir]:
 def load_step_defs(steps_dir: Path, root: Path) -> list[StepDef]:
     defs: list[StepDef] = []
     for source in sorted(steps_dir.rglob("*.py")):
+        rel = _rel(source, root)
         text = _read(source)
-        if text is not None:
-            defs += parse_step_defs(text, _rel(source, root))
+        try:
+            if text is None:
+                raise SyntaxError("unreadable")
+            defs += parse_step_defs(text, rel)
+        except (SyntaxError, ValueError) as err:
+            line = getattr(err, "lineno", None) or 1
+            defs.append(StepDef("any", "unreadable", "", rel, line))
     return defs
 
 
@@ -1283,7 +1328,11 @@ def _run(args: argparse.Namespace) -> int:
     if args.steps and not Path(args.steps).is_dir():
         print(f"check_features: pasta de definições não encontrada: {args.steps}", file=sys.stderr)
         return 2
-    fds = discover(root, args.feature)
+    try:
+        fds = discover(root, args.feature)
+    except IntentReadError as err:
+        print(f"check_features: {err}", file=sys.stderr)
+        return 2
     if args.feature and not fds:
         print(f"check_features: não há features/{args.feature}/ neste projeto.", file=sys.stderr)
         return 2
