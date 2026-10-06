@@ -27,4 +27,6 @@
 
 **When to use**: You have a clear idea of what you want to build or fix and want a structured plan before any code changes happen. If you omit both `--plan` and `--roadmap`, the agent auto-detects the best mode from your brief (>=3 entities or >=2 architectural layers suggests roadmap; single bug/file suggests single plan) and asks for confirmation before proceeding. Use `--framing metacomm` when describing the change from the user's perspective. Use `--light` for quick proposals that don't need full step metadata.
 
+**Default cycle (guia em português)**: in standard mode `/plan` runs the grill (alone: `--grill`), then the specify (alone: `--specify`; two approvals: the message to you, the `.feature` contract to whoever reads code), then writes a v2 plan whose steps list `Scenarios:` keys; refusals and how to skip the ladder: `docs/how-to/ciclo-default.pt-BR.md`.
+
 **Next step**: `/implement` to execute the plan (or the first roadmap item) once you have reviewed it.

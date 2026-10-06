@@ -1,5 +1,7 @@
 **What it does**: Get a clear explanation of how something works -- a feature's behavior, the data model, the overall architecture, how behavior evolved over time, how code works, or the drift between your design specs. Includes diagrams and analogies to make complex topics accessible. Six mode types, each producing a different kind of explanation report. The **drift** mode also offers an interactive sync workflow to realign diverged specs.
 
+**Default cycle (guia em português)**: `/explain drift ladder [<slug>]` reports the divergence per step of a feature ladder (needs `features/`): `docs/how-to/ciclo-default.pt-BR.md`.
+
 **Examples**:
 > `/explain architecture How does the authentication flow work?`
 > Produces a visual diagram of the auth flow, explains each step in plain language, and highlights key design decisions.

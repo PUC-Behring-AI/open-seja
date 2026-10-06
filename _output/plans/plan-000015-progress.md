@@ -136,3 +136,16 @@ Decisao: **seguir**. Os planos 000007 a 000014 executaram (todos DONE). Nada foi
 - deviated: Nada foi movido (havia folga); a chamada do review entrou na referencia, nao no SKILL.md do /plan.
 - less-sure: Se o agente do /plan le a SPC-009 inteira no passo 2c e chama o review sem a linha no SKILL.md.
 - gate: not-installed
+
+### Step 8 -- `/help` e guia pt-BR em voz controlada (2026-10-06)
+
+- Nota de recuperação: o commit original deste step (`ba82f06`) se perdeu num crash do WSL às 16:46 (objetos gravados vazios, nunca enviado). Os arquivos sobreviveram na árvore de trabalho; esta entrada foi reescrita a partir da reverificação abaixo.
+- `docs/how-to/ciclo-default.pt-BR.md` (novo): o que mudou, a escada em `flowchart LR` com D1, D2, D3a, D3b e quem olha em cada degrau, a tabela de comandos, como pular com motivo, o que fazer quando algo bloqueia, como atualizar.
+- Ponteiro de uma linha em seis arquivos: os quickguides de `plan`, `implement`, `reflect`, `explain` e `help`, mais a entrada "Ciclo default" no `help/SKILL.md`. Couberam num só commit (sem dividir em 8a/8b).
+- Verify: `lint_controlled_language.py` ausente, então `voz: não verificada`. Na contagem por `awk`, nenhuma frase passa de 25 palavras (os quatro casos acusados são o frontmatter e linhas de tabela). D1, D2, D3a e D3b aparecem no guia. `git grep -c "ciclo-default.pt-BR"` dá 1 em cada quickguide e no `help/SKILL.md`. `check_docs.py --plugins harness-integrity,path-liveness`: 0 erros e 2 warnings, os mesmos de antes. `run_all_checks.py` 19/14, mesmo conjunto. Termos de C1 no diff: 0.
+
+### Step 8 -- reflection-on-action | 2026-10-06 19:50 UTC | /help e guia pt-BR do ciclo default
+- happened: O guia pt-BR com a escada em Mermaid e os comandos foi escrito; cinco quickguides e o /help ganharam o ponteiro.
+- deviated: O lint de voz não existe; a contagem por awk ficou no lugar dele. O commit original se perdeu e foi refeito.
+- less-sure: Se quem lê o guia entende a tabela de degraus sem conhecer antes os nomes D1 a D3b.
+- gate: not-installed

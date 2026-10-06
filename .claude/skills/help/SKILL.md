@@ -38,6 +38,7 @@ When invoked without arguments (`/help`), display a curated overview of all user
 - **Quality & review** — `/critique`
 - **Communicate** — `/communicate`, `/onboard`
 - **Housekeeping** — `/qa-log`
+- **Ciclo default** — the guide `docs/how-to/ciclo-default.pt-BR.md` (in Portuguese): grill, specify, plan v2, test-first and divergence per step, with the ladder diagram
 
 For each category, show the skill names and a one-sentence summary. After the overview, show available options and then ask the user what they'd like to explore:
 
