@@ -47,6 +47,7 @@ CHECK_PLUGIN_MANIFEST:
 from __future__ import annotations
 
 import argparse
+import ast
 import re
 import sys
 from dataclasses import dataclass, field
@@ -796,6 +797,337 @@ def _matrix_entry(fd: FeatureDir, ff: FeatureFile, feature: Feature, scenario: S
 
 
 # ---------------------------------------------------------------------------
+# Step rules: duplicate, ambiguity, near-duplicate, size, style, vocabulary
+# ---------------------------------------------------------------------------
+
+_VALUE_RE = re.compile(r'"[^"]*"|\d+(?:[.,]\d+)?')
+
+# GHK-013: fixed list of implementation-detail patterns (documented in gherkin-spec-format.md).
+_DETAIL_PATTERNS = (
+    ("uma URL", re.compile(r"https?://|\bwww\.", re.IGNORECASE)),
+    ("um caminho de arquivo", re.compile(r"(?:[\w.-]+/)+[\w-]+\.\w{1,5}\b|\b[A-Za-z]:\\|\\\w+\\")),
+    ("SQL", re.compile(r"\bSELECT\b.+\bFROM\b|\bINSERT\s+INTO\b|\bUPDATE\b.+\bSET\b|\bDELETE\s+FROM\b",
+                       re.IGNORECASE)),
+    ("um seletor", re.compile(r"(?:^|\s)#[A-Za-z][\w-]*|(?:^|\s)\.[A-Za-z][\w-]*")),
+    ("uma chamada de função", re.compile(r"\b[a-z_][a-z0-9_]*\(\)")),
+    ("um nome de classe", re.compile(r"\b[A-Z][a-z0-9]+(?:[A-Z][a-z0-9]+)+\b")),
+)
+
+
+def light_key(text: str) -> str:
+    """Case and spacing only: two steps with the same light key are the same text."""
+    return " ".join(text.casefold().split())
+
+
+def normalize_step(text: str) -> str:
+    """Aggressive form for near-duplicates: no case, no punctuation, values replaced by <v>."""
+    value = _VALUE_RE.sub("\x00", text.casefold())
+    value = re.sub(r"[^\w\s<>\x00]", "", value)
+    return " ".join(value.split()).replace("\x00", "<v>")
+
+
+def step_values(text: str) -> tuple[str, ...]:
+    return tuple(re.sub(r"[^\w\s]", "", v.casefold()).strip() for v in _VALUE_RE.findall(text))
+
+
+def _all_steps(feature: Feature) -> list[tuple[Step, Scenario | None]]:
+    pairs: list[tuple[Step, Scenario | None]] = [(st, None) for st in feature.background]
+    for scenario in feature.scenarios:
+        pairs += [(st, scenario) for st in scenario.steps]
+    return pairs
+
+
+def _check_duplicates(ff: FeatureFile, feature: Feature) -> list[Finding]:
+    out = []
+    for scenario in feature.scenarios:
+        seen: dict[tuple[str, str], int] = {}
+        for step in scenario.steps:
+            if step.type is None:
+                continue
+            key = (step.type, light_key(step.text))
+            if key in seen:
+                out.append(_find("GHK-006", "error", ff.path, step.line,
+                                 f"Este step repete o da linha {seen[key]} no mesmo cenário.",
+                                 "Tire o step repetido.", scenario.name))
+            else:
+                seen[key] = step.line
+    return out
+
+
+def _check_ambiguity(ff: FeatureFile, feature: Feature) -> list[Finding]:
+    by_text: dict[str, dict[str, int]] = {}
+    for step, _ in _all_steps(feature):
+        if step.type is not None:
+            by_text.setdefault(light_key(step.text), {}).setdefault(step.type, step.line)
+    out = []
+    for kinds in by_text.values():
+        if len(kinds) < 2:
+            continue
+        ordered = sorted(kinds.items(), key=lambda item: item[1])
+        for kind, line in ordered[1:]:
+            out.append(_find("GHK-007", "error", ff.path, line,
+                             f"Este texto aparece como {ordered[0][0]} e como {kind} nesta feature.",
+                             "Escreva um texto diferente para cada tipo de step."))
+    return out
+
+
+def _check_near_duplicates(ff: FeatureFile, feature: Feature) -> list[Finding]:
+    groups: dict[tuple, dict[str, int]] = {}
+    for step, _ in _all_steps(feature):
+        if step.type is None:
+            continue
+        key = (step.type, normalize_step(step.text), step_values(step.text))
+        groups.setdefault(key, {}).setdefault(step.text.strip(), step.line)
+    out = []
+    for variants in groups.values():
+        if len(variants) < 2:
+            continue
+        ordered = sorted(variants.values())
+        for line in ordered[1:]:
+            out.append(_find("GHK-008", "warning", ff.path, line,
+                             f"Este step só difere do da linha {ordered[0]} por caixa ou pontuação.",
+                             "Use exatamente o mesmo texto."))
+    return out
+
+
+def _check_size(ff: FeatureFile, feature: Feature) -> list[Finding]:
+    out = []
+    if feature.background and (len(feature.background) > MAX_BACKGROUND_STEPS
+                               or any(st.type == "when" for st in feature.background)):
+        out.append(_find("GHK-012", "warning", ff.path, feature.background_line,
+                         f"O contexto tem mais de {MAX_BACKGROUND_STEPS} steps ou tem uma ação (When).",
+                         "Deixe no contexto só o que é comum e curto, sem ação."))
+    for scenario in feature.scenarios:
+        seen_then = False
+        flagged = False
+        for step in scenario.steps:
+            if step.type == "then":
+                seen_then = True
+            elif step.type == "when" and seen_then and not flagged:
+                flagged = True
+                out.append(_find("GHK-012", "warning", ff.path, step.line,
+                                 "Este cenário parece ter mais de um comportamento.",
+                                 "Divida em dois cenários: um When por cenário.", scenario.name))
+        if len(scenario.steps) > MAX_STEPS:
+            out.append(_find("GHK-012", "warning", ff.path, scenario.line,
+                             f"Este cenário tem {len(scenario.steps)} steps. O limite é {MAX_STEPS}.",
+                             "Divida o cenário ou tire o que não muda o resultado.", scenario.name))
+    return out
+
+
+def _check_style(ff: FeatureFile, feature: Feature) -> list[Finding]:
+    out = []
+    for step, scenario in _all_steps(feature):
+        for what, pattern in _DETAIL_PATTERNS:
+            if pattern.search(step.text):
+                out.append(_find("GHK-013", "warning", ff.path, step.line,
+                                 f"O step fala de {what}. Diga o que o usuário vê, não como o sistema faz.",
+                                 "Troque o detalhe técnico por uma frase do domínio.",
+                                 scenario.name if scenario else ""))
+                break
+    return out
+
+
+def term_candidates(text: str) -> list[str]:
+    """Words GHK-017 checks: quoted text without digits, and capitalized words after the first."""
+    text = PLACEHOLDER_RE.sub(" ", text)
+    out = [q for q in re.findall(r'"([^"]+)"', text) if not re.search(r"\d", q)]
+    rest = re.sub(r'"[^"]*"', " ", text)
+    words = re.findall(r"[^\W\d_][\w-]*", rest)
+    out += [w for i, w in enumerate(words) if i > 0 and w[0].isupper()]
+    return out
+
+
+def _stem(value: str) -> str:
+    return value[:-1] if value.endswith("s") and len(value) > 3 else value
+
+
+def _covered(candidate: str, terms: list[str]) -> bool:
+    cand = _stem(_norm(candidate))
+    for term in terms:
+        norm = _stem(_norm(term))
+        if (len(norm) >= 3 and norm in cand) or (len(cand) >= 3 and cand in norm):
+            return True
+    return False
+
+
+def _check_vocabulary(fd: FeatureDir) -> list[Finding]:
+    intent = fd.intent
+    assert intent is not None and fd.intent_path is not None
+    out: list[Finding] = []
+    measured = False
+    for ff in _parsed(fd):
+        assert ff.feature is not None
+        for scenario, steps in _steps_by_scenario(ff.feature):
+            reported: set[str] = set()
+            for step in steps:
+                if any(pattern.search(step.text) for _, pattern in _DETAIL_PATTERNS):
+                    continue  # already reported as an implementation detail (GHK-013)
+                for cand in term_candidates(step.text):
+                    measured = True
+                    key = _norm(cand)
+                    if intent.terms and not _covered(cand, intent.terms) and key not in reported:
+                        reported.add(key)
+                        out.append(_find("GHK-017", "warning", ff.path, step.line,
+                                         f"A palavra {cand} não está em Modelo e termos.",
+                                         "Acrescente o termo ao Modelo e termos ou use a palavra do pedido.",
+                                         scenario))
+    if measured and not intent.terms:
+        out.append(_find("GHK-017", "info", fd.intent_path, 1,
+                         "O intent.md não tem Modelo e termos; eu não conferi o vocabulário dos steps.",
+                         "Preencha o Modelo e termos na grill."))
+    return out
+
+
+def _steps_by_scenario(feature: Feature) -> list[tuple[str, list[Step]]]:
+    pairs = [("", list(feature.background))] if feature.background else []
+    pairs += [(sc.name, sc.steps) for sc in feature.scenarios]
+    return pairs
+
+
+def validate_steps(fd: FeatureDir) -> list[Finding]:
+    """GHK-006, 007, 008, 012, 013 and 017 for one features/<slug>/ folder."""
+    if fd.intent is None:
+        return []
+    out: list[Finding] = []
+    for ff in _parsed(fd):
+        feature = ff.feature
+        assert feature is not None
+        out += (_check_duplicates(ff, feature) + _check_ambiguity(ff, feature)
+                + _check_near_duplicates(ff, feature) + _check_size(ff, feature) + _check_style(ff, feature))
+    out += _check_vocabulary(fd)
+    return sort_findings(out)
+
+
+# ---------------------------------------------------------------------------
+# Step definitions (--steps): read with ast, never executed (GHK-015)
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class StepDef:
+    type: str  # given, when, then, any
+    kind: str  # literal, parse, unverified
+    pattern: str
+    file: str
+    line: int
+    regex: re.Pattern[str] | None = None
+
+
+_DEF_TYPES = {"given": "given", "when": "when", "then": "then", "step": "any"}
+_PARSE_NAMES = ("parse",)
+
+
+def _call_name(node: ast.AST) -> str:
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        return node.attr
+    return ""
+
+
+def _parse_to_regex(pattern: str) -> re.Pattern[str]:
+    parts = re.split(r"\{[^{}]*\}", pattern)
+    return re.compile("(.+?)".join(re.escape(part) for part in parts))
+
+
+def _decorator_def(node: ast.expr, file: str) -> StepDef | None:
+    if not isinstance(node, ast.Call):
+        return None
+    step_type = _DEF_TYPES.get(_call_name(node.func))
+    if step_type is None:
+        return None
+    arg = node.args[0] if node.args else None
+    if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+        return StepDef(step_type, "literal", arg.value, file, node.lineno)
+    if (isinstance(arg, ast.Call) and _call_name(arg.func) in _PARSE_NAMES and arg.args
+            and isinstance(arg.args[0], ast.Constant) and isinstance(arg.args[0].value, str)):
+        pattern = arg.args[0].value
+        return StepDef(step_type, "parse", pattern, file, node.lineno, _parse_to_regex(pattern))
+    return StepDef(step_type, "unverified", ast.unparse(arg) if arg is not None else "", file, node.lineno)
+
+
+def parse_step_defs(source: str, file: str) -> list[StepDef]:
+    """Step definitions (@given, @when, @then, @step) found in one Python source; never executed."""
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return []
+    defs = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            defs += [d for d in (_decorator_def(dec, file) for dec in node.decorator_list) if d is not None]
+    return sorted(defs, key=lambda d: (d.file, d.line))
+
+
+def _expanded_texts(step: Step, scenario: Scenario | None) -> list[str]:
+    if scenario is None or scenario.kind != "outline":
+        return [step.text]
+    texts = []
+    for block in scenario.examples:
+        for row in block.rows:
+            text = step.text
+            for column, value in zip(block.header, row):
+                text = text.replace(f"<{column}>", value)
+            texts.append(text)
+    return texts or [step.text]
+
+
+def _matches(definition: StepDef, step: Step, scenario: Scenario | None) -> bool:
+    if definition.type not in (step.type, "any") or definition.kind == "unverified":
+        return False
+    for text in _expanded_texts(step, scenario):
+        if definition.kind == "literal" and text.strip() == definition.pattern.strip():
+            return True
+        if definition.kind == "parse" and definition.regex is not None and definition.regex.fullmatch(text.strip()):
+            return True
+    return False
+
+
+def validate_step_defs(fds: list[FeatureDir], defs: list[StepDef]) -> list[Finding]:
+    """GHK-015: duplicate definitions (error), unused ones (warning), undefined or unverifiable (info)."""
+    out: list[Finding] = []
+    first: dict[tuple[str, str, str], StepDef] = {}
+    for definition in defs:
+        if definition.kind == "unverified":
+            out.append(_find("GHK-015", "info", definition.file, definition.line,
+                             "Este padrão de step não é um texto nem parsers.parse; não foi verificado.",
+                             "Confira à mão se algum step do .feature usa esta definição."))
+            continue
+        key = (definition.type, definition.kind, definition.pattern)
+        if key in first:
+            other = first[key]
+            out.append(_find("GHK-015", "error", definition.file, definition.line,
+                             f"A definição de step {definition.pattern} existe duas vezes "
+                             f"({other.file}:{other.line} e {definition.file}:{definition.line}).",
+                             "Deixe uma só: a segunda esconde a primeira sem aviso."))
+        else:
+            first[key] = definition
+    used: set[int] = set()
+    unverified_types = {d.type for d in defs if d.kind == "unverified"}
+    for fd in fds:
+        if fd.intent is None:
+            continue
+        for ff in _parsed(fd):
+            assert ff.feature is not None
+            for step, scenario in _all_steps(ff.feature):
+                hits = [i for i, d in enumerate(defs) if _matches(d, step, scenario)]
+                used.update(hits)
+                if not hits and "any" not in unverified_types and step.type not in unverified_types:
+                    out.append(_find("GHK-015", "info", ff.path, step.line,
+                                     "Este step ainda não tem definição. No teste-primeiro isto é normal.",
+                                     "Escreva a definição junto do teste do cenário.",
+                                     scenario.name if scenario else ""))
+    for i, definition in enumerate(defs):
+        if definition.kind != "unverified" and i not in used and first.get(
+                (definition.type, definition.kind, definition.pattern)) is definition:
+            out.append(_find("GHK-015", "warning", definition.file, definition.line,
+                             f"A definição {definition.pattern} não casa com nenhum step.",
+                             "Tire a definição ou escreva o step que a usa."))
+    return sort_findings(out)
+
+
+# ---------------------------------------------------------------------------
 # Discovery (I/O) and CLI
 # ---------------------------------------------------------------------------
 
@@ -849,10 +1181,21 @@ def discover(root: Path, only: str | None = None) -> list[FeatureDir]:
     return found
 
 
-def validate(fds: list[FeatureDir]) -> list[Finding]:
+def load_step_defs(steps_dir: Path, root: Path) -> list[StepDef]:
+    defs: list[StepDef] = []
+    for source in sorted(steps_dir.rglob("*.py")):
+        text = _read(source)
+        if text is not None:
+            defs += parse_step_defs(text, _rel(source, root))
+    return defs
+
+
+def validate(fds: list[FeatureDir], defs: list[StepDef] | None = None) -> list[Finding]:
     out: list[Finding] = []
     for fd in fds:
-        out += validate_structure(fd)
+        out += validate_structure(fd) + validate_steps(fd)
+    if defs is not None:
+        out += validate_step_defs(fds, defs)
     return sort_findings(out)
 
 
@@ -860,6 +1203,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate features/<slug>/*.feature (GHK-001 to GHK-019).")
     parser.add_argument("root", nargs="?", default=".", help="project root (default: current directory)")
     parser.add_argument("--feature", help="validate only features/<slug>/")
+    parser.add_argument("--steps", help="folder with the step definitions (Python), read with ast")
     args = parser.parse_args(argv)
     root = Path(args.root)
     if not root.is_dir():
@@ -869,7 +1213,8 @@ def main(argv: list[str] | None = None) -> int:
     if not any(fd.intent is not None for fd in fds):
         print("check_features: nenhum features/<slug>/intent.md; nada a verificar.")
         return 0
-    findings = validate(fds)
+    defs = load_step_defs(Path(args.steps), root) if args.steps else None
+    findings = validate(fds, defs)
     for f in findings:
         print(f"{f.file}:{f.line}: {f.rule} {f.severity}: {f.message}")
     return 1 if any(f.severity == "error" for f in findings) else 0

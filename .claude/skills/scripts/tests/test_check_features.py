@@ -18,8 +18,12 @@ from check_features import (
     ParseError,
     build_matrix,
     discover,
+    light_key,
     load_intent,
+    load_step_defs,
+    normalize_step,
     parse_feature,
+    term_candidates,
     validate,
 )
 
@@ -37,8 +41,11 @@ def _expected(case: str) -> dict:
     return json.loads((_FIXTURES / case / "esperado.json").read_text(encoding="utf-8"))
 
 
-def _findings(root: Path, rules: set[str]) -> list[list]:
-    found = validate(discover(root))
+def _findings(root: Path, rules: set[str], args: list[str] | None = None) -> list[list]:
+    steps = None
+    if args and "--steps" in args:
+        steps = load_step_defs(Path(args[args.index("--steps") + 1].replace("{root}", str(root))), root)
+    found = validate(discover(root), steps)
     return sorted([f.rule, f.severity, f.file, f.line] for f in found if f.rule in rules)
 
 
@@ -74,8 +81,10 @@ SCENARIO = """Feature: Entrar
 """
 
 
+ALL_RULES = {f"GHK-{n:03d}" for n in range(1, 20)}
+
 # ---------------------------------------------------------------------------
-# Golden cases (structure and traceability)
+# Golden cases (all rules)
 # ---------------------------------------------------------------------------
 
 
@@ -84,6 +93,13 @@ def test_structure_golden(case: str) -> None:
     expected = _expected(case)
     want = sorted(f for f in expected["findings"] if f[0] in STRUCTURE_RULES)
     assert _findings(_FIXTURES / case, STRUCTURE_RULES) == want
+
+
+@pytest.mark.parametrize("case", CASES)
+def test_steps_golden_all_rules(case: str) -> None:
+    expected = _expected(case)
+    got = _findings(_FIXTURES / case, ALL_RULES, expected["args"])
+    assert got == sorted(expected["findings"])
 
 
 def test_every_rule_has_a_golden_case() -> None:
@@ -201,3 +217,131 @@ def test_load_intent_reads_status_terms_serve_and_scenarios() -> None:
     assert (intent.status, intent.scenarios_approved, intent.serve, intent.terms) == (
         "approved", True, ["JM-TB-001", "D-004"], ["conta"])
     assert list(intent.reqs) == ["REQ-login-001", "REQ-login-002", "REQ-login-003"]
+
+
+# ---------------------------------------------------------------------------
+# Unit tests of the plan (steps and step definitions)
+# ---------------------------------------------------------------------------
+
+
+def _feature_root(tmp_path: Path, body: str, terms: str = "") -> Path:
+    intent = INTENT.format(status="approved") + terms
+    return _write(tmp_path, {"features/login/intent.md": intent, "features/login/a.feature": body})
+
+
+def _rules(root: Path, rule: str, defs=None):
+    return [f for f in validate(discover(root), defs) if f.rule == rule]
+
+
+def test_repeated_step_in_a_scenario_returns_ghk006_on_the_second(tmp_path: Path) -> None:
+    body = """Feature: X
+
+  @REQ-login-001
+  Scenario: Y
+    Given o usuário está logado
+    And o usuário está logado
+    When o usuário age
+    Then o sistema responde
+"""
+    found = _rules(_feature_root(tmp_path, body), "GHK-006")
+    assert [f.line for f in found] == [6]
+
+
+def test_same_text_as_given_and_then_returns_ghk007(tmp_path: Path) -> None:
+    body = """Feature: X
+
+  @REQ-login-001
+  Scenario: Y
+    Given o saldo é 10
+    When o usuário age
+    Then o saldo é 10
+"""
+    assert [f.line for f in _rules(_feature_root(tmp_path, body), "GHK-007")] == [7]
+
+
+def test_steps_that_differ_only_by_case_or_punctuation_are_a_warning(tmp_path: Path) -> None:
+    body = """Feature: X
+
+  @REQ-login-001
+  Scenario: Y
+    Given o usuário está logado
+    When o usuário age
+    Then o sistema responde
+
+  @REQ-login-002
+  Scenario: Z
+    Given O usuário está logado!
+    When o usuário age
+    Then o sistema responde
+"""
+    found = _rules(_feature_root(tmp_path, body), "GHK-008")
+    assert [(f.severity, f.line) for f in found] == [("warning", 11)]
+
+
+def test_when_then_when_returns_ghk012_as_warning(tmp_path: Path) -> None:
+    body = """Feature: X
+
+  @REQ-login-001
+  Scenario: Y
+    Given o usuário está logado
+    When o usuário age
+    Then o sistema responde
+    When o usuário age de novo
+    Then o sistema responde de novo
+"""
+    found = _rules(_feature_root(tmp_path, body), "GHK-012")
+    assert [(f.severity, f.line) for f in found] == [("warning", 8)]
+
+
+@pytest.mark.parametrize("step", ["abre https://exemplo.test/x", "roda SELECT * FROM contas", "clica em #entrar"])
+def test_implementation_detail_returns_ghk013_as_warning(tmp_path: Path, step: str) -> None:
+    body = f"Feature: X\n\n  @REQ-login-001\n  Scenario: Y\n    Given o usuário {step}\n"
+    found = _rules(_feature_root(tmp_path, body), "GHK-013")
+    assert [f.severity for f in found] == ["warning"]
+
+
+def test_normalization_and_candidates() -> None:
+    assert normalize_step('O saldo é "10".') == normalize_step("o saldo é 20")
+    assert light_key("  Um  Passo ") == "um passo"
+    assert term_candidates('o usuário abre a Fatura e vê "Premium" e "1 conta"') == ["Premium", "Fatura"]
+
+
+def test_term_missing_from_model_returns_ghk017_and_present_term_does_not(tmp_path: Path) -> None:
+    body = """Feature: X
+
+  @REQ-login-001
+  Scenario: Y
+    Given o usuário tem uma conta
+    When o usuário abre a Fatura
+    Then o sistema mostra "Conta"
+"""
+    terms = "\n## Modelo e termos\n\n| Termo | O que quer dizer | Fonte |\n|---|---|---|\n| conta | Algo. | F1 |\n"
+    found = _rules(_feature_root(tmp_path, body, terms), "GHK-017")
+    assert [(f.severity, f.line) for f in found] == [("warning", 6)]
+
+
+def test_duplicate_step_definitions_return_ghk015_error_with_both_places(tmp_path: Path) -> None:
+    root = _feature_root(tmp_path, SCENARIO.format(tag="@REQ-login-001"))
+    (root / "steps").mkdir()
+    (root / "steps" / "a.py").write_text('from pytest_bdd import given\n\n@given("um usuário")\ndef a(): pass\n')
+    (root / "steps" / "b.py").write_text('from pytest_bdd import given\n\n@given("um usuário")\ndef b(): pass\n')
+    found = _rules(root, "GHK-015", load_step_defs(root / "steps", root))
+    errors = [f for f in found if f.severity == "error"]
+    assert len(errors) == 1 and "steps/a.py:3" in errors[0].message and "steps/b.py:3" in errors[0].message
+
+
+def test_empty_steps_dir_gives_only_info_and_no_error(tmp_path: Path) -> None:
+    root = _feature_root(tmp_path, SCENARIO.format(tag="@REQ-login-001"))
+    (root / "steps").mkdir()
+    found = _rules(root, "GHK-015", load_step_defs(root / "steps", root))
+    assert found and {f.severity for f in found} == {"info"}
+
+
+def test_re_definition_is_not_verified_and_does_not_fail(tmp_path: Path) -> None:
+    root = _feature_root(tmp_path, SCENARIO.format(tag="@REQ-login-001"))
+    (root / "steps").mkdir()
+    (root / "steps" / "a.py").write_text(
+        'import re\nfrom pytest_bdd import given, parsers\n\n@given(parsers.re(r"um .+"))\ndef a(): pass\n')
+    found = _rules(root, "GHK-015", load_step_defs(root / "steps", root))
+    assert any("não foi verificado" in f.message for f in found)
+    assert all(f.severity != "error" for f in found)

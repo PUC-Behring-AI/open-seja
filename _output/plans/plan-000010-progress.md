@@ -78,3 +78,17 @@ Baseline confirmado: `run_all_checks.py` 16 PASS / 14 FAIL; `git status` limpo.
 - deviated: Rule como jornada (GHK-018) e @nao-faz (GHK-019) entraram aqui; fixtures de steps renomeadas para nao serem coletadas pelo pytest.
 - less-sure: O parser e minimo: construcoes raras do Gherkin (comentarios no meio de tabelas, Rule com Background proprio) nao foram exercitadas.
 - gate: not-installed
+
+## Step 5 -- regras de step e `--steps` (2026-10-06)
+
+`check_features.py` ganhou `normalize_step`, `light_key`, `validate_steps` (GHK-006, 007, 008, 012, 013, 017) e `validate_step_defs` (GHK-015, decisao pendente 4 = B: leitura com `ast`, nunca executa; literal e `parsers.parse` verificados; `parsers.re`, `cfparse` e decoradores dinamicos viram info "nao verificado"). `main` ja aceita `--steps`. Testes: 101 passam em `test_check_features.py` (golden de todas as regras com `args` e `--steps`, mais os testes unitarios do plano).
+- Refinamento de GHK-008: a normalizacao agressiva troca valores (numeros e texto entre aspas) por `<v>`, mas so e quase-duplicata quando os **valores** tambem sao iguais; senao todo step parametrizado ("tem 1 conta" / "tem 2 conta") seria acusado. Texto do plano seguia a regra sem essa ressalva.
+- GHK-017 pula o step que ja gerou GHK-013 (SQL em maiuscula virava "substantivo"). GHK-017 so emite a info "sem Modelo e termos" quando existe candidato a medir.
+- Heuristicas GHK-012/013/017 sao aviso, nunca erro; documentadas em `gherkin-spec-format.md`.
+- Verificacao: `run_all_checks.py` 17 PASS / 14 FAIL (contadores 17/2/9); pytest do harness 792 passed / 12 failed; ruff limpo.
+
+### Step 5 -- reflection-on-action | 2026-10-06 17:40 UTC | Regras de step e --steps
+- happened: Implementei duplicata, ambiguidade, quase-duplicata, tamanho, estilo, vocabulario e a leitura de definicoes por ast; os 36 casos golden e os testes unitarios passam.
+- deviated: GHK-008 ignora steps que diferem em valor; GHK-017 pula steps ja acusados por GHK-013.
+- less-sure: As heuristicas de aviso (012, 013, 017) podem errar nos dois sentidos com texto real.
+- gate: not-installed
