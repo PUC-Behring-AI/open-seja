@@ -52,3 +52,9 @@ Decisoes de implementacao tomadas aqui (para os Steps 2-6):
 - deviated: O cabecalho passa a ser as linhas antes da primeira secao; PFS-006 e PFS-013 aceitam N/A com motivo, como o contrato.
 - less-sure: Se N/A com motivo vira fuga; fica medido como info.
 - gate: not-installed
+
+### Step 2 -- reflection-on-action | 2026-10-06 18:16 UTC | Protocolo plan-from-scenarios
+- happened: Escrevi plan-from-scenarios.md com PFS-001..015, cabecalho v2, campo Scenarios, tabela de compatibilidade e esquema JSON.
+- deviated: N/A com motivo vale tambem com Tests nao-N/A (contrato); PFS-006 recusa so o campo ausente; PFS-014 e info.
+- less-sure: Se o contrato aceita N/A com motivo em step com teste sem virar fuga.
+- gate: not-installed
