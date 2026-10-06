@@ -1,0 +1,27 @@
+{
+  "descricao": "o .feature foi editado depois da aprovacao e ainda nao foi reaprovado: estado stale",
+  "root": "_raizes/editada",
+  "exit_code": 1,
+  "status": "stale",
+  "findings": [
+    [
+      "PFS-011",
+      "error",
+      4
+    ]
+  ],
+  "matrix": {
+    "contas-da-semana/contas-da-semana.feature::A lista abre logo com muitas contas": [
+      4
+    ],
+    "contas-da-semana/contas-da-semana.feature::Desfazer uma conta marcada como paga por engano": [
+      3
+    ],
+    "contas-da-semana/contas-da-semana.feature::Marcar uma conta como paga": [
+      3
+    ],
+    "contas-da-semana/contas-da-semana.feature::Ver as contas que vencem nos próximos 7 dias": [
+      2
+    ]
+  }
+}

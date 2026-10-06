@@ -27,7 +27,8 @@ _FIXTURES = _TESTS_DIR / "fixtures" / "plan_scenarios"
 _DOC = _TESTS_DIR.parents[2] / "references" / "general" / "plan-from-scenarios.md"
 _REGISTRY = _SCRIPTS / "check_plugin_registry.json"
 
-CASES = sorted(p.parent.name for p in _FIXTURES.glob("*/esperado.json"))
+CASES = sorted(p.parent.relative_to(_FIXTURES).as_posix()
+               for p in [*_FIXTURES.glob("*/esperado.json"), *_FIXTURES.glob("ref-*/*/esperado.json")])
 SLUG = "contas-da-semana"
 
 
@@ -141,6 +142,49 @@ def test_na_with_tests_is_info_and_strict_makes_it_fail() -> None:
 def test_unknown_version_is_a_fatal_finding_with_exit_2() -> None:
     report = _run_case("pfs-001-versao-3")
     assert cps.exit_code(report, strict=False) == 2
+
+
+# ---------------------------------------------------------------------------
+# Reference runs (plan-000012 step 7; simulated) and the real validator
+# ---------------------------------------------------------------------------
+
+_REF_A = "ref-a-feature-com-codigo"
+_REF_B = "ref-b-sem-codigo"
+_REF_C = "ref-c-cenarios-reaprovados"
+
+
+@pytest.mark.parametrize("case", [c for c in CASES if _expected(c)["status"] is not None])
+def test_real_check_specify_gives_the_status_the_stub_gives(case: str) -> None:
+    real = cps.scenario_status(_root(case), SLUG)
+    assert real["status"] == _expected(case)["status"]
+
+
+def test_run_a_draft_is_refused_then_one_fix_passes() -> None:
+    draft, final = _run_case(f"{_REF_A}/01-rascunho"), _run_case(f"{_REF_A}/02-final")
+    assert {f.rule for f in draft.findings} == {"PFS-006", "PFS-009"} and cps.exit_code(draft, strict=False) == 1
+    assert final.findings == [] and all(len(r["steps"]) == 1 for r in final.matrix)
+
+
+def test_run_b_skip_passes_and_the_variant_with_a_test_is_refused() -> None:
+    assert _run_case(f"{_REF_B}/01-final").findings == []
+    refused = _run_case(f"{_REF_B}/02-variante-recusada")
+    assert [f.rule for f in refused.findings] == ["PFS-013"] and "specify foi pulada" in refused.findings[0].message
+
+
+def test_run_c_reapproval_invalidates_the_plan_until_it_is_updated() -> None:
+    stale, old, updated = (_run_case(f"{_REF_C}/{n}") for n in
+                           ("01-feature-editado-sem-reaprovar", "02-reaprovado-plano-velho", "03-plano-atualizado"))
+    assert [f.rule for f in stale.findings] == ["PFS-011"]
+    assert {f.rule for f in old.findings} == {"PFS-005", "PFS-009", "PFS-012"}
+    assert updated.findings == [] and cps.exit_code(updated, strict=False) == 0
+
+
+def test_calibration_of_the_reference_run_a() -> None:
+    """Friction baseline for the pilot: N/A share of the steps and steps per scenario."""
+    final = _run_case(f"{_REF_A}/02-final")
+    na_share = sum(1 for s in final.steps if s["scenarios_na"]) / len(final.steps)
+    owned = sum(len(s["scenarios"]) for s in final.steps)
+    assert na_share == 0.4 and owned / len(final.matrix) == 1.0
 
 
 # ---------------------------------------------------------------------------

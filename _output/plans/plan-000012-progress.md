@@ -116,3 +116,22 @@ Lacuna nova: o fluxo `--roadmap` Modo 1/2 executa o `standard/SKILL.md` por item
 - deviated: O contrato levou mais que um ponteiro, para nao deixar regras contraditorias sobre @REQ- e chave.
 - less-sure: Se o roadmap inline gera plano v2 sem ter rodado a specify.
 - gate: not-installed
+
+## Step 7 -- tres execucoes de referencia e compatibilidade (2026-10-06, executor)
+
+**SIMULADAS**: eu, como o agente, segui o texto do passo 4c sobre a feature ficticia `contas-da-semana` (a mesma do 000011), em modo descartavel; nenhuma pessoa real participou. Ficam como fixtures em `.claude/skills/scripts/tests/fixtures/plan_scenarios/ref-*/NN-*/` (plan.md + esperado.json), com raizes novas `_raizes/editada` e `_raizes/reaprovada` (a segunda saiu de `check_specify.py --approve` real: lock `rev: 2`, chave renomeada). Saidas reais do verificador (exit codes conferidos pelos testes):
+
+(a) feature com codigo -- rascunho (exit 1): `plan.md:3: PFS-009 ... "A lista abre logo com muitas contas"` e `plan.md:36: PFS-006 ... O passo 4 muda comportamento e nao cita cenario`; uma correcao automatica (o step 4 passa a entregar o cenario de desempenho) -> final (exit 0, `0 erros, 0 informacoes; estado dos cenarios: approved`).
+(b) tarefa sem codigo (README ficticio): `Specify: skipped -- tarefa sem codigo: atualizar um README`, todos `Tests: N/A`, nenhum `Scenarios:` necessario -> exit 0; variante com um step de teste -> `plan.md:22: PFS-013 erro: A tarefa muda comportamento no passo 2, mas a specify foi pulada` (exit 1).
+(c) cenarios reaprovados depois do plano: `.feature` editado sem reaprovar -> `PFS-011 ... (estado: stale; feature, retraducao)` (exit 1); reaprovado com rev 2 e cenario renomeado -> `PFS-012` (rev 1 contra rev 2), `PFS-005` (chave antiga no passo 2) e `PFS-009` (a chave nova sem step) (exit 1); plano atualizado a mao (rev 2 e a chave nova) -> exit 0.
+
+Compatibilidade: (1) o `check_specify.py` real devolve o mesmo `status` que o stub nos 41 casos com status (teste `test_real_check_specify_gives_the_status_the_stub_gives`); (2) planos v1: os 3 (`v1-real-1`, `v1-real-2`, `v1-minimo`) mais `v1-corpo-quebrado` saem 0 sem leitura do corpo; o `/plan` nao muda para v1 (o passo 4c e "plan v2 only") e o `/implement` mantem v1 e a versao ausente identicos (so o ramo `2` e novo); (3) `run_all_checks.py` sem plano v2 em `_output/plans/`: 19 PASS / 14 FAIL (o conjunto dos 14 do baseline, contadores 17/2/9; o PASS novo e `check_plan_scenarios.py` com "nada a verificar"); `check_plan_scenarios.py` sem argumentos na raiz do open-seja: exit 0.
+
+**Calibracao** (simulada, um plano; o piloto do 000016 e que vale): correcoes automaticas antes de passar: 1 (execucao a); fracao de steps `N/A` no plano final: 2/5 = 40% (a migracao e o refactor); steps por cenario: 1,0 (dono unico); achados por rascunho: 2 (a) e 1 (b, variante). Nao medido: reacao de pessoa real a recusa; se `N/A (motivo)` vira fuga (so a fracao e o `info` PFS-006/013 medem).
+Pytest: 161 testes no modulo; harness 1120 passed / 12 failed (os 12 pre-existentes). `uvx ruff check` limpo.
+
+### Step 7 -- reflection-on-action | 2026-10-06 18:26 UTC | Execucoes de referencia
+- happened: Simulei tres execucoes do /plan como fixtures (rascunho recusado e corrigido, tarefa sem codigo, cenarios reaprovados) e comparei o status real com o stub.
+- deviated: A raiz reaprovada saiu de check_specify --approve real; as execucoes sao simuladas, sem pessoa.
+- less-sure: Se uma recusa em plano real parece tao simples quanto na simulacao.
+- gate: not-installed

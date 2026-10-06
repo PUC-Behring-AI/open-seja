@@ -1,0 +1,21 @@
+{
+  "descricao": "plano atualizado a mao: rev 2 e a chave nova; sai 0",
+  "root": "_raizes/reaprovada",
+  "exit_code": 0,
+  "status": "approved",
+  "findings": [],
+  "matrix": {
+    "contas-da-semana/contas-da-semana.feature::A lista abre logo com muitas contas": [
+      4
+    ],
+    "contas-da-semana/contas-da-semana.feature::Desfazer uma conta marcada como paga por engano": [
+      3
+    ],
+    "contas-da-semana/contas-da-semana.feature::Marcar uma conta como paga": [
+      3
+    ],
+    "contas-da-semana/contas-da-semana.feature::Ver as contas da semana": [
+      2
+    ]
+  }
+}

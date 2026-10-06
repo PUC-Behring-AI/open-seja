@@ -1,0 +1,35 @@
+{
+  "descricao": "reaprovado (rev 2, cenario renomeado): o plano rev 1 cita a chave antiga (PFS-005), nao entrega a nova (PFS-009) e esta velho (PFS-012)",
+  "root": "_raizes/reaprovada",
+  "exit_code": 1,
+  "status": "approved",
+  "findings": [
+    [
+      "PFS-009",
+      "error",
+      3
+    ],
+    [
+      "PFS-012",
+      "error",
+      4
+    ],
+    [
+      "PFS-005",
+      "error",
+      25
+    ]
+  ],
+  "matrix": {
+    "contas-da-semana/contas-da-semana.feature::A lista abre logo com muitas contas": [
+      4
+    ],
+    "contas-da-semana/contas-da-semana.feature::Desfazer uma conta marcada como paga por engano": [
+      3
+    ],
+    "contas-da-semana/contas-da-semana.feature::Marcar uma conta como paga": [
+      3
+    ],
+    "contas-da-semana/contas-da-semana.feature::Ver as contas da semana": []
+  }
+}

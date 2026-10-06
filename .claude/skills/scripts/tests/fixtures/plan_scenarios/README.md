@@ -52,3 +52,16 @@ Linha de cada achado: campo do step (`Scenarios:` ou `Tests:`) quando o achado e
 | `pfs-013-skipped-na-com-motivo` | skipped com Tests nao-N/A e N/A (motivo): passa com info |
 | `pfs-013-skipped-com-chave` | plano pulado nao tem cenario para citar |
 | `pfs-014-nenhum-step` | aprovado e nenhum step cita cenario: 4x PFS-009 e dica PFS-014 |
+
+## Execucoes de referencia (plan-000012, Step 7; SIMULADAS)
+
+Tres execucoes do `/plan` em modo descartavel, feitas pelo executor do plano (nenhuma pessoa real). Cada pasta `ref-*/NN-*/` e uma versao do plano, com a saida esperada do verificador:
+
+| Pasta | O que mostra |
+|---|---|
+| `ref-a-feature-com-codigo/01-rascunho` -> `02-final` | feature com codigo: o rascunho tem um cenario sem step e um step sem cenario (PFS-009, PFS-006); uma correcao e o plano sai 0 |
+| `ref-b-sem-codigo/01-final` | tarefa sem codigo (README): `Specify: skipped -- <motivo>`, sai 0 |
+| `ref-b-sem-codigo/02-variante-recusada` | a mesma tarefa com um step de teste: PFS-013 |
+| `ref-c-cenarios-reaprovados/01..03` | o `.feature` muda (stale, PFS-011); reaprovado com rev 2 e cenario renomeado (PFS-012, PFS-005, PFS-009); plano atualizado a mao sai 0 |
+
+Raizes novas: `_raizes/editada` (o `.feature` editado e o `intent.md` com rev 2 e linhas em Mudancas, sem reaprovar: `stale`) e `_raizes/reaprovada` (a anterior depois de `check_specify.py --approve`: lock com `rev: 2`, chave renomeada).
