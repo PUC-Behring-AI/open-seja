@@ -74,7 +74,7 @@ Desvio: o plano pedia um `status.txt` por caso lido por stub; usei o campo `stat
 
 ## Step 4 -- check_plan_scenarios.py (2026-10-06, executor)
 
-Entregue: `.claude/skills/scripts/check_plan_scenarios.py` (PFS-001..014, `--json`, `--table`, `--strict`, `--status-cmd`, varredura sem argumentos; exit 0/1/2), `tests/test_check_plan_scenarios.py` (117 testes; goldens sobre as 38 fixtures, CLI com o `check_specify.py` real, stub por `--status-cmd`, BOM, erro de leitura, varredura, "nunca escreve", registro). Registrado no fim de `check_plugin_registry.json`. `uvx ruff check` limpo nos dois .py; pyright nao medido (sem `libatomic.so.1`, como nos planos 000010/000011).
+Entregue: `.claude/skills/scripts/check_plan_scenarios.py` (PFS-001..014, `--json`, `--table`, `--strict`, `--status-cmd`, varredura sem argumentos; exit 0/1/2), `tests/test_check_plan_scenarios.py` (113 testes; goldens sobre as 38 fixtures, CLI com o `check_specify.py` real, stub por `--status-cmd`, BOM, erro de leitura, varredura, "nunca escreve", registro). Registrado no fim de `check_plugin_registry.json`. `uvx ruff check` limpo nos dois .py; pyright nao medido (sem `libatomic.so.1`, como nos planos 000010/000011).
 Medidas: pytest do harness 1072 passed / 12 failed (os 12 pre-existentes); `run_all_checks.py` 19 PASS / 14 FAIL (o mesmo conjunto de 14; PASS novo = `check_plan_scenarios.py`), contadores 17/2/9. Os WARNING de `check_docs` subiram (618 -> 652) por IDs de plano nas fixtures v1 reais e no README; sao avisos, nao falha (as fixtures `plan_format/` ja os geram).
 
 Decisoes de implementacao:
@@ -87,7 +87,18 @@ Decisoes de implementacao:
 - Nao tocei `check_specify.py`, `check_features.py`, `check_intent.py` nem os testes deles.
 
 ### Step 4 -- reflection-on-action | 2026-10-06 18:22 UTC | check_plan_scenarios.py
-- happened: Implementei o verificador com PFS-001..014, matriz em --json e 117 testes sobre as fixtures; 1072 passed e 12 failed pre-existentes.
+- happened: Implementei o verificador com PFS-001..014, matriz em --json e 113 testes sobre as fixtures; 1072 passed e 12 failed pre-existentes.
 - deviated: Escrevi script e teste na mesma rodada; N/A com motivo em step com teste vale como info.
 - less-sure: Se as linhas esperadas e o N/A com motivo sobrevivem a planos reais.
+- gate: not-installed
+
+## Step 5 -- check condicional no run_all_checks (2026-10-06, executor)
+
+Sem edicao de `run_all_checks.py` (desvio previsto): ele descobre `check_*.py` por glob, roda cada um com `cwd=<raiz>` e sem argumentos e le so o exit code. A condicionalidade esta no proprio script (varredura de `_output/plans/`): sem plano v2 ele imprime "nenhum plano v2 em _output/plans/; nada a verificar." e sai 0 (e o "pulado" do plano: o orquestrador mostra PASS, como `check_intent.py`, `check_features.py` e `check_specify.py`); com v2 valido sai 0 ("ok"); com v2 reprovado sai 1 e o nome da regra aparece na saida ("falhou"). Plano v1, `*-progress.md`, `*-qa-*` e plano `# DONE |` nunca entram. Nao ha estado "pulado" no orquestrador (lacuna ja registrada no 000011).
+Teste novo: `test_orchestrator_style_run_is_skipped_ok_or_failed` (roda o script como o orquestrador roda: sem argumentos, cwd = raiz); 114 testes no modulo. `run_all_checks.py` real: 19 PASS / 14 FAIL, conjunto dos 14 igual ao baseline, contadores 17/2/9.
+
+### Step 5 -- reflection-on-action | 2026-10-06 18:22 UTC | Check condicional no run_all_checks
+- happened: Nao editei o run_all_checks: o glob ja registra o script e a varredura sem argumentos e a condicionalidade.
+- deviated: Sem estado 'pulado' no orquestrador: aparece como PASS com 'nada a verificar'.
+- less-sure: Se o health check dos projetos que adotarem v2 fica ruidoso com plano velho.
 - gate: not-installed

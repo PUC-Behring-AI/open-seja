@@ -13,6 +13,7 @@ import hashlib
 import json
 import re
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -328,6 +329,23 @@ def test_scan_ignores_a_done_plan_even_if_its_scenarios_went_stale(tmp_path: Pat
     done = "# DONE | 2026-10-06 | Plan 000900 | x\n" + _read("pfs-009-cenario-sem-step").split("\n", 1)[1]
     root = _project(tmp_path, {"plan-000900-x.md": done})
     assert _cli(capsys, "--root", str(root))[0] == 0
+
+
+def _as_orchestrator(root: Path) -> subprocess.CompletedProcess:
+    """How run_all_checks.py runs a check: the script alone, no arguments, cwd = project root."""
+    return subprocess.run([sys.executable, str(_SCRIPTS / "check_plan_scenarios.py")], cwd=root,
+                          capture_output=True, text=True, check=False)
+
+
+def test_orchestrator_style_run_is_skipped_ok_or_failed(tmp_path: Path) -> None:
+    only_v1 = _project(tmp_path / "a", {"plan-000001-a.md": _read("v1-real-1")}, features=False)
+    done = _as_orchestrator(only_v1)
+    assert done.returncode == 0 and "nada a verificar" in done.stdout  # "pulado"
+    valid = _project(tmp_path / "b", {"plan-000900-ok.md": _read("v2-completo")})
+    assert _as_orchestrator(valid).returncode == 0  # "ok"
+    broken = _project(tmp_path / "c", {"plan-000900-ok.md": _read("pfs-009-cenario-sem-step")})
+    bad = _as_orchestrator(broken)
+    assert bad.returncode == 1 and "PFS-009" in bad.stdout  # "falhou", with the rule name
 
 
 # ---------------------------------------------------------------------------
