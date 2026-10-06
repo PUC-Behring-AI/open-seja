@@ -155,7 +155,7 @@ Criar `template/intent.md`: frontmatter (`slug`, `status: grilling|approved`, `b
 - **Verify**: o exemplo passa em `check_intent.py` (Step 4) com `--require-approved`; o arquivo mínimo do esquema do 000007 também passa sem `--require-approved`; nenhum termo de C1.
 - **Tests**: N/A (modelo; coberto pelas fixtures do Step 4)
 - **Docs**: o próprio modelo.
-- [ ] Done
+- [x] Done
 
 ### Step 4: Verificador determinístico `check_intent.py` (regra de parada)
 Função pura `check_intent(text: str, *, require_approved: bool = False) -> list[Finding]` mais CLI (`check_intent.py <intent.md> [--require-approved] [--json]`). Confere P1 a P6: dimensões preenchidas ou `fora do escopo: <motivo>`; critério na forma "Quando ..., o sistema ..." e sem palavra vaga sem número (lista em constante); "Perguntas abertas" vazia e "Premissas" todas `confirmado: sim` (para P3); IDs `REQ-<slug>-NNN` com slug igual ao do frontmatter, únicos, sem reuso (retirado conta como usado); cada REQ com "Nas suas palavras" ou `derivado de:`; `status: approved` só se `approved_at` e `approved_by` existem; voz controlada no texto do agente (colunas "Requisito" e "Critério", resumos) por `lint_controlled_language` se existir, senão pelos dois limites numéricos com as constantes do 000074 (Decisão pendente 4, default B), com ressalva `voz: não verificada`. Citação do citizen e tabelas de código ficam fora. Exit 0 sempre, exceto `--strict` (exit 1 se houver `error`); saída ordenada e idêntica para o mesmo texto; sem relógio. Cada `Finding`: `regra`, `linha`, `mensagem` em voz controlada, `severidade` (`error` para P1 a P6; `warning` para voz).

@@ -58,6 +58,8 @@ Tabela de requisitos:
 
 `NNN` tem três dígitos, sequencial dentro da feature, nunca reutilizado. Todo REQ tem texto e critério (CYC-002).
 
+> **Emenda 000009 (aditiva).** A fase grill escreve um superconjunto deste esquema: índice das frases do pedido (`F<n>`) e das respostas (`A<n>`) em "Nas suas palavras"; colunas `Tipo`, `Nas suas palavras`, `Para que`, `rev` e `Estado` (a coluna `Texto` também pode se chamar `Requisito`); seções "Dimensões", "Modelo e termos", "Perguntas abertas" e "Mudanças"; frontmatter `approved_at`, `approved_by` e `serve:`. Nada deste esquema mínimo muda ou é removido. Regras: `.claude/references/general/grill-phase.md` (GRL-005); modelo completo: `.claude/references/template/intent.md`; verificador: `.claude/skills/scripts/check_intent.py`.
+
 ## `*.feature`
 
 - Um ou mais arquivos por pasta; o nome descreve o comportamento (`<nome>.feature`, kebab-case).

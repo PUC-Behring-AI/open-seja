@@ -62,3 +62,15 @@ Nada escrito fora do ledger. `git status` limpo no inicio (branch `dev`, HEAD 6c
 - deviated: Tres regras alem dos 12 itens: slug (GRL-002), extensoes do esquema com as emendas (GRL-005) e D0 (GRL-015).
 - less-sure: Se a lista VAGUE_WORDS pega o bastante sem barrar criterio legitimo; calibrar no piloto.
 - gate: not-installed
+
+### Step 3 -- modelo template/intent.md (2026-10-06, executor)
+- Criado `.claude/references/template/intent.md`: o próprio arquivo é um `intent.md` válido (feature fictícia `contas-da-semana`, 3 REQs: 2 `comportamento` e 1 `restrição`; 1 premissa confirmada; 2 itens de fora do escopo, cada um citando `F<n>`; D0 vazio). Comentários HTML marcam cada extensão como "emenda 000009" (decisão 1 = B).
+- `feature-layout.md`: um bloco aditivo marcado "Emenda 000009 (aditiva)" com ponteiro às extensões; nada removido ou renomeado.
+- Desvios: (a) `brief` não está no frontmatter (ver Step 1); (b) o frontmatter do modelo tem `designer_description` porque o arquivo é referência do harness; o verificador ignora chaves desconhecidas; (c) a Verify com `check_intent.py` roda no Step 4, que cria o verificador.
+- `run_all_checks.py` no baseline (15 PASS / 14 FAIL; 17 / 2 / 9).
+
+### Step 3 -- reflection-on-action | 2026-10-06 17:18 UTC | Modelo de intent.md com exemplo ficticio
+- happened: Criei template/intent.md como intent valido de feature ficticia e um ponteiro aditivo em feature-layout.md.
+- deviated: Brief indexado na secao, nao no frontmatter; frontmatter com designer_description; checagem pelo verificador fica no Step 4.
+- less-sure: Se o specify do 000011 aceita o indice F/A como origem suficiente da retraducao.
+- gate: not-installed
