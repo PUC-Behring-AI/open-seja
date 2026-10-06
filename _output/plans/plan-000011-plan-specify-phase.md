@@ -1,3 +1,4 @@
+# DONE | 2026-10-06 18:15 UTC |
 # Plan 000011 | FEATURE-O | 2026-10-05 12:17 UTC | plan-specify-phase: fase specify do /plan (intenção aprovada vira .feature validado e aprovado pelo citizen) | Review: standard
 
 > **Origem**: movido do ledger do Doutourado em 2026-10-05 (proposal-000088; la era `plan-000080`). Os IDs roadmap-000006 e plan-000007..000016 sao deste ledger (tabela no roadmap). Referencias a research-NNNNNN, reflection-NNNNNN, communication-NNNNNN, roadmap-000062 e plan-000064..000074 apontam para o ledger do Doutourado (repositorio do pesquisador). Caminhos `open-seja/...` em Files passam a ser relativos a raiz deste repositorio.
@@ -297,3 +298,22 @@ Metacomm contradiction check: nenhuma intenção existente em `product-design-as
 - Lista de lacunas contra os planos 000007 a 000010 e texto sugerido para o designer.
 
 smoke: false
+
+## Implementation summary (2026-10-06)
+
+- Steps: 8/8 SUCCESS, executados por um subagente Opus (um commit por step); orquestrador revisou e fechou.
+- Arquivos: `.claude/references/general/specify-phase.md` (SPC-001..018), `.claude/skills/scripts/check_specify.py` (verificacao, `--status`, `--approve` com lock) + `test_check_specify.py` + 44 fixtures golden em `tests/fixtures/specify/`, passo 2c no `_internal/plan/standard/SKILL.md`, `--specify [<slug>]` no `/plan`, ponteiros em CYC-003/006, `feature-layout.md`, `gherkin-spec-format.md`.
+- Emenda D-004 aplicada: dois objetos de aprovacao -- o citizen aprova a Retraducao (primeira pessoa, exemplos narrados, "O que eu nao vou fazer") e nunca ve o `.feature`; quem le codigo aprova o `.feature` como contrato (opcao "ninguem" fica visivel como `contract_by: ninguem`).
+- Execucoes de referencia e dry-run SIMULADOS pelo executor; nenhum citizen real reconheceu a Retraducao (nao medido).
+- Baseline novo: run_all_checks 18 PASS / 14 FAIL (contadores 17/2/9); pytest 955 passed / 12 failed.
+- Proposta ao designer: D-011 (a aprovacao do specify e um comando com prova, sobre dois objetos) e STATUS implemented para REQ-MC-011 -- lote do plan-000015 Step 10.
+- Quality gate: `/critique review` (code-reviewer standard): 0 critical, 9 advisory; corrigidos 1, 3-9 no commit 64c5483 (hash normalizado do `.feature`, `copymode` na escrita atomica, `- Exemplo:` na coluna 0, constante morta, GRL-014, SPC-010/013/016); o advisory 2 ("flags reservadas" no contrato, CYC-006 e tabela de decisoes) fica para o fechamento do plan-000012, que edita o contrato.
+
+### Generator-Critic Iterations
+- Iteration count: 1/2
+- Findings per iteration: [0 critical, 9 advisory]
+- Resolution status: all resolved except advisory 2 (deferred to plan-000012 close)
+
+## Reflection
+
+- 2026-10-06: O executor aplicou a emenda D-004 criando dois objetos de aprovacao e um campo novo (scenarios_contract_by); o dry-run mostrou que nenhuma ferramenta confere se a mensagem e o contrato dizem o mesmo (sala Azul x primeira sala da lista). (notes 8, with deviation 8, with gate 0)

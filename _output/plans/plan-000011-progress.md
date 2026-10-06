@@ -222,3 +222,4 @@ Entregue: protocolo `specify-phase.md` (SPC-001..018, com a emenda D-004: mensag
 - Item 8: `- Exemplo:` na coluna 0 logo depois do item conta como exemplo; a forma indentada continua valendo. O ramo antigo, inalcançável para coluna 0, foi fundido num só `elif`. Teste novo.
 - Item 9: `SPECIFY_MAX_AUTOFIX` removida (sem consumidor). O SPC-008 diz que o limite de 3 tentativas vive só no SPC e no SKILL do `/plan`.
 - Docs: GRL-014 (`--specify` implementada, não reservada); SPC-013 (o que `stale` observa e por que, mais a normalização do hash); SPC-010 e docstring (atomicidade por arquivo, falha entre as duas escritas cai em `sem-campo`, recuperável); SPC-016 (sem `features/`: varredura 0, `--feature` sai 2).
+- drift: not-measured
