@@ -185,7 +185,7 @@ Rodar `run_all_checks.py` e `/critique validate` nos arquivos novos; conferir qu
 - **Interface**: N/A
 - **Verify**: `run_all_checks.py` retorna o mesmo conjunto de falhas pré-existentes do Step 1 (nenhuma nova); vocabulário consistente (`git grep -n "D3a" ` aparece nos quatro lugares); zero termos de C1; progress lista as pendências.
 - **Tests**: N/A (verificação)
-- [ ] Done
+- [x] Done
 
 ## Coverage (advisory)
 

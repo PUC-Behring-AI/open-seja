@@ -115,3 +115,25 @@ Nada escrito fora do ledger. `git status` limpo no inicio.
 - deviated: Nenhum.
 - less-sure: Se o plano 000014 aceita as definicoes de cadeia completa e populacao do D3a sem emenda.
 - gate: not-installed
+
+### Step 7 -- fechamento (2026-10-06, executor)
+- `run_all_checks.py` (com `< /dev/null`): 15 PASS / 14 FAIL, contadores 17 undefined / 2 / 9 = baseline. pytest: 626 passed / 12 failed = baseline. Nenhum arquivo novo reclamado por check algum.
+- Vocabulario: `D3a` aparece em `drift-metric.md`, `drift-control-protocol.md`, `pilot-run-record.md` e nas fixtures (`casos.json`, `README.md`); nomes de degrau, estados e codigos `NM-*` batem com CYC-009/010/016 e com o que o plan-000014 cita. Sem travessao tipografico nem aspas curvas. Sem nome de pessoa/parceiro/instituicao nos arquivos novos (a lista de termos de C1 e do orquestrador, que roda o `git grep`).
+- Recontagem do Step 3: tabela no Step 3 (0 divergencias, reconferida no fechamento).
+- Decisoes pendentes: 1=B, 2=B, 3=A, 4=B, todas `[default; aceito 2026-10-06]`; nenhuma no default sem aceite.
+- Itens abertos para o designer: D-NNN do oraculo independente (lacuna 8); texto de H-009 abaixo.
+
+**Texto sugerido ao designer (prosa Human; NAO escrito em `product-design/`), para colar em H-009 §3 2.9 via `/implement --manual`:**
+
+1. Na medida de H-009: "A divergencia e medida por degrau, nao em numero unico: intencao->cenario (D1), cenario->teste (D2) e teste->codigo em duas leituras, verdade (D3a) e excesso (D3b), cada uma com os estados coberto, descoberto e nao medido; a definicao esta em `.claude/references/general/drift-metric.md`. O tempo ate a primeira feature aprovada pelo designer e medida complementar."
+2. Na regra de comparacao e na refutacao: "O ciclo padrao nao tem REQ nem cenario; por isso D1 e D2 do ciclo padrao so existem por retrofit contra o oraculo do designer, e a comparacao direta e feita em D3a, D3b e O1 (cenarios do oraculo que falham no codigo final). Divergencia igual ou maior no estendido em um degrau significa `D_B >= D_A`, com empate quando a diferenca e menor que um item do denominador."
+3. Em "O que o D nao ve" (acrescentar ao fim de 2.9): "O vetor D mede presenca de tag, de teste e de verde sobre o que ja virou requisito; nao ve omissao (o resíduo do brief, D0, lido fora do D, `NM-SEM-INDICE-BRIEF` quando as frases do brief nao foram indexadas) nem distorcao (julgada pela auditoria semantica e pela retraducao do citizen)."
+4. Na condicao de refutacao: "Se, no piloto, ajustes e recusas no specify, escapes de intencao antes do codigo e mutantes virados em requisito forem todos zero, a aprovacao virou ritual, H-009 cai e H-001 volta a pedir adequacao por posicao na escala."
+
+**Lacunas que afetam os planos 000009-000016**: ver Step 6 e a tabela de lacunas em `drift-metric.md` (formato do relatorio do runner; `baseline_moved`; rodada `full`; colunas derivadas; `--freeze` de M1; indice de frases do brief).
+
+### Step 7 -- reflection-on-action | 2026-10-06 17:09 UTC | Fechar consistencia, C1 e decisoes pendentes
+- happened: Rodei checks e pytest (baseline mantido), conferi vocabulario entre os arquivos e registrei o texto sugerido a H-009.
+- deviated: Nenhum.
+- less-sure: A lista de termos de C1 nao esta comigo; a varredura e do orquestrador.
+- gate: not-installed
