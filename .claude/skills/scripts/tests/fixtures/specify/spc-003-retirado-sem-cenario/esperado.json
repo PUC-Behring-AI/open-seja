@@ -1,0 +1,10 @@
+{
+  "descricao": "REQ 003 retirado sem cenário (não dispara)",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 0,
+  "status": "draft",
+  "findings": []
+}

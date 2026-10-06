@@ -1,0 +1,12 @@
+{
+  "descricao": "pasta com intent.md e sem .feature: missing",
+  "args": [
+    "--feature",
+    "contas-da-semana",
+    "--status"
+  ],
+  "exit_code": 0,
+  "status": "missing",
+  "reasons": [],
+  "findings": []
+}

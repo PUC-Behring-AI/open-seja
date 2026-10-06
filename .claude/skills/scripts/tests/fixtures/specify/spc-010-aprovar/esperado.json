@@ -1,0 +1,19 @@
+{
+  "descricao": "--approve com tudo verde grava lock e 5 campos; repetir dá os mesmos bytes",
+  "args": [
+    "--feature",
+    "contas-da-semana",
+    "--approve",
+    "--at",
+    "2026-10-06T15:00Z",
+    "--by",
+    "usuario",
+    "--contract-by",
+    "usuario"
+  ],
+  "exit_code": 0,
+  "status": "approved",
+  "intent_final": "intent-final.md",
+  "lock_final": "lock-final.json",
+  "findings": []
+}

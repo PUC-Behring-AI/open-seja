@@ -1,0 +1,10 @@
+{
+  "descricao": "1 REQ, 1 cenário",
+  "args": [
+    "--feature",
+    "lista-de-tarefas"
+  ],
+  "exit_code": 0,
+  "status": "draft",
+  "findings": []
+}

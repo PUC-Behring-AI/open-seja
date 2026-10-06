@@ -1,0 +1,17 @@
+{
+  "descricao": "PASS e percentual na retradução (dispara SPC-018)",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 1,
+  "status": "draft",
+  "findings": [
+    [
+      "SPC-018",
+      "warning",
+      "features/contas-da-semana/intent.md",
+      75
+    ]
+  ]
+}

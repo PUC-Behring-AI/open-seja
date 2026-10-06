@@ -1,0 +1,6 @@
+{
+  "descricao": "varredura sem argumentos: scenarios: approved com lock que não bate, sai 1",
+  "args": [],
+  "exit_code": 1,
+  "findings": []
+}

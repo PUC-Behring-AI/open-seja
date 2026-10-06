@@ -1,0 +1,17 @@
+{
+  "descricao": "item sem primeira pessoa (dispara SPC-017 aviso)",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 1,
+  "status": "draft",
+  "findings": [
+    [
+      "SPC-017",
+      "warning",
+      "features/contas-da-semana/intent.md",
+      77
+    ]
+  ]
+}

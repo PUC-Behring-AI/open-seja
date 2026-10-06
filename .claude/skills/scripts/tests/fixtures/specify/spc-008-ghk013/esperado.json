@@ -1,0 +1,17 @@
+{
+  "descricao": "aviso GHK-013 (URL no step) vira SPC-008 aviso e bloqueia",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 1,
+  "status": "draft",
+  "findings": [
+    [
+      "SPC-008",
+      "warning",
+      "features/contas-da-semana/contas-da-semana.feature",
+      8
+    ]
+  ]
+}

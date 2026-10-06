@@ -1,0 +1,6 @@
+{
+  "descricao": "varredura sem argumentos: feature aprovada e lock bate, sai 0",
+  "args": [],
+  "exit_code": 0,
+  "findings": []
+}

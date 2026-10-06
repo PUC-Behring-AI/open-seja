@@ -1,0 +1,17 @@
+{
+  "descricao": "intent.md aprovado mas com erro P2 em check_intent (dispara SPC-001)",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 1,
+  "status": "draft",
+  "findings": [
+    [
+      "SPC-001",
+      "error",
+      "features/contas-da-semana/intent.md",
+      34
+    ]
+  ]
+}

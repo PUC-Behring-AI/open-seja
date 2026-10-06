@@ -1,0 +1,23 @@
+{
+  "descricao": "REQ 002 ativo sem cenário (dispara SPC-003 e SPC-008/GHK-005)",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 1,
+  "status": "draft",
+  "findings": [
+    [
+      "SPC-003",
+      "error",
+      "features/contas-da-semana/intent.md",
+      34
+    ],
+    [
+      "SPC-008",
+      "error",
+      "features/contas-da-semana/intent.md",
+      34
+    ]
+  ]
+}

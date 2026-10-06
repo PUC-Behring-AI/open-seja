@@ -1,0 +1,18 @@
+{
+  "descricao": "validador do plan-000010 ausente: sai 2 e não escreve nada",
+  "args": [
+    "--feature",
+    "contas-da-semana",
+    "--approve",
+    "--at",
+    "2026-10-06T15:00Z",
+    "--by",
+    "usuario",
+    "--contract-by",
+    "usuario"
+  ],
+  "exit_code": 2,
+  "simulate_missing_validator": true,
+  "unchanged": true,
+  "findings": []
+}

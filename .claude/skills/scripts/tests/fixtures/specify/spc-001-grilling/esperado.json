@@ -1,0 +1,17 @@
+{
+  "descricao": "intent.md em grilling: recusa (dispara SPC-001)",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 1,
+  "status": "draft",
+  "findings": [
+    [
+      "SPC-001",
+      "error",
+      "features/contas-da-semana/intent.md",
+      1
+    ]
+  ]
+}

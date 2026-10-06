@@ -1,0 +1,20 @@
+{
+  "descricao": "cenário aprovado renomeado sem linha em Mudanças (dispara SPC-012)",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 1,
+  "status": "stale",
+  "reasons": [
+    "feature"
+  ],
+  "findings": [
+    [
+      "SPC-012",
+      "error",
+      "features/contas-da-semana/scenarios.lock.json",
+      1
+    ]
+  ]
+}

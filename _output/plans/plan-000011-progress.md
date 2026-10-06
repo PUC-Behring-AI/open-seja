@@ -67,3 +67,22 @@ Verify: 48 ocorrencias de `SPC-`; 18 regras com "Quem decide" e "Critério de ac
 - deviated: Emenda D-004: dois objetos de aprovacao (mensagem ao citizen, contrato a quem le codigo); SPC-017/018 novas; quinto campo scenarios_contract_by; lock com hash da retraducao.
 - less-sure: Se o formato da secao Retraducao e simples o bastante para o agente escrever sem tropecar no verificador.
 - gate: not-installed
+
+## Step 3 -- fixtures golden (2026-10-06, executor)
+
+41 casos em `.claude/skills/scripts/tests/fixtures/specify/` (cada pasta e uma raiz de projeto; README com uma linha por caso), todos ficticios e **simulados** (nenhuma pessoa real aprovou nada; "usuario" e um papel):
+- validos: `ok-completo` (3 REQs: 2 `comportamento`, 1 `restrição` com `Esquema do Cenário`; erro "desfazer" com cenario proprio; pt), `ok-minimo`, `ok-en` (en, "What I will not do");
+- disparo e negativo por regra checavel: SPC-001 (`grilling`, `sem-intent`, `intent-com-erro`; negativo `ok-*`), SPC-003 (`sem-cenario`, `retirado-com-cenario`; negativo `retirado-sem-cenario`), SPC-004 (`sem-numero`; negativo `numero-no-entao` e o Outline de `ok-completo`), SPC-007 (26 / 25 palavras), SPC-008 (`ghk013`, `skip`), SPC-010 (`aprovar`, `contrato-ninguem`, `falha-nao-grava`), SPC-011 (`rev-sem-mudanca` / `rev-com-mudanca`, `teto` = info), SPC-012 (sem / com linha em Mudancas), SPC-013 (`aprovado`, `rev-subiu`, `hash-mudou`, `retraducao-mudou`, `intencao-reaberta`, `sem-lock`, `missing`), SPC-017 (sem secao, REQ sem exemplo, REQ fora, "nao faz" faltando, sem primeira pessoa), SPC-018 (PASS/percentual, frase de 26 palavras);
+- retrocompatibilidade: `sem-features`, `features-de-terceiros`, `pasta-sem-intent`, `check-features-ausente`, e varredura sem argumentos (`varredura-aprovado-ok`, `varredura-aprovado-stale`, `varredura-draft`) para o check do `run_all_checks` (Step 7).
+
+`esperado.json`: `args`, `exit_code`, `status`, `reasons`/`reqs` (stale), `findings` exatos `[regra, severidade, arquivo, linha]`, e `intent_final`/`lock_final` ou `unchanged` nos casos de `--approve`. As linhas foram tiradas do texto do fixture (a linha que a regra deve apontar) e conferidas a mao em `spc-008-*` (linha 8 = URL, linha 19 = tag `@skip`), `spc-003-sem-cenario` (linha 34 = linha do REQ 002) e `spc-003-retirado-com-cenario` (linha 26 = `Esquema do Cenário`). As linhas SPC-008 sao as que `check_features.py` ja devolve (o verificador embrulha, nao recalcula). Lock e frontmatter finais de `spc-010-*` foram calculados por uma implementacao independente da regra de `specify-phase.md` (gerador no scratchpad, nao versionado), nao pelo verificador.
+
+Conferencia: todos os `intent.md` validos passam em `check_intent.py --require-approved` (so os casos `grilling` dao P6 e `intent-com-erro` da P2, como esperado); todos os `.feature` passam em `check_features.py --strict` exceto os disparos de GHK previstos (`spc-003-sem-cenario` GHK-005, `spc-008-*`, `spc-013-missing` sem `.feature`). C1 zero; sem travessao nem aspas curvas.
+
+Desvio: as tres execucoes de referencia (`ref-a-ajuste`, `ref-b-sem-codigo`, `ref-c-stale`) ficam para o Step 6, que as escreve com as versoes intermediarias e a saida do verificador; o README ja as anuncia.
+
+### Step 3 -- reflection-on-action | 2026-10-06 18:00 UTC | Fixtures golden
+- happened: Escrevi 41 casos com esperado.json: ok pt/en/minimo, disparo e negativo por regra checavel, aprovacao com bytes finais, estados stale e retrocompatibilidade.
+- deviated: Execucoes de referencia movidas para o Step 6; casos novos para SPC-017/018 (emenda D-004) e para a varredura do run_all_checks.
+- less-sure: Se a contagem de palavras do step deve excluir a palavra-chave (decidi que sim).
+- gate: not-installed

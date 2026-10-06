@@ -1,0 +1,17 @@
+{
+  "descricao": "step com 26 palavras (dispara SPC-007)",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 1,
+  "status": "draft",
+  "findings": [
+    [
+      "SPC-007",
+      "warning",
+      "features/contas-da-semana/contas-da-semana.feature",
+      11
+    ]
+  ]
+}
