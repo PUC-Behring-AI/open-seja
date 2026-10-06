@@ -104,3 +104,14 @@ Nada escrito fora do ledger. `git status` limpo no inicio.
 - deviated: A ligacao timestamp-fonte ja estava no protocolo (Step 4); nao editei o protocolo de novo.
 - less-sure: Onde o piloto guarda o registro (features/<slug>/pilot/) e sugestao, nao decisao.
 - gate: not-installed
+
+### Step 6 -- costura e lacunas (2026-10-06, executor)
+- `drift-metric.md` ganhou as tabelas "Quem alimenta e quem consome" (itens 3 a 10) e "Lacunas contra o plan-000007" (8 lacunas, cada uma com item dono).
+- `extended-cycle-contract.md`: uma linha de ponteiro (`Medida: ver drift-metric.md e drift-control-protocol.md`) no fim de CYC-016. Nao toca gate, hooks, settings nem `feature-layout.md`.
+- Lacunas relevantes para os planos 000009-000016: (000013) `baseline_moved` e rodada `full` ao fim do plano; (000010/000014) formato do relatorio do runner (Cucumber JSON vs JUnit XML); (000014) colunas derivadas, cadeia completa, populacao do D3a, `--freeze` de M1; (000009) indice de frases do brief para sair de `NM-SEM-INDICE-BRIEF`.
+
+### Step 6 -- reflection-on-action | 2026-10-06 17:09 UTC | Costura com os itens vizinhos e lacunas
+- happened: Acrescentei as tabelas de quem alimenta e consome e as oito lacunas com dono; uma linha de ponteiro em CYC-016.
+- deviated: Nenhum.
+- less-sure: Se o plano 000014 aceita as definicoes de cadeia completa e populacao do D3a sem emenda.
+- gate: not-installed

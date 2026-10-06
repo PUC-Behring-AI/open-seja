@@ -288,3 +288,31 @@ Este arquivo **não**:
 
 - **Quem decide**: designer.
 - **Critério de aceitação**: nenhum texto deste arquivo traz código de calculador nem altera um limiar do portão.
+
+---
+
+## Quem alimenta e quem consome
+
+| Item | Plano | Alimenta | Consome |
+|---|---|---|---|
+| 3 | plan-000009 (grill) | `intent.md`, REQ IDs, índice de frases do brief (D0) | DRM-002 (unidade do D1); `NM-SEM-INDICE-BRIEF` |
+| 4 | plan-000010 (formato Gherkin) | `.feature`, validador de tags `@REQ-`, relatório do runner | DRM-003 (tag e chave de cenário) |
+| 5 | plan-000011 (specify) | aprovação do `intent.md` e dos `.feature`, `check_specify.py --status` | DRM-006 (`scenario_status`) |
+| 6 | plan-000012 (plano a partir de cenários) | campo `Scenarios:` (informativo, fora do vetor) | -- |
+| 7 | plan-000013 (teste-primeiro) | teste, relatório do runner, `gate.json`, registro "vermelho pelo motivo certo", cobertura por cenário, `baseline_moved` | DRM-004, DRM-005, DRM-011 |
+| 8 | plan-000014 (relatório no REFLECT) | calcula o relatório, congela M1, calcula o delta | todo este arquivo; `casos.json` como contrato de teste |
+| 9 | plan-000015 (integração) | quickguide pt-BR e ponteiros | nomes dos degraus (D1, D2, D3a, D3b) |
+| 10 | plan-000016 (piloto) | registros de execução (`pilot-run-record.md`), oráculo | `drift-control-protocol.md` e este arquivo |
+
+## Lacunas contra o plan-000007 e o item dono de cada uma
+
+| # | Lacuna | Item dono |
+|---|---|---|
+| 1 | O esquema de rastreabilidade de `feature-layout.md` só tem REQ, cenário, teste, código e gate. D3a e D3b precisam também de `test_result`, `red_reason_ok`, `touched_uncovered` e `baseline_moved`. Tratadas como colunas **derivadas** (DRM-006). Se alguma não for derivável, é emenda aditiva a `feature-layout.md`. | plan-000014 |
+| 2 | A condição de refutação do plan-000007 fala em "dois dos três degraus", mas o ciclo padrão não tem REQ nem cenário. A regra de comparação em `drift-control-protocol.md` (seção 7) opera isso. O texto de H-009 (prosa Human) pede a ressalva correspondente. | designer (via `/implement --manual`) |
+| 3 | O `gate.json` não traz indicador de baseline aceito; o plan-000013 o deriva do diff de `quality-baseline.json`. Este arquivo cita a fonte (`baseline_moved`, DRM-006). | plan-000013 |
+| 4 | O `/implement` por step só roda `--fast`; D3a exige `full` PASS. Sem a rodada `full` ao fim do plano, D3a fica `NM-SEM-GATE` mesmo com testes verdes. | plan-000013 |
+| 5 | O contrato diz Cucumber JSON com chave de cenário (CYC-012); os planos 000010 e 000014 citam JUnit XML. Este arquivo só exige estados (`passed`, `failed`, `error`, `skipped`, `xfail`, `undefined`, `absent`) e chave de cenário. | plan-000010 |
+| 6 | Quem congela M1 (`--freeze`) não estava fixado entre os planos. | plan-000014 e plan-000015 |
+| 7 | "Cadeia completa" e a população do D3a são definições deste arquivo, não do contrato; o plan-000014 as adota ou emenda. | plan-000014 |
+| 8 | Registrar o oráculo independente como `D-NNN` é decisão do designer (prosa Human); não foi feito. | designer |

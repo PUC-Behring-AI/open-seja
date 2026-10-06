@@ -175,7 +175,7 @@ Em `drift-metric.md`, acrescentar a tabela "quem alimenta e quem consome": item 
 - **Interface**: N/A
 - **Verify**: a tabela cobre os itens 3 a 10; `git diff --stat` do contrato mostra no máximo uma linha adicionada; o diff não toca `gate`, hooks, `settings` nem `feature-layout.md`.
 - **Tests**: N/A (costura documental)
-- [ ] Done
+- [x] Done
 
 ### Step 7: Fechar: consistência, C1 e decisões pendentes
 Rodar `run_all_checks.py` e `/critique validate` nos arquivos novos; conferir que os nomes de degrau, estados e tags batem entre `drift-metric.md`, `drift-control-protocol.md`, fixtures e o plano 000007; conferir C1 (`git grep -i` dos termos do Step 1 sobre o diff). Registrar no progress `_output/plans/plan-000008-progress.md` (Doutourado): resultado dos checks, a tabela de recontagem do Step 3, as lacunas e quais decisões pendentes ainda estão no default, e o texto sugerido (para o designer colar via `/implement --manual`) de **uma frase** a acrescentar à medida de H-009 e à regra de comparação, sem editar prosa Human.
