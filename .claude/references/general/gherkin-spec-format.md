@@ -68,6 +68,7 @@ O validador **reutiliza** `parse` e `table` de `check_intent.py` (um parser só 
 - Os REQs são as linhas da tabela da seção "Requisitos" cuja primeira célula casa `REQ-<slug>-NNN`. Linha com `Estado: retirado` existe (a tag que a cita não é órfã), mas não exige cenário.
 - `status` do frontmatter: `grilling` ou `approved` (feature-layout.md). Só `approved` torna REQ sem cenário um **erro** (GHK-005); em `grilling` é informação (`não medido`).
 - Campo opcional `scenarios: approved` no frontmatter `[default; aceito 2026-10-06]` (decisão pendente 5 = A): o validador só o **lê** e expõe `scenarios_approved: true | false | null` na matriz (`null` = campo ausente). Quem o escreve é o ponto de aprovação do plan-000011. Sem o campo, o D1 não separa cenário rascunho de aprovado (`NM-CENARIOS-STALE`, DRM-002).
+- Fase specify e aprovação dos cenários: ver `.claude/references/general/specify-phase.md` (quem escreve `scenarios: approved`, o `scenarios.lock.json` e o estado `stale` de `check_specify.py --status`).
 - A seção "Modelo e termos" (coluna `Termo`) alimenta GHK-017; "Fora do escopo" alimenta o aviso de GHK-019; `serve:` alimenta GHK-018.
 
 ## 5. Um cenário por comportamento

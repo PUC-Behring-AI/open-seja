@@ -35,7 +35,7 @@ Decisoes pendentes 1 a 6 aceitas nos defaults (1=A, 2=B, 3=A, 4=A, 5=A, 6=A) `[d
 | (f) onde moram | scripts `.claude/skills/scripts/`; testes `.claude/skills/scripts/tests/test_<mod>.py` (importam `from check_x import ...`); fixtures `.claude/skills/scripts/tests/fixtures/specify/` (nao `tests/fixtures/specify/`). |
 | (g) `run_all_checks.py` | descobre `check_*.py` por glob e roda `python <script>` sem argumentos, `cwd=raiz`, timeout 120 s; nao ha "pulado". O check condicional e o proprio script: `check_specify.py` sem argumentos varre `features/*/` e so reprova `stale` em feature com `scenarios: approved`; sem `features/` imprime "nada a verificar" e sai 0. Logo o registro do Step 7 e automatico (glob) mais a linha em `check_plugin_registry.json`; `run_all_checks.py` nao precisa ser editado. |
 
-Termos de C1 usados nos Steps seguintes (grep case-insensitive sobre os arquivos novos/alterados): `stone`, `tecgraf`, `petrobras`, `puc`, `behring` (o repositorio ja tem `PUC-Behring-AI` em URLs de remote, pre-existente e fora do escopo).
+Termos de C1 usados nos Steps seguintes: a lista de nomes de parceiro, instituicao e pessoa do designer (grep case-insensitive sobre os arquivos novos e alterados). A lista nao e copiada aqui (C2). O repositorio ja tem o nome da organizacao em URLs de remote e na identidade git, pre-existente e fora do escopo.
 
 Baseline confirmado: `run_all_checks.py` 17 PASS / 14 FAIL, contadores 17 undefined / 2 error(s) / 9 error(s); pytest 863 passed / 12 failed (`test_html_report` x8, `test_summarize_artifacts` x4). `git status` limpo.
 
@@ -169,4 +169,49 @@ Registro do check: **sem edicao de `run_all_checks.py`** -- ele descobre `check_
 - happened: Segui o passo 2c sobre a intencao da grill: rodada 1 com 2 erros e 4 avisos, uma autocorrecao, aprovacao gravada; run_all_checks num projeto ficticio so muda o check_specify quando a aprovacao fica velha.
 - deviated: run_all_checks.py nao foi editado: o glob registra o check; dry-run feito por mim, no scratchpad, sem pessoa.
 - less-sure: Se mensagem e contrato com valores diferentes no exemplo confundem quem aprova os dois.
+- gate: not-installed
+
+## Step 8 -- contrato com os itens vizinhos (2026-10-06, executor)
+
+**O que este plano entrega a quem**
+
+| Item | Plano | Recebe | Regra |
+|---|---|---|---|
+| 6 | plan-000012 (plano a partir de cenarios) | cabecalho com `Feature: <slug>` (grill) e `Specify: approved (rev N)` (2c); as chaves de cenario `<slug>/<arquivo>::<nome>` no `index` do `scenarios.lock.json` (e as tags `@REQ-` na matriz de `check_features.py --matrix`) como fonte de `Scenarios:`; plano v2 so parte com `check_specify.py --status` = `approved`; `Specify: skipped` + step com `Tests:` nao-N/A e invalido em v2 (o proxy e a classificacao da grill) | SPC-002, SPC-010, SPC-013 |
+| 7 | plan-000013 (teste-primeiro) | cenario -> teste pela chave do lock; `skip`/`xfail` ja barrados antes da aprovacao (GHK-014 -> SPC-008); o IMPLEMENT deve recusar step cujo `.feature` esta `stale` (a aprovacao nao vale mais) | SPC-008, SPC-012, SPC-013 |
+| 8 | plan-000014 e plan-000008 (D1, relatorio) | `check_specify.py --feature <slug> --status --json` (`schema_version: 1`; `status`, `reasons`, `reqs`): `approved` e o unico estado que conta como cenario aprovado; `stale`/`draft`/`missing` = `não medido` (`NM-CENARIOS-STALE`), nunca `coberto`; `reqs` diz quais REQs; `scenarios_contract_by: ninguem` vira "contrato: não lido" ao lado do resultado (Q4); a retradução e o objeto da auditoria semantica (mensagem x contrato, ver observacao do Step 7) | SPC-009, SPC-013, SPC-017 |
+| 9 | plan-000015 (integracao) | quickguide pt-BR e `/help` descrevem `/plan --specify` e as **duas** aprovacoes (mensagem ao citizen, contrato a quem le codigo, opcao "ninguem le codigo"); `check_specify.py` no `run_all_checks` dos projetos reprova aprovacao velha; atualizar GRL-014 ("`--specify` continua reservada") | SPC-009, SPC-016 |
+| 10 | plan-000016 (piloto) | tempo de specify = de `approved_at` (grill) a `scenarios_approved_at`; linha de base simulada (ref-a: 1 ajuste, 1 autocorrecao; dry-run: 1 autocorrecao, 6 achados na rodada 1); contar Ajustar x Voltar a entrevista; calibrar `SPECIFY_MAX_ROUNDS` e `SPECIFY_MAX_AUTOFIX`; medir se o citizen reconhece a retradução (teste da surpresa) -- hoje **nao medido** | SPC-011, SPC-018 |
+
+Reexecutado: `pytest` de `test_check_specify.py` + `test_check_features.py` + `test_check_intent.py` 312 passed; os exemplos de `specify-phase.md` passam em `check_features.py --strict` (teste `test_spec_good_examples_pass_check_features_strict`, pt e en); pytest do harness **955 passed / 12 failed** (os mesmos 12); `run_all_checks.py` **18 PASS / 14 FAIL** (o conjunto de 14 do baseline; contadores 17/2/9); `uvx ruff check` limpo nos dois .py novos (a partir da raiz). Vocabulario conferido com 000007-000010: `REQ-<slug>-NNN`, `status: grilling|approved`, `scenarios: approved`, chave `<slug>/<arquivo>::<nome>`, `NM-CENARIOS-STALE`, `scenario_status` (DRM-006: approved/stale/draft/missing). C1: grep dos termos sobre os arquivos novos e alterados -> zero (uma linha deste progress que listava os termos foi reescrita sem eles, por C2).
+
+Ponteiros (uma linha cada, nenhum esquema mudado): CYC-003 ganhou "**Protocolo**: ... `specify-phase.md` ... `check_specify.py`" (a meia linha de CYC-006 foi no Step 5); `feature-layout.md` (secao `*.feature`); `gherkin-spec-format.md` (secao 4, depois de `scenarios: approved`). Nenhum arquivo de gate, hook, `settings` ou de esquema.
+
+**Decisoes pendentes e o default em uso**: 1 = A (lock + campo; SPC-010, SPC-013), 2 = B (3 ajustes; SPC-011), 3 = A (idioma do pedido; Derivacao), 4 = A (o LLM escreve, as maquinas conferem; SPC-008), 5 = A (restricao com numero ou volta a grill; SPC-004), 6 = A (um `<slug>.feature`; Derivacao), todas `[default; aceito 2026-10-06]`.
+
+**Lacunas (estado ao fim do plano)**
+1. `check_features.py --matrix` ainda expoe `scenarios_approved` lendo so o campo; quem consome (plan-000014) deve ler `check_specify.py --status`. Nao editei `check_features.py` (instrucao).
+2. Layout (000007): `scenarios.lock.json` e a secao `## Retradução` sao aditivos; `check_features` e `check_intent` os toleram (Step 1). Falta a emenda no esquema de `feature-layout.md` (texto sugerido abaixo).
+3. Grill reaberta (lacuna 4 do plano): o campo `scenarios: approved` continua no frontmatter quando a grill reabre; `--status` devolve `stale (intencao-reaberta)` e a varredura do `run_all_checks` reprova. Alternativa para o 000015: a grill reaberta reescrever `scenarios: stale`. Decisao do designer.
+4. `restrição` nao observavel volta a grill (decisao 5 = A); restricao que so um gate externo mede continua sem solucao (emenda a 000008/000010 se o piloto pedir).
+5. Voz: sem `lint_controlled_language.py`; `check_specify` confere so tamanho de frase e paragrafo e a lista fixa de termos tecnicos; "uma ideia por frase", termos fixos e primeira pessoa (alem da palavra "eu"/"I") sao `voz: não verificada`.
+6. Equivalencia mensagem x contrato nao e mecanica: no dry-run o exemplo da retradução ("sala Azul") e o cenario ("a primeira sala da lista") contam o mesmo comportamento com valores diferentes. Para a auditoria semantica do 000014.
+7. GRL-014 em `grill-phase.md` ainda diz "`--specify` continua reservada para o plan-000011" (fora dos Files deste plano).
+8. `run_all_checks` dos projetos que adotarem `features/` passa a reprovar aprovacao velha (`check_specify.py` sem argumentos). E o pretendido (como 000009/000010 fizeram), mas muda o health check deles.
+9. Severidade: SPC-008 bloqueia por aviso GHK (estrito, como o plano), contra a sugestao do progress do 000010 ("avisos sao do power dev"). Se o piloto mostrar GHK-017 ruidoso (o dry-run teve 4 em 6 achados), reabrir: aviso GHK fica so no registro do contrato.
+
+**Texto sugerido ao designer** (prosa Human; NAO escrito em `product-design/`; os arquivos de referencia via `/implement --manual`):
+- `feature-layout.md`, secao `intent.md`: "Frontmatter opcional escrito so por `check_specify.py --approve` (SPC-010): `scenarios: approved`, `scenarios_approved_at`, `scenarios_approved_by`, `scenarios_contract_by` (`ninguem` quando ninguem le codigo), `scenarios_rev`. Secao opcional `## Retradução` (SPC-017): a mensagem ao citizen, com `rev`." Estrutura de pastas: acrescentar `scenarios.lock.json (specify; prova da aprovacao: versao de cada REQ, chaves de cenario, hash dos .feature e da retradução)`.
+- `drift-metric.md` DRM-002 / DRM-013: "`stale`, `draft` e `missing` de `check_specify.py --status` contam como `não medido` (`NM-CENARIOS-STALE`), nunca como `coberto`; `scenarios_contract_by: ninguem` aparece como 'contrato: não lido'."
+- Decisao **D-011** (proposta, via `apply_marker.py --marker DECISION_APPEND`, com confirmacao): "**D-011: a aprovacao da specify e um comando com prova, em dois objetos.** Context: o D1 precisa distinguir cenario aprovado de rascunho ou desatualizado, e D-004 separou a mensagem do contrato. Decision: o citizen aprova a retradução em primeira pessoa com exemplos narrados e o 'não faz'; quem le codigo aprova o `.feature` (ou o registro diz `ninguem`); so `check_specify.py --approve`, com tudo verde, grava os campos `scenarios_*` e o `scenarios.lock.json` (versao de cada REQ, hashes dos `.feature` e da retradução); qualquer mudanca depois torna o estado `stale`, que o D1 le como `não medido`. Consequences: aprovacao nao fica velha sem ninguem notar; mais um arquivo por feature; projetos com `features/` reprovam no `run_all_checks` com aprovacao velha. Rejected: so o campo no frontmatter (sem prova); tabela no `intent.md` (colide com o parser de REQ); mostrar o `.feature` ao citizen (D-004)."
+- §14, linha `[intended] Grill e specify no /plan` (REQ-MC-011): as duas metades estao entregues (grill no 000009, specify aqui). Um marcador `STATUS: implemented` cabe agora, se o designer confirmar; `[intended] Retradução como objeto de aprovação` (REQ-MC-012) tambem tem o mecanismo entregue (SPC-009, SPC-017), mas a medida de que o citizen reconhece a mensagem e do piloto (000016): sugestao, marcar so a REQ-MC-011.
+
+## Implementation summary
+
+Entregue: protocolo `specify-phase.md` (SPC-001..018, com a emenda D-004: mensagem ao citizen e contrato a quem le codigo; teste da surpresa), verificador `check_specify.py` (SPC-001/003/004/007/008/011/012/017/018, `--status` missing/draft/approved/stale com razoes e REQs, `--approve` atomico com lock e 5 campos, varredura para o `run_all_checks`, exit 0/1/2, registrado no plugin registry), 44 fixtures golden + 3 execucoes de referencia simuladas (com versoes intermediarias e a saida real), passo 2c no `/plan` e flag `--specify`, ponteiros em CYC-003/CYC-006, `feature-layout.md` e `gherkin-spec-format.md`. Medidas: 85 testes novos passam; harness 955 passed / 12 failed (os 12 pre-existentes); `run_all_checks` 18 PASS / 14 FAIL (o mesmo conjunto; PASS novo = `check_specify.py`), contadores 17/2/9. Nao medido: pyright (sem `libatomic.so.1`); entendimento real do citizen (nenhuma sessao com pessoa).
+
+### Step 8 -- reflection-on-action | 2026-10-06 18:12 UTC | Contrato com os itens vizinhos
+- happened: Registrei o que vai a 000012-000016, as nove lacunas, as seis decisoes no default, o texto sugerido (feature-layout, drift-metric, D-011, marcador de REQ-MC-011) e uma linha de ponteiro em CYC-003, feature-layout e gherkin-spec-format.
+- deviated: Reescrevi uma linha deste progress que listava os termos de C1 (C2 proibe nomes em _output).
+- less-sure: Se o designer quer o aviso GHK bloqueando a aprovacao, ou so no registro do contrato.
 - gate: not-installed

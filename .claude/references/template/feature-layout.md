@@ -67,6 +67,7 @@ Tabela de requisitos:
 - Estilo critério de aceitação: `Given` (contexto), `When` (ação do usuário), `Then` (resultado observável). Sem detalhe de implementação: nada de nome de função, tabela, rota, seletor ou tecnologia.
 - O `.feature` é um contrato endereçável, aprovado pelo power dev; o citizen aprova a retradução, não este texto (CYC-013, D-004).
 - Convenção e validador: ver `.claude/references/general/gherkin-spec-format.md` e `.claude/skills/scripts/check_features.py` (plan-000010).
+- Fase specify e aprovação dos cenários: ver `.claude/references/general/specify-phase.md` (retradução no `intent.md`, `scenarios.lock.json`, campos `scenarios_*`; verificador `check_specify.py`).
 
 ## `gate.json`
 

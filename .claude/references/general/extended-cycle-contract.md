@@ -48,6 +48,7 @@ O ciclo é PLAN, IMPLEMENT, REFLECT. O PLAN contém, nesta ordem, as fases grill
 - **Ponto de aprovação humana**: antes de escrever o plano, o designer aprova a mensagem e quem lê código aprova o `.feature` como contrato (CYC-013). No máximo 3 rodadas de ajuste; ajuste repetido indica REQ vago e a conversa volta à grill (§10, `[intended]`).
 - **Quem decide**: designer (a mensagem) e quem lê código (o contrato) aprovam; o `/plan` escreve.
 - **Critério de aceitação**: todo `Scenario` do `.feature` tem tag `@REQ-`; todo REQ aprovado do `intent.md` aparece em pelo menos um cenário, ou consta como descoberto (CYC-010); o registro da aprovação consta no plano.
+- **Protocolo**: fase specify e aprovação dos cenários: ver `.claude/references/general/specify-phase.md` (SPC-001..018) e o verificador `.claude/skills/scripts/check_specify.py`.
 
 ### CYC-004 -- Quando a specify é pulada `[default; aceito 2026-10-06]` (decisão pendente 2 = A)
 

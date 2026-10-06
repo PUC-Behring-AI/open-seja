@@ -16,9 +16,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
-
 import check_specify
+import pytest
 from check_specify import compute_status, main
 
 _TESTS_DIR = Path(__file__).resolve().parent
