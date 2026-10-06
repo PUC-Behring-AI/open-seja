@@ -8,7 +8,7 @@
     [
       "GHK-015",
       "info",
-      "steps/test_steps.py",
+      "steps/definitions.py",
       5
     ]
   ]

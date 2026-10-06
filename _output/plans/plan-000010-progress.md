@@ -63,3 +63,18 @@ Baseline confirmado: `run_all_checks.py` 16 PASS / 14 FAIL; `git status` limpo.
 - deviated: Casos extras para as tres emendas (GHK-017..019) e para --steps.
 - less-sure: As linhas esperadas dependem da minha leitura das regras; o Step 4 pode revelar divergencia de interpretacao.
 - gate: not-installed
+
+## Step 4 -- parser e regras de estrutura (2026-10-06)
+
+`check_features.py` criado (stdlib so; importa `parse`/`table`/`_norm` de `check_intent.py`, nao reescreve o parser de intent.md). Entregue neste step: `parse_feature` (en/pt, tags com linha, Rule, Background, Outline/Examples, doc strings e tabelas, tipos efetivos de And/But), `load_intent`, `validate_structure` (GHK-001, 002, 003, 004, 005, 009, 010, 011, 014, 016, 018, 019), `build_matrix`, `discover`, registro em `check_plugin_registry.json` (scope `features`). Testes: `.claude/skills/scripts/tests/test_check_features.py` (53 passam; golden por caso restrito as regras de estrutura).
+- Decisao de design: arquivo que nao parseia suprime GHK-005 da pasta (cobertura desconhecida, nao zero).
+- GHK-018 e GHK-019 (emendas do adendo) entraram aqui por serem estruturais; `@nao-faz` e proibida em Feature/Rule/Examples e o info de cobertura so aparece se "Fora do escopo" tem itens.
+- Achado do Step 3: arquivos `test_*.py` dentro de fixtures sao coletados pelo pytest do harness; os steps de exemplo dos fixtures de `--steps` foram renomeados para `steps/definitions.py`. Mesma ressalva vale para o `conftest`/`test_*.py` do Step 8 (ver la).
+- ruff limpo nos dois .py novos. pyright indisponivel neste ambiente (`libatomic.so.1` ausente no node do pyright): registrado como nao medido; o open-seja nao tem pyproject nem config de pyright.
+- Verificacao: `run_all_checks.py` 17 PASS / 14 FAIL (o PASS novo e `check_features.py`, que sem `features/` imprime "nada a verificar" e sai 0), contadores 17 undefined / 2 error(s) / 9 error(s); pytest do harness 744 passed / 12 failed (os mesmos 12 do baseline).
+
+### Step 4 -- reflection-on-action | 2026-10-06 17:38 UTC | Parser e regras de estrutura
+- happened: Implementei o parser Gherkin en/pt, load_intent reutilizando check_intent, as regras estruturais e a matriz; os 36 casos golden passaram na primeira rodada.
+- deviated: Rule como jornada (GHK-018) e @nao-faz (GHK-019) entraram aqui; fixtures de steps renomeadas para nao serem coletadas pelo pytest.
+- less-sure: O parser e minimo: construcoes raras do Gherkin (comentarios no meio de tabelas, Rule com Background proprio) nao foram exercitadas.
+- gate: not-installed

@@ -199,5 +199,15 @@
     },
     "scope": "intent",
     "critical": false
+  },
+  {
+    "script": "check_features.py",
+    "name": "Gherkin Spec Format",
+    "stack": {
+      "backend": ["any"],
+      "frontend": ["any"]
+    },
+    "scope": "features",
+    "critical": false
   }
 ]
