@@ -1,3 +1,4 @@
+# DONE | 2026-10-06 17:30 UTC |
 # Plan 000009 | FEATURE-O | METACOMM | 2026-10-05 11:26 UTC | plan-grill-phase: fase grill do /plan (entrevista até intenção detalhada com REQ IDs, voz que o citizen valida) | Review: standard
 
 > **Origem**: movido do ledger do Doutourado em 2026-10-05 (proposal-000088; la era `plan-000078`). Os IDs roadmap-000006 e plan-000007..000016 sao deste ledger (tabela no roadmap). Referencias a research-NNNNNN, reflection-NNNNNN, communication-NNNNNN, roadmap-000062 e plan-000064..000074 apontam para o ledger do Doutourado (repositorio do pesquisador). Caminhos `open-seja/...` em Files passam a ser relativos a raiz deste repositorio.
@@ -264,3 +265,20 @@ Metacomm contradiction check: nenhuma intenção existente em `product-design-as
 - Fixtures de três entrevistas e dados de calibração (rodadas, perguntas, avisos de voz).
 
 smoke: false
+
+## Implementation summary (2026-10-06)
+
+- Steps: 7/7 SUCCESS, executados por um subagente Opus (um commit por step); orquestrador revisou e fechou.
+- Arquivos: `.claude/references/general/grill-phase.md` (GRL-001..015), `.claude/references/template/intent.md`, `.claude/skills/scripts/check_intent.py` + `tests/test_check_intent.py` + fixtures `tests/fixtures/grill/` (3 entrevistas SIMULADAS), passo 2b no `_internal/plan/standard/SKILL.md`, `--grill` no `/plan`, bloco "Emenda 000009" em `feature-layout.md`, registro no `check_plugin_registry.json`.
+- Baseline novo: run_all_checks 16 PASS / 14 FAIL (o PASS extra e o `check_intent.py`), pytest 682 passed / 12 failed antes das correcoes; `test_check_intent.py` com 65 testes apos as correcoes.
+- Proposta ao designer: D-009 (a grill indexa o pedido e as respostas; a regra de parada e um verificador), texto no progress, Step 7 -- fica para o lote de marcadores do plan-000015 Step 10.
+- Quality gate: `/critique review` (code-reviewer standard): 0 critical, 9 advisory; todos corrigidos com teste primeiro no commit 6106881 (BOM, erro de leitura sem traceback, `|` em celula, fences, `--d0` invalido, docstring, cobranca de Mudancas com `--require-approved`, doc de `serve:`, contradicao do passo 2b com D-008).
+
+### Generator-Critic Iterations
+- Iteration count: 1/2
+- Findings per iteration: [0 critical, 9 advisory]
+- Resolution status: all resolved
+
+## Reflection
+
+- 2026-10-06: As entrevistas de calibracao foram simuladas pelo executor, entao o teto 5x4 segue sem evidencia; a revisao achou o passo 2b contradizendo D-008 para planos sem codigo, corrigido. (notes 7, with deviation 7, with gate 0)

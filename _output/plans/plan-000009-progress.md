@@ -174,3 +174,4 @@ Nada escrito fora do ledger. `git status` limpo no inicio (branch `dev`, HEAD 6c
 - Item 8: frase sobre `serve:` em `feature-layout.md` (Emenda 000009) e `intent.md`.
 - Item 9: com `--require-approved`, "Mudanças" é cobrada também no arquivo mínimo (`extended or require`).
 - Testes: 9 novos em `test_check_intent.py` (vermelhos antes, 65 verdes agora).
+- drift: not-measured
