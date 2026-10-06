@@ -48,3 +48,22 @@ Conflito de lacuna registrado: o progress do 000010 sugere usar `check_features.
 - deviated: Fixtures em .claude/skills/scripts/tests/fixtures/specify; run_all_checks nao precisa de edicao (glob); emenda D-004 muda o objeto de aprovacao do citizen.
 - less-sure: Se o aviso GHK deve bloquear a aprovacao (plano) ou ficar so com quem le codigo (lacuna do 000010).
 - gate: not-installed
+
+## Step 2 -- protocolo `specify-phase.md` (2026-10-06, executor)
+
+Criado `.claude/references/general/specify-phase.md`: SPC-001..018 (16 do plano + SPC-017 retradução e SPC-018 registro do citizen / teste da surpresa, ambos da emenda D-004), cada uma com "Quem decide" e "Critério de aceitação"; constantes (`SPECIFY_MAX_ROUNDS = 3`, `SPECIFY_MAX_AUTOFIX = 3`, voz importada de `check_intent`, `LOCK_SCHEMA_VERSION = 1`); tabela "de onde vem cada step"; 3 exemplos bons (pt e en) e 3 ruins; texto exato das duas aprovações; esquema dos campos `scenarios_*` e do lock; tabela de degradação (com a linha nova "Ninguém lê código"); voz; o que não faz; decisões 1-6 `[default; aceito 2026-10-06]`.
+
+Desvios (emenda D-004):
+- SPC-009 tem **dois** objetos de aprovação: o citizen aprova a retradução e o "não faz" (Aprovar / Ajustar / Voltar à entrevista / Descartar); quem lê código aprova o `.feature` (Aprovar o contrato / Pedir mudança / Ninguém aqui lê código). O plano mostrava o `.feature` ao citizen ("Fluxo da fase" item 3; Step 2 item 4).
+- Campos do frontmatter: 5, nao 4 (acrescido `scenarios_contract_by`, com valor `ninguem` honesto quando ninguem le codigo). `scenarios_rev` = `rev` da retradução (a rodada de ajuste muda a mensagem e o contrato juntos).
+- Lock acrescenta `retraducao` (sha256 da secao), `approved_at`, `approved_by`, `contract_by`; editar a retradução depois da aprovação torna o estado `stale` (razao `retraducao`).
+- SPC-008 em modo estrito (aviso GHK bloqueia) e SPC-003 acusando cenario de REQ retirado: ver o conflito registrado no Step 1.
+- `scenarios: draft` nao e escrito por ninguem: `draft` e estado calculado (sem lock e sem `scenarios: approved`).
+
+Verify: 48 ocorrencias de `SPC-`; 18 regras com "Quem decide" e "Critério de aceitação"; C1 zero; sem travessao nem aspas curvas. `run_all_checks.py` = baseline (17 PASS / 14 FAIL, 17/2/9). `check_docs.py` (ja FAIL no baseline) sobe de 542 para 553 **avisos** "Specific plan ID" (11 citacoes de `plan-0000NN` no arquivo novo; mesmo padrao de `grill-phase.md` e `gherkin-spec-format.md`); 0 erros. Os exemplos bons sao reexecutados contra `check_features.py --strict` por teste no Step 4/8.
+
+### Step 2 -- reflection-on-action | 2026-10-06 17:56 UTC | Protocolo specify-phase.md
+- happened: Escrevi SPC-001..018 com quem decide e criterio, exemplos bons e ruins pt/en, os dois textos de aprovacao, o esquema do lock e a degradacao.
+- deviated: Emenda D-004: dois objetos de aprovacao (mensagem ao citizen, contrato a quem le codigo); SPC-017/018 novas; quinto campo scenarios_contract_by; lock com hash da retraducao.
+- less-sure: Se o formato da secao Retraducao e simples o bastante para o agente escrever sem tropecar no verificador.
+- gate: not-installed
