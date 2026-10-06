@@ -108,3 +108,19 @@ Ajustes em `specify-phase.md`: o hash da retradução apaga comentarios HTML e l
 - deviated: Reuso por importacao em vez de subprocesso; compute_status devolve razoes e REQs; quinto campo contract_by e hash da retraducao no lock (D-004).
 - less-sure: Se a varredura do run_all_checks deve reprovar projetos reais com aprovacao velha (e o pretendido, mas muda o health check deles).
 - gate: not-installed
+
+## Step 5 -- fase specify no `/plan` e flag `--specify` (2026-10-06, executor)
+
+- `_internal/plan/standard/SKILL.md`: passo **2c Specify phase** logo depois da grill (2b) e antes da criacao das secoes do plano (3), em 7 itens curtos que apontam para `specify-phase.md` (portao SPC-001 e `--status`; escrever `.feature` e retradução; ate 3 autocorrecoes com `check_specify.py`; a mensagem ao citizen; o contrato a quem le codigo; `--approve` so com exit 0 e `Specify: approved (rev N)` no cabecalho; `--specify` avulsa e validador ausente). Em 2b sai a frase "`--specify` stays reserved". Tarefas sem codigo, planos v1 e projetos sem `features/` seguem como antes (D-008), dito na abertura do 2c.
+- `plan/SKILL.md`: `--specify [<slug>]` no `argument-hint`, na tabela (substitui "Reserved ... not implemented") e na Mode Detection ("step 2c only").
+- `extended-cycle-contract.md` CYC-006: a linha "Implementação" passa a dizer "`--specify` implementada pelo plan-000011 (`specify-phase.md`, SPC-016)" (troca de meia linha; o criterio de CYC-006 "nenhum texto executavel das flags existe em SKILL.md ate a implementacao" fica satisfeito pela propria implementacao).
+
+Desvios: (1) emenda D-004 -- o item 6 do plano ("resumo por requisito ... Aprovar/Ajustar/...") virou duas perguntas: a mensagem (retradução) ao citizen e o contrato (`.feature`) a quem le codigo, com a opcao "Nobody here reads code" (`--contract-by ninguem`); (2) a opcao "Voltar a entrevista" foi mantida e "Descartar" segue a grill; (3) o `Feature: <slug>` ja era escrito pelo 2b, o 2c so acrescenta `Specify: approved (rev N)`.
+
+Verify: `git diff --stat` so os 3 arquivos; `grep --specify plan/SKILL.md` acha a flag na tabela (linha 51), no hint e na Mode Detection; `Specify: skipped` continua no 2b e e citado no 2c; a fase aparece depois da grill e antes do passo 3. `check_skill_system.py` 9 erros (os mesmos do baseline: `product-design-as-coded.md` inexistente, `step_notes.py` etc.); `run_all_checks.py` 18 PASS / 14 FAIL, 17/2/9. Nenhum arquivo de gate, hook ou `settings` no diff. Lacuna: `grill-phase.md` GRL-014 ainda diz "`--specify` continua reservada para o plan-000011" (fora dos Files deste plano; para o plan-000015).
+
+### Step 5 -- reflection-on-action | 2026-10-06 18:06 UTC | Fase specify no /plan e --specify
+- happened: Inseri o passo 2c depois da grill, a flag --specify no wrapper e o ponteiro em CYC-006; check_skill_system e run_all_checks iguais ao baseline.
+- deviated: Duas perguntas de aprovacao (mensagem e contrato) em vez de um resumo com o .feature, pela emenda D-004.
+- less-sure: Se o agente vai separar bem a pergunta do contrato quando a mesma pessoa e citizen e power dev.
+- gate: not-installed

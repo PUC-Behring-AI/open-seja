@@ -1,7 +1,7 @@
 ---
 name: plan
 description: "Make a plan to add a feature, fix a bug, or refactor code. Supports metacomm framing for design-intent briefs."
-argument-hint: "<brief> [--review <light|standard|deep>] [--framing metacomm] [--light] [--grill [<slug>]] [--plan | --roadmap [--from-spec <path>] [--auto] [--only-unimplemented]]"
+argument-hint: "<brief> [--review <light|standard|deep>] [--framing metacomm] [--light] [--grill [<slug>]] [--specify [<slug>]] [--plan | --roadmap [--from-spec <path>] [--auto] [--only-unimplemented]]"
 compatibility: "Designed for Claude Code with the SEJA harness"
 metadata:
   last-updated: 2026-03-29 00:15 UTC
@@ -48,7 +48,7 @@ metadata:
 | `--framing metacomm` | No | Frame the brief as a designer's metacommunication message (I/you phrasing) |
 | `--review <level>` | No | Override complexity-gated review depth. Valid: `light`, `standard`, `deep` |
 | `--grill [<slug>]` | No | Run only the grill phase and stop: interview, then write only `features/<slug>/intent.md`; re-entry allowed (see `general/grill-phase.md`, GRL-014) |
-| `--specify` | No | Reserved for the specify phase (CYC-006 in `general/extended-cycle-contract.md`); not implemented |
+| `--specify [<slug>]` | No | Run only the specify phase and stop: read the approved `intent.md`, write only the `.feature` files, the Retradução, the lock and the `scenarios_*` fields; re-entry allowed (see `general/specify-phase.md`, SPC-016) |
 
 # Make a plan
 
@@ -64,7 +64,7 @@ If there are no arguments, ask for the brief.
 
 ## Mode Detection
 
-1. **Explicit override**: `--grill` -> standard internal, step 2b only (grill phase); `--light` -> [Lightweight Proposal Workflow](#lightweight-proposal-workflow); `--roadmap` -> [Roadmap Workflow](#roadmap-workflow); `--plan` -> standard workflow below. Skip auto-detection.
+1. **Explicit override**: `--grill` -> standard internal, step 2b only (grill phase); `--specify` -> standard internal, step 2c only (specify phase); `--light` -> [Lightweight Proposal Workflow](#lightweight-proposal-workflow); `--roadmap` -> [Roadmap Workflow](#roadmap-workflow); `--plan` -> standard workflow below. Skip auto-detection.
 
 2. **Auto-detection** (neither `--plan` nor `--roadmap` present): score the brief against signals.
 

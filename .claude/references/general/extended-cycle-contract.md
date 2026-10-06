@@ -69,7 +69,7 @@ As fases são internas ao `/plan`. Cada uma também poderá ser invocada avulsa 
 
 - **Quem decide**: designer, no plano que implementar as fases.
 - **Critério de aceitação**: nenhum texto executável das flags existe em `SKILL.md` até a implementação; as flags aparecem neste contrato como "reservada".
-- **Implementação**: `--grill` implementada pelo plan-000009 (`grill-phase.md`, GRL-014); `--specify` segue reservada.
+- **Implementação**: `--grill` implementada pelo plan-000009 (`grill-phase.md`, GRL-014); `--specify` implementada pelo plan-000011 (`specify-phase.md`, SPC-016).
 
 ### CYC-007 -- O que cada fase lê, escreve e quem aprova
 
