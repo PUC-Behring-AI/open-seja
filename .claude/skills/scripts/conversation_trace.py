@@ -243,6 +243,49 @@ def list_entries(session_id: str, led_to_skill: str | None = None,
     return result
 
 
+def exchange_user_entries(session_id: str, skill: str, since_evt: str | None = None,
+                          trace_file: Path | None = None) -> list[dict]:
+    """User utterances that led to `skill`, in file order.
+
+    pre-skill backfills led_to_skill on the LAST entry of the session, which is
+    the agent's reply, so user entries are reached through the chain: for each
+    claude entry tagged with the skill, walk preceding_evt_id back through user
+    entries and stop at a claude entry (or an entry tagged with another skill).
+    A user entry tagged directly with the skill also counts. The tag match is
+    exact after stripping a leading slash.
+    """
+    skill_id = skill.lstrip("/")
+    entries = list_entries(session_id, trace_file=trace_file)
+    by_id = {e.get("evt_id"): e for e in entries}
+
+    def tagged(e: dict) -> str:
+        return (e.get("led_to_skill") or "").lstrip("/")
+
+    picked: set[str] = set()
+    for e in entries:
+        if tagged(e) != skill_id:
+            continue
+        if e.get("emitter") == "user":
+            picked.add(str(e["evt_id"]))
+            continue
+        seen: set[str] = set()
+        prev = by_id.get(e.get("preceding_evt_id"))
+        while prev is not None and prev.get("emitter") == "user" \
+                and prev["evt_id"] not in seen:
+            seen.add(prev["evt_id"])
+            if tagged(prev) not in ("", skill_id):
+                break
+            picked.add(str(prev["evt_id"]))
+            prev = by_id.get(prev.get("preceding_evt_id"))
+    result = [e for e in entries if e.get("evt_id") in picked]
+    if since_evt is not None:
+        ids = [e.get("evt_id") for e in entries]
+        if since_evt in ids:
+            cut = ids.index(since_evt)
+            result = [e for e in result if ids.index(e.get("evt_id")) > cut]
+    return result
+
+
 def _cmd_list(args: argparse.Namespace) -> int:
     """Print the session's entries as a JSON array."""
     entries = list_entries(args.session_id, args.led_to_skill, args.since_evt)

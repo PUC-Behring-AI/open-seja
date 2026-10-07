@@ -258,3 +258,38 @@ def test_digest_skips_without_layer(tmp_path):
     root = _project(tmp_path, [], readme=False)
     assert pkb_inbox.digest(root) == {"skipped": "no-pkb-layer"}
     assert not (root / "inbox" / "_live.md").exists()
+
+
+def test_capture_uses_exchange_chain_when_only_claude_is_tagged(tmp_path):
+    rows = [
+        _trace_row(1, "Quero um inbox", skill=None),
+        _trace_row(2, "resposta", skill="plan X", emitter="claude"),
+    ]
+    rows[0]["preceding_evt_id"] = "null"
+    rows[1]["preceding_evt_id"] = "qa-000001"
+    root = _project(tmp_path, rows)
+    result = _capture(root)
+    assert result["fonte"] == ["qa-000001"]
+    assert "Quero um inbox" in (root / result["path"]).read_text(encoding="utf-8")
+
+
+def test_capture_exchange_does_not_leak_other_skill(tmp_path):
+    rows = [
+        _trace_row(1, "fala do plano", skill=None),
+        _trace_row(2, "r1", skill="plan X", emitter="claude"),
+        _trace_row(3, "fala da implementacao", skill=None),
+        _trace_row(4, "r2", skill="implement Y", emitter="claude"),
+    ]
+    for i, r in enumerate(rows):
+        r["preceding_evt_id"] = f"qa-{i:06d}" if i else "null"
+    root = _project(tmp_path, rows)
+    result = _capture(root)
+    assert result["fonte"] == ["qa-000001"]
+
+
+def test_capture_untagged_session_still_nothing_or_brief(tmp_path):
+    rows = [_trace_row(1, "fala", skill=None), _trace_row(2, "r", skill=None, emitter="claude")]
+    rows[1]["preceding_evt_id"] = "qa-000001"
+    root = _project(tmp_path, rows)
+    assert _capture(root) == {"skipped": "nothing-to-capture"}
+    assert _capture(root, brief="meu brief")["fonte"] == "briefs"

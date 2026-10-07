@@ -30,7 +30,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "design"))
 from check_secrets import SECRET_PATTERNS
-from conversation_trace import list_entries
+from conversation_trace import exchange_user_entries
 
 SCHEMA_VERSION = 1
 DEFAULT_PKB_DIR = "inbox"
@@ -118,11 +118,7 @@ def capture(skill: str, artifact: str, session_id: str, brief: str | None,
     if not pkb_layer_present(repo_root):
         return {"skipped": "no-pkb-layer"}
     skill_id = skill.lstrip("/")
-    entries = [
-        e for e in list_entries(session_id, trace_file=_trace_file(repo_root))
-        if e.get("emitter") == "user"
-        and (e.get("led_to_skill") or "").lstrip("/") == skill_id
-    ]
+    entries = exchange_user_entries(session_id, skill_id, trace_file=_trace_file(repo_root))
     quotes: list[tuple[str, str]] = []  # (HH:MM, text)
     for e in entries:
         stamp = str(e.get("timestamp", ""))
