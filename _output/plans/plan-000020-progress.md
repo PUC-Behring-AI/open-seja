@@ -19,3 +19,9 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 - deviated: O submodule do bootstrap estava vazio, entao copiei os templates de Templates/ do Doutourado (mesma origem, citada por URL no README). Troquei um travessao tipografico do Diario.md por --. Os esqueletos de Objetivos e index sao genericos, sem o conteudo do Doutourado, e sem acentos nos textos novos.
 - less-sure: Se os templates do Doutourado coincidem byte a byte com o bootstrap atual (nao pude conferir).
 - gate: not-installed
+
+### Step 2 -- reflection-on-action | 2026-10-07 21:37 UTC | Template da camada PKB: as 5 skills de manutencao
+- happened: Copiei as 5 skills (SKILL.md, quickguide e references) do Doutourado para template/pkb/skills/ e generalizei as mencoes a projetos/, Proposta, pegasus, disciplinas e AEWSOME. Verify passou: grep vazio e name: igual a pasta nas 5.
+- deviated: Troquei travessoes e aspas tipograficas por -- e aspas retas (regra do harness). Copiei tambem as pastas references/ de weekly-review e compress, que o passo nao citava.
+- less-sure: Se as frases generalizadas ('projetos do seu arquivo') bastam para as skills funcionarem em arquivo sem pasta de projetos; nao rodei as skills.
+- gate: not-installed

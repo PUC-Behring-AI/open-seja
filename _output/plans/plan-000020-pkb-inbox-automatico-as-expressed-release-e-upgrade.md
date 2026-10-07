@@ -87,7 +87,7 @@ Portar para `.claude/references/template/pkb/skills/<nome>/` as skills `daily-lo
 - **Interface**: N/A
 - **Verify**: `grep -rn 'projetos/\|Proposta/\|pegasus\|2026\.' .claude/references/template/pkb/skills/` vazio; cada pasta tem `SKILL.md` com frontmatter `name:` igual ao nome da pasta
 - **Tests**: N/A (Markdown; a copia e testada no Step 3)
-- [ ] Done
+- [x] Done
 
 ### Step 3: `pkb_inbox.py init`: instanciar a camada PKB, idempotente
 Criar `.claude/skills/scripts/pkb_inbox.py` (stdlib, argparse, bloco `# designer:` e docstring com Invocation/Lifecycle/exit codes). Subcomando `init [--target <dir>] [--with-skills] [--dry-run] [--json]`: copia `template/pkb/` (exceto `skills/`) para a raiz do alvo e, so com `--with-skills`, `template/pkb/skills/*` para `<alvo>/.claude/skills/`, **sem sobrescrever** nada que ja exista (relata `created`/`skipped` por arquivo), cria `inbox/.gitkeep` e `logs/<ano>/.gitkeep`. Le `PKB_DIR` de `conventions.md` via `project_config.get_path` (default `inbox`). Exit 0 ok, 1 erro, 2 uso. Saida `--json` com `schema_version: 1`. Ao fim, imprime em stderr a sugestao de registrar a camada no `CLAUDE.md` do projeto (nao edita `CLAUDE.md`: e preservado e e do humano).
