@@ -32,7 +32,7 @@ metadata:
 
 | Argument | Required | Description |
 |----------|----------|-------------|
-| `<planned-item-id>` | Yes | The 6-digit ID of the plan to execute |
+| `<planned-item-id>` | Yes | The artifact ID of the plan to execute (6-digit legacy or `YYYYMMDD-xxxxxx`) |
 | `--manual` | No | Execute all steps sequentially in the current context instead of using subagents. Default: auto mode |
 | `--max-iterations N` | No | Set the iteration cap for auto mode. Default: `20` |
 | `--dry-run` | No | Preview what changes would be made without applying them |

@@ -18,7 +18,7 @@ Combines read-only drift analysis with an optional sync workflow. Scope argument
 
 If scope is `--promote` or `--promote --apply-markers ...`, skip Steps A-B and go to Step C.
 
-1. Determine scope from the argument (default: `all`). Accepted variants: `all`, `conceptual-design`, `metacomm`, `ladder [<slug>]`, `--promote`, `--promote --apply-markers plan-NNNNNN`, `--scope since-plan plan-NNNNNN`. If scope is `since-plan plan-NNNNNN`, validate the plan ID format against `^plan-\d{6}$`. If invalid, emit `ERROR: --scope since-plan expects plan-NNNNNN (6-digit ID). Got: <value>` and abort.
+1. Determine scope from the argument (default: `all`). Accepted variants: `all`, `conceptual-design`, `metacomm`, `ladder [<slug>]`, `--promote`, `--promote --apply-markers plan-NNNNNN`, `--scope since-plan plan-NNNNNN`. If scope is `since-plan plan-NNNNNN`, validate the plan ID format against `^plan-(\d{6}|\d{8}-[0-9a-z]{6})$` (`plan-` + `ARTIFACT_ID` from `artifact_id.py`: 6-digit legacy or `YYYYMMDD-xxxxxx`). If invalid, emit `ERROR: --scope since-plan expects plan-NNNNNN or plan-YYYYMMDD-xxxxxx. Got: <value>` and abort.
 
 2. Read the as-intended/as-coded registry from `product-design/conventions.md` (fallback `template/conventions.md`). Use the Section column to narrow scans. For each row in scope: if the as-coded counterpart is `-` (research-only) or either file is missing, report and skip. Journey-ID locations: JM-TB-NNN -> `product-design-as-intended.md §15`; JM-E-NNN -> `ux-research-results.md §5`.
 
@@ -93,7 +93,7 @@ If **No**: apply C4 and stop. If **Promote implemented items**: go to Step C (Ph
 The promote workflow has two phases so the designer owns every word of the Decision prose while the harness manages the STATUS lifecycle structurally:
 
 - **Phase 3a -- Proposal generation** (`/explain drift --promote`): draft DDR-shaped entries for `STATUS: implemented` items to `_output/promote-proposals/promote-proposal-plan-<id>.md`. Do NOT modify `product-design-as-intended.md`. File one pending action (`apply-promote-markers`).
-- **Phase 3b -- Marker flip** (`/explain drift --promote --apply-markers plan-NNNNNN`, 6-digit plan ID): verify `### D-NNN:` entries were added (heading-only grep), run per-item AskUserQuestion confirmation, invoke `apply_marker.py` on confirmed items. Post-skill's `check_human_markers_only.py` and `check_changelog_append_only.py` verify marker flips do not bleed prose.
+- **Phase 3b -- Marker flip** (`/explain drift --promote --apply-markers plan-NNNNNN`, plan artifact ID in either format): verify `### D-NNN:` entries were added (heading-only grep), run per-item AskUserQuestion confirmation, invoke `apply_marker.py` on confirmed items. Post-skill's `check_human_markers_only.py` and `check_changelog_append_only.py` verify marker flips do not bleed prose.
 
 ##### Phase 3a steps (`/explain drift --promote`)
 
