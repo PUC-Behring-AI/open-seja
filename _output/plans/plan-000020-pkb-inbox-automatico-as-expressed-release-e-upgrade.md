@@ -77,7 +77,7 @@ Criar `.claude/references/template/pkb/` com os arquivos que `pkb_inbox.py init`
 - **Interface**: N/A
 - **Verify**: `ls .claude/references/template/pkb/Templates | wc -l` = 6; `grep -L '^---' .claude/references/template/pkb/Templates/*.md` vazio (todos tem frontmatter); `python3 .claude/skills/design/check_secrets.py` limpo
 - **Tests**: N/A (templates Markdown; cobertos pelo teste de `init` no Step 3)
-- [ ] Done
+- [x] Done
 
 ### Step 2: Template da camada PKB: as 5 skills de manutencao
 Portar para `.claude/references/template/pkb/skills/<nome>/` as skills `daily-log`, `weekly-review`, `compress`, `next-action` e `process-inbox` a partir de `../.claude/skills/<nome>/` (Doutourado, plan-000072), copiando `SKILL.md` e `SKILL-quickguide.md`. Reescrever so o que for especifico do Doutourado: referencias a `Objetivos.md`, `index.md`, `logs/`, `inbox/` e `Templates/` continuam relativas a raiz (sao as mesmas); remover mencoes a pastas que so existem la (`projetos/`, `Proposta/`, `2026.x/`, pegasus) trocando por "a estrutura real do seu arquivo"; manter o frontmatter (`context_budget`, `references: []`). Nao copiar para `.claude/skills/` do open-seja em nenhum step deste plano (nem pelo `init` do Step 8, que roda sem `--with-skills`): as skills so entram num projeto via `init --with-skills` ou `/seja-setup --pkb`, e o upgrade nunca as copia nem as apaga (ver A1/A2 em Plan Amendment).
