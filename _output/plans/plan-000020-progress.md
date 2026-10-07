@@ -61,3 +61,9 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 - deviated: step_notes.py exige --step inteiro: usei 7 com 7b no titulo. A dica fica antes das migracoes (logo apos a copia e remocao de skills aposentadas). Nao tratei docs/index.md como preservado (so index.md na raiz).
 - less-sure: Se o import de pkb_inbox via sys.path funciona quando o script roda de outro cwd (roda: o diretorio do script entra no path); ruff tem erros antigos nos dois arquivos, nao novos.
 - gate: not-installed
+
+### Step 8 -- reflection-on-action | 2026-10-07 21:58 UTC | Dogfooding: camada PKB no proprio open-seja
+- happened: Rodei init sem --with-skills (camada criada, 0 skills PKB em .claude/skills), capture e digest: 1 nota em inbox/ com 3 falas do usuario e _live.md com 1 captura. Manifesto nao inclui inbox/, logs/, Templates/, Objetivos.md nem index.md (allowlist); build_dist_branch --dry-run nao lista nenhum. Falas conferidas: sem segredos nem nomes de pessoa.
+- deviated: capture pulou com nothing-to-capture porque as falas do usuario qa-000015/17/19 estavam com led_to_skill nulo (so a resposta qa-000020 tinha o campo); rodei conversation_trace backfill-skill --skill-id plan nas 3 (alterou conversation-trace.jsonl, que nao foi staged). A nota se chama 2026-10-07-plan-plan-000020-*.md (data de hoje, prefixo plan duplicado), nao 2026-10-06-. grep puc/tecgraf/behring acha 1 linha em inbox/README.md (URL publica do repo bootstrap, do template do Step 1), nao nas notas. verify_commit_scope acusa Objetivos/Templates/index/logs como unexpected (so inbox/ e coberto pela fonte d).
+- less-sure: Se a ausencia de backfill das falas do usuario ocorrera no uso real (o post-skill deveria marcar led_to_skill antes de 7f); se o escopo do commit deve incluir a raiz da camada no init; se a URL org no README conta como violacao de C2.
+- gate: not-installed
