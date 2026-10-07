@@ -132,7 +132,7 @@ Subcomando `digest [--json]`: regenera `<PKB_DIR>/_live.md` do zero a partir das
 - **Tests**: quando `inbox/README.md` existe e `inbox/2026-10-06-plan-000020-x.md` e `inbox/_live.md` estao staged, `check_scope` nao os lista em `unexpected`; quando `inbox/README.md` nao existe, os mesmos arquivos aparecem em `unexpected`; quando `--always-include docs/` e passado, `docs/a.md` staged casa por prefixo (regressao da barra final)
 - **Docs**: `docs/pkb-layer.md` e `.claude/CHEATSHEET.md` (Step 10)
 - **Traces**: REQ-MC-006
-- [ ] Done
+- [x] Done
 
 ### Step 7a: `/seja-setup --pkb` e sinal `has_pkb_layer`
 (a) `seja-setup/SKILL.md`: flag `--pkb` na tabela de argumentos. Nos internos `install`, `here` e `demo`, um passo final "camada PKB": se `--pkb`, rodar `pkb_inbox.py init --target <alvo> --with-skills`; senao, AskUserQuestion com opcoes "Instanciar camada PKB" (Recommended when voce quer percorrer historicamente o que pediu ao harness e manter diarios e inbox no proprio repositorio; NOT recommended when o repositorio e compartilhado por um time que nao quer notas pessoais nele) e "Agora nao" (Recommended when voce vai decidir depois; `pkb_inbox.py init --with-skills` roda a qualquer momento). (b) `detect_setup_state.py --json`: sinal `has_pkb_layer`, calculado com o mesmo predicado de `pkb_inbox.pkb_layer_present` (importar, nao reimplementar); nao altera a classificacao de estado.

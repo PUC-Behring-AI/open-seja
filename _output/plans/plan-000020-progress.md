@@ -43,3 +43,9 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 - deviated: A ligacao com comunicacoes olha as 12 primeiras linhas de communication-*.md procurando o caminho do artefato (o cabecalho real usa 'Fonte' em blockquote, nao --source). Sem notas, a frase e 'nenhuma captura ainda'.
 - less-sure: Se comunicacoes que citam o artefato so por ID (sem caminho completo) devem contar; se 12 linhas de cabecalho bastam.
 - gate: not-installed
+
+### Step 6 -- reflection-on-action | 2026-10-07 21:47 UTC | post-skill: etapa 7f pkb-capture, escopo do commit e gatilho de /design na 2c
+- happened: verify_commit_scope.py ganhou a fonte (d) PKB_DIR/ quando a camada existe e _normalize preserva a barra final; 4 testes novos verdes (24 com pkb_inbox). post-skill ganhou 7f (silenciosa sem camada), linha na tabela --deferred, token de checkpoint e gate 2c ampliado com a linha de gatilho; DESIGN_TRIGGER_DRIFT_ITEMS vazio nas duas conventions.
+- deviated: O Verify de integracao (capture+digest com inbox staged no open-seja) depende do Step 8 e nao foi rodado; coberto por testes com tmp_path. Os testes usam skill-type desconhecido para isolar o REPO_ROOT mockado. run_all_checks: sem falha nova (check_skill_system passou de FAIL para PASS).
+- less-sure: Se a linha DESIGN_TRIGGER_DRIFT_ITEMS com valor vazio e lida bem por project_config e check_conventions; se o pkb_inbox importado no verify_commit_scope pesa em todo commit (e stdlib, mas e mais um import).
+- gate: not-installed
