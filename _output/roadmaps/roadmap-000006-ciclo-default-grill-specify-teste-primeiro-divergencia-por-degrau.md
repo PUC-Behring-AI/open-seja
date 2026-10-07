@@ -220,3 +220,61 @@ H-009 passa a declarar o próprio alcance: a escada é completa para comportamen
 ### Fora do escopo deste adendo
 
 Adaptadores C++ e JS/TS (research-000050 §5, §7; repositórios-piloto próprios); MoLIC como representação de jornada (fica como referência; `Rule:` é o substituto mínimo); auditoria semântica por LLM (rejeitada; decisão fechada do 000008).
+
+## Adendo 2026-10-07 -- interruptor da specify por projeto e escolha por plano
+
+> Textos acima preservados. Este adendo vem de uma conversa do designer em 2026-10-07 (nota no inbox do Doutourado: `inbox/2026-10-07-gherkin-opt-out-experimento-e-specify-por-plano.md`). Ele **reabre** duas decisões fechadas, a D-009 ("sem chave de desligar") e o CYC-004 ("pulo por tipo de tarefa; escolha livre rejeitada"). Por isso a revisão passa pelo `/design` e precisa sair **antes da tag v0.11.0**. Até lá, D-009 e CYC-004 valem como estão.
+
+### Nas palavras do designer
+
+> acho que faz sentido um preset ou um parametro no plan. pode ser que o dev esteja em um estágio de prototipação e não faz sentido materializar tantos artefatos e acabar escrevendo mal os requisitos e gherking
+
+> olha, assumindo que vamos usar o open-seja para fazer experimentos, eu fico curioso de ver se é válido ou não habilitar o gherking e fazer experimentos: um time usa o outro nao e medimos a velocidade/entendimento/qualidade do que foi construido. neste caso estou pendendo mais para um opt-out e um preset a ser decidido no setup/design. ao mesmo tempo, como usuário do seja, eu posso querer ainda sim escolher escrever a fase de especificação individualmente para cada plano
+
+### O que muda na leitura
+
+1. **O braço de controle por tag anterior confunde a variável.** Entre duas tags muda o Gherkin e também tudo mais que entrou na release (grill, checks, matriz, correções). Um interruptor **na mesma tag** isola a specify. O argumento da D-009 ("chave contamina o controle") se inverte.
+2. **Especificação forçada piora a medida.** Na prototipação, os requisitos e o Gherkin escritos à força são ruído no vetor D; medir isso não protege H-009.
+3. **Desvio registrado é aderência, não contaminação.** Com o motivo gravado no plano, a análise é feita de dois jeitos: por **intenção de tratar** (pelo braço do projeto: adotar o default funciona?) e **por protocolo** (pelo que cada plano fez: a escada funciona quando é escrita?). A taxa de desvio é um achado.
+4. **Variável, não preset.** A D-003 diz que preset não bifurca o ciclo. Um interruptor em `conventions.md` evita emendar a D-003; os presets continuam sendo perfis (`apprentice`, `literature-reviewer`, `pkb`).
+
+### Item novo
+
+### Wave 4b -- Interruptor (sequencial, antes do piloto)
+| # | ID | Title | Scope | Type | Plan | Depends on | Status |
+|---|-----|-------|-------|------|------|-----------|--------|
+| 11 | specify-switch | `SPECIFY_DEFAULT: on \| off` em `conventions.md`, escolhido no `/seja-setup` ou no `/design`; `/plan --specify` liga a fase num plano quando o default é `off`, e `/plan --no-specify "<motivo>"` desliga quando é `on`, sempre gravando `Specify: skipped -- <motivo>` ou `approved`; prototipação vira motivo aceito para tarefa com código; o relatório por degrau separa intenção de tratar e por protocolo | backend | design | plan-000022 | default-cycle-wiring | planned |
+
+O item 10 (`default-cycle-pilot`) passa a depender também de `specify-switch`.
+
+### Emendas por plano (absorver no Step 1 de cada um)
+
+| Plano | Item | Emenda |
+|---|---|---|
+| plan-000015 | 9 default-cycle-wiring | O Step 10 deixou a ressalva da D-009 com o designer; a revisão da D-009 sai no mesmo `/design`. O quickguide pt-BR ganha o interruptor e as duas flags depois do item 11. |
+| plan-000016 | 10 default-cycle-pilot | O braço B passa a ser a **mesma tag com `SPECIFY_DEFAULT: off`**, não a tag anterior pinada. As réplicas com ordem alternada viram o crossover. Medir intenção de tratar e por protocolo, a taxa de desvio por braço e os motivos registrados. Velocidade: timestamps do plano ao implement. Qualidade: escapes do `/critique` (D-002). Entendimento: retradução e `/reflect` (P-003, Q-012). |
+
+### Decisões que este adendo pede ao designer
+
+| Wave | Decisão | Opções | Recomendação |
+|---|---|---|---|
+| 4b | Chave do ciclo (revisa a D-009) | sem chave (como está) / variável por projeto `SPECIFY_DEFAULT` / preset | variável por projeto; o preset bifurcaria o ciclo (D-003) |
+| 4b | Valor default quando o projeto não declara | `on` / `off` | em aberto: `on` mantém a aposta de H-009; `off` respeita a prototipação. A instalação nova pergunta no `/seja-setup` |
+| 4b | Pulo da specify (revisa o CYC-004) | só por tipo de tarefa / tipo de tarefa + escolha do usuário com motivo | tipo de tarefa + escolha com motivo obrigatório; o `check_plan_scenarios.py` aceita `Tests:` não-N/A com `Specify: skipped -- <motivo>` |
+| 4b | Grill quando a specify está desligada | roda sempre (CYC-002) / pergunta única de confirmação | em aberto: a grill completa sem specify gera um `intent.md` que ninguém transforma em cenário |
+| 4 | Braço de controle do piloto | tag anterior pinada / mesma tag com `off` | mesma tag com `off` |
+| -- | Sequência de release | ciclo e PKB na v0.11.0 / ciclo na v0.11.0 e PKB na v0.12.0 | decidir junto; o plan-000020 também reivindica a v0.11.0 |
+
+### H-009 (para a prosa do designer)
+
+A refutação de H-009 ganha a leitura por protocolo: se, entre os planos que **escreveram** a specify, a divergência por degrau não for menor que entre os que pularam, a escada não paga o custo. A leitura por intenção de tratar diz se o default, como default, é adotado.
+
+### Riscos acrescentados
+
+- **A escolha livre esvazia o ciclo.** Se todos pularem, não há o que medir. Mitigação: o motivo é obrigatório e a taxa de desvio é reportada; a taxa alta é um achado sobre o custo percebido, não uma falha a esconder.
+- **Viés de seleção na leitura por protocolo.** Quem escreve a specify pode ser quem já tem a intenção mais clara. Mitigação: o crossover do piloto e a leitura por intenção de tratar ao lado.
+- **Colisão de versão.** D-009 e plan-000020 apontam para a v0.11.0.
+
+### Fora do escopo deste adendo
+
+Um preset `prototype` com outro conjunto de skills; mudar a grill além da decisão acima; reabrir a D-003.
