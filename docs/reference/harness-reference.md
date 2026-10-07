@@ -159,6 +159,7 @@ Generated 2026-07-04T22:56:29Z from seja-priv harness state.
 
 | Name | Purpose | Invoked by | Lifecycle | Path | Mentioned in |
 |---|---|---|---|---|---|
+| artifact_id.py | ULID generator, visible ID and shared ID grammar for SEJA artifacts. | library | active | `.claude/skills/scripts/artifact_id.py` |  |
 | design_system.py | Extract CSS and design tokens from HTML design system files. | library | active | `.claude/skills/scripts/design_system.py` |  |
 | human_markers_registry.py | Shared registry for Human (markers) files and allowed marker patterns. | library | active | `.claude/skills/scripts/human_markers_registry.py` | `concepts/call-graph.md` |
 | load_quickguide.py | Shared loader for SKILL-quickguide.md sibling files. | library | active | `.claude/skills/scripts/load_quickguide.py` | `concepts/call-graph.md` |
@@ -392,6 +393,7 @@ Harness artifacts mentioned at least once in `seja-public/docs`.
 | apply_marker.py | Scripts | `.claude/skills/scripts/apply_marker.py` | `concepts.md` |
 | arch | Perspectives | `.claude/references/general/review-perspectives/arch.md` | `concepts/call-graph.md` |
 | architecture-explainer | Agents | `.claude/agents/architecture-explainer.md` | `concepts/call-graph.md` |
+| artifact_id.py | Scripts | `.claude/skills/scripts/artifact_id.py` |  |
 | backend | Rules | `.claude/rules/backend.md` | `concepts/call-graph.md` |
 | backfill_decision_digest.py | Scripts | `.claude/skills/scripts/backfill_decision_digest.py` | `concepts/call-graph.md` |
 | backfill_open_plans.py | Scripts | `.claude/skills/scripts/backfill_open_plans.py` | `concepts/call-graph.md` |
