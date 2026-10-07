@@ -39,7 +39,7 @@ OUTPUT_DIR = get_path("OUTPUT_DIR") or REPO_ROOT / "_output"
 INDEX_FILE = OUTPUT_DIR / "INDEX.md"
 
 # Matches `source: advisory-000058` or `source: research-000545 -- some note`
-# and `source: plan-20261007-k3m9qz -- note` (both ID formats, see artifact_id)
+# and `source: plan-YYYYMMDD-xxxxxx -- note` (both ID formats, see artifact_id)
 _SOURCE_RE = re.compile(
     rf"^source:\s+([a-zA-Z][a-zA-Z0-9_-]*?)-({ARTIFACT_ID})(?:\s|--|$)", re.IGNORECASE
 )
@@ -73,7 +73,7 @@ def _extract_source(header_lines: list[str]) -> tuple[str, str] | None:
 def _artifact_token_from_path(artifact_path: Path) -> tuple[str, str] | None:
     """Derive (type, id) from filename e.g. plan-000546-foo.md -> ('plan', '000546').
 
-    Also reads the new format: plan-20261007-k3m9qz-foo.md -> ('plan', '20261007-k3m9qz').
+    Also reads the new format: plan-YYYYMMDD-xxxxxx-foo.md -> ('plan', 'YYYYMMDD-xxxxxx').
     """
     stem = artifact_path.stem  # e.g. plan-000546-foo
     parts = stem.split("-")

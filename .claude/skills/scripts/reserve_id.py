@@ -19,14 +19,16 @@ read nor written: it is fully derived by generate_macro_index.py.
 stdout carries only the visible ID (skills capture it), or the full birth
 record with --json. ``uid: <ULID>`` goes to stderr for information.
 The author is a pseudonymous token (artifact_id.default_author()), overridable
-by --author; it is never ``git config user.name`` (constitution C2).
+by --author with another token (12 lowercase hex chars or ``unknown``); free
+text is refused with exit 2, and it is never ``git config user.name``
+(constitution C2).
 
-Exit codes: 0 reserved (or dry run); 2 usage error (e.g., invalid --origin).
+Exit codes: 0 reserved (or dry run); 2 usage error (e.g., invalid --origin or --author).
 
 Usage
 -----
     python3 .claude/skills/scripts/reserve_id.py --type research --title "Some title"
-    python3 .claude/skills/scripts/reserve_id.py --type plan --title "T" --origin research-000018
+    python3 .claude/skills/scripts/reserve_id.py --type plan --title "T" --origin research-NNNNNN
     python3 .claude/skills/scripts/reserve_id.py --type plan --title "T" --dry-run
     python3 .claude/skills/scripts/reserve_id.py --type plan --title "T" --json
 
@@ -50,7 +52,9 @@ _DEFAULT_OUTPUT_DIR = get_path("OUTPUT_DIR") or REPO_ROOT / "_output"
 # Module-level default; overridden by --output-dir when called from CLI.
 OUTPUT_DIR = _DEFAULT_OUTPUT_DIR
 
-ORIGIN_RE = re.compile(rf"^[a-z][a-z-]*-{ARTIFACT_ID}$")
+ORIGIN_RE = re.compile(rf"^[a-z][a-z-]*-{ARTIFACT_ID}\Z")
+# Pseudonymous token only (constitution C2): never a free-text name.
+AUTHOR_RE = re.compile(r"^(?:[0-9a-f]{12}|unknown)\Z")
 
 
 def _write_record_atomic(ids_dir: Path, record: dict) -> Path:
@@ -105,11 +109,14 @@ def main() -> None:
     )
     parser.add_argument(
         "--origin",
-        help="Artifact this one derives from, as <type>-<id> (e.g., research-000018)",
+        help="Artifact this one derives from, as <type>-<id> (e.g., research-YYYYMMDD-xxxxxx)",
     )
     parser.add_argument(
         "--author",
-        help="Author handle (default: pseudonymous token from artifact_id.default_author())",
+        help=(
+            "Pseudonymous author token: 12 lowercase hex chars or 'unknown' "
+            "(default: artifact_id.default_author()); never a name"
+        ),
     )
     parser.add_argument(
         "--dry-run", action="store_true",
@@ -126,7 +133,10 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.origin is not None and not ORIGIN_RE.match(args.origin):
-        parser.error(f"invalid --origin {args.origin!r}: expected <type>-<id>, e.g. research-000018")
+        parser.error(f"invalid --origin {args.origin!r}: expected <type>-<id>, e.g. plan-YYYYMMDD-xxxxxx")
+    if args.author is not None and not AUTHOR_RE.match(args.author):
+        # Do not echo the value: it may be a person's name (constitution C2).
+        parser.error("invalid --author: expected 12 lowercase hex chars or 'unknown'")
 
     if sys.platform == "win32":
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[attr-defined]

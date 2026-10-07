@@ -13,7 +13,8 @@ Lifecycle: active
 
 Checks (D-010):
   1. duplicate-id: two primary artifacts in ``OUTPUT_DIR/**/*.md`` with the
-     same ID in the file name (companions ``<type>-<id>-qa-*.md`` and
+     same ID in the file name (the type may be hyphenated, e.g.
+     ``mob-session-<id>-<slug>.md``) (companions ``<type>-<id>-qa-*.md`` and
      ``<type>-<id>-progress.md`` share the ID of their primary and are skipped).
      Two birth records in ``ids/`` with the same ``id`` also count.
   2. orphan-record: ``ids/<uid>.json`` whose ``id`` has no artifact and whose
@@ -65,9 +66,13 @@ SCHEMA_VERSION = 1
 DEFAULT_ORPHAN_DAYS = 7
 DESIGN_REL = Path("product-design") / "product-design-as-intended.md"
 
-# <type>-<id>[-<rest>].md ; the lookahead keeps the legacy alternative from
-# matching the first six digits of a new-format ID.
-_NAME_RE = re.compile(rf"^([a-z]+)-({ARTIFACT_ID})(?![0-9A-Za-z])(?:-(.*))?\.md$")
+# <type>-<id>[-<rest>].md ; <type> may be hyphenated (mob-session,
+# dev-onboarding, data-model). The type is letters only, so it never swallows
+# digits; the lookahead keeps the legacy alternative from matching the first
+# six digits of a new-format ID.
+_NAME_RE = re.compile(
+    rf"^([a-z]+(?:-[a-z]+)*?)-({ARTIFACT_ID})(?![0-9A-Za-z])(?:-(.*))?\.md\Z"
+)
 _DECISION_RE = re.compile(r"^###\s+D-(\d+):")
 _H2_RE = re.compile(r"^##\s")
 
