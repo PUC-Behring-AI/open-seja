@@ -37,3 +37,9 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 - deviated: O exemplo ANTHROPIC_API_KEY=sk-... do plano nao casa nenhum SECRET_PATTERNS (exigem valor entre aspas), entao o teste usa api_key = "...". Quando ha falas no trace e --brief, o brief entra como linha extra '> brief' e fica fora da comparacao. Corrigi tambem o DTZ011 antigo de init (date.today -> UTC).
 - less-sure: Se o led_to_skill gravado pelo backfill vai coincidir com o --skill passado ao capture (comparo exato apos tirar a barra inicial); se o padrao de segredo do projeto deveria pegar chaves sem aspas.
 - gate: not-installed
+
+### Step 5 -- reflection-on-action | 2026-10-07 21:43 UTC | pkb_inbox.py digest: o indice vivo (inbox/_live.md)
+- happened: Adicionei digest (funcao e subcomando) que regenera _live.md com cabecalho gerado, tabela cronologica e coluna 'comunicado em'; recusa _live.md alheio com exit 1. 5 testes novos, 20 verdes, ruff limpo no script; duas execucoes dao bytes identicos.
+- deviated: A ligacao com comunicacoes olha as 12 primeiras linhas de communication-*.md procurando o caminho do artefato (o cabecalho real usa 'Fonte' em blockquote, nao --source). Sem notas, a frase e 'nenhuma captura ainda'.
+- less-sure: Se comunicacoes que citam o artefato so por ID (sem caminho completo) devem contar; se 12 linhas de cabecalho bastam.
+- gate: not-installed

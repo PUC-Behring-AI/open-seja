@@ -190,3 +190,71 @@ def test_capture_appends_never_overwrites(tmp_path):
     after = path.read_text(encoding="utf-8")
     assert second["path"] == first["path"]
     assert after.startswith(before) and len(after) > len(before)
+
+
+# ---- digest ---------------------------------------------------------------
+
+def _note(root, name, skill, artefato, data, line):
+    (root / "inbox" / name).write_text(
+        f"---\norigem: usuario\ntipo: transitoria\ndata: {data}\nskill: {skill}\n"
+        f"artefato: {artefato}\nfonte: briefs\n---\n\n> **--:--** {line}\n",
+        encoding="utf-8")
+
+
+def _digest_project(tmp_path):
+    root = _project(tmp_path, [])
+    _note(root, "2026-10-05-plan-a.md", "plan", "_output/plans/plan-000001-a.md", "2026-10-05", "primeira fala")
+    _note(root, "2026-10-06-plan-b.md", "plan", "_output/plans/plan-000002-b.md", "2026-10-06", "segunda fala")
+    _note(root, "2026-10-07-plan-c.md", "plan", "_output/plans/plan-000003-c.md", "2026-10-07", "terceira fala")
+    comm = root / "_output" / "communication" / "2026-10-07"
+    comm.mkdir(parents=True)
+    (comm / "communication-000007-ACD.md").write_text(
+        "# Communication 000007\n\n> **Fonte**: `_output/plans/plan-000002-b.md`\n", encoding="utf-8")
+    return root
+
+
+def test_digest_lists_notes_and_links_only_cited_artifact(tmp_path):
+    root = _digest_project(tmp_path)
+    result = pkb_inbox.digest(root)
+    text = (root / "inbox" / "_live.md").read_text(encoding="utf-8")
+    assert result["count"] == 3 and result["linked_communications"] == 1
+    assert text.startswith(pkb_inbox.LIVE_HEADER)
+    assert text.index("primeira fala") < text.index("segunda fala") < text.index("terceira fala")
+    rows = [r for r in text.splitlines() if r.startswith("| 2026")]
+    assert len(rows) == 3
+    assert "communication-000007-ACD.md" in rows[1]
+    assert "communication-" not in rows[0] and "communication-" not in rows[2]
+
+
+def test_digest_is_deterministic(tmp_path):
+    root = _digest_project(tmp_path)
+    pkb_inbox.digest(root)
+    first = (root / "inbox" / "_live.md").read_bytes()
+    pkb_inbox.digest(root)
+    assert (root / "inbox" / "_live.md").read_bytes() == first
+
+
+def test_digest_without_notes(tmp_path):
+    root = _project(tmp_path, [])
+    result = pkb_inbox.digest(root)
+    text = (root / "inbox" / "_live.md").read_text(encoding="utf-8")
+    assert result["count"] == 0
+    assert text.startswith(pkb_inbox.LIVE_HEADER) and "nenhuma captura ainda" in text
+
+
+def test_digest_refuses_foreign_live_file(tmp_path):
+    root = _project(tmp_path, [])
+    live = root / "inbox" / "_live.md"
+    live.write_text("meu conteudo\n", encoding="utf-8")
+    before = hashlib.sha256(live.read_bytes()).hexdigest()
+    proc = subprocess.run([sys.executable, str(SCRIPT_PATH), "digest", "--target", str(root)],
+                          capture_output=True, text=True, check=False)
+    assert proc.returncode == 1
+    assert "nao foi gerado por mim" in proc.stderr
+    assert hashlib.sha256(live.read_bytes()).hexdigest() == before
+
+
+def test_digest_skips_without_layer(tmp_path):
+    root = _project(tmp_path, [], readme=False)
+    assert pkb_inbox.digest(root) == {"skipped": "no-pkb-layer"}
+    assert not (root / "inbox" / "_live.md").exists()
