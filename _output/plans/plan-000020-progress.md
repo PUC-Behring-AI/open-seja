@@ -55,3 +55,9 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 - deviated: step_notes.py so aceita --step inteiro: usei 7 e marquei 7a no titulo. O import de pkb_inbox e guardado por try/except ImportError (False se faltar). Ruff mostra erros antigos nos dois arquivos, nao tocados.
 - less-sure: Se a camada ficar sem commit apos o 7d e aceitavel; se o sinal usa o conventions do alvo em --cwd (usa cwd como repo_root); o fluxo AskUserQuestion foi descrito, nao executado.
 - gate: not-installed
+
+### Step 7 -- reflection-on-action | 2026-10-07 21:55 UTC | Step 7b: upgrade: preservacao defensiva da camada PKB e tabela de classificacao
+- happened: is_preserved protege inbox/, logs/, Templates/, Objetivos.md e index.md raiz; run_upgrade imprime 'camada PKB detectada' (import guardado de pkb_inbox) apos a copia; upgrade/SKILL.md: linha Rules alinhada ao codigo, linha PKB layer, oferta de init no passo 8. 28 testes verdes (6 novos casos + 2 de saida).
+- deviated: step_notes.py exige --step inteiro: usei 7 com 7b no titulo. A dica fica antes das migracoes (logo apos a copia e remocao de skills aposentadas). Nao tratei docs/index.md como preservado (so index.md na raiz).
+- less-sure: Se o import de pkb_inbox via sys.path funciona quando o script roda de outro cwd (roda: o diretorio do script entra no path); ruff tem erros antigos nos dois arquivos, nao novos.
+- gate: not-installed

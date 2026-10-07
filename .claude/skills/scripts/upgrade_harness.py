@@ -255,9 +255,20 @@ def collect_source_files(source: Path) -> list[Path]:
 
 
 def is_preserved(rel_path: str) -> bool:
-    """Check if a relative path should be preserved (never overwritten)."""
+    """Check if a relative path should be preserved (never overwritten).
+
+    The PKB layer (inbox/, logs/, Templates/, root Objetivos.md and index.md) is a
+    defensive guard: collect_source_files only reads .claude/ of the source, so these
+    paths never reach the copy loop today.
+    """
     parts = Path(rel_path).parts
     filename = parts[-1] if parts else ""
+
+    # PKB layer: personal notes and logs of the project (plan-000020)
+    if parts and parts[0] in ("inbox", "logs", "Templates"):
+        return True
+    if rel_path in ("Objetivos.md", "index.md"):
+        return True
 
     # product-design/ directory (v4 layout: renamed from project-design in v0.3.0)
     # Also guard the old name during the upgrade window before migration 0003 runs.
@@ -610,6 +621,18 @@ def run_upgrade(
                     f"Removed retired skill {harness_dir}/skills/{skill_name}/"
                 )
                 print(f"OK: {prefix}Removed retired skill {harness_dir}/skills/{skill_name}/")
+
+    # --- PKB layer hint ---
+    try:
+        from pkb_inbox import pkb_layer_present
+    except ImportError:
+        pkb_layer_present = None
+    if pkb_layer_present is not None and pkb_layer_present(target):
+        print()
+        print(
+            f"INFO: {prefix}camada PKB detectada: rode `pkb_inbox.py init` "
+            "para acrescentar templates novos sem sobrescrever"
+        )
 
     # --- Run pending migrations ---
     print()

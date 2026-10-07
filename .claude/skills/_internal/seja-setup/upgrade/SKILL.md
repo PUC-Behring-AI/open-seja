@@ -28,11 +28,12 @@ Runs from the **target project** (not the source repo). Applies safe updates to 
 | Harness metadata | `.claude/CHANGELOG.md`, `VERSION`, `CHEATSHEET.md` | Yes | Auto-update |
 | Scripts | `.claude/skills/scripts/*.py` | Yes -- auto-overwritten by `upgrade_harness.py` | Auto-update |
 | Agents | `.claude/agents/*.md` | Mostly -- may have local tweaks | Show diff, ask per file |
-| Rules | `.claude/rules/*.md` | No -- project-specific conventions | Show diff, manual merge |
+| Rules | `.claude/rules/*.md` | Yes -- auto-overwritten by `upgrade_harness.py`; review with `git diff` afterwards | Auto-update (the rule files are harness inventory, not project convention) |
 | Project definitions | `product-design/**` | Never | Skip |
 | Settings | `.claude/settings.json`, `settings.local.json` | Never | Skip |
 | Output directory | `_output/` (or configured) | Never | Skip |
 | CLAUDE.md | `CLAUDE.md` | Never | Skip |
+| PKB layer | `inbox/`, `logs/`, `Templates/`, `Objetivos.md`, `index.md`, `.claude/skills/{daily-log,weekly-review,compress,next-action,process-inbox}/` | Never (not in source) | Skip; `init` adds missing files only |
 
 ### Steps
 
@@ -65,6 +66,7 @@ Runs from the **target project** (not the source repo). Applies safe updates to 
      - **`off`** -- Recommended when o projeto está em prototipação. NOT recommended when o projeto vai medir a escada.
 
      On an explicit answer, add the `SPECIFY_DEFAULT` row from the template's Review Configuration table to the same table of `product-design/conventions.md`, with the answer in backticks (`` `on` `` or `` `off` ``). Never write `SPECIFY_DEFAULT` without an explicit answer: in non-interactive mode, with `--dry-run`, or when the user does not answer, do not write the row and tell the user, in pt-BR: "Não gravei `SPECIFY_DEFAULT`. Vale `on` até você responder." This is the only upgrade write to `product-design/`; `upgrade_harness.py` still never touches `conventions.md`.
+   - `has_pkb_layer` (from `detect_setup_state.py --json`, or the "camada PKB detectada" line of the step 5 output) -> "Run `python .claude/skills/scripts/pkb_inbox.py init` to add the new PKB templates without overwriting anything?"
    - Old path references -> "Update the references?"
    - Stale CLAUDE.md -> "Regenerate your CLAUDE.md?"
    - `${QA_LOGS_DIR}` (default `_output/qa-logs/`) contains files matching `^<prefix>-\d{6}-qa-.*\.md$` (legacy centralized layout) -> "Post-skill now collocates QA logs with the parent artifact, not `${QA_LOGS_DIR}`. Migrate N detected files via `python .claude/skills/seja-setup/migrate_qa_logs_to_parent_dirs.py --apply`? (safe, uses `git mv` to preserve history, `--dry-run`-previewable.)"
