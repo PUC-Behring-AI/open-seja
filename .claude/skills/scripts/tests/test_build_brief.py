@@ -108,3 +108,23 @@ def test_cli_writes_the_brief(tmp_path: Path, capsys: pytest.CaptureFixture[str]
 
 def test_cli_missing_plan_is_exit_2(tmp_path: Path) -> None:
     assert bb.main(["--role", "coder", "--plan", str(tmp_path / "none.md"), "--step", "1"]) == 2
+
+
+@pytest.mark.parametrize(("name", "expected"), [
+    ("plan-20261007-k3m9qz-x.md", "plan-20261007-k3m9qz"),
+    ("plan-000022-x.md", "plan-000022"),
+    ("plan-000022-progress.md", "plan-000022"),
+    ("notes.md", "notes"),
+])
+def test_plan_id_reads_both_artifact_id_formats(name: str, expected: str) -> None:
+    assert bb._plan_id(Path(name)) == expected
+
+
+def test_cli_names_the_brief_with_the_whole_new_artifact_id(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    plan = tmp_path / "plan-20261007-k3m9qz-x.md"
+    plan.write_text(_PLAN, encoding="utf-8")
+    code = bb.main(["--role", "tester", "--plan", str(plan), "--step", "2", "--feature", "contas-da-semana",
+                    "--root", str(_ROOT), "--out-dir", str(tmp_path / "out"), "--json"])
+    assert code == 0
+    out = json.loads(capsys.readouterr().out)
+    assert Path(out["path"]).name == "brief-plan-20261007-k3m9qz-step-2-tester.md"

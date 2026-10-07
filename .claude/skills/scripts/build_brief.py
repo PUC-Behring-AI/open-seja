@@ -34,6 +34,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import check_features as cf
+from artifact_id import ARTIFACT_ID
 
 SCHEMA_VERSION = 1
 PIPELINE_BRIEF_MAX = 24000
@@ -285,7 +286,8 @@ def build_brief(role: str, plan_text: str, step: int, *, root: Path | None = Non
 
 
 def _plan_id(path: Path) -> str:
-    m = re.match(r"(plan-\d+)", path.name)
+    # The lookahead keeps the legacy branch from taking the first six digits of a new ID.
+    m = re.match(rf"(plan-{ARTIFACT_ID})(?![0-9A-Za-z])", path.name)
     return m.group(1) if m else path.stem
 
 

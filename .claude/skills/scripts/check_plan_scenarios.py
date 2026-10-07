@@ -84,6 +84,10 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import NamedTuple
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from artifact_id import ARTIFACT_ID
+
 SCHEMA_VERSION = 1
 LOCK_SCHEMA_VERSION = 1
 LOCK_NAME = "scenarios.lock.json"
@@ -116,7 +120,7 @@ FIELD_RE = re.compile(r"^\s*-\s*\*\*(Tests|Scenarios)(?::\*\*|\*\*:)\s*(.*?)\s*$
 NA_RE = re.compile(r"^N/A\b", re.IGNORECASE)
 NA_REASON_RE = re.compile(r"^N/A\s*\((.*)\)\s*$", re.IGNORECASE | re.DOTALL)
 TICKS_RE = re.compile(r"`([^`]*)`")
-PLAN_FILE_RE = re.compile(r"^plan-\d{6}-.+\.md$")
+PLAN_FILE_RE = re.compile(rf"^plan-{ARTIFACT_ID}-.+\.md$")
 CLOSED_TITLE_RE = re.compile(r"^#\s*(DONE|REVOKED|SUPERSEDED)\s*\|")
 
 RULES = tuple(f"PFS-{n:03d}" for n in range(1, 17))

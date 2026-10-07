@@ -70,11 +70,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import check_plan_scenarios as cps
+from artifact_id import ARTIFACT_ID
 
 SCHEMA_VERSION = 1
 STEPS = ("D1", "D2", "D3a", "D3b")
 NOT_MEASURED = "não medido"
-PLAN_NAME_RE = re.compile(r"^plan-(?:\d{6}|\d{8}-[0-9a-z]{6})-.+\.md$")
+PLAN_NAME_RE = re.compile(rf"^plan-{ARTIFACT_ID}-.+\.md$")
 PROPOSAL_NAME_RE = re.compile(r"^proposal-.+\.md$")
 CLOSED_RE = re.compile(r"^#\s*(DONE|REVOKED|SUPERSEDED)\s*\|")
 PLAN_FIELD_RE = re.compile(r"\bPlan\s+[0-9A-Za-z-]+\s*\|(.*)")

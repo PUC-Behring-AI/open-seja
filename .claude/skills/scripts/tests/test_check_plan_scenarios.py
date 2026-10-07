@@ -480,6 +480,19 @@ def test_scan_valid_v2_exits_zero_and_invalid_v2_exits_one(tmp_path: Path, capsy
     assert code == 1 and "plan-000901-ruim.md" in out and "PFS-009" in out
 
 
+def test_scan_checks_an_open_v2_plan_with_the_new_artifact_id(tmp_path: Path, capsys) -> None:
+    root = _project(tmp_path, {"plan-20261007-k3m9qz-x.md": _read("pfs-009-cenario-sem-step")})
+    code, out, _ = _cli(capsys, "--root", str(root))
+    assert code == 1 and "plan-20261007-k3m9qz-x.md" in out and "PFS-009" in out
+    assert "nada a verificar" not in out
+
+
+def test_scan_skips_the_progress_file_of_a_plan_with_the_new_artifact_id(tmp_path: Path, capsys) -> None:
+    root = _project(tmp_path, {"plan-20261007-k3m9qz-progress.md": _read("pfs-009-cenario-sem-step")})
+    code, out, _ = _cli(capsys, "--root", str(root))
+    assert code == 0 and "nada a verificar" in out
+
+
 def test_scan_ignores_a_done_plan_even_if_its_scenarios_went_stale(tmp_path: Path, capsys) -> None:
     done = "# DONE | 2026-10-06 | Plan 000900 | x\n" + _read("pfs-009-cenario-sem-step").split("\n", 1)[1]
     root = _project(tmp_path, {"plan-000900-x.md": done})
