@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Communication 000021 End Users</title>
+  <style>
+body {
+  max-width: 48em;
+  margin: 2em auto;
+  padding: 0 1em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  color: #222;
+}
+h1, h2, h3 { margin-top: 1.4em; }
+code { background: #f4f4f4; padding: 0.15em 0.3em; border-radius: 3px; }
+pre  { background: #f4f4f4; padding: 1em; overflow-x: auto; border-radius: 4px; }
+pre code { background: none; padding: 0; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #ddd; padding: 0.5em 0.75em; text-align: left; }
+th { background: #f8f8f8; }
+blockquote { border-left: 4px solid #ddd; margin: 1em 0; padding: 0.5em 1em; color: #555; }
+a { color: #0366d6; }
+
+  </style>
+</head>
+<body>
+
+<h1 id="communication-000021-usr-2026-10-07-0045-utc-end-users">Communication 000021 | USR | 2026-10-07 00:45 UTC | End Users</h1>
+<blockquote>
+<p><strong>Fonte</strong>: <code>_output/plans/plan-000019-upgrade-multi-dev-identidade-por-ulid.md</code>, com o porque em <code>_output/research-logs/research-000018-upgrade-multi-dev-esquema-de-ids.md</code> (recomendacoes revisadas e perguntas de acompanhamento) e na decisao D-005 de <code>product-design/product-design-as-intended.md</code>.</p>
+</blockquote>
+<h2 id="para-quem-eu-escrevo">Para quem eu escrevo</h2>
+<p>Eu escrevo para voce que usa o open-seja num repositorio compartilhado com outras pessoas, na mesma branch, e que vive com os artefatos que o harness produz: planos, pesquisas, reflexoes, comunicacoes. Este texto e o espelho do PLAN: o plano contado a quem vai conviver com ele, antes de qualquer codigo. Se alguma parte nao sobreviver a ser contada, e isso que eu quero descobrir agora, e nao depois.</p>
+<h2 id="o-open-seja-em-uma-pagina">O open-seja em uma pagina</h2>
+<p>O open-seja e a distribuicao de acesso aberto do SEJA, um harness para o Claude Code. Eu trato desenvolvimento assistido por IA como comunicacao projetada: voce me diz o que quer, nas suas palavras, antes de qualquer codigo; eu registro isso como intencao que uma maquina consegue enderecar; eu so considero um passo feito quando uma ferramenta diz que passou; e ao fim de cada fase eu lhe devolvo um espelho, para que voce veja a distancia entre o que pediu e o que existe.</p>
+<p>O problema que eu resolvo: quando um agente escreve mais rapido do que voce consegue revisar, a traducao da sua intencao pode estar errada sem estar quebrada. Eu existo para que voce exerca autoria sem precisar ler cada linha, e para que o que nao foi medido apareca como nao medido.</p>
+<p>O que me diferencia: a intencao vem antes do codigo e fica registrada em arquivo; cada artefato tem identidade estavel e historia; a voz de cada arquivo e de quem a emitiu; e eu aplico a mim mesmo o que exijo dos projetos, numerando minhas apostas e dizendo o que as refutaria. Hoje eu estou entre uma versao e a seguinte, e este plano e uma das mudancas que preparam a proxima.</p>
+<h2 id="o-que-eu-entendi-de-voce">O que eu entendi de voce</h2>
+<p>Eu sei que voces sao mais de um na mesma branch, cada um na sua maquina, e que as vezes algum de voces trabalha sem rede. Eu sei que, hoje, quando dois de voces reservam um artefato ao mesmo tempo, os dois podem receber o mesmo numero, e nada avisa: os dois planos coexistem em silencio ate alguem tropecar. Eu sei que o numero curto, "plan 7", e comodo de dizer em voz alta, e que voce ja se acostumou a ele. E eu sei que a ordem dos arquivos na arvore importa para voce: abrir a pasta e ver o que veio antes.</p>
+<p>Por isso eu projetei esta mudanca para que nenhum de voces precise combinar nada com ninguem, nem antes nem depois, e para que a ordem na arvore continue de pe. Em troca, eu lhe peco duas coisas: aceitar um ID mais longo e atualizar o harness junto com o seu time.</p>
+<h2 id="o-que-muda-para-voce">O que muda para voce</h2>
+<ul>
+<li><strong>O ID de um artefato novo passa a ter a data e um sufixo curto.</strong> Em vez de <code>plan-000020</code>, voce vera algo como <code>plan-20261007-k3m9qz</code>. A data e o dia em que o artefato nasceu; o sufixo vem de um identificador gerado na sua propria maquina, sem consultar ninguem.</li>
+<li><strong>O nome do arquivo segue o mesmo padrao.</strong> <code>plan-20261007-k3m9qz-&lt;assunto&gt;.md</code>. Como a data vem primeiro, a pasta continua ordenada no tempo.</li>
+<li><strong>O cabecalho ganha uma linha <code>uid:</code>.</strong> E a identidade completa do artefato, logo abaixo do titulo. Voce nao precisa ler nem digitar essa linha; ela existe para que eu e as ferramentas futuras saibamos, sem ambiguidade, de qual artefato se trata.</li>
+<li><strong>Nasce uma pasta <code>_output/ids/</code>.</strong> Cada artefato novo deixa ali um registro de nascimento pequeno: tipo, titulo, instante em que nasceu, de onde veio, e um token anonimo de quem o criou. Um arquivo por artefato, para que o git funda o trabalho de voces sem conflito.</li>
+<li><strong>O INDEX.md deixa de guardar estado.</strong> Hoje ele carrega linhas de reserva que podem ficar orfas. Depois, ele e regenerado inteiro a qualquer momento a partir do que existe, e nada se perde ao regenerar.</li>
+<li><strong>Eu passo a acusar ID duplicado.</strong> Um verificador novo roda antes de cada skill e no preflight. Se dois artefatos tiverem o mesmo ID, ou se um registro de nascimento ficar sem artefato por muito tempo, eu lhe digo qual e qual antes de voce commitar.</li>
+<li><strong>Eu mudo o que lhe digo ao reservar.</strong> Em vez de "reservado 000020", eu digo "reservado 20261007-k3m9qz" e mostro o uid ao lado.</li>
+</ul>
+<h2 id="o-que-nao-muda">O que nao muda</h2>
+<ul>
+<li><strong>Todo ID antigo continua valido, para sempre.</strong> Nenhum artefato existente muda de nome, de numero ou de conteudo. <code>plan-000007</code> continua sendo <code>plan-000007</code>, citavel e rastreavel como hoje.</li>
+<li><strong>Os comandos sao os mesmos.</strong> <code>/plan</code>, <code>/research</code>, <code>/reflect</code>, <code>/implement</code> e as demais skills funcionam como antes; so o ID que elas lhe devolvem muda de forma.</li>
+<li><strong>Os marcadores nos seus arquivos de voz humana aceitam os dois formatos.</strong> Eu nao lhe peco para reescrever nenhum marcador, changelog ou decisao que ja existe.</li>
+<li><strong>A ordem na arvore continua cronologica.</strong> O prefixo de data faz esse papel.</li>
+<li><strong>O seu nome nao entra no ledger.</strong> O registro de nascimento guarda um token derivado do seu e-mail do git, nao o seu nome. Isso segue a regra que ja vale para tudo em <code>_output/</code>.</li>
+<li><strong>As decisoes D-NNN e as pendencias <code>pa-</code> ficam como estao.</strong> Mudancas nesses identificadores ficam para um plano separado.</li>
+</ul>
+<h2 id="o-que-voce-precisa-fazer">O que voce precisa fazer</h2>
+<ol>
+<li><strong>Atualizar o harness junto com todo mundo que compartilha o ledger.</strong> Esta e a unica exigencia real. Um harness anterior nao corrompe nada ao encontrar artefatos novos, mas fica cego a eles: continua emitindo IDs no formato antigo (e a janela de colisao segue aberta para ele), indexa os artefatos novos como "Other" sem ID, nao os acompanha em cobertura nem em pendencias, e <strong>recusa commitar</strong> qualquer arquivo de voz humana que tenha um marcador no formato novo. Se um de voces ficar para tras, e ele quem vai esbarrar nisso, sem aviso claro.</li>
+<li><strong>Depois de atualizar, regenerar o INDEX.md.</strong> As linhas de reserva orfas de hoje desaparecem nessa regeneracao. Nao ha nada a migrar: se a pasta <code>_output/ids/</code> nao existir ainda, ela nasce na primeira reserva.</li>
+<li><strong>Passar a citar artefatos novos pela data e pelo sufixo.</strong> "O plano de sete de outubro, k3m9qz" e o que voce tem por enquanto para falar de um artefato novo em voz alta. Um apelido pronunciavel, derivado do identificador e igual em todas as maquinas, esta previsto para um plano seguinte; eu digo isso para que voce nao espere dele agora.</li>
+</ol>
+<h2 id="o-que-voce-perde-e-o-que-ganha">O que voce perde e o que ganha</h2>
+<table>
+<thead>
+<tr>
+<th>Voce perde</th>
+<th>Voce ganha</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>O numero curto. "Plan 7" cabia numa frase; <code>20261007-k3m9qz</code> nao cabe tao bem.</td>
+<td>Nenhuma combinacao entre maquinas: cada um reserva na sua, com ou sem rede, e nunca colide.</td>
+</tr>
+<tr>
+<td>A ordem entre artefatos criados no mesmo dia por pessoas diferentes. Dois artefatos do mesmo dia ordenam entre si pelo sufixo, nao pela hora.</td>
+<td>A ordem entre dias continua garantida pela data no nome, mais legivel do que o numero.</td>
+</tr>
+<tr>
+<td>Um unico formato de ID. O harness passa a conviver com os dois por tempo indefinido.</td>
+<td>Nenhuma renumeracao, nunca. O que nasceu com um ID morre com ele, e artefatos antigos ficam intactos.</td>
+</tr>
+<tr>
+<td>A sensacao de que o INDEX.md "sabe" o que esta reservado.</td>
+<td>Um INDEX.md que voce pode regenerar sem medo, e um verificador que acusa duplicata em vez de deixar passar em silencio.</td>
+</tr>
+</tbody>
+</table>
+<p>O designer aceitou as duas primeiras perdas de forma explicita: o numero curto e substituivel por um apelido, e a ordem dentro do dia "nao importa tanto". Se para o seu time ela importa, esta e a hora de dizer.</p>
+<h2 id="o-que-eu-me-comprometo-a-manter">O que eu me comprometo a manter</h2>
+<ul>
+<li><strong>Eu nao toco no que ja existe.</strong> Artefato e marcador antigos ficam como estao. A historia do seu ledger e evidencia, nao rascunho.</li>
+<li><strong>Eu aviso antes, nao depois.</strong> Duplicata de ID aparece antes do commit, com os dois caminhos nomeados, e nao numa descoberta acidental semanas depois.</li>
+<li><strong>Eu nao guardo o seu nome.</strong> O registro de nascimento usa um token anonimo; voce pode trocar esse token por um apelido seu, se quiser.</li>
+<li><strong>Eu nao preciso de rede para funcionar.</strong> Reservar um ID e um ato local. Voce pode trabalhar dias sem sincronizar e o seu trabalho se funde depois sem conflito.</li>
+<li><strong>Eu digo o que nao faco neste plano.</strong> Apelidos pronunciaveis, resolucao de apelido para artefato e os identificadores secundarios de pendencias e QA ficam para planos seguintes. Nao espere isso desta entrega.</li>
+<li><strong>Eu so entrego com a suite verde.</strong> Cada passo do plano tem teste antes do codigo, e o conjunto so entra quando os verificadores do harness nao acusam falha nova.</li>
+</ul>
+<h2 id="pergunte-a-si-mesmo">Pergunte a si mesmo</h2>
+<p>A resposta honesta a qualquer uma destas perguntas pode mandar o plano de volta para a mesa. E melhor que volte agora.</p>
+<ol>
+<li><strong>Voce cita IDs em voz alta, em reuniao ou no chat, com frequencia?</strong> Se "plan 7" e parte do vocabulario do time todo dia, a perda do numero curto vai doer antes de o apelido chegar. Nesse caso, talvez o apelido precise vir junto, e nao depois.</li>
+<li><strong>Voces criam varios artefatos no mesmo dia, em pessoas diferentes, e precisam saber qual veio primeiro?</strong> Se sim, a ordem dentro do dia importa para voce, ao contrario do que o designer assumiu, e o prefixo precisaria incluir a hora.</li>
+<li><strong>Voce tem scripts, atalhos ou integracoes suas que leem o nome do arquivo esperando seis digitos?</strong> Qualquer coisa que procure <code>plan-</code> seguido de seis numeros vai passar batido pelos artefatos novos. Eu cuido do que esta dentro do harness; o que esta fora dele e seu, e eu nao vejo.</li>
+<li><strong>Alguem do time vai ficar numa versao antiga do harness por mais do que alguns dias?</strong> Se a resposta e sim, essa pessoa vai ter commits recusados sem entender por que. Ou todos atualizam juntos, ou o plano precisa de um modo de transicao que hoje ele nao tem.</li>
+</ol>
+<h2 id="como-me-dizer-que-algo-nao-bateu">Como me dizer que algo nao bateu</h2>
+<ul>
+<li><strong>Antes do codigo existir</strong>: a janela e agora, entre este espelho e o <code>/implement</code>. Leve a resposta das perguntas acima para quem vai executar o plano, ou anote no proprio arquivo do plano. Uma resposta "sim" na pergunta 2 ou na 4 muda o plano; na 1 ou na 3, muda a ordem dos planos seguintes.</li>
+<li><strong>Se voce discorda da decisao de fundo</strong> (identidade sem coordenacao, no lugar de um numero global): o lugar e um <code>/design</code>, que reabre a decisao D-005 com a sua razao registrada nas suas palavras. As alternativas que foram rejeitadas, e por que, estao escritas la.</li>
+<li><strong>Depois de usar</strong>: <code>/reflect</code> registra o que voce disser, literalmente, sem prescrever mudanca. Se o ID novo atrapalhar na pratica, e por ali que isso vira entrada para o proximo ciclo.</li>
+<li><strong>Se encontrar um comportamento errado</strong> (uma duplicata que eu nao acusei, um marcador que eu recusei sem motivo): abra um <code>/research</code> com o caso concreto. Um verificador que falha em silencio e exatamente o que este plano existe para evitar.</li>
+</ul>
+<p>Eu nao prometo prazo de resposta; prometo que nada do que voce disser nesses canais se perde, e que o plano nao avanca para o codigo enquanto este espelho estiver sendo lido.</p>
+
+</body>
+</html>
