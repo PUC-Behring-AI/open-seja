@@ -124,6 +124,7 @@ from typing import NamedTuple
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts" / "priv"))
 
+from artifact_id import ARTIFACT_ID
 from load_quickguide import load_quickguide as _shared_load_quickguide
 
 # ---------------------------------------------------------------------------
@@ -1584,9 +1585,9 @@ def plugin_internal_reference_leakage(root: Path, verbose: bool) -> list[Finding
 
     # Patterns that indicate internal development references
     _patterns = [
-        (re.compile(r"plan-\d{6}"), "Specific plan ID"),
-        (re.compile(r"advisory-\d{6}"), "Specific advisory ID"),
-        (re.compile(r"research-\d{6}"), "Specific research ID"),
+        (re.compile(rf"plan-{ARTIFACT_ID}(?![0-9A-Za-z])"), "Specific plan ID"),
+        (re.compile(rf"advisory-{ARTIFACT_ID}(?![0-9A-Za-z])"), "Specific advisory ID"),
+        (re.compile(rf"research-{ARTIFACT_ID}(?![0-9A-Za-z])"), "Specific research ID"),
         (re.compile(r"Phase\s+3[ab]\b"), "Internal development phase label"),
         (re.compile(r"SEJA\s+\d+\.\d+\.\d+"), "Internal SEJA version number"),
     ]
@@ -1683,7 +1684,9 @@ _SKILL_WAIVER_RE = re.compile(
     r"<!--\s*skill-length-waiver\s*:\s*(?P<reason>.*?)\s*-->",
     re.IGNORECASE,
 )
-_SKILL_CITATION_RE = re.compile(r"\b(advisory-\d{6}|plan-\d{6})\b")
+_SKILL_CITATION_RE = re.compile(
+    rf"\b((?:advisory|plan)-{ARTIFACT_ID})(?![0-9A-Za-z])"
+)
 _SKILL_STEP_HEADING_RE = re.compile(r"^###\s+Step\s+\d+", re.IGNORECASE)
 _SKILL_STEP_NUMBERED_RE = re.compile(r"^\d+[a-z]?\.\s+")
 _SKILL_FENCE_OPEN_RE = re.compile(r"^```")
@@ -2167,10 +2170,10 @@ def plugin_mantra_banner_consistency(
 # ---------------------------------------------------------------------------
 
 _SCRIPT_CITATION_DRIFT_RE = re.compile(
-    r"\b(?:plan|advisory|research)-\d{6}\b"
+    rf"\b(?:plan|advisory|research)-{ARTIFACT_ID}(?![0-9A-Za-z])"
 )
 _SCRIPT_TRANSITION_ANCHOR_RE = re.compile(
-    r"\bTRANSITION\s+\(?plan-\d{6}\)?\b",
+    rf"\bTRANSITION\s+\(?plan-{ARTIFACT_ID}\)?(?![0-9A-Za-z])",
     re.IGNORECASE,
 )
 _SCRIPT_RATIONALE_POINTER_RE = re.compile(

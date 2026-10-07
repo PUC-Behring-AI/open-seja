@@ -7,8 +7,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import check_docs
 import check_plan_coverage
+import generate_decision_digest
+import generate_pending_roadmap
 import pending
+import reflect_deep_scope
+import reflect_stuck_loops
 import step_notes
 import summarize_artifacts
 import update_cross_refs
@@ -122,3 +127,57 @@ class TestPending:
     def test_roadmap_id_new(self):
         assert pending._ROADMAP_ID_RE.match(f"roadmap-{NEW}").group(1) == NEW
         assert pending._ROADMAP_ID_RE.match("roadmap-0007") is None
+
+
+# --- Step 6: peripheral parsers -------------------------------------------
+
+
+class TestCheckDocs:
+    def test_skill_citation(self):
+        rx = check_docs._SKILL_CITATION_RE
+        assert rx.search("see plan-000007 here").group(1) == "plan-000007"
+        assert rx.search(f"see advisory-{NEW}.").group(1) == f"advisory-{NEW}"
+        assert rx.search("see plan-0007 here") is None
+
+    def test_script_citation_drift(self):
+        rx = check_docs._SCRIPT_CITATION_DRIFT_RE
+        assert rx.search(f"# research-{NEW}").group(0) == f"research-{NEW}"
+        assert rx.search("# plan-000007").group(0) == "plan-000007"
+        assert check_docs._SCRIPT_TRANSITION_ANCHOR_RE.search(f"TRANSITION (plan-{NEW})")
+
+
+class TestDecisionDigest:
+    def test_advisory_header_new_id(self):
+        line = f"# Advisory {NEW} | X | 2026-10-07 10:00 UTC | titulo"
+        m = generate_decision_digest._ADVISORY_HEADER_RE.search(line)
+        assert m and m.group(1) == NEW
+        legacy = "# Research 000018 | X | 2026-10-06 10:00 UTC | t"
+        assert generate_decision_digest._RESEARCH_HEADER_RE.search(legacy).group(1) == "000018"
+
+
+class TestPendingRoadmap:
+    def test_plan_id_new_whole(self):
+        rx = generate_pending_roadmap._PLAN_ID_RE
+        assert rx.search(f"source: plan-{NEW}").group(1) == NEW
+        assert rx.search("plan-000007-x").group(1) == "000007"
+        assert rx.search("plan-0007") is None
+
+    def test_header_metacomm(self):
+        text = "# Plan 000007 | FEATURE-O | METACOMM | 2026-10-05 02:00 UTC | t | Review: standard\n"
+        assert generate_pending_roadmap._parse_plan_header(text) == ("t", "other")
+
+    def test_header_new_id_done_line(self):
+        text = f"# DONE | 2026-10-07 |\n# Plan {NEW} | FEATURE-B | 2026-10-07 02:00 UTC | t | Review: standard\n"
+        assert generate_pending_roadmap._parse_plan_header(text) == ("t", "backend")
+
+
+class TestReflect:
+    def test_stuck_loops_brief_map_new_id(self, tmp_path):
+        b = tmp_path / "briefs.md"
+        b.write_text(f"STARTED | 2026-10-07 10:00 UTC | plan | {NEW} | fazer x\n", encoding="utf-8")
+        assert reflect_stuck_loops._load_briefs_map(b) == {NEW: "fazer x"}
+
+    def test_deep_scope_plan_id(self):
+        assert reflect_deep_scope._extract_plan_id(f"PLAN | {NEW} | x") == NEW
+        assert reflect_deep_scope._extract_plan_id("PLAN | 000007") == "000007"
+        assert reflect_deep_scope._extract_plan_id("PLAN | 0007") is None

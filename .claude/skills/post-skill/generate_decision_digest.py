@@ -38,6 +38,7 @@ from pathlib import Path
 import sys as _sys; from pathlib import Path as _Path
 _sys.path.insert(0, str(_Path(__file__).resolve().parent.parent / 'scripts'))
 del _sys, _Path
+from artifact_id import ARTIFACT_ID
 from project_config import REPO_ROOT, get_path
 
 OUTPUT_DIR = get_path("OUTPUT_DIR") or REPO_ROOT / "_output"
@@ -55,13 +56,13 @@ _REC_LINE_RE = re.compile(
 
 # Advisory header pattern
 _ADVISORY_HEADER_RE = re.compile(
-    r"^#\s+Advisory\s+(\d+)\s*\|.*?\|\s*(\d{4}-\d{2}-\d{2})\s+\d{2}:\d{2}\s+UTC\s*\|\s*(.+)$",
+    rf"^#\s+Advisory\s+({ARTIFACT_ID})\s*\|.*?\|\s*(\d{{4}}-\d{{2}}-\d{{2}})\s+\d{{2}}:\d{{2}}\s+UTC\s*\|\s*(.+)$",
     re.MULTILINE,
 )
 
 # Research header pattern for the forward-only advisory-to-research rename.
 _RESEARCH_HEADER_RE = re.compile(
-    r"^#\s+Research\s+(\d+)\s*\|.*?\|\s*(\d{4}-\d{2}-\d{2})\s+\d{2}:\d{2}\s+UTC\s*\|\s*(.+)$",
+    rf"^#\s+Research\s+({ARTIFACT_ID})\s*\|.*?\|\s*(\d{{4}}-\d{{2}}-\d{{2}})\s+\d{{2}}:\d{{2}}\s+UTC\s*\|\s*(.+)$",
     re.MULTILINE,
 )
 
@@ -113,7 +114,7 @@ def scan_d_nnn_entries(verbose: bool = False) -> list[dict]:
         decision_stmt = decision_match.group(1).strip() if decision_match else title
 
         # Try to find source advisory
-        source_match = re.search(r"advisory-(\d+)", block)
+        source_match = re.search(rf"advisory-({ARTIFACT_ID})(?![0-9A-Za-z])", block)
         source_id = f"advisory-{source_match.group(1)}" if source_match else None
 
         # Try to find date
