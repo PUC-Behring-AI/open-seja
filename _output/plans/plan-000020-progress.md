@@ -31,3 +31,9 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 - deviated: PKB_DIR e lido por regex do conventions.md do alvo, nao por project_config.get_path, porque get_path so resolve contra o REPO_ROOT do harness e --target pode ser outro repo. pytest nao estava instalado; rodei via uv run --no-project --with pytest.
 - less-sure: Se a leitura por regex diverge de project_config em casos de borda (valores com ${...}); logs/<ano> usa o ano corrente.
 - gate: not-installed
+
+### Step 4 -- reflection-on-action | 2026-10-07 21:41 UTC | conversation_trace.py list e pkb_inbox.py capture: a nota de inbox derivada
+- happened: Adicionei conversation_trace.list_entries e o subcomando list, e em pkb_inbox.py pkb_layer_present e capture (mascaramento via SECRET_PATTERNS importado, comparacao normalizada com o User brief, append sem sobrescrever). 18 testes verdes, ruff limpo.
+- deviated: O exemplo ANTHROPIC_API_KEY=sk-... do plano nao casa nenhum SECRET_PATTERNS (exigem valor entre aspas), entao o teste usa api_key = "...". Quando ha falas no trace e --brief, o brief entra como linha extra '> brief' e fica fora da comparacao. Corrigi tambem o DTZ011 antigo de init (date.today -> UTC).
+- less-sure: Se o led_to_skill gravado pelo backfill vai coincidir com o --skill passado ao capture (comparo exato apos tirar a barra inicial); se o padrao de segredo do projeto deveria pegar chaves sem aspas.
+- gate: not-installed

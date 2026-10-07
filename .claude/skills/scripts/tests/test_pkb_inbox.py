@@ -92,3 +92,101 @@ def test_pkb_dir_from_target_conventions(tmp_path):
     pkb_inbox.init_layer(tmp_path, TEMPLATE_ROOT, False, False)
     assert (tmp_path / "captura" / "README.md").is_file()
     assert not (tmp_path / "inbox").exists()
+
+
+# ---------------------------------------------------------------------------
+# capture
+# ---------------------------------------------------------------------------
+
+PLAN_TEXT = (
+    "# Plan 000099 | FEATURE-X | 2026-10-07 | t\n\n## User brief\n\n"
+    '"Quero um inbox automatico"\n\n## Agent interpretation\n\nx\n'
+)
+
+
+def _trace_row(n, text, skill="plan X", session="s1", emitter="user"):
+    return {"evt_id": f"qa-{n:06d}", "session_id": session, "emitter": emitter,
+            "message": text, "led_to_skill": skill,
+            "timestamp": f"2026-10-07T10:0{n}:00+00:00"}
+
+
+def _project(tmp_path, rows, *, readme=True, pkb_dir="inbox", plan=PLAN_TEXT):
+    (tmp_path / "product-design").mkdir()
+    (tmp_path / "product-design" / "conventions.md").write_text(
+        f"| `PKB_DIR` | `{pkb_dir}` | x |\n", encoding="utf-8")
+    (tmp_path / "_output").mkdir()
+    (tmp_path / "_output" / "conversation-trace.jsonl").write_text(
+        "".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+    (tmp_path / "inbox").mkdir()
+    if readme:
+        (tmp_path / "inbox" / "README.md").write_text("r", encoding="utf-8")
+    art = tmp_path / "_output" / "plans"
+    art.mkdir()
+    (art / "plan-000099-x.md").write_text(plan, encoding="utf-8")
+    return tmp_path
+
+
+def _capture(root, **kw):
+    args = dict(skill="plan X", artifact="_output/plans/plan-000099-x.md",
+                session_id="s1", brief=None, repo_root=root)
+    args.update(kw)
+    return pkb_inbox.capture(**args)
+
+
+def test_capture_equal_to_brief_after_normalization(tmp_path):
+    rows = [_trace_row(1, "> QUERO   um inbox"), _trace_row(2, "automatico."),
+            _trace_row(3, "outra skill", skill="implement Z")]
+    root = _project(tmp_path, rows)
+    result = _capture(root)
+    note = (root / result["path"]).read_text(encoding="utf-8")
+    assert result["as_expressed_igual_ao_brief"] is True
+    assert "as_expressed_igual_ao_brief: true" in note
+    assert note.count("\n> ") == 2
+    assert "outra skill" not in note
+    assert result["fonte"] == ["qa-000001", "qa-000002"]
+
+
+def test_capture_differs_when_words_change(tmp_path):
+    root = _project(tmp_path, [_trace_row(1, "Quero um inbox automatico e live")])
+    assert _capture(root)["as_expressed_igual_ao_brief"] is False
+
+
+def test_capture_masks_secret_in_brief(tmp_path):
+    root = _project(tmp_path, [_trace_row(1, "oi")])
+    result = _capture(root, brief='use api_key = "abcd1234efgh5678"')
+    note = (root / result["path"]).read_text(encoding="utf-8")
+    assert "[MASKED:" in note and "mascarado: true" in note
+    assert "abcd1234efgh5678" not in note
+
+
+def test_capture_skips_without_readme(tmp_path):
+    root = _project(tmp_path, [_trace_row(1, "x")], readme=False)
+    result = _capture(root)
+    assert result == {"skipped": "no-pkb-layer"}
+    assert list((root / "inbox").iterdir()) == []
+
+
+def test_capture_skips_when_pkb_dir_empty(tmp_path):
+    root = _project(tmp_path, [_trace_row(1, "x")], pkb_dir="")
+    assert _capture(root) == {"skipped": "no-pkb-layer"}
+    assert not list((root / "inbox").glob("2026*"))
+
+
+def test_capture_without_session_uses_briefs(tmp_path):
+    root = _project(tmp_path, [_trace_row(1, "x", session="other")])
+    result = _capture(root, brief="Quero um inbox automatico")
+    note = (root / result["path"]).read_text(encoding="utf-8")
+    assert result["fonte"] == "briefs"
+    assert "fonte: briefs" in note
+    assert result["as_expressed_igual_ao_brief"] is True
+
+
+def test_capture_appends_never_overwrites(tmp_path):
+    root = _project(tmp_path, [_trace_row(1, "primeira fala")])
+    first = _capture(root)
+    path = root / first["path"]
+    before = path.read_text(encoding="utf-8")
+    second = _capture(root)
+    after = path.read_text(encoding="utf-8")
+    assert second["path"] == first["path"]
+    assert after.startswith(before) and len(after) > len(before)

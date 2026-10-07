@@ -18,6 +18,7 @@ Subcommands:
   append           Append a new entry (with automatic secret masking)
   backfill-skill   Set led_to_skill on an existing entry
   last-evt-id      Print the last evt_id for a session
+  list             List a session's entries as JSON (read-only)
 
 Usage
 -----
@@ -215,6 +216,41 @@ def _cmd_last_evt_id(args: argparse.Namespace) -> int:
 
 
 # ---------------------------------------------------------------------------
+# Subcommand: list
+# ---------------------------------------------------------------------------
+
+
+def list_entries(session_id: str, led_to_skill: str | None = None,
+                 since_evt: str | None = None,
+                 trace_file: Path | None = None) -> list[dict]:
+    """Return the session's entries in file order, without rewriting the file.
+
+    Entries are already masked at write time. led_to_skill keeps only entries
+    with that exact value; since_evt keeps entries after that evt_id.
+    """
+    path = trace_file if trace_file is not None else _trace_path()
+    result: list[dict] = []
+    seen_since = since_evt is None
+    for entry in _read_entries(path):
+        if entry.get("session_id") != session_id:
+            continue
+        if not seen_since:
+            seen_since = entry.get("evt_id") == since_evt
+            continue
+        if led_to_skill is not None and entry.get("led_to_skill") != led_to_skill:
+            continue
+        result.append(entry)
+    return result
+
+
+def _cmd_list(args: argparse.Namespace) -> int:
+    """Print the session's entries as a JSON array."""
+    entries = list_entries(args.session_id, args.led_to_skill, args.since_evt)
+    print(json.dumps(entries, indent=2, ensure_ascii=False))
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 
@@ -259,6 +295,17 @@ def _build_parser() -> argparse.ArgumentParser:
     p_last.add_argument("--session-id", required=True,
                         help="Session identifier to search for")
 
+    # -- list --
+    p_list = sub.add_parser("list", help="List a session's entries as JSON")
+    p_list.add_argument("--session-id", required=True,
+                        help="Session identifier")
+    p_list.add_argument("--led-to-skill", default=None,
+                        help="Keep only entries with this led_to_skill")
+    p_list.add_argument("--since-evt", default=None,
+                        help="Keep only entries after this evt_id")
+    p_list.add_argument("--json", action="store_true",
+                        help="JSON output (always on; accepted for symmetry)")
+
     return parser
 
 
@@ -270,6 +317,7 @@ def main() -> int:
         "append": _cmd_append,
         "backfill-skill": _cmd_backfill_skill,
         "last-evt-id": _cmd_last_evt_id,
+        "list": _cmd_list,
     }
 
     handler = dispatch.get(args.command)

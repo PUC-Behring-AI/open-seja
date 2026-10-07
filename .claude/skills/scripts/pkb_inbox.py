@@ -4,13 +4,15 @@
 #   already wrote. I tell you which files I created and which I skipped, and
 #   I never edit your CLAUDE.md: I only suggest the line to add.
 """
-pkb_inbox.py -- PKB layer tooling (init).
+pkb_inbox.py -- PKB layer tooling (init, capture).
 
 Invocation: agent-invoked, user-invoked via /seja-setup --pkb
 Lifecycle: active
 
 Usage:
     pkb_inbox.py init [--target DIR] [--with-skills] [--dry-run] [--json]
+    pkb_inbox.py capture --skill NAME --artifact PATH_OR_ID --session-id ID
+                         [--brief TEXT] [--target DIR] [--json]
 
 Exit codes: 0 ok, 1 error, 2 usage.
 """
@@ -20,8 +22,13 @@ import argparse
 import json
 import re
 import sys
-from datetime import date
+from datetime import datetime, timezone
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "design"))
+from check_secrets import SECRET_PATTERNS
+from conversation_trace import list_entries
 
 SCHEMA_VERSION = 1
 DEFAULT_PKB_DIR = "inbox"
@@ -37,6 +44,153 @@ def read_pkb_dir(target: Path) -> str:
         if match and match.group(1).strip():
             return match.group(1).strip().strip("/")
     return DEFAULT_PKB_DIR
+
+
+def _conv_row(target: Path, key: str) -> str | None:
+    """Raw value of a conventions.md table row, or None when the row is absent."""
+    conv = target / "product-design" / "conventions.md"
+    if not conv.is_file():
+        return None
+    match = re.search(
+        rf"^\|\s*`{re.escape(key)}`\s*\|\s*`?([^`|]*?)`?\s*\|",
+        conv.read_text(encoding="utf-8"), re.MULTILINE)
+    return match.group(1).strip() if match else None
+
+
+def pkb_layer_present(repo_root: Path) -> bool:
+    """True when PKB_DIR is non-empty and <PKB_DIR>/README.md exists.
+
+    An empty PKB_DIR row turns the layer off; an absent row means the default.
+    """
+    raw = _conv_row(repo_root, "PKB_DIR")
+    pkb_dir = DEFAULT_PKB_DIR if raw is None else raw.strip("/")
+    return bool(pkb_dir) and (repo_root / pkb_dir / "README.md").is_file()
+
+
+def _trace_file(repo_root: Path) -> Path:
+    raw = _conv_row(repo_root, "CONVERSATION_TRACE_FILE")
+    out = _conv_row(repo_root, "OUTPUT_DIR") or "_output"
+    if not raw:
+        raw = "${OUTPUT_DIR}/conversation-trace.jsonl"
+    return repo_root / raw.replace("${OUTPUT_DIR}", out.strip("/"))
+
+
+def _mask(text: str) -> tuple[str, bool]:
+    masked = text
+    for name, pattern in SECRET_PATTERNS:
+        masked = pattern.sub(f"[MASKED:{name}]", masked)
+    return masked, masked != text
+
+
+def _normalize(text: str) -> str:
+    """casefold, drop blockquote markers, collapse spaces, strip edge quotes/punctuation."""
+    text = re.sub(r"^\s*>\s?", "", text, flags=re.MULTILINE)
+    text = " ".join(text.casefold().split())
+    return text.strip(" \t\"'\u201c\u201d.,;:!?")
+
+
+def _plan_brief(artifact: Path) -> str | None:
+    if not artifact.is_file():
+        return None
+    match = re.search(r"^## User brief\s*\n(.*?)(?=^## |\Z)",
+                      artifact.read_text(encoding="utf-8"), re.MULTILINE | re.DOTALL)
+    return match.group(1) if match else None
+
+
+def _artifact_id(artifact: str) -> str:
+    stem = Path(artifact).stem
+    match = re.match(r"^([a-z]+-(?:\d{6}|\d{8}-[0-9a-z]{6}))", stem)
+    return match.group(1) if match else stem
+
+
+def _slug(text: str) -> str:
+    words = re.findall(r"[a-z0-9]+", text.casefold().encode("ascii", "ignore").decode())
+    return "-".join(words[:5]) or "captura"
+
+
+def capture(skill: str, artifact: str, session_id: str, brief: str | None,
+            repo_root: Path) -> dict:
+    """Write (or extend) the inbox note derived from trace + brief."""
+    if not pkb_layer_present(repo_root):
+        return {"skipped": "no-pkb-layer"}
+    skill_id = skill.lstrip("/")
+    entries = [
+        e for e in list_entries(session_id, trace_file=_trace_file(repo_root))
+        if e.get("emitter") == "user"
+        and (e.get("led_to_skill") or "").lstrip("/") == skill_id
+    ]
+    quotes: list[tuple[str, str]] = []  # (HH:MM, text)
+    for e in entries:
+        stamp = str(e.get("timestamp", ""))
+        try:
+            hhmm = datetime.fromisoformat(stamp).strftime("%H:%M")
+        except ValueError:
+            hhmm = "--:--"
+        quotes.append((hhmm, str(e.get("message", ""))))
+    fonte: list[str] | str = [str(e["evt_id"]) for e in entries]
+    if not quotes:
+        if not brief:
+            return {"skipped": "nothing-to-capture"}
+        fonte = "briefs"
+        quotes = [("--:--", brief)]
+    texts = [_mask(t) for _, t in quotes]
+    mascarado = any(flag for _, flag in texts)
+    body_lines = [f"> **{hhmm}** {t.replace(chr(10), chr(10) + '> ')}"
+                  for (hhmm, _), (t, _) in zip(quotes, texts)]
+    gathered = " ".join(t for t, _ in texts)
+    if fonte != "briefs" and brief:
+        brief_masked, brief_flag = _mask(brief)
+        mascarado = mascarado or brief_flag
+        body_lines.append(f"> **brief** {brief_masked}")
+
+    art_path = Path(artifact)
+    if not art_path.is_absolute():
+        art_path = repo_root / art_path
+    igual = None
+    plan_brief = _plan_brief(art_path)
+    if plan_brief is not None:
+        igual = _normalize(gathered) == _normalize(plan_brief)
+    try:
+        artefato = art_path.relative_to(repo_root).as_posix()
+    except ValueError:
+        artefato = artifact
+
+    today = datetime.now(timezone.utc).date().isoformat()
+    pkb_dir = repo_root / (_conv_row(repo_root, "PKB_DIR") or DEFAULT_PKB_DIR).strip("/")
+    safe_skill = re.sub(r"[^a-z0-9]+", "-", skill_id.split()[0].casefold()).strip("-") or "skill"
+    name = f"{today}-{safe_skill}-{_artifact_id(artifact)}-{_slug(gathered)}.md"
+    note = pkb_dir / name
+    body = "\n".join(body_lines) + "\n"
+    if note.exists():
+        with note.open("a", encoding="utf-8", newline="") as f:
+            f.write(f"\n## Acrescentado em {today}\n\n{body}")
+    else:
+        fonte_yaml = fonte if isinstance(fonte, str) else "[" + ", ".join(fonte) + "]"
+        front = [
+            "---", "origem: usuario", "tipo: transitoria", f"tags: [seja, {safe_skill}]",
+            f"data: {today}", f"skill: {skill_id}", f"artefato: {artefato}",
+            f"fonte: {fonte_yaml}", f"mascarado: {str(mascarado).lower()}",
+        ]
+        if igual is not None:
+            front.append(f"as_expressed_igual_ao_brief: {str(igual).lower()}")
+        front.append("---")
+        note.write_text("\n".join(front) + f"\n\n{body}", encoding="utf-8", newline="")
+    return {"schema_version": SCHEMA_VERSION, "path": note.relative_to(repo_root).as_posix(),
+            "fonte": fonte, "mascarado": mascarado, "as_expressed_igual_ao_brief": igual}
+
+
+def _cmd_capture(args: argparse.Namespace) -> int:
+    root = Path(args.target).resolve() if args.target else Path.cwd()
+    result = capture(args.skill, args.artifact, args.session_id, args.brief, root)
+    if args.json:
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+    elif "skipped" in result:
+        print(f"skipped: {result['skipped']}")
+    else:
+        print(f"captured {result['path']}")
+        if result["mascarado"]:
+            print("WARNING: secret-like text was masked in the note", file=sys.stderr)
+    return 0
 
 
 def _plan(target: Path, template_root: Path, with_skills: bool) -> list[tuple[Path | None, Path]]:
@@ -55,7 +209,7 @@ def _plan(target: Path, template_root: Path, with_skills: bool) -> list[tuple[Pa
             rel = Path(pkb_dir, *rel.parts[1:])
         pairs.append((src, target / rel))
     pairs.append((None, target / pkb_dir / ".gitkeep"))
-    pairs.append((None, target / "logs" / str(date.today().year) / ".gitkeep"))
+    pairs.append((None, target / "logs" / str(datetime.now(timezone.utc).year) / ".gitkeep"))
     return pairs
 
 
@@ -121,6 +275,14 @@ def main(argv: list[str] | None = None) -> int:
     init.add_argument("--dry-run", action="store_true")
     init.add_argument("--json", action="store_true")
     init.set_defaults(func=_cmd_init)
+    cap = sub.add_parser("capture", help="write the inbox note for one skill invocation")
+    cap.add_argument("--skill", required=True)
+    cap.add_argument("--artifact", required=True)
+    cap.add_argument("--session-id", required=True)
+    cap.add_argument("--brief")
+    cap.add_argument("--target", help="project root (default: cwd)")
+    cap.add_argument("--json", action="store_true")
+    cap.set_defaults(func=_cmd_capture)
     args = parser.parse_args(argv)
     return args.func(args)
 
