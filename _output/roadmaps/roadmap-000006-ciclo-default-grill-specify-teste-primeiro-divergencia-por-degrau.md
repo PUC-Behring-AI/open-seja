@@ -278,3 +278,5 @@ A refutação de H-009 ganha a leitura por protocolo: se, entre os planos que **
 ### Fora do escopo deste adendo
 
 Um preset `prototype` com outro conjunto de skills; mudar a grill além da decisão acima; reabrir a D-003.
+
+> **Correção 2026-10-07 (Step 1 do plan-000022).** Na tabela "Emendas por plano" deste adendo, a linha do plan-000016 diz "O braço B passa a ser a mesma tag com `SPECIFY_DEFAULT: off`". No `drift-control-protocol.md` o braço A é o controle (ciclo padrão) e o B é o estendido. Leia: **o braço A** passa a ser a mesma tag com `off`. O texto acima não foi alterado (T3).

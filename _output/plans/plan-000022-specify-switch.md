@@ -91,7 +91,7 @@ Escrever `_output/tmp/design-rascunho-specify-switch-2026-10-07.md` com: a nova 
 - **Verify**: o arquivo existe; `grep -c` acha D-009 (>= 2), D-005, CYC-004, CYC-033 e H-009 (>= 1 cada); `git status --porcelain product-design/` vazio; nenhum nome de pessoa (C2).
 - **Tests**: N/A (rascunho de prosa para o designer)
 - **Scenarios**: N/A (plano de harness, Specify skipped)
-- [ ] Done
+- [x] Done
 
 ### Step 2: **[DESIGNER]** Registrar a revisão no `/design`
 O designer roda `/design` no open-seja a partir do rascunho do Step 1 e decide. **Aprova:** a nova D-NNN fica registrada com STATUS, a D-009 recebe o marcador `superseded`, a D-005 é revisada como o designer decidir (marcador ou D-NNN nova) e o CYC-004 passa a ter as três classes. O designer decide também o nome da flag de desligar e a sequência de release com o plan-000020; se a sequência for "os dois na v0.11.0", os Steps 3 a 11 terminam antes do Step 11 do plan-000020 (tag v0.11.0). **Recusa ou muda:** o plano para aqui e volta para `/plan`. O agente não escreve prosa no as-intended (T4).

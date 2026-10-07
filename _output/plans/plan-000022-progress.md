@@ -13,3 +13,9 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 - less-sure: Nome da flag de desligar (--no-specify ou --without-specify) e sequencia de release com o plan-000020 ficam para o Step 2; a leitura por protocolo de H-009 so e mensuravel no piloto com oraculo.
 - gate: not-applicable
 - communication: declined
+
+### Step 1 -- reflection-on-action | 2026-10-07 16:03 UTC | Rascunho da revisão para o /design
+- happened: Rascunho escrito em _output/tmp com a nova D-NNN que substitui a D-009, a revisão da D-005 em duas formas, o ajuste a H-009 (ITT e por protocolo, mensurável só no piloto com oráculo), o alcance no contrato e no protocolo, e as três decisões do designer.
+- deviated: Erro no adendo do roadmap escrito hoje (braço B no lugar de A), corrigido por apensamento (T3).
+- less-sure: Se a forma 1 da revisão da D-005 (só citar) basta para quem lê só as decisões.
+- gate: not-installed
