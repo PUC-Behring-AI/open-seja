@@ -146,7 +146,7 @@ Generated 2026-07-04T22:56:29Z from seja-priv harness state.
 | generate_pending_roadmap.py | Generate a roadmap from pending implement entries. | skill-invoked | active | `.claude/skills/scripts/generate_pending_roadmap.py` | `concepts/call-graph.md` |
 | generate_reflection_report.py | orchestrator for the /reflect skill. | skill-invoked | active | `.claude/skills/reflect/generate_reflection_report.py` | `concepts/call-graph.md` |
 | mark_brief_done.py | Mark a STARTED brief entry as DONE in briefs.md. | skill-invoked, agent-invoked | active | `.claude/skills/scripts/mark_brief_done.py` | `concepts/call-graph.md` |
-| reserve_id.py | ID reservation for SEJA artifacts (single-writer assumed). | skill-invoked | active | `.claude/skills/scripts/reserve_id.py` | `concepts/call-graph.md` |
+| reserve_id.py | ULID-based identity for SEJA artifacts, with a birth record per artifact. | skill-invoked | active | `.claude/skills/scripts/reserve_id.py` | `concepts/call-graph.md` |
 | run_all_checks.py | CI-independent validation orchestrator for SEJA checks. | agent-invoked | active | `.claude/skills/scripts/run_all_checks.py` | `concepts/call-graph.md`, `how-to/quality-gates.md` |
 | run_all_tests.py | Run backend, frontend and Playwright tests, saving results. | agent-invoked | active | `.claude/skills/scripts/run_all_tests.py` | `concepts/call-graph.md` |
 | run_preflight_fast.py | Fast preflight checks for git hooks and CI. | skill-invoked, hook-ci | active | `.claude/skills/scripts/run_preflight_fast.py` | `concepts/call-graph.md`, `how-to/ci-integration.md` |

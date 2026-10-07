@@ -6,6 +6,7 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 <!-- Subagents consolidate reusable patterns here -->
 - Ferramentas: `python3` (nao `python`); pytest e ruff via `uvx --with pyyaml --with markdown pytest .claude/skills/scripts/tests/ -q --ignore=.../test_generate_spo.py --ignore=.../test_generate_spo_design_system.py` e `uvx ruff check`. Baseline: 4 falhas pre-existentes em `test_summarize_artifacts.py` (2026-10-07).
 - ID de artefato: importar de `artifact_id` (`ARTIFACT_ID` sem grupo de captura, para embutir em `rf"...({ARTIFACT_ID})..."`; `normalize_id` so faz zfill em numerico <= 6 digitos). Script `library` novo entra em `harness-reference.md` na tabela `### Hook and CI` e no indice alfabetico do fim.
+- Testes de CLI que leem `git config`: isolar com `GIT_CONFIG_GLOBAL=<tmp>/gitconfig` + `GIT_CONFIG_NOSYSTEM=1` e `cwd=tmp_path` no subprocess (fora de repo, sem config local); assim da para provar que `user.name` nao vaza. Testes manuais de `reserve_id.py` sempre com `--output-dir <scratchpad>` para nao criar `_output/ids/` real.
 
 ## Iteration Log
 
@@ -20,4 +21,10 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 - happened: artifact_id.py criado (stdlib) com new_ulid, ulid_timestamp, visible_id, regexes LEGACY_ID/ULID_ID/ARTIFACT_ID sem grupo de captura, normalize_id, is_legacy_id/is_ulid_id, default_author (sha256 do user.email, fallback $USER, senao unknown) e birth_record schema_version 1; 24 testes escritos antes, vermelhos por ImportError, depois verdes; linhas acrescentadas nas tabelas Hook and CI e no indice alfabetico de harness-reference.md.
 - deviated: Nenhum desvio de escopo. pytest e ruff nao estao no PATH: rodados via uvx (com pyyaml e markdown). ruff pediu check=False explicito no subprocess.run. Suite completa: 1648 passed, 4 failed em test_summarize_artifacts.py, que ja falhavam sem as mudancas deste step.
 - less-sure: O plugin harness-reference-coverage ja dava PASS antes de a linha existir, entao a verificacao nao prova que a linha era exigida. ulid_timestamp usa ms/1000 em float; para datas do intervalo atual a precisao de ms basta, mas nao foi testada fora dele.
+- gate: not-installed
+
+### Step 2 -- reflection-on-action | 2026-10-07 18:56 UTC | Reescrever reserve_id.py para gerar ULID e gravar o registro de nascimento
+- happened: reserve_id.py reescrito: deixou de ler e escrever o INDEX.md; reserve() chama artifact_id.birth_record e grava _output/ids/<uid>.json (tempfile + os.replace); stdout so com o ID visivel, uid em stderr, --json com o registro completo; --origin validado por regex com ARTIFACT_ID (exit 2), --author opcional. 11 testes escritos antes (7 vermelhos); linha do reserve_id.py em harness-reference.md atualizada. Suite completa: 1659 passed, 4 failed pre-existentes em test_summarize_artifacts.py.
+- deviated: Os 4 casos de --origin invalido ja davam exit 2 antes da implementacao, mas pelo motivo errado (argparse nao conhecia --origin); ficaram como estao porque o contrato e o mesmo. reserve() devolve o registro (dict) em vez de str, para o main imprimir id, uid e --json sem segunda chamada. Helpers removidos (_extract_max_id, _format_id, _ID_RE, INDEX_HEADER) nao tinham importadores em .claude/.
+- less-sure: O docstring de generate_macro_index.py ainda diz que reserve_id.py cria linhas RESERVED; fica para o Step 3, e ate la nenhuma reserva nova aparece no INDEX.md. Skills que capturam stdout continuam funcionando, mas as que fazem zfill ou parse numerico do ID devolvido so ficam corretas nos Steps 5-6 e 11-12.
 - gate: not-installed
