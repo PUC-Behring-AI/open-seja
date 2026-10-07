@@ -55,7 +55,7 @@ Fórmula do degrau: `D = descobertos / (cobertos + descobertos)`.
 | **Fonte** | `intent.md` x `*.feature` da pasta `features/<slug>/`. |
 | **Coberto** | REQ aprovado com pelo menos um cenário com a tag `@REQ-<slug>-NNN` em `.feature` aprovado. |
 | **Descoberto** | REQ aprovado sem nenhum cenário com a tag. |
-| **Não medido** | `intent.md` não aprovado (`NM-INTENCAO-NAO-APROVADA`); `Specify: skipped` (`NM-SPECIFY-PULADA`); `.feature` desatualizado ou ausente em relação ao `intent.md` aprovado (`NM-CENARIOS-STALE`). |
+| **Não medido** | `intent.md` não aprovado (`NM-INTENCAO-NAO-APROVADA`); `Specify: skipped` (`NM-SPECIFY-PULADA`; emenda 000022: `NM-SPECIFY-OPT-OUT` para a classe `opt-out` e `NM-SPECIFY-DEFAULT-OFF` para `default off`); `.feature` desatualizado ou ausente em relação ao `intent.md` aprovado (`NM-CENARIOS-STALE`). |
 | **Escrito por** | `intent.md`: plan-000009 (grill) e plan-000011 (aprovação); `.feature` e validador de tags: plan-000010 e plan-000011; junção: plan-000014. |
 
 - **Quem decide**: designer.
@@ -189,6 +189,8 @@ Todo `não medido` traz um código e uma frase. O código é estável. Os códig
 |---|---|---|
 | `NM-INTENCAO-NAO-APROVADA` | D1 | "Eu não medi: você ainda não aprovou os requisitos." |
 | `NM-SPECIFY-PULADA` | D1 | "Eu não medi: esta tarefa não teve cenários." |
+| `NM-SPECIFY-OPT-OUT` | D1 | "Eu não medi: você escolheu não escrever a especificação neste plano." (emenda 000022, D-011; frase em `drift-report.md` DRP-004) |
+| `NM-SPECIFY-DEFAULT-OFF` | D1 | "Eu não medi: a especificação está desligada neste projeto." (emenda 000022, D-011; frase em `drift-report.md` DRP-004) |
 | `NM-CENARIOS-STALE` | D1 | "Eu não medi: os cenários mudaram depois da aprovação." |
 | `NM-SEM-ADAPTADOR-RUNNER` | D2, D3a | "Eu não medi: esta stack ainda não tem executor de cenários." |
 | `NM-SEM-RUNNER` | D2 | "Eu não medi: não achei o relatório dos testes." |
@@ -265,6 +267,7 @@ Não há M0 (aprovação do plano). D1 e D2 em M0 já são portão do contrato (
 | Caso | Tratamento |
 |---|---|
 | `Specify: skipped` | D1 `não medido` (`NM-SPECIFY-PULADA`); relatório "não aplicável" |
+| `Specify: skipped -- opt-out: <motivo>` ou `skipped -- default off` (emenda 000022) | D1 `não medido` (`NM-SPECIFY-OPT-OUT` ou `NM-SPECIFY-DEFAULT-OFF`); o relatório diz a classe (`drift-report.md` DRP-021) |
 | Tarefa sem código (sem `features/<slug>/`) | relatório "não aplicável", uma linha; nenhum erro |
 | Feature com menos de 8 REQs | ressalva `amostra pequena`; os números continuam brutos |
 | REQ removido depois da aprovação | conta como `descoberto` até o `intent.md` ser reaprovado; depois da reaprovação o REQ é `retirado` e sai do denominador |

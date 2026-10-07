@@ -29,4 +29,6 @@
 
 **Default cycle (guia em português)**: in standard mode `/plan` runs the grill (alone: `--grill`), then the specify (alone: `--specify`; two approvals: the message to you, the `.feature` contract to whoever reads code), then writes a v2 plan whose steps list `Scenarios:` keys; refusals and how to skip the ladder: `docs/how-to/ciclo-default.pt-BR.md`.
 
+**Specify switch**: the project default is `SPECIFY_DEFAULT` (`on`/`off`) in `product-design/conventions.md`. `/plan --with-specify` turns the specify on for one plan when the default is `off` (e.g. a stable part of a prototype); `/plan --without-specify "<motivo>"` turns it off for one plan when the default is `on`, with a one-line reason. Every new v2 plan records `Specify default: on|off`; deviations are listed by `cycle_adherence.py`; details in the guide's section "Ligar e desligar a especificação".
+
 **Next step**: `/implement` to execute the plan (or the first roadmap item) once you have reviewed it.
