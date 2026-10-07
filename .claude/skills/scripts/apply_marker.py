@@ -39,6 +39,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from artifact_id import ARTIFACT_ID
 from human_markers_registry import (
     ALLOWED_MARKERS,
     HUMAN_MARKERS_FILES,
@@ -57,6 +58,11 @@ if sys.platform == "win32":
 # established | superseded) and the legacy uppercase `IMPLEMENTED` one-shot
 # marker from pre-2.8.3 files. This lets a Phase 3b flip REPLACE a
 # legacy marker rather than stack a new one above it.
+# A DECISION_APPEND --value whose first line already names the decision
+# ("D-005: Title" or "D-NEXT: Title") would yield "### D-006: D-005: Title";
+# the prefix is stripped because the id is always auto-assigned.
+_DECISION_ID_PREFIX_RE = re.compile(r"^(?:D-\d{3}|D-NEXT):\s*")
+
 _STATUS_MARKER_RE = re.compile(r"^<!--\s*STATUS:\s*([A-Za-z]+)(?:\s*\|[^>]*)?\s*-->\s*$")
 
 
@@ -238,7 +244,9 @@ def _apply_decision_append(
     value_lines = value.strip().splitlines()
     if not value_lines:
         raise ValueError("DECISION_APPEND --value must not be empty")
-    title = value_lines[0].strip()
+    title = _DECISION_ID_PREFIX_RE.sub("", value_lines[0].strip(), count=1).strip()
+    if not title:
+        raise ValueError("DECISION_APPEND --value first line must carry a title")
     body_lines = value_lines[1:] if len(value_lines) > 1 else []
 
     heading_line = f"### {d_id}: {title}"
@@ -261,8 +269,10 @@ def _apply_decision_append(
     entry_lines = ["", heading_line, ""]
     entry_lines.extend(body_lines)
     if note:
+        source_line = f"*Source: {note} ({date})*"
+        _validate_regex("DECISION_APPEND", source_line)
         entry_lines.append("")
-        entry_lines.append(f"*Source: {note} ({date})*")
+        entry_lines.append(source_line)
 
     new_lines = list(lines)
     for offset, el in enumerate(entry_lines):
@@ -323,7 +333,8 @@ def _apply_changelog(
     if note is None:
         raise ValueError("CHANGELOG_APPEND requires --note")
     date = date or _today()
-    plan_token = plan if plan else "-"
+    # 'manual' is a STATUS token; a CHANGELOG line records it as '-'.
+    plan_token = plan if plan and plan != "manual" else "-"
     new_line = f"{date} | {entry_id} | {value} | {plan_token} | {note}"
     _validate_regex("CHANGELOG_APPEND", new_line)
 
@@ -397,9 +408,10 @@ def main() -> int:
     parser.add_argument(
         "--plan",
         help=(
-            "Plan id. Accepts either the fully-qualified form 'plan-NNNNNN' "
-            "(e.g., plan-NNNNNN) or a bare 6-digit id (e.g., NNNNNN) which "
-            "will be auto-prefixed with 'plan-'."
+            "Plan id. Accepts the fully-qualified form 'plan-NNNNNN' or "
+            "'plan-YYYYMMDD-xxxxxx', or a bare id in either format, which "
+            "will be auto-prefixed with 'plan-'. 'manual' marks a "
+            "human-initiated change (written as '-' in a CHANGELOG line)."
         ),
     )
     parser.add_argument("--date", help="Override date (YYYY-MM-DD).")
@@ -418,17 +430,19 @@ def main() -> int:
         )
         return 1
 
-    # Post-parse validation 2: --plan normalizer. Accepts bare 6-digit id
-    # and auto-prefixes 'plan-'. Accepts the fully-qualified form unchanged.
-    # Rejects any other form with a clear error.
+    # Post-parse validation 2: --plan normalizer. Accepts a bare id in either
+    # format (6-digit legacy or YYYYMMDD-xxxxxx) and auto-prefixes 'plan-'.
+    # Accepts the fully-qualified form unchanged. Rejects any other form with
+    # a clear error.
     if args.plan is not None:
-        if re.fullmatch(r"\d{6}", args.plan):
+        if re.fullmatch(ARTIFACT_ID, args.plan):
             args.plan = f"plan-{args.plan}"
         elif args.plan == "manual":
             pass  # literal 'manual' is a valid plan token (human-initiated)
-        elif not re.fullmatch(r"plan-\d{6}", args.plan):
+        elif not re.fullmatch(rf"plan-{ARTIFACT_ID}", args.plan):
             print(
-                "ERROR: --plan must be 'plan-NNNNNN', a bare 6-digit ID, or "
+                "ERROR: --plan must be 'plan-NNNNNN' or 'plan-YYYYMMDD-xxxxxx', "
+                "a bare id in either format, or "
                 f"'manual' (got {args.plan!r})",
                 file=sys.stderr,
             )
