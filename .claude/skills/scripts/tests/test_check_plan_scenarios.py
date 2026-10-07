@@ -265,6 +265,31 @@ def test_skip_class_is_none_for_an_empty_value_or_a_malformed_class(value: str) 
     assert cps.skip_class(value)[0] is None
 
 
+@pytest.mark.parametrize("value", [
+    # near-miss spellings of a class: an error (PFS-002), never the legacy class (code review, plan-000022)
+    "Opt-out: protótipo de tela que vai ser descartado", "OPT-OUT: protótipo de tela que vai ser descartado",
+    "opt out: protótipo de tela que vai ser descartado", "optout: protótipo de tela que vai ser descartado",
+    "opt.out: protótipo de tela que vai ser descartado", "Opt-out",
+    "DEFAULT OFF", "Default off", "default-off", "default.off", "defaultoff", "default  off",
+    "default off. motivo", "default-off: protótipo de tela", "Default Off: protótipo",
+])
+def test_skip_class_is_none_for_a_near_miss_spelling_of_a_class(value: str) -> None:
+    assert cps.skip_class(value)[0] is None
+
+
+@pytest.mark.parametrize("value", ["tarefa sem código: só configuração", "tarefa sem código: atualizar um README",
+                                   "Default offline mode", "opt-outs nao sao uma classe", "optional: so documentacao"])
+def test_skip_class_near_miss_tolerance_does_not_capture_other_legacy_words(value: str) -> None:
+    assert cps.skip_class(value)[0] == _NO_CODE
+
+
+@pytest.mark.parametrize("case,canonical", [("pfs-002-opt-out-maiusculo", "`opt-out: <motivo>`"),
+                                            ("pfs-002-default-off-hifen", "`default off`")])
+def test_near_miss_class_error_names_the_canonical_spelling(case: str, canonical: str) -> None:
+    [finding] = _run_case(case).findings
+    assert finding.rule == "PFS-002" and "grafia" in finding.message and canonical in finding.hint
+
+
 def test_skip_class_accepts_the_whole_specify_value() -> None:
     assert cps.skip_class("skipped -- default off") == (_OFF, "")
     assert cps.skip_class("skipped --") == (None, "")

@@ -86,6 +86,8 @@ def ledger(tmp_path: Path) -> Path:
     proposals.mkdir()
     (proposals / "proposal-000001-ajuste-leve.md").write_text(
         "# Proposal 000001 | 2026-10-03 10:00 UTC | ajuste leve\n", encoding="utf-8")
+    for slug in ("beta", "gamma", "delta", "nu"):  # an approved plan needs features/<slug>/ (PFS-002)
+        (tmp_path / "features" / slug).mkdir(parents=True)
     drift = tmp_path / "features" / "alpha" / "drift"
     drift.mkdir(parents=True)
     (drift / "M1.json").write_text(json.dumps(M1), encoding="utf-8")
@@ -230,3 +232,41 @@ def test_empty_root_reports_zero(tmp_path, capsys):
     assert ca.main(["--json", "--root", str(tmp_path)]) == 0
     data = json.loads(capsys.readouterr().out)
     assert data["total"] == 0 and data["identidade"]["ok"] is True
+
+
+# Header validity comes from the checker (code review of plan-000022, finding 2): any PFS-002 error
+# from check_plan_scenarios on the header puts the plan in `cabecalho_invalido`, never in `elegivel`.
+REJECTED = {
+    "plan-000120-opt-out-com-feature.md": _v2("# Plan 000120 | FEATURE | 2026-10-06 10:00 UTC | of",
+                                              "skipped -- opt-out: protótipo rápido para validar a ideia",
+                                              default="on", feature="alpha"),
+    "plan-000121-approved-sem-feature.md": _v2("# Plan 000121 | FEATURE | 2026-10-06 11:00 UTC | af",
+                                               "approved (rev 1)", default="on"),
+    "plan-000122-default-duplicado.md": _v2("# Plan 000122 | FEATURE | 2026-10-06 12:00 UTC | dd",
+                                            "skipped -- default off", default="off\nSpecify default: off"),
+    "plan-000123-opt-out-maiusculo.md": _v2("# Plan 000123 | FEATURE | 2026-10-06 13:00 UTC | om",
+                                            "skipped -- Opt-out: protótipo rápido para validar a ideia", default="on"),
+    "plan-000124-default-off-hifen.md": _v2("# Plan 000124 | FEATURE | 2026-10-06 14:00 UTC | dh",
+                                            "skipped -- default-off", default="off"),
+    "plan-000125-feature-sem-pasta.md": _v2("# Plan 000125 | FEATURE | 2026-10-06 15:00 UTC | fp",
+                                            "approved (rev 1)", default="on", feature="omega"),
+}
+
+
+@pytest.mark.parametrize("name", sorted(REJECTED))
+def test_header_the_checker_rejects_is_invalid_not_eligible(ledger, name):
+    (ledger / "_output" / "plans" / name).write_text(REJECTED[name], encoding="utf-8")
+    r = _run(ledger)
+    row = _by_file(r)[name]
+    assert row["grupo"] == "cabecalho_invalido" and row["braco"] is None and not row["desvio"]
+    assert "PFS-002" in row["desfecho"]["razao"]
+    assert r["elegiveis"] == 7 and r["cabecalho_invalido"] == 3 and r["identidade"]["ok"] is True
+
+
+def test_since_counts_proposals_without_a_date(ledger):
+    (ledger / "_output" / "proposals" / "proposal-000002-sem-data.md").write_text("# Proposal 000002 | sem data\n",
+                                                                                  encoding="utf-8")
+    r = _run(ledger, "2026-10-01")
+    assert r["propostas"] == ["proposal-000001-ajuste-leve.md"] and r["fora_do_ciclo"] == 1
+    assert r["propostas_sem_data"] == 1
+    assert _run(ledger)["propostas_sem_data"] == 0

@@ -117,7 +117,7 @@ Todo plano novo grava o braço do projeto no cabeçalho, na linha `Specify defau
 
 - `check_plan_scenarios.py` dá um aviso `info` (PFS-016): o plano conta como desvio do default.
 - `python3 .claude/skills/scripts/cycle_adherence.py` lista todos os planos: o braço de cada um, o que ele fez e os desvios, com o motivo. Use `--json` para a máquina e `--since AAAA-MM-DD` para começar numa data. O relatório mede aderência, não o resultado da escada.
-- No `/reflect`, o relatório de divergência diz por que não há escada. Com `opt-out`: "Você escolheu não escrever a especificação neste plano: <motivo>." Com `default off`: "A especificação está desligada neste projeto."
+- No `/reflect`, o relatório de divergência diz por que não há escada. Com `opt-out`: "Você escolheu não escrever a especificação neste plano: <motivo>." Com `default off`: "Não aplicável: a especificação está desligada neste projeto."
 
 ## Quando algo bloqueia
 

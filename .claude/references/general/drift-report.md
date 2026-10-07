@@ -433,9 +433,10 @@ Com `--plan` e `Specify: skipped`, o relatório lê a classe do pulo por `check_
 | Classe | `razao_nm` | `motivo` | Frase (todos os registros) |
 |---|---|---|---|
 | `opt-out` | `NM-SPECIFY-OPT-OUT` | `specify-opt-out`, com o motivo em `motivo_pulo` | "Você escolheu não escrever a especificação neste plano: <motivo>." |
-| `default off` | `NM-SPECIFY-DEFAULT-OFF` | `specify-default-off` | "A especificação está desligada neste projeto." |
+| `default off` | `NM-SPECIFY-DEFAULT-OFF` | `specify-default-off` | "Não aplicável: a especificação está desligada neste projeto." |
 | `tarefa sem código` (com ou sem a classe escrita) | `NM-SPECIFY-PULADA` | ausente | "Não aplicável: esta tarefa não teve cenários." |
 | linha malformada (`skip_class` devolve `None`) | `NM-SPECIFY-PULADA` | ausente | "Não aplicável: esta tarefa não teve cenários." |
+| cabeçalho que o verificador recusa (PFS-002 de `check_plan_scenarios.check_header`, por exemplo `default off` com o braço `on`) | `NM-SPECIFY-PULADA` | ausente | "Não aplicável: esta tarefa não teve cenários." |
 
 A saída de `tarefa sem código` é a de antes, byte a byte: a fixture `specify-pulado` prova. A linha malformada fica com a saída de antes porque o erro é do `check_plan_scenarios.py` (PFS-002), não deste relatório. A chave `motivo_pulo` e os dois códigos novos são aditivos ao `--json`.
 

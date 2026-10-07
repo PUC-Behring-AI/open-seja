@@ -27,7 +27,8 @@ other readers of the plan header. `--json` carries `skip_class`, `skip_reason` a
 | PFS-002 | v2 header: one `Specify:` (approved (rev N) or skipped -- reason),     | error        |
 |         | `Feature:` required with approved, forbidden with skipped; the skip    |              |
 |         | class (`skip_class`): `opt-out` needs a readable reason; a value that  |              |
-|         | starts with `opt-out` or `default off` and is malformed; at most one   |              |
+|         | starts with `opt-out` or `default off` (any case or separator) and is  |              |
+|         | malformed; at most one                                                 |              |
 |         | `Specify default:` (on or off); `default off` with `on` (or no line),  |              |
 |         | and `opt-out` with `off`, are incoherent                               |              |
 | PFS-003 | approved plan: every step has `Scenarios:`                             | error        |
@@ -106,7 +107,10 @@ SKIP_CLASSES = (NO_CODE, DEFAULT_OFF, OPT_OUT)
 _CLASS_RES = ((OPT_OUT, re.compile(r"^opt-out:\s*(\S.*)$")),
               (DEFAULT_OFF, re.compile(r"^default off(?::\s*(\S.*))?$")),
               (NO_CODE, re.compile(r"^tarefa sem código(?::\s*(\S.*))?$")))
-_CLAIMED_RE = re.compile(r"^(opt-out|default off)(?:$|[:\s])")
+# A value that claims a class: case-insensitive and tolerant of `-`, `.` or space between the words, so a
+# near-miss spelling (`Opt-out:`, `DEFAULT OFF`, `default-off`) is a PFS-002 error, never the legacy class.
+# Only the exact lowercase forms in _CLASS_RES are valid.
+_CLAIMED_RE = re.compile(r"^(?:(?P<opt>opt[-.\s]*out)|(?P<off>default[-.\s]*off))(?=$|[:.,;\s])", re.IGNORECASE)
 STEP_RE = re.compile(r"^###\s+Step\s+(\d+)\s*:\s*(.*)$")
 FIELD_RE = re.compile(r"^\s*-\s*\*\*(Tests|Scenarios)(?::\*\*|\*\*:)\s*(.*?)\s*$")
 NA_RE = re.compile(r"^N/A\b", re.IGNORECASE)
@@ -279,7 +283,8 @@ def skip_class(value: str) -> tuple[str | None, str]:
     `tarefa sem código` (reason optional, "" when missing). A value without a class is the legacy
     `tarefa sem código` with the whole value as the reason. (None, text) means an error (PFS-002):
     an empty value, or a value that starts with `opt-out` or `default off` and does not match its
-    class. Call it only for a skipped plan: `approved (rev N)` would read as a legacy reason.
+    class. Near-miss spellings (any case, `-`, `.` or space between the words) also claim the class
+    and are errors, not legacy. Call it only for a skipped plan: `approved (rev N)` would read as a legacy reason.
     """
     text = value.strip()
     if m := SKIP_PREFIX_RE.match(text):
@@ -337,11 +342,19 @@ def _check_header(plan: Plan, file: str, root: Path) -> tuple[list[Finding], str
 
 def _class_error(value: str, file: str, line: int) -> Finding:
     """PFS-002: a value that claims `opt-out` or `default off` and does not match its class."""
-    if value.startswith(OPT_OUT):
+    text = value.strip()
+    if text.startswith(OPT_OUT):
         return _f("PFS-002", "error", file, line, "O `opt-out` precisa de um motivo que se leia.",
                   "Escreva `Specify: skipped -- opt-out: <motivo>` com pelo menos 3 palavras: por que este plano desliga a specify.")
-    return _f("PFS-002", "error", file, line, "O valor `default off` não segue a forma da classe.",
-              "Escreva `Specify: skipped -- default off` ou `Specify: skipped -- default off: <motivo>`.")
+    if text.startswith(DEFAULT_OFF):
+        return _f("PFS-002", "error", file, line, "O valor `default off` não segue a forma da classe.",
+                  "Escreva `Specify: skipped -- default off` ou `Specify: skipped -- default off: <motivo>`.")
+    m = _CLAIMED_RE.match(text)
+    if m and m.group("opt"):
+        return _f("PFS-002", "error", file, line, "O valor parece a classe `opt-out`, mas a grafia não é a da classe.",
+                  "Escreva `opt-out: <motivo>` assim, em minúsculas e com hífen, depois de `skipped -- `.")
+    return _f("PFS-002", "error", file, line, "O valor parece a classe `default off`, mas a grafia não é a da classe.",
+              "Escreva `default off` assim, em minúsculas e com espaço, depois de `skipped -- `.")
 
 
 def _specify_default(plan: Plan, file: str) -> tuple[list[Finding], str | None]:
@@ -377,6 +390,30 @@ def _check_arm(plan: Plan, file: str, mode: str | None, cls: str | None, default
     arm = f"`{cls or 'approved'}` com o braço `{default}`"
     return [_f("PFS-016", "info", file, sline, f"Leitura por protocolo: este plano conta como desvio do default ({arm}).",
                f"Isto não bloqueia: {deviation}.")]
+
+
+class HeaderCheck(NamedTuple):
+    findings: list[Finding]
+    mode: str | None  # "approved" | "skipped"; None when the header cannot be trusted
+    slug: str | None
+    skip_class: str | None
+    skip_reason: str | None
+    specify_default: str | None
+
+
+def check_header(plan: Plan, *, file: str = "plan.md", root: Path = Path(".")) -> HeaderCheck:
+    """The header rules of a v2 plan: PFS-002 (format, class, `Specify default:`, coherence) and PFS-016.
+
+    Public so the other readers of the plan header (cycle_adherence.py, drift_report.py) take the
+    checker's verdict instead of re-deriving it: any PFS-002 finding means the header cannot be trusted.
+    """
+    findings, mode, slug = _check_header(plan, file, root)
+    found, default = _specify_default(plan, file)
+    findings += found
+    specify = plan.specifies[0][1] if plan.specifies else None
+    cls, reason = skip_class(specify) if mode == "skipped" and specify else (None, None)
+    findings += _check_arm(plan, file, mode, cls, default)
+    return HeaderCheck(findings, mode, slug, cls, reason, default)
 
 
 def _check_feature(plan: Plan, file: str, root: Path, out: list[Finding]) -> tuple[list[Finding], str | None, str | None]:
@@ -550,13 +587,10 @@ def check_plan(plan: Plan, lock: dict | None, status: dict | None, *, file: str 
         return Report(file, 0, None, None, None, [finding], [], None, False)
     if version == 1:
         return Report(file, 1, None, None, None, [], [], None, True)
-    findings, mode, slug = _check_header(plan, file, root)
-    found, default = _specify_default(plan, file)
-    findings += found
+    head = check_header(plan, file=file, root=root)
+    findings, mode, slug, cls = list(head.findings), head.mode, head.slug, head.skip_class
     specify = plan.specifies[0][1] if plan.specifies else None
-    cls, reason = skip_class(specify) if mode == "skipped" and specify else (None, None)
-    findings += _check_arm(plan, file, mode, cls, default)
-    arm = {"skip_class": cls, "skip_reason": reason, "specify_default": default}
+    arm = {"skip_class": cls, "skip_reason": head.skip_reason, "specify_default": head.specify_default}
     if mode is None:
         return _finish(file, slug, specify, None, findings, plan, {}, None)._replace(**arm)
     if mode == "skipped":

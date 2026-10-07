@@ -1,5 +1,4 @@
 """Tests for project_config.py — central configuration module."""
-import importlib
 from pathlib import Path
 
 import pytest

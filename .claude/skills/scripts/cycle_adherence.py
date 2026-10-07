@@ -23,10 +23,11 @@ Groups (every plan file lands in exactly one):
 |----------------------|-----------------------------------------------------------------------|
 | `revogado`           | first line `# REVOKED |` or `# SUPERSEDED |` (checked first)           |
 | `v1`                 | `plan_format_version: 1` or no version line -> outcome `não medido` (Q4) |
-| `cabecalho_invalido` | v2 header the checker cannot trust: no or malformed `Specify:`, class   |
-|                      | error (PFS-002), unreadable `Specify default:` (bad value or duplicates |
-|                      | that disagree), `default off` with arm `on`, `opt-out` with arm `off`,  |
-|                      | unknown `plan_format_version`, unreadable file. Never dropped.          |
+| `cabecalho_invalido` | v2 header the checker cannot trust: any PFS-002 finding of             |
+|                      | `check_plan_scenarios.check_header` (no or malformed `Specify:`, class  |
+|                      | error, `Feature:` missing or extra, `features/<slug>/` missing, bad or  |
+|                      | repeated `Specify default:`, `default off` with `on`, `opt-out` with    |
+|                      | `off`), unknown `plan_format_version`, unreadable file. Never dropped.  |
 | `nao_elegivel`       | v2, class `tarefa sem código` (also a skip reason without a class)      |
 | `elegivel`           | v2, `approved`, `default off` or `opt-out`                              |
 
@@ -39,7 +40,8 @@ Outcome per plan: the vector per step only when `features/<slug>/drift/M1.json` 
 `não medido` with the reason. No aggregate outcome number (D-007).
 `--since YYYY-MM-DD` filters by the creation date in the plan header (the first date after the
 `Plan <id> |` field), never by `features/adoption.json`, which an `off` project never writes.
-A plan without a readable date is left out under `--since` and counted in `sem_data`.
+A plan without a readable date is left out under `--since` and counted in `sem_data`; a proposal
+without a readable date is left out under `--since` and counted in `propostas_sem_data`.
 
 Paths: without `--root`, `PLANS_DIR` and `PROPOSALS_DIR` come from `project_config` and features
 from the repo root. With `--root PATH`, the template defaults under it: `_output/plans`,
@@ -110,29 +112,18 @@ def closed_state(text: str) -> str:
     return m.group(1) if m else "aberto"
 
 
-def assigned_arm(plan: cps.Plan) -> str | None:
-    """The plan's own `Specify default:` (absent = `on`, CYC-036); None when unreadable."""
-    values = [v for _, v in plan.specify_defaults]
-    if not values:
-        return "on"
-    if any(not cps.SPECIFY_DEFAULT_VALUE_RE.match(v) for v in values) or len(set(values)) > 1:
-        return None
-    return values[0]
+def _v2_class(plan: cps.Plan, root: Path) -> tuple[str | None, str, str | None, str]:
+    """(class, reason, arm, why-invalid) of a v2 header; class None means `cabecalho_invalido`.
 
-
-def _v2_class(plan: cps.Plan) -> tuple[str | None, str, str]:
-    """(class, reason, why-invalid) of a v2 header; class None means `cabecalho_invalido`."""
-    if len(plan.specifies) != 1:
-        return None, "", "o cabeçalho não tem exatamente uma linha `Specify:`"
-    value = plan.specifies[0][1]
-    if cps.APPROVED_RE.match(value):
-        return APPROVED, "", ""
-    if not cps.SKIPPED_RE.match(value):
-        return None, "", "o valor de `Specify:` não segue o formato"
-    cls, reason = cps.skip_class(value)
-    if cls is None:
-        return None, reason, "a classe do pulo não segue a forma (PFS-002)"
-    return cls, reason, ""
+    The verdict is the checker's (check_plan_scenarios.check_header): any PFS-002 finding on the
+    header means the checker cannot trust it, so the plan is never counted as eligible.
+    """
+    head = cps.check_header(plan, root=root)
+    errors = [f for f in head.findings if f.rule == "PFS-002"]
+    if errors:
+        return None, head.skip_reason or "", None, f"PFS-002: {errors[0].message}"
+    cls = APPROVED if head.mode == APPROVED else head.skip_class
+    return cls, head.skip_reason or "", head.specify_default, ""
 
 
 def _base_entry(name: str, text: str) -> dict:
@@ -147,8 +138,11 @@ def _not_measured(entry: dict, group: str, reason: str) -> dict:
     return entry
 
 
-def classify(name: str, text: str) -> dict:
-    """One plan file -> its row: group, class, arm, treatment, deviation. Outcome is filled later."""
+def classify(name: str, text: str, root: Path = Path(".")) -> dict:
+    """One plan file -> its row: group, class, arm, treatment, deviation. Outcome is filled later.
+
+    `root` is the project root: the checker looks for `features/<slug>/` of an approved plan there.
+    """
     entry = _base_entry(name, text)
     if entry["estado"] in ("REVOKED", "SUPERSEDED"):
         return _not_measured(entry, REVOKED, REASON_REVOKED)
@@ -159,21 +153,16 @@ def classify(name: str, text: str) -> dict:
         return _not_measured(entry, V1, REASON_V1)
     if version is None:
         return _not_measured(entry, INVALID, f"{REASON_INVALID} (`plan_format_version` desconhecida)")
-    cls, reason, why = _v2_class(plan)
+    cls, reason, arm, why = _v2_class(plan, root)
     entry["classe"], entry["motivo"] = cls, reason
-    if cls is None:
+    if cls is None or arm is None:
         return _not_measured(entry, INVALID, f"{REASON_INVALID} ({why})")
     if cls == cps.NO_CODE:
         return _not_measured(entry, NOT_ELIGIBLE, REASON_NO_CODE)
-    return _eligible(entry, plan, cls)
+    return _eligible(entry, plan, cls, arm)
 
 
-def _eligible(entry: dict, plan: cps.Plan, cls: str) -> dict:
-    arm = assigned_arm(plan)
-    if arm is None:
-        return _not_measured(entry, INVALID, f"{REASON_INVALID} (`Specify default:` ilegível)")
-    if (cls, arm) in ((cps.DEFAULT_OFF, "on"), (cps.OPT_OUT, "off")):
-        return _not_measured(entry, INVALID, f"{REASON_INVALID} (`{cls}` com o braço `{arm}`, PFS-002)")
+def _eligible(entry: dict, plan: cps.Plan, cls: str, arm: str) -> dict:
     entry.update(grupo=ELIGIBLE, braco=arm, tratamento="escada" if cls == APPROVED else "sem_escada",
                  desvio=(cls, arm) in ((cps.OPT_OUT, "on"), (APPROVED, "off")))
     if cls == APPROVED and plan.features:
@@ -252,7 +241,7 @@ def _deviation_reason(row: dict) -> str:
     return "o plano ligou a especificação num projeto que a desliga (`--with-specify`, sem motivo registrado)"
 
 
-def summarize(rows: list[dict], proposals: list[str], sem_data: int) -> dict:
+def summarize(rows: list[dict], proposals: list[str], sem_data: int, proposals_sem_data: int = 0) -> dict:
     count = {g: sum(1 for r in rows if r["grupo"] == g) for g in (ELIGIBLE, NOT_ELIGIBLE, V1, REVOKED, INVALID)}
     eligible = [r for r in rows if r["grupo"] == ELIGIBLE]
     deviations = [r for r in eligible if r["desvio"]]
@@ -275,6 +264,7 @@ def summarize(rows: list[dict], proposals: list[str], sem_data: int) -> dict:
         "fora_do_ciclo": len(proposals),
         "propostas": proposals,
         "sem_data": sem_data,
+        "propostas_sem_data": proposals_sem_data,
         "identidade": {"ok": sum(count.values()) == total,
                        "conta": "elegiveis + nao_elegiveis + nao_medido + revogados + cabecalho_invalido = total"},
     }
@@ -288,18 +278,21 @@ def build_report(plans_dir: Path, proposals_dir: Path | None, root: Path, *, sin
         if text is None:
             entry = _not_measured(_base_entry(path.name, ""), INVALID, f"{REASON_INVALID} (arquivo ilegível)")
         else:
-            entry = classify(path.name, text)
+            entry = classify(path.name, text, root)
         if not _keep(entry["data"], since):
             sem_data += entry["data"] is None
             continue
         entry["desfecho"] = outcome(entry, root)
         rows.append(entry)
     proposals = []
+    proposals_sem_data = 0
     for path in proposal_files(proposals_dir):
-        text = _read(path) or ""
-        if _keep(header_date(text), since):
+        date = header_date(_read(path) or "")
+        if _keep(date, since):
             proposals.append(path.name)
-    return summarize(rows, proposals, sem_data)
+        else:
+            proposals_sem_data += date is None
+    return summarize(rows, proposals, sem_data, proposals_sem_data)
 
 
 # ---------------------------------------------------------------------------
@@ -343,6 +336,8 @@ def render_table(report: dict) -> str:
     lines.append(f"Fora do ciclo (proposals, rota --light): {report['fora_do_ciclo']}.")
     if report["sem_data"]:
         lines.append(f"Planos sem data legível deixados de fora pelo --since: {report['sem_data']}.")
+    if report["propostas_sem_data"]:
+        lines.append(f"Proposals sem data legível deixadas de fora pelo --since: {report['propostas_sem_data']}.")
     lines.append("Nenhum número agregado de desfecho: a divergência só aparece por plano, onde o M1 foi congelado.")
     return "\n".join(lines) + "\n"
 

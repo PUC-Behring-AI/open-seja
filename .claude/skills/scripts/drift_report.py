@@ -547,21 +547,12 @@ def parse_post_code(text: str) -> dict[str, str]:
 
 
 def _plan_header(plan: Path) -> dict[str, Any]:
-    lines = read_text(plan).splitlines()
-    head = []
-    for ln in lines[1:]:
-        if ln.startswith("## "):
-            break
-        head.append(ln)
-    version, specify = 1, ""
-    for ln in head:
-        m = re.match(r"^plan_format_version:\s*(\d+)", ln)
-        if m:
-            version = int(m.group(1))
-        m = re.match(r"^Specify:\s*(.*)$", ln)
-        if m and not specify:
-            specify = m.group(1).strip()
-    return {"version": version, "skipped": specify.startswith("skipped"), "specify": specify}
+    """The plan header read by the checker's parser (`cps.parse_header`, code fences skipped)."""
+    head = cps.parse_header(read_text(plan))
+    m = re.match(r"^(\d+)", head.version or "")
+    version = int(m.group(1)) if m else 1
+    specify = head.specifies[0][1] if head.specifies else ""
+    return {"version": version, "skipped": specify.startswith("skipped"), "specify": specify, "plan": head}
 
 
 def _count_steps(feature_file: Path, line: int) -> int:
@@ -757,9 +748,11 @@ def load_matrix(
             return _na(slug, moment, "plano-v1")
         if head["skipped"]:
             out: dict[str, Any] = {"feature": slug, "momento": moment, "intent": {"status": "skipped"}}
-            # the class comes from the one parser; None (malformed) keeps today's report
+            # the class comes from the one parser; None (malformed) keeps today's report, and so does a
+            # header the checker rejects (PFS-002, e.g. `default off` with the arm `on`)
             cls, reason = cps.skip_class(head["specify"])
-            if cls in SKIP_NM:
+            rejected = any(f.rule == "PFS-002" for f in cps.check_header(head["plan"], root=root).findings)
+            if cls in SKIP_NM and not rejected:
                 out["pulo"] = {"classe": cls, "motivo": reason}
             return out
     if not (root / "features").is_dir():
@@ -1092,7 +1085,7 @@ NA_LINES = {
     "feature-sem-pasta": "Não aplicável: esta feature não tem pasta.",
     "feature-sem-matriz": "Não aplicável: esta feature não tem matriz.",
     "specify-pulado": "Não aplicável: esta tarefa não teve cenários.",
-    "specify-default-off": "A especificação está desligada neste projeto.",
+    "specify-default-off": "Não aplicável: a especificação está desligada neste projeto.",
 }
 CAVEAT_TEXT = {
     "amostra pequena": "Poucos requisitos: os números valem como contagem, não como tendência.",

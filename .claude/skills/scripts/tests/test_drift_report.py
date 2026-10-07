@@ -14,9 +14,8 @@ import json
 import re
 from pathlib import Path
 
-import pytest
-
 import drift_report as dr
+import pytest
 
 _TESTS_DIR = Path(__file__).resolve().parent
 _FIX = _TESTS_DIR / "fixtures" / "drift_report"
@@ -786,7 +785,7 @@ def _skip_report(tmp_path, specify, default="on"):
     ("skipped -- opt-out: protótipo para mostrar ao cliente amanhã", "on", "NM-SPECIFY-OPT-OUT",
      "Você escolheu não escrever a especificação neste plano: protótipo para mostrar ao cliente amanhã."),
     ("skipped -- default off", "off", "NM-SPECIFY-DEFAULT-OFF",
-     "A especificação está desligada neste projeto."),
+     "Não aplicável: a especificação está desligada neste projeto."),
     ("skipped -- tarefa sem código: só documentação", "on", "NM-SPECIFY-PULADA",
      "Não aplicável: esta tarefa não teve cenários."),
 ])
@@ -825,3 +824,31 @@ def test_drift_report_reads_the_class_through_skip_class():
     text = Path(dr.__file__).read_text(encoding="utf-8")
     assert "cps.skip_class(" in text
     assert "opt-out" not in "".join(ln for ln in text.splitlines() if "re.compile" in ln or "re.match" in ln)
+
+
+# ---- plan-000022 code review (iteration 1): the header verdict is the checker's
+
+
+@pytest.mark.parametrize("specify,default", [
+    ("skipped -- default off", "on"),  # default off with arm on: PFS-002
+    ("skipped -- opt-out: protótipo para mostrar ao cliente amanhã", "off"),  # opt-out with arm off: PFS-002
+])
+def test_skip_class_against_the_arm_falls_back_to_the_malformed_report(tmp_path, specify, default):
+    rep = _skip_report(tmp_path, specify, default)
+    assert rep["razao_nm"] == ["NM-SPECIFY-PULADA"] and "motivo" not in rep and "motivo_pulo" not in rep
+
+
+def test_plan_header_skips_code_fences(tmp_path):
+    plan = tmp_path / "plan.md"
+    plan.write_text("# Plan 000904 | FEATURE-O | FIXTURE | 2026-10-07 12:00 UTC | cerca | Review: light\n"
+                    "```\nplan_format_version: 2\nSpecify: skipped -- opt-out: exemplo dentro de uma cerca\n```\n"
+                    "plan_format_version: 2\nSpecify default: on\n"
+                    "Specify: skipped -- tarefa sem código: só documentação\n\n## Steps\n", encoding="utf-8")
+    head = dr._plan_header(plan)
+    assert head["specify"] == "skipped -- tarefa sem código: só documentação"
+    rep = dr.generate(tmp_path, SLUG, plan=plan, moment="M2", compare_m1=True, status_fn=stub_status)
+    assert rep["razao_nm"] == ["NM-SPECIFY-PULADA"] and "motivo" not in rep
+
+
+def test_every_not_applicable_line_says_so():
+    assert all(line.startswith("Não aplicável:") for line in dr.NA_LINES.values())

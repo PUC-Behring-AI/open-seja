@@ -79,6 +79,7 @@ Specify: skipped -- opt-out: protótipo de tela que vai ser descartado
 | `tarefa sem código` (legado) | qualquer outro valor (o `SKIPPED_RE` atual já casou) | o valor inteiro |
 
 - Valor que começa com `opt-out` ou com `default off`, seguido de fim de linha, `:` ou espaço, e não casa com a expressão da sua classe (por exemplo `opt-out` sem motivo, ou `opt-out: x y`) é erro PFS-002, nunca legado.
+- Grafia próxima de uma classe também é erro PFS-002, nunca legado: o valor que começa com `opt-out` ou `default off` em qualquer caixa e com `-`, `.`, espaço ou nada entre as palavras (por exemplo `Opt-out: ...`, `DEFAULT OFF`, `default-off`, `default off. motivo`). Só as formas exatas da tabela, em minúsculas, são válidas (revisão de código do plan-000022).
 - O legado cobre todos os planos v2 escritos antes desta emenda (`tarefa sem código: ...`, `tarefa sem código (só documentação)`, `tarefa sem codigo: ...` sem acento, `só documentação`): a classe é `tarefa sem código` e o motivo é o valor inteiro. O resultado de hoje desses planos não muda.
 
 **Braço do plano.** Linha opcional do cabeçalho, no máximo uma vez:
