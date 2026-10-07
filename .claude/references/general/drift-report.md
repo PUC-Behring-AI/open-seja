@@ -98,6 +98,8 @@ Os códigos do DRM-009 valem com o mesmo nome. Este arquivo fixa a **frase de re
 |---|---|---|
 | `NM-INTENCAO-NAO-APROVADA` | D1 | "Eu não medi: você ainda não aprovou os requisitos." |
 | `NM-SPECIFY-PULADA` | D1 | "Eu não medi: esta tarefa não teve cenários." |
+| `NM-SPECIFY-OPT-OUT` | D1 | "Eu não medi: você escolheu não escrever a especificação neste plano." (emenda 000022, DRP-021) |
+| `NM-SPECIFY-DEFAULT-OFF` | D1 | "Eu não medi: a especificação está desligada neste projeto." (emenda 000022, DRP-021) |
 | `NM-CENARIOS-STALE` | D1 | "Eu não medi: os cenários mudaram depois da aprovação." |
 | `NM-SEM-ADAPTADOR-RUNNER` | D2, D3a | "Eu não medi: esta stack ainda não tem executor de cenários." |
 | `NM-SEM-RUNNER` | D2, D3a | "Eu não medi: não achei o relatório dos testes." |
@@ -295,6 +297,7 @@ O relatório está em tempo presente descritivo ou passado. Não escreve "deveri
 | projeto sem `features/` (e sem `--feature`) | uma linha "Não aplicável: este projeto não tem features.", exit 0 |
 | plano v1 ou sem `plan_format_version` | uma linha "Não aplicável: este plano é do formato antigo.", exit 0 |
 | plano `Specify: skipped` | uma linha, `NM-SPECIFY-PULADA`, exit 0 |
+| plano `Specify: skipped -- opt-out: <motivo>` ou `skipped -- default off` | uma linha com a classe, `NM-SPECIFY-OPT-OUT` ou `NM-SPECIFY-DEFAULT-OFF`, exit 0 (emenda 000022, DRP-021) |
 | `--feature` sem pasta | uma linha "Não aplicável", exit 0 |
 | feature sem M1 | relatório normal, `NM-SEM-M1`, sem delta |
 | fonte ausente | `não medido` com a razão |
@@ -420,3 +423,23 @@ Antes do Step B1, o agente do `/reflect` escreve `features/<slug>/drift/retraduc
 
 - **Quem decide**: o designer (pedido explícito); senão o campo `scenarios_contract_by`.
 - **Critério de aceitação**: uma feature com `scenarios_contract_by: ninguem` recebe o relatório do citizen sem número técnico; as outras recebem o do power dev com a oferta do citizen.
+
+## Emendas do plan-000022 (emenda 000022)
+
+### DRP-021 -- O relatório diz por que não há escada (emenda 000022)
+
+Com `--plan` e `Specify: skipped`, o relatório lê a classe do pulo por `check_plan_scenarios.skip_class`, o parser único do cabeçalho (CYC-035, D-011). O `drift_report.py` não tem regex próprio da classe.
+
+| Classe | `razao_nm` | `motivo` | Frase (todos os registros) |
+|---|---|---|---|
+| `opt-out` | `NM-SPECIFY-OPT-OUT` | `specify-opt-out`, com o motivo em `motivo_pulo` | "Você escolheu não escrever a especificação neste plano: <motivo>." |
+| `default off` | `NM-SPECIFY-DEFAULT-OFF` | `specify-default-off` | "A especificação está desligada neste projeto." |
+| `tarefa sem código` (com ou sem a classe escrita) | `NM-SPECIFY-PULADA` | ausente | "Não aplicável: esta tarefa não teve cenários." |
+| linha malformada (`skip_class` devolve `None`) | `NM-SPECIFY-PULADA` | ausente | "Não aplicável: esta tarefa não teve cenários." |
+
+A saída de `tarefa sem código` é a de antes, byte a byte: a fixture `specify-pulado` prova. A linha malformada fica com a saída de antes porque o erro é do `check_plan_scenarios.py` (PFS-002), não deste relatório. A chave `motivo_pulo` e os dois códigos novos são aditivos ao `--json`.
+
+Ruptura que pode provocar: quem lê o relatório de um plano desligado espera um número e encontra uma frase. A frase diz quem desligou a especificação, você no plano ou o projeto, e o motivo que você escreveu.
+
+- **Quem decide**: designer (D-011).
+- **Critério de aceitação**: um plano por classe dá a frase e o código da tabela no `--md`, no `--citizen` e no `--json`; a fixture `specify-pulado` não muda.

@@ -82,6 +82,10 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import check_plan_scenarios as cps  # the one parser of the skip class (plan-000022)
+
 SCHEMA_VERSION = 1
 STEPS = ("D1", "D2", "D3a", "D3b")
 MAX_SENTENCE_WORDS = 25
@@ -93,6 +97,8 @@ AUDIT_PCT = 30
 NM_CATALOG = (
     "NM-INTENCAO-NAO-APROVADA",
     "NM-SPECIFY-PULADA",
+    "NM-SPECIFY-OPT-OUT",
+    "NM-SPECIFY-DEFAULT-OFF",
     "NM-CENARIOS-STALE",
     "NM-SEM-ADAPTADOR-RUNNER",
     "NM-SEM-RUNNER",
@@ -110,6 +116,8 @@ NM_CATALOG = (
 NM_SENTENCE = {
     "NM-INTENCAO-NAO-APROVADA": "Eu não medi: você ainda não aprovou os requisitos.",
     "NM-SPECIFY-PULADA": "Eu não medi: esta tarefa não teve cenários.",
+    "NM-SPECIFY-OPT-OUT": "Eu não medi: você escolheu não escrever a especificação neste plano.",
+    "NM-SPECIFY-DEFAULT-OFF": "Eu não medi: a especificação está desligada neste projeto.",
     "NM-CENARIOS-STALE": "Eu não medi: os cenários mudaram depois da aprovação.",
     "NM-SEM-ADAPTADOR-RUNNER": "Eu não medi: esta stack ainda não tem executor de cenários.",
     "NM-SEM-RUNNER": "Eu não medi: não achei o relatório dos testes.",
@@ -198,6 +206,25 @@ def _not_applicable(matrix: dict, razao: list[str]) -> dict[str, Any]:
     return out
 
 
+#: plan-000022 (D-011): skip class -> (NM code, `motivo` code). `tarefa sem código` keeps today's report.
+SKIP_NM = {
+    cps.OPT_OUT: ("NM-SPECIFY-OPT-OUT", "specify-opt-out"),
+    cps.DEFAULT_OFF: ("NM-SPECIFY-DEFAULT-OFF", "specify-default-off"),
+}
+
+
+def _skipped(matrix: dict) -> dict[str, Any]:
+    """The not-applicable report of a skipped plan, by skip class (emenda 000022)."""
+    skip = matrix.get("pulo") or {}
+    code, motivo = SKIP_NM.get(skip.get("classe"), ("NM-SPECIFY-PULADA", ""))
+    out = _not_applicable(matrix, [code])
+    if motivo:
+        out["motivo"] = motivo
+        if skip.get("motivo"):
+            out["motivo_pulo"] = skip["motivo"]
+    return out
+
+
 def analyze(matrix: dict) -> dict[str, Any]:
     """Everything the calculator knows: the DRM-007 report plus per-item states.
 
@@ -208,7 +235,7 @@ def analyze(matrix: dict) -> dict[str, Any]:
     if matrix.get("nao_aplicavel"):
         return {"report": _not_applicable(matrix, list(matrix.get("razao_nm", []))), "states": {}}
     if intent_status == "skipped":
-        return {"report": _not_applicable(matrix, ["NM-SPECIFY-PULADA"]), "states": {}}
+        return {"report": _skipped(matrix), "states": {}}
 
     reqs: list[str] = list(matrix.get("reqs", []))
     retired = set(matrix.get("reqs_retirados", []))
@@ -534,7 +561,7 @@ def _plan_header(plan: Path) -> dict[str, Any]:
         m = re.match(r"^Specify:\s*(.*)$", ln)
         if m and not specify:
             specify = m.group(1).strip()
-    return {"version": version, "skipped": specify.startswith("skipped")}
+    return {"version": version, "skipped": specify.startswith("skipped"), "specify": specify}
 
 
 def _count_steps(feature_file: Path, line: int) -> int:
@@ -729,7 +756,12 @@ def load_matrix(
         if head["version"] < 2:
             return _na(slug, moment, "plano-v1")
         if head["skipped"]:
-            return {"feature": slug, "momento": moment, "intent": {"status": "skipped"}}
+            out: dict[str, Any] = {"feature": slug, "momento": moment, "intent": {"status": "skipped"}}
+            # the class comes from the one parser; None (malformed) keeps today's report
+            cls, reason = cps.skip_class(head["specify"])
+            if cls in SKIP_NM:
+                out["pulo"] = {"classe": cls, "motivo": reason}
+            return out
     if not (root / "features").is_dir():
         return _na(slug, moment, "sem-features")
     fdir = root / "features" / slug
@@ -1060,6 +1092,7 @@ NA_LINES = {
     "feature-sem-pasta": "Não aplicável: esta feature não tem pasta.",
     "feature-sem-matriz": "Não aplicável: esta feature não tem matriz.",
     "specify-pulado": "Não aplicável: esta tarefa não teve cenários.",
+    "specify-default-off": "A especificação está desligada neste projeto.",
 }
 CAVEAT_TEXT = {
     "amostra pequena": "Poucos requisitos: os números valem como contagem, não como tendência.",
@@ -1119,6 +1152,10 @@ def _na_line(report: dict) -> str:
     motivo = report.get("motivo") or ""
     if not motivo and "NM-SPECIFY-PULADA" in report.get("razao_nm", []):
         motivo = "specify-pulado"
+    if motivo == "specify-opt-out":
+        reason = str(report.get("motivo_pulo") or "").strip().rstrip(".")
+        return f"Você escolheu não escrever a especificação neste plano: {reason}." if reason else \
+            "Você escolheu não escrever a especificação neste plano."
     return NA_LINES.get(motivo, "Não aplicável: não há o que medir aqui.")
 
 

@@ -763,3 +763,65 @@ def test_real_intact_feature_is_measured_in_d1(tmp_path: Path):
     assert entry["scenarios_state"] == "approved"
     d1 = rep["degraus"]["D1"]
     assert d1["cobertos"] + d1["descobertos"] == d1["n"] and d1["n"] > 0
+
+
+# ---- plan-000022 Step 9: the skip class says why there is no ladder (D-011)
+
+_SKIP_PLAN = """# Plan 000903 | FEATURE-O | FIXTURE | 2026-10-07 12:00 UTC | plano pulado | Review: light
+plan_format_version: 2
+Specify default: {default}
+Specify: {specify}
+
+## Steps
+"""
+
+
+def _skip_report(tmp_path, specify, default="on"):
+    plan = tmp_path / "plan.md"
+    plan.write_text(_SKIP_PLAN.format(default=default, specify=specify), encoding="utf-8")
+    return dr.generate(tmp_path, SLUG, plan=plan, moment="M2", compare_m1=True, status_fn=stub_status)
+
+
+@pytest.mark.parametrize("specify,default,code,line", [
+    ("skipped -- opt-out: protótipo para mostrar ao cliente amanhã", "on", "NM-SPECIFY-OPT-OUT",
+     "Você escolheu não escrever a especificação neste plano: protótipo para mostrar ao cliente amanhã."),
+    ("skipped -- default off", "off", "NM-SPECIFY-DEFAULT-OFF",
+     "A especificação está desligada neste projeto."),
+    ("skipped -- tarefa sem código: só documentação", "on", "NM-SPECIFY-PULADA",
+     "Não aplicável: esta tarefa não teve cenários."),
+])
+def test_skip_class_names_the_class_and_the_reason(tmp_path, specify, default, code, line):
+    rep = _skip_report(tmp_path, specify, default)
+    assert rep["nao_aplicavel"] is True and rep["razao_nm"] == [code]
+    assert dr.render_markdown(rep) == line + "\n" and dr.render_citizen(rep) == line + "\n"
+    assert dr.check_voice(line) == [] and code in dr.NM_CATALOG
+    assert not any(p in line.lower() for p in dr.FORBIDDEN_PHRASES)
+
+
+def test_skip_class_codes_reach_the_json(tmp_path, capsys):
+    plan = tmp_path / "plan.md"
+    plan.write_text(_SKIP_PLAN.format(default="on", specify="skipped -- opt-out: protótipo para o cliente ver"),
+                    encoding="utf-8")
+    (tmp_path / "features" / SLUG).mkdir(parents=True)
+    assert dr.main([str(tmp_path), "--feature", SLUG, "--plan", str(plan), "--json"]) == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["razao_nm"] == ["NM-SPECIFY-OPT-OUT"]
+    assert out["motivo"] == "specify-opt-out" and out["motivo_pulo"] == "protótipo para o cliente ver"
+
+
+def test_tarefa_sem_codigo_and_legacy_keep_todays_report(tmp_path):
+    for specify in ("skipped -- tarefa sem código: só documentação", "skipped -- tarefa sem codigo: so documentacao"):
+        rep = _skip_report(tmp_path, specify)
+        assert rep == {"schema_version": 1, "feature": SLUG, "momento": "M2", "nao_aplicavel": True,
+                       "razao_nm": ["NM-SPECIFY-PULADA"]}
+
+
+def test_malformed_skip_keeps_todays_reason(tmp_path):
+    rep = _skip_report(tmp_path, "skipped -- opt-out: x")  # reason too short: skip_class returns None
+    assert rep["razao_nm"] == ["NM-SPECIFY-PULADA"] and "motivo" not in rep
+
+
+def test_drift_report_reads_the_class_through_skip_class():
+    text = Path(dr.__file__).read_text(encoding="utf-8")
+    assert "cps.skip_class(" in text
+    assert "opt-out" not in "".join(ln for ln in text.splitlines() if "re.compile" in ln or "re.match" in ln)
