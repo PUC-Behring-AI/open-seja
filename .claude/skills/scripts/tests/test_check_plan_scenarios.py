@@ -1,4 +1,4 @@
-"""Tests for check_plan_scenarios.py -- PFS-001 to PFS-015 over the golden fixtures.
+"""Tests for check_plan_scenarios.py -- PFS-001 to PFS-016 over the golden fixtures.
 
 Invocation: test
 Lifecycle: active
@@ -226,6 +226,92 @@ def test_lock_key_with_backtick_cannot_be_cited(tmp_path: Path) -> None:
     text = (_FIXTURES / "v2-completo" / "plan.md").read_text(encoding="utf-8")
     report = check_text(text, root, status_fn=lambda r, s: {"status": "approved"})
     assert {"PFS-004", "PFS-009"} <= {f.rule for f in report.findings}
+
+
+# ---------------------------------------------------------------------------
+# Skip class and plan arm (plan-000022 step 5; emenda 000022, D-011)
+# ---------------------------------------------------------------------------
+
+_NO_CODE, _OFF, _OPT_OUT = "tarefa sem código", "default off", "opt-out"
+
+
+@pytest.mark.parametrize("value,expected", [
+    ("tarefa sem código", (_NO_CODE, "")),
+    ("tarefa sem código: só documentação", (_NO_CODE, "só documentação")),
+    ("default off", (_OFF, "")),
+    ("default off: protótipo de tela", (_OFF, "protótipo de tela")),
+    ("opt-out: protótipo de tela que vai ser descartado", (_OPT_OUT, "protótipo de tela que vai ser descartado")),
+])
+def test_skip_class_reads_the_three_classes(value: str, expected: tuple) -> None:
+    assert cps.skip_class(value) == expected
+
+
+@pytest.mark.parametrize("value", [
+    # real legacy lines from _output/plans/ and from the fixtures (grep "^Specify: skipped --")
+    "tarefa sem código (só documentação)",
+    "tarefa sem codigo: so documentacao",
+    "tarefa de documentação (DOCUMENT), sem comportamento observável a testar",
+    "só documentação",
+    "opt-outs nao sao uma classe",
+    "default offline",
+])
+def test_skip_class_without_a_class_is_the_legacy_no_code_class_with_the_whole_value(value: str) -> None:
+    assert cps.skip_class(value) == (_NO_CODE, value)
+
+
+@pytest.mark.parametrize("value", ["", "   ", "opt-out", "opt-out:", "opt-out: x y", "opt-out: n/a",
+                                   "opt-out protótipo de tela descartado", "default off agora", "default off:"])
+def test_skip_class_is_none_for_an_empty_value_or_a_malformed_class(value: str) -> None:
+    assert cps.skip_class(value)[0] is None
+
+
+def test_skip_class_accepts_the_whole_specify_value() -> None:
+    assert cps.skip_class("skipped -- default off") == (_OFF, "")
+    assert cps.skip_class("skipped --") == (None, "")
+
+
+def test_parse_header_reads_specify_default_and_does_not_mix_it_with_specify() -> None:
+    head = cps.parse_header("# T\nplan_format_version: 2\nSpecify default: off\nSpecify: skipped -- default off\n")
+    assert head.specify_defaults == [(3, "off")] and head.specifies == [(4, "skipped -- default off")]
+
+
+def test_amended_pfs_013_default_off_with_real_tests_emits_nothing() -> None:
+    report = _run_case("pfs-016-default-off-com-testes")
+    assert report.findings == [] and cps.exit_code(report, strict=True) == 0
+
+
+def test_pfs_016_says_the_plan_counts_as_a_deviation_and_does_not_block() -> None:
+    report = _run_case("pfs-016-opt-out-com-testes")
+    [finding] = report.findings
+    assert finding.rule == "PFS-016" and "leitura por protocolo: este plano conta como desvio do default" in finding.message.lower()
+    assert cps.exit_code(report, strict=False) == 0
+
+
+def test_off_class_hint_says_the_specify_is_off() -> None:
+    report = _run_case("pfs-013-default-off-sem-na")
+    assert all("specify está desligada neste plano" in f.hint for f in report.findings)
+
+
+def test_no_code_class_never_gets_pfs_016(tmp_path: Path) -> None:
+    text = _read("v2-skipped").replace("plan_format_version: 2\n", "plan_format_version: 2\nSpecify default: off\n")
+    report = check_text(text, tmp_path)
+    assert report.findings == [] and report.specify_default == "off" and report.skip_class == _NO_CODE
+
+
+@pytest.mark.parametrize("case,skip,reason,default", [
+    ("pfs-016-opt-out-com-testes", _OPT_OUT, "protótipo de tela que vai ser descartado", "on"),
+    ("pfs-016-default-off-com-testes", _OFF, "", "off"),
+    ("pfs-013-sem-classe-legado", _NO_CODE, "tarefa sem codigo: so documentacao", "on"),
+    ("v2-completo", None, None, "on"),
+    ("pfs-016-approved-com-default-off", None, None, "off"),
+    ("v1-real-1", None, None, None),
+])
+def test_cli_json_has_skip_class_skip_reason_and_specify_default(case: str, skip, reason, default, capsys) -> None:
+    root = _root(case) if _expected(case)["root"] else _FIXTURES
+    code, out, _ = _cli(capsys, str(_FIXTURES / case / "plan.md"), "--root", str(root), "--json")
+    data = json.loads(out)
+    assert code == _expected(case)["exit_code"] and data["schema_version"] == 1
+    assert (data["skip_class"], data["skip_reason"], data["specify_default"]) == (skip, reason, default)
 
 
 # ---------------------------------------------------------------------------

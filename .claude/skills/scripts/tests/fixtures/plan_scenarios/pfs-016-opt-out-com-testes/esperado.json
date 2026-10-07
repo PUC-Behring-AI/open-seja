@@ -1,0 +1,14 @@
+{
+  "descricao": "opt-out com Specify default: on e step com teste real e Scenarios N/A (motivo): so o info PFS-016 (desvio do default), sai 0",
+  "root": null,
+  "exit_code": 0,
+  "status": null,
+  "findings": [
+    [
+      "PFS-016",
+      "info",
+      4
+    ]
+  ],
+  "matrix": null
+}

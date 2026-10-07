@@ -7,7 +7,7 @@
 #   plan is not saved as ready. Old plans, and projects without scenarios, are
 #   never blocked.
 """
-check_plan_scenarios.py -- Plan v2 scenario coverage checker (PFS-001 to PFS-015).
+check_plan_scenarios.py -- Plan v2 scenario coverage checker (PFS-001 to PFS-016).
 
 Invocation: skill-invoked, user-cli, hook-ci
 Lifecycle: active
@@ -17,12 +17,19 @@ Reads the plan, `features/<slug>/scenarios.lock.json` and, by subprocess, the
 output of `check_specify.py --feature <slug> --status --json` (coupled to the
 CLI and the versioned lock, never to the internals of the other checkers).
 Never writes a file. No LLM, no network, no clock.
+`skip_class(value)` is the single parser of the skip class (CYC-035), imported by the
+other readers of the plan header. `--json` carries `skip_class`, `skip_reason` and
+`specify_default` (additive keys; schema_version stays 1).
 
 | Rule    | What I check                                                          | Severity     |
 |---------|-----------------------------------------------------------------------|--------------|
 | PFS-001 | v1 or no version: not verified, exit 0; unknown version: exit 2        | fatal        |
 | PFS-002 | v2 header: one `Specify:` (approved (rev N) or skipped -- reason),     | error        |
-|         | `Feature:` required with approved, forbidden with skipped              |              |
+|         | `Feature:` required with approved, forbidden with skipped; the skip    |              |
+|         | class (`skip_class`): `opt-out` needs a readable reason; a value that  |              |
+|         | starts with `opt-out` or `default off` and is malformed; at most one   |              |
+|         | `Specify default:` (on or off); `default off` with `on` (or no line),  |              |
+|         | and `opt-out` with `off`, are incoherent                               |              |
 | PFS-003 | approved plan: every step has `Scenarios:`                             | error        |
 | PFS-004 | scenario key well formed, between backticks, same slug, no duplicate   | error        |
 | PFS-005 | the key is in `index` of the lock                                      | error        |
@@ -33,9 +40,13 @@ Never writes a file. No LLM, no network, no clock.
 | PFS-010 | one scenario, one owner step                                           | error        |
 | PFS-011 | `check_specify.py --status` is `approved`                              | error        |
 | PFS-012 | `Specify: approved (rev N)` matches `rev` of the lock                  | error        |
-| PFS-013 | skipped plan: every step has `Tests: N/A` (or a justified N/A)         | error / info |
+| PFS-013 | skipped plan, class `tarefa sem código` (or no class): every step has  | error / info |
+|         | `Tests: N/A` (or a justified N/A); classes `default off` and `opt-out`:|              |
+|         | no key, and non-N/A `Tests:` needs `Scenarios: N/A (reason)` (silent)  |              |
 | PFS-014 | approved plan and no step cites a scenario (hint: skipped?)            | info         |
 | PFS-015 | not a check: I never change the plan or the lock                       | --           |
+| PFS-016 | the class goes against the plan's own `Specify default:` line          | info         |
+|         | (`opt-out` with `on`, `approved` with `off`); never reads conventions  |              |
 
 Exit codes:
   0 = no error (infos do not fail, except with --strict); v1 and no-v2 scans.
@@ -87,6 +98,15 @@ FEATURE_RE = re.compile(r"^Feature:\s*(.*)$")
 SPECIFY_RE = re.compile(r"^Specify:\s*(.*)$")
 APPROVED_RE = re.compile(r"^approved \(rev (\d+)\)$")
 SKIPPED_RE = re.compile(r"^skipped -- (\S.*)$")
+SKIP_PREFIX_RE = re.compile(r"^skipped --\s*(.*)$")
+SPECIFY_DEFAULT_RE = re.compile(r"^Specify default:\s*(.*)$")
+SPECIFY_DEFAULT_VALUE_RE = re.compile(r"^(on|off)$")
+NO_CODE, DEFAULT_OFF, OPT_OUT = "tarefa sem código", "default off", "opt-out"
+SKIP_CLASSES = (NO_CODE, DEFAULT_OFF, OPT_OUT)
+_CLASS_RES = ((OPT_OUT, re.compile(r"^opt-out:\s*(\S.*)$")),
+              (DEFAULT_OFF, re.compile(r"^default off(?::\s*(\S.*))?$")),
+              (NO_CODE, re.compile(r"^tarefa sem código(?::\s*(\S.*))?$")))
+_CLAIMED_RE = re.compile(r"^(opt-out|default off)(?:$|[:\s])")
 STEP_RE = re.compile(r"^###\s+Step\s+(\d+)\s*:\s*(.*)$")
 FIELD_RE = re.compile(r"^\s*-\s*\*\*(Tests|Scenarios)(?::\*\*|\*\*:)\s*(.*?)\s*$")
 NA_RE = re.compile(r"^N/A\b", re.IGNORECASE)
@@ -95,7 +115,7 @@ TICKS_RE = re.compile(r"`([^`]*)`")
 PLAN_FILE_RE = re.compile(r"^plan-\d{6}-.+\.md$")
 CLOSED_TITLE_RE = re.compile(r"^#\s*(DONE|REVOKED|SUPERSEDED)\s*\|")
 
-RULES = tuple(f"PFS-{n:03d}" for n in range(1, 16))
+RULES = tuple(f"PFS-{n:03d}" for n in range(1, 17))
 _SEVERITY_WORDS = {"fatal": "erro", "error": "erro", "info": "informação"}
 
 
@@ -129,6 +149,7 @@ class Plan(NamedTuple):
     features: list[tuple[int, str]]
     specifies: list[tuple[int, str]]
     steps: list[Step]
+    specify_defaults: tuple[tuple[int, str], ...] | list[tuple[int, str]] = ()  # `Specify default:` lines
 
 
 class Report(NamedTuple):
@@ -141,6 +162,9 @@ class Report(NamedTuple):
     steps: list[dict]
     matrix: list[dict] | None
     unverified: bool
+    skip_class: str | None = None
+    skip_reason: str | None = None
+    specify_default: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -160,6 +184,7 @@ def parse_header(text: str) -> Plan:
     version_line = 1
     features: list[tuple[int, str]] = []
     specifies: list[tuple[int, str]] = []
+    defaults: list[tuple[int, str]] = []
     in_fence = False
     for number, raw in enumerate(lines[1:], start=2):
         if _is_fence(raw):
@@ -176,7 +201,9 @@ def parse_header(text: str) -> Plan:
             features.append((number, m.group(1).strip()))
         elif m := SPECIFY_RE.match(line):
             specifies.append((number, m.group(1).strip()))
-    return Plan(title, version, version_line, features, specifies, [])
+        elif m := SPECIFY_DEFAULT_RE.match(line):
+            defaults.append((number, m.group(1).strip()))
+    return Plan(title, version, version_line, features, specifies, [], defaults)
 
 
 def _steps_block(lines: list[str]) -> list[tuple[int, str]]:
@@ -244,6 +271,32 @@ def reason_ok(reason: str) -> bool:
     return plain not in FILLER_REASONS and len(plain.split()) >= MIN_REASON_WORDS
 
 
+def skip_class(value: str) -> tuple[str | None, str]:
+    """The skip class of a `Specify: skipped -- <value>` line and its reason (CYC-035, plan-from-scenarios.md).
+
+    `value` is the text after `skipped -- ` (the whole `skipped -- ...` value is also accepted).
+    Returns (class, reason): `opt-out` (reason required, PFS-007 rule), `default off` and
+    `tarefa sem código` (reason optional, "" when missing). A value without a class is the legacy
+    `tarefa sem código` with the whole value as the reason. (None, text) means an error (PFS-002):
+    an empty value, or a value that starts with `opt-out` or `default off` and does not match its
+    class. Call it only for a skipped plan: `approved (rev N)` would read as a legacy reason.
+    """
+    text = value.strip()
+    if m := SKIP_PREFIX_RE.match(text):
+        text = m.group(1).strip()
+    if not text:
+        return None, ""
+    for name, regex in _CLASS_RES:
+        if m := regex.match(text):
+            reason = (m.group(1) or "").strip()
+            if name == OPT_OUT and not reason_ok(reason):
+                return None, reason
+            return name, reason
+    if m := _CLAIMED_RE.match(text):
+        return None, text[m.end():].lstrip(": ").strip()
+    return NO_CODE, text
+
+
 def parse_scenarios(value: str) -> tuple[list[str], str]:
     """Backtick tokens of a Scenarios value and the text left over outside them."""
     tokens = TICKS_RE.findall(value)
@@ -276,8 +329,54 @@ def _check_header(plan: Plan, file: str, root: Path) -> tuple[list[Finding], str
     if skipped:
         out += [_f("PFS-002", "error", file, ln, "Um plano com `Specify: skipped` não tem `Feature:`.",
                    "Tire a linha `Feature:` ou rode a specify.") for ln, _ in plan.features]
+        if skip_class(skipped.group(1))[0] is None:
+            return out + [_class_error(skipped.group(1), file, sline)], None, None
         return out, "skipped", None
     return _check_feature(plan, file, root, out)
+
+
+def _class_error(value: str, file: str, line: int) -> Finding:
+    """PFS-002: a value that claims `opt-out` or `default off` and does not match its class."""
+    if value.startswith(OPT_OUT):
+        return _f("PFS-002", "error", file, line, "O `opt-out` precisa de um motivo que se leia.",
+                  "Escreva `Specify: skipped -- opt-out: <motivo>` com pelo menos 3 palavras: por que este plano desliga a specify.")
+    return _f("PFS-002", "error", file, line, "O valor `default off` não segue a forma da classe.",
+              "Escreva `Specify: skipped -- default off` ou `Specify: skipped -- default off: <motivo>`.")
+
+
+def _specify_default(plan: Plan, file: str) -> tuple[list[Finding], str | None]:
+    """PFS-002 on the `Specify default:` lines. Returns (findings, "on" | "off"); None when unreadable."""
+    if not plan.specify_defaults:
+        return [], "on"  # before the emenda 000022 only `on` existed (CYC-036)
+    (line, value), extra = plan.specify_defaults[0], list(plan.specify_defaults[1:])
+    out = [_f("PFS-002", "error", file, ln, "O cabeçalho tem `Specify default:` mais de uma vez.", "Deixe uma só linha.")
+           for ln, _ in extra]
+    if not SPECIFY_DEFAULT_VALUE_RE.match(value):
+        return out + [_f("PFS-002", "error", file, line, "O valor de `Specify default:` não é `on` nem `off`.",
+                         "Escreva `Specify default: on` ou `Specify default: off`.")], None
+    agree = all(v == value for _, v in extra)
+    return out, value if agree else None
+
+
+def _check_arm(plan: Plan, file: str, mode: str | None, cls: str | None, default: str | None) -> list[Finding]:
+    """PFS-002 (incoherent header) and PFS-016 (deviation from the plan's own default). Never reads conventions.md."""
+    if mode is None or default is None:
+        return []
+    sline = plan.specifies[0][0]
+    absent = "" if plan.specify_defaults else " (o cabeçalho não tem a linha `Specify default:`, que vale `on`)"
+    if cls == DEFAULT_OFF and default == "on":
+        return [_f("PFS-002", "error", file, sline, f"O plano diz `default off`, mas o braço do cabeçalho é `on`{absent}.",
+                   "Se o projeto desliga a specify, escreva `Specify default: off`; com `on`, o pulo é `opt-out: <motivo>`.")]
+    if cls == OPT_OUT and default == "off":
+        return [_f("PFS-002", "error", file, sline, "O plano diz `opt-out`, mas o cabeçalho diz `Specify default: off`.",
+                   "Com `off`, a specify desligada é `default off`: o `--without-specify` não faz nada.")]
+    deviation = {(OPT_OUT, "on"): "o plano desligou a specify num projeto que a liga",
+                 (None, "off"): "o plano ligou a specify num projeto que a desliga"}.get((cls, default))
+    if deviation is None or (cls is None and mode != "approved"):
+        return []
+    arm = f"`{cls or 'approved'}` com o braço `{default}`"
+    return [_f("PFS-016", "info", file, sline, f"Leitura por protocolo: este plano conta como desvio do default ({arm}).",
+               f"Isto não bloqueia: {deviation}.")]
 
 
 def _check_feature(plan: Plan, file: str, root: Path, out: list[Finding]) -> tuple[list[Finding], str | None, str | None]:
@@ -443,7 +542,7 @@ def _step_rows(plan: Plan, cited: dict[int, list[str]]) -> list[dict]:
 
 def check_plan(plan: Plan, lock: dict | None, status: dict | None, *, file: str = "plan.md",
                root: Path = Path(".")) -> Report:
-    """Apply PFS-001 to PFS-014. `lock` and `status` are only used with Specify: approved."""
+    """Apply PFS-001 to PFS-016. `lock` and `status` are only used with Specify: approved."""
     version = plan_version(plan)
     if version is None:
         finding = _f("PFS-001", "fatal", file, plan.version_line, f"Não conheço a versão do plano ({plan.version}).",
@@ -452,20 +551,43 @@ def check_plan(plan: Plan, lock: dict | None, status: dict | None, *, file: str 
     if version == 1:
         return Report(file, 1, None, None, None, [], [], None, True)
     findings, mode, slug = _check_header(plan, file, root)
+    found, default = _specify_default(plan, file)
+    findings += found
     specify = plan.specifies[0][1] if plan.specifies else None
+    cls, reason = skip_class(specify) if mode == "skipped" and specify else (None, None)
+    findings += _check_arm(plan, file, mode, cls, default)
+    arm = {"skip_class": cls, "skip_reason": reason, "specify_default": default}
     if mode is None:
-        return _finish(file, slug, specify, None, findings, plan, {}, None)
+        return _finish(file, slug, specify, None, findings, plan, {}, None)._replace(**arm)
     if mode == "skipped":
         cited: dict[int, list[str]] = {s.n: [] for s in plan.steps}
         for s in plan.steps:
-            findings += _check_skipped_step(s, file)
-        return _finish(file, None, specify, None, findings, plan, cited, None)
+            findings += _check_skipped_step(s, file) if cls == NO_CODE else _check_off_step(s, file)
+        return _finish(file, None, specify, None, findings, plan, cited, None)._replace(**arm)
     assert slug is not None  # approved always has a slug
-    return _approved(plan, lock, status, file, slug, specify, findings)
+    return _approved(plan, lock, status, file, slug, specify, findings)._replace(**arm)
+
+
+_OFF_HINT = "A specify está desligada neste plano: use `Scenarios: N/A (motivo)`."
+
+
+def _check_off_step(step: Step, file: str) -> list[Finding]:
+    """PFS-007 and the amended PFS-013 for the classes `default off` and `opt-out` (emenda 000022).
+
+    A step with real `Tests:` and `Scenarios: N/A (reason)` is the expected case: no finding, not even info.
+    """
+    out = _check_na_reason(step, file)
+    if step.scen is not None and not NA_RE.match(step.scen.strip()):
+        return out + [_f("PFS-013", "error", file, step.scen_line,
+                         f"O passo {step.n} cita cenário, mas a specify está desligada neste plano.", _OFF_HINT)]
+    if step.scen is None and not is_na(step.tests):
+        return out + [_f("PFS-013", "error", file, step.tests_line,
+                         f"O passo {step.n} tem teste e não diz `Scenarios: N/A (motivo)`.", _OFF_HINT)]
+    return out
 
 
 def _check_skipped_step(step: Step, file: str) -> list[Finding]:
-    """PFS-007 and PFS-013 for a plan with Specify: skipped (no lock, no feature)."""
+    """PFS-007 and PFS-013 for a plan skipped as `tarefa sem código` (explicit or legacy; no lock, no feature)."""
     out = _check_na_reason(step, file)
     if step.scen is not None and not NA_RE.match(step.scen.strip()):
         return out + [_f("PFS-013", "error", file, step.scen_line, f"O passo {step.n} cita cenário, mas a specify foi pulada.",
@@ -599,6 +721,7 @@ def table(report: Report) -> str:
 def as_json(report: Report) -> dict:
     return {"schema_version": SCHEMA_VERSION, "plan": report.file, "version": report.version, "feature": report.feature,
             "specify": report.specify, "status": report.status, "unverified": report.unverified,
+            "skip_class": report.skip_class, "skip_reason": report.skip_reason, "specify_default": report.specify_default,
             "findings": [f._asdict() for f in report.findings], "steps": report.steps, "matrix": report.matrix}
 
 
@@ -664,7 +787,7 @@ def _run(args: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Plan v2 scenario coverage checker (PFS-001 to PFS-015).")
+    parser = argparse.ArgumentParser(description="Plan v2 scenario coverage checker (PFS-001 to PFS-016).")
     parser.add_argument("plan", nargs="?", help="plan file; omit to scan _output/plans/ for v2 plans")
     parser.add_argument("--root", default=".", help="project root with features/ (default: current directory)")
     parser.add_argument("--json", action="store_true", help="one JSON object with schema_version")

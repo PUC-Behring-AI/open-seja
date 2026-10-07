@@ -1,0 +1,14 @@
+{
+  "descricao": "Specify default: com valor fora de on e off",
+  "root": null,
+  "exit_code": 1,
+  "status": null,
+  "findings": [
+    [
+      "PFS-002",
+      "error",
+      3
+    ]
+  ],
+  "matrix": null
+}

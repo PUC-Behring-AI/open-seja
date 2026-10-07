@@ -52,6 +52,20 @@ Linha de cada achado: campo do step (`Scenarios:` ou `Tests:`) quando o achado e
 | `pfs-013-skipped-na-com-motivo` | skipped com Tests nao-N/A e N/A (motivo): passa com info |
 | `pfs-013-skipped-com-chave` | plano pulado nao tem cenario para citar |
 | `pfs-014-nenhum-step` | aprovado e nenhum step cita cenario: 4x PFS-009 e dica PFS-014 |
+| `pfs-002-opt-out-sem-motivo` | opt-out sem motivo: erro, nunca legado (emenda 000022) |
+| `pfs-002-opt-out-motivo-curto` | opt-out com motivo que nao passa no PFS-007 |
+| `pfs-002-default-off-com-cabecalho-on` | default off com `Specify default: on`: incoerencia do cabecalho |
+| `pfs-002-default-off-sem-linha` | default off sem a linha `Specify default:` (ausente = on): incoerencia do cabecalho |
+| `pfs-002-opt-out-com-default-off` | opt-out com `Specify default: off`: com off o `--without-specify` nao faz nada |
+| `pfs-002-specify-default-invalido` | `Specify default:` com valor fora de on e off |
+| `pfs-002-specify-default-duplicado` | `Specify default:` duas vezes (a segunda e o achado) |
+| `pfs-013-sem-classe-legado` | motivo sem classe e sem acento (legado = tarefa sem codigo): Tests nao-N/A sem Scenarios continua erro |
+| `pfs-013-legado-parenteses-na-com-motivo` | legado com parenteses: Tests nao-N/A com N/A (motivo) continua info |
+| `pfs-013-default-off-sem-na` | default off: step de teste sem `Scenarios: N/A (motivo)` e step com chave sao erro, com a dica da specify desligada |
+| `pfs-016-opt-out-com-testes` | opt-out com `Specify default: on` e teste real com N/A (motivo): so o info PFS-016, sai 0 |
+| `pfs-016-opt-out-sem-linha` | opt-out sem a linha `Specify default:` (ausente = on): info PFS-016 |
+| `pfs-016-approved-com-default-off` | approved com `Specify default: off`: info PFS-016 |
+| `pfs-016-default-off-com-testes` | default off com off e teste real com N/A (motivo): segue o braco, nenhum achado (negativo de PFS-016 e do info do PFS-013) |
 
 ## Execucoes de referencia (plan-000012, Step 7; SIMULADAS)
 
