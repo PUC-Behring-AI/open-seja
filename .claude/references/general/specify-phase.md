@@ -52,6 +52,7 @@ A specify roda quando a grill classificou a tarefa "com código" (existe `featur
 
 - **Quem decide**: o `/plan` classifica (GRL-012); o designer pode contestar na revisão do plano.
 - **Critério de aceitação**: plano de tarefa sem código não tem pasta `features/` nova e tem a linha `Specify: skipped -- <motivo>`.
+- **Emenda 000022** (D-011; CYC-035, CYC-036): a specify também não roda numa tarefa com código quando o projeto tem `SPECIFY_DEFAULT` em `off` e o plano não usa `--with-specify` (linha `Specify: skipped -- default off`), ou quando o plano usa `--without-specify "<motivo>"` num projeto `on` (linha `Specify: skipped -- opt-out: <motivo>`). Nos dois casos a grill faz a entrevista curta (GRL-012) e não há pasta. Com `off` e `/plan --with-specify`, a specify roda como numa feature com código, depois da grill completa. A `--specify` avulsa (SPC-016) não muda.
 
 ### SPC-003 -- Derivação: todo requisito ativo tem cenário
 

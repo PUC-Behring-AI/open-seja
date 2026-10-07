@@ -56,6 +56,7 @@ A decisão é por plano, não por step. A specify roda quando algum step do plan
 
 - **Quem decide**: o `/plan` aplica a regra e registra o motivo; o designer pode contestar na revisão do plano.
 - **Critério de aceitação**: plano sem `*.feature` aprovado contém a linha `Specify: skipped -- <motivo>`; plano com algum step de comportamento observável e `Tests:` não-N/A, e sem essa linha, tem pasta `features/<slug>/` com `.feature` aprovado.
+- **Emendado por**: CYC-035 (plan-000022, D-011): três classes de pulo; a alternativa "pular por escolha livre" deixa de ser rejeitada nos termos da D-011.
 
 ### CYC-005 -- Escrita do plano
 
@@ -190,6 +191,7 @@ Plano novo sai `plan_format_version: 2` nos dois casos (`Specify: approved` ou `
 
 - **Quem decide**: designer.
 - **Critério de aceitação**: um plano v1 existente é lido pelo `/plan` e pelo `/implement` sem mudança de resultado; só um plano v2 `approved` com step sem `Scenarios:` (inclusive `Tests: N/A`, PFS-003) é classificado como inválido.
+- **Emendado por**: seção "Emendas do item 11", emenda ao CYC-018 (plan-000022, D-011): "nenhum step tem `Tests:` não-N/A" vale só para a classe `tarefa sem código`.
 
 ### CYC-019 -- O que o contrato não faz
 
@@ -214,6 +216,7 @@ Ele também não muda o portão, os hooks ou os denies (S2).
 |---|---|---|---|
 | 1 | Forma das fases grill e specify | B: internas ao `/plan`, flags avulsas (reservadas em 2026-10-06; implementadas pelos planos 000009 e 000011) `[default; aceito 2026-10-06]` | CYC-006 |
 | 2 | Quando a specify é pulada | A: por tipo de tarefa, com `Specify: skipped -- <motivo>` `[default; aceito 2026-10-06]` | CYC-004 |
+| 2 (plan-000022) | Quando a specify é pulada, revisão | por tipo de tarefa **ou** pelo interruptor do projeto e pela escolha do plano, com classe e motivo registrados (D-011); detalhe na seção "Emendas do item 11" | CYC-035, CYC-036 |
 | 3 | Layout por feature | A: `features/<slug>/` `[default; aceito 2026-10-06]` | CYC-015 |
 | 4 | Definição de divergência | C: composta, por degrau `[default; aceito 2026-10-06]` | CYC-016 |
 | 5 | Onde roda o teste-primeiro | A: dentro do `/implement`, por step `[default; aceito 2026-10-06]` | CYC-017 |
@@ -233,6 +236,7 @@ Esta seção fixa a versão do formato de plano (CYC-018) e o campo `Scenarios:`
 |---|---|---|
 | `plan_format_version: 2` com `Specify: approved` | obrigatório em todo step (chaves, ou `N/A (motivo)`) | step sem `Scenarios:` torna o plano **inválido** (PFS-003, PFS-006) |
 | `plan_format_version: 2` com `Specify: skipped` | sem chaves; nenhum step com `Tests:` não-N/A de comportamento observável | PFS-013 recusa o contrário |
+| `plan_format_version: 2` com `Specify: skipped -- default off` ou `Specify: skipped -- opt-out: <motivo>` (plan-000022, D-011) | sem chaves; `Tests:` não-N/A é permitido com `Scenarios: N/A (motivo)` | válido; a linha anterior passa a valer só para a classe `tarefa sem código` |
 | `plan_format_version: 2` | `N/A (motivo)` em step sem comportamento observável (com ou sem `Tests:`) | válido |
 | `plan_format_version: 1` ou ausente | ausente | **válido para sempre**; `/plan` e `/implement` o leem como antes; no máximo advisory, nunca bloqueio |
 
@@ -322,6 +326,7 @@ A classificação "com código / sem código" da grill (GRL-012) decide **antes*
 - **Quem decide**: designer; o verificador recusa.
 - **Critério de aceitação**: plano pulado com step de teste e sem N/A justificado sai 1 com PFS-013; todos os steps `Tests: N/A` saem 0.
 - **Ruptura que pode provocar** (CYC-014): ao power dev, "disse que não tinha código e o plano tem teste". Registro do power dev.
+- **Emendado por**: seção "Emendas do item 11", emenda ao CYC-029 (plan-000022, D-011): a recusa do PFS-013 vale só para a classe `tarefa sem código`.
 
 ### CYC-030 -- O motor do teste-primeiro e onde ele grava (emenda 000013)
 
@@ -362,6 +367,7 @@ O ciclo default (grill, specify, plano v2, teste-primeiro, relatório por degrau
 - **Quem decide**: designer.
 - **Critério de aceitação**: num projeto sem `features/` e só com planos v1, atualizar para a tag nova não muda nenhum arquivo do projeto, e o `run_all_checks.py` devolve o mesmo conjunto de falhas de antes, com os quatro checks em PASS.
 - **Ruptura que pode provocar** (CYC-014): ao citizen, "o /plan agora me faz perguntas antes de escrever o plano". O guia pt-BR (`docs/how-to/ciclo-default.pt-BR.md`) explica o porquê e a saída.
+- **Emendado por**: seção "Emendas do item 11", emenda ao CYC-033 (plan-000022, D-011, que substitui a D-009): a chave existe (CYC-036) e o braço de controle do piloto é a mesma tag com `off`.
 
 ### CYC-034 -- Quem escreve os registros de leitura e em que registro o relatório fala (emenda 000015)
 
@@ -391,3 +397,65 @@ Seis planos editaram os mesmos arquivos, nesta ordem. A medida final está no St
 Medida final (2026-10-06, `check_docs.py --plugins skill-body-length --verbose`): `plan` 72/500, `implement` 254/500, `explain` 65/300, `reflect` 248/300, `help` 70/150, `seja-setup` 85/300; nenhum acima de 90% do tier. `_internal/plan/standard/SKILL.md` (141 linhas no arquivo) e `_internal/explain/drift/SKILL.md` (156) não são medidos pelo plugin. `Specify: skipped` aparece uma vez no `_internal/plan/standard/SKILL.md`; `--grill` e `--specify` uma vez cada na tabela de argumentos do `/plan`; `--pipeline` uma vez na do `/implement`; `plan_format_version: 2` só no C3 do modo standard.
 
 Regra para o próximo plano que tocar estes arquivos: ler esta tabela, acrescentar a sua linha e manter o detalhe nas referências normativas (`grill-phase.md`, `specify-phase.md`, `plan-from-scenarios.md`, `implement-test-first.md`, `drift-report.md`), com uma linha de ponteiro no `SKILL.md`.
+
+---
+
+## Emendas do item 11 (emenda 000022)
+
+Interruptor da specify (plan-000022; D-011, que substitui a D-009 e revisa a D-005 em dois pontos sem substituí-la). Só acréscimos: nenhuma regra anterior é removida ou renumerada. Onde o texto anterior desta seção de contrato contradiz o que segue (CYC-004, CYC-018, CYC-029, CYC-033, a linha 2 de "Decisões pendentes" e a tabela "Regra de versão"), vale o que segue; as regras anteriores levam a linha **Emendado por** que aponta para cá. A gramática das linhas `Specify: skipped -- <classe>` e `Specify default:` mora em `.claude/references/general/plan-from-scenarios.md` (não aqui, CYC-019). O nome da variável de projeto aparece só entre crases, `SPECIFY_DEFAULT`; nenhuma referência o escreve como variável de convenção a ser expandida, para que um projeto antigo sem a linha continue sem falha nova no `check_conventions.py`.
+
+### CYC-035 -- Três classes de pulo (emenda 000022 ao CYC-004)
+
+A specify é pulada por tipo de tarefa (CYC-004) **ou** pelo interruptor do projeto e pela escolha do plano (CYC-036). O pulo passa a ter três classes, escritas na linha `Specify: skipped -- <classe>[: <motivo>]`:
+
+| Classe | Quando | Motivo |
+|---|---|---|
+| `tarefa sem código` | a grill classificou a tarefa "sem código" (CYC-004, GRL-012), em qualquer valor do interruptor | opcional |
+| `default off` | tarefa com código, projeto com `SPECIFY_DEFAULT` em `off` e plano sem `--with-specify` | opcional |
+| `opt-out` | tarefa com código, projeto com `SPECIFY_DEFAULT` em `on` e plano com `--without-specify "<motivo>"` | **obrigatório**, passa no PFS-007 |
+
+A classificação "sem código" tem precedência: tarefa sem código é `tarefa sem código` em qualquer default. Uma linha `Specify: skipped -- <motivo>` sem classe (todos os planos v2 escritos antes desta emenda) é lida como `tarefa sem código`; nenhum plano existente é reescrito (T3, D-008). Com `default off` ou `opt-out`, a grill faz a entrevista curta (GRL-012 emendada) e não cria pasta. A alternativa que o CYC-004 rejeitava, "pular por escolha livre", fica respondida pela D-011: a escolha não é livre, é registrada com classe e motivo, e H-009 passa a ter duas leituras (por intenção de tratar e por protocolo).
+
+- **Quem decide**: o `/plan` aplica a classe; o projeto escolhe o default; o designer escolhe o desvio por plano, com motivo.
+- **Critério de aceitação**: todo plano v2 com `Specify: skipped` traz uma das três classes ou um motivo sem classe, lido como `tarefa sem código`; nenhum `opt-out` sem motivo é aceito pelo verificador (PFS-002).
+- **Ruptura que pode provocar** (CYC-014): ao citizen, "você escolheu pular a especificação neste plano porque <motivo>" (D-011), que ele pode recusar com "não, eu não escolhi isso"; ao power dev, "meu plano pulado diz agora por que pulou".
+
+### CYC-036 -- O interruptor `SPECIFY_DEFAULT` e as flags por plano (emenda 000022)
+
+O projeto declara `SPECIFY_DEFAULT` (valores `on` e `off`) em `product-design/conventions.md`. Ausente ou vazio vale `on`. O `/seja-setup` pergunta o valor na instalação; o upgrade pergunta quando a linha falta e só grava com resposta explícita; sem resposta, não grava e diz "vale `on` até você responder". O script de upgrade continua sem tocar em `conventions.md` (D-011).
+
+Por plano:
+
+- `/plan --with-specify` liga a fase quando o default é `off`: grill completa e specify, como numa feature com código.
+- `/plan --without-specify "<motivo>"` desliga a fase quando o default é `on`: entrevista curta e `Specify: skipped -- opt-out: <motivo>`.
+- `--with-specify` com `on` e `--without-specify` com `off` não fazem nada e não avisam. `--specify` (fase avulsa, SPC-016, CYC-006) não muda. As combinações recusadas e a mensagem da recusa ficam na skill `/plan`.
+
+Todo plano v2 novo grava o braço do projeto no próprio cabeçalho, na linha `Specify default: on|off` (o valor de `SPECIFY_DEFAULT` no momento em que o plano é escrito). Ausente vale `on`, porque antes desta emenda só existia o `on`. O desvio é sempre registrado: é a classe do pulo (ou o `approved`) lida contra essa linha, nunca contra o `conventions.md` de hoje. O relatório de aderência lista os desvios como achado (plan-000022, `cycle_adherence.py`).
+
+- **Quem decide**: designer (o projeto, no setup e no upgrade; cada plano, pela flag).
+- **Critério de aceitação**: um projeto sem a linha `SPECIFY_DEFAULT` se comporta como `on`; todo plano v2 escrito depois desta emenda tem a linha `Specify default:`; um plano `default off` com `Specify default: on` (ou sem a linha) é recusado pelo verificador (PFS-002).
+- **Ruptura que pode provocar** (CYC-014): ao citizen, "neste projeto a especificação está desligada; para ligá-la neste plano, use `--with-specify`" (D-011); ao power dev, "o setup me perguntou se a especificação em Gherkin é o padrão".
+
+### Emenda 000022 ao CYC-018 e à seção "Compatibilidade"
+
+Em v2 com `Specify: skipped`, a frase "nenhum step tem `Tests:` não-N/A de comportamento observável" vale só para a classe `tarefa sem código`. Com `default off` ou `opt-out`, o step que muda código pode ter `Tests:` não-N/A, desde que tenha `Scenarios: N/A (motivo)` e nenhuma chave de cenário; ele segue o teste-primeiro por `Tests:` do caminho atual do `/implement` (CYC-020), sem cenário. Não há `Feature:` nem pasta. O plano continua v2 nas três classes; v1 continua válido para sempre (D-008). Na tabela "Regra de versão" isso é a linha marcada plan-000022 (D-011).
+
+- **Ruptura que pode provocar** (CYC-014): ao power dev, "meu plano pulado tem teste real e é aceito; antes, com a mesma linha `Specify: skipped`, seria recusado". Registro do power dev.
+
+### Emenda 000022 ao CYC-029
+
+O proxy do skip continua: a grill classifica antes, o verificador confere depois. A recusa do PFS-013 ("disse que não tinha código e o plano tem teste") vale só para a classe `tarefa sem código`. Com `default off` ou `opt-out`, o verificador aceita `Tests:` não-N/A com `Scenarios: N/A (motivo)` e continua recusando chave de cenário e step de `Tests:` não-N/A sem `Scenarios: N/A (motivo)`. Quando a classe contraria a linha `Specify default:` do próprio plano, o verificador emite um achado `info` (PFS-016), que não bloqueia: "leitura por protocolo: este plano conta como desvio do default" (D-011).
+
+- **Ruptura que pode provocar** (CYC-014): ao power dev, "o verificador diz que este plano conta como desvio do default do projeto". Registro do power dev.
+
+### Emenda 000022 à linha 2 de "Decisões pendentes"
+
+A decisão 2 (quando a specify é pulada) deixa de ser só "A: por tipo de tarefa". Ela passa a ser: por tipo de tarefa **ou** pelo interruptor do projeto e pela escolha do plano, sempre com classe e motivo registrados (CYC-035, CYC-036; D-011). A marca `[default; aceito 2026-10-06]` da linha original fica como história; a linha marcada plan-000022 na tabela é a leitura corrente.
+
+- **Ruptura que pode provocar** (CYC-014): ao power dev, "a decisão 2, que eu lia como fechada, foi reaberta pela D-011". Registro do power dev.
+
+### Emenda 000022 ao CYC-033
+
+O ciclo default continua entrando pela tag e agindo só onde há `features/<slug>/intent.md` ou plano v2. Mudam duas frases. Primeira: "não há chave de ligar ou desligar" deixa de valer; a chave existe, é `SPECIFY_DEFAULT` (CYC-036), e não é preset (D-003): um preset é fixado no pin, a chave é escolhida por projeto e desviada por plano com registro. A grill continua nunca pulada (`--no-grill` e `CYCLE_MODE` continuam não existindo), e `--light` continua sendo a saída do ciclo. Segunda: o braço de controle do piloto deixa de ser a tag anterior pinada e passa a ser a **mesma tag com `off`**, porque o controle por tag confunde o Gherkin com tudo o mais que entrou na release (D-011). O controle passa a ter a entrevista curta e plano v2 `default off`; a ameaça à validade é declarada em `drift-control-protocol.md`. O critério de aceitação do CYC-033 continua: num projeto antigo sem a linha `SPECIFY_DEFAULT`, o upgrade não muda nenhum arquivo do projeto sem resposta explícita, e o `run_all_checks.py` devolve o mesmo conjunto de falhas de antes.
+
+- **Ruptura que pode provocar** (CYC-014): ao citizen, "o upgrade me perguntou se a especificação em Gherkin é o padrão neste projeto"; ao pesquisador do piloto, "o braço de controle tem a entrevista curta, então o contraste deixou de ser escada x ciclo de H-008".

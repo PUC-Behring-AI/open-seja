@@ -53,6 +53,44 @@ Expressões regulares (linha inteira, depois de `strip`):
 | specify aprovada | `^Specify:\s*approved \(rev (\d+)\)$` |
 | specify pulada | `^Specify:\s*skipped -- (\S.*)$` |
 
+#### Classe do pulo e braço do plano (emenda 000022)
+
+Gramática das classes de CYC-035 e da linha de CYC-036 (D-011). Ela mora aqui, não no contrato (CYC-019). Exemplos de cabeçalho:
+
+```
+plan_format_version: 2
+Specify default: off
+Specify: skipped -- default off
+```
+
+```
+plan_format_version: 2
+Specify default: on
+Specify: skipped -- opt-out: protótipo de tela que vai ser descartado
+```
+
+**Classe.** Lida no texto que a expressão "specify pulada" captura (o *valor*, depois de `skipped -- `), nesta ordem:
+
+| Classe | Expressão sobre o valor | Motivo |
+|---|---|---|
+| `opt-out` | `^opt-out:\s*(\S.*)$` | obrigatório; precisa passar no PFS-007 (não vazio, sem enchimento, pelo menos 3 palavras) |
+| `default off` | `^default off(?::\s*(\S.*))?$` | opcional |
+| `tarefa sem código` | `^tarefa sem código(?::\s*(\S.*))?$` | opcional |
+| `tarefa sem código` (legado) | qualquer outro valor (o `SKIPPED_RE` atual já casou) | o valor inteiro |
+
+- Valor que começa com `opt-out` ou com `default off`, seguido de fim de linha, `:` ou espaço, e não casa com a expressão da sua classe (por exemplo `opt-out` sem motivo, ou `opt-out: x y`) é erro PFS-002, nunca legado.
+- O legado cobre todos os planos v2 escritos antes desta emenda (`tarefa sem código: ...`, `tarefa sem código (só documentação)`, `tarefa sem codigo: ...` sem acento, `só documentação`): a classe é `tarefa sem código` e o motivo é o valor inteiro. O resultado de hoje desses planos não muda.
+
+**Braço do plano.** Linha opcional do cabeçalho, no máximo uma vez:
+
+| Linha | Expressão |
+|---|---|
+| specify default | `^Specify default:\s*(on\|off)$` |
+
+- Ausente vale `on` (antes desta emenda só existia o `on`). Duas linhas, ou um valor fora de `on` e `off`, é erro PFS-002.
+- A expressão "specify" (`^Specify:`) não casa com `Specify default:`; as duas linhas não colidem.
+- O verificador lê só esta linha, nunca o `conventions.md` do projeto: o braço é o do momento em que o plano foi escrito (CYC-036).
+
 ### Campo `Scenarios:` de cada step
 
 Linha de metadados do step, depois de `Tests:`:
@@ -96,6 +134,8 @@ Depois da grill e da specify, quando existe `Feature: <slug>` com cenários apro
 
 Tarefa sem código: a grill escreve `Specify: skipped -- <motivo>` **uma vez** (passo 2b do `standard/SKILL.md`); o plano é v2 com todos os steps `Tests: N/A`.
 
+Specify desligada numa tarefa com código (emenda 000022, D-011): a grill escreve `Specify: skipped -- default off` ou `Specify: skipped -- opt-out: <motivo>` **uma vez**; o plano é v2, sem `Feature:`, e os steps de código podem ter `Tests:` não-N/A com `Scenarios: N/A (motivo)`. Todo plano v2 novo, nas três classes e em `approved`, tem a linha `Specify default: on|off`.
+
 ## Regras
 
 ### PFS-001 -- Versão
@@ -111,6 +151,7 @@ Em v2, `Specify:` aparece exatamente uma vez, no formato `approved (rev N)` ou `
 
 - **Quem decide**: designer (CYC-004, CYC-005).
 - **Critério de aceitação**: sem `Specify:`, com duas, com formato fora das expressões, `approved` sem `Feature:` ou com pasta inexistente, `skipped` com `Feature:` ou sem motivo disparam PFS-002 (erro, na linha do problema ou na do título); cabeçalho correto não dispara.
+- **Emenda 000022** (D-011; CYC-035, CYC-036): PFS-002 aceita as três classes e o valor sem classe (legado = `tarefa sem código`). Disparam também (erro): `opt-out` sem motivo ou com motivo que não passa no PFS-007; valor que começa com `opt-out` ou `default off` e não casa com a expressão da classe; `Specify default:` duas vezes ou com valor fora de `on` e `off`; `default off` com `Specify default: on` ou sem a linha (incoerência do cabeçalho: ausente vale `on`); `opt-out` com `Specify default: off` (com `off`, `--without-specify` não faz nada, então o plano não pode ter `opt-out`).
 
 ### PFS-003 -- Campo presente
 
@@ -188,6 +229,7 @@ Com `Specify: skipped`, todo step tem `Tests: N/A` e `Scenarios:` ausente ou `N/
 
 - **Quem decide**: o verificador recusa; o designer decide entre a specify e o `Tests: N/A`.
 - **Critério de aceitação**: plano pulado com um step de `Tests:` não-N/A e sem `Scenarios: N/A (motivo)` dispara PFS-013 (erro); com todos `Tests: N/A`, não.
+- **Emenda 000022** (D-011; CYC-029 emendado): o alcance do texto acima, inclusive o achado `info` de step com `Tests:` não-N/A e `Scenarios: N/A (motivo)`, passa a ser só a classe `tarefa sem código` (explícita ou legado). Com `default off` ou `opt-out`, step com `Tests:` não-N/A e `Scenarios: N/A (motivo)` (motivo que passa no PFS-007) é o caso esperado e não dispara nada, nem `info`; step de `Tests:` não-N/A sem `Scenarios: N/A (motivo)`, e step com chaves de cenário, continuam disparando PFS-013 (erro), com a dica "a specify está desligada neste plano: use `Scenarios: N/A (motivo)`".
 
 ### PFS-014 -- Nenhum step com cenário
 
@@ -202,6 +244,13 @@ O verificador **não** altera o plano nem o lock; não mede divergência (D1, D2
 
 - **Quem decide**: designer.
 - **Critério de aceitação**: o diff de uma execução do verificador é vazio (nenhum arquivo muda); `--json` não traz número único de divergência.
+
+### PFS-016 -- Desvio do default (emenda 000022)
+
+Achado `info`, que não bloqueia, quando a classe do plano contraria a linha `Specify default:` do **próprio plano** (ausente = `on`), sem ler o `conventions.md`: `opt-out` com `on` (o projeto liga a specify e o plano a desligou) e `approved` com `off` (o projeto desliga a specify e o plano a ligou com `--with-specify`). Mensagem: "leitura por protocolo: este plano conta como desvio do default". `tarefa sem código` nunca dispara (não é elegível para a medida, D-011); `default off` com `off` e `approved` com `on` seguem o braço e não disparam. As combinações incoerentes (`default off` com `on`, `opt-out` com `off`) são erro PFS-002, não PFS-016.
+
+- **Quem decide**: designer (D-011); o verificador só registra.
+- **Critério de aceitação**: `Specify: skipped -- opt-out: <motivo>` com `Specify default: on` (ou sem a linha) dá um `info` PFS-016 e exit 0; `approved` com `Specify default: off` dá um `info` PFS-016; `default off` com `off`, `approved` com `on` e `tarefa sem código` em qualquer braço não dão PFS-016.
 
 ## Estado `stale`: o que o `/plan` e o `/implement` dizem
 
@@ -220,6 +269,8 @@ Reaprovar os cenários invalida o plano até ele ser atualizado, sem migração 
 | Plano v1 ou sem `plan_format_version` | lê só o cabeçalho; "v1: não verificado" (PFS-001) | 0 |
 | Plano v2 com `Specify: approved` | PFS-002 a PFS-014 | 0 ou 1 |
 | Plano v2 com `Specify: skipped` | PFS-002, PFS-007, PFS-013 (sem lock, sem `check_specify.py`) | 0 ou 1 |
+| Plano v2 com `Specify: skipped -- default off` ou `-- opt-out: <motivo>` (emenda 000022) | PFS-002, PFS-007, PFS-013 no alcance emendado, PFS-016 (`info`) | 0 ou 1 |
+| Plano v2 sem a linha `Specify default:` (todos os de antes da emenda 000022) | lida como `on`; nenhum resultado muda | o de antes |
 | `plan_format_version` desconhecido (ex.: 3) | PFS-001 fatal | 2 |
 | Projeto sem `features/` e sem plano v2 | varredura sem argumentos: "nada a verificar" | 0 |
 | Harness antigo, sem `check_specify.py` | só plano v2 `approved` recebe "validador de cenários não encontrado" (PFS-011) | 2 |
@@ -244,6 +295,14 @@ Uso sem argumentos (o `run_all_checks.py` roda assim, na raiz do projeto): varre
 ```
 
 `matrix` traz, por chave de `index`, os números dos steps que a citam (vazio quando nenhum). Ordem estável: achados por linha e regra, matriz pela ordem do `index`, steps pelo número.
+
+Chaves aditivas (emenda 000022, D-011; o `schema_version` continua `1`):
+
+- `skip_class`: `"tarefa sem código"`, `"default off"` ou `"opt-out"` em plano v2 pulado (o legado sai `"tarefa sem código"`); `null` em `approved` e em v1.
+- `skip_reason`: o motivo em plano v2 pulado (o valor inteiro no legado; `""` quando a classe aceita motivo opcional e ele falta); `null` em `approved` e em v1.
+- `specify_default`: `"on"` ou `"off"` em plano v2 (sem a linha = `"on"`); `null` em v1, que o verificador não lê além da versão.
+
+Consumidores que não conhecem as chaves as ignoram; nenhuma chave existente muda de sentido.
 
 ## Emenda ao texto do plan-000007 (para o designer)
 

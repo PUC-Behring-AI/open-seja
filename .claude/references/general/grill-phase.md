@@ -240,6 +240,8 @@ Enquanto a reaprovação não vem, o D1 conta o REQ retirado como descoberto (pl
 |---|---|---|
 | Feature com código (algum step terá `Tests:` não-N/A) | rodadas até P1 a P6 | `features/<slug>/intent.md` aprovado; plano v2 |
 | Tarefa sem código (docs, pesquisa, harness, configuração) | entrevista **curta**: objetivo, resultado que se vê, o que não faz, critério de pronto; sem REQ IDs, sem pasta | seção `## Intenção` no próprio plano (4 linhas) e a linha `Specify: skipped -- <motivo>` (CYC-004); aprovação no mesmo AskUserQuestion do plano |
+| Tarefa com código e specify desligada (`SPECIFY_DEFAULT` em `off` sem `--with-specify`, ou `--without-specify "<motivo>"`) (emenda 000022, D-011) | entrevista **curta**, como na tarefa sem código; sem REQ IDs, sem pasta | seção `## Intenção` no plano e a linha `Specify: skipped -- default off` ou `Specify: skipped -- opt-out: <motivo>` (CYC-035); os steps de código podem ter `Tests:` com `Scenarios: N/A (motivo)` |
+| Specify desligada no projeto e `/plan --with-specify` (emenda 000022, D-011) | rodadas até P1 a P6, como feature com código | `features/<slug>/intent.md` aprovado; a specify roda; plano v2 `approved` |
 | Brief já detalhado (com requisitos ou critérios) | uma rodada de **confirmação**: o agente reescreve em voz controlada, aponta o que falta em P1 a P5 e pergunta só isso | mesmo `intent.md`; o brief inteiro indexado em `F<n>` |
 | Brief grande demais (mais de `GRILL_MAX_REQS` requisitos prováveis) | propõe quebrar em duas features com slugs distintos antes de entrevistar | dois `features/<slug>/`; o roadmap fica com o orquestrador |
 | Projeto sem `features/` ou plano v1 | a fase não muda o plano v1; quem não usa `features/` segue o fluxo antigo | nenhum; sem aviso de bloqueio |
@@ -258,6 +260,7 @@ A seção `## Intenção` da tarefa sem código tem quatro linhas, em voz contro
 
 - **Quem decide**: o `/plan` classifica a tarefa; o designer pode contestar na revisão do plano.
 - **Critério de aceitação**: um plano sem pasta de feature tem a seção `## Intenção` e a linha `Specify: skipped -- <motivo>`; um plano v1 antigo é lido pelo `/plan` sem mudança.
+- **Emenda 000022** (D-011; CYC-035, CYC-036): a classificação "sem código" vem primeiro e tem precedência: tarefa sem código é `tarefa sem código` em qualquer valor de `SPECIFY_DEFAULT`, e a entrevista curta dela não muda. Só a tarefa com código lê o interruptor e as flags; quando a specify fica desligada, ela recebe a mesma entrevista curta, e a seção `## Intenção` substitui o `intent.md`. A grill continua nunca pulada (CYC-002).
 
 ### GRL-013 -- O que a fase não faz
 
