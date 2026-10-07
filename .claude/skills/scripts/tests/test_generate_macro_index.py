@@ -1,12 +1,11 @@
 """Tests for generate_macro_index.py -- unified artifact index generator."""
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
-import pytest
-
 import generate_macro_index as gen
-
+import pytest
 
 FIXTURE_ROOT = Path(__file__).resolve().parent / "fixtures" / "generate_macro_index"
 
@@ -148,3 +147,161 @@ def test_generate_index_includes_mob_session_and_skips_siblings(tmp_path, monkey
     assert "mob-sessions/mob-session-000001-x.md" in content
     for sibling in ("agenda.json", "timer.jsonl", "state.json"):
         assert sibling not in content
+
+
+# ---------------------------------------------------------------------------
+# plan-000019 Step 3: INDEX.md fully derived; both ID formats
+# ---------------------------------------------------------------------------
+
+NEW_ID = "20261007-k3m9qz"
+
+
+def _setup(tmp_path, monkeypatch):
+    output_dir = tmp_path / "_output"
+    output_dir.mkdir()
+    index_file = output_dir / "INDEX.md"
+    monkeypatch.setattr(gen, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(gen, "OUTPUT_DIR", output_dir)
+    monkeypatch.setattr(gen, "INDEX_FILE", index_file)
+    return output_dir, index_file
+
+
+def _write_birth(output_dir, vid, type_="plan", title="novo-plano"):
+    ids_dir = output_dir / "ids"
+    ids_dir.mkdir(exist_ok=True)
+    record = {
+        "schema_version": 1,
+        "uid": "01K6ZZZZZZZZZZZZZZZZK3M9QZ",
+        "id": vid,
+        "type": type_,
+        "title": title,
+        "author": "abcdef012345",
+        "ts_utc": "2026-10-07T18:53:12.345000+00:00",
+        "origin": None,
+    }
+    (ids_dir / f"{record['uid']}.json").write_text(json.dumps(record), encoding="utf-8")
+
+
+def test_reserved_row_from_ids_dir_when_artifact_missing(tmp_path, monkeypatch):
+    output_dir, index_file = _setup(tmp_path, monkeypatch)
+    _write_birth(output_dir, NEW_ID)
+    gen.generate_index()
+    content = index_file.read_text(encoding="utf-8")
+    assert (
+        f"| 2026-10-07 18:53 UTC | RESERVED | {NEW_ID} | plan: novo-plano | RESERVED |  |"
+        in content
+    )
+
+
+def test_reserved_row_absent_when_artifact_exists(tmp_path, monkeypatch):
+    output_dir, index_file = _setup(tmp_path, monkeypatch)
+    _write_birth(output_dir, NEW_ID)
+    plans = output_dir / "plans"
+    plans.mkdir()
+    (plans / f"plan-{NEW_ID}-novo-plano.md").write_text(
+        f"# Plan {NEW_ID} | FEATURE-O | 2026-10-07 18:53 UTC | novo plano | Review: light\n",
+        encoding="utf-8",
+    )
+    gen.generate_index()
+    content = index_file.read_text(encoding="utf-8")
+    assert "RESERVED" not in content
+    assert f"| Plan | {NEW_ID} | novo plano | OPEN |" in content
+
+
+def test_plan_header_with_new_id_is_plan(tmp_path, monkeypatch):
+    output_dir, _ = _setup(tmp_path, monkeypatch)
+    fp = output_dir / f"plan-{NEW_ID}-t.md"
+    fp.write_text(
+        f"# Plan {NEW_ID} | FEATURE-O | 2026-10-07 10:00 UTC | t | Review: light\n",
+        encoding="utf-8",
+    )
+    entry = gen.extract_artifact(fp)
+    assert entry["type"] == "Plan"
+    assert entry["id"] == NEW_ID
+    assert entry["status"] == "OPEN"
+
+
+@pytest.mark.parametrize(
+    "header,status",
+    [
+        ("# Plan 000015 | FEATURE-O | METACOMM | 2026-10-05 12:55 UTC | wiring | Review: deep", "OPEN"),
+        (f"# Plan {NEW_ID} | FEATURE-O | METACOMM | 2026-10-05 12:55 UTC | wiring | Review: deep", "OPEN"),
+        ("# DONE | 2026-10-06 16:59 UTC | Plan 000007 | FEATURE-O | METACOMM | 2026-10-05 02:00 UTC | wiring", "DONE"),
+        ("# Plan 000007 | DONE | FEATURE-O | METACOMM | 2026-10-05 02:00 UTC | wiring", "DONE"),
+    ],
+)
+def test_plan_header_with_metacomm_is_plan(tmp_path, monkeypatch, header, status):
+    output_dir, _ = _setup(tmp_path, monkeypatch)
+    fp = output_dir / "plan-x.md"
+    fp.write_text(header + "\n", encoding="utf-8")
+    entry = gen.extract_artifact(fp)
+    assert entry["type"] == "Plan"
+    assert entry["id"] in {"000015", "000007", NEW_ID}
+    assert entry["title"] == "wiring"
+    assert entry["status"] == status
+
+
+def test_two_line_done_marker_is_plan(tmp_path, monkeypatch):
+    """/implement marks DONE on its own line above the plan H1."""
+    output_dir, _ = _setup(tmp_path, monkeypatch)
+    fp = output_dir / "plan-000007-x.md"
+    fp.write_text(
+        "# DONE | 2026-10-06 16:59 UTC |\n"
+        "# Plan 000007 | FEATURE-O | METACOMM | 2026-10-05 02:00 UTC | contrato | Review: standard\n",
+        encoding="utf-8",
+    )
+    entry = gen.extract_artifact(fp)
+    assert entry["type"] == "Plan"
+    assert entry["id"] == "000007"
+    assert entry["status"] == "DONE"
+    assert entry["title"] == "contrato"
+
+
+def test_companion_qa_of_new_plan_is_not_plan(tmp_path, monkeypatch):
+    output_dir, _ = _setup(tmp_path, monkeypatch)
+    fp = output_dir / f"plan-{NEW_ID}-qa-x.md"
+    fp.write_text(
+        f"# Plan {NEW_ID} | FEATURE-O | 2026-10-07 10:00 UTC | x | Review: light\n",
+        encoding="utf-8",
+    )
+    entry = gen.extract_artifact(fp)
+    assert entry["type"] == "Plan QA"
+
+
+def test_qa_log_with_new_parent_id(tmp_path, monkeypatch):
+    output_dir, _ = _setup(tmp_path, monkeypatch)
+    fp = output_dir / f"plan-{NEW_ID}-qa-x.md"
+    fp.write_text(
+        f"# QA Log | Plan {NEW_ID} | 2026-10-07 10:00 UTC | x\n", encoding="utf-8"
+    )
+    entry = gen.extract_artifact(fp)
+    assert entry["type"] == "QA Log"
+    assert entry["id"] == NEW_ID
+    fp.write_text(f"# QA Log | Plan {NEW_ID} | sem data\n", encoding="utf-8")
+    entry = gen.extract_artifact(fp)
+    assert entry["type"] == "QA Log"
+    assert entry["id"] == NEW_ID
+
+
+def test_old_reserved_rows_are_not_preserved(tmp_path, monkeypatch):
+    _, index_file = _setup(tmp_path, monkeypatch)
+    index_file.write_text(
+        "| Date | Type | ID | Title | Status | File |\n"
+        "|------|------|----|-------|--------|------|\n"
+        "| 2026-08-27 00:52 UTC | RESERVED | 000003 | qa: o-que-e-o-seja | RESERVED |  |\n",
+        encoding="utf-8",
+    )
+    gen.generate_index()
+    assert "000003" not in index_file.read_text(encoding="utf-8")
+
+
+def test_finalize_is_deprecated_noop(tmp_path, monkeypatch, capsys):
+    _, index_file = _setup(tmp_path, monkeypatch)
+    monkeypatch.setattr("sys.argv", ["generate_macro_index.py", "--finalize", "000007"])
+    try:
+        gen.main()
+    except SystemExit as exc:
+        assert exc.code in (0, None)
+    err = capsys.readouterr().err
+    assert "deprecated" in err
+    assert not index_file.exists()
