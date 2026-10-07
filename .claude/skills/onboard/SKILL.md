@@ -40,7 +40,7 @@ If arguments are missing (and not in batch or --all mode), ask the user interact
 ## Definitions
 
 Output folder: `${ONBOARDING_PLANS_DIR}/<YYYY-MM-DD>` where `<YYYY-MM-DD>` is the current UTC date.
-Filename pattern: `onboarding-<id>-<name-or-role-slug>.md` (6-digit zero-padded ID)
+Filename pattern: `onboarding-<id>-<name-or-role-slug>.md` (artifact ID returned by reserve_id.py)
 
 All plans generated on the same date share the same date folder, regardless of role or level. Plans generated on different dates live in different folders, creating a versioned history of onboarding material.
 
@@ -63,7 +63,7 @@ ${ONBOARDING_PLANS_DIR}/
 
 When both formats are generated, the `.md` and `.html` files share the same ID and slug. Use `--format md` or `--format html` to produce only one of the two.
 
-The sequential ID is globally unique across all artifact types (6-digit, zero-padded). Reserve it by running `python .claude/skills/scripts/reserve_id.py --type onboarding --title '<name-or-role-slug>'` before writing any content.
+The artifact ID returned by reserve_id.py is unique across all artifact types. Reserve it by running `python .claude/skills/scripts/reserve_id.py --type onboarding --title '<name-or-role-slug>'` before writing any content (add `--json` to also get the `uid`).
 
 ## Batch Mode
 
@@ -147,7 +147,7 @@ If a batch spec is incomplete (e.g., missing level), resolve all incomplete spec
 3. **Determine output path:**
 
    Compute the date folder: `${ONBOARDING_PLANS_DIR}/<YYYY-MM-DD>` (current UTC date). Create it if it does not exist.
-   Reserve the next global ID by running `python .claude/skills/scripts/reserve_id.py --type onboarding --title '<name-or-role-slug>'`. Use the returned 6-digit ID.
+   Reserve the next global ID by running `python .claude/skills/scripts/reserve_id.py --type onboarding --title '<name-or-role-slug>'`. Use the returned artifact ID (add `--json` to also get the `uid`).
 
 4. **Launch generator agent:**
 

@@ -38,8 +38,8 @@ Flags never skip a question: every session asks slot, duration and per-phase tim
 > Rationale for design choices: see `SKILL-rationale.md` in this directory.
 
 Output folder: `${MOB_SESSIONS_DIR}` (see product-design/conventions.md)
-Filename pattern: `mob-session-<id>-<truncated short title slug>.md` (6-digit zero-padded ID)
-Header pattern: `# Mob Session <id> | <YYYY-MM-DD HH:MM UTC> | <short title>` (macro-index regex requires this exact shape)
+Filename pattern: `mob-session-<id>-<truncated short title slug>.md` (artifact ID returned by reserve_id.py)
+Header pattern: `# Mob Session <id> | <YYYY-MM-DD HH:MM UTC> | <short title>` (macro-index regex requires this exact shape), followed on the next line by `uid: <ULID>` (value from `reserve_id.py --json` or `${OUTPUT_DIR}/ids/<uid>.json`)
 Sibling files (same folder): `mob-session-<id>-agenda.json`, `mob-session-<id>-timer.jsonl`, `mob-session-<id>-state.json`.
 
 ## Roles
@@ -62,7 +62,7 @@ Sibling files (same folder): `mob-session-<id>-agenda.json`, `mob-session-<id>-t
 
 1. Run `/pre-skill "mob" $ARGUMENTS` to add general instructions to the context window. If `<goal>` is missing, ask for it in plain text.
 
-2. Reserve the ID: `python .claude/skills/scripts/reserve_id.py --type mob-session --title '<short goal>'`. Capture the 6-digit ID.
+2. Reserve the ID: `python .claude/skills/scripts/reserve_id.py --type mob-session --title '<short goal>'`. Capture the returned artifact ID (add `--json` to also get the `uid`).
 
 3. **Research data and participants.** Ask via AskUserQuestion: "Will this session be used as research data?" Options:
    - **No** -- Recommended when the session is ordinary team work or a class exercise not covered by a research protocol. NOT recommended when anything from it (plan, reflection lines, record) may appear in a study.
@@ -111,6 +111,7 @@ Sibling files (same folder): `mob-session-<id>-agenda.json`, `mob-session-<id>-t
 
    ```markdown
    # Mob Session <id> | <YYYY-MM-DD HH:MM UTC> | <short title>
+   uid: <ULID>
 
    **State**: completed | interrupted
 
