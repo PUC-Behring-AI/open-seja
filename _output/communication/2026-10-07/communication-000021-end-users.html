@@ -30,7 +30,7 @@ a { color: #0366d6; }
 
 <h1 id="communication-000021-usr-2026-10-07-0045-utc-end-users">Communication 000021 | USR | 2026-10-07 00:45 UTC | End Users</h1>
 <blockquote>
-<p><strong>Fonte</strong>: <code>_output/plans/plan-000019-upgrade-multi-dev-identidade-por-ulid.md</code>, com o porque em <code>_output/research-logs/research-000018-upgrade-multi-dev-esquema-de-ids.md</code> (recomendacoes revisadas e perguntas de acompanhamento) e na decisao D-010 de <code>product-design/product-design-as-intended.md</code>.</p>
+<p><strong>Fonte</strong>: <code>_output/plans/plan-000019-upgrade-multi-dev-identidade-por-ulid.md</code>, com o porque em <code>_output/research-logs/research-000018-upgrade-multi-dev-esquema-de-ids.md</code> (recomendacoes revisadas e perguntas de acompanhamento) e na decisao D-005 de <code>product-design/product-design-as-intended.md</code>.</p>
 </blockquote>
 <h2 id="para-quem-eu-escrevo">Para quem eu escrevo</h2>
 <p>Eu escrevo para voce que usa o open-seja num repositorio compartilhado com outras pessoas, na mesma branch, e que vive com os artefatos que o harness produz: planos, pesquisas, reflexoes, comunicacoes. Este texto e o espelho do PLAN: o plano contado a quem vai conviver com ele, antes de qualquer codigo. Se alguma parte nao sobreviver a ser contada, e isso que eu quero descobrir agora, e nao depois.</p>
@@ -114,11 +114,12 @@ a { color: #0366d6; }
 <h2 id="como-me-dizer-que-algo-nao-bateu">Como me dizer que algo nao bateu</h2>
 <ul>
 <li><strong>Antes do codigo existir</strong>: a janela e agora, entre este espelho e o <code>/implement</code>. Leve a resposta das perguntas acima para quem vai executar o plano, ou anote no proprio arquivo do plano. Uma resposta "sim" na pergunta 2 ou na 4 muda o plano; na 1 ou na 3, muda a ordem dos planos seguintes.</li>
-<li><strong>Se voce discorda da decisao de fundo</strong> (identidade sem coordenacao, no lugar de um numero global): o lugar e um <code>/design</code>, que reabre a decisao D-010 com a sua razao registrada nas suas palavras. As alternativas que foram rejeitadas, e por que, estao escritas la.</li>
+<li><strong>Se voce discorda da decisao de fundo</strong> (identidade sem coordenacao, no lugar de um numero global): o lugar e um <code>/design</code>, que reabre a decisao D-005 com a sua razao registrada nas suas palavras. As alternativas que foram rejeitadas, e por que, estao escritas la.</li>
 <li><strong>Depois de usar</strong>: <code>/reflect</code> registra o que voce disser, literalmente, sem prescrever mudanca. Se o ID novo atrapalhar na pratica, e por ali que isso vira entrada para o proximo ciclo.</li>
 <li><strong>Se encontrar um comportamento errado</strong> (uma duplicata que eu nao acusei, um marcador que eu recusei sem motivo): abra um <code>/research</code> com o caso concreto. Um verificador que falha em silencio e exatamente o que este plano existe para evitar.</li>
 </ul>
 <p>Eu nao prometo prazo de resposta; prometo que nada do que voce disser nesses canais se perde, e que o plano nao avanca para o codigo enquanto este espelho estiver sendo lido.</p>
 
+<section><h2>Adendo 2026-10-07: renumeração da decisão</h2><p>A decisão de ULID citada neste artefato como <strong>D-005</strong> passou a <strong>D-010</strong> no merge de <code>origin/dev</code> em <code>dev</code> (2026-10-07): duas sessões numeraram D-005 em paralelo. Leia D-005 acima como D-010. O texto acima não foi alterado.</p></section>
 </body>
 </html>

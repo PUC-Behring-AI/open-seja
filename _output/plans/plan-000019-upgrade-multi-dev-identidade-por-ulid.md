@@ -1,18 +1,16 @@
 # Plan 000019 | FEATURE-X | 2026-10-06 23:18 | Upgrade multi-dev: identidade por ULID, gramatica aditiva e verificador | Review: deep
 plan_format_version: 1
-source: research-000018 -- IDs sequenciais locais colidem entre maquinas; D-010 adota ULID sem coordenacao
-
-> **Renumeração (2026-10-07):** a decisão de ULID que este plano implementa era D-005 e passou a D-010 no merge de `origin/dev` em `dev`, porque a sessão do ciclo default numerou D-005 em paralelo. As linhas que citam literalmente o bug do título (`D-005: D-005:`) ficam como aconteceram.
+source: research-000018 -- IDs sequenciais locais colidem entre maquinas; D-005 adota ULID sem coordenacao
 
 ## User brief
 
-> source: research-000018 -- identidade de artefato por ULID sem coordenacao (D-010). Upgrade multi-dev, primeiro recorte (R2-1, R2-2, R2-3): (1) reserve_id.py deixa de ler INDEX.md e passa a gerar um ULID local com registro de nascimento (tipo, titulo, autor, timestamp UTC, origem) em _output/ids/<uid>.json; ID visivel = <YYYYMMDD>-<6 chars do ULID>; nome de arquivo <tipo>-<YYYYMMDD>-<6 chars>-<slug>.md; header "# Plan 20261006-q8zrj4 | ..." mais linha "uid: <ULID>"; INDEX.md 100% derivado (generate_macro_index.py le RESERVED de _output/ids/ e nao preserva mais linhas RESERVED). (2) Gramatica aditiva: regexes do macro-index, check_plan_coverage, human_markers_registry (STATUS, ESTABLISHED, INCORPORATED, CHANGELOG_APPEND), apply_marker --plan, update_cross_refs, step_notes, summarize_artifacts, check_docs, pending.py, generate_decision_digest, verify_commit_scope, reflect scripts, e os textos "6-digit ID" em report-conventions.md, skills e agentes passam a aceitar \d{6} OU \d{8}-[0-9a-z]{6}; artefatos antigos nao sao tocados (T3). (3) check_ledger_ids.py novo, registrado em check_plugin_registry.json e no run_all_checks.py e chamado pelo pre-skill: IDs duplicados em ambos formatos, RESERVED orfaos, pa-/D-NNN duplicados; casos positivo e negativo. Incluir no plano os dois bugs achados ao aplicar D-010: apply_marker CHANGELOG_APPEND com --plan manual gera linha que o proprio regex rejeita (precisa mapear manual -> "-"), e check_human_markers_only --staged acusa a linha "*Source: from ...*" escrita pelo DECISION_APPEND. Fora do escopo deste plano: merge=union e ids secundarios pa-/qa- (R2-5), apelido derivado e resolve_artifact.py (R2-4), seja-mcp.
+> source: research-000018 -- identidade de artefato por ULID sem coordenacao (D-005). Upgrade multi-dev, primeiro recorte (R2-1, R2-2, R2-3): (1) reserve_id.py deixa de ler INDEX.md e passa a gerar um ULID local com registro de nascimento (tipo, titulo, autor, timestamp UTC, origem) em _output/ids/<uid>.json; ID visivel = <YYYYMMDD>-<6 chars do ULID>; nome de arquivo <tipo>-<YYYYMMDD>-<6 chars>-<slug>.md; header "# Plan 20261006-q8zrj4 | ..." mais linha "uid: <ULID>"; INDEX.md 100% derivado (generate_macro_index.py le RESERVED de _output/ids/ e nao preserva mais linhas RESERVED). (2) Gramatica aditiva: regexes do macro-index, check_plan_coverage, human_markers_registry (STATUS, ESTABLISHED, INCORPORATED, CHANGELOG_APPEND), apply_marker --plan, update_cross_refs, step_notes, summarize_artifacts, check_docs, pending.py, generate_decision_digest, verify_commit_scope, reflect scripts, e os textos "6-digit ID" em report-conventions.md, skills e agentes passam a aceitar \d{6} OU \d{8}-[0-9a-z]{6}; artefatos antigos nao sao tocados (T3). (3) check_ledger_ids.py novo, registrado em check_plugin_registry.json e no run_all_checks.py e chamado pelo pre-skill: IDs duplicados em ambos formatos, RESERVED orfaos, pa-/D-NNN duplicados; casos positivo e negativo. Incluir no plano os dois bugs achados ao aplicar D-005: apply_marker CHANGELOG_APPEND com --plan manual gera linha que o proprio regex rejeita (precisa mapear manual -> "-"), e check_human_markers_only --staged acusa a linha "*Source: from ...*" escrita pelo DECISION_APPEND. Fora do escopo deste plano: merge=union e ids secundarios pa-/qa- (R2-5), apelido derivado e resolve_artifact.py (R2-4), seja-mcp.
 
 ## Agent interpretation
 
 **Problem**: `reserve_id.py` aloca IDs por max+1 sobre o `_output/INDEX.md` local ("single-writer assumed"), de modo que dois devs em maquinas diferentes reservam o mesmo numero sem que nada avise, e o INDEX.md carrega estado de alocacao (linhas RESERVED) dentro de um arquivo derivado.
 
-**Approach**: a identidade do artefato passa a ser um ULID gerado localmente no nascimento (D-010), com o registro de nascimento num arquivo por artefato em `_output/ids/`, o que faz o merge entre devs ser trivial e torna o INDEX.md inteiramente derivado. O ID visivel vira `<YYYYMMDD>-<6 chars do ULID>`, que preserva a ordem cronologica na arvore do sistema de arquivos sem contador. A gramatica dos regexes e dos marcadores e **alargada**, nao trocada: toda regex que hoje casa `\d{6}` passa a casar tambem `\d{8}-[0-9a-z]{6}`, por meio de um unico modulo `artifact_id.py` que os demais importam, e os artefatos antigos ficam como estao (constituicao T3). Um verificador novo torna qualquer colisao visivel. A ordem dos steps vai do modulo de ID (sem dependentes) ate os textos das skills, para que cada step seja verificavel com a suite do harness verde.
+**Approach**: a identidade do artefato passa a ser um ULID gerado localmente no nascimento (D-005), com o registro de nascimento num arquivo por artefato em `_output/ids/`, o que faz o merge entre devs ser trivial e torna o INDEX.md inteiramente derivado. O ID visivel vira `<YYYYMMDD>-<6 chars do ULID>`, que preserva a ordem cronologica na arvore do sistema de arquivos sem contador. A gramatica dos regexes e dos marcadores e **alargada**, nao trocada: toda regex que hoje casa `\d{6}` passa a casar tambem `\d{8}-[0-9a-z]{6}`, por meio de um unico modulo `artifact_id.py` que os demais importam, e os artefatos antigos ficam como estao (constituicao T3). Um verificador novo torna qualquer colisao visivel. A ordem dos steps vai do modulo de ID (sem dependentes) ate os textos das skills, para que cada step seja verificavel com a suite do harness verde.
 
 **Alternatives rejected**:
 
@@ -27,8 +25,8 @@ source: research-000018 -- IDs sequenciais locais colidem entre maquinas; D-010 
 - Included: R2-3 -- `check_ledger_ids.py` com casos positivo e negativo, no pre-skill e no `run_all_checks.py` (Steps 7-8).
 - Excluded: R2-4 -- apelido derivado, apelido livre e `resolve_artifact.py`: segundo plano, ligado a retraducao do citizen (D-004).
 - Excluded: R2-5 -- `merge=union`, `spawned:` append-only, ids `pa-`/`qa-` por ULID curto: terceiro plano; independente deste.
-- Excluded: R2-6 -- ja feito: D-010 registrado nesta sessao.
-- Included (bugs achados ao aplicar D-010): `apply_marker` CHANGELOG_APPEND com `--plan manual` e a linha `*Source:*` do DECISION_APPEND fora da allowlist (Step 4).
+- Excluded: R2-6 -- ja feito: D-005 registrado nesta sessao.
+- Included (bugs achados ao aplicar D-005): `apply_marker` CHANGELOG_APPEND com `--plan manual` e a linha `*Source:*` do DECISION_APPEND fora da allowlist (Step 4).
 
 ## Files
 
@@ -160,7 +158,7 @@ Criar `.claude/skills/scripts/check_ledger_ids.py` no padrao de `check_conventio
 - [ ] Done
 
 ### Step 9: Registrar o verificador no registry, no preflight rapido e no pre-skill
-Acrescentar a entrada de `check_ledger_ids.py` em `check_plugin_registry.json`; acrescentar `("ledger-ids", [sys.executable, str(SCRIPTS_DIR / "check_ledger_ids.py")])` em `FAST_CHECKS` de `run_preflight_fast.py` logo apos `plan-coverage`; no `pre-skill/SKILL.md`, estagio pending-check, acrescentar: rodar `python .claude/skills/scripts/check_ledger_ids.py` e imprimir a saida se nao vazia, sem bloquear. No `CHANGELOG.md`, secao `## [Unreleased]`: linha `<!-- bump: minor -->` (D-010 chama a mudanca de MAJOR na gramatica; em v0.x isso e minor), `### Changed` com o formato novo de ID (`YYYYMMDD-xxxxxx` + `uid:`), `_output/ids/`, INDEX.md derivado e o verificador, e um paragrafo **Upgrade**: "devs que compartilham um ledger devem atualizar juntos: um harness anterior continua emitindo IDs legados, indexa artefatos novos como Other, nao os rastreia em coverage/pending e **recusa commitar** marcadores `plan-YYYYMMDD-xxxxxx` em arquivos Human (markers); IDs legados continuam validos para sempre; `migrate_qa_logs_to_parent_dirs.py` e os `backfill_*.py` continuam so para o formato legado". Acrescentar um bullet no resumo do passo 6 de `_internal/seja-setup/upgrade/SKILL.md`: "se `_output/ids/` nao existe, nada a migrar; IDs legados ficam".
+Acrescentar a entrada de `check_ledger_ids.py` em `check_plugin_registry.json`; acrescentar `("ledger-ids", [sys.executable, str(SCRIPTS_DIR / "check_ledger_ids.py")])` em `FAST_CHECKS` de `run_preflight_fast.py` logo apos `plan-coverage`; no `pre-skill/SKILL.md`, estagio pending-check, acrescentar: rodar `python .claude/skills/scripts/check_ledger_ids.py` e imprimir a saida se nao vazia, sem bloquear. No `CHANGELOG.md`, secao `## [Unreleased]`: linha `<!-- bump: minor -->` (D-005 chama a mudanca de MAJOR na gramatica; em v0.x isso e minor), `### Changed` com o formato novo de ID (`YYYYMMDD-xxxxxx` + `uid:`), `_output/ids/`, INDEX.md derivado e o verificador, e um paragrafo **Upgrade**: "devs que compartilham um ledger devem atualizar juntos: um harness anterior continua emitindo IDs legados, indexa artefatos novos como Other, nao os rastreia em coverage/pending e **recusa commitar** marcadores `plan-YYYYMMDD-xxxxxx` em arquivos Human (markers); IDs legados continuam validos para sempre; `migrate_qa_logs_to_parent_dirs.py` e os `backfill_*.py` continuam so para o formato legado". Acrescentar um bullet no resumo do passo 6 de `_internal/seja-setup/upgrade/SKILL.md`: "se `_output/ids/` nao existe, nada a migrar; IDs legados ficam".
 - **Files**: `.claude/skills/scripts/check_plugin_registry.json` (modify), `.claude/skills/scripts/run_preflight_fast.py` (modify), `.claude/skills/pre-skill/SKILL.md` (modify), `CHANGELOG.md` (modify), `.claude/skills/_internal/seja-setup/upgrade/SKILL.md` (modify)
 - **References**: `product-design/standards.md § Testing > 4`
 - **Depends on**: Step 8
@@ -216,7 +214,7 @@ Mesma edicao em `qa-log/SKILL.md` (:33, :51) e nos agentes `architecture-explain
 
 Review depth overridden: auto=deep (X-scope, >8 files), floor=light, flag=none, effective=deep.
 
-`check_plan_coverage.py --mode advisory`: 0/40 requisitos rastreados. Nenhum REQ-* do `product-design-as-intended.md` descreve identidade de artefato ou o ledger; este plano implementa D-010 (decisao), nao um REQ. Sem `Traces:` nos steps por isso.
+`check_plan_coverage.py --mode advisory`: 0/40 requisitos rastreados. Nenhum REQ-* do `product-design-as-intended.md` descreve identidade de artefato ou o ledger; este plano implementa D-005 (decisao), nao um REQ. Sem `Traces:` nos steps por isso.
 
 ## Outcomes
 
@@ -244,7 +242,7 @@ false
 
 - Todos os steps com Files / References / Interface / Verify / Tests / checkbox; dependencias fluem para a frente.
 - Antes da emenda, os Steps 6, 10 e 11 descreviam edicoes em arquivos fora das suas listas (Step 6 nomeava 7 scripts; Step 11, 8 arquivos); um caminho inexistente (`post-skill/backfill_decision_digest.py`; o script vive em `scripts/`). Corrigido na emenda (split 6/7 e 12/13; renumeracao).
-- Cobertura: o plano implementa D-010, sem REQ rastreavel; coerente com o aviso do `check_plan_coverage --mode advisory`.
+- Cobertura: o plano implementa D-005, sem REQ rastreavel; coerente com o aviso do `check_plan_coverage --mode advisory`.
 
 ### Phase 1 -- Perspective Scan (2026-10-06 23:40 UTC)
 
@@ -267,10 +265,10 @@ false
 
 **Concern:** nome de pessoa persistido no ledger; `id` nao e funcao pura de `uid`.
 **Step ref:** Step 1, Step 2.
-**Files read:** `product-design/constitution.md` (C2, S3), D-010, `_output/pending.jsonl`, `_output/briefs.md`, `tools/publish-manifest.txt`.
-**Finding:** D-010 diz que o registro de nascimento carrega "autor", e o Step 1 o resolvia de `git config user.name`. C2 proibe nome de pessoa em `_output/`; hoje nenhum arquivo de `_output/` carrega o nome do usuario git, e este plano introduziria o primeiro. `_output/**` fica fora de `main` pelo manifesto, mas `dev` e visivel a organizacao, exatamente o que C2 protege. `visible_id(ulid, when=None)` tomava a data de um relogio externo enquanto `ts_utc` vem do registro: dois relogios podem discordar na virada de dia UTC, e nada permitiria ao verificador conferir `id == f(uid)`. Crockford base32 (0-9, A-Z sem I/L/O/U) em minusculas cabe inteira em `[0-9a-z]`; os 6 ultimos chars sao os 30 bits baixos da parte aleatoria, logo P(colisao num dia) ~ n^2 / 2^31 (n=100 -> 5e-6; n=1000 -> 5e-4), adequado com o verificador.
+**Files read:** `product-design/constitution.md` (C2, S3), D-005, `_output/pending.jsonl`, `_output/briefs.md`, `tools/publish-manifest.txt`.
+**Finding:** D-005 diz que o registro de nascimento carrega "autor", e o Step 1 o resolvia de `git config user.name`. C2 proibe nome de pessoa em `_output/`; hoje nenhum arquivo de `_output/` carrega o nome do usuario git, e este plano introduziria o primeiro. `_output/**` fica fora de `main` pelo manifesto, mas `dev` e visivel a organizacao, exatamente o que C2 protege. `visible_id(ulid, when=None)` tomava a data de um relogio externo enquanto `ts_utc` vem do registro: dois relogios podem discordar na virada de dia UTC, e nada permitiria ao verificador conferir `id == f(uid)`. Crockford base32 (0-9, A-Z sem I/L/O/U) em minusculas cabe inteira em `[0-9a-z]`; os 6 ultimos chars sao os 30 bits baixos da parte aleatoria, logo P(colisao num dia) ~ n^2 / 2^31 (n=100 -> 5e-6; n=1000 -> 5e-4), adequado com o verificador.
 **Recommendation:** (a) `author` = token pseudonimo `sha256(git config user.email)[:12]` (fallback `sha256($USER)`), sobrescrevivel por `--author`; nunca `user.name`. (b) `visible_id(ulid)` deriva `YYYYMMDD` do timestamp do ULID; `check_ledger_ids` ganha a verificacao (6) `id == visible_id(uid)`.
-**Resolution:** Plano emendado -- Steps 1, 2 e 8. Nota ao designer: isto estreita o "autor" literal de D-010; a constituicao prevalece; registrar o estreitamento via `/design` se desejar.
+**Resolution:** Plano emendado -- Steps 1, 2 e 8. Nota ao designer: isto estreita o "autor" literal de D-005; a constituicao prevalece; registrar o estreitamento via `/design` se desejar.
 
 ### Phase 2 -- Deep-dive: SEC (iteration 1, deep-dive 2/6)
 
@@ -319,7 +317,7 @@ false
 
 ### Conflict Check (iteration 1)
 
-Um conflito: DATA/SEC (constituicao C2, sem nome de pessoa em `_output/`) versus a redacao literal de D-010 ("registro de nascimento: ... autor"). Resolvido pela regra default (SEC prevalece): `author` vira token pseudonimo com `--author` explicito; o designer pode re-decidir via `/design`. Sem outros conflitos: os splits de TEST e DX acrescentam steps mantendo cada um em <= 5 arquivos; a nota de CHANGELOG (COMPAT) e as linhas do harness-reference (ARCH) sao aditivas.
+Um conflito: DATA/SEC (constituicao C2, sem nome de pessoa em `_output/`) versus a redacao literal de D-005 ("registro de nascimento: ... autor"). Resolvido pela regra default (SEC prevalece): `author` vira token pseudonimo com `--author` explicito; o designer pode re-decidir via `/design`. Sem outros conflitos: os splits de TEST e DX acrescentam steps mantendo cada um em <= 5 arquivos; a nota de CHANGELOG (COMPAT) e as linhas do harness-reference (ARCH) sao aditivas.
 
 ### Iteration 2 -- re-evaluation (sem deep-dives novos; orcamento esgotado)
 
@@ -347,6 +345,10 @@ Um conflito: DATA/SEC (constituicao C2, sem nome de pessoa em `_output/`) versus
 
 **Change summary**: (A1) `author` pseudonimo e `id` derivado do timestamp do ULID (C2, DATA); (A2) allowlist `*Source:*` exata, validacao de `--origin`, strip do prefixo D-NNN, substring da mensagem de erro mantida (SEC/TEST); (A3) regexes de QA `:282/:296/:310`, `--finalize` depreciado, linhas no harness-reference (ARCH); (A4) Step 6 original dividido em 6 e 7 com Files corrigidas (TEST); (A5) regra de registro de criacao para `pa-`, comportamento sem `OUTPUT_DIR`, verificacao (6) (COMPAT/OPS/DATA); (A6) CHANGELOG com nota de upgrade e bullet no upgrade do seja-setup (COMPAT); (A7) Step 11 original dividido em 12 e 13, Step 10 original enxugado, tolerancia a METACOMM nos Steps 5/6 (DX). Steps renumerados 1-13 (6b -> 7, 11b -> 13; os demais deslocados).
 
-**Rationale**: a constituicao C2 e as regras de seguranca prevalecem sobre a redacao literal de D-010; o preflight do harness (`harness-reference-coverage`, `check_human_markers_only`) falharia ou seria afrouxado; tres steps excediam suas Files como escritos.
+**Rationale**: a constituicao C2 e as regras de seguranca prevalecem sobre a redacao literal de D-005; o preflight do harness (`harness-reference-coverage`, `check_human_markers_only`) falharia ou seria afrouxado; tres steps excediam suas Files como escritos.
 
 **Asserts que ficam vermelhos para o implementador**: `test_apply_marker.py:641` se a mensagem for reescrita (o Step 4 emendado mantem a substring); `test_check_human_markers_only.py:227` so se a allowlist for mais larga que a forma exata; preflight `harness-reference-coverage` ate as linhas de `artifact_id.py` e `check_ledger_ids.py` entrarem; `check_version_changelog_sync.py` se o bump do CHANGELOG discordar do `.seja-version`; `check_ledger_ids.py` neste repo antes do Step 3 (linhas RESERVED orfas).
+
+## Adendo 2026-10-07 -- renumeração da decisão
+
+A decisão de ULID citada neste artefato como **D-005** passou a **D-010** no merge de `origin/dev` em `dev` (2026-10-07, commit `8f8a601`): duas sessões de 2026-10-06 numeraram D-005 em paralelo, e a D-005 do ciclo default (grill e specify como fases do `/plan`) ficou com o número. Leia D-005 acima como D-010. O texto acima não foi alterado (T3).

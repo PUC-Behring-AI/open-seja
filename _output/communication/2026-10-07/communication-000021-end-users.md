@@ -1,6 +1,6 @@
 # Communication 000021 | USR | 2026-10-07 00:45 UTC | End Users
 
-> **Fonte**: `_output/plans/plan-000019-upgrade-multi-dev-identidade-por-ulid.md`, com o porque em `_output/research-logs/research-000018-upgrade-multi-dev-esquema-de-ids.md` (recomendacoes revisadas e perguntas de acompanhamento) e na decisao D-010 de `product-design/product-design-as-intended.md`.
+> **Fonte**: `_output/plans/plan-000019-upgrade-multi-dev-identidade-por-ulid.md`, com o porque em `_output/research-logs/research-000018-upgrade-multi-dev-esquema-de-ids.md` (recomendacoes revisadas e perguntas de acompanhamento) e na decisao D-005 de `product-design/product-design-as-intended.md`.
 
 ## Para quem eu escrevo
 
@@ -77,8 +77,12 @@ A resposta honesta a qualquer uma destas perguntas pode mandar o plano de volta 
 ## Como me dizer que algo nao bateu
 
 - **Antes do codigo existir**: a janela e agora, entre este espelho e o `/implement`. Leve a resposta das perguntas acima para quem vai executar o plano, ou anote no proprio arquivo do plano. Uma resposta "sim" na pergunta 2 ou na 4 muda o plano; na 1 ou na 3, muda a ordem dos planos seguintes.
-- **Se voce discorda da decisao de fundo** (identidade sem coordenacao, no lugar de um numero global): o lugar e um `/design`, que reabre a decisao D-010 com a sua razao registrada nas suas palavras. As alternativas que foram rejeitadas, e por que, estao escritas la.
+- **Se voce discorda da decisao de fundo** (identidade sem coordenacao, no lugar de um numero global): o lugar e um `/design`, que reabre a decisao D-005 com a sua razao registrada nas suas palavras. As alternativas que foram rejeitadas, e por que, estao escritas la.
 - **Depois de usar**: `/reflect` registra o que voce disser, literalmente, sem prescrever mudanca. Se o ID novo atrapalhar na pratica, e por ali que isso vira entrada para o proximo ciclo.
 - **Se encontrar um comportamento errado** (uma duplicata que eu nao acusei, um marcador que eu recusei sem motivo): abra um `/research` com o caso concreto. Um verificador que falha em silencio e exatamente o que este plano existe para evitar.
 
 Eu nao prometo prazo de resposta; prometo que nada do que voce disser nesses canais se perde, e que o plano nao avanca para o codigo enquanto este espelho estiver sendo lido.
+
+## Adendo 2026-10-07 -- renumeração da decisão
+
+A decisão de ULID citada neste artefato como **D-005** passou a **D-010** no merge de `origin/dev` em `dev` (2026-10-07, commit `8f8a601`): duas sessões de 2026-10-06 numeraram D-005 em paralelo, e a D-005 do ciclo default (grill e specify como fases do `/plan`) ficou com o número. Leia D-005 acima como D-010. O texto acima não foi alterado (T3).
