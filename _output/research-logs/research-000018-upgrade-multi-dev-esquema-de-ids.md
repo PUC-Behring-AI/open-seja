@@ -1,6 +1,6 @@
 # Research 000018 | FEATURE-X | 2026-10-06 22:47 | Upgrade multi-dev: esquema de IDs e pontos de colisao
 source: reflection-000017 -- IDs computados localmente colidem entre maquinas; sha ou inteiro?
-spawned: plan-000019
+spawned: plan-000019, plan-000019
 tags: multi-dev, artifact-ids, ledger, architecture, dx, data-integrity, seja-mcp
 
 ## User brief

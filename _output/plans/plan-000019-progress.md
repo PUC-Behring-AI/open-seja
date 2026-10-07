@@ -116,3 +116,4 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 - A2: `reserve_id --author` validado contra `^(?:[0-9a-f]{12}|unknown)\Z`; texto livre sai com 2 sem ecoar o valor (C2). Help atualizado; o teste antigo que usava `--author dev-a` passou a usar token valido.
 - check_docs: citacoes privadas removidas (reserve_id: `research-000018` -> placeholders; update_cross_refs: `plan-20261007-k3m9qz` -> `plan-YYYYMMDD-xxxxxx`); 670 avisos, igual ao pre-plano.
 - Verificacao: suite 1810 passed, 4 failed pre-existentes em test_summarize_artifacts.py; check_ledger_ids no repo exit 0; run_all_checks 20 PASS / 14 FAIL (inalterado); ruff limpo nos arquivos tocados.
+- drift: not-measured

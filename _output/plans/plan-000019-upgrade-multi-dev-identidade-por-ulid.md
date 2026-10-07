@@ -1,3 +1,4 @@
+# DONE | 2026-10-07 19:55 UTC |
 # Plan 000019 | FEATURE-X | 2026-10-06 23:18 | Upgrade multi-dev: identidade por ULID, gramatica aditiva e verificador | Review: deep
 plan_format_version: 1
 source: research-000018 -- IDs sequenciais locais colidem entre maquinas; D-005 adota ULID sem coordenacao
@@ -84,7 +85,7 @@ Criar `.claude/skills/scripts/artifact_id.py` com: `new_ulid() -> str` (26 chars
 - **Interface**: exports `new_ulid() -> str`, `ulid_timestamp(ulid: str) -> datetime`, `visible_id(ulid: str) -> str`, `default_author() -> str`, `ARTIFACT_ID: str`, `ARTIFACT_ID_RE: re.Pattern`, `normalize_id(raw: str) -> str`, `is_legacy_id(s) -> bool`, `is_ulid_id(s) -> bool`, `birth_record(type_: str, title: str, author: str | None, origin: str | None) -> dict`
 - **Verify**: `pytest .claude/skills/scripts/tests/test_artifact_id.py` verde; `ruff check .claude/skills/scripts/artifact_id.py` limpo; `python3 .claude/skills/critique/check_docs.py --plugins harness-reference-coverage --filter warning` sem achado novo
 - **Tests**: quando `new_ulid()` e chamado 10.000 vezes, todos tem 26 chars, sao distintos e dois ULIDs gerados com 2 ms de intervalo ordenam lexicograficamente; quando `visible_id` recebe um ULID cujo timestamp e 2026-10-07T23:59:59Z, retorna `20261007-` + 6 ultimos chars em minusculas, e `ulid_timestamp` devolve esse instante; quando `normalize_id("7")` retorna `000007` e `normalize_id("20261007-k3m9qz")` retorna o valor inalterado; `ARTIFACT_ID_RE` casa `000007` e `20261007-k3m9qz` e nao casa `0007`, `20261007-K3M9QZ` nem `20261007-k3m9`; `birth_record` devolve `schema_version`, `uid`, `id == visible_id(uid)` e `ts_utc == ulid_timestamp(uid)`; `default_author()` nunca contem o valor de `git config user.name` (monkeypatch) e tem 12 hex chars.
-- [ ] Done
+- [x] Done
 
 ### Step 2: Reescrever reserve_id.py para gerar ULID e gravar o registro de nascimento
 Reescrever `.claude/skills/scripts/reserve_id.py` para nao ler nem escrever o INDEX.md. Fluxo: `reserve(type, title, origin=None, author=None, dry_run=False)` chama `artifact_id.birth_record`, escreve `_output/ids/<uid>.json` (criando o diretorio; tempfile + `os.replace`), e imprime em stdout **somente o ID visivel** (compatibilidade com todas as skills que capturam a saida); imprime `uid: <ULID>` em stderr (informativo); com `--json` imprime o registro completo em stdout. Manter `--type`, `--title`, `--dry-run`, `--output-dir`; acrescentar `--origin <tipo>-<id>` (validado por `^[a-z][a-z-]*-` + `ARTIFACT_ID` + `$`; valor invalido sai com 2), `--author <handle>` (opcional; default `artifact_id.default_author()`) e `--json`. Atualizar `# designer:` e docstring: remover "single-writer assumed"; dizer que dois devs nunca colidem porque o ID nasce de um ULID local. Remover `_extract_max_id`, `_format_id`, `_ID_RE` e `INDEX_HEADER` (nenhum modulo ou teste os importa; grep em `.claude/`). Atualizar a linha do `reserve_id.py` em `docs/reference/harness-reference.md` (:149) com a nova primeira linha da docstring.
@@ -95,7 +96,7 @@ Reescrever `.claude/skills/scripts/reserve_id.py` para nao ler nem escrever o IN
 - **Verify**: `pytest .claude/skills/scripts/tests/test_reserve_id.py` verde; `reserve_id.py --type plan --title t --dry-run --output-dir <tmp>` nao cria arquivo e imprime um ID no formato novo
 - **Tests**: quando dois processos reservam em copias identicas de `_output` em duas `tmp_path`, IDs e uids sao distintos; quando a reserva e feita, existe exatamente um `ids/<uid>.json` com `schema_version`, `type`, `title`, `author`, `ts_utc` e o INDEX.md nao e modificado (mtime e conteudo iguais); quando `--dry-run`, nenhum arquivo e criado e stdout tem o ID; quando `--json`, stdout e um JSON com `id` e `uid`; quando `--origin foo` (sem ID), exit 2 e nenhum arquivo; quando `--author` nao e passado, o registro nao contem `git config user.name`.
 - **Docs**: `docs/reference/harness-reference.md` linha do `reserve_id.py`
-- [ ] Done
+- [x] Done
 
 ### Step 3: INDEX.md inteiramente derivado: RESERVED vem de _output/ids/, e o extrator aceita os dois formatos
 Em `generate_macro_index.py`: (a) substituir `_extract_reserved_rows()` (:585-620) e o merge-back (:649-653) por `_reserved_from_ids_dir()` que le `_output/ids/*.json` e produz `{date: ts_utc em YYYY-MM-DD HH:MM UTC, type: RESERVED, id, title: "<type>: <title>", status: RESERVED, file: ""}` para cada registro cujo `id` nao esta em `scanned_ids`; nao preservar mais linhas do INDEX.md existente; (b) em cada regex de H1 (:90-218) trocar `(\d+)` do campo ID por `(\d+|\d{8}-[0-9a-z]{6})` (ou `artifact_id.ARTIFACT_ID` com grupo externo) e cada `.zfill(6)` por `artifact_id.normalize_id`; nos tres regexes de plano tolerar o campo opcional `METACOMM |` apos o prefixo-scope; (c) nos regexes de QA (:157, :163, :385-386) aceitar o ID novo no pipe do pai e no `parent_ref`; (d) **nas deteccoes de QA companheiro `^plan-\d{6}-qa-` em :282, :296 e :310, usar `^plan-` + `ARTIFACT_ID` + `-qa-`** (senao um QA log de plano novo e indexado como Plan e contado como duplicado pelo Step 7); (e) `finalize_reserved`/`--finalize` (sem chamadores em `.claude/`) viram no-op: imprimem "deprecated: INDEX.md is derived; just regenerate" em stderr e saem 0. Rodar `generate_macro_index.py` neste repo e conferir que as linhas RESERVED 000002, 000003, 000007, 000009, 000015 e 000019 desaparecem e que os planos com METACOMM sao indexados como Plan com ID; **registrar na nota do step as linhas RESERVED removidas** (proveniencia; INDEX.md e arquivo regenerado, T3 nao se aplica a linhas de alocacao).
@@ -105,7 +106,7 @@ Em `generate_macro_index.py`: (a) substituir `_extract_reserved_rows()` (:585-62
 - **Interface**: N/A (`--finalize` mantido como no-op depreciado)
 - **Verify**: `pytest .claude/skills/scripts/tests/test_generate_macro_index.py` verde; `python3 .claude/skills/scripts/generate_macro_index.py` neste repo produz INDEX.md sem linhas RESERVED e com plan-000007/000009/000015 indexados como Plan com ID
 - **Tests**: quando `_output/ids/` tem um registro sem artefato, o INDEX.md tem uma linha RESERVED com aquele ID e titulo; quando o artefato existe, a linha nao aparece; quando um plano tem header `# Plan 20261007-k3m9qz | FEATURE-O | <data> | t | Review: light`, e indexado como Plan com ID `20261007-k3m9qz`; quando o header tem `| METACOMM |` apos o prefixo, e indexado com ID e nao como Other; quando existe `plan-20261007-k3m9qz-qa-x.md`, e indexado como QA Log do plano e nao como Plan; quando um INDEX.md anterior contem linhas RESERVED, elas nao sao preservadas; quando `--finalize 000007` e chamado, exit 0 com aviso em stderr.
-- [ ] Done
+- [x] Done
 
 ### Step 4: Gramatica dos marcadores e apply_marker: dois formatos de plano, manual -> "-", linha Source permitida
 Em `human_markers_registry.py`: definir `_PLAN_REF = r"plan-(?:\d{6}|\d{8}-[0-9a-z]{6})"` (ou importar `artifact_id.ARTIFACT_ID`) e usa-lo em STATUS (:81), ESTABLISHED (:105), INCORPORATED (:112) e CHANGELOG_APPEND (:120, mantendo `|-`); em DECISION_APPEND (:134) acrescentar **exatamente** a alternativa `\*Source: [^*<>\n]{1,200} \(\d{4}-\d{2}-\d{2}\)\*` (a forma que `apply_marker.py:265` escreve; nao usar `.{1,200}`, que abriria um canal de prosa). Em `apply_marker.py`: o normalizador de `--plan` (:425-437) aceita `\d{8}-[0-9a-z]{6}` (auto-prefixa `plan-`) e `plan-<novo>`; a mensagem de erro **mantem a substring** `--plan must be 'plan-NNNNNN'` (asserida em `test_apply_marker.py:641`) e acrescenta o formato novo; em `_apply_changelog` (:310-328) mapear `manual` -> `-` ao montar a linha (so para CHANGELOG_APPEND; STATUS continua aceitando `manual`); em `_apply_decision` (:230-240), se a primeira linha de `--value` comecar com `D-\d{3}:` ou `D-NEXT:`, remover esse prefixo antes de montar o heading (evita "D-005: D-005:").
@@ -115,7 +116,7 @@ Em `human_markers_registry.py`: definir `_PLAN_REF = r"plan-(?:\d{6}|\d{8}-[0-9a
 - **Interface**: N/A
 - **Verify**: os tres arquivos de teste verdes mais `tests/test_check_changelog_append_only.py`; `check_human_markers_only.py` aceita um diff que adiciona uma entrada D-NNN completa com a linha `*Source: ...*`
 - **Tests**: quando um marcador STATUS traz `plan-20261007-k3m9qz`, o regex casa; quando traz `plan-0007`, nao casa; quando `apply_marker --marker CHANGELOG_APPEND --plan manual` e invocado, a linha tem `| - |` e passa pelo regex; quando `--plan 20261007-k3m9qz`, e normalizado para `plan-20261007-k3m9qz`; quando `--plan invalid`, exit 1 e stderr contem `--plan must be 'plan-NNNNNN'`; quando `check_human_markers_only --staged` ve `+*Source: from research-000018 (2026-10-06)*` dentro de uma entrada D-NNN, retorna 0; quando ve `+*Source: texto livre sem data*`, retorna 1; quando o valor de DECISION_APPEND comeca com `D-NEXT: `, o heading contem o prefixo uma unica vez.
-- [ ] Done
+- [x] Done
 
 ### Step 5: Alargar os parsers de ID do nucleo (coverage, cross-refs, step notes, summarize, pending)
 Trocar cada regex local por `artifact_id.ARTIFACT_ID` (para scripts fora de `scripts/`, usar o mesmo `sys.path.insert` que `check_plan_coverage.py` ja usa para `project_config`): `check_plan_coverage.py:216`; `update_cross_refs.py` (:42 `_SOURCE_RE`; :48 `_INDEX_ROW_RE`; :72-80 `_artifact_token_from_path` usa `ARTIFACT_ID_RE` em vez de `isdigit()`; :93/:100 `zfill` -> `normalize_id`); `step_notes.py:102` (`_norm_id` -> `normalize_id`; glob funciona com os dois); `summarize_artifacts.py:29-30` (`(\d{6})` -> `ARTIFACT_ID`, e tolerar o campo opcional `METACOMM |` apos o prefixo), :82-90 (busca por substring continua valida), :209; `pending.py:58-59`. Nao mudar `pa-` (:50; R2-5). **Deixar como estao** (legado ou nao-artefato, registrados aqui para o implementador nao os perseguir): `backfill_open_plans.py:59-67`, `backfill_qa_dates.py:148`, `seja-setup/migrate_qa_logs_to_parent_dirs.py:44`, `_internal/seja-setup/upgrade/SKILL.md:59`, `conversation_trace.py:58`, `generate_reflection_report.py:500` (`zfill(6)` e no-op para o ID novo).
@@ -125,7 +126,7 @@ Trocar cada regex local por `artifact_id.ARTIFACT_ID` (para scripts fora de `scr
 - **Interface**: N/A
 - **Verify**: `pytest .claude/skills/scripts/tests/test_check_plan_coverage.py tests/test_pending.py tests/test_pending_integration.py tests/test_step_notes.py tests/test_summarize_artifacts.py` verdes; testes novos (Step 7) verdes
 - **Tests**: cobertos no Step 7
-- [ ] Done
+- [x] Done
 
 ### Step 6: Alargamento dos scripts perifericos
 `check_docs.py` (:1587-1589, :1686, :2170-2173: citacoes `plan-`, `advisory-`, `research-` aceitam o ID novo); `generate_decision_digest.py` (:58, :64 `(\d+)` -> `ARTIFACT_ID`; :116 `advisory-(\d+)` -> `advisory-` + `ARTIFACT_ID`); `generate_pending_roadmap.py` (:44, :52, :55; tolerar `METACOMM |` opcional); `reflect_stuck_loops.py:90` (primeiro token que casa `ARTIFACT_ID` na linha do brief); `reflect_deep_scope.py:113` (`PLAN\s*\|\s*(\d+)` -> `ARTIFACT_ID`, senao o ID novo e truncado em `20261007`). `backfill_decision_digest.py` (em `.claude/skills/scripts/`, nao em `post-skill/`) fica fora: migracao unica de advisory logs legados, nunca recebe ID novo. `verify_commit_scope.py:111` nao muda (glob funciona).
@@ -135,7 +136,7 @@ Trocar cada regex local por `artifact_id.ARTIFACT_ID` (para scripts fora de `scr
 - **Interface**: N/A
 - **Verify**: `pytest .claude/skills/scripts/tests/test_check_docs.py tests/test_generate_pending_roadmap.py tests/test_reflect_primitives.py tests/test_post_skill_scripts.py` verdes
 - **Tests**: cobertos no Step 7
-- [ ] Done
+- [x] Done
 
 ### Step 7: Testes dos parsers alargados (nucleo e perifericos)
 Criar `tests/test_id_grammar.py` cobrindo os parsers dos Steps 5 e 6 e acrescentar casos aos testes existentes de `step_notes`, `summarize_artifacts` e `generate_pending_roadmap`.
@@ -145,7 +146,7 @@ Criar `tests/test_id_grammar.py` cobrindo os parsers dos Steps 5 e 6 e acrescent
 - **Interface**: N/A
 - **Verify**: `pytest .claude/skills/scripts/tests/` verde; `python3 .claude/skills/scripts/run_all_checks.py` sem falha nova em relacao ao baseline (constituicao Q1)
 - **Tests**: para cada parser (coverage, cross_refs, step_notes, summarize, pending, check_docs, decision_digest, pending_roadmap, stuck_loops, deep_scope): quando a entrada traz `plan-000007`, o resultado e o mesmo de antes; quando traz `plan-20261007-k3m9qz`, o ID e extraido inteiro; quando traz `plan-0007`, nao casa. Para `update_cross_refs`: quando um artefato novo tem `source: plan-20261007-k3m9qz -- motivo`, a linha `spawned:` do plano de origem recebe o token do artefato novo. Para `summarize_artifacts` e `generate_pending_roadmap`: um header `# Plan 000007 | FEATURE-O | METACOMM | 2026-10-05 02:00 UTC | t | Review: standard` e parseado com prefixo `FEATURE-O`, data e titulo corretos. Para `pending`: `_plan_file_present("plan-20261007-k3m9qz")` e False quando nao ha arquivo e True quando `plan-20261007-k3m9qz-x.md` existe.
-- [ ] Done
+- [x] Done
 
 ### Step 8: Criar check_ledger_ids.py (IDs duplicados, registros orfaos, pa-/D-NNN duplicados)
 Criar `.claude/skills/scripts/check_ledger_ids.py` no padrao de `check_conventions.py` (bloco `# designer:`, docstring com exit codes, `CHECK_PLUGIN_MANIFEST` stack any/any, scope `ledger`, critical true). Verificacoes: (1) **ID duplicado**: percorrer `_output/**/*.md` (exceto companheiros `<tipo>-<id>-qa-*.md` e `-progress.md`), extrair o ID do nome com `ARTIFACT_ID` e acusar qualquer ID usado por mais de um artefato primario; (2) **registro orfao**: `_output/ids/*.json` cujo `id` nao tem artefato e cujo `ts_utc` e mais antigo que `--orphan-days` (default 7) -> aviso (exit 0) ou erro com `--strict`; (3) **`pa-` duplicado**: em `pending.jsonl` **nao ha campo `action`**; registro de criacao e o que carrega `created_at` (`cmd_add`), atualizacoes trazem so `id`/`status`/`closed_at` ou `snooze_until`; dois registros com o mesmo `id` ambos com `created_at` -> erro; (4) **`D-NNN` duplicado**: dois headings `### D-NNN:` com o mesmo numero na secao `## Decisions` de `product-design/product-design-as-intended.md` -> erro; (5) **uid duplicado** em `_output/ids/` -> erro; (6) **id incoerente**: registro cujo `id != artifact_id.visible_id(uid)` -> erro. Quando `OUTPUT_DIR` nao existe (projeto sem ledger), sair 0 sem saida. Saida legivel em stdout, `--json` com `schema_version`, exit 0 sem achados, 1 com erros, 2 uso incorreto. Acrescentar a linha do script nas duas tabelas de `docs/reference/harness-reference.md`.
@@ -155,7 +156,7 @@ Criar `.claude/skills/scripts/check_ledger_ids.py` no padrao de `check_conventio
 - **Interface**: CLI `check_ledger_ids.py [--output-dir DIR] [--orphan-days N] [--strict] [--json]`; exit 0/1/2
 - **Verify**: `pytest .claude/skills/scripts/tests/test_check_ledger_ids.py` verde; rodar no repo retorna 0 (apos o Step 3)
 - **Tests**: quando `plan-000007-a.md` e `plan-000007-b.md` existem, retorna 1 e lista os dois caminhos; quando existem `plan-000007-a.md`, `plan-000007-qa-a.md` e `plan-000007-progress.md`, retorna 0; quando `ids/01K6...json` tem `id` sem artefato e `ts_utc` de 10 dias atras, retorna 0 com aviso e 1 com `--strict`; quando o mesmo `pa-000012` aparece em dois registros com `created_at`, retorna 1, e quando aparece em um registro com `created_at` e outro so com `status`, retorna 0; quando `### D-005:` aparece duas vezes, retorna 1; quando um registro tem `id` diferente de `visible_id(uid)`, retorna 1; quando `--output-dir` aponta para pasta inexistente, retorna 0 sem saida; no fixture limpo, retorna 0 e `--json` tem `schema_version` e listas vazias.
-- [ ] Done
+- [x] Done
 
 ### Step 9: Registrar o verificador no registry, no preflight rapido e no pre-skill
 Acrescentar a entrada de `check_ledger_ids.py` em `check_plugin_registry.json`; acrescentar `("ledger-ids", [sys.executable, str(SCRIPTS_DIR / "check_ledger_ids.py")])` em `FAST_CHECKS` de `run_preflight_fast.py` logo apos `plan-coverage`; no `pre-skill/SKILL.md`, estagio pending-check, acrescentar: rodar `python .claude/skills/scripts/check_ledger_ids.py` e imprimir a saida se nao vazia, sem bloquear. No `CHANGELOG.md`, secao `## [Unreleased]`: linha `<!-- bump: minor -->` (D-005 chama a mudanca de MAJOR na gramatica; em v0.x isso e minor), `### Changed` com o formato novo de ID (`YYYYMMDD-xxxxxx` + `uid:`), `_output/ids/`, INDEX.md derivado e o verificador, e um paragrafo **Upgrade**: "devs que compartilham um ledger devem atualizar juntos: um harness anterior continua emitindo IDs legados, indexa artefatos novos como Other, nao os rastreia em coverage/pending e **recusa commitar** marcadores `plan-YYYYMMDD-xxxxxx` em arquivos Human (markers); IDs legados continuam validos para sempre; `migrate_qa_logs_to_parent_dirs.py` e os `backfill_*.py` continuam so para o formato legado". Acrescentar um bullet no resumo do passo 6 de `_internal/seja-setup/upgrade/SKILL.md`: "se `_output/ids/` nao existe, nada a migrar; IDs legados ficam".
@@ -166,7 +167,7 @@ Acrescentar a entrada de `check_ledger_ids.py` em `check_plugin_registry.json`; 
 - **Verify**: `python3 .claude/skills/scripts/run_all_checks.py` lista `check_ledger_ids.py`; `run_preflight_fast.py` mostra `ledger-ids`; `check_version_changelog_sync.py` continua passando
 - **Tests**: N/A (configuracao; coberto pelo Step 8 e pelos verificadores de registry/changelog)
 - **Docs**: `CHANGELOG.md` (Unreleased)
-- [ ] Done
+- [x] Done
 
 ### Step 10: Atualizar referencias e agentes: a definicao do ID e o header com uid
 Em `report-conventions.md:9`, substituir a definicao do *id* por: ID visivel `YYYYMMDD-xxxxxx` derivado de um ULID gerado localmente por `reserve_id.py` (artefatos anteriores a esta versao mantem o numero sequencial de 6 digitos; os dois formatos sao validos); acrescentar o campo *uid* (linha `uid: <ULID>` imediatamente apos o header, antes de `source:`/`tags:`) e atualizar o padrao de nome de arquivo. Em `template/docs/ddr.md:78` e nos tres agentes listados (communication-generator.md:24, explanation-generator.md:22, onboarding-generator.md:27) trocar "reserved 6-digit ID" por "reserved artifact ID (see report-conventions)". Em `batch-execution-pattern.md:22`, ajustar a frase sobre reservar IDs antecipadamente (continua valida; nota de que a unicidade agora e local). Os agentes `architecture-explainer` e `evolution-explainer` ficam para o Step 13.
@@ -177,7 +178,7 @@ Em `report-conventions.md:9`, substituir a definicao do *id* por: ID visivel `YY
 - **Verify**: `grep -rn "6-digit" .claude/references .claude/agents` so retorna mencoes historicas explicitas e os dois agentes do Step 13; `check_docs.py` e `check_skill_spec.py` sem falha nova
 - **Tests**: N/A (prosa de referencia)
 - **Docs**: as proprias referencias
-- [ ] Done
+- [x] Done
 
 ### Step 11: Atualizar as skills que reservam ID e escrevem o header (primeira leva)
 Nas skills `plan` (SKILL.md:87), `research` (:50, :75), `reflect` (:51, :148, :231 e o regex do macro-index citado no fim), `implement` (:33 "The 6-digit ID of the plan"; `pre-plan-<id>` funciona com os dois formatos) e `_internal/explain/drift/SKILL.md:21` (`plan-NNNNNN` -> aceitar o formato novo): trocar "6-digit zero-padded ID" por "artifact ID returned by reserve_id.py" e acrescentar, no padrao de header de cada uma, a linha `uid: <ULID>` logo apos o H1 (valor de `reserve_id.py --json` ou de `_output/ids/<uid>.json`). As skills internas `_internal/plan/*` nao citam o formato nem montam o header (grep): sem edicao. Rodar `generate_skills_manifest.py` e `check_skill_spec.py` ao final.
@@ -188,7 +189,7 @@ Nas skills `plan` (SKILL.md:87), `research` (:50, :75), `reflect` (:51, :148, :2
 - **Verify**: `check_skill_spec.py` e `check_skill_system.py` sem falha nova; `generate_skills_manifest.py --check` passa
 - **Tests**: N/A (prosa de skill; comportamento coberto pelos Steps 2-7)
 - **Docs**: as proprias skills; `SKILL-quickguide.md` de `plan` e `research` se citarem o formato do ID
-- [ ] Done
+- [x] Done
 
 ### Step 12: Segunda leva de skills
 Mesma edicao do Step 11 em `communicate` (:71, :82, :116), `onboard` (:66, :99, :150), `explain` (:53), `critique` (:52, :193, :205, :257), `mob` (:65).
@@ -198,7 +199,7 @@ Mesma edicao do Step 11 em `communicate` (:71, :82, :116), `onboard` (:66, :99, 
 - **Interface**: N/A
 - **Verify**: `check_skill_spec.py`, `check_skill_system.py` e `generate_skills_manifest.py --check` sem falha nova
 - **Tests**: N/A (prosa de skill)
-- [ ] Done
+- [x] Done
 
 ### Step 13: qa-log, agentes restantes e ensaio ponta a ponta
 Mesma edicao em `qa-log/SKILL.md` (:33, :51) e nos agentes `architecture-explainer.md:21` e `evolution-explainer.md:21` ("reserved 6-digit ID" -> "reserved artifact ID (see report-conventions)"). Depois, ensaio: em um clone temporario deste repo (`git clone . <tmp>`), reservar um ID com `reserve_id.py --type research --title ensaio`, criar `_output/research-logs/research-<id>-ensaio.md` com header no formato novo e linha `uid:`, rodar `generate_macro_index.py`, `update_cross_refs.py`, `check_ledger_ids.py` e `check_plan_coverage.py --mode blocking`, e conferir que o artefato aparece no INDEX.md com o ID novo e nenhum verificador falha; conferir tambem que `grep -rn "6-digit" .claude/` so retorna mencoes historicas. Registrar o resultado na nota do step.
@@ -208,7 +209,7 @@ Mesma edicao em `qa-log/SKILL.md` (:33, :51) e nos agentes `architecture-explain
 - **Interface**: N/A
 - **Verify**: ensaio com exit 0 em todos os scripts; `pytest .claude/skills/scripts/tests/` verde; `run_all_checks.py` sem falha nova
 - **Tests**: N/A (prosa mais ensaio manual registrado na nota do step)
-- [ ] Done
+- [x] Done
 
 ### Step 14: Alargar os parsers do ciclo default que ficaram fora do levantamento
 Emenda 2026-10-07 (conferencia do terreno depois do merge `8f8a601`): este plano foi escrito no lado de `origin/dev`, sem os scripts do ciclo default (plans 000007-000015, 000022). Dois parsers deles nao aceitam o ID novo. `check_plan_scenarios.py:119` `PLAN_FILE_RE = ^plan-\d{6}-.+\.md$` -> usar `artifact_id.ARTIFACT_ID` (a varredura sem argumento passaria a ignorar planos com ULID). `build_brief.py:288` `re.match(r"(plan-\d+)", path.name)` -> `plan-` + `ARTIFACT_ID` (hoje um nome `plan-20261007-k3m9qz-x.md` vira `plan-20261007`, truncado, sem erro). `cycle_adherence.py:77` ja aceita os dois formatos: trocar o padrao local por `artifact_id.ARTIFACT_ID` para ter uma fonte so. Antes de editar, refazer o grep de `\d{6}`, `\d+` junto de `plan-`, `zfill(6)` e `:06d` em `.claude/` e acrescentar aqui o que mais aparecer.
@@ -218,7 +219,7 @@ Emenda 2026-10-07 (conferencia do terreno depois do merge `8f8a601`): este plano
 - **Interface**: N/A
 - **Verify**: `pytest .claude/skills/scripts/tests/test_check_plan_scenarios.py .claude/skills/scripts/tests/test_build_brief.py .claude/skills/scripts/tests/test_cycle_adherence.py` verdes; todas as fixtures de `plan_scenarios/` com o `esperado.json` igual
 - **Tests**: quando a varredura do `check_plan_scenarios.py` encontra `plan-20261007-k3m9qz-x.md` v2 aberto, ela o verifica; quando `build_brief` recebe `plan-20261007-k3m9qz-x.md`, o ID extraido e `plan-20261007-k3m9qz`; quando recebe `plan-000022-x.md`, continua `plan-000022`
-- [ ] Done
+- [x] Done
 
 ## Coverage (advisory)
 
@@ -372,3 +373,24 @@ A decisão de ULID citada neste artefato como **D-005** passou a **D-010** no me
 ## Emenda 2026-10-07 (2) -- o autor fica
 
 O designer revisou a decisão da emenda anterior e manteve o autor no registro de nascimento, como a D-010 já diz. Vale de novo a recomendação (a) do deep-dive DATA e a emenda A1: `author` é o token pseudônimo `sha256(git config user.email)[:12]` (fallback `sha256($USER)`, senão `"unknown"`), sobrescrevível por `--author`, nunca `user.name` (C2). Os Steps 1 e 2 voltaram ao texto anterior à emenda. Não há D-NNN nova: a D-010 continua valendo como está. O item "Sem autor" da emenda anterior fica sem efeito; os itens "Terreno" (Step 14) e "Versão" continuam valendo.
+
+## Implementation summary (2026-10-07)
+
+- Steps: 14/14 SUCCESS, auto mode, um subagente e um commit por step, na ordem 1-9, 14, 10-13 (8dc3eb3, 93be2c3, 6320002, 8981403, bd8a57d, cee07ab, 268d916, 59f901f, 763bfb0, 04ecf9f, f720db0, d34c8ab, e415c95, d9a47c4). 14 iterações de 20.
+- Entregue: `artifact_id.py` (ULID, ID visível `YYYYMMDD-xxxxxx`, `ARTIFACT_ID`, `default_author` pseudônimo); `reserve_id.py` sem INDEX.md, com registro de nascimento em `_output/ids/<uid>.json`, `--origin`, `--author`, `--json`; INDEX.md inteiramente derivado (RESERVED vem de `ids/`; `--finalize` depreciado); gramática aditiva nos marcadores (STATUS, ESTABLISHED, INCORPORATED, CHANGELOG_APPEND) e nos ~20 parsers; os dois bugs do `apply_marker` (`manual` -> `-`, linha `*Source:*`) corrigidos; `check_ledger_ids.py` no registry, no preflight rápido e no pre-skill; CHANGELOG `[Unreleased]` com nota de upgrade; referências, skills e agentes com "artifact ID" e a linha `uid:`.
+- Desvios registrados no progress: o marcador `# DONE` em linha própria passou a ser juntado ao H1 (Steps 3, 5, 6), o que reindexou como Plan os planos 000007-000014 e 000022; RESERVED 000021 removido além dos listados (Step 3); `test_id_grammar.py` criado no Step 5, não no 7; lookahead `(?![0-9A-Za-z])` onde `ARTIFACT_ID` não é seguido de literal fixo; `--design-file` no verificador (Step 8); entrada do registry antes de `check_plan_scenarios.py` (Step 9); `ddr.md:78` mantido (numeração DDR é outra) e `batch-execution-pattern.md` editado fora de Files (Step 10); `skills-manifest.json` regenerado por defasagem anterior (Step 11); `semiotic-inspector` e `harness-health-evaluator` editados por decisão do orquestrador, lendo o uid de `_output/ids/` porque o `/critique` não o passa (Step 13).
+- Ensaio ponta a ponta (Step 13, clone temporário): reserva, INDEX.md, `spawned:`, `check_ledger_ids` (0; 1 com duplicata montada) e `check_plan_scenarios` com `uid:` antes de `plan_format_version` funcionaram; `check_plan_coverage --mode blocking` sai 1 também sem o artefato (REQ-VAL-001, REQ-PERM-001, REQ-PERM-002 sem trace, pré-existente).
+- Testes: 1810 passed / 4 failed (as 4 da linha de base em `test_summarize_artifacts.py`, que dependem de `plan-000295` e `advisory-000300`, ausentes deste ledger); testes co-localizados 103 passed. `run_all_checks`: 20 PASS / 14 FAIL, mesmo conjunto de antes do plano; `check_ledger_ids` PASS. `check_docs`: 670 warnings, igual ao pré-plano.
+- Quality gate: `/critique validate` (run_all_checks) sem falha nova; `/critique review` (code-reviewer standard): 1 crítico (C1: `check_ledger_ids` não reconhecia tipos com hífen, `mob-session`, `dev-onboarding`, `data-model`) e 10 advisórios; C1, A2 (`--author` validado), A8 (âncoras `\Z`) e os 5 warnings novos do `check_docs` corrigidos com teste primeiro em 2f44bbb.
+- Diferido (advisórios): A1 a alternativa `*Source:*` do DECISION_APPEND vale em qualquer linha dos arquivos Human (markers), não só em `## Decisions`; A3 `check_ledger_ids` lê o relógio (sem `--now`); A4 `generate_reflection_report.py` e `generate_pending_roadmap.py` não escrevem `uid:` e têm texto "6-digit"; A5 parsers que iam de `\d+` para exatamente 6 dígitos ignoram IDs curtos legados; A6 `ARTIFACT_ID_BOUNDED` em `artifact_id.py` em vez do lookahead repetido; A7 textos legados em `call-graph.json` e `verify_commit_scope.py`; A9 sem `fsync`/`O_EXCL` na gravação do registro; A10 nomes `<palavra>-YYYYMMDD-<6>.md` em `_output` contam como artefato.
+- Em aberto para o designer: a D-010 cita "autor" e o registro usa o token `sha256(email)[:12]` (pseudônimo, não anônimo); `check_version_changelog_sync` lê `.claude/CHANGELOG.md`, não o da raiz, e já falhava antes; os commits dos Steps 3 e 4 saíram com a identidade `arodrigues <arodrigues@pbai.puc-rio.br>`, os demais com `arodrigues-puc-rio <...noreply.github.com>`.
+
+### Generator-Critic Iterations
+- Iteration count: 1/2
+- Findings per iteration: [1 critical, 10 advisory]
+- Resolution status: all resolved (8 advisory deferred)
+
+
+## Reflection
+
+- 2026-10-07: Todos os 14 steps registraram desvio; os mais consequentes foram o marcador DONE em linha própria (Steps 3, 5, 6), o lookahead contra a alternativa legada de 6 dígitos, e os agentes de critique lendo o uid de _output/ids (Step 13); a revisão achou tipos com hífen fora do check_ledger_ids. (notes 15, with deviation 15, with gate 0)
