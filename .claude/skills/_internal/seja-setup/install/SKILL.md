@@ -80,12 +80,21 @@ metadata:
 
    1. If the user answered `framework: none` for backend, omit every `BACKEND_*` row from the generated `conventions.md` -- including the backend-parented i18n variable `I18N_BACKEND_CATALOGS` -- and note internally that smoke-test infrastructure (added by a later step in this flow) and backend rules (likewise) will be skipped. (Covers API-absent cases: frontend-only and CLI / library.)
    2. If the user answered `framework: none` for frontend, omit every `FRONTEND_*` row, the `FRONTEND_I18N_DIR` row, and the `I18N_FRONTEND_FILES` variable; frontend rules emission (likewise) will be skipped. (Covers frontend-absent cases: API-only and CLI / library.)
-   3. If both are `none` (pure CLI or library project), emit a minimal valid `conventions.md` containing only `PROJECT_NAME`, `PROJECT_DESCRIPTION`, `PROJECT_MODE`, `CODEBASE_DIR`, `OUTPUT_DIR`, and the `Directory Structure` variables. Both i18n catalog variables (`I18N_FRONTEND_FILES`, `I18N_BACKEND_CATALOGS`) are absent in this mode.
+   3. If both are `none` (pure CLI or library project), emit a minimal valid `conventions.md` containing only `PROJECT_NAME`, `PROJECT_DESCRIPTION`, `PROJECT_MODE`, `CODEBASE_DIR`, `OUTPUT_DIR`, the `Directory Structure` variables, and `SPECIFY_DEFAULT` (filled by 4d). Both i18n catalog variables (`I18N_FRONTEND_FILES`, `I18N_BACKEND_CATALOGS`) are absent in this mode.
    4. Never emit template placeholders in the final file: every `{{VAR}}` must either be resolved from the questionnaire answers or its row omitted. A leftover placeholder is a bug, not a valid state.
 
    **i18n prompt gating (Section 1 questionnaire, step 4b).** `I18N_FRONTEND_FILES` is prompted only when frontend is present; `I18N_BACKEND_CATALOGS` is prompted only when backend is present. An API-only project with backend-translated emails still gets asked about `I18N_BACKEND_CATALOGS`. A frontend-only project with localized UI still gets asked about `I18N_FRONTEND_FILES`. A CLI / library project is asked about neither. The agent implements this gating while presenting Section 1 -- skip the prompt when its parent stack was answered `framework: none`.
 
    The `<!-- CONDITIONAL: ... -->` comments in `.claude/references/template/conventions.md` (added by a later step in this plan) are the machine-readable markers that drive the row-omission logic. Until those comments land, apply the conditionality by matching variable-name prefixes (`BACKEND_`, `FRONTEND_`, `I18N_FRONTEND_`, `I18N_BACKEND_`).
+
+4d. **Specify default** (anchor: `Ask-SpecifyDefault`; D-011, CYC-036). Runs after 4c, in every stack mode (the CLI / library profile of 4c.3 keeps this row too). Skip when `--demo` is active (the demo conventions have no row; absent = `on`). Ask one `AskUserQuestion` (rationale per C4), with this question text in pt-BR:
+
+   > A especificação em Gherkin é o padrão neste projeto? Gherkin é um texto curto que diz, com exemplos, o que o sistema deve fazer, antes do código. Um exemplo de quando não vale: num protótipo, o que o sistema deve fazer ainda muda toda semana.
+
+   - **`on`** -- Recommended when o projeto vai medir a escada ou já tem requisitos estáveis. NOT recommended when o projeto está em prototipação.
+   - **`off`** -- Recommended when o projeto está em prototipação. NOT recommended when o projeto vai medir a escada.
+
+   Replace `{{SPECIFY_DEFAULT}}` in the `SPECIFY_DEFAULT` row of `product-design/conventions.md` with the answer in backticks (`` `on` `` or `` `off` ``). No answer (non-interactive run) -> write `` `on` ``. Tell the user, in pt-BR: "Você pode mudar isso depois na linha `SPECIFY_DEFAULT` de `product-design/conventions.md`. Num plano, `--with-specify` liga a especificação, e `--without-specify` com um motivo a desliga."
 
 5. **Create output directory** (default: `_output/`) with subdirs `plans/`, `advisory-logs/`, `qa-logs/`, `check-logs/` and `briefs.md` header `# Briefs\n\nExecution log of all skill invocations.\n\n---\n`.
 

@@ -56,6 +56,14 @@ Runs from the **target project** (not the source repo). Applies safe updates to 
 
 8. **Offer follow-up actions**:
    - New convention variables -> "Add to your `product-design/conventions.md`?"
+   - `SPECIFY_DEFAULT` missing (listed by `diff_conventions` in the step 5 report as missing from `product-design/conventions.md`; D-011, CYC-036) -> ask one `AskUserQuestion` (rationale per C4), same text as install step 4d (`Ask-SpecifyDefault`):
+
+     > A especificação em Gherkin é o padrão neste projeto? Gherkin é um texto curto que diz, com exemplos, o que o sistema deve fazer, antes do código. Um exemplo de quando não vale: num protótipo, o que o sistema deve fazer ainda muda toda semana.
+
+     - **`on`** -- Recommended when o projeto vai medir a escada ou já tem requisitos estáveis. NOT recommended when o projeto está em prototipação.
+     - **`off`** -- Recommended when o projeto está em prototipação. NOT recommended when o projeto vai medir a escada.
+
+     On an explicit answer, add the `SPECIFY_DEFAULT` row from the template's Review Configuration table to the same table of `product-design/conventions.md`, with the answer in backticks (`` `on` `` or `` `off` ``). Never write `SPECIFY_DEFAULT` without an explicit answer: in non-interactive mode, with `--dry-run`, or when the user does not answer, do not write the row and tell the user, in pt-BR: "Não gravei `SPECIFY_DEFAULT`. Vale `on` até você responder." This is the only upgrade write to `product-design/`; `upgrade_harness.py` still never touches `conventions.md`.
    - Old path references -> "Update the references?"
    - Stale CLAUDE.md -> "Regenerate your CLAUDE.md?"
    - `${QA_LOGS_DIR}` (default `_output/qa-logs/`) contains files matching `^<prefix>-\d{6}-qa-.*\.md$` (legacy centralized layout) -> "Post-skill now collocates QA logs with the parent artifact, not `${QA_LOGS_DIR}`. Migrate N detected files via `python .claude/skills/seja-setup/migrate_qa_logs_to_parent_dirs.py --apply`? (safe, uses `git mv` to preserve history, `--dry-run`-previewable.)"
