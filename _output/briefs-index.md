@@ -7,7 +7,7 @@
 |------|-------|-------|--------|------|----------|-----------|
 | 2026-10-07 00:45 UTC | communicate | USR --source _output/plans/plan-000019-upgrade-multi-dev-identidade-por-ulid.md | DONE |  |  |  |
 | 2026-10-06 23:56 UTC | plan | Executar de uma vez a ideia da nota do inbox 2026-10-06: inbox automatico da PK… | DONE | 000020 |  |  |
-| 2026-10-06 23:15 UTC | plan | source: research-000018 -- identidade de artefato por ULID sem coordenacao (D-0… | STARTED |  |  |  |
+| 2026-10-06 23:15 UTC | plan | source: research-000018 -- identidade de artefato por ULID sem coordenacao (D-0… | DONE | 000019 |  |  |
 | 2026-10-06 22:34 UTC | research | source: reflection-000017. Upgrade multi-dev do SEJA: IDs computados localmente… | DONE |  |  |  |
 | 2026-10-06 22:25 UTC | reflect | o open-seja está sendo usado por times de desenvolvimento. mas o uso tem de ser… | DONE |  |  |  |
 | 2026-10-03 15:10 UTC | implement | 5 --manual | DONE | 000005 |  |  |
