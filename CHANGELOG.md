@@ -16,6 +16,18 @@ Format: loosely based on [Keep a Changelog](https://keepachangelog.com/). SemVer
 
 ## [Unreleased]
 
+<!-- bump: minor -->
+
+### Changed
+
+- **Artifact IDs are now generated locally, with no counter** (D-010): `reserve_id.py` creates a ULID for each new artifact and returns a visible ID `YYYYMMDD-xxxxxx` (the UTC date plus six characters of the ULID), for example `plan-20261007-k3m9qz-<slug>.md`. File names keep their chronological order in the tree; the order within one day is not guaranteed. Every new artifact carries a `uid: <ULID>` line right after its header. Two developers on the same branch, on different machines and offline, no longer reserve the same number.
+- **Birth records in `_output/ids/`**: each reservation writes `_output/ids/<uid>.json` (type, title, author as a pseudonymous token, UTC timestamp, origin). `reserve_id.py` no longer reads or writes `INDEX.md`.
+- **`INDEX.md` is fully derived**: `generate_macro_index.py` rebuilds it from the artifacts and from `_output/ids/`; it no longer keeps `RESERVED` rows from the previous index, and `--finalize` is a no-op with a warning.
+- **Both ID formats are accepted everywhere**: the marker grammar (`STATUS`, `ESTABLISHED`, `INCORPORATED`, `CHANGELOG_APPEND`, `DECISION_APPEND`), `apply_marker.py --plan`, and the ID parsers of coverage, cross-references, pending, step notes, summaries, docs, decision digest and pending roadmap read the legacy 6-digit ID and the new one.
+- **New check `check_ledger_ids.py`**: reports duplicate artifact IDs, duplicate `uid`s, birth records with an inconsistent ID, orphan birth records (a warning; an error with `--strict`), a pending action `pa-` created twice, and a duplicate `D-NNN` inside `## Decisions`. It runs in `run_all_checks.py`, in the fast preflight (`ledger-ids`) and, without blocking, in the pre-skill pending check.
+
+**Upgrade**: developers who share a ledger must upgrade together. An older harness keeps emitting legacy IDs, indexes new artifacts as Other, does not track them in coverage or pending, and **refuses to commit** `plan-YYYYMMDD-xxxxxx` markers in Human (markers) files. Legacy IDs stay valid forever; existing artifacts are not renamed. `migrate_qa_logs_to_parent_dirs.py` and the `backfill_*.py` scripts still handle only the legacy format.
+
 ## [v0.11.0] - 2026-10-06
 
 ### Added

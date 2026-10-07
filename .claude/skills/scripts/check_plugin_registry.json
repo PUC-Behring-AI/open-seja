@@ -221,6 +221,16 @@
     "critical": false
   },
   {
+    "script": "check_ledger_ids.py",
+    "name": "Ledger IDs",
+    "stack": {
+      "backend": ["any"],
+      "frontend": ["any"]
+    },
+    "scope": "ledger",
+    "critical": true
+  },
+  {
     "script": "check_plan_scenarios.py",
     "name": "Plan Scenario Coverage",
     "stack": {

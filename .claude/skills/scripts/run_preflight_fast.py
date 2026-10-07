@@ -55,6 +55,7 @@ FAST_CHECKS: list[tuple[str, list[str]]] = [
     ("version-changelog-sync", [sys.executable, str(SCRIPTS_DIR / "check_version_changelog_sync.py")]),
     ("design-output", [sys.executable, str(SCRIPTS_DIR / "check_design_output.py")]),
     ("plan-coverage", [sys.executable, str(SKILLS_DIR / "design" / "check_plan_coverage.py"), "--mode", "blocking"]),
+    ("ledger-ids", [sys.executable, str(SCRIPTS_DIR / "check_ledger_ids.py")]),
     ("human-markers", [sys.executable, str(SCRIPTS_DIR / "check_human_markers_only.py"), "--staged"]),
     ("changelog-append-only", [sys.executable, str(SKILLS_DIR / "explain" / "check_changelog_append_only.py"), "--staged"]),
     ("section-boundary-writes", [sys.executable, str(SKILLS_DIR / "post-skill" / "check_section_boundary_writes.py"), "--staged"]),

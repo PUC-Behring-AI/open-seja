@@ -51,6 +51,7 @@ Runs from the **target project** (not the source repo). Applies safe updates to 
 5b. **Test-first plugin (only if already installed)**: if the project has `tests/scenario_report.py`, run `python .claude/skills/scripts/build_checks.py install-plugin .` after step 5. It is idempotent and refuses a copy edited by hand (show that message). If the file is absent, do nothing: an upgrade never creates the plugin; `/implement` installs it on the first red step.
 
 6. **Review summary**: highlight public-release pin change (e.g., `v0.1.0 -> v0.2.0`), internal harness version change, old-layout migration if any, new convention variables, files auto-updated vs needing manual merge.
+   - Artifact IDs (D-010): if `_output/ids/` does not exist, there is nothing to migrate; legacy 6-digit IDs stay as they are and remain valid.
 
 7. **Show diffs for manual-merge files**: unified diff for each script/rule/agent that differs. For agents: ask "Accept source / Keep current / Show diff?" per file. For scripts and rules: show diff and advise on merge.
 
