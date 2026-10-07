@@ -34,6 +34,8 @@ Fixado **igual** nos dois braços e por execução:
 - um worktree limpo por execução;
 - as mesmas ferramentas e o mesmo portão, quando o projeto o tem.
 
+**Emenda 000022 (D-011, CYC-036, emenda ao CYC-033).** O braço A passa a ser a **mesma tag** do braço B com `SPECIFY_DEFAULT` em `off`: a grill faz a entrevista curta (as quatro linhas de `## Intenção`, sem `intent.md` nem REQ IDs), o plano é v2 com `Specify default: off` e `Specify: skipped -- default off`, e cada step que muda código tem `Tests:` real com `Scenarios: N/A (motivo)`. A linha "Harness" da tabela acima (tag v0.10.x pinada) fica como história: o controle por tag confundia o Gherkin com tudo o mais que entrou na release. O plano v1 do braço A também fica como história; o controle novo é plano v2 `default off`. A aderência dos dois braços (quantos planos seguiram o braço atribuído e por que desviaram) é lida por `python3 .claude/skills/scripts/cycle_adherence.py`, que mede aderência e não desfecho.
+
 ## 3. O oráculo
 
 O **oráculo** é a régua independente. O designer o escreve **antes** de qualquer braço rodar.
@@ -52,6 +54,8 @@ O **oráculo** é a régua independente. O designer o escreve **antes** de qualq
 **Degraus nativos só no B.** O braço A não tem REQ nem cenário próprios. D1 e D2 do A são medidos por **retrofit**: mapear os REQs do oráculo para os critérios do plano v1 e para os testes do A. A auditoria semântica (`drift-metric.md`, DRM-010; decisão pendente 1 = B `[default; aceito 2026-10-06]`) cobre **todos** os REQs do retrofit do A e pelo menos 30% dos REQs do B, cega (o auditor não sabe de que braço vem), com `adequado: sim | parcial | nao` numa coluna separada do D.
 
 Degraus **comparáveis diretamente**: D3a, D3b e O1. D1 e D2 só **pelo retrofit**, e a assimetria é ameaça declarada (seção 9).
+
+**Emenda 000022 ao retrofit e à leitura por protocolo.** O retrofit desta seção vale para o plano v2 `default off` do braço A: os REQs do oráculo são mapeados para as quatro linhas de `## Intenção` e para os critérios dos steps (D1 do A) e para os testes declarados em `Tests:` (D2 do A), com a mesma auditoria semântica cega. Com o interruptor, H-009 tem duas leituras (D-011): por intenção de tratar (o braço atribuído pela linha `Specify default:` do plano) e por protocolo (o plano escreveu ou não a especificação). A leitura **por protocolo** da divergência é feita **só com o oráculo** (O1 e D3b contra o oráculo), porque um plano sem especificação não tem vetor D nativo; fora do piloto não há leitura por protocolo da divergência, só de aderência. Os limiares das duas leituras (o que conta como redução em O1 e D3b, e a taxa de desvio que se considera alta) são fixados e registrados **antes da primeira execução**, no registro de execução (`.claude/references/template/pilot-run-record.md`); fixá-los depois de ver os dados invalida a leitura (Q3).
 
 ## 5. Ordem e réplicas
 
@@ -121,6 +125,8 @@ Cada célula traz numerador/denominador e `não medido` com a razão (`drift-met
 | Variância do agente | três réplicas por braço; relatar as três |
 | Goodhart: cenários fracos que passam e não provam a intenção | O1 contra o oráculo; auditoria semântica; leitura "escada fechou sem capturar a intenção" |
 | Aprovação do citizen virando ritual | os três medidores do citizen; teste da surpresa (CYC-014) |
+| (emenda 000022) O controle tem entrevista curta, o contraste deixa de ser H-008: com `off`, o braço A tem a entrevista curta e plano v2 `default off`, então a comparação é "escada x entrevista curta", não "escada x ciclo de H-008" | declarar a ameaça em todo resultado; não ler a diferença como efeito do ciclo estendido contra o ciclo padrão; a vantagem é que a tag é a mesma, então só a especificação varia entre os braços (D-011) |
+| (emenda 000022) Viés de seleção na leitura por protocolo: quem escreve a especificação pode ser quem tem a intenção mais clara | relatar a leitura por intenção de tratar ao lado da por protocolo; listar cada desvio com o motivo (`cycle_adherence.py`); a leitura por protocolo da divergência só com o oráculo (seção 4) |
 
 ## 10. Critérios de parada e o que não concluir
 
