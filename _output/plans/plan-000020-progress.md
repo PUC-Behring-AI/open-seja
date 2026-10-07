@@ -73,3 +73,9 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 - deviated: Nao mudei o subcomando list nem o pre-skill; a funcao nova e so de biblioteca (sem flag CLI). O texto da etapa 7f nao dependia do comportamento antigo e ficou intacto. run_all_checks: 13 FAIL/1 erro antes e depois, sem falha nova; ruff com os mesmos 10 achados antigos.
 - less-sure: Se a cadeia preceding_evt_id e sempre gravada no uso real (append usa 'null' por padrao quando o agente esquece a flag); sem ela a captura volta a nada; --since-evt so existe na funcao nova, nao no capture.
 - gate: not-installed
+
+### Step 9 -- reflection-on-action | 2026-10-07 22:11 UTC | Rascunho para o /design: as-expressed em H-005, Q-014 e limiar
+- happened: Escrevi _output/tmp/design-rascunho-as-expressed-2026-10-06.md com emenda a H-005 (as-expressed, 1a/1b, confirma/refuta), Q-014, D-012 proposto com N e M como placeholders, linhas de CHANGELOG e a limitacao do encadeamento preceding_evt_id/exchange_user_entries. Pendencia pa-000022 registrada; grep de travessoes/aspas vazio.
+- deviated: Numerei a decisao D-012 e a questao Q-014 como propostas (a conferir pelo designer). _output/tmp e rastreado, entao o rascunho entra no commit. Nenhum arquivo de product-design/ tocado.
+- less-sure: Se a descricao do sinal as_expressed_igual_ao_brief como 'presenca de diferenca' e a regra de plano nao contado quando a captura falha refletem o que o designer quer; o valor N e M ficam seus.
+- gate: not-installed

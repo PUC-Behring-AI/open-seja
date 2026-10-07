@@ -173,7 +173,7 @@ Escrever `_output/tmp/design-rascunho-as-expressed-2026-10-06.md` com o texto **
 - **Interface**: N/A
 - **Verify**: arquivo existe, sem travessao tipografico (`grep -P '[\x{2013}\x{2014}\x{201C}\x{201D}]'` vazio), cita H-005, Q-014 e D-NNN; `pending.py status` lista a pendencia; `check_human_markers_only.py` nao e acionado (nada em `product-design/` muda)
 - **Tests**: N/A (rascunho de prosa)
-- [ ] Done
+- [x] Done
 
 ### Step 10: Documentacao e inventario do harness
 Criar `docs/pkb-layer.md` (en-US, para a distribuicao): o que e a camada PKB, como `init`/`capture`/`digest` funcionam, o interruptor por pasta, o que e e o que nao e o `_live.md` (preparacao, nao emissao), o gatilho de `/design` e a linha `DESIGN_TRIGGER_DRIFT_ITEMS`, e a origem do metodo (bootstrap, URL publica). Atualizar `.claude/CHEATSHEET.md` (`--pkb`, `pkb_inbox.py`; criar se nao existir), `.claude/rules/harness-structure.md` (novo script, novo template, etapa 7f), `seja-setup/SKILL-quickguide.md` e `post-skill` quickguide se existir, e `CHANGELOG.md` em `[Unreleased]` com as entradas Added (camada PKB, `--pkb`, `pkb_inbox.py`, `conversation_trace.py list`, etapa 7f) e Changed (preservacao no upgrade; gatilho de /design na 2c). Conferir que `docs/pkb-layer.md` entra no manifesto (`docs/**` ja esta).
