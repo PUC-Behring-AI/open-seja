@@ -4,6 +4,10 @@ Execution log of all skill invocations.
 
 ---
 
+DONE | 2026-10-07 00:42 UTC | STARTED | 2026-10-06 23:56 UTC | plan | Executar de uma vez a ideia da nota do inbox 2026-10-06: inbox automatico da PKB gerado pelo open-seja (derivado do trace/briefs, com mascaramento), /seja-setup instancia a camada PKB, live communicate no inbox; registrar as-expressed em H-005 e limiar/gatilho para /design; publicar v0.10.1 e upgrade do Doutourado via /seja-setup --upgrade | PLAN | 000020
+
+STARTED | 2026-10-06 23:15 UTC | plan | source: research-000018 -- identidade de artefato por ULID sem coordenacao (D-005). Upgrade multi-dev, primeiro recorte (R2-1, R2-2, R2-3): reserve_id.py gera ULID local com registro de nascimento em _output/ids/; ID visivel YYYYMMDD-6chars; INDEX.md 100% derivado; gramatica aditiva nos regexes e marcadores; check_ledger_ids.py; dois bugs do apply_marker/check_human_markers_only
+
 DONE | 2026-10-06 22:47 UTC | STARTED | 2026-10-06 22:34 UTC | research | source: reflection-000017. Upgrade multi-dev do SEJA: IDs computados localmente (reserve_id.py single-writer) colidem entre maquinas; esquema de ID (sequencial vs hash vs commit sha vs ULID), pontos de colisao, fronteira front/core, relacao com plan-000004/H-007
 
 DONE | 2026-10-06 22:30 UTC | STARTED | 2026-10-06 22:25 UTC | reflect | o open-seja está sendo usado por times de desenvolvimento. mas o uso tem de ser síncrono, em alguma medida, pois os ids são computados localmente e podem ter conflito, caso 2 devs invoquem uma skill ao mesmo tempo em maquinas diferentes. vamos refletir sobre iisso e bolar um plano para um upgrade do seja: multi-dev
