@@ -35,6 +35,7 @@ designer_description: "I'm your project's single source of truth for directory s
 | `RESEARCH_DIR` | `${OUTPUT_DIR}/research-logs` | Research log output folder (new /research outputs land here; see advisory-000448) |
 | `PROPOSALS_DIR` | `${OUTPUT_DIR}/proposals` | Lightweight change proposals |
 | `INVENTORIES_DIR` | `${OUTPUT_DIR}/inventories` | Inventory output folder |
+| `PKB_DIR` | `inbox` | PKB capture folder (empty value turns capture off) |
 | `USER_TESTS_DIR` | `${OUTPUT_DIR}/user-tests` | User test plan output folder |
 | `EXPLAINED_BEHAVIORS_DIR` | `${OUTPUT_DIR}/explained-behaviors` | Behavior explanation output folder |
 | `EXPLAINED_CODE_DIR` | `${OUTPUT_DIR}/explained-code` | Code explanation output folder |

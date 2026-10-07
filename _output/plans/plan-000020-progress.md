@@ -25,3 +25,9 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 - deviated: Troquei travessoes e aspas tipograficas por -- e aspas retas (regra do harness). Copiei tambem as pastas references/ de weekly-review e compress, que o passo nao citava.
 - less-sure: Se as frases generalizadas ('projetos do seu arquivo') bastam para as skills funcionarem em arquivo sem pasta de projetos; nao rodei as skills.
 - gate: not-installed
+
+### Step 3 -- reflection-on-action | 2026-10-07 21:39 UTC | pkb_inbox.py init: instanciar a camada PKB, idempotente
+- happened: Criei pkb_inbox.py com init (--target, --with-skills, --dry-run, --json) e 8 testes escritos antes; verde. Adicionei PKB_DIR nas duas conventions.
+- deviated: PKB_DIR e lido por regex do conventions.md do alvo, nao por project_config.get_path, porque get_path so resolve contra o REPO_ROOT do harness e --target pode ser outro repo. pytest nao estava instalado; rodei via uv run --no-project --with pytest.
+- less-sure: Se a leitura por regex diverge de project_config em casos de borda (valores com ${...}); logs/<ano> usa o ano corrente.
+- gate: not-installed
