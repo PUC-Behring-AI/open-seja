@@ -814,6 +814,11 @@ Texto de origem: roadmap-000006. O ajuste que D-004 fixa: H-009 declara o própr
 
 O que a refutaria: se, no piloto, ajustes e recusas no specify, escapes de intenção antes do código e mutantes virados em REQ forem todos zero, a aprovação virou ritual, H-009 cai e H-001 volta a pedir adequação por posição na escala.
 
+<!-- Texto de B.1 do rascunho de 2026-10-07 (plan-000022), aprovado literalmente pelo designer e inserido pelo agente com autorização explícita no /design de 2026-10-07 (override de T4). -->
+Com o interruptor (D-011), H-009 tem duas leituras. **Por intenção de tratar**: os projetos ou planos com `Specify default: on` contra os com `off`, cada um no braço que lhe foi atribuído, desviando ou não. Diz se adotar a escada como padrão funciona. **Por protocolo**: os planos que escreveram a especificação contra os que não escreveram. Diz se a escada funciona quando é escrita, com viés de seleção (quem escreve pode ser quem tem a intenção mais clara). A leitura por protocolo da divergência por degrau só é mensurável no piloto com oráculo (O1 e D3b contra o oráculo, `drift-control-protocol.md`), porque um plano sem specify não tem vetor D. Fora do piloto, o ledger mede aderência (quantos planos seguiram o braço e por que desviaram), não desfecho. Os limiares das duas leituras são fixados antes do primeiro dado (Q3).
+
+O que também a refutaria: se, no piloto, os planos que escreveram a especificação não tiverem O1 e D3b menores que os que pularam, nas mesmas features, a escada não paga o seu custo quando é escrita. Se a taxa de desvio no braço `on` for alta, o custo percebido da escada é um achado, não uma falha a esconder.
+
 > **Nota sobre H-007.** O CHANGELOG da fundamentação registra que a hipótese de SEJA como serviço passou a ser H-007 (2026-09-18), mas o texto dela não está neste arquivo nem estava no de origem. Fica como lacuna a redigir; o rumo está no §0 (`seja-mcp`, parado).
 
 ### Questões abertas
@@ -1421,7 +1426,7 @@ ausência não é cosmética. Registrada em `Q-008`.
 
 *Source: plan-000007 Step 6 (2026-10-06)*
 
-<!-- STATUS: proposed | plan-000015 | 2026-10-07 -->
+<!-- STATUS: superseded | plan-000022 | 2026-10-07 -->
 ### D-009: O ciclo default entra por upgrade de tag e age só onde há features/ ou plano v2; sem chave de desligar
 
 **Context**: O ciclo default muda /plan, /implement e /reflect em todo projeto que atualiza a tag. Projeto existente não pode quebrar, e o piloto precisa de um braço de controle limpo.
@@ -1442,6 +1447,16 @@ ausência não é cosmética. Registrada em `Q-008`.
 **Rejected Alternatives**: SHA do commit do git (circular: o SHA so existe depois do commit que ja contem o ID; o SHA do pai identifica a branch, nao o artefato); inteiro global reservado por push na branch (D' da research-000018: exige rede na reserva, modo provisorio e renumeracao de artefato nunca compartilhado); prefixo por dev (codifica o alocador no endereco); hash de conteudo (instavel, o artefato muda depois de nascer); renumeracao pos-merge (viola T3).
 
 *Source: from research-000018 (2026-10-06)*
+
+<!-- STATUS: proposed | plan-000022 | 2026-10-07 -->
+### D-011: O ciclo default entra por upgrade de tag e tem um interruptor por projeto (SPECIFY_DEFAULT); cada plano pode desviar com motivo registrado
+
+**Context**: A D-009 fechou o ciclo default "sem chave de desligar" e pôs o braço de controle do piloto na tag anterior pinada. Duas coisas mudaram a leitura. Primeira: entre duas tags muda o Gherkin e também tudo o que entrou na release (grill, checks, matriz, correções); o controle por tag confunde a variável que H-009 quer isolar. Segunda: na prototipação, requisitos e Gherkin escritos à força são ruído no vetor D; obrigar a escada não protege a medida, piora. O designer quer usar o open-seja como instrumento de experimento (com e sem a escada) e, como usuário, escolher a fase de especificação por plano.
+**Decision**: O ciclo continua entrando pela tag e agindo só onde há `features/<slug>/` ou plano v2 (o que a D-009 já dizia). Passa a existir a variável `SPECIFY_DEFAULT: on | off` em `product-design/conventions.md`. Ausente vale `on`. O `/seja-setup` pergunta o valor na instalação; o upgrade pergunta quando a variável falta e só grava com resposta explícita. Cada plano v2 novo registra o braço no próprio cabeçalho (`Specify default: on | off`). Por plano: `/plan --with-specify` liga a fase quando o default é `off`; `/plan --without-specify "<motivo>"` desliga quando é `on`, com motivo obrigatório. Quando a fase não roda numa tarefa com código, a grill faz a entrevista curta. O pulo passa a ter três classes: `tarefa sem código` (a de hoje), `default off` e `opt-out`. O braço de controle do piloto é a **mesma tag com `off`**.
+**Consequences**: O upgrade passa a poder gravar `conventions.md`, mas só depois de resposta explícita; sem resposta, não grava e diz "vale `on` até você responder". O script de upgrade continua sem tocar em `conventions.md`; H-009 passa a ser lida de dois jeitos: por intenção de tratar (o braço do projeto) e por protocolo (o que cada plano fez). A taxa de desvio é reportada como achado; O braço de controle deixa de ser o ciclo de H-008 puro: com `off`, o controle tem a entrevista curta e plano v2. O contraste vira "escada x entrevista curta" (ameaça declarada no protocolo); Planos v1 continuam valendo para sempre (D-008). Nenhum plano existente é reescrito; Um preset continua sendo perfil (D-003); a chave não é preset; Revisa a D-005 em dois pontos, sem substituí-la: a specify é pulada por tipo de tarefa **ou** pelo interruptor e pela escolha do plano; e a alternativa rejeitada "specify por escolha livre" fica respondida, porque a escolha não é livre, é registrada com classe e motivo, e a medida passa a ter as duas leituras.
+**Rejected Alternatives**: Sem chave (D-009): o controle por tag confunde o Gherkin com o resto da release, e a prototipação produz Gherkin ruim; Preset por projeto: a D-003 diz que preset não bifurca o ciclo, e um preset é fixado no pin, não escolhido por plano; Escolha por plano sem default de projeto: não dá braço para o experimento; Reusar `--specify` para ligar a fase: `--specify` já quer dizer "rodar só a fase specify, avulsa" (SPC-016); `--no-specify` como flag de desligar: pela convenção de CLI, `--no-X` nega `--X`, e `--specify` já tem outro sentido.
+
+*Source: plan-000022 Step 2; adendo 2026-10-07 do roadmap-000006 (2026-10-07)*
 
 ## CHANGELOG
 
@@ -1465,3 +1480,6 @@ ausência não é cosmética. Registrada em `Q-008`.
 2026-10-05 | JM-TB-001 | added | - | seed do as-intended por /design; fusao da fundamentacao (Q-006 fundir); D-001 e D-002 migradas, D-003 apprentice e D-004 contrato Gherkin adicionadas
 2026-10-05 | JM-TB-002 | added | - | jornada intended do citizen dev aprovando a mensagem (SS-002, D-004)
 2026-10-07 | D-010 | renumbered | - | merge de origin/dev em dev: as sessoes de 2026-10-06 numeraram D-005 em paralelo; a decisao de ULID passa a D-010 e a D-005 do ciclo default fica
+2026-10-07 | D-011 | added | plan-000022 | interruptor SPECIFY_DEFAULT por projeto e desvio por plano com motivo (--with-specify / --without-specify); braco de controle = mesma tag com off; revisa a D-005 em dois pontos sem substitui-la
+2026-10-07 | D-009 | superseded | plan-000022 | substituida pela D-011: a chave existe; o controle por tag confundia o Gherkin com o resto da release
+2026-10-07 | H-009 | revised | plan-000022 | duas leituras (intencao de tratar x por protocolo) e condicao de refutacao acrescentada; texto de B.1 aprovado pelo designer, inserido com override explicito de T4

@@ -19,3 +19,9 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 - deviated: Erro no adendo do roadmap escrito hoje (braço B no lugar de A), corrigido por apensamento (T3).
 - less-sure: Se a forma 1 da revisão da D-005 (só citar) basta para quem lê só as decisões.
 - gate: not-installed
+
+### Step 2 -- reflection-on-action | 2026-10-07 16:25 UTC | Registrar a revisão no /design
+- happened: O designer aprovou o rascunho no /design. D-011 registrada (STATUS proposed, plan-000022) com a A.1 como está; D-009 marcada superseded. D-005 pela forma 1: a D-011 cita os dois pontos que mudam, a D-005 fica como está. Flag de desligar: `--without-specify`. Release: interruptor na v0.11.0, PKB (plan-000020) na v0.12.0. O /design não vira segunda porta (fora do escopo). Parte B: o designer autorizou o agente a inserir o texto de B.1 literalmente no §3 2.9 (override explícito de T4 neste turno, anotado num comentário acima do trecho).
+- deviated: D-011 com Consequences e Rejected Alternatives em linha única (o verificador só aceita os rótulos DDR em linha única). As três linhas do CHANGELOG (D-011, D-009, H-009) foram apensadas à mão: o regex do CHANGELOG_APPEND só aceita IDs `XXX-YY-NNN` (lacuna já registrada em 2026-09-18). A linha `*Source:*` que o próprio apply_marker escreve também é acusada pelo check_human_markers_only.
+- less-sure: Se a D-010 deve receber o STATUS que ficou faltando no merge; não mexi.
+- gate: not-applicable
