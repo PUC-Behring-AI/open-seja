@@ -24,7 +24,7 @@ You will receive:
 - **level_file_path**: path to the expertise level file (e.g., `.claude/references/general/onboarding/l1-contributor.md`, `.claude/references/general/onboarding/l2-expert.md`, `.claude/references/general/onboarding/l3-leader.md`)
 - **project_context**: paths to project state files (conceptual design, conventions)
 - **output_path**: full path where the output file should be written
-- **output_id**: the reserved 6-digit ID for this artifact
+- **output_id**: the reserved artifact ID (see report-conventions)
 - **format**: `md`, `html`, or `both`
 
 ## Process
