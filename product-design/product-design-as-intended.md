@@ -1431,6 +1431,18 @@ ausência não é cosmética. Registrada em `Q-008`.
 
 *Source: plan-000015 Step 10 (2026-10-07)*
 
+### D-010: Identidade de artefato por ULID gerado localmente, sem coordenacao; apelido derivado e apelido livre no front-end
+
+**Context**: O open-seja e usado por times na mesma branch. reserve_id.py aloca IDs por max+1 sobre o INDEX.md local ("single-writer assumed"), e dois devs em maquinas diferentes podem reservar o mesmo numero sem aviso. O designer avaliou que o numero sequencial legivel nao e essencial: devs podem citar artefatos por um apelido proximo do que precisam fazer; o que nao pode se perder e a ordenacao na arvore do sistema de arquivos. A solucao precisa funcionar offline so com git, e um seja-mcp (H-007) deve consumir o mesmo esquema. Ver research-000018.
+
+**Decision**: A identidade do artefato e um ULID gerado localmente no nascimento (registro de nascimento: tipo, titulo, autor, timestamp UTC, origem), gravado como `uid:` no header e como `_output/ids/<uid>.json`. O nome de arquivo leva a data e seis caracteres do ULID (`plan-20261006-q8zrj4-<slug>.md`), o que preserva a ordem cronologica na arvore sem contador; a ordem intradia nao e garantida. A gramatica dos regexes e dos marcadores passa a aceitar os dois formatos; artefatos antigos nao sao tocados (T3). O front-end exibe um apelido pronunciavel derivado deterministicamente do ULID e aceita um apelido livre em linguagem natural ("o plano do Criar Projeto"), resolvido para o uid e nunca usado em caminho. Um verificador de IDs duplicados torna qualquer colisao visivel. Nao ha push na reserva, modo provisorio nem renumeracao.
+
+**Consequences**: Multi-dev e offline deixam de ser casos especiais. INDEX.md fica inteiramente derivado. A mudanca de formato e MAJOR na gramatica mas aditiva no ledger. O seja-mcp futuro reusa uid, registro de nascimento, apelidos e resolvedor sem alteracao. Perde-se o numero curto "plan 7"; o apelido derivado ocupa esse lugar na conversa.
+
+**Rejected Alternatives**: SHA do commit do git (circular: o SHA so existe depois do commit que ja contem o ID; o SHA do pai identifica a branch, nao o artefato); inteiro global reservado por push na branch (D' da research-000018: exige rede na reserva, modo provisorio e renumeracao de artefato nunca compartilhado); prefixo por dev (codifica o alocador no endereco); hash de conteudo (instavel, o artefato muda depois de nascer); renumeracao pos-merge (viola T3).
+
+*Source: from research-000018 (2026-10-06)*
+
 ## CHANGELOG
 
 <!-- Append-only. Format: YYYY-MM-DD | <id> | added|revised|revoked|superseded | plan-NNNNNN | <note>
@@ -1452,3 +1464,4 @@ ausência não é cosmética. Registrada em `Q-008`.
 2026-10-03 | D-002 | added | - | o release apresenta as três fases como entrada, com o portão como condição, a taxa de escape do /critique final e os escapes de intenção como medidas, e /design obrigatório antes do ciclo; projetos sem portão ficam fora da medida
 2026-10-05 | JM-TB-001 | added | - | seed do as-intended por /design; fusao da fundamentacao (Q-006 fundir); D-001 e D-002 migradas, D-003 apprentice e D-004 contrato Gherkin adicionadas
 2026-10-05 | JM-TB-002 | added | - | jornada intended do citizen dev aprovando a mensagem (SS-002, D-004)
+2026-10-07 | D-010 | renumbered | - | merge de origin/dev em dev: as sessoes de 2026-10-06 numeraram D-005 em paralelo; a decisao de ULID passa a D-010 e a D-005 do ciclo default fica
