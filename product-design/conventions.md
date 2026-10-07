@@ -84,6 +84,7 @@
 | Variable | Value | Description |
 |----------|-------|-------------|
 | `MINIMUM_REVIEW_DEPTH` | `light` | Minimum review depth floor. Valid values: `light`, `standard`, `deep`. |
+| `SPECIFY_DEFAULT` | `on` | Project default for the /plan specify phase (D-011, CYC-036). Valid values: `on`, `off`; empty = `on`. Per plan: `--with-specify` turns it on when the default is `off`; `--without-specify "<reason>"` turns it off when the default is `on`. |
 
 ---
 

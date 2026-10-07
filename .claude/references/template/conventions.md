@@ -100,6 +100,7 @@ designer_description: "I'm your project's single source of truth for directory s
 | Variable | Value | Description |
 |----------|-------|-------------|
 | `MINIMUM_REVIEW_DEPTH` | `{{MINIMUM_REVIEW_DEPTH}}` | Minimum review depth floor. Valid values: `light`, `standard`, `deep`. The automatic complexity gate and per-call flags can only raise the depth above this floor, never lower it. Depth ordering: light < standard < deep. Default: `light`. |
+| `SPECIFY_DEFAULT` | `{{SPECIFY_DEFAULT}}` | Project default for the /plan specify phase (D-011, CYC-036). Valid values: `on`, `off`; empty = `on`. Per plan: `--with-specify` turns it on when the default is `off`; `--without-specify "<reason>"` turns it off when the default is `on`. `/seja-setup` asks for the value at install; upgrade asks when the row is missing and writes it only on an explicit answer. Default: `on`. |
 
 ---
 
