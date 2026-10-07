@@ -42,6 +42,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import project_config  # noqa: E402
+from artifact_id import normalize_id
 
 REPO_ROOT = project_config.REPO_ROOT
 
@@ -105,7 +106,7 @@ def _plans_dir() -> Path:
 
 
 def _norm_id(plan_id: str) -> str:
-    return plan_id.zfill(6) if plan_id.isdigit() else plan_id
+    return normalize_id(plan_id)
 
 
 def progress_path(plan_id: str, plans_dir: Path | None = None) -> Path:

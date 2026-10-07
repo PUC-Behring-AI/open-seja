@@ -39,6 +39,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from artifact_id import ARTIFACT_ID
 from project_config import REPO_ROOT, get_path, get_pending_file
 
 
@@ -55,8 +56,8 @@ _PUBLISH_OVERDUE_DAYS = 3
 _IMPLEMENT_TYPE = "implement"
 _IMPLEMENT_DEFAULT_THRESHOLD = 30
 _IMPLEMENT_THRESHOLD_TRIGGER = "Pending plan age escalation"
-_PLAN_ID_RE = re.compile(r"^plan-(\d{6})$")
-_ROADMAP_ID_RE = re.compile(r"^roadmap-(\d{6})$")
+_PLAN_ID_RE = re.compile(rf"^plan-({ARTIFACT_ID})$")
+_ROADMAP_ID_RE = re.compile(rf"^roadmap-({ARTIFACT_ID})$")
 
 
 # ---------------------------------------------------------------------------
