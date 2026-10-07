@@ -49,3 +49,9 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 - deviated: O Verify de integracao (capture+digest com inbox staged no open-seja) depende do Step 8 e nao foi rodado; coberto por testes com tmp_path. Os testes usam skill-type desconhecido para isolar o REPO_ROOT mockado. run_all_checks: sem falha nova (check_skill_system passou de FAIL para PASS).
 - less-sure: Se a linha DESIGN_TRIGGER_DRIFT_ITEMS com valor vazio e lida bem por project_config e check_conventions; se o pkb_inbox importado no verify_commit_scope pesa em todo commit (e stdlib, mas e mais um import).
 - gate: not-installed
+
+### Step 7 -- reflection-on-action | 2026-10-07 21:52 UTC | Step 7a: /seja-setup --pkb e sinal has_pkb_layer
+- happened: detect_setup_state ganhou signals.has_pkb_layer via import de pkb_inbox.pkb_layer_present (sem reimplementar); 2 testes novos e o de shape ajustado, 19 verdes. SKILL.md ganhou --pkb e o ancora Offer-PkbLayer (7d do install, 7c do here, 10c do demo) com AskUserQuestion; quickguide atualizado.
+- deviated: step_notes.py so aceita --step inteiro: usei 7 e marquei 7a no titulo. O import de pkb_inbox e guardado por try/except ImportError (False se faltar). Ruff mostra erros antigos nos dois arquivos, nao tocados.
+- less-sure: Se a camada ficar sem commit apos o 7d e aceitavel; se o sinal usa o conventions do alvo em --cwd (usa cwd como repo_root); o fluxo AskUserQuestion foi descrito, nao executado.
+- gate: not-installed

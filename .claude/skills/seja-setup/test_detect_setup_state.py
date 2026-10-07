@@ -270,6 +270,7 @@ def test_json_output_shape():
             "has_seja_public_subtree",
             "has_dev_scripts",
             "head_at_default_branch",
+            "has_pkb_layer",
         }
         assert set(result["signals"].keys()) == expected_signal_keys
         # Round-trip through JSON to ensure the shape is serialisable.
@@ -306,3 +307,38 @@ def test_finalised_legacy_layout():
         result = detect_state(tmp)
         assert result["state"] == State.FINALISED
         assert result["signals"]["has_project_conventions"] is True
+
+
+# ---------- has_pkb_layer signal (plan-000020 step 7a) -----------------------
+
+
+def make_pkb_layer(tmpdir: Path, readme: bool = True) -> None:
+    (tmpdir / "inbox").mkdir()
+    if readme:
+        (tmpdir / "inbox" / "README.md").write_text("# inbox\n", encoding="utf-8")
+
+
+def test_has_pkb_layer_true_with_readme():
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        make_claude_skills(tmp)
+        make_project_conventions(tmp)
+        make_pkb_layer(tmp)
+        assert detect_state(tmp)["signals"]["has_pkb_layer"] is True
+
+
+def test_has_pkb_layer_false_without_readme_and_state_unchanged():
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        make_claude_skills(tmp)
+        make_project_conventions(tmp)
+        make_populated_output(tmp)
+        without = detect_state(tmp)
+        make_pkb_layer(tmp, readme=False)
+        bare = detect_state(tmp)
+        (tmp / "inbox" / "README.md").write_text("# inbox\n", encoding="utf-8")
+        with_layer = detect_state(tmp)
+        assert without["signals"]["has_pkb_layer"] is False
+        assert bare["signals"]["has_pkb_layer"] is False
+        assert with_layer["signals"]["has_pkb_layer"] is True
+        assert without["state"] == bare["state"] == with_layer["state"]

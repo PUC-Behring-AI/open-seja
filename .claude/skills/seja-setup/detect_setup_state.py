@@ -33,6 +33,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+
 SEJA_PRIV_RE = re.compile(r"(?i)github\.com[:/]simonedjb/seja-priv(\.git)?/?$")
 SEJA_PUBLIC_RE = re.compile(r"(?i)github\.com[:/]simonedjb/seja(\.git)?/?$")
 
@@ -170,6 +172,15 @@ def _output_non_empty(output_dir: Path) -> bool:
     return False
 
 
+def _has_pkb_layer(cwd: Path) -> bool:
+    """PKB layer signal: the same predicate the post-skill uses (pkb_inbox)."""
+    try:
+        from pkb_inbox import pkb_layer_present
+    except ImportError:  # harness without the PKB script: layer cannot be present
+        return False
+    return pkb_layer_present(cwd)
+
+
 def _collect_signals(cwd: Path) -> dict:
     """Gather all detection signals without short-circuiting."""
     claude_dir = cwd / ".claude"
@@ -205,6 +216,7 @@ def _collect_signals(cwd: Path) -> dict:
         "has_seja_public_subtree": _has_seja_public_subtree(cwd),
         "has_dev_scripts": _present_dev_scripts(cwd),
         "head_at_default_branch": _head_at_default_branch(cwd),
+        "has_pkb_layer": _has_pkb_layer(cwd),
     }
 
 
@@ -280,6 +292,7 @@ def detect_state(cwd: Path) -> dict:
         "has_seja_public_subtree": signals["has_seja_public_subtree"],
         "has_dev_scripts": signals["has_dev_scripts"],
         "head_at_default_branch": signals["head_at_default_branch"],
+        "has_pkb_layer": signals["has_pkb_layer"],
     }
     state = _classify(signals)
     return {

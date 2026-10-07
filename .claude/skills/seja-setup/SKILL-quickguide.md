@@ -15,6 +15,9 @@ State detection recognizes four project states: **no-harness** (fresh install ta
 > `/seja-setup /path/to/taskflow-demo --demo`
 > Sets up the harness with the pre-configured TaskFlow demo project (pre-filled conventions, constitution, conceptual design, and walkthrough).
 
+> `/seja-setup <target> --pkb` (also valid with `--here` and `--demo`)
+> Also instantiates the PKB layer (inbox, logs, templates, Objetivos.md, index.md and the 5 maintenance skills) without asking. Without the flag, install asks once. Run `pkb_inbox.py init --with-skills` later to add it to an existing project.
+
 > `/seja-setup --upgrade`
 > Upgrades harness files in the current project to the latest SemVer tag without touching project-specific files.
 

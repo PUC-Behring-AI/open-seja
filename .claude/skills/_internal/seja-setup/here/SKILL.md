@@ -121,6 +121,10 @@ Apply chosen actions sequentially; log each rename/move before executing.
 
 Only when Step 4f was accepted. Apply the `Write-QualityGateConfig` anchor body from Standard Install Flow step 7c against cwd: append `## Quality Gate` to `product-design/conventions.md` after the initial commit, leave it uncommitted, and tell the user to commit it themselves after `uv run python gate.py --init-baseline`.
 
+### Step 7c -- PKB layer
+
+Apply the `Offer-PkbLayer` anchor body from Standard Install Flow step 7d against cwd (`--pkb` runs `pkb_inbox.py init --target . --with-skills` without asking; otherwise ask once).
+
 ### Step 8 -- Handoff
 
 Report the scaffolded stack summary, then direct to `/design`. Stack-aware: render present frameworks as their slug (e.g. `flask`, `react`) and absent stacks as `no backend` / `no frontend`.

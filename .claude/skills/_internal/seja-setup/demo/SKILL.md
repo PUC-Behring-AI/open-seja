@@ -29,6 +29,8 @@ Runs Standard Install steps 1-7 (skipping 7b -- deferred to after step 10), then
 
 10b. **Initial commit (demo)**: run step 7b now so the commit includes demo files + walkthrough.
 
+10c. **PKB layer**: apply the `Offer-PkbLayer` anchor body from Standard Install Flow step 7d against `<target>` (`--pkb` runs `init --with-skills` without asking; otherwise ask once).
+
 11. **Print walkthrough message**:
     > Your demo project "TaskFlow" has been set up at `<target>` with pre-filled design files.
     >
