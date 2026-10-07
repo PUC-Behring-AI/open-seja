@@ -79,3 +79,9 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 - deviated: Numerei a decisao D-012 e a questao Q-014 como propostas (a conferir pelo designer). _output/tmp e rastreado, entao o rascunho entra no commit. Nenhum arquivo de product-design/ tocado.
 - less-sure: Se a descricao do sinal as_expressed_igual_ao_brief como 'presenca de diferenca' e a regra de plano nao contado quando a captura falha refletem o que o designer quer; o valor N e M ficam seus.
 - gate: not-installed
+
+### Step 10 -- reflection-on-action | 2026-10-07 22:14 UTC | Documentacao e inventario do harness
+- happened: Criei docs/pkb-layer.md (en-US) a partir do codigo real: init, capture, digest, _live.md, PKB_DIR, 7f, gatilho 2c, upgrade e as limitacoes (cadeia preceding_evt_id e session_id, so brief sem trace, mascarado, skills so no template, pastas fora do main). CHANGELOG [Unreleased] ganhou Added e Changed; harness-structure e CHEATSHEET atualizados.
+- deviated: CHEATSHEET e gerado por generate_cheatsheet.py: regenerei, e o diff trouxe tambem /mob e o contador 16 (deriva antiga do arquivo). seja-setup quickguide ja tinha --pkb (Step 7a), nao alterei; nao ha quickguide do post-skill. harness-structure: scripts 76 para 77 e template/pkb citado. docs/pkb-layer.md tem um unico link externo (URL publica do bootstrap).
+- less-sure: Se o contador de scripts (77) bate com a contagem real do check; se o texto sobre padroes de segredo sem aspas e detalhe demais para o consumidor. run_all_checks: 20 pass/14 fail antes e depois, mesmos checks.
+- gate: not-installed

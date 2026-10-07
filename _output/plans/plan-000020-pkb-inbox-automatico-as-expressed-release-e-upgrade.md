@@ -184,7 +184,7 @@ Criar `docs/pkb-layer.md` (en-US, para a distribuicao): o que e a camada PKB, co
 - **Verify**: `python3 .claude/skills/scripts/run_all_checks.py` sem falha nova; links relativos do `docs/pkb-layer.md` resolvem (`ls` de cada alvo)
 - **Tests**: N/A (documentacao)
 - **Docs**: este step e a documentacao
-- [ ] Done
+- [x] Done
 
 ### Step 11: Release do open-seja (v0.11.0; ver decisao de versao)
 Seguir `tools/release-process.md` a partir de `dev` limpo: mover `[Unreleased]` do CHANGELOG para `[v0.11.0] - <data UTC>`, com uma linha de nota no topo da secao: "v0.10.0 e v0.10.1 constam acima com data mas nunca receberam tag; v0.11.0 e a primeira tag depois de v0.9.1 e contem as tres secoes"; gravar `v0.11.0` em `.seja-version`; **nao** alterar `.claude/skills/VERSION` (e a versao interna do harness, `version: 0.7.1`, lida por `read_version`, fora do processo de release; alinhar os dois numeros e decisao separada); commitar em `dev`. Rodar `python3 tools/build_dist_branch.py --dry-run`, depois sem flag, depois `--check` (exit 0). Verificar com `git clone --branch main <repo> /tmp/x && python3 /tmp/x/.claude/skills/seja-setup/detect_setup_state.py` esperando `fresh-download`, e que `inbox/`, `_output/`, `product-design/`, `.seja-version` e `tools/` nao estao no clone, e que `.claude/references/template/pkb/` esta. `git tag -a v0.11.0 main -m "open-seja v0.11.0"`. **Parar e pedir confirmacao** antes de `git push origin dev main v0.11.0`; sem confirmacao, deixar tag e main locais e registrar no progress file que o push ficou pendente (o Step 12 tem caminho local para esse caso). Se o designer tiver optado por publicar v0.10.1 antes (sem este plano), rodar este step primeiro para v0.10.1 a partir do commit anterior ao plano, e depois para v0.11.0.
