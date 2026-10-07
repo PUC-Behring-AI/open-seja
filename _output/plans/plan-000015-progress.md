@@ -165,3 +165,35 @@ Decisao: **seguir**. Os planos 000007 a 000014 executaram (todos DONE). Nada foi
 - deviated: Mexi em `upgrade_harness.py` (fora da lista de arquivos do plano) e no passo 5 do fluxo de upgrade, porque sem isso a decisão 6 = C não se cumpre. O `check_version_changelog_sync.py` não cobre `.seja-version` nem o CHANGELOG da raiz; usei um teste no lugar. A tag nova vive só num clone descartável.
 - less-sure: Se um upgrade real, com o passo 5 rodando o script da release nova sobre um projeto muito antigo, se comporta como o da v0.9.1 simulada. Também não sei se o designer quer a correção do template já na v0.11.0 ou em um patch à parte.
 - gate: not-installed
+
+### Step 10 -- H-009 e as D-NNN coerentes entre os oito planos (2026-10-07)
+
+- O arquivo real é `product-design/product-design-as-intended.md`: `seja-as-intended.md` foi fundido nele em 2026-10-05 (Q-006). H-009 está em §2.9; as D-NNN do ciclo são D-004 a D-008.
+- Conferência: os nomes D1, D2, D3a e D3b, os estados `coberto/descoberto/não medido`, `Specify: skipped` e "v1 válido para sempre" batem entre D-004 a D-008, `drift-metric.md`, `drift-report.md`, `drift-control-protocol.md` e o guia pt-BR. `approved/stale/draft/missing`, `rev` do REQ e `--pipeline` não aparecem em H-009 nem nas D-NNN. Estão só nas referências, sem conflito.
+- Lacuna achada: a refutação de H-009 reescrita pela D-004 só traz o critério do ritual (ajustes, escapes e mutantes iguais a zero). Ela não traz a comparação entre os braços que o `drift-control-protocol.md` diz operacionalizar (`D_B >= D_A`). O designer escolheu acrescentar só a ressalva do retrofit, sem reintroduzir a condição comparativa.
+- (c) feito: D-009 "O ciclo default entra por upgrade de tag e age só onde há features/ ou plano v2; sem chave de desligar", via `apply_marker.py` (DECISION_APPEND, depois STATUS `proposed | plan-000015 | 2026-10-07`). Texto aprovado pelo designer em 2026-10-07. `grep -c "^### D-"` passou de 8 a 9.
+- (a) e (b) **pendentes, com o designer**: são prosa de H-009, e a T4 do open-seja e o `check_human_markers_only.py` recusam a escrita por agente. Apliquei, o check acusou e desfiz. Textos aprovados, para colar via `/implement --manual` logo depois de "...adequação por posição na escala." em §2.9:
+  - (a), no mesmo parágrafo: "No ciclo padrão não há REQ nem cenário. Por isso D1 e D2 do ciclo padrão só existem por retrofit contra o oráculo do designer, e a comparação direta se faz em D3a, D3b e O1, pela regra de `drift-control-protocol.md`."
+  - (b), em parágrafo próprio: "A medida é feita pelo `drift_report.py`: sobre o M1, retrato congelado pelo `/implement` no fim do plano, e sobre o M2, depois da entrega (`drift-metric.md`)."
+- Desvio: sem linha no `## CHANGELOG`. O regex de CHANGELOG_APPEND só aceita IDs `XX-YY-NNN`, como `JM-TB-001`, e não `D-NNN`. As D-005 a D-008 também ficaram sem linha.
+- Follow-up do harness: o `apply_marker.py --note` escreve `*Source: ...*` numa DECISION_APPEND, e o `check_human_markers_only.py` recusa essa linha. O commit `9f4a70e` (D-005 a D-008) dá as mesmas violações em `--range`. Não aparece no baseline porque o check só olha o stage ou um intervalo.
+
+| Afirmação de H-009 | Quem sustenta |
+|---|---|
+| intenção detalhada com REQ IDs | 000009 (grill, `intent.md`), D-005 |
+| cenários Gherkin com `@REQ-` | 000010 (formato), 000011 (specify e aprovação), D-004, D-006 |
+| plano a partir dos cenários | 000012 (`Scenarios:`, v2), D-008 |
+| testes executáveis antes do código | 000013 (teste-primeiro, portão) |
+| só implementa depois | 000011 (aprovação), 000012 (`check_plan_scenarios`), 000015 Step 5 (M1) |
+| divergência por degrau, não só no fim | 000008 (`drift-metric.md`), 000014 (`drift_report.py`, `/reflect`), D-007 |
+| comparação com o ciclo de H-008 | 000008 (`drift-control-protocol.md`), D-009 (tag anterior como controle) |
+| alcance declarado e D0 | D-004, 000008 |
+| refutação por ritual | 000011 (ajustes e recusas), 000013 (mutantes), 000014 (escapes) |
+
+- Verify: `check_human_markers_only.py --staged` dá 1 violação, a linha `*Source:*` (o follow-up acima). `run_all_checks.py` sem stage: 19/14, mesmo conjunto. C1 no diff: 0.
+
+### Step 10 -- reflection-on-action | 2026-10-07 UTC | H-009 e as D-NNN coerentes
+- happened: Conferi H-009 e D-004 a D-008 contra os planos: os termos batem. Entrou a D-009 aprovada pelo designer.
+- deviated: A ressalva e a nota de H-009 ficaram com o designer (T4 recusa prosa de agente). Não há linha no CHANGELOG, porque o regex não aceita D-NNN.
+- less-sure: Se a refutação de H-009 deve voltar a ter a condição comparativa que o protocolo diz operacionalizar.
+- gate: not-installed

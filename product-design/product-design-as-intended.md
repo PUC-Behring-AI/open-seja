@@ -1421,6 +1421,16 @@ ausência não é cosmética. Registrada em `Q-008`.
 
 *Source: plan-000007 Step 6 (2026-10-06)*
 
+<!-- STATUS: proposed | plan-000015 | 2026-10-07 -->
+### D-009: O ciclo default entra por upgrade de tag e age só onde há features/ ou plano v2; sem chave de desligar
+
+**Context**: O ciclo default muda /plan, /implement e /reflect em todo projeto que atualiza a tag. Projeto existente não pode quebrar, e o piloto precisa de um braço de controle limpo.
+**Decision**: O ciclo entra pela v0.11.0 e age só onde há features/<slug>/ com intent.md ou plano v2. Planos v1 valem para sempre (D-008). Não há chave para desligar: quem não quer a escada pula com motivo registrado (--light, tarefa sem código, Specify: skipped). O braço de controle do piloto usa a tag anterior pinada.
+**Consequences**: O upgrade não toca product-design/, conventions.md, settings, _output/ nem features/ (tests/compat, plan-000015). Fora do perímetro, os checks do ciclo dizem "nada a verificar". O plugin de teste-primeiro só é atualizado onde já estava. Todo desvio fica registrado, o que preserva a medida de H-009 (H-008, D-005, D-007).
+**Rejected Alternatives**: chave global de desligar (preset por outro nome; contamina o controle); opt-in por projeto (H-009 não mede o que é opcional); migrar planos v1 (D-008).
+
+*Source: plan-000015 Step 10 (2026-10-07)*
+
 ## CHANGELOG
 
 <!-- Append-only. Format: YYYY-MM-DD | <id> | added|revised|revoked|superseded | plan-NNNNNN | <note>
