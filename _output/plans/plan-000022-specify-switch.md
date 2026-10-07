@@ -1,3 +1,4 @@
+# DONE | 2026-10-07 17:20 UTC |
 # Plan 000022 | FEATURE-O | 2026-10-07 15:37 UTC | specify-switch: interruptor da specify por projeto e escolha por plano | Review: deep
 plan_format_version: 2
 Specify: skipped -- tarefa sem código: plano de harness (contrato, skills, verificadores e guias do próprio open-seja); os testes estão no Verify de cada step
@@ -113,7 +114,7 @@ Cinco referências, só acréscimos marcados "emenda 000022", cada emenda ao con
 - **Verify**: `git diff --numstat` dos cinco arquivos com 0 remoções; `grep -c "emenda 000022"` >= 1 em cada um dos cinco; no contrato, cada bloco "emenda 000022" tem uma linha "Ruptura que pode provocar"; `grep -rn '${SPECIFY_DEFAULT}' .claude/` vazio; `check_features.py`, `check_intent.py`, `check_specify.py` e `check_conventions.py` continuam passando no `run_all_checks.py`.
 - **Tests**: N/A (documento normativo; os validadores dos Steps 4, 5, 8 e 9 têm os testes)
 - **Scenarios**: N/A (plano de harness, Specify skipped)
-- [ ] Done
+- [x] Done
 
 ### Step 4: `SPECIFY_DEFAULT` nas convenções e um leitor
 Acrescentar a linha `SPECIFY_DEFAULT` (valores `on`/`off`; vazio = `on`) ao template `.claude/references/template/conventions.md` (placeholder `{{SPECIFY_DEFAULT}}`) e ao `product-design/conventions.md` do open-seja (`on`). Em `project_config.py`, função `specify_default(root: Path | None = None) -> str` que devolve `"on"` ou `"off"`. Ela lê `<root>/product-design/conventions.md` (e a pasta legada `project-design/`) diretamente, sem o cache de módulo e sem cair no template (`root` ausente = `REPO_ROOT`). Ela aceita o valor com ou sem crases, por um regex próprio da linha `SPECIFY_DEFAULT`, para que um `off` sem crases não vire `on` em silêncio. Arquivo ausente, linha ausente, valor vazio ou placeholder `{{...}}` = `"on"`. Outro valor levanta `ValueError` em pt-BR com o valor lido.
@@ -124,7 +125,7 @@ Acrescentar a linha `SPECIFY_DEFAULT` (valores `on`/`off`; vazio = `on`) ao temp
 - **Verify**: `pytest .claude/skills/scripts/tests/test_project_config.py` verde; `check_conventions.py` sem falha nova.
 - **Tests**: `.claude/skills/scripts/tests/test_project_config.py`: casos `specify_default` para arquivo ausente, linha ausente, vazio, placeholder `{{SPECIFY_DEFAULT}}`, `on`, `off`, `off` sem crases, inválido (`ValueError`), e `root` de fixture diferente do `REPO_ROOT`
 - **Scenarios**: N/A (plano de harness, Specify skipped)
-- [ ] Done
+- [x] Done
 
 ### Step 5: `check_plan_scenarios.py` lê a classe do pulo
 Função pública `skip_class(value) -> (classe | None, motivo)`, o parser único da classe, importado por `build_checks.py`, `drift_report.py` e `cycle_adherence.py`. PFS-002 aceita as três classes e o motivo sem classe (legado = `tarefa sem código`); `opt-out` sem motivo, ou com motivo que não passa no `reason_ok`, é erro. Nova leitura do cabeçalho `Specify default: on|off` (ausente = `on`; outro valor = PFS-002). PFS-013 passa a valer só para `tarefa sem código`; com `default off` ou `opt-out`, step com `Tests:` não-N/A precisa de `Scenarios: N/A (motivo)` e não pode ter chave. Nova PFS-016 (info), sem ler `conventions.md`: dispara quando a classe contraria a linha `Specify default:` do próprio plano (`opt-out` com `on`; `approved` com `off`), dizendo "leitura por protocolo: este plano conta como desvio do default"; `default off` com `Specify default: on` é erro (incoerência do cabeçalho). `--json` ganha `skip_class`, `skip_reason` e `specify_default` (aditivo; `schema_version` igual, documentado em "Esquema de `--json`"). Atualizar a tabela PFS no docstring.
@@ -135,7 +136,7 @@ Função pública `skip_class(value) -> (classe | None, motivo)`, o parser únic
 - **Verify**: `pytest .claude/skills/scripts/tests/test_check_plan_scenarios.py .claude/skills/scripts/tests/test_build_checks.py` verde; todas as fixtures existentes de `plan_scenarios/` (inclusive `pfs-002-skipped-*`, `pfs-013-*`, `v2-skipped`, `ref-b-sem-codigo`) com o `esperado.json` igual; `python3 .claude/skills/scripts/check_plan_scenarios.py _output/plans/plan-000022-specify-switch.md` sai 0; `python3 .claude/skills/scripts/check_plan_scenarios.py` (scan) sai 0.
 - **Tests**: `test_check_plan_scenarios.py`: `skip_class` para as três classes, o legado (com e sem acento, com parênteses) e o vazio; uma fixture por PFS novo ou alterado (lista em Files); `--json` com `skip_class`, `skip_reason`, `specify_default`
 - **Scenarios**: N/A (plano de harness, Specify skipped)
-- [ ] Done
+- [x] Done
 
 ### Step 6: As flags no `/plan`
 `plan/SKILL.md`: `--with-specify` e a flag de desligar no `argument-hint`, na tabela de flags e no Mode Detection (não são overrides de modo; seguem para o standard). `_internal/plan/standard/SKILL.md`, passos 2b e 2c: ler `SPECIFY_DEFAULT` (via `project_config.specify_default`) e gravar `Specify default: on|off` sob o cabeçalho de todo plano v2 novo. A classificação "sem código" tem precedência e dá `tarefa sem código` em qualquer default. Com `off` e sem `--with-specify`, ou com `on` e a flag de desligar, a tarefa com código recebe a entrevista curta e a linha `Specify: skipped -- default off` ou `Specify: skipped -- opt-out: <motivo>`; os steps de código podem ter `Tests:` reais com `Scenarios: N/A (specify desligada neste plano)` (trocar a frase "every step has `Tests: N/A`" do passo 2b). Com `off` e `--with-specify`, a grill completa e a specify rodam como hoje. O motivo vira uma linha (quebra de linha vira espaço) e precisa passar no `reason_ok`; motivo ausente ou fraco é recusado em uma frase. As duas flags juntas, ou uma delas com `--light`, `--grill`, `--specify` ou `--roadmap`, são recusadas em uma frase; os planos gerados por um roadmap herdam o default do projeto. `--with-specify` com `on` e a flag de desligar com `off` não fazem nada e não avisam. `--specify` (fase avulsa, SPC-016) não muda. Acrescentar a linha 8 (000022) à tabela "Ordem de edição dos `SKILL.md`" do contrato.
@@ -146,7 +147,7 @@ Função pública `skip_class(value) -> (classe | None, motivo)`, o parser únic
 - **Verify**: `check_skill_spec.py` e `check_skill_system.py` sem falha nova; `grep -n "with-specify\|no-specify"` (ou o nome decidido) acha as duas flags nos dois `SKILL.md`; `grep -c "every step has \`Tests: N/A\`"` no standard = 0; `python3 .claude/skills/scripts/check_docs.py --plugins skill-body-length --verbose` com `plan` abaixo de 90% do tier (hoje 72/500); a tabela "Ordem de edição" tem a linha 000022.
 - **Tests**: N/A (instrução de skill; a fiação é testada no Step 11)
 - **Scenarios**: N/A (plano de harness, Specify skipped)
-- [ ] Done
+- [x] Done
 
 ### Step 7: O setup e o upgrade perguntam
 `install/SKILL.md`: uma AskUserQuestion (C4) depois de preencher as convenções: "A especificação em Gherkin é o padrão neste projeto?", com opções `on` (Recommended when o projeto vai medir a escada ou já tem requisitos estáveis) e `off` (Recommended when o projeto está em prototipação); gravar em `conventions.md`. `upgrade/SKILL.md`, passo 8 ("New convention variables"): se `SPECIFY_DEFAULT` está ausente depois do `diff_conventions`, fazer a mesma pergunta (C4); gravar a linha em `product-design/conventions.md` **só** com resposta explícita, com o valor entre crases; em modo não interativo, em `--dry-run` ou sem resposta, não gravar e dizer "vale `on` até você responder". O `upgrade_harness.py` não muda (continua sem tocar em `conventions.md`).
@@ -157,7 +158,7 @@ Função pública `skip_class(value) -> (classe | None, motivo)`, o parser únic
 - **Verify**: `grep -n "SPECIFY_DEFAULT"` acha a pergunta nos dois arquivos; `check_skill_system.py` sem falha nova; `pytest tests/compat/test_upgrade_compat.py` verde (prova que o script de upgrade não grava em `conventions.md` e que o conjunto de falhas do `run_all_checks.py` não muda num projeto antigo sem a linha); a regra "não grava sem resposta" no texto da skill é testada no Step 11.
 - **Tests**: N/A (instrução de skill; compat no Verify, texto testado no Step 11)
 - **Scenarios**: N/A (plano de harness, Specify skipped)
-- [ ] Done
+- [x] Done
 
 ### Step 8: Relatório de aderência e o braço de controle
 Criar `cycle_adherence.py`, instrumento de **aderência**, não de desfecho. Ele faz a própria varredura de `PLANS_DIR` (via `project_config`, ou `--root`): todos os `plan-*.md`, inclusive DONE, sem `-progress` e `-qa-`, nos dois formatos de nome (6 dígitos e ULID, D-010). A classe vem de `check_plan_scenarios.skip_class` (import, como o `build_checks.py`). Definições: elegível = v2 com `approved`, `default off` ou `opt-out`; braço atribuído (ITT) = linha `Specify default:` do plano (ausente = `on`); tratamento recebido (por protocolo) = escada se `approved`, sem escada se `default off` ou `opt-out`; desvio = braço `on` com `opt-out`, ou braço `off` com `approved`. Não elegível = `tarefa sem código` (contagem própria); v1 = `não medido` (Q4); REVOKED e SUPERSEDED listados à parte; proposals de `${PROPOSALS_DIR}` contadas como `fora do ciclo` (a rota `--light`). Identidade: elegíveis + não elegíveis + v1 + revogados ou substituídos = total de planos. Desfecho por plano: o vetor por degrau só quando existe `features/<slug>/drift/M1.json`; nos outros, `não medido` com a razão; nenhum número agregado (D-007). Saída em tabela pt-BR e `--json`: `{"planos": [...], "itt": {"on": {...}, "off": {...}}, "por_protocolo": {"escada": {...}, "sem_escada": {...}}, "desvio": {"n": N, "elegiveis": M, "motivos": [...]}, "nao_elegiveis": N, "nao_medido": N, "fora_do_ciclo": N, "revogados": N}`. `--since YYYY-MM-DD` filtra pela data do cabeçalho do plano (não pelo `features/adoption.json`, que um projeto `off` nunca escreve). Emendar `drift-control-protocol.md`: braço A = mesma tag com `off` (entrevista curta, plano v2 `default off`, `Tests:` por step); seção 9 com a ameaça "o controle tem entrevista curta, o contraste deixa de ser H-008"; o retrofit da seção 4 vale para plano v2 `default off`; a leitura por protocolo da divergência é feita só com o oráculo (O1, D3b), e os limiares são fixados antes da primeira execução (Q3).
@@ -168,7 +169,7 @@ Criar `cycle_adherence.py`, instrumento de **aderência**, não de desfecho. Ele
 - **Verify**: `pytest .claude/skills/scripts/tests/test_cycle_adherence.py` verde; na fixture, elegíveis + não elegíveis + v1 + revogados = total de arquivos de plano, e ITT (on + off) = por protocolo (escada + sem escada) = elegíveis; v1 aparece como `não medido` e o DONE é contado; `python3 .claude/skills/scripts/cycle_adherence.py --json` roda no próprio open-seja e sai 0; `git diff --numstat .claude/references/general/drift-control-protocol.md` com 0 remoções.
 - **Tests**: `.claude/skills/scripts/tests/test_cycle_adherence.py`: ledger de fixture com um plano de cada classe nos dois braços, um com desvio em cada braço, um DONE, um REVOKED, um v1, um nome ULID, uma proposal e um plano sem `Specify default:` (lido como `on`); identidade de contagem; `--since`; desfecho `não medido` sem `drift/M1.json`
 - **Scenarios**: N/A (plano de harness, Specify skipped)
-- [ ] Done
+- [x] Done
 
 ### Step 9: `drift_report.py` diz por que não há escada
 Hoje `--plan` com `Specify: skipped` reporta "não aplicável" com a razão `NM-SPECIFY-PULADA`. Passar a ler a classe por `check_plan_scenarios.skip_class` (sem regex próprio) e a dizer a classe e o motivo, em voz controlada (DRP-013): "Você escolheu não escrever a especificação neste plano: <motivo>." ou "A especificação está desligada neste projeto.", com as razões novas `NM-SPECIFY-OPT-OUT` e `NM-SPECIFY-DEFAULT-OFF` no JSON, documentadas em `drift-report.md`. `tarefa sem código` continua com `NM-SPECIFY-PULADA` e a mesma saída.
@@ -179,7 +180,7 @@ Hoje `--plan` com `Specify: skipped` reporta "não aplicável" com a razão `NM-
 - **Verify**: `pytest .claude/skills/scripts/tests/test_drift_report.py` verde; a fixture `tests/fixtures/drift_report/specify-pulado/esperado.json` não muda (a saída de `tarefa sem código` é igual byte a byte); `grep -n "NM-SPECIFY-OPT-OUT\|NM-SPECIFY-DEFAULT-OFF" .claude/references/general/drift-report.md` acha as duas.
 - **Tests**: `test_drift_report.py`: um caso por classe (`opt-out` com motivo, `default off`, `tarefa sem código`), checando a frase e a razão NM no JSON
 - **Scenarios**: N/A (plano de harness, Specify skipped)
-- [ ] Done
+- [x] Done
 
 ### Step 10: Guias e ajuda
 `docs/how-to/ciclo-default.pt-BR.md`: substituir a frase "Não existe chave para desligar o ciclo. Uma chave escondida mudaria a medida da escada sem deixar registro." por uma que aponte para a seção nova; seção "Ligar e desligar a especificação" (o interruptor, as duas flags, quando usar cada uma, a linha `Specify default:`, como o desvio aparece no relatório; prototipação como exemplo). `plan/SKILL-quickguide.md`: as duas flags. `help/SKILL.md`: uma linha.
@@ -191,7 +192,7 @@ Hoje `--plan` com `Specify: skipped` reporta "não aplicável" com a razão `NM-
 - **Tests**: N/A (documentação)
 - **Docs**: os três arquivos.
 - **Scenarios**: N/A (plano de harness, Specify skipped)
-- [ ] Done
+- [x] Done
 
 ### Step 11: Fiação, CHANGELOG e portão final
 `test_default_cycle_wiring.py`: casos novos: o template tem `SPECIFY_DEFAULT`; `plan/SKILL.md` e o standard citam as duas flags; o standard grava `Specify default:`; o `upgrade/SKILL.md` diz que não grava sem resposta; `cycle_adherence.py` existe e roda; `build_checks.py route` sobre um plano `opt-out` com `Tests:` real dá steps `no-scenario` com as ações TDD e preâmbulo sem `check-specify-status` (o `/implement` trata o plano sem mudança, CYC-020). `CHANGELOG.md`: se `git tag -l v0.11.0` estiver vazio, acrescentar a entrada à seção `## [v0.11.0]` já cortada (sem bump), citando a nova D-NNN e dizendo que a D-009 foi substituída, e corrigir as frases "needs no switch" e "does not touch [...] `conventions.md`" dessa seção; se a tag existir ou o Step 2 tiver escolhido outra versão, parar e perguntar ao designer (C4) antes de escrever. Rodar o portão de Q1.
@@ -202,7 +203,7 @@ Hoje `--plan` com `Specify: skipped` reporta "não aplicável" com a razão `NM-
 - **Verify**: `pytest .claude/skills/scripts/tests/` e `pytest tests/compat/test_upgrade_compat.py` verdes; `python3 .claude/skills/scripts/run_all_checks.py` com no máximo as 15 falhas da linha de base pós-merge e nenhuma nova; `check_version_changelog_sync.py` no mesmo estado ou melhor; `git tag -l v0.11.0` ainda vazio no fim deste plano (a tag é do Step 11 do plan-000020).
 - **Tests**: `.claude/skills/scripts/tests/test_default_cycle_wiring.py`: os casos novos listados acima
 - **Scenarios**: N/A (plano de harness, Specify skipped)
-- [ ] Done
+- [x] Done
 
 ## Riscos
 
@@ -487,3 +488,22 @@ Observação: não conferi a linha de base "18/15" do `run_all_checks.py` citada
 - Files: ganham `template/plan-step.md` (Step 3), `extended-cycle-contract.md` (Step 6), `drift-report.md` (Step 9), `test_build_checks.py` (Verify do Step 5) e `tests/compat/test_upgrade_compat.py` (Verify dos Steps 7 e 11).
 - Outcomes, item 2: "lê H-009 de dois jeitos" vale só no piloto com oráculo (A4); fora dele, o `cycle_adherence.py` mede aderência, não desfecho.
 - Cabeçalho do plano: "antes da tag v0.11.0" continua valendo; a seção `[v0.11.0]` do CHANGELOG já foi cortada sem tag (A5).
+
+## Implementation summary (2026-10-07)
+
+- Steps: 11/11 SUCCESS. Steps 1 (rascunho) e 2 (`/design`: D-011, D-009 superseded, `--without-specify`, interruptor na v0.11.0 e PKB na v0.12.0) antes do código; Steps 3 a 11 em auto mode, um subagente e um commit por step (afe5a53, 2a3504e, b73c16f, 51f5ee4, 9255112, d4ddddf, 395d1cf, 00cd70d, 2948ab1).
+- Entregue: CYC-035/036 e emendas aditivas ao contrato, GRL-012, SPC-002, PFS (gramática, `Specify default:`, PFS-016) e `plan-step.md`; `SPECIFY_DEFAULT` e `project_config.specify_default()`; `skip_class` público e PFS-002/013/016 no `check_plan_scenarios.py`; flags `--with-specify` / `--without-specify` no `/plan`; pergunta no `/seja-setup` (install, here) e no upgrade, gravando só com resposta explícita; `cycle_adherence.py` (aderência: ITT, por protocolo, desvios, identidade de contagem); `NM-SPECIFY-OPT-OUT` e `NM-SPECIFY-DEFAULT-OFF` no `drift_report.py`; braço A do protocolo de controle = mesma tag com `off`; guia pt-BR, quickguide, ajuda; entrada na seção `[v0.11.0]` do CHANGELOG (tag ainda não criada).
+- Desvios registrados no progress: linha no `/seja-setup --here` e códigos NM no `drift-metric.md` (Step 10); PFS-002 também para `opt-out` com `Specify default: off` (Step 3); `cabecalho_invalido` como grupo próprio no relatório de aderência (Step 8).
+- Testes: 1616 passed / 12 failed (as 12 da linha de base: 8 `test_html_report`, 4 `test_summarize_artifacts`); `tests/compat` 9 passed. `run_all_checks`: 19/14, mesmo conjunto da base (a linha de base citada no plano, 18/15, estava velha).
+- Quality gate: `/critique review` (code-reviewer standard): 1 crítico (grafia variante de classe caía no legado e sumia da contagem de aderência) e 7 advisórios; crítico e advisórios 2, 3, 4, 6, 7, 8 corrigidos com teste primeiro em 9d56e49.
+- Diferido: advisório 5 (o `cycle_adherence.py` lê `features/` sob `REPO_ROOT`, não `CODEBASE_DIR`, no modo workspace).
+- Em aberto para o designer: maiúsculas em `SPECIFY_DEFAULT` (hoje aceitas); seção própria do ciclo em `conventions.md`; validar o motivo de `--without-specify` também com `off`; CLI curta no `project_config` no lugar do `python3 -c` do `/plan`; plano aprovado sem pasta de feature conta como `cabecalho_invalido` no relatório de aderência.
+
+### Generator-Critic Iterations
+- Iteration count: 1/2
+- Findings per iteration: [1 critical, 7 advisory]
+- Resolution status: all resolved (1 advisory deferred)
+
+## Reflection
+
+- 2026-10-07: O plano reabriu mais decisões que o previsto (D-005, CYC-018/029/033) e a revisão de código achou que uma grafia variante da classe sumia da contagem de aderência; o Step 10 confirmou que o /implement mantém o teste-primeiro em plano sem specify. (notes 13, with deviation 13, with gate 0)

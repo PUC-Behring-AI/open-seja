@@ -243,7 +243,7 @@ Adaptadores C++ e JS/TS (research-000050 §5, §7; repositórios-piloto próprio
 ### Wave 4b -- Interruptor (sequencial, antes do piloto)
 | # | ID | Title | Scope | Type | Plan | Depends on | Status |
 |---|-----|-------|-------|------|------|-----------|--------|
-| 11 | specify-switch | `SPECIFY_DEFAULT: on \| off` em `conventions.md`, escolhido no `/seja-setup` ou no `/design`; `/plan --specify` liga a fase num plano quando o default é `off`, e `/plan --no-specify "<motivo>"` desliga quando é `on`, sempre gravando `Specify: skipped -- <motivo>` ou `approved`; prototipação vira motivo aceito para tarefa com código; o relatório por degrau separa intenção de tratar e por protocolo | backend | design | plan-000022 | default-cycle-wiring | planned |
+| 11 | specify-switch | `SPECIFY_DEFAULT: on \| off` em `conventions.md`, escolhido no `/seja-setup` ou no `/design`; `/plan --specify` liga a fase num plano quando o default é `off`, e `/plan --no-specify "<motivo>"` desliga quando é `on`, sempre gravando `Specify: skipped -- <motivo>` ou `approved`; prototipação vira motivo aceito para tarefa com código; o relatório por degrau separa intenção de tratar e por protocolo | backend | design | plan-000022 | default-cycle-wiring | done |
 
 O item 10 (`default-cycle-pilot`) passa a depender também de `specify-switch`.
 

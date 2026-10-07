@@ -5,8 +5,8 @@
 
 | Date | Type | ID | Title | Status | File |
 |------|------|----|-------|--------|------|
+| 2026-10-07 17:20 UTC | Other |  | DONE | 2026-10-07 17:20 UTC | |  | [plan-000022-specify-switch.md](plans/plan-000022-specify-switch.md) |
 | 2026-10-07 15:51 UTC | Other |  | Progress -- Plan 000022 |  | [plan-000022-progress.md](plans/plan-000022-progress.md) |
-| 2026-10-07 15:37 UTC | Plan | 000022 | specify-switch: interruptor da specify por projeto e escolha por plano | OPEN | [plan-000022-specify-switch.md](plans/plan-000022-specify-switch.md) |
 | 2026-10-07 12:44 UTC | Other |  | Progress -- Plan 000015 |  | [plan-000015-progress.md](plans/plan-000015-progress.md) |
 | 2026-10-07 00:45 UTC | Other |  | Communication 000021 | USR | 2026-10-07 00:45 UTC | End Users |  | [communication-000021-end-users.md](communication/2026-10-07/communication-000021-end-users.md) |
 | 2026-10-07 00:45 UTC | RESERVED | 000021 | communication: end-users | RESERVED |  |
