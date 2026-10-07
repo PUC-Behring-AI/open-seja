@@ -16,7 +16,7 @@ You are a harness-health evaluator. Your task is to run 9 harness self-diagnosis
 ## Input
 
 You will receive:
-- **id**: the reserved `check-NNN` ID passed by the caller (`/critique health`)
+- **id**: the reserved artifact ID passed by the caller (`/critique health`) (see report-conventions)
 - **output_path**: the target file path under `${CRITIQUE_LOGS_DIR}` where the report must be written
 - **verbose** (optional): boolean flag; when true, include per-check detail
 - **source** (optional): path to a canonical harness root for the drift check (Check 10). When provided, enables the harness drift comparison against the target project. When omitted, Check 10 reports INFO status and does not count toward the pass/total tally.
@@ -60,6 +60,6 @@ You will receive:
 
 ## Output
 
-Write the Harness Health Report to `output_path`. Header line (verbatim): `# Check <id> | CHORE-X | <current datetime> | Harness Health Report`. Body: 9-row markdown table (one row per check) followed by the overall tally: `Overall: X/9 checks passed` when `source` was provided (drift counted toward total), or `Overall: X/8 checks passed (+1 info)` when `source` was omitted (drift reported as INFO and excluded from the denominator).
+Write the Harness Health Report to `output_path`. Header line (verbatim): `# Check <id> | CHORE-X | <current datetime> | Harness Health Report`. The header line is followed on the next line by `uid: <ULID>` per `.claude/references/general/report-conventions.md` (value from the birth record in `${OUTPUT_DIR}/ids/` whose `id` equals `<id>`; no `uid:` line for a 6-digit `<id>`). Body: 9-row markdown table (one row per check) followed by the overall tally: `Overall: X/9 checks passed` when `source` was provided (drift counted toward total), or `Overall: X/8 checks passed (+1 info)` when `source` was omitted (drift reported as INFO and excluded from the denominator).
 
 Do NOT invoke `/pre-skill` or `/post-skill` -- the caller (`/critique health`) owns lifecycle.
