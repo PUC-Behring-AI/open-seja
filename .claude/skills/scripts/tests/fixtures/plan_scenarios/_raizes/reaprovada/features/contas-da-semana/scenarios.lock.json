@@ -1,0 +1,23 @@
+{
+  "approved_at": "2026-10-06T16:00Z",
+  "approved_by": "usuario",
+  "basis": {
+    "REQ-contas-da-semana-001": 1,
+    "REQ-contas-da-semana-002": 1,
+    "REQ-contas-da-semana-003": 1
+  },
+  "contract_by": "usuario",
+  "files": {
+    "contas-da-semana.feature": "c50a9a340d9ba8490fbdb5077db622e010ce6ba850216ec48aeda68e32a12ebe"
+  },
+  "index": [
+    "contas-da-semana/contas-da-semana.feature::A lista abre logo com muitas contas",
+    "contas-da-semana/contas-da-semana.feature::Desfazer uma conta marcada como paga por engano",
+    "contas-da-semana/contas-da-semana.feature::Marcar uma conta como paga",
+    "contas-da-semana/contas-da-semana.feature::Ver as contas da semana"
+  ],
+  "retraducao": "b71014be58c91f639aa6a1221039a7960ab73b2364b9d8fd6709823c8b4c0511",
+  "rev": 2,
+  "schema_version": 1,
+  "slug": "contas-da-semana"
+}

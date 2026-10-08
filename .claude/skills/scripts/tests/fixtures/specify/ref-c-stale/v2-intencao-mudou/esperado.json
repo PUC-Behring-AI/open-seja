@@ -1,0 +1,16 @@
+{
+  "descricao": "(c) REQ 002 com rev novo: stale",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 0,
+  "status": "stale",
+  "reasons": [
+    "req-rev"
+  ],
+  "reqs": [
+    "REQ-contas-da-semana-002"
+  ],
+  "findings": []
+}

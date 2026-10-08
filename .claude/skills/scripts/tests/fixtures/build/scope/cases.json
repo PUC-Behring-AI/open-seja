@@ -1,0 +1,302 @@
+[
+  {
+    "added": {},
+    "changes": [
+      [
+        "A",
+        "tests/steps_defs.py"
+      ],
+      [
+        "A",
+        "tests/test_task_list.py"
+      ],
+      [
+        "M",
+        "tests/conftest.py"
+      ],
+      [
+        "A",
+        "src/tasks.py"
+      ]
+    ],
+    "expected": [],
+    "frozen": [],
+    "name": "tester-ok",
+    "role": "tester"
+  },
+  {
+    "added": {},
+    "changes": [
+      [
+        "M",
+        "features/task-list/manage-tasks.feature"
+      ]
+    ],
+    "expected": [
+      [
+        "ITF-008",
+        "features/task-list/manage-tasks.feature"
+      ]
+    ],
+    "frozen": [],
+    "name": "tester-edits-feature",
+    "role": "tester"
+  },
+  {
+    "added": {},
+    "changes": [
+      [
+        "M",
+        "src/tasks.py"
+      ],
+      [
+        "A",
+        "tests/test_unit_new.py"
+      ]
+    ],
+    "expected": [],
+    "frozen": [
+      "features/task-list/manage-tasks.feature",
+      "tests/steps_defs.py",
+      "tests/test_task_list.py"
+    ],
+    "name": "coder-ok",
+    "role": "coder"
+  },
+  {
+    "added": {},
+    "changes": [
+      [
+        "M",
+        "src/tasks.py"
+      ],
+      [
+        "M",
+        "features/task-list/manage-tasks.feature"
+      ]
+    ],
+    "expected": [
+      [
+        "ITF-008",
+        "features/task-list/manage-tasks.feature"
+      ]
+    ],
+    "frozen": [
+      "features/task-list/manage-tasks.feature",
+      "tests/steps_defs.py",
+      "tests/test_task_list.py"
+    ],
+    "name": "coder-edits-feature",
+    "role": "coder"
+  },
+  {
+    "added": {},
+    "changes": [
+      [
+        "M",
+        "tests/steps_defs.py"
+      ]
+    ],
+    "expected": [
+      [
+        "ITF-007",
+        "tests/steps_defs.py"
+      ]
+    ],
+    "frozen": [
+      "features/task-list/manage-tasks.feature",
+      "tests/steps_defs.py",
+      "tests/test_task_list.py"
+    ],
+    "name": "coder-edits-frozen-test",
+    "role": "coder"
+  },
+  {
+    "added": {},
+    "changes": [
+      [
+        "M",
+        "src/tasks.py"
+      ]
+    ],
+    "expected": [],
+    "frozen": [
+      "features/task-list/manage-tasks.feature",
+      "tests/steps_defs.py",
+      "tests/test_task_list.py"
+    ],
+    "name": "cleaner-ok",
+    "role": "cleaner"
+  },
+  {
+    "added": {},
+    "changes": [
+      [
+        "M",
+        "src/tasks.py"
+      ],
+      [
+        "M",
+        "tests/test_unit.py"
+      ]
+    ],
+    "expected": [
+      [
+        "ITF-008",
+        "tests/test_unit.py"
+      ]
+    ],
+    "frozen": [
+      "features/task-list/manage-tasks.feature",
+      "tests/steps_defs.py",
+      "tests/test_task_list.py"
+    ],
+    "name": "cleaner-edits-test",
+    "role": "cleaner"
+  },
+  {
+    "added": {
+      "src/tasks.py": [
+        "        pass  # pragma: no mutate  # equivalent: corpo vazio por desenho"
+      ]
+    },
+    "changes": [
+      [
+        "A",
+        "tests/test_tasks_mutants.py"
+      ],
+      [
+        "M",
+        "src/tasks.py"
+      ]
+    ],
+    "expected": [],
+    "frozen": [
+      "features/task-list/manage-tasks.feature",
+      "tests/steps_defs.py",
+      "tests/test_task_list.py"
+    ],
+    "name": "hardener-ok",
+    "role": "hardener"
+  },
+  {
+    "added": {
+      "src/tasks.py": [
+        "        self.tasks[title] = True"
+      ]
+    },
+    "changes": [
+      [
+        "M",
+        "src/tasks.py"
+      ]
+    ],
+    "expected": [
+      [
+        "ITF-008",
+        "src/tasks.py"
+      ]
+    ],
+    "frozen": [
+      "features/task-list/manage-tasks.feature",
+      "tests/steps_defs.py",
+      "tests/test_task_list.py"
+    ],
+    "name": "hardener-edits-code",
+    "role": "hardener"
+  },
+  {
+    "added": {
+      "src/tasks.py": [
+        "        pass  # pragma: no mutate"
+      ]
+    },
+    "changes": [
+      [
+        "M",
+        "src/tasks.py"
+      ]
+    ],
+    "expected": [
+      [
+        "ITF-008",
+        "src/tasks.py"
+      ]
+    ],
+    "frozen": [
+      "features/task-list/manage-tasks.feature",
+      "tests/steps_defs.py",
+      "tests/test_task_list.py"
+    ],
+    "name": "hardener-pragma-without-reason",
+    "role": "hardener"
+  },
+  {
+    "added": {},
+    "changes": [
+      [
+        "M",
+        "quality-baseline.json"
+      ]
+    ],
+    "expected": [
+      [
+        "ITF-008",
+        "quality-baseline.json"
+      ]
+    ],
+    "frozen": [
+      "features/task-list/manage-tasks.feature",
+      "tests/steps_defs.py",
+      "tests/test_task_list.py"
+    ],
+    "name": "any-role-baseline",
+    "role": "coder"
+  },
+  {
+    "added": {},
+    "changes": [
+      [
+        "M",
+        "gate.py"
+      ],
+      [
+        "M",
+        ".claude/hooks/quality_gate_stop.py"
+      ],
+      [
+        "M",
+        ".claude/settings.json"
+      ],
+      [
+        "M",
+        "product-design/conventions.md"
+      ]
+    ],
+    "expected": [
+      [
+        "ITF-008",
+        ".claude/hooks/quality_gate_stop.py"
+      ],
+      [
+        "ITF-008",
+        ".claude/settings.json"
+      ],
+      [
+        "ITF-008",
+        "gate.py"
+      ],
+      [
+        "ITF-008",
+        "product-design/conventions.md"
+      ]
+    ],
+    "frozen": [
+      "features/task-list/manage-tasks.feature",
+      "tests/steps_defs.py",
+      "tests/test_task_list.py"
+    ],
+    "name": "any-role-gate",
+    "role": "cleaner"
+  }
+]

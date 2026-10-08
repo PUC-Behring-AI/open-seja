@@ -1,7 +1,7 @@
 ---
 name: seja-setup
 description: "Manage the SEJA harness in this project: install into a new or existing codebase, finalise an in-place download, create a companion workspace, bootstrap a demo project, or upgrade harness files to the latest release. State-driven dispatch routes each invocation to the right action, preserving project-specific configuration."
-argument-hint: "[<target-directory>] [--here | --workspace | --demo | --upgrade] [--version <tag>] [--dry-run]"
+argument-hint: "[<target-directory>] [--here | --workspace | --demo | --upgrade] [--pkb] [--version <tag>] [--dry-run]"
 compatibility: "Designed for Claude Code with the SEJA harness"
 metadata:
   last-updated: 2026-04-26
@@ -27,6 +27,7 @@ metadata:
 | `--demo` | No | Set up with the pre-configured TaskFlow demo project |
 | `--upgrade` | No | Upgrade harness files in the current project to the latest SemVer tag (or `--version <tag>`). Preserves project-specific files. |
 | `--version <tag>` | No | open-seja release tag to pin to (e.g. `v0.10.0`). Default: latest SemVer tag on the open-seja remote (`$SEJA_REMOTE`, else `git@github.com:PUC-Behring-AI/open-seja.git`). Falls back to HEAD with a warning if no tags exist. |
+| `--pkb` | No | Instantiate the PKB layer (`inbox/`, `logs/`, `Templates/`, `Objetivos.md`, `index.md` and the 5 maintenance skills) at the end of install, `--here` or `--demo`, without asking. Runs `pkb_inbox.py init --target <target> --with-skills`. Without the flag those flows ask once (anchor `Offer-PkbLayer`). |
 | `--dry-run` | No | Preview upgrade changes without applying them (valid with `--upgrade`) |
 
 # Seja-Setup
@@ -63,7 +64,7 @@ Shared mechanics: the source repository is not a runtime dependency -- after set
 
 ## Entry-Point Routing
 
-**First action is always state detection.** Shell out to `python .claude/skills/seja-setup/detect_setup_state.py --json` (from cwd, or from the explicit target) and parse the JSON output. Fields: `state` (one of `no-harness`, `fresh-download`, `partial-init`, `finalised`, `dev-repo-refuse`, `public-clone-soft-confirm`), `signals` dict (diagnostics: `has_claude`, `has_project_conventions`, `has_output`, `git_remote_url`, `has_dev_scripts`), `recommendation` (human-readable sentence).
+**First action is always state detection.** Shell out to `python .claude/skills/seja-setup/detect_setup_state.py --json` (from cwd, or from the explicit target) and parse the JSON output. Fields: `state` (one of `no-harness`, `fresh-download`, `partial-init`, `finalised`, `dev-repo-refuse`, `public-clone-soft-confirm`), `signals` dict (diagnostics: `has_claude`, `has_project_conventions`, `has_output`, `git_remote_url`, `has_dev_scripts`, `has_pkb_layer`), `recommendation` (human-readable sentence).
 
 **Flag short-circuits** (before state dispatch):
 

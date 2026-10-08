@@ -1,0 +1,12 @@
+{
+  "args": [],
+  "exit_code": 0,
+  "findings": [
+    [
+      "GHK-017",
+      "info",
+      "features/login/intent.md",
+      1
+    ]
+  ]
+}

@@ -725,3 +725,111 @@ def test_req_traced_by_dry_run(fake_repo):
     after = _read(target)
     assert before == after
     assert "+<!-- REQ-ENT-001 | traced_by: bootstrap -->" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# plan-000019 step 4: ULID plan ids, manual -> "-", D-NNN prefix strip
+# ---------------------------------------------------------------------------
+
+NEW_PLAN_ID = "20261007-k3m9qz"
+
+
+def test_changelog_append_manual_plan_writes_dash(fake_repo):
+    """--plan manual is a STATUS token; in a CHANGELOG line it becomes '-'."""
+    import re as _re
+
+    tmp, rel, target = fake_repo
+    result = _run_in_fake_repo(
+        tmp, rel,
+        "--file", str(target), "--id", "R-P-001",
+        "--marker", "CHANGELOG_APPEND", "--value", "revised",
+        "--plan", "manual", "--note", "manual note",
+    )
+    assert result.returncode == 0, result.stderr
+    lines = [ln for ln in _read(target).splitlines() if ln.endswith("| manual note")]
+    assert len(lines) == 1
+    assert "| revised | - | manual note" in lines[0]
+    regex = human_markers_registry.ALLOWED_MARKERS["CHANGELOG_APPEND"]["line_regex"]
+    assert _re.fullmatch(regex, lines[0])
+
+
+def test_plan_bare_ulid_id_is_prefixed(fake_repo):
+    tmp, rel, target = fake_repo
+    result = _run_in_fake_repo(
+        tmp, rel,
+        "--file", str(target), "--id", "D-001",
+        "--marker", "INCORPORATED",
+        "--plan", NEW_PLAN_ID,
+    )
+    assert result.returncode == 0, result.stderr
+    assert f"<!-- INCORPORATED: plan-{NEW_PLAN_ID} |" in _read(target)
+
+
+def test_plan_prefixed_ulid_id_passes_through(fake_repo):
+    tmp, rel, target = fake_repo
+    result = _run_in_fake_repo(
+        tmp, rel,
+        "--file", str(target), "--id", "R-P-001",
+        "--marker", "CHANGELOG_APPEND", "--value", "revised",
+        "--plan", f"plan-{NEW_PLAN_ID}", "--note", "ulid note",
+    )
+    assert result.returncode == 0, result.stderr
+    assert f"| revised | plan-{NEW_PLAN_ID} | ulid note" in _read(target)
+
+
+@pytest.mark.parametrize("bad", ["0007", "plan-0007", "20261007-K3M9QZ", "plan-20261007-k3m9q"])
+def test_plan_invalid_forms_name_both_formats(fake_repo, bad):
+    tmp, rel, target = fake_repo
+    result = _run_in_fake_repo(
+        tmp, rel,
+        "--file", str(target), "--id", "D-001",
+        "--marker", "INCORPORATED",
+        "--plan", bad,
+    )
+    assert result.returncode == 1
+    assert "--plan must be 'plan-NNNNNN'" in result.stderr
+    assert "plan-YYYYMMDD-xxxxxx" in result.stderr
+
+
+@pytest.mark.parametrize("prefix", ["D-NEXT: ", "D-005: ", "D-NEXT:"])
+def test_decision_append_strips_leading_decision_id(fake_repo, prefix):
+    tmp, rel, target = fake_repo
+    value = f"{prefix}Pick ULID ids\n\n**Context**: Collisions."
+    result = _run_in_fake_repo(
+        tmp, rel,
+        "--file", str(target), "--id", "D-NEXT",
+        "--marker", "DECISION_APPEND", "--value", value,
+        "--plan", "manual",
+    )
+    assert result.returncode == 0, result.stderr
+    content = _read(target)
+    assert "### D-003: Pick ULID ids" in content
+    assert "D-NEXT" not in content
+    assert "D-005" not in content
+
+
+def test_decision_append_source_line_round_trips_registry(fake_repo):
+    """The *Source:* line apply_marker writes must pass the registry regex
+    that check_human_markers_only applies; a note that cannot is refused."""
+    import re as _re
+
+    tmp, rel, target = fake_repo
+    ok = _run_in_fake_repo(
+        tmp, rel,
+        "--file", str(target), "--id", "D-NEXT",
+        "--marker", "DECISION_APPEND", "--value", "Title\n\n**Context**: C.",
+        "--note", "from research-000018", "--date", "2026-10-06",
+    )
+    assert ok.returncode == 0, ok.stderr
+    regex = human_markers_registry.ALLOWED_MARKERS["DECISION_APPEND"]["line_regex"]
+    assert _re.fullmatch(regex, "*Source: from research-000018 (2026-10-06)*")
+    assert "*Source: from research-000018 (2026-10-06)*" in _read(target)
+
+    bad = _run_in_fake_repo(
+        tmp, rel,
+        "--file", str(target), "--id", "D-NEXT",
+        "--marker", "DECISION_APPEND", "--value", "Other\n\n**Context**: C.",
+        "--note", "a *starred* note", "--date", "2026-10-06",
+    )
+    assert bad.returncode == 1
+    assert "starred" not in _read(target)

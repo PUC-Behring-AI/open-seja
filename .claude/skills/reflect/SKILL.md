@@ -35,8 +35,8 @@ metadata:
 # Reflect
 
 Output folder: `${REFLECTIONS_DIR}` (see product-design/conventions.md)
-Filename pattern: `reflection-<id>-<truncated short title slug>.md` (6-digit zero-padded ID)
-Header pattern: `# Reflection <id> | <current datetime> | <short title>` (macro-index regex requires this exact shape)
+Filename pattern: `reflection-<id>-<truncated short title slug>.md` (artifact ID returned by reserve_id.py)
+Header pattern: `# Reflection <id> | <current datetime> | <short title>` (macro-index regex requires this exact shape), followed on the next line by `uid: <ULID>` (value from `reserve_id.py --json` or `${OUTPUT_DIR}/ids/<uid>.json`)
 
 ## Mode detection
 
@@ -48,7 +48,7 @@ If `--deep` is present in the arguments, route to the [Deep workflow](#deep-work
 
 1. Run `/pre-skill "reflect" $ARGUMENTS` to add general instructions to the context window.
 
-2. Reserve the next global ID by running `python .claude/skills/scripts/reserve_id.py --type reflection --title '<short title synthesized from scope>'`. Capture the returned 6-digit ID.
+2. Reserve the next global ID by running `python .claude/skills/scripts/reserve_id.py --type reflection --title '<short title synthesized from scope>'`. Capture the returned artifact ID (add `--json` to also get the `uid`).
 
 3. **Step A -- Pick scope.** Ask the user via AskUserQuestion which artifacts to reflect on. Each option carries rationale per the Decision-point rationale convention in `.claude/references/general/constraints.md`:
 
@@ -69,6 +69,8 @@ If `--deep` is present in the arguments, route to the [Deep workflow](#deep-work
    - **Free-form**: No artifact resolution needed. Skip to Step C with an empty summary.
 
 5. **Step B -- Summarize chosen artifacts.** Run `python .claude/skills/reflect/summarize_artifacts.py <id1> <id2> ...` to produce the narrative summary block. Capture the stdout output. Present it to the user so they can see what they are reflecting on. For plans, the summary also carries the per-step reflection-on-action notes, the plan-phase note, the quality-gate evidence and, when the designer accepted them, the communication of the plan and the drift report recorded by `/plan` and `/implement`; name explicitly which of the four were not measured. Present them before the lens question, as recorded, without interpreting them; agent words appear quoted and attributed, never as the skill's voice.
+
+   **Step B1 -- Divergence per step (only with `features/`).** If a chosen artifact is a plan whose header has `Feature: <slug>`, run `python .claude/skills/scripts/drift_report.py --feature <slug> --plan <plan file> --moment M2 --compare --md` (add `--citizen` for the register without technical numbers) and present the output as is, without interpreting it. If M1 was not frozen the output says so and the reflection goes on. A "not applicable" line (v1 plan, no `features/`, `Specify: skipped`) adds nothing: skip this step and the section in Step D. If `drift_report.py --feature <slug> --audit-sample` lists REQs, show them to the designer; record an answer in `features/<slug>/drift/audit.json` only with the designer's own words in `nota` (reference: `.claude/references/general/drift-report.md`, DRP-009).
 
 6. **Step B2 -- Pick lens.** Ask the user which lens they are reflecting through via AskUserQuestion:
 
@@ -105,6 +107,10 @@ If `--deep` is present in the arguments, route to the [Deep workflow](#deep-work
    ## Summary
 
    <narrative summaries from Step B>
+
+   ## Divergência por degrau
+
+   <output of Step B1, verbatim; omit this whole section when Step B1 did not run>
 
    ## Reflection
 
@@ -145,7 +151,7 @@ If `--deep` is present in the arguments, route to the [Deep workflow](#deep-work
 
 1. Run `/pre-skill "reflect" $ARGUMENTS` to add general instructions to the context window.
 
-2. Reserve the next global ID by running `python .claude/skills/scripts/reserve_id.py --type reflection --title '<short title synthesized from scope>'`. Capture the returned 6-digit ID.
+2. Reserve the next global ID by running `python .claude/skills/scripts/reserve_id.py --type reflection --title '<short title synthesized from scope>'`. Capture the returned artifact ID (add `--json` to also get the `uid`).
 
 3. Parse arguments: `--deep [scope] [--since <duration>]`. Scope is an optional free-text keyword; `--since` accepts `Nd` or ISO datetime (default: `30d`).
 
@@ -228,7 +234,7 @@ If `--deep` is present in the arguments, route to the [Deep workflow](#deep-work
 
 1. Run `/pre-skill "reflect" $ARGUMENTS` to add general instructions to the context window.
 
-2. Reserve the next global ID by running `python .claude/skills/scripts/reserve_id.py --type reflection --title '<short title synthesized from the window>'`. Capture the returned 6-digit ID.
+2. Reserve the next global ID by running `python .claude/skills/scripts/reserve_id.py --type reflection --title '<short title synthesized from the window>'`. Capture the returned artifact ID (add `--json` to also get the `uid`).
 
 3. Parse arguments:
    - Resolve `--since`: accept either an ISO datetime or a relative `Nd` suffix (`30d`, `14d`, `7d`). Default: `30d`.
@@ -273,4 +279,4 @@ Each primitive lives in `.claude/skills/scripts/` and exposes an `analyze(window
 
 ## Output location
 
-Reports land at `${REFLECTIONS_DIR}/reflection-<id>-<slug>.md`. `generate_macro_index.py` picks up the new report automatically on post-skill step 8's commit pipeline. The macro-index scanner is anchored on the H1 regex `^#\s+Reflection\s+(\d+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)`, so the header shape must not be edited.
+Reports land at `${REFLECTIONS_DIR}/reflection-<id>-<slug>.md`. `generate_macro_index.py` picks up the new report automatically on post-skill step 8's commit pipeline. The macro-index scanner is anchored on the H1 regex `^#\s+Reflection\s+<ARTIFACT_ID>\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)` (`ARTIFACT_ID` from `artifact_id.py` accepts both the 6-digit and the `YYYYMMDD-xxxxxx` form), so the header shape must not be edited; the `uid:` line goes after the H1, never inside it.

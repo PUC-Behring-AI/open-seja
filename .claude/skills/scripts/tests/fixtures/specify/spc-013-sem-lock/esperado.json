@@ -1,0 +1,14 @@
+{
+  "descricao": "scenarios: approved sem lock: stale (aprovação sem prova)",
+  "args": [
+    "--feature",
+    "contas-da-semana",
+    "--status"
+  ],
+  "exit_code": 0,
+  "status": "stale",
+  "reasons": [
+    "sem-lock"
+  ],
+  "findings": []
+}

@@ -1,0 +1,69 @@
+"""Reference reading of a Cucumber JSON report into the states of DRM-003 (CYC-027).
+
+Not a product script: the consumer of the report is plan-000014. This file keeps the
+mapping table of gherkin-spec-format.md (section 8) executable and testable. Standard
+library only.
+
+    states = report_states(report, expected)
+
+`report` is the parsed Cucumber JSON. `expected` maps each scenario key
+`<slug>/<file>::<name>` of the .feature files to `{"steps": n, "tags": [...]}` (n steps of
+the scenario in the .feature; tags of the scenario, with or without "@").
+"""
+
+PRIORITY = ("error", "failed", "undefined", "skipped", "passed")  # worst first, for Scenario Outline rows
+DISABLED = ("skip", "wip", "ignore")
+
+
+def _tags(names):
+    return {n.lstrip("@").lower() for n in names}
+
+
+def scenario_key(uri, name):
+    """`<slug>/<file>::<name>` from the last two components of the report `uri`."""
+    parts = [p for p in uri.replace("\\", "/").split("/") if p]
+    return f"{'/'.join(parts[-2:])}::{name}"
+
+
+def scenario_state(element, n_steps, tags):
+    """State of one report element (one Scenario, or one row of a Scenario Outline)."""
+    if "xfail" in _tags(tags):
+        return "xfail"  # xfail is not native to Cucumber: it comes from the tag, whatever the result
+    steps = element.get("steps", [])
+    statuses = [s.get("result", {}).get("status") for s in steps]
+    failed = [s for s in steps if s.get("result", {}).get("status") == "failed"]
+    if failed:
+        message = failed[0]["result"].get("error_message", "")
+        return "failed" if "AssertionError" in message else "error"
+    if "ambiguous" in statuses:
+        return "error"
+    if "undefined" in statuses or "pending" in statuses:
+        return "undefined"
+    if statuses and all(s == "skipped" for s in statuses):
+        return "skipped"
+    if len(statuses) < n_steps:
+        return "undefined"  # pytest-bdd leaves the undefined step out of the report
+    return "passed"
+
+
+def report_states(report, expected):
+    """State of every scenario of `expected`; a Scenario Outline is the worst of its rows."""
+    rows = {}
+    for feature in report:
+        for element in feature.get("elements", []):
+            key = scenario_key(feature.get("uri", ""), element.get("name", ""))
+            info = expected.get(key)
+            if info is None:
+                continue
+            tags = list(info["tags"]) + [t["name"] for t in element.get("tags", [])]
+            rows.setdefault(key, []).append(scenario_state(element, info["steps"], tags))
+    states = {}
+    for key, info in expected.items():
+        if key not in rows:
+            # pytest-bdd leaves a skipped scenario, or one that fails before its first step, out of the report
+            states[key] = "skipped" if _tags(info["tags"]) & set(DISABLED) else "absent"
+        elif "xfail" in rows[key]:
+            states[key] = "xfail"
+        else:
+            states[key] = min(rows[key], key=PRIORITY.index)
+    return states

@@ -1,0 +1,19 @@
+{
+  "descricao": "default off: step com Tests nao-N/A sem Scenarios N/A (motivo) e step com chave sao erro PFS-013",
+  "root": null,
+  "exit_code": 1,
+  "status": null,
+  "findings": [
+    [
+      "PFS-013",
+      "error",
+      16
+    ],
+    [
+      "PFS-013",
+      "error",
+      24
+    ]
+  ],
+  "matrix": null
+}

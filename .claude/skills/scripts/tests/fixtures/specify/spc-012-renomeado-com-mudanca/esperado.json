@@ -1,0 +1,13 @@
+{
+  "descricao": "cenário renomeado com linha em Mudanças (não dispara; estado stale)",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 0,
+  "status": "stale",
+  "reasons": [
+    "feature"
+  ],
+  "findings": []
+}

@@ -1,0 +1,25 @@
+{
+  "descricao": "--approve com intent em grilling: sai 1 e não escreve nada",
+  "args": [
+    "--feature",
+    "contas-da-semana",
+    "--approve",
+    "--at",
+    "2026-10-06T15:00Z",
+    "--by",
+    "usuario",
+    "--contract-by",
+    "usuario"
+  ],
+  "exit_code": 1,
+  "status": "draft",
+  "unchanged": true,
+  "findings": [
+    [
+      "SPC-001",
+      "error",
+      "features/contas-da-semana/intent.md",
+      1
+    ]
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "descricao": "rev do REQ 002 subiu depois da aprovação: stale (req-rev, REQ 002)",
+  "args": [
+    "--feature",
+    "contas-da-semana",
+    "--status"
+  ],
+  "exit_code": 0,
+  "status": "stale",
+  "reasons": [
+    "req-rev"
+  ],
+  "reqs": [
+    "REQ-contas-da-semana-002"
+  ],
+  "findings": []
+}

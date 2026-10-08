@@ -18,4 +18,6 @@
 
 **Not for**: Execution -- `/help` explains and navigates; it does not perform the work itself. Once you know which skill to run, invoke it directly.
 
+**Default cycle (guia em português)**: the ladder intent -> scenario -> test -> code, with a diagram, the commands and what to do when something blocks: `docs/how-to/ciclo-default.pt-BR.md`.
+
 **Next step**: `/help --browse` to walk the full skill catalogue by category, then the quick-reference workflow sections in `docs/how-to/plan-and-execute.md`.

@@ -1,0 +1,824 @@
+{
+  "schema_version": 1,
+  "descricao": "Casos golden do drift-metric.md (plan-000008). Feature ficticia; sem dado real.",
+  "casos": {
+    "normal": {
+      "entrada": {
+        "feature": "task-list",
+        "momento": "M1",
+        "intent": {
+          "status": "approved"
+        },
+        "scenarios_status": "approved",
+        "runner": {
+          "adaptador": true,
+          "relatorio": true
+        },
+        "gate": {
+          "full": "PASS",
+          "baseline_moved": false
+        },
+        "reqs": [
+          "REQ-task-list-001",
+          "REQ-task-list-002",
+          "REQ-task-list-003",
+          "REQ-task-list-004",
+          "REQ-task-list-005",
+          "REQ-task-list-006",
+          "REQ-task-list-007",
+          "REQ-task-list-008",
+          "REQ-task-list-009",
+          "REQ-task-list-010"
+        ],
+        "scenarios": [
+          {
+            "id": "S01",
+            "tags": [
+              "REQ-task-list-001"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S02",
+            "tags": [
+              "REQ-task-list-001"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S03",
+            "tags": [
+              "REQ-task-list-002"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S04",
+            "tags": [
+              "REQ-task-list-003"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S05",
+            "tags": [
+              "REQ-task-list-004"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S06",
+            "tags": [
+              "REQ-task-list-005"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S07",
+            "tags": [
+              "REQ-task-list-006"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S08",
+            "tags": [
+              "REQ-task-list-006"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S09",
+            "tags": [
+              "REQ-task-list-007"
+            ],
+            "test_result": "failed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S10",
+            "tags": [
+              "REQ-task-list-008"
+            ],
+            "test_result": "error",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S11",
+            "tags": [
+              "REQ-task-list-008"
+            ],
+            "test_result": "absent",
+            "red_reason_ok": null
+          },
+          {
+            "id": "S12",
+            "tags": [
+              "REQ-task-list-008"
+            ],
+            "test_result": "skipped",
+            "red_reason_ok": null
+          }
+        ],
+        "touched": {
+          "total": 50,
+          "uncovered": 7
+        },
+        "oraculo": null,
+        "auditoria": []
+      },
+      "esperado": {
+        "schema_version": 1,
+        "feature": "task-list",
+        "momento": "M1",
+        "degraus": {
+          "D1": {
+            "n": 10,
+            "cobertos": 8,
+            "descobertos": 2,
+            "nao_medidos": 0,
+            "D": 0.2,
+            "razao_nm": []
+          },
+          "D2": {
+            "n": 12,
+            "cobertos": 10,
+            "descobertos": 2,
+            "nao_medidos": 0,
+            "D": 0.1667,
+            "razao_nm": []
+          },
+          "D3a": {
+            "n": 10,
+            "cobertos": 8,
+            "descobertos": 2,
+            "nao_medidos": 0,
+            "D": 0.2,
+            "razao_nm": []
+          },
+          "D3b": {
+            "n": 50,
+            "cobertos": 43,
+            "descobertos": 7,
+            "nao_medidos": 0,
+            "D": 0.14,
+            "razao_nm": []
+          }
+        },
+        "leituras": {
+          "cadeia_completa": 6,
+          "cenarios_orfaos": 0,
+          "cenarios_sem_tag": 0,
+          "escada_fechou_sem_capturar": false,
+          "o1": null,
+          "d0": {
+            "estado": "nao_medido",
+            "razao_nm": [
+              "NM-SEM-INDICE-BRIEF"
+            ]
+          }
+        },
+        "ressalvas": []
+      }
+    },
+    "nada-medido": {
+      "entrada": {
+        "feature": "tasks-no-gate",
+        "momento": "M1",
+        "intent": {
+          "status": "approved"
+        },
+        "scenarios_status": "approved",
+        "runner": {
+          "adaptador": true,
+          "relatorio": true
+        },
+        "gate": null,
+        "reqs": [
+          "REQ-task-list-001",
+          "REQ-task-list-002",
+          "REQ-task-list-003",
+          "REQ-task-list-004",
+          "REQ-task-list-005",
+          "REQ-task-list-006",
+          "REQ-task-list-007",
+          "REQ-task-list-008"
+        ],
+        "scenarios": [
+          {
+            "id": "S01",
+            "tags": [
+              "REQ-task-list-001"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S02",
+            "tags": [
+              "REQ-task-list-002"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S03",
+            "tags": [
+              "REQ-task-list-003"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S04",
+            "tags": [
+              "REQ-task-list-004"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S05",
+            "tags": [
+              "REQ-task-list-005"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S06",
+            "tags": [
+              "REQ-task-list-006"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S07",
+            "tags": [
+              "REQ-task-list-007"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S08",
+            "tags": [
+              "REQ-task-list-008"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          }
+        ],
+        "touched": {
+          "total": 30,
+          "uncovered": null
+        },
+        "oraculo": null,
+        "auditoria": []
+      },
+      "esperado": {
+        "schema_version": 1,
+        "feature": "tasks-no-gate",
+        "momento": "M1",
+        "degraus": {
+          "D1": {
+            "n": 8,
+            "cobertos": 8,
+            "descobertos": 0,
+            "nao_medidos": 0,
+            "D": 0.0,
+            "razao_nm": []
+          },
+          "D2": {
+            "n": 8,
+            "cobertos": 8,
+            "descobertos": 0,
+            "nao_medidos": 0,
+            "D": 0.0,
+            "razao_nm": []
+          },
+          "D3a": {
+            "n": 8,
+            "cobertos": 0,
+            "descobertos": 0,
+            "nao_medidos": 8,
+            "D": "n/a",
+            "razao_nm": [
+              "NM-SEM-GATE"
+            ]
+          },
+          "D3b": {
+            "n": 30,
+            "cobertos": 0,
+            "descobertos": 0,
+            "nao_medidos": 30,
+            "D": "n/a",
+            "razao_nm": [
+              "NM-SEM-GATE",
+              "NM-SEM-COBERTURA"
+            ]
+          }
+        },
+        "leituras": {
+          "cadeia_completa": 0,
+          "cenarios_orfaos": 0,
+          "cenarios_sem_tag": 0,
+          "escada_fechou_sem_capturar": false,
+          "o1": null,
+          "d0": {
+            "estado": "nao_medido",
+            "razao_nm": [
+              "NM-SEM-INDICE-BRIEF"
+            ]
+          }
+        },
+        "ressalvas": []
+      }
+    },
+    "specify-pulado": {
+      "entrada": {
+        "feature": "docs-only",
+        "momento": "M1",
+        "intent": {
+          "status": "skipped"
+        },
+        "scenarios_status": "missing",
+        "runner": {
+          "adaptador": true,
+          "relatorio": false
+        },
+        "gate": null,
+        "reqs": [],
+        "scenarios": [],
+        "touched": null,
+        "oraculo": null,
+        "auditoria": []
+      },
+      "esperado": {
+        "schema_version": 1,
+        "feature": "docs-only",
+        "momento": "M1",
+        "nao_aplicavel": true,
+        "razao_nm": [
+          "NM-SPECIFY-PULADA"
+        ]
+      }
+    },
+    "orfao-e-sem-tag": {
+      "entrada": {
+        "feature": "tasks-orphans",
+        "momento": "M1",
+        "intent": {
+          "status": "approved"
+        },
+        "scenarios_status": "approved",
+        "runner": {
+          "adaptador": true,
+          "relatorio": true
+        },
+        "gate": {
+          "full": "PASS",
+          "baseline_moved": false
+        },
+        "reqs": [
+          "REQ-task-list-001",
+          "REQ-task-list-002",
+          "REQ-task-list-003",
+          "REQ-task-list-004",
+          "REQ-task-list-005",
+          "REQ-task-list-006",
+          "REQ-task-list-007",
+          "REQ-task-list-008"
+        ],
+        "scenarios": [
+          {
+            "id": "S01",
+            "tags": [
+              "REQ-task-list-001"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S02",
+            "tags": [
+              "REQ-task-list-002"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S03",
+            "tags": [
+              "REQ-task-list-003"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S04",
+            "tags": [
+              "REQ-task-list-004"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S05",
+            "tags": [
+              "REQ-task-list-005"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S06",
+            "tags": [
+              "REQ-task-list-006"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S07",
+            "tags": [
+              "REQ-task-list-007"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S08",
+            "tags": [
+              "REQ-task-list-008"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S09",
+            "tags": [],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S10",
+            "tags": [
+              "REQ-task-list-099"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          }
+        ],
+        "touched": {
+          "total": 20,
+          "uncovered": 2
+        },
+        "oraculo": null,
+        "auditoria": []
+      },
+      "esperado": {
+        "schema_version": 1,
+        "feature": "tasks-orphans",
+        "momento": "M1",
+        "degraus": {
+          "D1": {
+            "n": 8,
+            "cobertos": 8,
+            "descobertos": 0,
+            "nao_medidos": 0,
+            "D": 0.0,
+            "razao_nm": []
+          },
+          "D2": {
+            "n": 8,
+            "cobertos": 8,
+            "descobertos": 0,
+            "nao_medidos": 0,
+            "D": 0.0,
+            "razao_nm": []
+          },
+          "D3a": {
+            "n": 8,
+            "cobertos": 8,
+            "descobertos": 0,
+            "nao_medidos": 0,
+            "D": 0.0,
+            "razao_nm": []
+          },
+          "D3b": {
+            "n": 20,
+            "cobertos": 18,
+            "descobertos": 2,
+            "nao_medidos": 0,
+            "D": 0.1,
+            "razao_nm": []
+          }
+        },
+        "leituras": {
+          "cadeia_completa": 8,
+          "cenarios_orfaos": 1,
+          "cenarios_sem_tag": 1,
+          "escada_fechou_sem_capturar": false,
+          "o1": null,
+          "d0": {
+            "estado": "nao_medido",
+            "razao_nm": [
+              "NM-SEM-INDICE-BRIEF"
+            ]
+          }
+        },
+        "ressalvas": []
+      }
+    },
+    "escada-fechada": {
+      "entrada": {
+        "feature": "tasks-closed",
+        "momento": "M1",
+        "intent": {
+          "status": "approved"
+        },
+        "scenarios_status": "approved",
+        "runner": {
+          "adaptador": true,
+          "relatorio": true
+        },
+        "gate": {
+          "full": "PASS",
+          "baseline_moved": false
+        },
+        "reqs": [
+          "REQ-task-list-001",
+          "REQ-task-list-002",
+          "REQ-task-list-003",
+          "REQ-task-list-004",
+          "REQ-task-list-005",
+          "REQ-task-list-006",
+          "REQ-task-list-007",
+          "REQ-task-list-008"
+        ],
+        "scenarios": [
+          {
+            "id": "S01",
+            "tags": [
+              "REQ-task-list-001"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S02",
+            "tags": [
+              "REQ-task-list-002"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S03",
+            "tags": [
+              "REQ-task-list-003"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S04",
+            "tags": [
+              "REQ-task-list-004"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S05",
+            "tags": [
+              "REQ-task-list-005"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S06",
+            "tags": [
+              "REQ-task-list-006"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S07",
+            "tags": [
+              "REQ-task-list-007"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S08",
+            "tags": [
+              "REQ-task-list-008"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          }
+        ],
+        "touched": {
+          "total": 20,
+          "uncovered": 0
+        },
+        "oraculo": {
+          "n": 5,
+          "falham": 2
+        },
+        "auditoria": []
+      },
+      "esperado": {
+        "schema_version": 1,
+        "feature": "tasks-closed",
+        "momento": "M1",
+        "degraus": {
+          "D1": {
+            "n": 8,
+            "cobertos": 8,
+            "descobertos": 0,
+            "nao_medidos": 0,
+            "D": 0.0,
+            "razao_nm": []
+          },
+          "D2": {
+            "n": 8,
+            "cobertos": 8,
+            "descobertos": 0,
+            "nao_medidos": 0,
+            "D": 0.0,
+            "razao_nm": []
+          },
+          "D3a": {
+            "n": 8,
+            "cobertos": 8,
+            "descobertos": 0,
+            "nao_medidos": 0,
+            "D": 0.0,
+            "razao_nm": []
+          },
+          "D3b": {
+            "n": 20,
+            "cobertos": 20,
+            "descobertos": 0,
+            "nao_medidos": 0,
+            "D": 0.0,
+            "razao_nm": []
+          }
+        },
+        "leituras": {
+          "cadeia_completa": 8,
+          "cenarios_orfaos": 0,
+          "cenarios_sem_tag": 0,
+          "escada_fechou_sem_capturar": true,
+          "o1": {
+            "n": 5,
+            "falham": 2,
+            "O1": 0.4
+          },
+          "d0": {
+            "estado": "nao_medido",
+            "razao_nm": [
+              "NM-SEM-INDICE-BRIEF"
+            ]
+          }
+        },
+        "ressalvas": []
+      }
+    },
+    "amostra-pequena": {
+      "entrada": {
+        "feature": "tasks-small",
+        "momento": "M1",
+        "intent": {
+          "status": "approved"
+        },
+        "scenarios_status": "approved",
+        "runner": {
+          "adaptador": true,
+          "relatorio": true
+        },
+        "gate": {
+          "full": "PASS",
+          "baseline_moved": false
+        },
+        "reqs": [
+          "REQ-task-list-001",
+          "REQ-task-list-002",
+          "REQ-task-list-003",
+          "REQ-task-list-004",
+          "REQ-task-list-005"
+        ],
+        "scenarios": [
+          {
+            "id": "S01",
+            "tags": [
+              "REQ-task-list-001"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S02",
+            "tags": [
+              "REQ-task-list-002"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S03",
+            "tags": [
+              "REQ-task-list-003"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          },
+          {
+            "id": "S04",
+            "tags": [
+              "REQ-task-list-004"
+            ],
+            "test_result": "passed",
+            "red_reason_ok": true
+          }
+        ],
+        "touched": {
+          "total": 12,
+          "uncovered": 3
+        },
+        "oraculo": null,
+        "auditoria": []
+      },
+      "esperado": {
+        "schema_version": 1,
+        "feature": "tasks-small",
+        "momento": "M1",
+        "degraus": {
+          "D1": {
+            "n": 5,
+            "cobertos": 4,
+            "descobertos": 1,
+            "nao_medidos": 0,
+            "D": 0.2,
+            "razao_nm": []
+          },
+          "D2": {
+            "n": 4,
+            "cobertos": 4,
+            "descobertos": 0,
+            "nao_medidos": 0,
+            "D": 0.0,
+            "razao_nm": []
+          },
+          "D3a": {
+            "n": 4,
+            "cobertos": 4,
+            "descobertos": 0,
+            "nao_medidos": 0,
+            "D": 0.0,
+            "razao_nm": []
+          },
+          "D3b": {
+            "n": 12,
+            "cobertos": 9,
+            "descobertos": 3,
+            "nao_medidos": 0,
+            "D": 0.25,
+            "razao_nm": []
+          }
+        },
+        "leituras": {
+          "cadeia_completa": 4,
+          "cenarios_orfaos": 0,
+          "cenarios_sem_tag": 0,
+          "escada_fechou_sem_capturar": false,
+          "o1": null,
+          "d0": {
+            "estado": "nao_medido",
+            "razao_nm": [
+              "NM-SEM-INDICE-BRIEF"
+            ]
+          }
+        },
+        "ressalvas": [
+          "amostra pequena"
+        ]
+      }
+    }
+  }
+}

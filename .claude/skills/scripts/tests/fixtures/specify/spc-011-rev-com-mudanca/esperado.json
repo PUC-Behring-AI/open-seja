@@ -1,0 +1,10 @@
+{
+  "descricao": "retradução rev 2 com linha em Mudanças (não dispara)",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 0,
+  "status": "draft",
+  "findings": []
+}

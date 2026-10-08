@@ -1,0 +1,10 @@
+{
+  "descricao": "en-US: feature sem # language, retradução com What I will not do",
+  "args": [
+    "--feature",
+    "weekly-bills"
+  ],
+  "exit_code": 0,
+  "status": "draft",
+  "findings": []
+}

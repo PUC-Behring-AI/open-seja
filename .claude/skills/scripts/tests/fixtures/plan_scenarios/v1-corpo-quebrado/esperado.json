@@ -1,0 +1,8 @@
+{
+  "descricao": "v1 nunca e lido alem do cabecalho (PFS-001): corpo invalido sai 0",
+  "root": null,
+  "exit_code": 0,
+  "status": null,
+  "findings": [],
+  "matrix": null
+}

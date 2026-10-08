@@ -49,7 +49,7 @@ Fallback (legacy projects): if `conventions.md` has no stack variables and they 
 
 > Warning: No stack framework variables found in conventions.md. Running all check scripts. Add BACKEND_FRAMEWORK and FRONTEND_FRAMEWORK to conventions.md to enable stack filtering.
 
-**C3. Reserve ID + save report.** Output folder: `${CRITIQUE_LOGS_DIR}` (see `product-design/conventions.md`). Filename: `critique-<id>-<truncated short title slug>.md` (6-digit zero-padded ID). Reserve the next global ID via `python .claude/skills/scripts/reserve_id.py --type critique --title '<title>'`. Save per report conventions with the mode-specific header and body described in each mode section.
+**C3. Reserve ID + save report.** Output folder: `${CRITIQUE_LOGS_DIR}` (see `product-design/conventions.md`). Filename: `critique-<id>-<truncated short title slug>.md` (artifact ID returned by reserve_id.py). Reserve the next global ID via `python .claude/skills/scripts/reserve_id.py --type critique --title '<title>'` (add `--json` to also get the `uid`). Save per report conventions with the mode-specific header and body described in each mode section; the H1 is followed on the next line by `uid: <ULID>` (value from `reserve_id.py --json` or `${OUTPUT_DIR}/ids/<uid>.json`).
 
 **C4. Present + post-skill.** Present the summary to the user, highlighting failures (or the mode-appropriate severity). Run /post-skill <id>.
 
@@ -190,7 +190,7 @@ Reuses C1, C2, C3, C4. Combines validate + review into a single pre-merge checkp
 
 Reuses C1, C3, C4. Flags: `[--verbose] [--source <path>]`.
 
-1. Apply C1 (pre-skill + argument parse) and C3 to reserve a `check-NNN` ID via `python .claude/skills/scripts/reserve_id.py --type critique --title 'Harness Health Report'` and compute the output path `${CRITIQUE_LOGS_DIR}/critique-<id>-harness-health.md`.
+1. Apply C1 (pre-skill + argument parse) and C3 to reserve an artifact ID via `python .claude/skills/scripts/reserve_id.py --type critique --title 'Harness Health Report'` and compute the output path `${CRITIQUE_LOGS_DIR}/critique-<id>-harness-health.md`.
 
 2. Launch the `harness-health-evaluator` agent via the Agent tool with inputs `{id, output_path, verbose, source}`. When `--source <path>` is provided, pass `source` to the agent so it can run the harness drift check against the given canonical source directory. The agent runs the 9 built-in diagnostic checks (skill system integrity, orphaned briefs, stale plans, reference file completeness, conventions completeness, constitution presence, skill spec compliance, pending ledger summary, harness drift) and writes the Harness Health Report to `output_path`.
 
@@ -202,7 +202,7 @@ Reuses C1, C3, C4. Flags: `[--verbose] [--source <path>]`.
 
 Reuses C1 and C4; C3 is adapted because output folder, ID type, and header shape differ. Scope: a brief describing what to test. If no brief is provided, ask the user.
 
-1. Apply C1 (pre-skill + argument parse). Reserve a `usertest-NNN` ID via `python .claude/skills/scripts/reserve_id.py --type usertest --title '<title>'` (note: `--type usertest`, NOT `check`). Compute output path `${USER_TESTS_DIR}/usertest-<id>-<slug>.md`. Header shape on output: `# User test <id> | <prefix><scope> | <current datetime> | <short title>`.
+1. Apply C1 (pre-skill + argument parse). Reserve an artifact ID via `python .claude/skills/scripts/reserve_id.py --type usertest --title '<title>'` (note: `--type usertest`, NOT `check`). Compute output path `${USER_TESTS_DIR}/usertest-<id>-<slug>.md`. Header shape on output: `# User test <id> | <prefix><scope> | <current datetime> | <short title>`, followed on the next line by `uid: <ULID>` (value from `reserve_id.py --json` or `${OUTPUT_DIR}/ids/<uid>.json`).
 
 2. Launch the `test-plan-generator` agent via the Agent tool with inputs `{brief, id, output_path}`. The agent reads `${OUTPUT_DIR}/INDEX.md`, filters for recently DONE plans relevant to the brief, carries unchecked items forward from prior user tests, phrases each to-do as a command to the user, and writes the test plan to `output_path`.
 
@@ -254,7 +254,7 @@ Reuses C1, C3, C4. Scope: a feature name, page, user flow, or `all`. If no scope
 
 Conducts a Semiotic Inspection Method (SIM) evaluation of a project's interface communicability. The agent reconstructs the designer's metacommunication message across three sign classes (metalinguistic, static, dynamic), collates them, and produces a communicability judgment. The agent acts as **evaluator-as-user-advocate** -- representing users' interests through HCI knowledge, not replacing them.
 
-1. Apply C1 (pre-skill + argument parse) and C3 to reserve a `check-NNN` ID via `python .claude/skills/scripts/reserve_id.py --type critique --title 'Semiotic Inspection: <scope>'` and compute output path `${CRITIQUE_LOGS_DIR}/critique-<id>-semiotic-inspection-<scope-slug>.md`.
+1. Apply C1 (pre-skill + argument parse) and C3 to reserve an artifact ID via `python .claude/skills/scripts/reserve_id.py --type critique --title 'Semiotic Inspection: <scope>'` and compute output path `${CRITIQUE_LOGS_DIR}/critique-<id>-semiotic-inspection-<scope-slug>.md`.
 
 2. Launch the `semiotic-inspector` agent via the Agent tool with inputs `{scope, id, output_path}`. The agent reads the metacommunication files, conducts per-sign-class analysis, applies the 5 scaffold questions and the 4 SigniFYIng Interaction dimensions, and writes the SIM report with header `# Critique <id> | CHORE-O | <current datetime> | Semiotic Inspection: <scope>`.
 

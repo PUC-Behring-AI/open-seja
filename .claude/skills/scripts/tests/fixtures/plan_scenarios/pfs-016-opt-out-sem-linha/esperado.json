@@ -1,0 +1,14 @@
+{
+  "descricao": "opt-out sem a linha Specify default: (ausente = on): info PFS-016",
+  "root": null,
+  "exit_code": 0,
+  "status": null,
+  "findings": [
+    [
+      "PFS-016",
+      "info",
+      3
+    ]
+  ],
+  "matrix": null
+}

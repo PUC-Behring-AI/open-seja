@@ -6,6 +6,8 @@ In deep mode, I read telemetry and briefs within a time window, optionally filte
 
 In telemetry mode, I read `telemetry.jsonl` and run 5 analysis primitives: sequence frequency, duration outliers, revision density, stuck-loop detection, and decision-reversal tracking. This mode is also practice-oriented.
 
+**Default cycle (guia em português)**: for a plan with `Feature: <slug>`, `/reflect` shows the divergence per step (D1, D2, D3a, D3b) with what was not measured; the citizen register (no technical number) is used when nobody reads code: `docs/how-to/ciclo-default.pt-BR.md`.
+
 **Examples**:
 > `/reflect`
 > Asks which scope you want (recent plans, recent research, specific ID, time window, or free-form). You pick artifacts, I summarize them, ask whether you are reflecting on the product or your practice, ask the matching question, and write your reflection.

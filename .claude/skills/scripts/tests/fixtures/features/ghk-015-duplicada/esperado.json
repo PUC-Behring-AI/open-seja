@@ -1,0 +1,15 @@
+{
+  "args": [
+    "--steps",
+    "{root}/steps"
+  ],
+  "exit_code": 1,
+  "findings": [
+    [
+      "GHK-015",
+      "error",
+      "steps/definitions.py",
+      19
+    ]
+  ]
+}

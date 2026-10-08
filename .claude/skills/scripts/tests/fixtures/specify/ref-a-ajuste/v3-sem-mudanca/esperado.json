@@ -1,0 +1,17 @@
+{
+  "descricao": "(a) ajuste sem a linha em Mudanças",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 1,
+  "status": "draft",
+  "findings": [
+    [
+      "SPC-011",
+      "error",
+      "features/contas-da-semana/intent.md",
+      73
+    ]
+  ]
+}

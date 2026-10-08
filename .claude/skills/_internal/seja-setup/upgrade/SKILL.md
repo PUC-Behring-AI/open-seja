@@ -28,11 +28,12 @@ Runs from the **target project** (not the source repo). Applies safe updates to 
 | Harness metadata | `.claude/CHANGELOG.md`, `VERSION`, `CHEATSHEET.md` | Yes | Auto-update |
 | Scripts | `.claude/skills/scripts/*.py` | Yes -- auto-overwritten by `upgrade_harness.py` | Auto-update |
 | Agents | `.claude/agents/*.md` | Mostly -- may have local tweaks | Show diff, ask per file |
-| Rules | `.claude/rules/*.md` | No -- project-specific conventions | Show diff, manual merge |
+| Rules | `.claude/rules/*.md` | Yes -- auto-overwritten by `upgrade_harness.py`; review with `git diff` afterwards | Auto-update (the rule files are harness inventory, not project convention) |
 | Project definitions | `product-design/**` | Never | Skip |
 | Settings | `.claude/settings.json`, `settings.local.json` | Never | Skip |
 | Output directory | `_output/` (or configured) | Never | Skip |
 | CLAUDE.md | `CLAUDE.md` | Never | Skip |
+| PKB layer | `inbox/`, `logs/`, `Templates/`, `Objetivos.md`, `index.md`, `.claude/skills/{daily-log,weekly-review,compress,next-action,process-inbox}/` | Never (not in source) | Skip; `init` adds missing files only |
 
 ### Steps
 
@@ -46,14 +47,26 @@ Runs from the **target project** (not the source repo). Applies safe updates to 
 
 4b. **Quality gate check (before step 5)**: if the project has `gate.py` at its root, compare it with the project's own template copy (`.claude/references/template/quality-gate/python/gate.py`) BEFORE the auto-update of `.claude/references/template/**` overwrites it. Identical -> after the upgrade, replace the project's `gate.py` with the new template. Different (local changes) -> show the diff and ask whether to replace, keep, or merge. Never touch `.baseline` files in `QUALITY_DIR`.
 
-5. **Run upgrade script**: `python .claude/skills/scripts/upgrade_harness.py --from <source-path> --target . --new-version <resolved-tag>`. Add `--dry-run` for preview. Omit `--new-version` only on the pre-release HEAD fallback path. The script reads existing `.seja-version` for the banner's "from" half and writes the resolved tag on success.
+5. **Run upgrade script**: `python <source-path>/.claude/skills/scripts/upgrade_harness.py --from <source-path> --target . --new-version <resolved-tag>` -- the script of the release being installed, not the copy already in the project (the new release may copy files the old script skips). Add `--dry-run` for preview. Omit `--new-version` only on the pre-release HEAD fallback path. The script reads existing `.seja-version` for the banner's "from" half and writes the resolved tag on success.
+
+5b. **Test-first plugin (only if already installed)**: if the project has `tests/scenario_report.py`, run `python .claude/skills/scripts/build_checks.py install-plugin .` after step 5. It is idempotent and refuses a copy edited by hand (show that message). If the file is absent, do nothing: an upgrade never creates the plugin; `/implement` installs it on the first red step.
 
 6. **Review summary**: highlight public-release pin change (e.g., `v0.1.0 -> v0.2.0`), internal harness version change, old-layout migration if any, new convention variables, files auto-updated vs needing manual merge.
+   - Artifact IDs (D-010): if `_output/ids/` does not exist, there is nothing to migrate; legacy 6-digit IDs stay as they are and remain valid.
 
 7. **Show diffs for manual-merge files**: unified diff for each script/rule/agent that differs. For agents: ask "Accept source / Keep current / Show diff?" per file. For scripts and rules: show diff and advise on merge.
 
 8. **Offer follow-up actions**:
    - New convention variables -> "Add to your `product-design/conventions.md`?"
+   - `SPECIFY_DEFAULT` missing (listed by `diff_conventions` in the step 5 report as missing from `product-design/conventions.md`; D-011, CYC-036) -> ask one `AskUserQuestion` (rationale per C4), same text as install step 4d (`Ask-SpecifyDefault`):
+
+     > A especificação em Gherkin é o padrão neste projeto? Gherkin é um texto curto que diz, com exemplos, o que o sistema deve fazer, antes do código. Um exemplo de quando não vale: num protótipo, o que o sistema deve fazer ainda muda toda semana.
+
+     - **`on`** -- Recommended when o projeto vai medir a escada ou já tem requisitos estáveis. NOT recommended when o projeto está em prototipação.
+     - **`off`** -- Recommended when o projeto está em prototipação. NOT recommended when o projeto vai medir a escada.
+
+     On an explicit answer, add the `SPECIFY_DEFAULT` row from the template's Review Configuration table to the same table of `product-design/conventions.md`, with the answer in backticks (`` `on` `` or `` `off` ``). Never write `SPECIFY_DEFAULT` without an explicit answer: in non-interactive mode, with `--dry-run`, or when the user does not answer, do not write the row and tell the user, in pt-BR: "Não gravei `SPECIFY_DEFAULT`. Vale `on` até você responder." This is the only upgrade write to `product-design/`; `upgrade_harness.py` still never touches `conventions.md`.
+   - `has_pkb_layer` (from `detect_setup_state.py --json`, or the "camada PKB detectada" line of the step 5 output) -> "Run `python .claude/skills/scripts/pkb_inbox.py init` to add the new PKB templates without overwriting anything?"
    - Old path references -> "Update the references?"
    - Stale CLAUDE.md -> "Regenerate your CLAUDE.md?"
    - `${QA_LOGS_DIR}` (default `_output/qa-logs/`) contains files matching `^<prefix>-\d{6}-qa-.*\.md$` (legacy centralized layout) -> "Post-skill now collocates QA logs with the parent artifact, not `${QA_LOGS_DIR}`. Migrate N detected files via `python .claude/skills/seja-setup/migrate_qa_logs_to_parent_dirs.py --apply`? (safe, uses `git mv` to preserve history, `--dry-run`-previewable.)"

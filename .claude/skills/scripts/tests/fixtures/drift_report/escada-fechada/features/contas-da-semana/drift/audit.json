@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "itens": [
+    {
+      "req": "REQ-contas-da-semana-002",
+      "adequado": "nao",
+      "por": "humano",
+      "objeto": "cenario",
+      "nota": "Passa e nao prova o pedido."
+    }
+  ]
+}

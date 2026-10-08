@@ -1,0 +1,17 @@
+{
+  "descricao": "REQ 003 retirado ainda com cenário (dispara SPC-003)",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 1,
+  "status": "draft",
+  "findings": [
+    [
+      "SPC-003",
+      "error",
+      "features/contas-da-semana/contas-da-semana.feature",
+      26
+    ]
+  ]
+}

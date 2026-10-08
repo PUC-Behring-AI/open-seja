@@ -25,6 +25,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+from artifact_id import ARTIFACT_ID
 
 WINDOW_MINUTES = 30
 SIMILARITY_THRESHOLD = 0.6
@@ -80,14 +82,17 @@ def _load_briefs_map(briefs_path: Path | None) -> dict[str, str]:
         text = briefs_path.read_text(encoding="utf-8", errors="replace")
     except OSError:
         return mapping
-    # Heuristic: find six-digit ids followed by any separator, then capture
+    # Heuristic: find the first artifact id (six-digit legacy or
+    # YYYYMMDD-xxxxxx) followed by any separator, then capture
     # the remainder of the line as the brief. The briefs.md file uses an
     # idiom like ``STARTED | <datetime> | <skill> | <id> | <brief>``. We
-    # simply take the last ``|``-delimited segment after a 6-digit id.
+    # simply take the last ``|``-delimited segment after the id.
     for line in text.splitlines():
         if "|" not in line:
             continue
-        id_match = re.search(r"\b(\d{6})\b", line)
+        id_match = re.search(
+            rf"(?<![0-9A-Za-z])({ARTIFACT_ID})(?![0-9A-Za-z])", line
+        )
         if not id_match:
             continue
         tail = line.split("|")[-1].strip()

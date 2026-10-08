@@ -1,0 +1,20 @@
+{
+  "args": [],
+  "exit_code": 0,
+  "findings": [
+    [
+      "GHK-014",
+      "warning",
+      "features/login/login.feature",
+      3
+    ]
+  ],
+  "matrix": {
+    "login": {
+      "scenarios_approved": true,
+      "reqs": {
+        "REQ-login-001": 1
+      }
+    }
+  }
+}

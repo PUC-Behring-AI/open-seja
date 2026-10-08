@@ -32,20 +32,22 @@ import sys
 import tempfile
 from pathlib import Path
 
+from artifact_id import ARTIFACT_ID, ARTIFACT_ID_RE, normalize_id
 from project_config import REPO_ROOT, get_path
 
 OUTPUT_DIR = get_path("OUTPUT_DIR") or REPO_ROOT / "_output"
 INDEX_FILE = OUTPUT_DIR / "INDEX.md"
 
 # Matches `source: advisory-000058` or `source: research-000545 -- some note`
+# and `source: plan-YYYYMMDD-xxxxxx -- note` (both ID formats, see artifact_id)
 _SOURCE_RE = re.compile(
-    r"^source:\s+([a-zA-Z][a-zA-Z0-9_-]*?)-(\d+)(?:\s|--|$)", re.IGNORECASE
+    rf"^source:\s+([a-zA-Z][a-zA-Z0-9_-]*?)-({ARTIFACT_ID})(?:\s|--|$)", re.IGNORECASE
 )
 
 # Matches the path column in INDEX.md table rows:
 # | ... | [filename](relative/path.md) |
 _INDEX_ROW_RE = re.compile(
-    r"^\|\s*[^|]*\|\s*([^|]*?)\s*\|\s*(\d+)\s*\|[^|]*\|[^|]*\|\s*\[([^\]]+)\]\(([^)]+)\)\s*\|",
+    rf"^\|\s*[^|]*\|\s*([^|]*?)\s*\|\s*({ARTIFACT_ID}|\d+)\s*\|[^|]*\|[^|]*\|\s*\[([^\]]+)\]\(([^)]+)\)\s*\|",
 )
 
 
@@ -69,17 +71,20 @@ def _extract_source(header_lines: list[str]) -> tuple[str, str] | None:
 
 
 def _artifact_token_from_path(artifact_path: Path) -> tuple[str, str] | None:
-    """Derive (type, id) from filename e.g. plan-000546-foo.md -> ('plan', '000546')."""
+    """Derive (type, id) from filename e.g. plan-000546-foo.md -> ('plan', '000546').
+
+    Also reads the new format: plan-YYYYMMDD-xxxxxx-foo.md -> ('plan', 'YYYYMMDD-xxxxxx').
+    """
     stem = artifact_path.stem  # e.g. plan-000546-foo
     parts = stem.split("-")
-    # Expect at least <type>-<6-digit-id>[-slug...]
+    # Expect at least <type>-<id>[-slug...]; the new ID spans two dash-separated parts
     if len(parts) < 2:
         return None
     artifact_type = parts[0].lower()
-    candidate_id = parts[1]
-    if not candidate_id.isdigit():
-        return None
-    return artifact_type, candidate_id
+    for candidate_id in ("-".join(parts[1:3]), parts[1]):
+        if ARTIFACT_ID_RE.match(candidate_id):
+            return artifact_type, candidate_id
+    return None
 
 
 def _find_source_file(source_type: str, source_id: str) -> Path | None:
@@ -90,14 +95,14 @@ def _find_source_file(source_type: str, source_id: str) -> Path | None:
 
     index_text = INDEX_FILE.read_text(encoding="utf-8")
     # Normalize the ID to compare without leading zeros where safe
-    padded_id = source_id.zfill(6)
+    padded_id = normalize_id(source_id)
 
     for line in index_text.splitlines():
         m = _INDEX_ROW_RE.match(line)
         if not m:
             continue
         row_type = m.group(1).strip().lower()
-        row_id = m.group(2).strip().zfill(6)
+        row_id = normalize_id(m.group(2).strip())
         rel_path = m.group(4).strip()
 
         if row_id == padded_id and row_type == source_type:

@@ -12,10 +12,11 @@ Lifecycle: active
 
 Runs `git diff --cached --name-only` to get staged files and compares them
 against the expected file set for a given skill type and artifact ID. Expected
-files come from three sources:
+files come from four sources:
   (a) the plan's ## Files section if --plan-id is given
   (b) the skill output directory resolved from conventions.md
   (c) the --always-include list
+  (d) the PKB_DIR prefix when the PKB layer exists (<PKB_DIR>/README.md)
 
 Files under _loom/ and .claude/ are always allowed (never unexpected).
 
@@ -45,6 +46,7 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from pkb_inbox import pkb_layer_present, read_pkb_dir
 from project_config import REPO_ROOT, get, get_path
 
 # ---------------------------------------------------------------------------
@@ -81,7 +83,11 @@ _FILES_LINE_RE = re.compile(r"^-\s*`([^`]+)`", re.MULTILINE)
 
 def _normalize(path: str) -> str:
     """Normalize a path to forward-slash form for cross-platform comparison."""
-    return Path(path).as_posix()
+    norm = Path(path).as_posix()
+    # Path() drops a trailing slash; keep it so directory prefixes survive.
+    if path.endswith("/") and not norm.endswith("/"):
+        norm += "/"
+    return norm
 
 
 def _get_staged_files() -> list[str]:
@@ -192,6 +198,12 @@ def build_expected(
         norm = _normalize(p.strip())
         if norm:
             expected.append(norm)
+
+    # (d) PKB capture folder, only when the PKB layer is instantiated
+    if pkb_layer_present(REPO_ROOT):
+        pkb_dir = read_pkb_dir(REPO_ROOT).strip("/")
+        if pkb_dir:
+            expected.append(pkb_dir + "/")
 
     # QA log if provided
     if qa_log:

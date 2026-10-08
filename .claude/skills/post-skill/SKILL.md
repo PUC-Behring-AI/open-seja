@@ -35,6 +35,7 @@ When `--deferred` is passed (by the roadmap parallel-wave orchestrator after mer
 | 7 (index regeneration) | run | run |
 | 2g (pending action creation) | run | run |
 | 7e (deferred-artifact generation) | run | **skip** -- orchestrator handles wave-level docs |
+| 7f (pkb-capture) | run | **skip** -- the wave orchestrator does not capture |
 | 8 (commit) | run | **skip** -- orchestrator commits |
 | 8b (telemetry flush) | run | run (appended; orchestrator includes in wave commit) |
 | 9-12 (wrap-up, next-step) | run | **skip** |
@@ -43,7 +44,7 @@ When `--deferred` is active, execute steps 0, 1b, 2, 2c, 7, 2g, and 8b only. Ski
 
 ## Skill-specific Instructions
 
-0. **Checkpoint recovery**: if `${OUTPUT_DIR}/.post-skill-checkpoint` exists, read it (`<step> | <datetime> | <skill-id>`). If `<skill-id>` matches $ARGUMENTS[0], resume from the step AFTER `<step>`. Otherwise delete the stale file and proceed normally. Also read SKILL-reference.md for schema definitions. Step order for resume: the deferred-artifact generation step `7e` runs between `7` and `8`, so a `7` token resumes at `7e` (which is idempotent) and a `7e` token resumes at step 8 (the already-generated artifacts are then committed). When resuming from a `7` or `7e` token, also capture `<pre-commit-sha>` via `git rev-parse HEAD` -- step 8 has not run, so HEAD is still the pre-commit state.
+0. **Checkpoint recovery**: if `${OUTPUT_DIR}/.post-skill-checkpoint` exists, read it (`<step> | <datetime> | <skill-id>`). If `<skill-id>` matches $ARGUMENTS[0], resume from the step AFTER `<step>`. Otherwise delete the stale file and proceed normally. Also read SKILL-reference.md for schema definitions. Step order for resume: the deferred-artifact generation step `7e` runs between `7` and `8`, and the PKB capture step `7f` runs between `7e` and `8`, so a `7` token resumes at `7e` (which is idempotent), a `7e` token resumes at `7f` (idempotent: `capture` appends a dated section instead of duplicating the note), and a `7f` token resumes at step 8 (the already-generated artifacts are then committed). When resuming from a `7`, `7e` or `7f` token, also capture `<pre-commit-sha>` via `git rev-parse HEAD` -- step 8 has not run, so HEAD is still the pre-commit state.
 
 1. Obtain UTC time via `date -u +"%Y-%m-%d %H:%M UTC"`; use the exact output as `<datetime>` (do not estimate).
 
@@ -111,8 +112,10 @@ When `--deferred` is active, execute steps 0, 1b, 2, 2c, 7, 2g, and 8b only. Ski
       iii. If step 2b's opt-out branch was taken (parent `/implement` had `--skip-docs` per 2b.c, or user chose "Skip" on 2b.d) AND the plan has any non-N/A `Docs:` step: `python .claude/skills/scripts/pending.py add --type update-documentation --source plan-<id> --description "Run /document --plan plan-<id>"`.
       iv. **Implement mark-done safety net**: `python .claude/skills/scripts/pending.py done --source plan-<id> --type implement`, only when the plan header is marked DONE (either header form: `# DONE | ...` or legacy `# Plan NNNN | DONE | ...`); for a partial plan (`/implement` manual step 9 partial stop), keep the `implement` entry open. Closes the entry filed at `/plan` step 7h; idempotent (no-op if absent or already done). Also recovers when a crash occurred between `/implement`'s rename and its own mark-done call.
 
-2c. **Design intent curation reminder** (same gate as step 2; skip when the plan header is not marked DONE (either header form: `# DONE | ...` or legacy `# Plan NNNN | DONE | ...`), i.e. a partial plan). Informational only -- do **not** perform the promotion (designer owns every word of Decision entries; harness manages only the STATUS marker lifecycle). Output (text, not AskUserQuestion):
+2c. **Design intent curation reminder** (same gate as step 2; skip when the plan header is not marked DONE (either header form: `# DONE | ...` or legacy `# Plan NNNN | DONE | ...`), i.e. a partial plan). **Widened gate**: the reminder below also runs when the parent skill is `plan` and step 7f of this invocation produced `as_expressed_igual_ao_brief: false`; in that case only the drift line below is printed (the promotion text applies to `implement` parents). Informational only -- do **not** perform the promotion (designer owns every word of Decision entries; harness manages only the STATUS marker lifecycle). Output (text, not AskUserQuestion):
    > "Design intent from plan [plan-id] has been implemented. Consider promoting items to `established` status via `/explain drift --promote` (Phase 3a generates a draft Decision entry proposal; Phase 3b flips the STATUS markers after you apply the prose). P0 priority items: §4 Permission Model, §11 Global Vision, §13 Solution Representations, §14 Per-Feature Intentions."
+
+   **Design trigger line** (never blocks). Read `DESIGN_TRIGGER_DRIFT_ITEMS` from `conventions.md`; empty = off, print nothing. Otherwise read the plan progress file for the line written by `step_notes.py record --kind drift` (`- drift: <path> (<n> itens)` or `- drift: not-measured`). If `<n> >= limiar`, or the skill is `plan` and 7f reported `as_expressed_igual_ao_brief: false`, print: "deriva de intencao: <n> itens de deriva (limiar <limiar>) | as-expressed difere do brief -- considere `/design` antes de um novo `/plan`" (omit the clause that does not apply). If the line is `drift: not-measured`, print "deriva: nao medida" beside it. The user fixes the threshold; the harness never picks it (Q3).
 
 2b. **Documentation auto-run** (same gate as step 2; skip silently if no plan -- advisory, explain, check).
 
@@ -191,6 +194,10 @@ When `--deferred` is active, execute steps 0, 1b, 2, 2c, 7, 2g, and 8b only. Ski
       iv. deploy.html is a create-or-overwrite write, hence idempotent under a checkpoint resume. Once generated it is staged by the step-8 commit (generation now precedes the commit, so no separate "commit scope" note is needed).
 
    Checkpoint: `7e | <current datetime UTC> | $ARGUMENTS[0]`.
+
+7f. **pkb-capture** (gate: the PKB layer exists, i.e. `PKB_DIR` is non-empty and `<PKB_DIR>/README.md` exists; skipped in `--deferred` mode). Runs after 7e and BEFORE the step-8 commit so the inbox notes land in the primary commit. Run `python .claude/skills/scripts/pkb_inbox.py capture --skill <skill> --artifact <id/path> --session-id $CLAUDE_SESSION_ID --json`, where `<skill>` is the same skill id the brief's skill field and `conversation_trace.py backfill` use (matching against `led_to_skill` is exact after stripping a leading slash, so do not rename it). If the JSON carries `skipped`, continue **in silence**: no output line, because the layer is optional and most projects do not have it. Otherwise run `python .claude/skills/scripts/pkb_inbox.py digest`; if the capture JSON has `mascarado: true`, print one warning line with the note path; remember `as_expressed_igual_ao_brief` for step 2c. Stage `<PKB_DIR>/` with the step-8 commit (`verify_commit_scope.py` expects it when the layer exists).
+
+   Checkpoint: `7f | <current datetime UTC> | $ARGUMENTS[0]`.
 
 8. Stage the affected files (including regenerated indexes, updated as-coded files, and any step-7e artifacts -- `_output/docs/deploy.html` when generated, plus the plan file carrying the Manual Actions edit) and commit using the message from step 4. Checkpoint: `8 | <current datetime UTC> | $ARGUMENTS[0]`. Then delete `${OUTPUT_DIR}/.post-skill-checkpoint` -- post-skill completed successfully.
 

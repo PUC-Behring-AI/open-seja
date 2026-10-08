@@ -1,0 +1,15 @@
+{
+  "functions": {
+    "src/tasks.py::TaskList.add": {
+      "cc": 1,
+      "cov": 1.0,
+      "crap": 1.0,
+      "survived": 0
+    }
+  },
+  "markers": {},
+  "mutation": {
+    "survived_total": 0
+  },
+  "version": 1
+}

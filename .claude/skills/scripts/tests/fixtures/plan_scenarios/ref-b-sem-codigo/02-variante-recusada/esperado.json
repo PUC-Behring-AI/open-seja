@@ -1,0 +1,14 @@
+{
+  "descricao": "variante: um step de teste num plano pulado e recusado (PFS-013); o agente volta a grill ou a specify",
+  "root": null,
+  "exit_code": 1,
+  "status": null,
+  "findings": [
+    [
+      "PFS-013",
+      "error",
+      22
+    ]
+  ],
+  "matrix": null
+}

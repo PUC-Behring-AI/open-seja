@@ -1,0 +1,17 @@
+{
+  "descricao": "REQ 002 ativo sem cenário (dispara SPC-003; o GHK-005 do validador fica com ela)",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 1,
+  "status": "draft",
+  "findings": [
+    [
+      "SPC-003",
+      "error",
+      "features/contas-da-semana/intent.md",
+      34
+    ]
+  ]
+}

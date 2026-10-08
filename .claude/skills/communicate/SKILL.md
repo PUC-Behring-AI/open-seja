@@ -68,7 +68,7 @@ ${COMMUNICATION_DIR}/
 
 When the content for a single audience naturally splits into distinct topics (e.g., a product vision and a status reporting template for clients), create a subfolder named `communication-<id>-<audience-slug>/` containing an `index.md` that links to the individual topic files. All files within the subfolder get both `.md` and `.html` versions. Use a single file when the content forms a cohesive narrative.
 
-The sequential ID is globally unique across all artifact types (6-digit, zero-padded). Reserve it by running `python .claude/skills/scripts/reserve_id.py --type communication --title '<audience-slug>'` before writing any content.
+The artifact ID returned by reserve_id.py is unique across all artifact types. Reserve it by running `python .claude/skills/scripts/reserve_id.py --type communication --title '<audience-slug>'` before writing any content (add `--json` to also get the `uid`).
 
 ## Batch Mode
 
@@ -113,7 +113,7 @@ This mode follows the [Batch Execution Pattern](../../../.claude/references/gene
 3. **Determine output path:**
 
    Compute the date folder: `${COMMUNICATION_DIR}/<YYYY-MM-DD>` (current UTC date). Create it if it does not exist.
-   Reserve the next global ID by running `python .claude/skills/scripts/reserve_id.py --type communication --title '<audience-slug>'`. Use the returned 6-digit ID.
+   Reserve the next global ID by running `python .claude/skills/scripts/reserve_id.py --type communication --title '<audience-slug>'`. Use the returned artifact ID (add `--json` to also get the `uid`).
 
 4. **Launch generator agent:**
 

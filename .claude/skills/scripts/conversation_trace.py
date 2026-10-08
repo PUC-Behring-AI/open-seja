@@ -18,6 +18,7 @@ Subcommands:
   append           Append a new entry (with automatic secret masking)
   backfill-skill   Set led_to_skill on an existing entry
   last-evt-id      Print the last evt_id for a session
+  list             List a session's entries as JSON (read-only)
 
 Usage
 -----
@@ -215,6 +216,84 @@ def _cmd_last_evt_id(args: argparse.Namespace) -> int:
 
 
 # ---------------------------------------------------------------------------
+# Subcommand: list
+# ---------------------------------------------------------------------------
+
+
+def list_entries(session_id: str, led_to_skill: str | None = None,
+                 since_evt: str | None = None,
+                 trace_file: Path | None = None) -> list[dict]:
+    """Return the session's entries in file order, without rewriting the file.
+
+    Entries are already masked at write time. led_to_skill keeps only entries
+    with that exact value; since_evt keeps entries after that evt_id.
+    """
+    path = trace_file if trace_file is not None else _trace_path()
+    result: list[dict] = []
+    seen_since = since_evt is None
+    for entry in _read_entries(path):
+        if entry.get("session_id") != session_id:
+            continue
+        if not seen_since:
+            seen_since = entry.get("evt_id") == since_evt
+            continue
+        if led_to_skill is not None and entry.get("led_to_skill") != led_to_skill:
+            continue
+        result.append(entry)
+    return result
+
+
+def exchange_user_entries(session_id: str, skill: str, since_evt: str | None = None,
+                          trace_file: Path | None = None) -> list[dict]:
+    """User utterances that led to `skill`, in file order.
+
+    pre-skill backfills led_to_skill on the LAST entry of the session, which is
+    the agent's reply, so user entries are reached through the chain: for each
+    claude entry tagged with the skill, walk preceding_evt_id back through user
+    entries and stop at a claude entry (or an entry tagged with another skill).
+    A user entry tagged directly with the skill also counts. The tag match is
+    exact after stripping a leading slash.
+    """
+    skill_id = skill.lstrip("/")
+    entries = list_entries(session_id, trace_file=trace_file)
+    by_id = {e.get("evt_id"): e for e in entries}
+
+    def tagged(e: dict) -> str:
+        return (e.get("led_to_skill") or "").lstrip("/")
+
+    picked: set[str] = set()
+    for e in entries:
+        if tagged(e) != skill_id:
+            continue
+        if e.get("emitter") == "user":
+            picked.add(str(e["evt_id"]))
+            continue
+        seen: set[str] = set()
+        prev = by_id.get(e.get("preceding_evt_id"))
+        while prev is not None and prev.get("emitter") == "user" \
+                and prev["evt_id"] not in seen:
+            seen.add(prev["evt_id"])
+            if tagged(prev) not in ("", skill_id):
+                break
+            picked.add(str(prev["evt_id"]))
+            prev = by_id.get(prev.get("preceding_evt_id"))
+    result = [e for e in entries if e.get("evt_id") in picked]
+    if since_evt is not None:
+        ids = [e.get("evt_id") for e in entries]
+        if since_evt in ids:
+            cut = ids.index(since_evt)
+            result = [e for e in result if ids.index(e.get("evt_id")) > cut]
+    return result
+
+
+def _cmd_list(args: argparse.Namespace) -> int:
+    """Print the session's entries as a JSON array."""
+    entries = list_entries(args.session_id, args.led_to_skill, args.since_evt)
+    print(json.dumps(entries, indent=2, ensure_ascii=False))
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 
@@ -259,6 +338,17 @@ def _build_parser() -> argparse.ArgumentParser:
     p_last.add_argument("--session-id", required=True,
                         help="Session identifier to search for")
 
+    # -- list --
+    p_list = sub.add_parser("list", help="List a session's entries as JSON")
+    p_list.add_argument("--session-id", required=True,
+                        help="Session identifier")
+    p_list.add_argument("--led-to-skill", default=None,
+                        help="Keep only entries with this led_to_skill")
+    p_list.add_argument("--since-evt", default=None,
+                        help="Keep only entries after this evt_id")
+    p_list.add_argument("--json", action="store_true",
+                        help="JSON output (always on; accepted for symmetry)")
+
     return parser
 
 
@@ -270,6 +360,7 @@ def main() -> int:
         "append": _cmd_append,
         "backfill-skill": _cmd_backfill_skill,
         "last-evt-id": _cmd_last_evt_id,
+        "list": _cmd_list,
     }
 
     handler = dispatch.get(args.command)

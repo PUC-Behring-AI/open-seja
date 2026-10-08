@@ -1,0 +1,211 @@
+[
+  {
+    "keyword": "Funcionalidade",
+    "uri": "contas-da-semana/contas-da-semana.feature",
+    "name": "Contas da semana",
+    "id": "contas-da-semana/contas-da-semana.feature",
+    "line": 1,
+    "tags": [],
+    "elements": [
+      {
+        "keyword": "Cenário",
+        "id": "test_K1",
+        "name": "Ver as contas que vencem nos próximos 7 dias",
+        "line": 1,
+        "tags": [
+          {
+            "name": "REQ-contas-da-semana-001",
+            "line": 1
+          }
+        ],
+        "type": "scenario",
+        "steps": [
+          {
+            "keyword": "Dado",
+            "name": "passo 1",
+            "line": 2,
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Dado",
+            "name": "passo 2",
+            "line": 3,
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Dado",
+            "name": "passo 3",
+            "line": 4,
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Dado",
+            "name": "passo 4",
+            "line": 5,
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Dado",
+            "name": "passo 5",
+            "line": 6,
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          }
+        ]
+      },
+      {
+        "keyword": "Cenário",
+        "id": "test_K2",
+        "name": "Marcar uma conta como paga",
+        "line": 1,
+        "tags": [
+          {
+            "name": "REQ-contas-da-semana-002",
+            "line": 1
+          }
+        ],
+        "type": "scenario",
+        "steps": [
+          {
+            "keyword": "Dado",
+            "name": "passo 1",
+            "line": 2,
+            "result": {
+              "status": "skipped",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Dado",
+            "name": "passo 2",
+            "line": 3,
+            "result": {
+              "status": "skipped",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Dado",
+            "name": "passo 3",
+            "line": 4,
+            "result": {
+              "status": "skipped",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Dado",
+            "name": "passo 4",
+            "line": 5,
+            "result": {
+              "status": "skipped",
+              "duration": 0
+            }
+          }
+        ]
+      },
+      {
+        "keyword": "Cenário",
+        "id": "test_K3",
+        "name": "Desfazer uma conta marcada como paga por engano",
+        "line": 1,
+        "tags": [
+          {
+            "name": "REQ-contas-da-semana-002",
+            "line": 1
+          },
+          {
+            "name": "xfail",
+            "line": 1
+          }
+        ],
+        "type": "scenario",
+        "steps": [
+          {
+            "keyword": "Dado",
+            "name": "passo 1",
+            "line": 2,
+            "result": {
+              "status": "skipped",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Dado",
+            "name": "passo 2",
+            "line": 3,
+            "result": {
+              "status": "skipped",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Dado",
+            "name": "passo 3",
+            "line": 4,
+            "result": {
+              "status": "skipped",
+              "duration": 0
+            }
+          }
+        ]
+      },
+      {
+        "keyword": "Cenário",
+        "id": "test_K4",
+        "name": "A lista abre logo com muitas contas",
+        "line": 1,
+        "tags": [
+          {
+            "name": "REQ-contas-da-semana-003",
+            "line": 1
+          }
+        ],
+        "type": "scenario",
+        "steps": [
+          {
+            "keyword": "Dado",
+            "name": "passo 1",
+            "line": 2,
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Dado",
+            "name": "passo 2",
+            "line": 3,
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Dado",
+            "name": "passo 3",
+            "line": 4,
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "descricao": "retradução rev 5: passou do teto de 3 ajustes (informação, não falha)",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 0,
+  "status": "draft",
+  "findings": [
+    [
+      "SPC-011",
+      "info",
+      "features/contas-da-semana/intent.md",
+      73
+    ]
+  ]
+}

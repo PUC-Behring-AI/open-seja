@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "feature": "contas-da-semana",
+  "momento": "M1",
+  "at": "2026-10-06T18:00:00Z",
+  "report": {
+    "schema_version": 1,
+    "feature": "contas-da-semana",
+    "momento": "M1",
+    "degraus": {
+      "D1": {
+        "n": 3,
+        "cobertos": 3,
+        "descobertos": 0,
+        "nao_medidos": 0,
+        "D": 0.0,
+        "razao_nm": []
+      },
+      "D2": {
+        "n": 4,
+        "cobertos": 4,
+        "descobertos": 0,
+        "nao_medidos": 0,
+        "D": 0.0,
+        "razao_nm": []
+      },
+      "D3a": {
+        "n": 4,
+        "cobertos": 4,
+        "descobertos": 0,
+        "nao_medidos": 0,
+        "D": 0.0,
+        "razao_nm": []
+      },
+      "D3b": {
+        "n": 20,
+        "cobertos": 18,
+        "descobertos": 2,
+        "nao_medidos": 0,
+        "D": 0.1,
+        "razao_nm": []
+      }
+    }
+  },
+  "entradas": {
+    "features/contas-da-semana/contas-da-semana.feature": "10971673b786d9fbd769176a0086a4f5e25aeef5fdb9f2a27d99518c96f9acef",
+    "features/contas-da-semana/drift/coverage.json": "ebbc3ee304a23e1683930502454142ff10a45f3f799f68077030749eeb64c1c9",
+    "features/contas-da-semana/drift/red-reason.json": "8ba049c51adb308fdba164562f899b86aa9eac6bb4223acfdcf6d4eacde9e48b",
+    "features/contas-da-semana/gate.json": "a24526802938821808d79e5947d381e49c1d25c496d45aaa50028180d97671f5",
+    "features/contas-da-semana/intent.md": "06632239bcac93723aa4d361ec7d1d4d6812c8d5095db79297bd6732c2ac0e19",
+    "features/contas-da-semana/runner/cucumber.json": "b06dee743ee0696b11476ddc0079e4edd3ec208252774a8540aad6374c681846"
+  }
+}

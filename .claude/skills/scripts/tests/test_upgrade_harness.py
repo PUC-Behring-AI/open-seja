@@ -334,3 +334,60 @@ def test_collect_source_files_excludes_non_py_colocated_files(tmp_path):
     assert "helper.py" in names
     assert "NOTES.md" not in names
     assert "data.json" not in names
+
+
+def test_collect_source_files_includes_every_template_file(tmp_path):
+    """Template files that are not .md/.json (gate.py, *.example, *.toml) reach upgraded projects.
+
+    plan-000015 Step 9: the test-first plugin template is `scenario_report.py.example`; without it an
+    upgraded project cannot run `build_checks.py install-plugin`.
+    """
+    template = tmp_path / ".claude" / "references" / "template"
+    (template / "bdd" / "python").mkdir(parents=True)
+    (template / "quality-gate" / "python").mkdir(parents=True)
+    (template / "__pycache__").mkdir()
+    for rel in ("conventions.md", "bdd/python/scenario_report.py.example",
+                "quality-gate/python/gate.py", "quality-gate/python/pyproject-dev.example.toml"):
+        (template / rel).write_text("x\n", encoding="utf-8")
+    (template / "__pycache__" / "gate.cpython-312.pyc").write_bytes(b"\0")
+    names = {p.relative_to(template).as_posix() for p in upgrade_harness.collect_source_files(tmp_path)
+             if template in p.parents}
+    assert names == {"conventions.md", "bdd/python/scenario_report.py.example",
+                     "quality-gate/python/gate.py", "quality-gate/python/pyproject-dev.example.toml"}
+
+
+@pytest.mark.parametrize("rel", ["inbox/a.md", "logs/2026/x.md", "Templates/Diario.md",
+                                 "Objetivos.md", "index.md"])
+def test_is_preserved_guards_pkb_layer(rel):
+    assert upgrade_harness.is_preserved(rel) is True
+
+
+@pytest.mark.parametrize("rel", [".claude/skills/plan/SKILL.md", "docs/a.md", "docs/index.md"])
+def test_is_preserved_leaves_harness_and_docs_alone(rel):
+    assert upgrade_harness.is_preserved(rel) is False
+
+
+def _dry_run_upgrade(tmp_path, with_pkb, capsys):
+    source = tmp_path / "src"
+    (source / ".claude" / "skills" / "plan").mkdir(parents=True)
+    (source / ".claude" / "skills" / "plan" / "SKILL.md").write_text("x\n", encoding="utf-8")
+    target = tmp_path / "tgt"
+    (target / ".claude" / "skills").mkdir(parents=True)
+    (target / "product-design").mkdir()
+    (target / "product-design" / "conventions.md").write_text("# c\n", encoding="utf-8")
+    if with_pkb:
+        (target / "inbox").mkdir()
+        (target / "inbox" / "README.md").write_text("r\n", encoding="utf-8")
+    upgrade_harness.run_upgrade(source, target, True, new_version="vX")
+    return capsys.readouterr().out
+
+
+def test_upgrade_prints_pkb_hint_when_layer_present(tmp_path, capsys):
+    out = _dry_run_upgrade(tmp_path, True, capsys)
+    assert "camada PKB detectada" in out
+    assert "inbox/README.md" not in out.split("camada PKB detectada")[0]
+
+
+def test_upgrade_omits_pkb_hint_without_layer(tmp_path, capsys):
+    out = _dry_run_upgrade(tmp_path, False, capsys)
+    assert "camada PKB detectada" not in out

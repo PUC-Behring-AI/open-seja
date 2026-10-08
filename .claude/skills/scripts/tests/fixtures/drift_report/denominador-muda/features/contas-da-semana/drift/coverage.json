@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "base": "a1b2c3d",
+  "touched_total": 24,
+  "touched_uncovered": 2
+}

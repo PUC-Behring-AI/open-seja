@@ -1,0 +1,17 @@
+{
+  "descricao": "restrição sem número no Então nem em Exemplos (dispara SPC-004)",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 1,
+  "status": "draft",
+  "findings": [
+    [
+      "SPC-004",
+      "error",
+      "features/contas-da-semana/contas-da-semana.feature",
+      26
+    ]
+  ]
+}

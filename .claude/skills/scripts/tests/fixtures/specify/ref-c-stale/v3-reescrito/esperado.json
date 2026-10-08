@@ -1,0 +1,19 @@
+{
+  "descricao": "(c) só os cenários do REQ 002 reescritos; reaprovação regrava o lock",
+  "args": [
+    "--feature",
+    "contas-da-semana",
+    "--approve",
+    "--at",
+    "2026-10-07T09:30Z",
+    "--by",
+    "usuario",
+    "--contract-by",
+    "usuario"
+  ],
+  "exit_code": 0,
+  "status": "approved",
+  "intent_final": "intent-final.md",
+  "lock_final": "lock-final.json",
+  "findings": []
+}

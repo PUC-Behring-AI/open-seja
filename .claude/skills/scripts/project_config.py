@@ -230,6 +230,50 @@ def diff_conventions(project_path: str | Path, template_path: str | Path) -> dic
     }
 
 
+# Own row regex for SPECIFY_DEFAULT: unlike _ROW_RE, the value may come with or
+# without backticks, or be empty, so an unquoted `off` is not silently read as `on`.
+_SPECIFY_ROW_RE = re.compile(
+    r"^\|\s*`?SPECIFY_DEFAULT`?\s*\|([^|\n]*)\|", re.MULTILINE
+)
+_PLACEHOLDER_RE = re.compile(r"^\{\{[^}]*\}\}$")
+_SPECIFY_VALUES = ("on", "off")
+
+
+def specify_default(root: Path | None = None) -> str:
+    """Return the project's specify switch, ``"on"`` or ``"off"`` (D-011, CYC-036).
+
+    Reads ``<root>/product-design/conventions.md`` (or the legacy
+    ``project-design/`` folder) directly: no module cache and no fallback to the
+    template, so a verifier pointed at a fixture root never sees this repo's
+    conventions. ``root`` defaults to ``REPO_ROOT``.
+
+    Missing file, missing row, empty value or a ``{{...}}`` placeholder all mean
+    ``"on"``. Any other value raises ``ValueError``.
+    """
+    base = Path(root) if root is not None else REPO_ROOT
+    conventions = base / _CONVENTIONS_REL
+    if not conventions.is_file():
+        conventions = base / _CONVENTIONS_REL_LEGACY
+        if not conventions.is_file():
+            return "on"
+
+    text = conventions.read_text(encoding="utf-8", errors="replace")
+    match = _SPECIFY_ROW_RE.search(text)
+    if match is None:
+        return "on"
+
+    value = match.group(1).strip().strip("`").strip()
+    if not value or _PLACEHOLDER_RE.match(value):
+        return "on"
+    normalized = value.lower()
+    if normalized in _SPECIFY_VALUES:
+        return normalized
+    raise ValueError(
+        f"SPECIFY_DEFAULT inválido em {conventions}: {value!r}. "
+        f"Valores aceitos: `on`, `off` ou vazio (= `on`)."
+    )
+
+
 def get_pending_file() -> Path | None:
     """Return the pending ledger path, or None if OUTPUT_DIR is unresolvable.
 

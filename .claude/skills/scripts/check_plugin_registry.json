@@ -189,5 +189,55 @@
     },
     "scope": "harness",
     "critical": false
+  },
+  {
+    "script": "check_intent.py",
+    "name": "Intent Stop Rule",
+    "stack": {
+      "backend": ["any"],
+      "frontend": ["any"]
+    },
+    "scope": "intent",
+    "critical": false
+  },
+  {
+    "script": "check_features.py",
+    "name": "Gherkin Spec Format",
+    "stack": {
+      "backend": ["any"],
+      "frontend": ["any"]
+    },
+    "scope": "features",
+    "critical": false
+  },
+  {
+    "script": "check_specify.py",
+    "name": "Specify Approval",
+    "stack": {
+      "backend": ["any"],
+      "frontend": ["any"]
+    },
+    "scope": "features",
+    "critical": false
+  },
+  {
+    "script": "check_ledger_ids.py",
+    "name": "Ledger IDs",
+    "stack": {
+      "backend": ["any"],
+      "frontend": ["any"]
+    },
+    "scope": "ledger",
+    "critical": true
+  },
+  {
+    "script": "check_plan_scenarios.py",
+    "name": "Plan Scenario Coverage",
+    "stack": {
+      "backend": ["any"],
+      "frontend": ["any"]
+    },
+    "scope": "plans",
+    "critical": false
   }
 ]

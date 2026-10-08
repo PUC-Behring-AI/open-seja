@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "itens": [
+    {
+      "req": "REQ-contas-da-semana-001",
+      "adequado": "sim",
+      "por": "humano",
+      "objeto": "cenario",
+      "nota": "Captura o pedido."
+    },
+    {
+      "req": "REQ-contas-da-semana-002",
+      "adequado": "nao",
+      "por": "humano",
+      "objeto": "cenario",
+      "nota": "O cenario nao trata o desfazer."
+    }
+  ]
+}

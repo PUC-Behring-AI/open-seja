@@ -1,7 +1,7 @@
 ---
 name: plan
 description: "Make a plan to add a feature, fix a bug, or refactor code. Supports metacomm framing for design-intent briefs."
-argument-hint: "<brief> [--review <light|standard|deep>] [--framing metacomm] [--light] [--plan | --roadmap [--from-spec <path>] [--auto] [--only-unimplemented]]"
+argument-hint: "<brief> [--review <light|standard|deep>] [--framing metacomm] [--light] [--grill [<slug>]] [--specify [<slug>]] [--with-specify | --without-specify '<motivo>'] [--plan | --roadmap [--from-spec <path>] [--auto] [--only-unimplemented]]"
 compatibility: "Designed for Claude Code with the SEJA harness"
 metadata:
   last-updated: 2026-03-29 00:15 UTC
@@ -47,6 +47,10 @@ metadata:
 | `--only-unimplemented` | No | Scope the roadmap's requirements-extraction pass to REQ items whose section lacks a `STATUS: implemented` / `STATUS: established` marker (legacy uppercase `STATUS: IMPLEMENTED` also honored). Use with `--roadmap --auto`. Useful on established projects where a fresh roadmap should cover only the open-item delta. |
 | `--framing metacomm` | No | Frame the brief as a designer's metacommunication message (I/you phrasing) |
 | `--review <level>` | No | Override complexity-gated review depth. Valid: `light`, `standard`, `deep` |
+| `--grill [<slug>]` | No | Run only the grill phase and stop: interview, then write only `features/<slug>/intent.md`; re-entry allowed (see `general/grill-phase.md`, GRL-014) |
+| `--specify [<slug>]` | No | Run only the specify phase and stop: read the approved `intent.md`, write only the `.feature` files, the Retradução, the lock and the `scenarios_*` fields; re-entry allowed (see `general/specify-phase.md`, SPC-016) |
+| `--with-specify` | No | Run the grill and the specify for this plan when the project's `SPECIFY_DEFAULT` is `off`; no effect when `on` (CYC-036) |
+| `--without-specify "<motivo>"` | No | Skip the specify for this plan when `SPECIFY_DEFAULT` is `on`; the one-line reason goes into `Specify: skipped -- opt-out: <motivo>`; no effect when `off` (CYC-035, CYC-036) |
 
 # Make a plan
 
@@ -62,7 +66,7 @@ If there are no arguments, ask for the brief.
 
 ## Mode Detection
 
-1. **Explicit override**: `--light` -> [Lightweight Proposal Workflow](#lightweight-proposal-workflow); `--roadmap` -> [Roadmap Workflow](#roadmap-workflow); `--plan` -> standard workflow below. Skip auto-detection.
+1. **Explicit override**: `--grill` -> standard internal, step 2b only (grill phase); `--specify` -> standard internal, step 2c only (specify phase); `--light` -> [Lightweight Proposal Workflow](#lightweight-proposal-workflow); `--roadmap` -> [Roadmap Workflow](#roadmap-workflow); `--plan` -> standard workflow below. Skip auto-detection. `--with-specify` and `--without-specify` are not mode overrides: they go to the standard workflow (step 2b). Both together, or either one with `--light`, `--grill`, `--specify` or `--roadmap`, is refused in one sentence: "As flags `--with-specify` e `--without-specify` valem para um plano novo e não se combinam entre si nem com `--light`, `--grill`, `--specify` ou `--roadmap`." Plans a roadmap generates for its items run the standard workflow, so they are v2 and inherit the project default (C3); the roadmap summary itself stays v1.
 
 2. **Auto-detection** (neither `--plan` nor `--roadmap` present): score the brief against signals.
 
@@ -84,8 +88,8 @@ If there are no arguments, ask for the brief.
 Shared execution steps referenced by every mode's delta table. Each mode's step numbering stays intact; delta tables cite Common Steps by `C<n>` label.
 
 - **C1. Pre-skill**: Run /pre-skill "plan" $ARGUMENTS[0] to load general instructions and register the brief.
-- **C2. Reserve ID**: Run `python .claude/skills/scripts/reserve_id.py --type <type> --title '<short title>'`. `<type>` is `plan` (standard single-plan), `proposal` (`--light`), or `roadmap` (`--roadmap` Modes 1 and 2). Mode 3 skips this step.
-- **C3. Artifact header**: Header shape `# <Kind> <id> | <prefix><scope> | <current datetime> | <short title>`. For plans, extend with ` | Review: <depth>` and follow with `plan_format_version: 1` on the next line; metacomm framing inserts `METACOMM |` after prefix-scope; advisory Q&A source adds `source: advisory-<id>`. Proposals include `plan_format_version: 1` (see `.claude/references/template/proposal.md`). Roadmaps follow `.claude/references/template/roadmap-summary.md`. Output folders: `${PLANS_DIR}`, `${PROPOSALS_DIR}`, `${ROADMAP_DIR}` (see product-design/conventions.md); Mode 3 writes to `<target>/specs/`.
+- **C2. Reserve ID**: Run `python .claude/skills/scripts/reserve_id.py --type <type> --title '<short title>'`. Stdout is the artifact ID returned by reserve_id.py; add `--json` to also get the `uid`. `<type>` is `plan` (standard single-plan), `proposal` (`--light`), or `roadmap` (`--roadmap` Modes 1 and 2). Mode 3 skips this step.
+- **C3. Artifact header**: Header shape `# <Kind> <id> | <prefix><scope> | <current datetime> | <short title>`, followed on the next line by `uid: <ULID>` (value from `reserve_id.py --json` or `${OUTPUT_DIR}/ids/<uid>.json`). For plans, extend the H1 with ` | Review: <depth>` and follow the `uid:` line with `plan_format_version: 1` (standard mode, after the grill phase: `plan_format_version: 2`, then `Specify default: on|off`, `Feature: <slug>` and `Specify: approved (rev N)` or one of the three skip lines `Specify: skipped -- tarefa sem código: <reason>`, `Specify: skipped -- default off` (reason optional: `default off: <reason>`) or `Specify: skipped -- opt-out: <reason>` (reason required); exact formats in `general/plan-from-scenarios.md`; `--light` proposals and the roadmap summary stay v1, while the item plans a roadmap generates through the standard workflow are v2); metacomm framing inserts `METACOMM |` after prefix-scope; advisory Q&A source adds `source: advisory-<id>`. Proposals include `plan_format_version: 1` (see `.claude/references/template/proposal.md`). Roadmaps follow `.claude/references/template/roadmap-summary.md`. Output folders: `${PLANS_DIR}`, `${PROPOSALS_DIR}`, `${ROADMAP_DIR}` (see product-design/conventions.md); Mode 3 writes to `<target>/specs/`.
 - **C4. Decision-point rationale**: phrase every AskUserQuestion option (or text-based decision-point option) per the Decision-point rationale convention in `general/constraints.md`: `Recommended when ...` / `NOT recommended when ...`.
 - **C5. Review Depth Override**: the `--review <light|standard|deep>` flag overrides complexity-gated depth. Effective depth = `max(auto, floor, flag)` with ordering `light < standard < deep`, where `auto` = complexity gate, `floor` = `MINIMUM_REVIEW_DEPTH` from `product-design/conventions.md` (default `light`), `flag` = `--review` value. If effective differs from auto, log: "Review depth overridden: auto=`<auto>`, floor=`<floor>`, flag=`<flag>`, effective=`<effective>`". Update the plan header's `Review:` field to match effective. Applies to the standard single-plan workflow; `--light` reviews lightly inline; `--roadmap` delegates to generated plans.
 - **C6. Post-skill**: Run /post-skill <id> after the plan is finalized (before the implement question). For `--roadmap` Modes 1 and 2, the roadmap run owns the commit; per-plan invocations generated inline skip their own post-skill (see Mode 1 step 9).

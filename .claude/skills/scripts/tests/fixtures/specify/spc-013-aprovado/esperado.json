@@ -1,0 +1,12 @@
+{
+  "descricao": "lock bate com REQs, rev, hashes e retradução: approved",
+  "args": [
+    "--feature",
+    "contas-da-semana",
+    "--status"
+  ],
+  "exit_code": 0,
+  "status": "approved",
+  "reasons": [],
+  "findings": []
+}

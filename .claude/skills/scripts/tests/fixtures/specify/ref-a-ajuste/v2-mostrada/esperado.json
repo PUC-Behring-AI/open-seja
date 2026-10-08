@@ -1,0 +1,10 @@
+{
+  "descricao": "(a) versão mostrada ao citizen",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 0,
+  "status": "draft",
+  "findings": []
+}

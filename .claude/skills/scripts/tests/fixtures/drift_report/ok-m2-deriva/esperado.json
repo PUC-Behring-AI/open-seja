@@ -1,0 +1,91 @@
+{
+  "momento": "M2",
+  "degraus": {
+    "D1": {
+      "n": 3,
+      "cobertos": 3,
+      "descobertos": 0,
+      "nao_medidos": 0,
+      "D": 0.0,
+      "razao_nm": []
+    },
+    "D2": {
+      "n": 4,
+      "cobertos": 4,
+      "descobertos": 0,
+      "nao_medidos": 0,
+      "D": 0.0,
+      "razao_nm": []
+    },
+    "D3a": {
+      "n": 4,
+      "cobertos": 3,
+      "descobertos": 1,
+      "nao_medidos": 0,
+      "D": 0.25,
+      "razao_nm": []
+    },
+    "D3b": {
+      "n": 20,
+      "cobertos": 15,
+      "descobertos": 5,
+      "nao_medidos": 0,
+      "D": 0.25,
+      "razao_nm": []
+    }
+  },
+  "leituras": {
+    "cadeia_completa": 2,
+    "cadeia_indeterminada": 0,
+    "cenarios_orfaos": 0,
+    "cenarios_sem_tag": 0,
+    "escada_fechou_sem_capturar": false,
+    "nao_faz": {
+      "itens": 2,
+      "cenarios": 0,
+      "sem_evidencia": 2
+    }
+  },
+  "ressalvas": [
+    "amostra pequena"
+  ],
+  "delta": {
+    "D1": {
+      "m1": [
+        0,
+        3
+      ],
+      "m2": [
+        0,
+        3
+      ],
+      "mudanca": 0.0
+    },
+    "D3a": {
+      "m1": [
+        0,
+        4
+      ],
+      "m2": [
+        1,
+        4
+      ],
+      "mudanca": 0.25
+    },
+    "D3b": {
+      "m1": [
+        2,
+        20
+      ],
+      "m2": [
+        5,
+        20
+      ],
+      "mudanca": 0.15
+    },
+    "mudou": [
+      "features/contas-da-semana/drift/coverage.json",
+      "features/contas-da-semana/runner/cucumber.json"
+    ]
+  }
+}

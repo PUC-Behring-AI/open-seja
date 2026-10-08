@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-26T02:13:42Z",
+  "generated": "2026-10-07T19:37:30Z",
   "count": 16,
   "skills": [
     {
@@ -47,7 +47,7 @@
     {
       "name": "implement",
       "description": "Execute a previously generated plan to add a feature, fix a bug, or refactor code. Use when user mentions \"implement\", \"execute plan\", or \"run plan\".",
-      "argument_hint": "<planned-item-id> [--manual] [--roadmap <roadmap-id>] [--pending] [--checkpoint wave|plan|none] [--max-iterations N] [--dry-run] [--skip-checks] [--skip-docs]",
+      "argument_hint": "<planned-item-id> [--manual] [--roadmap <roadmap-id>] [--pending] [--checkpoint wave|plan|none] [--max-iterations N] [--dry-run] [--skip-checks] [--skip-docs] [--pipeline]",
       "category": "planning",
       "version": "1.0.0"
     },
@@ -75,7 +75,7 @@
     {
       "name": "plan",
       "description": "Make a plan to add a feature, fix a bug, or refactor code. Supports metacomm framing for design-intent briefs.",
-      "argument_hint": "<brief> [--review <light|standard|deep>] [--framing metacomm] [--light] [--plan | --roadmap [--from-spec <path>] [--auto] [--only-unimplemented]]",
+      "argument_hint": "<brief> [--review <light|standard|deep>] [--framing metacomm] [--light] [--grill [<slug>]] [--specify [<slug>]] [--with-specify | --without-specify '<motivo>'] [--plan | --roadmap [--from-spec <path>] [--auto] [--only-unimplemented]]",
       "category": "planning",
       "version": "1.0.0"
     },

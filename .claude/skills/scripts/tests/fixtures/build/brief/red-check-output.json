@@ -1,0 +1,18 @@
+{
+  "findings": [],
+  "frozen": [
+    "features/task-list/manage-tasks.feature",
+    "tests/steps_defs.py",
+    "tests/test_task_list.py"
+  ],
+  "message": "O teste falhou no passo Então: assert False is True (AssertionError).",
+  "ok": true,
+  "scenarios": {
+    "task-list/manage-tasks.feature::Marcar uma tarefa como feita": {
+      "exception": "AssertionError",
+      "failing_step_type": "then",
+      "reason_ok": true
+    }
+  },
+  "schema_version": 1
+}

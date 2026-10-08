@@ -1,0 +1,14 @@
+{
+  "descricao": "intent.md voltou a grilling com scenarios: approved: stale",
+  "args": [
+    "--feature",
+    "contas-da-semana",
+    "--status"
+  ],
+  "exit_code": 0,
+  "status": "stale",
+  "reasons": [
+    "intencao-reaberta"
+  ],
+  "findings": []
+}

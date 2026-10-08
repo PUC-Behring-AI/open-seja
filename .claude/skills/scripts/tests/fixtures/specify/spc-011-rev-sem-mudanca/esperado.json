@@ -1,0 +1,17 @@
+{
+  "descricao": "retradução rev 2 sem linha em Mudanças (dispara SPC-011)",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 1,
+  "status": "draft",
+  "findings": [
+    [
+      "SPC-011",
+      "error",
+      "features/contas-da-semana/intent.md",
+      73
+    ]
+  ]
+}

@@ -78,7 +78,7 @@ If the cycle fails for you, that is exactly the evidence I want.
 
 ## Source
 
-The authoritative text is section 2.8 of [`product-design/seja-as-intended.md`](https://github.com/PUC-Behring-AI/open-seja/blob/dev/product-design/seja-as-intended.md)
+The authoritative text is section 2.8 of the grounding in [`product-design/product-design-as-intended.md`](https://github.com/PUC-Behring-AI/open-seja/blob/dev/product-design/product-design-as-intended.md) §3
 (in Portuguese, on the `dev` branch: the distributed `main` does not carry the design record). It sits on H-004 (the workflow agent has an orchestrator), D-001 (the three-phase workflow agent
 is the coarse grain of the canonical path), and D-002 (what this release does while the hypothesis is under test).
 Terms: "portao" in the source is "gate" here, and BUILD is IMPLEMENT.

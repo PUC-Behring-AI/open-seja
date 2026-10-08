@@ -46,6 +46,12 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
+_SCRIPTS_DIR = str(Path(__file__).resolve().parent.parent / "scripts")
+if _SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPTS_DIR)
+
+from artifact_id import ARTIFACT_ID
+
 
 # ---------------------------------------------------------------------------
 # Repo root discovery
@@ -213,7 +219,8 @@ _TRACES_RE = re.compile(
 
 _REQ_ID_RE = re.compile(r"REQ-[A-Z0-9]+-\d{3}")
 
-_PLAN_ID_RE = re.compile(r"plan-(\d{6})")
+# The lookahead keeps a new ID (20261007-k3m9qz) from being cut at its first six digits.
+_PLAN_ID_RE = re.compile(rf"plan-({ARTIFACT_ID})(?![0-9A-Za-z])")
 
 
 def extract_traces(plans_dir: Path) -> dict[str, list[str]]:

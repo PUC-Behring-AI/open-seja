@@ -1,0 +1,223 @@
+[
+  {
+    "keyword": "Funcionalidade",
+    "uri": "task-list/manage-tasks.feature",
+    "name": "Gerenciar tarefas",
+    "id": "task-list/manage-tasks.feature",
+    "line": 2,
+    "description": "",
+    "language": "pt",
+    "tags": [],
+    "elements": [
+      {
+        "keyword": "Cenário",
+        "id": "test_acrescentar_uma_tarefa",
+        "name": "Acrescentar uma tarefa",
+        "line": 5,
+        "description": "",
+        "tags": [
+          {
+            "name": "REQ-task-list-001",
+            "line": 4
+          }
+        ],
+        "type": "scenario",
+        "steps": [
+          {
+            "keyword": "Dado",
+            "name": "que a lista de tarefas está vazia",
+            "line": 6,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Quando",
+            "name": "eu acrescento a tarefa \"tarefa de compras\"",
+            "line": 7,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Então",
+            "name": "a lista mostra a tarefa \"tarefa de compras\" como pendente",
+            "line": 8,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          }
+        ]
+      },
+      {
+        "keyword": "Esquema do Cenário",
+        "id": "test_acrescentar_tarefas_de_nomes_diferentes[tarefa de estudo]",
+        "name": "Acrescentar tarefas de nomes diferentes",
+        "line": 11,
+        "description": "",
+        "tags": [
+          {
+            "name": "REQ-task-list-001",
+            "line": 10
+          }
+        ],
+        "type": "scenario",
+        "steps": [
+          {
+            "keyword": "Dado",
+            "name": "que a lista de tarefas está vazia",
+            "line": 12,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Quando",
+            "name": "eu acrescento a tarefa \"tarefa de estudo\"",
+            "line": 13,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Então",
+            "name": "a lista mostra a tarefa \"tarefa de estudo\" como pendente",
+            "line": 14,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          }
+        ]
+      },
+      {
+        "keyword": "Esquema do Cenário",
+        "id": "test_acrescentar_tarefas_de_nomes_diferentes[tarefa de casa]",
+        "name": "Acrescentar tarefas de nomes diferentes",
+        "line": 11,
+        "description": "",
+        "tags": [
+          {
+            "name": "REQ-task-list-001",
+            "line": 10
+          }
+        ],
+        "type": "scenario",
+        "steps": [
+          {
+            "keyword": "Dado",
+            "name": "que a lista de tarefas está vazia",
+            "line": 12,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Quando",
+            "name": "eu acrescento a tarefa \"tarefa de casa\"",
+            "line": 13,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Então",
+            "name": "a lista mostra a tarefa \"tarefa de casa\" como pendente",
+            "line": 14,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          }
+        ]
+      },
+      {
+        "keyword": "Cenário",
+        "id": "test_marcar_uma_tarefa_como_feita",
+        "name": "Marcar uma tarefa como feita",
+        "line": 22,
+        "description": "",
+        "tags": [
+          {
+            "name": "REQ-task-list-002",
+            "line": 21
+          }
+        ],
+        "type": "scenario",
+        "steps": [
+          {
+            "keyword": "Dado",
+            "name": "que a lista tem a tarefa pendente \"tarefa de compras\"",
+            "line": 23,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Quando",
+            "name": "eu marco a tarefa \"tarefa de compras\" como feita",
+            "line": 24,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "Então",
+            "name": "a lista mostra a tarefa \"tarefa de compras\" como feita",
+            "line": 25,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "failed",
+              "duration": 0,
+              "error_message": "E   assert False is True\n\ntest_task_list.py:68: AssertionError"
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

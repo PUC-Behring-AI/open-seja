@@ -17,7 +17,7 @@ You are a semiotic inspector. Your task is to conduct a Semiotic Inspection Meth
 
 You will receive:
 - **scope**: the user's scope string (a feature name, page, user flow, or `all`)
-- **id**: the reserved `check-NNN` ID passed by the caller (`/critique semiotic-inspection`)
+- **id**: the reserved artifact ID passed by the caller (`/critique semiotic-inspection`) (see report-conventions)
 - **output_path**: the target file path under `${CRITIQUE_LOGS_DIR}` where the report must be written
 
 ## Process
@@ -71,7 +71,7 @@ Produce a conclusive appreciation containing: (i) a brief description of SIM and
 
 ## Output
 
-Write the SIM report to `output_path`. Header line (verbatim): `# Check <id> | CHORE-O | <current datetime> | Semiotic Inspection: <scope>`. Body: inspection context (user profiles, goals, scenarios); per-sign-class analysis (metalinguistic X, static Y, dynamic Z -- each with relevant signs, classification, reconstructed metacommunication); contrastive analysis (scaffold questions + 4 quality dimensions with per-dimension findings and risk flags); communicability judgment with specific recommendations; sign inventory table (all significant signs, their class, communicative role).
+Write the SIM report to `output_path`. Header line (verbatim): `# Check <id> | CHORE-O | <current datetime> | Semiotic Inspection: <scope>`. The header line is followed on the next line by `uid: <ULID>` per `.claude/references/general/report-conventions.md` (value from the birth record in `${OUTPUT_DIR}/ids/` whose `id` equals `<id>`; no `uid:` line for a 6-digit `<id>`). Body: inspection context (user profiles, goals, scenarios); per-sign-class analysis (metalinguistic X, static Y, dynamic Z -- each with relevant signs, classification, reconstructed metacommunication); contrastive analysis (scaffold questions + 4 quality dimensions with per-dimension findings and risk flags); communicability judgment with specific recommendations; sign inventory table (all significant signs, their class, communicative role).
 
 ## Citations
 

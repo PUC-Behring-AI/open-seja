@@ -1,0 +1,14 @@
+{
+  "descricao": "estado dos cenarios missing: refaca a specify",
+  "root": "_raizes/missing",
+  "exit_code": 1,
+  "status": "missing",
+  "findings": [
+    [
+      "PFS-011",
+      "error",
+      4
+    ]
+  ],
+  "matrix": null
+}

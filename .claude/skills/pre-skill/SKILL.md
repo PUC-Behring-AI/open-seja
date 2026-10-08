@@ -62,7 +62,7 @@ Read the calling skill's SKILL.md file at `.claude/skills/$ARGUMENTS[0]/SKILL.md
 
 ### Stage: pending-check
 
-Run `python .claude/skills/scripts/pending.py status --overdue-days 14 --format banner`. Print the output verbatim if non-empty. Never block the skill invocation; this stage is purely informational.
+Run `python .claude/skills/scripts/pending.py status --overdue-days 14 --format banner`. Print the output verbatim if non-empty. Then run `python .claude/skills/scripts/check_ledger_ids.py` and print its output if non-empty (duplicate artifact IDs, orphan birth records). Never block the skill invocation; this stage is purely informational.
 
 ### Stage: ref-load
 

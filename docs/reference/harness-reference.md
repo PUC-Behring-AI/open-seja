@@ -127,6 +127,7 @@ Generated 2026-07-04T22:56:29Z from seja-priv harness state.
 | check_frontend_test_coverage.py | Analyse frontend test coverage. | agent-invoked, hook-ci | active | `.claude/skills/scripts/check_frontend_test_coverage.py` | `concepts/call-graph.md` |
 | check_human_markers_only.py | Verify that diffs to Human (markers) files | agent-invoked, hook-ci | active | `.claude/skills/scripts/check_human_markers_only.py` | `concepts.md`, `concepts/call-graph.md`, `foundations.md`, `how-to/brownfield-collocated.md`, `how-to/brownfield-workspace.md`, `how-to/greenfield-collocated.md`, `how-to/greenfield-workspace.md`, `how-to/quality-gates.md` |
 | check_i18n_keys.py | Detect undefined / mismatched i18n keys. | agent-invoked, hook-ci | active | `.claude/skills/scripts/check_i18n_keys.py` | `concepts/call-graph.md` |
+| check_ledger_ids.py | Detect duplicate and orphan IDs in the SEJA ledger. | agent-invoked, hook-ci | active | `.claude/skills/scripts/check_ledger_ids.py` |  |
 | check_migration_chain.py | Validate Alembic migration revision chain in dialogos. | agent-invoked, hook-ci | active | `.claude/skills/scripts/check_migration_chain.py` | `concepts/call-graph.md` |
 | check_plan_coverage.py | Plan coverage verification against design-intent requirements. | agent-invoked, hook-ci | active | `.claude/skills/design/check_plan_coverage.py` | `concepts.md`, `concepts/call-graph.md` |
 | check_po_parity.py | Verify Flask-Babel .po catalog parity. | agent-invoked, hook-ci | active | `.claude/skills/scripts/check_po_parity.py` | `concepts/call-graph.md` |
@@ -146,7 +147,7 @@ Generated 2026-07-04T22:56:29Z from seja-priv harness state.
 | generate_pending_roadmap.py | Generate a roadmap from pending implement entries. | skill-invoked | active | `.claude/skills/scripts/generate_pending_roadmap.py` | `concepts/call-graph.md` |
 | generate_reflection_report.py | orchestrator for the /reflect skill. | skill-invoked | active | `.claude/skills/reflect/generate_reflection_report.py` | `concepts/call-graph.md` |
 | mark_brief_done.py | Mark a STARTED brief entry as DONE in briefs.md. | skill-invoked, agent-invoked | active | `.claude/skills/scripts/mark_brief_done.py` | `concepts/call-graph.md` |
-| reserve_id.py | ID reservation for SEJA artifacts (single-writer assumed). | skill-invoked | active | `.claude/skills/scripts/reserve_id.py` | `concepts/call-graph.md` |
+| reserve_id.py | ULID-based identity for SEJA artifacts, with a birth record per artifact. | skill-invoked | active | `.claude/skills/scripts/reserve_id.py` | `concepts/call-graph.md` |
 | run_all_checks.py | CI-independent validation orchestrator for SEJA checks. | agent-invoked | active | `.claude/skills/scripts/run_all_checks.py` | `concepts/call-graph.md`, `how-to/quality-gates.md` |
 | run_all_tests.py | Run backend, frontend and Playwright tests, saving results. | agent-invoked | active | `.claude/skills/scripts/run_all_tests.py` | `concepts/call-graph.md` |
 | run_preflight_fast.py | Fast preflight checks for git hooks and CI. | skill-invoked, hook-ci | active | `.claude/skills/scripts/run_preflight_fast.py` | `concepts/call-graph.md`, `how-to/ci-integration.md` |
@@ -159,6 +160,7 @@ Generated 2026-07-04T22:56:29Z from seja-priv harness state.
 
 | Name | Purpose | Invoked by | Lifecycle | Path | Mentioned in |
 |---|---|---|---|---|---|
+| artifact_id.py | ULID generator, visible ID and shared ID grammar for SEJA artifacts. | library | active | `.claude/skills/scripts/artifact_id.py` |  |
 | design_system.py | Extract CSS and design tokens from HTML design system files. | library | active | `.claude/skills/scripts/design_system.py` |  |
 | human_markers_registry.py | Shared registry for Human (markers) files and allowed marker patterns. | library | active | `.claude/skills/scripts/human_markers_registry.py` | `concepts/call-graph.md` |
 | load_quickguide.py | Shared loader for SKILL-quickguide.md sibling files. | library | active | `.claude/skills/scripts/load_quickguide.py` | `concepts/call-graph.md` |
@@ -392,6 +394,7 @@ Harness artifacts mentioned at least once in `seja-public/docs`.
 | apply_marker.py | Scripts | `.claude/skills/scripts/apply_marker.py` | `concepts.md` |
 | arch | Perspectives | `.claude/references/general/review-perspectives/arch.md` | `concepts/call-graph.md` |
 | architecture-explainer | Agents | `.claude/agents/architecture-explainer.md` | `concepts/call-graph.md` |
+| artifact_id.py | Scripts | `.claude/skills/scripts/artifact_id.py` |  |
 | backend | Rules | `.claude/rules/backend.md` | `concepts/call-graph.md` |
 | backfill_decision_digest.py | Scripts | `.claude/skills/scripts/backfill_decision_digest.py` | `concepts/call-graph.md` |
 | backfill_open_plans.py | Scripts | `.claude/skills/scripts/backfill_open_plans.py` | `concepts/call-graph.md` |
@@ -411,6 +414,7 @@ Harness artifacts mentioned at least once in `seja-public/docs`.
 | check_harness_drift.py | Scripts | `.claude/skills/scripts/check_harness_drift.py` | `concepts/call-graph.md` |
 | check_human_markers_only.py | Scripts | `.claude/skills/scripts/check_human_markers_only.py` | `concepts.md` |
 | check_i18n_keys.py | Scripts | `.claude/skills/scripts/check_i18n_keys.py` | `concepts/call-graph.md` |
+| check_ledger_ids.py | Scripts | `.claude/skills/scripts/check_ledger_ids.py` |  |
 | check_migration_chain.py | Scripts | `.claude/skills/scripts/check_migration_chain.py` | `concepts/call-graph.md` |
 | check_plan_coverage.py | Scripts | `.claude/skills/design/check_plan_coverage.py` | `concepts.md` |
 | check_po_parity.py | Scripts | `.claude/skills/scripts/check_po_parity.py` | `concepts/call-graph.md` |

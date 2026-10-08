@@ -16,6 +16,44 @@ Format: loosely based on [Keep a Changelog](https://keepachangelog.com/). SemVer
 
 ## [Unreleased]
 
+## [v0.11.0] - 2026-10-08
+
+v0.10.0 and v0.10.1 are tagged. v0.11.0 is the next release and contains the default cycle, the local ULID artifact identity and the optional PKB layer.
+
+### Added
+
+- **Default cycle**: `/plan` now runs the whole ladder before any code: a short interview in your own words (grill), requirements and scenarios you approve (specify), a plan in format v2 with a `Scenarios:` list on every step that has tests, and then `/implement` builds test first: red for the right reason, then green, with the gate at each step. When the plan ends, `/implement` freezes the first measurement (M1) so `/reflect` and `/explain drift` can compare it with what was delivered, step by step on the ladder, and say what was not measured. The new feature folder is `features/<slug>/` (`intent.md`, `*.feature`, `gate.json`, `scenarios.lock.json`, `drift/`).
+- **`/plan --grill` and `/plan --specify`**: run one phase alone. A task that needs no code (documentation, chore, research) skips specify with a recorded reason (`Specify: skipped -- <reason>`); the grill is never skipped but can be short.
+- **`/implement --pipeline`** (opt-in): adds the Cleaner and Hardener roles after the green step. Without the flag the default build is unchanged.
+- **`scenarios: draft`** in `intent.md`: when the interview is reopened and the requirements change, `check_specify.py --reconcile` sets the field to `draft` instead of leaving a stale `approved`. `check_features.py --matrix` reports the true state (`approved`, `stale`, `draft`, `missing`).
+- **Four checks in `run_all_checks.py`**: `check_intent`, `check_features`, `check_specify` and `check_plan_scenarios`. They print "nada a verificar" and pass where the project has no `features/` and no v2 plan.
+- **Guide**: `docs/how-to/ciclo-default.pt-BR.md` (pt-BR) explains the ladder, the commands, how to skip, what to do when something blocks, and how to update.
+- **Test-first plugin** (`tests/scenario_report.py`, pytest): an upgrade updates it only if the project already installed it; it never creates it, and it never overwrites a copy edited by hand.
+- **Specify switch** (D-011, which supersedes D-009): `SPECIFY_DEFAULT` (`on` or `off`) in `product-design/conventions.md` sets whether `/plan` writes requirements and Gherkin scenarios by default; a missing row means `on`. `/seja-setup` asks for the value at install. Per plan, `/plan --with-specify` turns the specify phase on when the default is `off`, and `/plan --without-specify "<reason>"` turns it off when the default is `on`, with a one-line reason. Every new v2 plan records `Specify default: on|off`, and a skipped specify now has one of three classes (`tarefa sem código`, `default off`, `opt-out`). A plan without specify still builds test first from its `Tests:` lines. `cycle_adherence.py` reports which plans followed the project default and why the others did not; the drift report (`drift_report.py`) says why a plan has no ladder. The control arm of the pilot is the same tag with `off`, not the previous tag.
+- **PKB layer (optional)**: an inbox, daily logs, note templates, a goals map and a catalogue, installed without overwriting anything you wrote. Install it with `/seja-setup <target> --pkb` (also valid with `--here` and `--demo`; without the flag those flows ask once) or run `python .claude/skills/scripts/pkb_inbox.py init [--with-skills]` later. The five maintenance skills (`daily-log`, `weekly-review`, `compress`, `next-action`, `process-inbox`) ship in `.claude/references/template/pkb/skills/` and reach a project only with `--with-skills`. New convention `PKB_DIR` (default `inbox`; empty turns capture off). See `docs/pkb-layer.md`.
+- **`pkb_inbox.py capture` and `digest`**: after a skill runs, an inbox note records your own words, the skill and the artifact, with secret-like text masked and flagged (`mascarado`). `digest` regenerates `<PKB_DIR>/_live.md`, a chronological index that is preparation, not emission. Capture depends on the exchange chain (`preceding_evt_id`) and on the session id; with no trace it falls back to the brief only.
+- **`conversation_trace.py list`**: prints a session's entries as JSON, optionally filtered by `--led-to-skill` and `--since-evt`.
+- **Post-skill step 7f (`pkb-capture`)**: runs capture and digest before the commit and stays silent when the project has no PKB layer. The commit scope check expects `<PKB_DIR>/` when the layer exists.
+- **`DESIGN_TRIGGER_DRIFT_ITEMS`** (default empty = off): when set, post-skill step 2c recommends `/design` once a measured drift reaches that number of items, or when a `/plan` capture shows your words differ from the brief. It never blocks, and you fix the threshold.
+
+### Changed
+
+- **Upgrading is safe for existing projects**: the new cycle acts only where the project has `features/` with an `intent.md` or a plan in format v2. **Plans in v1 stay valid** and are never rewritten; `--light`, the task type and the specify switch remain the way out. `/seja-setup --upgrade` does not touch `product-design/`, settings, `CLAUDE.md`, `_output/` or `features/`, with one exception: when `conventions.md` has no `SPECIFY_DEFAULT` row, it asks for the value and adds the row only after an explicit answer; without an answer it writes nothing and the project behaves as `on`. `upgrade_harness.py` itself never touches `conventions.md`. Running the upgrade twice changes nothing the second time.
+- `/seja-setup --upgrade` runs the `upgrade_harness.py` of the release it installs, not the one already in the project.
+- **Artifact IDs are now generated locally, with no counter** (D-010): `reserve_id.py` creates a ULID for each new artifact and returns a visible ID `YYYYMMDD-xxxxxx` (the UTC date plus six characters of the ULID), for example `plan-20261007-k3m9qz-<slug>.md`. File names keep their chronological order in the tree; the order within one day is not guaranteed. Every new artifact carries a `uid: <ULID>` line right after its header. Two developers on the same branch, on different machines and offline, no longer reserve the same number.
+- **Birth records in `_output/ids/`**: each reservation writes `_output/ids/<uid>.json` (type, title, author as a pseudonymous token, UTC timestamp, origin). `reserve_id.py` no longer reads or writes `INDEX.md`.
+- **`INDEX.md` is fully derived**: `generate_macro_index.py` rebuilds it from the artifacts and from `_output/ids/`; it no longer keeps `RESERVED` rows from the previous index, and `--finalize` is a no-op with a warning.
+- **Both ID formats are accepted everywhere**: the marker grammar (`STATUS`, `ESTABLISHED`, `INCORPORATED`, `CHANGELOG_APPEND`, `DECISION_APPEND`), `apply_marker.py --plan`, and the ID parsers of coverage, cross-references, pending, step notes, summaries, docs, decision digest and pending roadmap read the legacy 6-digit ID and the new one.
+- **New check `check_ledger_ids.py`**: reports duplicate artifact IDs, duplicate `uid`s, birth records with an inconsistent ID, orphan birth records (a warning; an error with `--strict`), a pending action `pa-` created twice, and a duplicate `D-NNN` inside `## Decisions`. It runs in `run_all_checks.py`, in the fast preflight (`ledger-ids`) and, without blocking, in the pre-skill pending check.
+- **Upgrade keeps the PKB layer**: `/seja-setup --upgrade` preserves `inbox/`, `logs/`, `Templates/`, `Objetivos.md` and the root `index.md`, reports when it detects the layer, and offers `init` when it is missing.
+- **Post-skill step 2c** gained the `/design` trigger line described above.
+
+**Upgrade**: developers who share a ledger must upgrade together. An older harness keeps emitting legacy IDs, indexes new artifacts as Other, does not track them in coverage or pending, and **refuses to commit** `plan-YYYYMMDD-xxxxxx` markers in Human (markers) files. Legacy IDs stay valid forever; existing artifacts are not renamed. `migrate_qa_logs_to_parent_dirs.py` and the `backfill_*.py` scripts still handle only the legacy format.
+
+### Fixed
+
+- **`upgrade_harness.py` now copies every file of `.claude/references/template/`** (`gate.py`, `*.example`, `*.toml`, `*.yaml`), not only `.md` and `.json`. Before, an upgraded project kept an old quality-gate template and could not install the test-first plugin, because its template never arrived.
+
 ## [v0.10.1] - 2026-10-04
 
 ### Fixed

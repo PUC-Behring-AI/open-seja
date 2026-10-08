@@ -1,0 +1,27 @@
+{
+  "descricao": "Specify: duas vezes (a segunda e o achado)",
+  "root": "_raizes/aprovada",
+  "exit_code": 1,
+  "status": "approved",
+  "findings": [
+    [
+      "PFS-002",
+      "error",
+      5
+    ]
+  ],
+  "matrix": {
+    "contas-da-semana/contas-da-semana.feature::Ver as contas que vencem nos próximos 7 dias": [
+      2
+    ],
+    "contas-da-semana/contas-da-semana.feature::Marcar uma conta como paga": [
+      3
+    ],
+    "contas-da-semana/contas-da-semana.feature::Desfazer uma conta marcada como paga por engano": [
+      3
+    ],
+    "contas-da-semana/contas-da-semana.feature::A lista abre logo com muitas contas": [
+      4
+    ]
+  }
+}

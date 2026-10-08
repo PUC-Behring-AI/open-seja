@@ -1,5 +1,5 @@
 ---
-designer_description: "When /plan generates a structured step inside the ## Steps section of a plan file, I'm the canonical step format -- title, self-contained description, Files / References / Depends on / Verify / Tests / Docs / Traces metadata, checkbox -- and the decomposition guidelines that keep each step executable by a fresh subagent without shared context."
+designer_description: "When /plan generates a structured step inside the ## Steps section of a plan file, I'm the canonical step format -- title, self-contained description, Files / References / Depends on / Verify / Tests / Docs / Traces / Scenarios metadata, checkbox -- and the decomposition guidelines that keep each step executable by a fresh subagent without shared context."
 ---
 
 # Template: Plan Step Format
@@ -25,6 +25,7 @@ Include enough context that the step makes sense in isolation: what the code sho
 - **Docs**: <what documentation to create or update> *(omit line entirely when N/A)*
 - **Deploy**: <deployment configuration changes required by this step — new env vars, changed ports, new services, Docker or server-config changes; cover Docker and standalone (Windows / Linux) where they differ> *(omit line entirely when N/A)*
 - **Traces**: REQ-xxx, REQ-yyy *(omit line entirely when N/A)*
+- **Scenarios**: `<slug>/<file>.feature::<scenario name>`, `<slug>/<file>.feature::<other scenario>` | N/A (<reason>) *(plan_format_version: 2 only)*
 - [ ] Done
 ```
 
@@ -41,3 +42,12 @@ Include enough context that the step makes sense in isolation: what the code sho
 - **Deploy**: include when the step adds, removes, or changes deployment configuration: new environment variables (name + expected value shape), changed ports, new services or processes, container/image changes, nginx/web-server config, secrets, volume mounts, migration commands that must run before startup. Describe what operators need to configure for Docker and for standalone server (Windows and Linux), noting where they differ. Omit when the step has no deployment impact — only harness scripts, tests, or pure UI changes with no server-side configuration effect.
 - **Traces**: include when the step implements a design requirement. Comma-separated REQ IDs from `product-design-as-intended.md` (e.g., `REQ-ENT-001, REQ-PERM-003`). Omit when no REQ markers exist or the step does not trace to one. See `general/shared-definitions.md` for the REQ ID convention.
 - Order steps so dependencies flow forward (Step 2 depends on Step 1, not the reverse).
+- **Scenarios** (`plan_format_version: 2`): the scenario keys this step **owns** (the step where the scenario becomes a test), each `<slug>/<file>.feature::<scenario name>` between backticks, exactly as in `index` of `features/<slug>/scenarios.lock.json`; never a `@REQ-` tag. `N/A (<reason>)` (at least 3 words) when the step delivers no scenario: infrastructure, migration, config, refactor with prior coverage; then `Tests:` is normally N/A too. Required in every step of a plan with `Specify: approved` (including `Tests: N/A` steps, which use `N/A (<reason>)`; PFS-003); each approved scenario has exactly one owner step. Rules and header: `general/plan-from-scenarios.md` (PFS-001..015); checker: `check_plan_scenarios.py`.
+  Example (emenda 000015): a step that owns a scenario has the line `- **Scenarios**: ` followed by the key `contas-da-semana/contas-da-semana.feature::Marcar uma conta como paga` between backticks; an infrastructure step has `- **Scenarios**: N/A (migração sem comportamento observável)`. The key replaces the plan-000007 wording "`@REQ-...` or scenario names" (CYC-028; contract section "Emendas do item 9").
+
+## Format version
+
+- `plan_format_version: 2` has the header lines `Feature: <slug>` and `Specify: approved (rev N)` (or `Specify: skipped -- <reason>` with no `Feature:`) and requires `Scenarios:` in every step of a plan with `Specify: approved` (scenario keys, or `N/A (<reason>)` for a step with no observable behavior). With `Specify: skipped`, no step has non-N/A `Tests:` for observable behavior. New plans are v2 in both cases. A v2 plan that `check_plan_scenarios.py` refuses (step without scenario, scenario without step, old scenarios) is invalid: `/plan` fixes it before saving, `/implement` stops and does not fix it.
+  Emenda 000022 (D-011; CYC-035, CYC-036): the sentence "With `Specify: skipped`, no step has non-N/A `Tests:`" holds only for the class `tarefa sem código` (and for a `skipped` line with no class, read as `tarefa sem código`). With `Specify: skipped -- default off` or `Specify: skipped -- opt-out: <reason>` (a task with code whose plan has the specify switched off), a step that changes code may have non-N/A `Tests:` with `Scenarios: N/A (<reason>)` and no scenario key; it follows the `Tests:` red-green route of `/implement`. Every new v2 plan also carries the header line `Specify default: on|off`. Grammar: `general/plan-from-scenarios.md` (PFS-002, PFS-013, PFS-016).
+- `plan_format_version: 1` (or absent) remains **valid forever**. `/plan` and `/implement` read v1 plans as before; the absence of `Scenarios:` is at most advisory, never blocking.
+- Rules and rationale: `general/extended-cycle-contract.md`, section "Compatibilidade" (CYC-018). Fixtures: `.claude/skills/scripts/tests/fixtures/plan_format/`.

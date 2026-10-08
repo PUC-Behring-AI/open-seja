@@ -1,0 +1,23 @@
+"""Model conftest for pytest-bdd (first runner adapter, recommendation of CYC-026).
+
+Copy this file next to your tests as `conftest.py`. It does one thing: lets the
+`@REQ-<slug>-NNN` and `@nao-faz` tags of the .feature files pass `--strict-markers`.
+The tags are not turned into pytest markers; they stay in the Cucumber JSON report
+(`--cucumberjson`), in the `tags` list of each scenario, which is how the report links
+scenario -> REQ (gherkin-spec-format.md, section 8). Everything else (`@skip`,
+`@xfail`) is left to pytest-bdd.
+
+In a project built with the test-first branch of /implement, the runner report plugin
+(`.claude/references/template/bdd/python/scenario_report.py.example`, installed by
+`build_checks.py install-plugin <project>` as `tests/scenario_report.py` and loaded with
+`pytest_plugins = ["scenario_report"]`) implements this same hook and also writes the scenario
+report (implement-test-first.md, ITF-016); this model stays as the minimal, plugin-free form.
+
+Not run by the harness tests: the file has the suffix `.example` on purpose.
+"""
+
+
+def pytest_bdd_apply_tag(tag, function):
+    if tag.startswith("REQ-") or tag == "nao-faz":
+        return True  # accepted; no marker is created, so --strict-markers has nothing to reject
+    return None  # let pytest-bdd handle the other tags

@@ -30,6 +30,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from artifact_id import ARTIFACT_ID
 from project_config import REPO_ROOT, get_path
 
 if sys.platform == "win32":
@@ -41,18 +42,24 @@ if sys.platform == "win32":
 # Constants
 # ---------------------------------------------------------------------------
 
-_PLAN_ID_RE = re.compile(r"plan-(\d{6})")
+_PLAN_ID_RE = re.compile(rf"plan-({ARTIFACT_ID})(?![0-9A-Za-z])")
 _BACKTICK_PATH_RE = re.compile(r"`([^`]+)`")
 # A plausible file path: starts with a dot or letter, contains a slash or
 # extension, no spaces (angle-bracket placeholders are excluded).
 _PLAUSIBLE_PATH_RE = re.compile(
     r"^[a-zA-Z._][\w./\\-]*\.[a-zA-Z0-9]+$"
 )
+# Optional "METACOMM |" field after the prefix-scope (metacomm-framed plans).
+_METACOMM_OPT = r"(?:\s*METACOMM\s*\|)?"
+# The /implement DONE marker may sit on its own line above the H1.
+_DONE_LINE_RE = re.compile(r"^#\s+DONE\s*\|[^|]*\|\s*$")
 _PLAN_HEADER_RE = re.compile(
-    r"^#\s+(?:DONE\s*\|[^|]*\|\s*)?Plan\s+\d{6}\s*\|\s*([^|]*?)\s*\|[^|]*\|\s*(.+?)\s*\|"
+    rf"^#\s+(?:DONE\s*\|[^|]*\|\s*)?Plan\s+{ARTIFACT_ID}\s*\|\s*([^|]*?)\s*\|"
+    rf"{_METACOMM_OPT}[^|]*\|\s*(.+?)\s*\|"
 )
 _PLAN_HEADER_FALLBACK_RE = re.compile(
-    r"^#\s+(?:DONE\s*\|[^|]*\|\s*)?Plan\s+\d{6}\s*\|\s*([^|]*?)\s*\|[^|]*\|\s*(.+?)\s*$"
+    rf"^#\s+(?:DONE\s*\|[^|]*\|\s*)?Plan\s+{ARTIFACT_ID}\s*\|\s*([^|]*?)\s*\|"
+    rf"{_METACOMM_OPT}[^|]*\|\s*(.+?)\s*$"
 )
 _SCOPE_MAP = {
     "-B": "backend", "-F": "frontend", "-X": "cross-cutting", "-O": "other",
@@ -120,7 +127,10 @@ def _parse_plan_header(text: str) -> tuple[str, str]:
     Returns (title, scope) where scope is one of: backend, frontend,
     cross-cutting, other.
     """
-    first_line = text.split("\n", 1)[0]
+    lines = text.split("\n", 2)
+    first_line = lines[0]
+    if _DONE_LINE_RE.match(first_line) and len(lines) > 1:
+        first_line = lines[1]
     m = _PLAN_HEADER_RE.match(first_line)
     if m:
         prefix_scope = m.group(1).strip()

@@ -1,0 +1,14 @@
+{
+  "descricao": ".feature editado depois da aprovação: stale (feature)",
+  "args": [
+    "--feature",
+    "contas-da-semana",
+    "--status"
+  ],
+  "exit_code": 0,
+  "status": "stale",
+  "reasons": [
+    "feature"
+  ],
+  "findings": []
+}

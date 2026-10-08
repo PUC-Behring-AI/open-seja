@@ -1,0 +1,14 @@
+{
+  "descricao": "plano pulado nao tem cenario para citar",
+  "root": null,
+  "exit_code": 1,
+  "status": null,
+  "findings": [
+    [
+      "PFS-013",
+      "error",
+      16
+    ]
+  ],
+  "matrix": null
+}

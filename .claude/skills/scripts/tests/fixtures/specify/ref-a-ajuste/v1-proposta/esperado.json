@@ -1,0 +1,29 @@
+{
+  "descricao": "(a) proposta do agente com defeitos",
+  "args": [
+    "--feature",
+    "contas-da-semana"
+  ],
+  "exit_code": 1,
+  "status": "draft",
+  "findings": [
+    [
+      "SPC-008",
+      "warning",
+      "features/contas-da-semana/contas-da-semana.feature",
+      8
+    ],
+    [
+      "SPC-003",
+      "error",
+      "features/contas-da-semana/intent.md",
+      34
+    ],
+    [
+      "SPC-017",
+      "error",
+      "features/contas-da-semana/intent.md",
+      71
+    ]
+  ]
+}

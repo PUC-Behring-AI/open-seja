@@ -1,0 +1,14 @@
+{
+  "descricao": "retradução editada depois da aprovação: stale (retraducao)",
+  "args": [
+    "--feature",
+    "contas-da-semana",
+    "--status"
+  ],
+  "exit_code": 0,
+  "status": "stale",
+  "reasons": [
+    "retraducao"
+  ],
+  "findings": []
+}

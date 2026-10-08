@@ -1,0 +1,18 @@
+{
+  "args": [],
+  "exit_code": 0,
+  "findings": [
+    [
+      "GHK-017",
+      "warning",
+      "features/login/login.feature",
+      6
+    ],
+    [
+      "GHK-017",
+      "warning",
+      "features/login/login.feature",
+      7
+    ]
+  ]
+}
