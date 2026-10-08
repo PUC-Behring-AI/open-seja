@@ -1,5 +1,7 @@
 # Briefs
 
+STARTED | 2026-10-07 21:35 UTC | implement | plan-000020
+
 Execution log of all skill invocations.
 
 ---
