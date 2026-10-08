@@ -85,3 +85,12 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 - deviated: CHEATSHEET e gerado por generate_cheatsheet.py: regenerei, e o diff trouxe tambem /mob e o contador 16 (deriva antiga do arquivo). seja-setup quickguide ja tinha --pkb (Step 7a), nao alterei; nao ha quickguide do post-skill. harness-structure: scripts 76 para 77 e template/pkb citado. docs/pkb-layer.md tem um unico link externo (URL publica do bootstrap).
 - less-sure: Se o contador de scripts (77) bate com a contagem real do check; se o texto sobre padroes de segredo sem aspas e detalhe demais para o consumidor. run_all_checks: 20 pass/14 fail antes e depois, mesmos checks.
 - gate: not-installed
+
+### Step 11 -- reflection-on-action | 2026-10-08 11:12 UTC | Release v0.11.0 (local; push pending)
+- happened: Atualizei main local por 'git fetch origin main:main' (056a6de -> 8c4ac9d, so avanco). Mesclei [Unreleased] em [v0.11.0] (data 2026-10-08), .seja-version ja era v0.11.0. Build de main fcfa9c1, --check exit 0, clone fresco: fresh-download, sem _output/product-design/inbox/logs/Templates/tools/.seja-version, com template/pkb. Tag anotada v0.11.0 local em main.
+- deviated: git checkout main abortou (arquivos _output modificados), entao usei fetch origin main:main, equivalente ao ff-only. detect_setup_state le o cwd, rodei a partir do clone. Push NAO feito: pendente de confirmacao do designer.
+- less-sure: Se o texto da nota de abertura do CHANGELOG convem; o scan de segredos em staged disse 'No staged files' mas o --all passou.
+- gate: not-installed
+
+### Step 11 -- push PENDING
+- main (fcfa9c1) e tag v0.11.0 existem so localmente. Push pendente de confirmacao do designer: `git push origin dev main v0.11.0`. O Step 12 usa o caminho local (clone da tag).
