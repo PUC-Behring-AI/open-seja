@@ -28,7 +28,7 @@
 | `PROPOSALS_DIR` | `${OUTPUT_DIR}/proposals` | Lightweight change proposals |
 | `INVENTORIES_DIR` | `${OUTPUT_DIR}/inventories` | Inventory output folder |
 | `PKB_DIR` | `inbox` | PKB capture folder (empty value turns capture off) |
-| `DESIGN_TRIGGER_DRIFT_ITEMS` |  | Drift items from which post-skill recommends /design; empty = off; fix it before measuring (Q3) |
+| `DESIGN_TRIGGER_DRIFT_ITEMS` | `3` | Drift items from which post-skill recommends /design; empty = off; fix it before measuring (Q3) |
 | `USER_TESTS_DIR` | `${OUTPUT_DIR}/user-tests` | User test plan output folder |
 | `EXPLAINED_BEHAVIORS_DIR` | `${OUTPUT_DIR}/explained-behaviors` | Behavior explanation output folder |
 | `EXPLAINED_CODE_DIR` | `${OUTPUT_DIR}/explained-code` | Code explanation output folder |

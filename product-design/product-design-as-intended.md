@@ -92,7 +92,7 @@ Projeto com o harness instalado
 <!-- REQ-ENT-002 -->
 ### Intenção
 
-- **Representa**: o que o designer quer, em arquivo. Três estados: as-conceived (na cabeça, sem artefato), as-intended (registrado), as-coded (o que existe) (H-005).
+- **Representa**: o que o designer quer, em arquivo. Quatro estados: as-conceived (na cabeça, sem artefato), as-expressed (dito ao harness, em linguagem natural), as-intended (registrado), as-coded (o que existe) (H-005).
 - **Regra**: as-intended e as-coded ficam separados de propósito; a distância é a deriva, e `/explain drift` a reconcilia.
 
 <!-- REQ-ENT-003 -->
@@ -645,32 +645,30 @@ subseção -- e é estado intencional, não atual.
 #### 2.4 As-conceived / as-intended / as-coded: duas lacunas
 
 <!-- H-005 -->
-**H-005 (hipótese) -- Há três estados da intenção, não dois, e só a segunda lacuna
-entre eles é verificável por máquina.**
+**H-005 (hipótese, emendada em 2026-10-08) -- Há quatro estados da intenção, não dois, e só uma parte da primeira lacuna é comparável por máquina.**
 
-O par de 1.2.2 (as-intended / as-coded, dois arquivos em tensão) esconde um terceiro
-termo. Há o que o designer **concebeu** (na cabeça, sem artefato), o que ele
-**registrou** (`product-design-as-intended.md`, planos, briefs -- o as-intended, que
-continua sendo o arquivo) e o que **existe** (as-coded). Isso dá duas lacunas:
+O par de 1.2.2 (as-intended / as-coded) esconde dois termos. Há o que o designer **concebeu** (na cabeça, sem artefato); o que ele **disse** ao harness, em linguagem natural (**as-expressed**: a fala registrada no `conversation-trace.jsonl` e na nota de `inbox/`); o que ele **registrou** (`product-design-as-intended.md`, planos, briefs: o as-intended); e o que **existe** (as-coded). Isso dá lacunas assim:
 
 | Lacuna | Entre | Verificável por máquina? | Como aparece |
 |---|---|---|---|
-| 1 | as-conceived -> as-intended | não | o registro não diz o que se queria; várias realizações cabem no mesmo texto (subespecificação; ver Q-007) |
+| 1a | as-conceived -> as-expressed | não capturável | o designer não disse tudo o que queria; o que ficou na cabeça não deixa traço |
+| 1b | as-expressed -> as-intended | sim, por texto | o registro (brief, plano, as-intended) diz outra coisa que a fala; o preposto parafraseou, resumiu ou deslocou |
 | 2 | as-intended -> as-coded | sim (`/explain drift`, `check_plan_coverage`) | a implementação diverge do registro |
 
-A lacuna 1 não é verificável, mas é **elicitável**: a surpresa no EXPLAIN (2.2) é a
-lacuna 1 detectada através de artefatos da lacuna 2 -- o código voltou fiel ao registro
-e ainda assim não era o que se queria. O microloop de PLAN (prototipar -> observar ->
-ajustar) é a sonda humana da mesma lacuna, antes de travar o design.
+A 1a continua elicitável, não verificável: a surpresa no EXPLAIN (2.2) e o microloop de PLAN são as sondas. A 1b passa a ter um sinal determinístico: `pkb_inbox.py capture` compara a fala capturada com o `## User brief` do plano gerado, depois de normalizar, e grava `as_expressed_igual_ao_brief: true | false` no cabeçalho da nota. É um sinal de **presença de diferença**, não de fidelidade: `false` diz que o texto mudou, não que o sentido mudou nem que o sentido foi traído.
 
-O que a confirmaria: `/explain drift` produzindo, com alguma frequência, propostas de
-`/design` (mudar o registro) e não só de `/plan` (mudar o código). O que a refutaria:
-toda deriva tratada como bug de código e nunca como bug de expressão -- as surpresas no
-EXPLAIN nunca resultando em mudança do as-intended.
+**O que a confirmaria:** notas de inbox com `as_expressed_igual_ao_brief: false` em que o designer, ao ler fala e brief lado a lado, aponta que o registro perdeu ou deslocou algo (um ajuste do registro, no `/design` ou no próprio plano); e `/design` sendo acionado a partir do gatilho (Q-014) e mudando o as-intended, não só o código. Em resumo: a 1b produzindo ajustes de registro.
 
-Nota de nomenclatura: o termo "as-conceived" para o estado tácito é escolha deste
-documento; formulações anteriores usaram outro nome para o termo do meio. O arquivo
-as-intended mantém o sentido que tem em 1.2.2 e H-002.
+**O que a refutaria:** toda diferença da 1b tratada como paráfrase inocente, sem nenhum ajuste de registro depois de uma janela de planos fixada antes (D-012); ou `as_expressed_igual_ao_brief` ficando `true` em quase todos os casos, o que indicaria que o sinal não discrimina (o brief é cópia da fala) e a 1b não é um lugar onde a intenção se perde.
+
+**Limitação real, achada na construção (plan-000020, Steps 6 e 8):** a captura só vê a fala do designer quando o `conversation-trace.jsonl` a registrou e a encadeou. Duas dependências, ambas frágeis na prática:
+
+1. **Encadeamento por `preceding_evt_id`.** A fala do usuário entra no trace com o campo `led_to_skill` nulo; só a resposta do agente costuma levar a skill. Sem o `preceding_evt_id` correto ligando fala e resposta, a captura não acha a fala e devolve `nothing-to-capture`. O `append` grava `null` por padrão quando o agente esquece a flag.
+2. **Caminhada da cadeia da troca.** Por isso `conversation_trace.exchange_user_entries` parte de cada entrada do agente marcada com a skill e caminha `preceding_evt_id` por entradas do usuário até encontrar uma entrada do agente (ou outra skill). Se a cadeia estiver quebrada, a fala se perde e a nota sai sem ela, com `fonte: briefs` declarando a perda.
+
+Consequência para a hipótese: onde a captura falha, a 1b fica **não medida**, e o `/reflect` deve dizer `não medido`, nunca `igual`. Um `true` só vale quando a fala foi de fato capturada.
+
+*(Nota de nomenclatura: "as-expressed" é escolha deste documento para o estado dito, entre o concebido e o registrado.)*
 
 #### 2.5 Governança, proveniência, rastreabilidade
 
@@ -838,6 +836,7 @@ O que também a refutaria: se, no piloto, os planos que escreveram a especifica�
 | `Q-011` | Como a faixa contínua de EXPLAIN (2.2) respeita o portão de P-005 sem virar ritual -- o que é "preparar" um COMMUNICATE sem emiti-lo? | 2.2, Q-004 |
 | `Q-012` | O `semiotic-inspector` avalia signos de interface via SIM. Avaliar a retradução (se a mensagem IA -> humano é reconstruível pelo receptor) pede um modo novo. Qual método -- CEM adaptado? **Resposta parcial (D-004, 2026-10-05):** a retradução é julgada pelo receptor ("é isso / não é isso" por requisito), lógica CEM, registrada em `audit.json`. | pergunta de pesquisa da seção 2 |
 | `Q-013` | Qual skill consome os registros de `/reflect` como entrada, e com que regra de escrita sobre `.claude/skills` (reversível? proposta + confirmação humana?) | H-006 |
+| `Q-014` | A partir de que medida de deriva o ciclo volta ao `/design` em vez de abrir outro `/plan`? A medida é o número de itens do relatório do `/explain drift` (construído sem intenção, intenção não construída) e o resíduo da 1b (`as_expressed_igual_ao_brief: false`). E em que ponto o gatilho dispara: na etapa 2c do post-skill (ao fim de um `/implement` com deriva medida, ou de um `/plan` cuja captura veio com `false`), no REFLECT, ou nos dois? D-012 fixa o mecanismo e o limiar (N = 3 itens, janela M = 5 planos); o ponto de disparo segue aberto até haver dados. | gatilho de `/design` por deriva; leitura de H-005 |
 
 > **Nota sobre `Q-003`.** Esta questão está **deliberadamente sustentada em aberto**, e
 > não meramente sem resposta. A razão é de dependência: não se decide *como detectar* a
@@ -1459,6 +1458,16 @@ ausência não é cosmética. Registrada em `Q-008`.
 
 *Source: plan-000022 Step 2; adendo 2026-10-07 do roadmap-000006 (2026-10-07)*
 
+<!-- STATUS: proposed | plan-000020 | 2026-10-08 -->
+### D-012: O gatilho de /design por deriva tem limiar e janela fixados antes do primeiro dado; vazio significa desligado
+
+**Context**: A sessão de 2026-10-06 registrou a lacuna: falta o `/design` no ciclo quando as-expressed, as-intended e as-coded divergem muito. Hoje a deriva é medida (`/explain drift`) e a fala é capturada (inbox do plan-000020), mas nada leva deriva grande ao `/design`; o caminho natural é abrir outro `/plan`, que muda o código e deixa o registro como está (a deriva tratada como bug de código, refutação de H-005). O harness entrega o mecanismo (variável `DESIGN_TRIGGER_DRIFT_ITEMS` em `product-design/conventions.md`, vazia; etapa 2c do post-skill; sinal `as_expressed_igual_ao_brief`), mas não o valor.
+**Decision**: O post-skill recomenda `/design` (nunca bloqueia) quando o relatório de deriva do `/implement` registra `n` itens com `n >= DESIGN_TRIGGER_DRIFT_ITEMS`, ou quando a captura de um `/plan` vem com `as_expressed_igual_ao_brief: false`. Valor inicial de `DESIGN_TRIGGER_DRIFT_ITEMS`: **3**. Número mínimo de planos com deriva medida antes da primeira leitura de H-005 pela 1b: **5**. O valor e a janela são gravados em `conventions.md` e neste registro **antes** de qualquer plano ser contado; mudá-los depois exige nova decisão que supere esta, com os dados anteriores marcados como lidos sob o limiar antigo. Vazio continua significando desligado, e o `/reflect` registra `gatilho desligado` ao lado do que mediu. Deriva `não medida` aparece como `não medida`, nunca como zero.
+**Consequences**: O gatilho é recomendação, na linha da 2c; o `/design` continua sendo escolha sua (os espelhos são oferecidos, nunca impostos, D-002). A taxa de acionamento e o que o `/design` fez depois (mudou o as-intended, ou nada) viram dados de H-005. Onde a captura falha (cadeia `preceding_evt_id` quebrada), a 1b fica `não medida` e o plano não conta para a janela 5. O sinal `as_expressed_igual_ao_brief` mede diferença de texto, não de sentido; falsos positivos (paráfrase inocente) são esperados e entram na leitura como o custo do sinal.
+**Rejected Alternatives**: gatilho só por evento no `/implement` (perde a 1b: a intenção pode se desviar já no brief, antes de haver código); gatilho só por período, a verificação de 14 dias (tarde demais; a deriva acumula por semanas e o designer só volta ao `/design` por acaso); um LLM julgando se a divergência é grande (a medida deixa de ser resultado de ferramenta, T1, e não é reprodutível; o julgamento semântico fica com você, na retradução, D-004); fixar o limiar depois de ver os primeiros planos (invalida a medida, Q3).
+
+*Source: plan-000020 Step 9, rascunho para /design; limiar N = 3 e janela M = 5 fixados pelo designer antes do primeiro dado (2026-10-08)*
+
 ## CHANGELOG
 
 <!-- Append-only. Format: YYYY-MM-DD | <id> | added|revised|revoked|superseded | plan-NNNNNN | <note>
@@ -1484,3 +1493,6 @@ ausência não é cosmética. Registrada em `Q-008`.
 2026-10-07 | D-011 | added | plan-000022 | interruptor SPECIFY_DEFAULT por projeto e desvio por plano com motivo (--with-specify / --without-specify); braco de controle = mesma tag com off; revisa a D-005 em dois pontos sem substitui-la
 2026-10-07 | D-009 | superseded | plan-000022 | substituida pela D-011: a chave existe; o controle por tag confundia o Gherkin com o resto da release
 2026-10-07 | H-009 | revised | plan-000022 | duas leituras (intencao de tratar x por protocolo) e condicao de refutacao acrescentada; texto de B.1 aprovado pelo designer, inserido com override explicito de T4
+2026-10-08 | H-005 | revised | plan-000020 | as-expressed como quarto estado; lacuna 1 dividida em 1a (nao capturavel) e 1b (comparavel por texto, sinal as_expressed_igual_ao_brief); condicoes de confirmacao e refutacao atualizadas; limitacao da captura (encadeamento preceding_evt_id) declarada; texto do rascunho aprovado pelo designer, inserido com override explicito de T4
+2026-10-08 | Q-014 | added | plan-000020 | a partir de que medida de deriva o ciclo volta ao /design em vez de abrir outro /plan, e em que ponto (post-skill 2c, REFLECT); mantida aberta ate haver dados
+2026-10-08 | D-012 | added | plan-000020 | limiar DESIGN_TRIGGER_DRIFT_ITEMS = 3 e janela minima de 5 planos fixados pelo designer antes do primeiro dado; vazio = desligado
