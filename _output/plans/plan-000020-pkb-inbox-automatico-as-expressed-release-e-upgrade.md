@@ -206,7 +206,7 @@ No repositorio pai (`cd ..`, branch `main`, arvore limpa exceto a nota do inbox)
 - **Verify**: `cat ../.seja-version` = `v0.11.0`; `git -C .. diff --stat -- .claude/skills/daily-log .claude/skills/weekly-review .claude/skills/compress .claude/skills/next-action .claude/skills/process-inbox` vazio; `git -C .. status --short` nao lista `pegasus/sources.txt`, nada em `product-design/`, nem `open-seja` (ponteiro do submodule inalterado); `ls ../inbox/_live.md ../inbox/README.md`; `run_all_checks.py` no Doutourado sem falha nova; `git -C .. log -1 --format=%H` identico ao valor antes do step (nenhum commit feito pelo agente)
 - **Tests**: N/A (operacao cross-repo; os scripts envolvidos foram testados nos Steps 3-7b)
 - **Docs**: `../CLAUDE.md` secao "SEJA Harness" (com confirmacao)
-- [ ] Done
+- [x] Done
 
 ## Coverage check (advisory)
 
