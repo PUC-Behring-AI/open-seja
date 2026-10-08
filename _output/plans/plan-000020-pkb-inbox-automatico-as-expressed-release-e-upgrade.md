@@ -1,4 +1,4 @@
-# Plan 000020 | FEATURE-X | 2026-10-07 00:05 UTC | PKB inbox automatico, as-expressed em H-005, release e upgrade do Doutourado | Review: deep
+# DONE | 2026-10-08 11:16 UTC | Plan 000020 | FEATURE-X | 2026-10-07 00:05 UTC | PKB inbox automatico, as-expressed em H-005, release e upgrade do Doutourado | Review: deep
 plan_format_version: 1
 source: inbox (Doutourado) 2026-10-06-ideia-open-seja-chat-para-inbox-e-live-communicate.md -- captura da ideia e da lacuna, mesma conversa
 
@@ -353,3 +353,7 @@ Steps 4, 6, 7 (split into 7a/7b), 8, 11 and 12 were replaced in place in `## Ste
 **A9 -- Step 12:** states that the target's old `upgrade_harness.py` runs; declares the expected conventions WARN; local-clone fallback that does not touch the `open-seja/` submodule checkout; direct `capture` verification instead of invoking a skill; no `git add`/`git commit` by the agent.
 
 **A10 -- Files and dependencies (supersedes the corresponding lines in `## Files`):** add `.claude/skills/scripts/verify_commit_scope.py` (modify) and `.claude/skills/scripts/tests/test_verify_commit_scope.py` (create/modify); drop `.claude/skills/VERSION`; drop "`.claude/skills/{daily-log,...}` (create, via init)" from the open-seja side; Step 3 gains `--with-skills`; Step 10 depends on 6, 7a, 7b; `harness-structure.md` skill count stays 17, add `pkb_inbox.py`, `template/pkb/` and post-skill 7f.
+
+## Reflection
+
+- 2026-10-08: Steps 1-12 done; capture needed an exchange-chain fix (step 6 addendum) after the step 8 dogfood; release v0.11.0 merged ULID and PKB into the existing changelog section, tag local, push pending; Doutourado upgraded without commit. (notes 15, with deviation 15, with gate 0)
