@@ -21,7 +21,7 @@ Harness conversacional para CLI (Claude Code). Os padrões abaixo são os de `pr
 | Nota por step | A nota de reflexão-sobre-a-ação é mostrada quando escrita, não só no `/reflect` | 1.2.4 |
 | Verbatim | Palavras do designer registradas literalmente, atribuídas | P-003, `/reflect` |
 | `não medido` visível | O que não foi medido aparece ao lado do que foi | constituição Q4 |
-| [intended] Grill e specify | Rodadas curtas, uma ideia por pergunta; aprovação em voz controlada; o citizen aprova a mensagem, o power dev o contrato | D-004 |
+| [intended] Jogo de linguagem | Rodadas curtas de cenas que você aceita, recusa ou corrige; aprovação da retradução em voz controlada; o citizen aprova a mensagem, quem lê código vê os testes | D-004, D-006 |
 
 ### 3. Voz
 

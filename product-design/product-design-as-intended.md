@@ -22,8 +22,8 @@
 
 | Target Version | Change Summary | Motivation / Rationale |
 |---|---|---|
-| v0.11 | Ciclo default com fases grill e specify dentro do `/plan`, teste-primeiro por cenário no `/implement`, divergência por degrau no `/reflect` (roadmap-000006, H-009) -- STATUS: intended | Decompor a intenção em representações progressivamente formais (intenção detalhada -> cenários -> testes -> código) para que o as-coded divirja menos do as-intended, com a divergência medida por degrau e não só no fim. |
-| v0.11 | Retradução em primeira pessoa como objeto de aprovação do citizen no specify e no REFLECT; `.feature` como contrato aprovado pelo power dev -- STATUS: intended | Features são contratos endereçáveis, não signos; o citizen aprova a mensagem (D-004). |
+| v0.12 | A escada vive no plano: o `/plan` joga um jogo de linguagem (cenas que você aceita, recusa ou corrige) e escreve no próprio plano a intenção, os requisitos, os casos de uso, a retradução e as suas palavras; o `/implement` escreve um teste vermelho por requisito antes do código (H-009, D-006) -- STATUS: intended | Decompor a intenção em representações progressivamente formais (intenção -> requisitos -> casos de uso -> testes -> código) num único artefato, para que o as-coded divirja menos do as-intended, sem pedir ao citizen que aprove um contrato. |
+| v0.12 | Retradução em primeira pessoa como objeto de aprovação do citizen, dentro do plano; os testes por requisito são o contrato de quem lê código -- STATUS: intended | O citizen aprova a mensagem, não o contrato (D-004, mantida na D-006). |
 | v0.11 | Voz controlada (STE100) como voz padrão de `/explain`, `/communicate`, `/document`; `--html` autocontido -- STATUS: intended (plan-000074 do ledger do pesquisador) | O citizen lê em frases curtas e termos fixos. |
 | v0.12+ | Preset `apprentice` (iniciantes em programa de formação) gerado a partir do open-seja pinado, dependência unidirecional preset -> open-seja -- STATUS: intended (D-003) | Ponto discreto da escala H-001 (Q-002) sem bifurcar o ciclo; comparabilidade de artefatos entre instâncias. |
 | futuro | SEJA como serviço (`seja-mcp`, H-007) -- STATUS: intended, parado | Rumo de arquitetura; o ciclo consome o harness como ele estiver. |
@@ -56,7 +56,7 @@ O SEJA não é um gerenciador de tarefas para agentes, nem uma camada de process
 
 ## 2. Entity Hierarchy
 
-Duas hierarquias paralelas: a **estrutura do harness** (o que existe) e a **escada de representações** (intended, roadmap-000006).
+Duas hierarquias paralelas: a **estrutura do harness** (o que existe) e a **escada de representações dentro do plano** (intended, D-006).
 
 ```
 Projeto com o harness instalado
@@ -67,7 +67,7 @@ Projeto com o harness instalado
 └── Ledger (_output/)
     └── Artefato com ID global (research, plan, roadmap, proposal, reflection, communication, qa-log)
         └── Plano
-            └── Step (Files, Verify, Tests, Traces; Scenarios em v2 [intended])
+            └── Step (Files, Verify, Tests, Traces; Covers em v3 [intended])
                 └── Resultado do portão (gate JSON por step)
 └── Harness (.claude/)
     ├── Skill (orquestra; pre-skill e post-skill envolvem toda invocação)
@@ -76,11 +76,15 @@ Projeto com o harness instalado
 ```
 
 ```
-[intended] Feature (features/<slug>/)
-└── intent.md         (REQ-<slug>-NNN; "Nas suas palavras"; Fora do escopo; Premissas; Para que; Modelo e termos; serve:)
-    └── *.feature     (cenário com @REQ-<slug>-NNN; contrato)
-        └── teste executável (vermelho pelo motivo certo, depois verde)
-            └── código + gate.json (perímetro da feature)
+[intended] Plano v3 (_output/plans/plan-<id>-<slug>.md)
+├── ## Intenção          (objetivo, o que você vê, não faz, pronto quando)
+├── ## Requisitos        (REQ-<slug>-NNN; uma frase; Para que; origem A<n> do lance)
+├── ## Casos de uso      (um ou mais por requisito, em prosa)
+├── ## Retradução        (primeira pessoa; "O que eu não vou fazer")
+├── ## Nas suas palavras (respostas verbatim do jogo)
+└── Step com Covers: REQ-<slug>-NNN
+    └── teste por requisito (vermelho pelo motivo certo, depois verde)
+        └── código + resultado do portão
 ```
 
 <!-- REQ-ENT-001 -->
@@ -114,10 +118,10 @@ Projeto com o harness instalado
 - **Regra**: o usuário nunca invoca um agente diretamente (P-006).
 
 <!-- REQ-ENT-006 -->
-### Feature [intended]
+### Plano v3 [intended]
 
-- **Representa**: a unidade de medida da divergência por degrau; nunca apagada (git é a recuperação).
-- **Regra**: a feature é o perímetro de medição; fora dele é `legado: não medido`.
+- **Representa**: o artefato único de uma mudança: intenção, requisitos, casos de uso, retradução e steps.
+- **Regra**: todo requisito tem caso de uso e é coberto por um step com `Covers:`; `check_plan_intent.py` confere; planos v1 e v2 continuam valendo e não são reescritos.
 
 ---
 
@@ -136,9 +140,9 @@ Projeto com o harness instalado
 - **Três registros de Schön**: na-ação (justificativa de cada opção), sobre-a-ação (nota por step e por skill), sobre-a-prática (`/reflect`, palavras literais).
 - **Hipótese H-NNN**: enunciado com o que a confirmaria e o que a refutaria; não é decisão.
 - **Classificações de autoria**: Human, Human (markers), Human/Agent, Agent; dizem de quem é a voz em cada arquivo (P-004, Q-007).
-- **Escada de representações [intended]**: brief -> intent.md -> .feature -> teste -> código + gate, com divergência por degrau (H-009).
-- **Degrau zero [intended]**: resíduo do brief que não virou requisito nem fora-do-escopo; leitura fora do vetor D.
-- **Contrato endereçável [intended]**: o `.feature` é um par expressão-conteúdo convencionalizado entre humano e preposto; REQ IDs e chaves de cenário são endereços, não signos (D-004).
+- **Escada de representações [intended]**: brief -> jogo de linguagem -> intenção, requisitos e casos de uso no plano -> teste por requisito -> código + gate (H-009, D-006).
+- **Jogo de linguagem [intended]**: a entrevista do `/plan`; eu conto cenas, você aceita, recusa ou corrige; aceito vira requisito ou caso de uso, recusado vai para "Não faz", corrigido é citado em "Nas suas palavras" (D-006).
+- **Requisito endereçável [intended]**: `REQ-<slug>-NNN` no plano é o endereço para onde apontam o caso de uso, o step (`Covers:`) e o teste; o signo para o citizen é a retradução, não o ID (D-004, D-006).
 - **Preset [intended]**: perfil gerado a partir do open-seja pinado, com dependência unidirecional preset -> open-seja; não é fork (D-003).
 
 ### Fundamentação
@@ -805,14 +809,16 @@ correção, não intenção, e o ciclo curto precisa do espelho como passo fixo,
 oferta.
 Registrado em D-002 o que o release faz enquanto a hipótese está em teste.
 
-#### 2.9 A escada de representações (proposta)
+#### 2.9 A escada de representações no plano (proposta)
 
 <!-- H-009 -->
-**H-009 (proposta, filha de H-008) -- se o SEJA decompõe a intenção em linguagem natural em representações progressivamente mais formais (intenção detalhada com REQ IDs -> cenários Gherkin -> testes executáveis -> código) e só implementa depois, o *as-coded* diverge menos do *as-intended* do que no ciclo PLAN -> BUILD -> REFLECT de H-008. A divergência é medida por degrau da escada, não só no fim.**
+**H-009 (proposta, filha de H-008; reescrita em 2026-10-20 pela D-006) -- se o `/plan` decompõe a intenção dita em linguagem natural, por um jogo de linguagem, em representações progressivamente mais formais dentro do próprio plano (intenção -> requisitos com REQ IDs -> casos de uso -> um teste por requisito, escrito antes do código), o *as-coded* diverge menos do *as-intended* do que no ciclo PLAN -> BUILD -> REFLECT de H-008.**
 
-Texto de origem: roadmap-000006. O ajuste que D-004 fixa: H-009 declara o próprio alcance. A escada é completa para comportamento operacionalizado, com perda declarada de racional, modelo, preferência e crença sobre o usuário; essas categorias são objeto do degrau zero (D0), da auditoria semântica e da retradução julgada pelo citizen, não do vetor D.
+Alcance declarado (herdado da D-004): a escada é completa para comportamento operacionalizado, com perda declarada de racional, modelo, preferência e crença sobre o usuário; essas categorias ficam na retradução julgada pelo citizen e em "Nas suas palavras". A divergência por requisito ainda não é medida: o `/reflect` diz `não medido` até um plano a construir.
 
-O que a refutaria: se, no piloto, ajustes e recusas no specify, escapes de intenção antes do código e mutantes virados em REQ forem todos zero, a aprovação virou ritual, H-009 cai e H-001 volta a pedir adequação por posição na escala.
+O que a refutaria: se, numa janela de planos v3 fixada antes do primeiro dado, as respostas "recuso" e "corrijo" do jogo, os requisitos sem teste vermelho antes do código e os escapes de intenção achados depois do código forem todos zero, o jogo virou ritual, H-009 cai e H-001 volta a pedir adequação por posição na escala. O que a confirmaria: recusas e correções no jogo que mudam requisitos, e escapes de intenção raros nos planos v3 em que a deriva foi medida.
+
+O texto anterior desta hipótese (escada com cenários, roadmap-000006) está na tag `archive/gherkin-ladder-v0.11.0`.
 
 > **Nota sobre H-007.** O CHANGELOG da fundamentação registra que a hipótese de SEJA como serviço passou a ser H-007 (2026-09-18), mas o texto dela não está neste arquivo nem estava no de origem. Fica como lacuna a redigir; o rumo está no §0 (`seja-mcp`, parado).
 
@@ -823,7 +829,7 @@ O que a refutaria: se, no piloto, ajustes e recusas no specify, escapes de inten
 | `Q-001` | Referência bibliográfica exata do artigo de Abrahão de que partiu o desenho de 1.1.2 -- autor(es), título, veículo, ano. Não foi inventada aqui de propósito. | citação de P-002 |
 | `Q-002` | A escala H-001 é ortogonal a BLD/SHP/GRD e L1-L3, ou colapsa parcialmente? Quantos pontos discretos ela precisa para ser operacional? D-003 registra um ponto concreto (`apprentice`) sem fechá-la. | operacionalização de H-001 |
 | `Q-003` | Como o harness **detecta** a posição do humano na escala? Declaração explícita no `conventions.md`? Inferência a partir da interação? Escolha por sessão? **Sustentada em aberto por decisão de 2026-08-26 -- ver nota abaixo.** | H-003 |
-| `Q-004` | A retradução obrigatória (P-003) é um novo artefato, um novo modo de `/explain`, ou uma etapa do `post-skill`? **Fechada por D-004 (2026-10-05):** é etapa do specify e do REFLECT, não artefato novo nem modo de `/explain`. | P-003 |
+| `Q-004` | A retradução obrigatória (P-003) é um novo artefato, um novo modo de `/explain`, ou uma etapa do `post-skill`? **Fechada por D-004 (2026-10-05), relida pela D-006 (2026-10-20):** é etapa do `/plan` (a seção Retradução do plano) e do REFLECT, não artefato novo nem modo de `/explain`. | P-003 |
 | `Q-005` | Este documento fica em pt-BR ou é traduzido para en-US junto com `docs/`? O SEJA é publicado publicamente. **Mantida aberta em 2026-10-05**; o texto segue em pt-BR. | publicação |
 | `Q-006` | Relação entre a fundamentação e o `product-design-as-intended.md` no formato §0-§17 do template. **Fechada em 2026-10-05 (`/design`): fundir.** A fundamentação vive no §3 deste arquivo; as hipóteses ficam no §3, e só as decisões entram em `## Decisions`. | estrutura |
 | `Q-007` | Duas vias de autoria escrevem no mesmo `</>` (Figura 1). De quem é a voz que o leitor do código está lendo? O harness precisa distinguir trecho de autoria humana de trecho de autoria do preposto? | `P-002a` |
@@ -831,7 +837,7 @@ O que a refutaria: se, no piloto, ajustes e recusas no specify, escapes de inten
 | `Q-009` | "Orquestrador" aparece **duas vezes** na Figura 2: dentro da lista do `Agent WF` e de novo, solto, fora da caixa. São dois níveis de orquestração (um por-workflow e um global), ou é repetição de ênfase? | `H-004` |
 | `Q-010` | O círculo com figura no alto à esquerda da Figura 1, alimentado por um humano e ligado ao `</>`, não foi identificado com segurança. O que representa? | leitura da Figura 1 |
 | `Q-011` | Como a faixa contínua de EXPLAIN (2.2) respeita o portão de P-005 sem virar ritual -- o que é "preparar" um COMMUNICATE sem emiti-lo? | 2.2, Q-004 |
-| `Q-012` | O `semiotic-inspector` avalia signos de interface via SIM. Avaliar a retradução (se a mensagem IA -> humano é reconstruível pelo receptor) pede um modo novo. Qual método -- CEM adaptado? **Resposta parcial (D-004, 2026-10-05):** a retradução é julgada pelo receptor ("é isso / não é isso" por requisito), lógica CEM, registrada em `audit.json`. | pergunta de pesquisa da seção 2 |
+| `Q-012` | O `semiotic-inspector` avalia signos de interface via SIM. Avaliar a retradução (se a mensagem IA -> humano é reconstruível pelo receptor) pede um modo novo. Qual método -- CEM adaptado? **Resposta parcial (D-004, 2026-10-05; D-006):** a retradução é julgada pelo receptor ("é isso / não é isso" por requisito), lógica CEM; o lugar do registro fica para quando a medida por requisito existir. | pergunta de pesquisa da seção 2 |
 | `Q-013` | Qual skill consome os registros de `/reflect` como entrada, e com que regra de escrita sobre `.claude/skills` (reversível? proposta + confirmação humana?) | H-006 |
 
 > **Nota sobre `Q-003`.** Esta questão está **deliberadamente sustentada em aberto**, e
@@ -932,7 +938,7 @@ A interface é a conversa no Claude Code. Padrões próprios:
 <!-- REQ-UX-005 -->
 - **Progress file** por plano, com nota por step.
 <!-- REQ-UX-006 -->
-- [intended] **Grill e specify**: entrevista em rodadas curtas, uma ideia por pergunta; aprovação em voz controlada; o citizen aprova a mensagem, o power dev aprova o contrato.
+- [intended] **Jogo de linguagem no `/plan`**: rodadas curtas de até 3 lances; eu conto cenas e você aceita, recusa ou corrige; a aprovação é sobre a retradução em voz controlada; quem lê código vê os testes por requisito.
 
 ---
 
@@ -961,8 +967,8 @@ CC BY-NC 4.0 (derivado do SEJA), uso não comercial, sem garantias; nome usado c
 | `--fast` do portão | <= 90 s, sem mutação | Portão por step tem de caber no laço interno |
 | Rodadas do portão por step | 3, depois PARTIAL com os achados no progress file (`/implement`) | O agente não insiste indefinidamente |
 | Pendência vencida / escalada de plano / auto-dismiss | 14 / 30 / 90 dias | Conforme `conventions.md` |
-| [intended] Grill: rodadas x perguntas | 5 x 4 | Teto, não alvo; depois devolve a decisão ao citizen |
-| [intended] Specify: rodadas de ajuste | 3 | Ajuste repetido indica REQ vago; volta à grill |
+| [intended] Jogo de linguagem: lances por rodada x rodadas | 3 x 5 | Teto, não alvo; no teto: continuar, aceitar como premissa, arquivar |
+| [intended] Aprovação da retradução: rodadas de ajuste | 3 | Ajuste repetido indica requisito vago; volta ao jogo |
 | [intended] Voz controlada | 25 palavras por frase; 6 frases por parágrafo | Legibilidade para o citizen |
 
 > CRAP 10/30 e as 3 rodadas conferidos em `gate.py` e em `.claude/skills/implement/SKILL.md` em 2026-10-05. Os 90 s do `--fast` são meta, não valor imposto pelo script.
@@ -1023,10 +1029,10 @@ O dev escreve o brief, o `/plan` gera e revisa o plano, o `/implement` em modo a
 
 - **Persona:** citizen dev (R-P-002; tem a intenção; não lê código)
 - **Goals:** exercer autoria sem ler código; reconhecer a própria intenção no que voltou
-- **Setting:** mesma escada, sem perfil; muda o objeto de aprovação
-- **Design Rationale:** para o citizen o código não pode ser a mensagem (H-001); features são contratos, a mensagem é a retradução (D-004)
+- **Setting:** mesma escada, dentro do plano, sem perfil; muda o objeto de aprovação
+- **Design Rationale:** para o citizen o código não pode ser a mensagem (H-001); os testes são o contrato, a mensagem é a retradução (D-004, D-006)
 
-O citizen responde à grill nas próprias palavras; aprova a lista de requisitos; recebe a retradução em primeira pessoa com exemplos narrados e a lista do que não será feito, e aprova a mensagem; o power dev (ou ele mesmo, em outro papel) aprova o `.feature` como contrato; ao fim, recebe a demonstração por cenário, os mutantes sobreviventes recontados como perguntas e o que ficou `não medido`.
+O citizen joga o jogo de linguagem, aceitando, recusando ou corrigindo cenas nas próprias palavras; recebe no plano a retradução em primeira pessoa, com os casos de uso e a lista do que não será feito, e aprova a mensagem; quem lê código (ele mesmo, em outro papel, ou o power dev) vê os testes por requisito; ao fim, recebe o que foi demonstrado por requisito e o que ficou `não medido`.
 
 ### Option B: User Stories
 
@@ -1049,7 +1055,7 @@ O citizen responde à grill nas próprias palavras; aprova a lista de requisitos
 
 - **Story:** Como citizen dev, quero aprovar o que vai ser construído num texto que eu reconheça, e saber o que não foi construído, para não delegar às cegas.
 - **Acceptance Criteria:**
-  - retradução com "Nas suas palavras" ao lado
+  - retradução no plano, com "Nas suas palavras" ao lado
   - ausências enumeradas
   - nenhum número técnico no meu registro
 
@@ -1080,11 +1086,11 @@ O citizen responde à grill nas próprias palavras; aprova a lista de requisitos
 <!-- REQ-MC-010 -->
 | Hooks e denies | Eu não deixo o agente pular o portão nem aceitar baseline; isso é seu. | P0 | human | 2026-10-05 00:00 UTC |
 <!-- REQ-MC-011 -->
-| [intended] Grill e specify no `/plan` | Eu pergunto o que você quer, um pouco de cada vez e nas suas palavras, escrevo de volta como requisitos e só sigo para os cenários depois que você aprovar. | P1 | human | 2026-10-05 00:00 UTC |
+| [intended] Jogo de linguagem no `/plan` | Eu lhe conto cenas do que entendi, um pouco de cada vez; você aceita, recusa ou corrige, e eu escrevo no plano os requisitos e os casos de uso que você reconheceu, antes de qualquer código. | P1 | human | 2026-10-20 00:00 UTC |
 <!-- REQ-MC-012 -->
-| [intended] Retradução como objeto de aprovação | Eu lhe mostro o que entendi e o que vou construir em primeira pessoa, com exemplos; você aprova a mensagem, e o contrato fica para quem lê código. | P1 | human | 2026-10-05 00:00 UTC |
+| [intended] Retradução como objeto de aprovação | Eu lhe mostro no plano, em primeira pessoa, o que entendi e o que vou construir, com casos de uso; você aprova a mensagem, e os testes ficam para quem lê código. | P1 | human | 2026-10-20 00:00 UTC |
 <!-- REQ-MC-013 -->
-| [intended] Divergência por degrau | Eu mostro onde a sua intenção se perdeu, degrau a degrau, com o que não medi ao lado, em vez de uma nota única. | P1 | human | 2026-10-05 00:00 UTC |
+| [intended] Divergência por requisito | Eu mostro qual requisito foi demonstrado, qual não foi e o que não medi, em vez de uma nota única. | P1 | human | 2026-10-20 00:00 UTC |
 <!-- REQ-MC-014 -->
 | [intended] Preset `apprentice` | Eu me ofereço num perfil gerado a partir de mim, sem bifurcar o ciclo, para quem está aprendendo e precisa de outro registro. | P2 | human | 2026-10-05 00:00 UTC |
 
@@ -1118,21 +1124,21 @@ O citizen responde à grill nas próprias palavras; aprova a lista de requisitos
 Feature em PASS, achados do `/critique` registrados, deriva medida ou registrada como não medida, reflexão gravada.
 
 <!-- REQ-JM-002 -->
-### JM-TB-002 [intended]: O citizen dev na escada, aprovando a mensagem
+### JM-TB-002 [intended]: O citizen dev no jogo de linguagem, aprovando a mensagem
 
 - **Persona:** citizen dev (R-P-002)
 - **Solution Scenario:** SS-002
 - **Goal:** reconhecer a própria intenção no que foi construído, sem ler código
-- **Pre-conditions:** ciclo default do roadmap-000006 entregue; `features/` no projeto
+- **Pre-conditions:** plano v3 (D-006) entregue
 
 #### Steps
 
 | # | Action | Touchpoint | User Emotion | Pain Point | Opportunity |
 |---|---|---|---|---|---|
-| 1 | Responde à grill, nas próprias palavras | rodadas curtas | ouvido | perguntas demais | teto de rodadas; "Nas suas palavras" |
+| 1 | Joga o jogo: aceita, recusa ou corrige cenas | rodadas curtas | ouvido | lances demais | teto de rodadas; "Nas suas palavras" |
 | 2 | Aprova a lista de requisitos e o "não faz" | resumo em voz controlada | seguro | aprovar o que não entendeu | critério por requisito em uma frase |
-| 3 | Aprova a retradução com exemplos narrados | mensagem em primeira pessoa | reconhecendo | "parece bem" sem ler | exemplos narrados; teste da surpresa |
-| 4 | Recebe demonstração por cenário e mutantes recontados | superfície do produto; perguntas | surpreso | mais coisas para olhar | só sobreviventes e cenários marcados por padrão |
+| 3 | Aprova a retradução com casos de uso | mensagem em primeira pessoa | reconhecendo | "parece bem" sem ler | casos de uso; teste da surpresa |
+| 4 | Recebe o que foi demonstrado por requisito | plano e superfície do produto | surpreso | mais coisas para olhar | só o não demonstrado, por padrão |
 | 5 | Marca "é isso / não é isso" por requisito | REFLECT | autor | fricção | alimenta a auditoria semântica |
 
 #### Post-conditions / Outcomes
@@ -1150,7 +1156,7 @@ Requisitos com estado demonstrado / não demonstrado / não medido / fora do esc
 | Section | Element | Description |
 |---|---|---|
 <!-- REQ-DELTA-001 -->
-| §0, §2, §3 | Escada de representações, feature, degrau zero, contrato endereçável | intended; roadmap-000006, H-009, D-004 |
+| §0, §2, §3 | Escada no plano, jogo de linguagem, plano v3, requisito endereçável | intended; H-009, D-006 |
 <!-- REQ-DELTA-002 -->
 | §0, §3, §14 | Preset `apprentice` | intended; D-003; sem roadmap |
 <!-- REQ-DELTA-003 -->
@@ -1177,11 +1183,11 @@ Requisitos com estado demonstrado / não demonstrado / não medido / fora do esc
 | Feature / Flow | Designer Intent | Priority |
 |---|---|---|
 <!-- REQ-DELTA-004 -->
-| Grill e specify | ver §14 (REQ-MC-011) | P1 |
+| Jogo de linguagem no `/plan` | ver §14 (REQ-MC-011) | P1 |
 <!-- REQ-DELTA-005 -->
 | Retradução como objeto de aprovação | ver §14 (REQ-MC-012) | P1 |
 <!-- REQ-DELTA-006 -->
-| Divergência por degrau | ver §14 (REQ-MC-013) | P1 |
+| Divergência por requisito | ver §14 (REQ-MC-013) | P1 |
 <!-- REQ-DELTA-007 -->
 | Voz controlada | Eu falo com você em frases curtas e termos fixos. | P1 |
 <!-- REQ-DELTA-008 -->
@@ -1368,7 +1374,7 @@ ausência não é cosmética. Registrada em `Q-008`.
 
 *Source: /design a partir de design-rascunho-as-intended-2026-10-05 (2026-10-05)*
 
-<!-- STATUS: proposed | 2026-10-05 -->
+<!-- STATUS: superseded | plan-20261020-688kjs | 2026-10-20 -->
 ### D-004: Features Gherkin são contratos endereçáveis, não signos; o citizen aprova a mensagem, não o .feature
 
 **Context**: O ciclo default pretendido (roadmap-000006, H-009) decompõe a intenção em intent.md -> .feature -> teste -> código e mede a divergência por degrau. A análise da lacuna da intenção mostrou que o Gherkin representa comportamento observável e deixa sem signo o porquê, o modelo conceitual, as preferências e as crenças sobre o usuário; que D1 mede presença de tag, não fidelidade; e que o ponto de aprovação do specify mostrava o texto do .feature ao citizen, tratando contrato como mensagem.
@@ -1394,6 +1400,19 @@ ausência não é cosmética. Registrada em `Q-008`.
 
 *Source: from research-000018 (2026-10-06)*
 
+<!-- STATUS: proposed | plan-20261020-688kjs | 2026-10-20 -->
+### D-006: A escada vive no plano: jogo de linguagem, intenção, requisitos, casos de uso e testes por requisito; sem Gherkin, sem grill
+
+**Context**: A D-004 leu o `.feature` como contrato, não como mensagem, e o ciclo default da linhagem v0.11.0 o manteve como degrau da escada (`features/<slug>/`, `intent.md`, specify, grill). A reflexão do designer de 2026-10-20 concluiu: "Contrato não é mensagem". Se o citizen aprova a mensagem, o degrau do cenário pede uma aprovação que ele não decodifica e duplica, num segundo artefato, o que o plano já carrega. Num projeto cliente, a entrevista por jogo de linguagem (cenas aceitas, recusadas ou corrigidas) substituiu a grill como experimento, e o designer preferiu reconhecer cenas a formular requisitos de cabeça. O multi-dev (D-005) precisa continuar.
+
+**Decision**: A escada vive no próprio plano, formato v3. O `/plan` joga o jogo de linguagem (`general/plan-language-game.md`) e escreve no plano `## Intenção`, `## Requisitos` (`REQ-<slug>-NNN`), `## Casos de uso`, `## Retradução` e `## Nas suas palavras`; cada step com teste declara `Covers:`; o `/implement` escreve um teste vermelho por requisito antes do código, nos modos auto e manual; `check_plan_intent.py` confere o plano. Não há Gherkin, `.feature`, `features/`, `intent.md`, grill nem specify. Da D-004 fica o essencial: o citizen aprova a mensagem (a retradução), não o contrato; o contrato de quem lê código são os testes por requisito. A linhagem parte de `2b17d27`, com o ULID portado; a anterior fica na tag `archive/gherkin-ladder-v0.11.0`. Não confundir com a D-006 da linhagem arquivada (uma pasta por feature).
+
+**Consequences**: A D-004 passa a superseded. H-009 é reescrita para a escada no plano. Planos v1 e v2 continuam válidos e não são reescritos (o `/implement` roda v2 em manual e ignora `Scenarios:`). O upgrade remove dos clientes v0.11.0 os arquivos do ladder idênticos aos que instalou e avisa sobre `features/` e a camada PKB, sem apagar nada do projeto. A linhagem perde a granularidade por cenário, a medida de divergência por degrau (fica `não medido` até a medida por requisito existir), a camada PKB e o sinal as-expressed. O portão com CRAP e mutação escrito no ciclo v3, e a volta do cleaner e do hardener, ficam para outra rodada. A reescrita de H-009, da D-004 e das seções derivadas foi feita com override de T3 e T4 autorizado pelo designer, registrado no CHANGELOG.
+
+**Rejected Alternatives**: remover o Gherkin para a frente, arquivo a arquivo (cerca de 24 steps); portar ULID e PKB (a PKB vive por fora no cliente); manter a grill com o jogo como desvio local; reusar `plan_format_version: 2` (colide com os planos v2 do ladder nos clientes); manter o `.feature` como contrato aprovado pelo power dev (dois artefatos por mudança).
+
+*Source: plan-20261020-688kjs Step 6; reflexão do designer de 2026-10-20 (2026-10-20)*
+
 ## CHANGELOG
 
 <!-- Append-only. Format: YYYY-MM-DD | <id> | added|revised|revoked|superseded | plan-NNNNNN | <note>
@@ -1415,3 +1434,6 @@ ausência não é cosmética. Registrada em `Q-008`.
 2026-10-03 | D-002 | added | - | o release apresenta as três fases como entrada, com o portão como condição, a taxa de escape do /critique final e os escapes de intenção como medidas, e /design obrigatório antes do ciclo; projetos sem portão ficam fora da medida
 2026-10-05 | JM-TB-001 | added | - | seed do as-intended por /design; fusao da fundamentacao (Q-006 fundir); D-001 e D-002 migradas, D-003 apprentice e D-004 contrato Gherkin adicionadas
 2026-10-05 | JM-TB-002 | added | - | jornada intended do citizen dev aprovando a mensagem (SS-002, D-004)
+2026-10-20 | D-006 | added | plan-20261020-688kjs | a escada vive no plano (jogo de linguagem, intenção, requisitos, casos de uso, testes por requisito); sem Gherkin, grill nem specify
+2026-10-20 | D-004 | superseded | plan-20261020-688kjs | substituída pela D-006; fica dela que o citizen aprova a mensagem, não o contrato
+2026-10-20 | H-009 | revised | plan-20261020-688kjs | escada no plano com teste por requisito; texto anterior na tag archive/gherkin-ladder-v0.11.0; reescrita de H-009 e de §0, §2, §3 (glossário, Q-004, Q-012), §8, §10, §13, §14, §15, §16, §17 com override explícito de T3 e T4 autorizado pelo designer
