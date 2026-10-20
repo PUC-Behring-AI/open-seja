@@ -38,7 +38,7 @@ Uma vez por plano, depois de `## User brief` e de `## Agent interpretation`, e a
 4. `## Retradução`
 5. `## Nas suas palavras`
 
-Nenhuma das cinco fica vazia num plano com código. Num plano sem código (jogo curto, JDL-009), `## Requisitos` e `## Casos de uso` podem conter só a linha `nenhum (tarefa sem código)`.
+Nenhuma das cinco fica vazia num plano com código. Num plano do jogo curto (JDL-009), `## Requisitos` e `## Casos de uso` podem conter só uma linha `nenhum (<motivo>)`: `nenhum (tarefa sem código)` ou, num item de roadmap, `nenhum (jogo curto, item de roadmap)`.
 
 - **Quem decide**: o `/plan`.
 - **Critério de aceitação**: as cinco seções existem e têm conteúdo; o verificador devolve `error` para seção ausente ou vazia.

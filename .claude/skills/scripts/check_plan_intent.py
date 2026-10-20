@@ -56,7 +56,7 @@ SCHEMA_VERSION = 1
 PLAN_FORMAT_VERSION = 3
 SECTIONS = ("Intenção", "Requisitos", "Casos de uso", "Retradução", "Nas suas palavras")
 INTENT_LINES = ("Objetivo", "O que você vê no fim", "Não faz", "Pronto quando")
-NO_CODE_MARK = "nenhum (tarefa sem código)"
+NO_CODE_PREFIX = "nenhum ("  # e.g. "nenhum (tarefa sem código)", "nenhum (jogo curto, item de roadmap)"
 
 _VERSION_RE = re.compile(r"^plan_format_version:\s*(\d+)\s*$")
 _H2_RE = re.compile(r"^##\s+(.+?)\s*$")
@@ -122,7 +122,8 @@ def _check_intent(sections: dict, findings: list[dict]) -> None:
 
 
 def _no_code(sections: dict, name: str) -> bool:
-    return name in sections and _content(sections[name][1]) == [NO_CODE_MARK]
+    content = _content(sections[name][1]) if name in sections else []
+    return len(content) == 1 and content[0].startswith(NO_CODE_PREFIX)
 
 
 def _parse_requirements(sections: dict, findings: list[dict]) -> dict[str, list[str]]:

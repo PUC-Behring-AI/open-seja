@@ -10,7 +10,7 @@ metadata:
 
 > This is an inlined worker; execute these instructions as part of the caller's flow. The wrapper at .claude/skills/plan/SKILL.md has already run C1 (pre-skill) and the Design Guard; execute the steps below and invoke C6 (post-skill) at step 7. Note: when this internal is invoked inline from `_internal/plan/roadmap/SKILL.md` (Mode 1 step 9 or Mode 2 step 8), the caller instructs per-item execution to skip steps 7 and 8 -- the roadmap run owns the commit and the user prompt.
 
-This mode is the reference prose -- other modes delta off of its shape. Steps 1, 3 (reserve-ID + header), 5 (Review Depth), 7 (post-skill), and 8 (decision-point phrasing) reuse C1, C2+C3, C5, C6, and C4 respectively; the local prose below adds only the single-plan-specific content.
+This mode is the reference prose -- other modes delta off of its shape. Step 2b plays the language game and writes the plan's intention sections (plan v3, D-006). Steps 1, 3 (reserve-ID + header), 5 (Review Depth), 7 (post-skill), and 8 (decision-point phrasing) reuse C1, C2+C3, C5, C6, and C4 respectively; the local prose below adds only the single-plan-specific content.
 
 1. Apply C1 (pre-skill).
 
@@ -22,10 +22,17 @@ This mode is the reference prose -- other modes delta off of its shape. Steps 1,
    | Plan touches backend/frontend/testing/i18n files | `product-design/standards.md` |
    | Plan involves auth, validation, or sensitive data | `product-design/security-checklists.md` |
    | Plan involves UX flows or visual design | `product-design/design-standards.md` |
+   | Before step 2b | `general/plan-language-game.md`, `general/plan-intent-and-cases.md` |
    | Before Phase 1 review | `general/review-perspectives.md` |
    | Before writing the review log | `general/review-log-template.md` |
 
-3. Create a structured, self-contained plan with these sections (header per C3; `<depth>` set in step 5):
+2b. **Language game (the interview).** Before the steps are written, play the language game of `general/plan-language-game.md` with the user. Reserve the ID and write the header first (C2, C3 with `plan_format_version: 3`), so each round is saved in the plan file as it grows (JDL-001).
+   - **Task with code**: play rounds of up to 3 moves (scenes the user accepts, refuses or fixes; JDL-002 to JDL-006). After each round, write `## Intenção`, `## Requisitos`, `## Casos de uso` and `## Nas suas palavras` into the plan (shape: `general/plan-intent-and-cases.md`, PIC) and run `python3 .claude/skills/scripts/check_plan_intent.py <plan file>`. Keep playing while it reports any `error`; the tool decides, not your impression. At the round ceiling, return the decision to the user with the three exits of JDL-007.
+   - **Retelling and approval**: when the check has no `error`, write `## Retradução` (first person, controlled voice, with "O que eu não vou fazer"), show it, and ask via AskUserQuestion **Aprovar** / **Ajustar** / **Descartar** (JDL-010, phrased per C4). Ajustar goes back to the game with a fix move on the requirement pointed at; Descartar stops the plan. On Aprovar, add the line `Aprovação: aprovado em <YYYY-MM-DD>` under the Retelling and go on to step 3.
+   - **Task without code** (DOCUMENT, CHORE or RESEARCH prefix, or steps touching only docs, config or the harness): play the short game (JDL-009, two moves), write only `## Intenção` and `## Nas suas palavras`, and write `nenhum (tarefa sem código)` under `## Requisitos` and `## Casos de uso`.
+   - **Invoked inline from a roadmap**: always the short game, with `nenhum (jogo curto, item de roadmap)` under `## Requisitos` and `## Casos de uso`; the roadmap worker says so.
+
+3. Complete the structured, self-contained plan with these sections (header per C3; `<depth>` set in step 5; the five intention sections of step 2b stay between *agent interpretation* and *steps*):
    - If default framing: *user brief*, *agent interpretation*, *files* -- per `general/report-conventions.md`.
    - If metacomm framing: *designer's metacommunication message* (the brief verbatim), *agent interpretation*, *files*.
    - *agent interpretation* covers three elements (four when `source:` is present):
@@ -39,7 +46,7 @@ This mode is the reference prose -- other modes delta off of its shape. Steps 1,
      - **User-visible impact**: what changes from the user's perspective (one paragraph).
      - **Trade-offs accepted**: what was gained, what was given up.
      - **Metacommunication impact** (when the plan modifies user-facing communication -- error messages, help, UI copy, CLI output, docs): what the system will now communicate differently. Use I/you phrasing per `shared-definitions.md`. Include regardless of `--framing metacomm`.
-   - *steps*: structured step list -- step format and decomposition guidelines: see `.claude/references/template/plan-step.md`.
+   - *steps*: structured step list -- step format and decomposition guidelines: see `.claude/references/template/plan-step.md`. Every step whose `Tests:` is not N/A carries a `Covers:` line with the plan requirements its tests demonstrate (PIC-008); every requirement is covered by at least one step.
    - *review log*: if applicable.
    - *outcomes*: expected outcomes.
    - *smoke*: `true` if any step creates or modifies API route files or frontend page/component files; `false` otherwise. Consumed by `/implement` to decide whether to run `/critique smoke api`.
@@ -53,6 +60,7 @@ This mode is the reference prose -- other modes delta off of its shape. Steps 1,
 
    **Step metadata validation (before perspective review):**
    - Every step has all required fields (Files, References, Interface, Verify, Tests, checkbox). Optional fields (Depends on, Docs, Deploy, Traces) may be omitted entirely -- absent Depends on = no dependencies; absent Docs/Deploy/Traces = not applicable. `Interface:` is required but may be `N/A` -- omitting it entirely is a validation error; populate for dependency-producing steps.
+   - `Covers:` (plan v3) appears only on steps with non-N/A `Tests:`, cites only requirements of the plan's `## Requisitos`, and never goes inside `Traces:` (which cites the as-intended). Run `check_plan_intent.py <plan file>` again after the steps are written: no `error` is allowed.
    - Docs, Deploy, and Traces are present-when-relevant. When present, validate: Docs describes specific documentation to update; Deploy describes actionable deployment changes (specific env var names, ports, service names) covering Docker and standalone (Windows/Linux) where they differ; Traces lists valid REQ-xxx IDs.
    - For non-N/A `Tests:` entries: the description must express an observable behavior ('when X is called with Y, returns Z') rather than a structural assertion ('module exports class Z') or bare test name. Auto mode uses this to write a meaningful failing test before implementation.
    - `Tests: N/A` is appropriate for database migrations, configuration-only steps, pure refactors with pre-existing coverage, and framework/tooling-only steps that produce no business logic.

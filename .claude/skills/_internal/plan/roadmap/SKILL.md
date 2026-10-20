@@ -119,6 +119,7 @@ Steps 1-11 below. Common-step reuse: step 1 = C1; step 8 = C2+C3 with `--type ro
    **Context budget guardrail**: if >5 items and user selects "Create all plans now", emit: "This roadmap has N work items. Generating all plans in a single session may impact quality for later waves. Consider 'Wave 0 only' if quality is a concern." Do not block.
 
    **Conditional plan generation** based on choice:
+   - **Language game for items**: each item plan plays the short game of `general/plan-language-game.md` (JDL-009, two moves) in standard step 2b, not the full game, and writes `nenhum (jogo curto, item de roadmap)` under `## Requisitos` and `## Casos de uso`; the full game can be played later on the item with `/plan`.
    - **Technical**: invoke the standard workflow inline (read `.claude/skills/_internal/plan/standard/SKILL.md` via the Read tool per work item; execute steps 1-6 inline, including the note of step 6a but not its communication offer; skip steps 7 and 8 per the clarification below) with item description.
    - **Design**: invoke the standard workflow inline (read `.claude/skills/_internal/plan/standard/SKILL.md` via the Read tool per work item; execute steps 1-6 inline, including the note of step 6a but not its communication offer; skip steps 7 and 8 per the clarification below) with `--framing metacomm` and item description phrased as I/you (e.g., "When you open the home page, I want you to see...").
    - After each plan is generated, run:

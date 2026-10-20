@@ -39,7 +39,7 @@ When invoked without arguments (`/help`), display a curated overview of all user
 - **Communicate** — `/communicate`, `/onboard`
 - **Housekeeping** — `/qa-log`
 
-For each category, show the skill names and a one-sentence summary. After the overview, show available options and then ask the user what they'd like to explore:
+For each category, show the skill names and a one-sentence summary. For `/plan`, the summary says that it plays a language game with you (short scenes you accept, refuse or fix) and writes the intention, the requirements, the use cases and the tests for each requirement inside the plan, before any code. After the overview, show available options and then ask the user what they'd like to explore:
 
 **Options:**
 - `/help <skill>` — Full details for a specific skill (guide, arguments, related skills)

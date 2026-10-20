@@ -176,3 +176,13 @@ def test_usage_error_exits_2(tmp_path) -> None:
 def test_registered_in_plugin_registry() -> None:
     reg = json.loads((SCRIPT.parent / "check_plugin_registry.json").read_text(encoding="utf-8"))
     assert any(e["script"] == "check_plan_intent.py" for e in reg)
+
+
+@pytest.mark.parametrize("mark", ["nenhum (tarefa sem código)", "nenhum (jogo curto, item de roadmap)"])
+def test_short_game_plan_with_none_marks_passes(tmp_path, mark) -> None:
+    text = (FIX / "v3_completo.md").read_text(encoding="utf-8")
+    a, b = text.index("## Requisitos"), text.index("## Retradução")
+    short = text[:a] + f"## Requisitos\n{mark}\n\n## Casos de uso\n{mark}\n\n" + text[b:]
+    short = short.replace("- **Covers**: REQ-contas-001\n", "").replace("- **Covers**: REQ-contas-002\n", "")
+    p = _write(tmp_path, "p.md", short)
+    assert not _errors(p)
