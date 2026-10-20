@@ -1,5 +1,7 @@
 # Briefs
 
+DONE | 2026-10-20 21:38 UTC | STARTED | 2026-10-20 20:32 UTC | plan | Remover o Gherkin do open-seja a partir da reflexão recente do designer | PLAN | plan-20261020-688kjs
+
 STARTED | 2026-10-07 21:35 UTC | implement | plan-000020
 
 Execution log of all skill invocations.
