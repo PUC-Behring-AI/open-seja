@@ -1,0 +1,378 @@
+# ruff: noqa
+"""scenario_report -- runner report plugin for pytest + pytest-bdd (implement-test-first.md, ITF-016).
+
+Copied into the project as `tests/scenario_report.py` by
+`python .claude/skills/scripts/build_checks.py install-plugin <project>`, which also adds
+`pytest_plugins = ["scenario_report"]` to `tests/conftest.py`. The harness keeps it with the suffix
+`.example` so the harness pytest never collects it. No network, no LLM; it imports pytest-bdd only
+inside its hooks, so the pure functions below run with the standard library.
+
+Options:
+    --scenario-report <path>       write one JSON report (schema_version 1) at the end of the run
+    --scenario-key <key>           run only this scenario (repeatable); plain tests are deselected
+    --scenario-exclude-key <key>   leave this scenario out (repeatable)
+
+Every scenario item gets the marker `scenario` (`pytest -m scenario` = the scenario-only coverage run
+of ITF-018) and the JUnit properties `scenario_key` and one `req` per `@REQ-` tag. The key is
+`<slug>/<file>.feature::<name>`, the same as `check_features.py` and `scenarios.lock.json` (CYC-027).
+Per scenario the report keeps: outcome (passed|failed|error|skipped|xfailed|xpassed), exception class,
+effective type of the failing step (`given|when|then`), the failing step text, the location of the step
+function, a short reason and, for a Scenario Outline, one row per example with the worst outcome on top.
+It also accepts the `@REQ-...` and `@nao-faz` tags under `--strict-markers` (the model conftest of the
+feature example did only this). Run it together with `--cucumberjson` and `--junitxml`: the cycle
+contract stays the Cucumber JSON; this report and the JUnit add what that JSON leaves out.
+"""
+
+from __future__ import annotations
+
+import datetime
+import inspect
+import json
+import os
+
+SCHEMA_VERSION = 1
+PRIORITY = ("error", "failed", "xpassed", "skipped", "xfailed", "passed")  # worst first
+REASON_MAX = 200
+_STATE_ATTR = "_scenario_report_state"
+
+
+# ---------------------------------------------------------------------------
+# Pure functions (tested with the standard library)
+# ---------------------------------------------------------------------------
+
+
+def _basename(path):
+    return str(path).replace("\\", "/").rstrip("/").rsplit("/", 1)[-1]
+
+
+def scenario_key(slug, path, name):
+    """Same as check_features.scenario_key: `<slug>/<file name>::<scenario name>`."""
+    return f"{slug}/{_basename(path)}::{name}"
+
+
+def key_for(feature_path, name):
+    """Key from the path of the .feature file: the slug is its folder (features/<slug>/)."""
+    parts = [p for p in str(feature_path).replace("\\", "/").split("/") if p]
+    slug = parts[-2] if len(parts) >= 2 else ""
+    return scenario_key(slug, feature_path, name)
+
+
+def req_tags(tags):
+    return sorted({t.lstrip("@") for t in tags if t.lstrip("@").startswith("REQ-")})
+
+
+def item_outcome(when, outcome, wasxfail, exception):
+    """Outcome of one test item from the pytest report of one phase."""
+    if wasxfail:
+        return "xpassed" if outcome == "passed" else "xfailed"
+    if outcome == "skipped":
+        return "skipped"
+    if outcome == "passed":
+        return "passed"
+    if when == "call" and exception == "AssertionError":
+        return "failed"
+    return "error"  # setup/teardown failure, or a call that failed with anything but an assertion
+
+
+def aggregate(outcomes):
+    """Worst outcome of the rows of a Scenario Outline."""
+    known = [o for o in outcomes if o in PRIORITY]
+    if not known:
+        return "error"
+    return min(known, key=PRIORITY.index)
+
+
+def short_reason(text, limit=REASON_MAX):
+    if not text:
+        return ""
+    for line in str(text).splitlines():
+        line = line.strip()
+        if line:
+            return line[:limit]
+    return ""
+
+
+def add_row(records, key, data, index):
+    """Add one item (a plain scenario, or one row of an Outline when index is not None)."""
+    if index is None:
+        records[key] = dict(data, rows=None)
+        return
+    row = {
+        "index": index,
+        "outcome": data["outcome"],
+        "exception": data["exception"],
+        "failing_step_type": data["failing_step_type"],
+        "step_func": data["step_func"],
+    }
+    rec = records.get(key)
+    if rec is None or rec.get("rows") is None:
+        rec = dict(data, rows=[], duration=0.0)
+        records[key] = rec
+    rec["rows"].append(row)
+    rec["rows"].sort(key=lambda r: r["index"])
+    rec["duration"] = rec["duration"] + (data.get("duration") or 0.0)
+    worst = aggregate([r["outcome"] for r in rec["rows"]])
+    rec["outcome"] = worst
+    if data["outcome"] == worst and worst != "passed":
+        for field in (
+            "exception",
+            "failing_step_type",
+            "failing_step",
+            "step_func",
+            "reason",
+            "undefined",
+        ):
+            rec[field] = data.get(field)
+
+
+def build_report(scenarios, tests, version, generated_at):
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "generated_at": generated_at,
+        "pytest_bdd_version": version,
+        "scenarios": scenarios,
+        "tests": tests,
+    }
+
+
+def selected(key, include, exclude):
+    if key in exclude:
+        return False
+    return not include or key in include
+
+
+# ---------------------------------------------------------------------------
+# pytest hooks
+# ---------------------------------------------------------------------------
+
+
+class _State:
+    def __init__(self, root):
+        self.root = root
+        self.items = {}  # nodeid -> (key, feature_file, req, row index or None)
+        self.errors = {}  # nodeid -> step error info
+        self.phases = {}  # nodeid -> list of (when, outcome, wasxfail, exception, longrepr, duration)
+        self.collect_errors = []
+
+
+def _rel(path, root):
+    try:
+        return os.path.relpath(str(path), str(root)).replace(os.sep, "/")
+    except ValueError:
+        return str(path).replace(os.sep, "/")
+
+
+def pytest_addoption(parser):
+    group = parser.getgroup("scenario_report", "scenario report (ITF-016)")
+    group.addoption(
+        "--scenario-report", default=None, help="write the scenario report JSON here"
+    )
+    group.addoption(
+        "--scenario-key", action="append", default=[], help="run only this scenario key"
+    )
+    group.addoption(
+        "--scenario-exclude-key",
+        action="append",
+        default=[],
+        help="leave this scenario key out",
+    )
+
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers", "scenario: test generated from a Gherkin scenario (scenario_report)"
+    )
+    setattr(config, _STATE_ATTR, _State(str(config.rootpath)))
+
+
+def pytest_bdd_apply_tag(tag, function):
+    if tag.startswith("REQ-") or tag == "nao-faz":
+        return True  # accepted under --strict-markers; no marker is created
+    return None
+
+
+def _template(item):
+    try:
+        from pytest_bdd.scenario import scenario_wrapper_template_registry
+    except ImportError:  # pragma: no cover - pytest-bdd missing
+        return None
+    obj = getattr(item, "obj", None)
+    try:
+        return scenario_wrapper_template_registry.get(obj) if obj is not None else None
+    except TypeError:
+        return None
+
+
+def pytest_collection_modifyitems(session, config, items):
+    import pytest
+
+    state = getattr(config, _STATE_ATTR)
+    include = config.getoption("--scenario-key")
+    exclude = config.getoption("--scenario-exclude-key")
+    keep, drop = [], []
+    for item in items:
+        template = _template(item)
+        if template is None:
+            (drop if include else keep).append(item)
+            continue
+        feature_file = template.feature.filename
+        key = key_for(feature_file, template.name)
+        reqs = req_tags(template.tags)
+        callspec = getattr(item, "callspec", None)
+        index = (
+            callspec.indices.get("_pytest_bdd_example")
+            if callspec is not None
+            else None
+        )
+        state.items[item.nodeid] = (key, _rel(feature_file, state.root), reqs, index)
+        item.add_marker(pytest.mark.scenario)
+        item.user_properties.append(("scenario_key", key))
+        for req in reqs:
+            item.user_properties.append(("req", req))
+        (keep if selected(key, include, exclude) else drop).append(item)
+    if drop:
+        config.hook.pytest_deselected(items=drop)
+        items[:] = keep
+
+
+def _step_func_location(step_func, root):
+    if step_func is None:
+        return None
+    try:
+        source = inspect.getsourcefile(step_func)
+        line = step_func.__code__.co_firstlineno
+    except (TypeError, AttributeError):
+        return None
+    return {
+        "file": _rel(source, root),
+        "line": line,
+        "name": getattr(step_func, "__name__", ""),
+    }
+
+
+def pytest_bdd_step_error(
+    request, feature, scenario, step, step_func, step_func_args, exception
+):
+    state = getattr(request.config, _STATE_ATTR)
+    state.errors[request.node.nodeid] = {
+        "failing_step_type": step.type,
+        "failing_step": step.name,
+        "step_func": _step_func_location(step_func, state.root),
+        "undefined": False,
+        "exception": type(exception).__name__,
+    }
+
+
+def pytest_bdd_step_func_lookup_error(request, feature, scenario, step, exception):
+    state = getattr(request.config, _STATE_ATTR)
+    state.errors[request.node.nodeid] = {
+        "failing_step_type": step.type,
+        "failing_step": step.name,
+        "step_func": None,
+        "undefined": True,
+        "exception": type(exception).__name__,
+    }
+
+
+def pytest_collectreport(report):
+    if report.failed:
+        state = _STATE.get("state")
+        if state is not None:
+            state.collect_errors.append(
+                {"nodeid": report.nodeid, "reason": short_reason(str(report.longrepr))}
+            )
+
+
+_STATE = {}
+
+
+def pytest_sessionstart(session):
+    _STATE["state"] = getattr(session.config, _STATE_ATTR)
+
+
+try:
+    import pytest as _pytest
+
+    @_pytest.hookimpl(hookwrapper=True)
+    def pytest_runtest_makereport(item, call):
+        outcome = yield
+        rep = outcome.get_result()
+        state = getattr(item.config, _STATE_ATTR)
+        exc = call.excinfo.typename if call.excinfo is not None else None
+        state.phases.setdefault(item.nodeid, []).append(
+            (
+                rep.when,
+                rep.outcome,
+                bool(getattr(rep, "wasxfail", False)),
+                exc,
+                short_reason(str(rep.longrepr)) if rep.longrepr else "",
+                rep.duration,
+            )
+        )
+except ImportError:  # pragma: no cover - the pure functions do not need pytest
+    pass
+
+
+def _final(phases):
+    """Outcome, exception and reason of one item from its setup/call/teardown reports."""
+    result = ("passed", None, "")
+    for when, outcome, wasxfail, exc, reason, _ in phases:
+        if outcome == "passed" and not wasxfail:
+            continue
+        current = item_outcome(when, outcome, wasxfail, exc)
+        if current == "passed":
+            continue
+        if result[0] == "passed" or PRIORITY.index(current) < PRIORITY.index(result[0]):
+            result = (current, exc, reason)
+    return result
+
+
+def pytest_sessionfinish(session, exitstatus):
+    path = session.config.getoption("--scenario-report")
+    if not path:
+        return
+    state = getattr(session.config, _STATE_ATTR)
+    records, tests = {}, {}
+    for nodeid, phases in state.phases.items():
+        outcome, exc, reason = _final(phases)
+        duration = sum(p[5] for p in phases)
+        if nodeid not in state.items:
+            tests[nodeid] = outcome
+            continue
+        key, feature_file, reqs, index = state.items[nodeid]
+        err = state.errors.get(nodeid, {})
+        if err.get("undefined"):
+            outcome = "error"
+        data = {
+            "scenario_key": key,
+            "feature_file": feature_file,
+            "req": reqs,
+            "outcome": outcome,
+            "exception": (err.get("exception") or exc) if outcome != "passed" else None,
+            "failing_step_type": err.get("failing_step_type")
+            if outcome != "passed"
+            else None,
+            "failing_step": err.get("failing_step") if outcome != "passed" else None,
+            "step_func": err.get("step_func") if outcome != "passed" else None,
+            "reason": reason if outcome != "passed" else "",
+            "undefined": bool(err.get("undefined")),
+            "duration": round(duration, 6),
+        }
+        add_row(records, key, data, index)
+    try:
+        from importlib.metadata import version
+
+        bdd_version = version("pytest-bdd")
+    except Exception:  # noqa: BLE001 - report without the version rather than fail the run
+        bdd_version = None
+    stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    report = build_report(
+        dict(sorted(records.items())), dict(sorted(tests.items())), bdd_version, stamp
+    )
+    if state.collect_errors:
+        report["collect_errors"] = state.collect_errors
+    directory = os.path.dirname(os.path.abspath(path))
+    os.makedirs(directory, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(report, fh, indent=2, ensure_ascii=False, sort_keys=True)
+        fh.write("\n")
