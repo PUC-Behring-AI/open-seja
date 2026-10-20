@@ -251,3 +251,32 @@ def test_drift_report_missing_on_disk(repo):
     block = as_markdown_block(summarize(["plan-000777"]))
     assert "2 items" in block
     assert "(report missing)" in block
+
+
+# --- plan-000019 Step 7: METACOMM header and new ID format --------------------
+
+_NEW_ID = "20261007-k3m9qz"
+
+
+def test_metacomm_header_parsed(repo):
+    plans = repo / "_output" / "plans"
+    (plans / "plan-000007-ciclo.md").write_text(
+        "# Plan 000007 | FEATURE-O | METACOMM | 2026-10-05 02:00 UTC | t | Review: standard\n",
+        encoding="utf-8",
+    )
+    m = sa._HEADER_RE.match(
+        "# Plan 000007 | FEATURE-O | METACOMM | 2026-10-05 02:00 UTC | t | Review: standard"
+    )
+    assert m and m.group(2) == "FEATURE-O"
+    [r] = sa.summarize(["plan-000007"])
+    assert (r["id"], r["datetime"], r["title"]) == ("000007", "2026-10-05 02:00 UTC", "t")
+
+
+def test_new_id_plan_resolved_whole(repo):
+    plans = repo / "_output" / "plans"
+    (plans / f"plan-{_NEW_ID}-foo.md").write_text(
+        f"# Plan {_NEW_ID} | FEATURE-B | 2026-10-07 19:00 UTC | Novo | Review: standard\n",
+        encoding="utf-8",
+    )
+    [r] = sa.summarize([f"plan-{_NEW_ID}"])
+    assert (r["id"], r["type"], r["title"]) == (_NEW_ID, "plan", "Novo")

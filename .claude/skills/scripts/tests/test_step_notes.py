@@ -225,3 +225,27 @@ def test_parse_cli_stats_shows_gate_attempts(plans, capsys):
     assert step_notes.main(["parse", str(path), "--stats"]) == 0
     out = capsys.readouterr().out
     assert "attempts 2" in out
+
+
+# --- plan-000019 Step 7: both ID formats --------------------------------------
+
+NEW_ID = "20261007-k3m9qz"
+
+
+def test_append_and_parse_with_new_id(plans):
+    path = _append(plan=NEW_ID)
+    assert path.name == f"plan-{NEW_ID}-progress.md"
+    notes = step_notes.parse_notes(path.read_text(encoding="utf-8"))
+    assert [n.step for n in notes] == [1]
+
+
+def test_plan_path_resolves_new_id_and_skips_progress(plans):
+    (plans / f"plan-{NEW_ID}-progress.md").write_text("# P\n", encoding="utf-8")
+    (plans / f"plan-{NEW_ID}-foo.md").write_text("# Plan\n", encoding="utf-8")
+    assert step_notes.plan_path(NEW_ID).name == f"plan-{NEW_ID}-foo.md"
+
+
+def test_legacy_short_input_still_padded(plans):
+    # Legacy behaviour unchanged: a short numeric ID is padded to six digits.
+    assert step_notes.progress_path("7").name == "plan-000007-progress.md"
+    assert step_notes.progress_path("000007").name == "plan-000007-progress.md"

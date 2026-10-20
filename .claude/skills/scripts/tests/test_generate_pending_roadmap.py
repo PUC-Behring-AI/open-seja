@@ -350,3 +350,34 @@ class TestCustomOutputDir:
 
         roadmap_file = custom_dir / "roadmap-999992-pending-plans.md"
         assert roadmap_file.is_file()
+
+
+class TestIdGrammar:
+    """plan-000019 Step 7: new ID format and METACOMM header."""
+
+    NEW = "20261007-k3m9qz"
+
+    def test_parse_metacomm_header(self):
+        import generate_pending_roadmap as gpr
+
+        text = "# Plan 000007 | FEATURE-O | METACOMM | 2026-10-05 02:00 UTC | t | Review: standard\n"
+        m = gpr._PLAN_HEADER_RE.match(text)
+        assert m and m.group(1) == "FEATURE-O"
+        assert gpr._parse_plan_header(text) == ("t", "other")
+
+    def test_new_id_plan_in_roadmap(self, tmp_path):
+        fake = _setup_fake_repo(tmp_path)
+        plan = fake / "_output" / "plans" / f"plan-{self.NEW}-feature.md"
+        plan.write_text(
+            f"# Plan {self.NEW} | FEATURE-B | METACOMM | 2026-10-07 02:00 UTC | Novo formato | Review: standard\n\n"
+            "## Files\n\n- `src/a.py` (modify)\n",
+            encoding="utf-8",
+        )
+        _write_pending_entries(fake, [_make_pending_entry("pa-000001", self.NEW)])
+        r = _run_script(fake, "--roadmap-id", "999999")
+        assert r.returncode == 0, f"stderr: {r.stderr}"
+        content = (fake / "_output" / "roadmaps" / "roadmap-999999-pending-plans.md").read_text(
+            encoding="utf-8"
+        )
+        assert f"plan-{self.NEW}" in content
+        assert "Novo formato" in content

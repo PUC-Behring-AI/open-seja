@@ -181,3 +181,134 @@ class TestReflect:
         assert reflect_deep_scope._extract_plan_id(f"PLAN | {NEW} | x") == NEW
         assert reflect_deep_scope._extract_plan_id("PLAN | 000007") == "000007"
         assert reflect_deep_scope._extract_plan_id("PLAN | 0007") is None
+
+
+# --- Step 7: full matrix (legacy same as before, new whole, short rejected) --
+
+
+SHORT = "0007"
+
+
+class TestCheckPlanCoverageShort:
+    def test_short_id_not_extracted(self, tmp_path):
+        d = _plan(tmp_path, f"plan-{SHORT}-foo.md")
+        # No ID matches: the stem is used as the plan key, as before.
+        assert check_plan_coverage.extract_traces(d) == {
+            "REQ-ENT-001": [f"plan-{SHORT}-foo"]
+        }
+
+
+class TestUpdateCrossRefsMatrix:
+    def test_source_short_id_rejected(self):
+        assert update_cross_refs._extract_source([f"source: plan-{SHORT} -- x"]) is None
+
+    def test_token_from_legacy_path(self):
+        assert update_cross_refs._artifact_token_from_path(
+            Path("plan-000007-foo.md")
+        ) == ("plan", "000007")
+
+    @staticmethod
+    def _ledger(tmp_path, monkeypatch, source_id: str) -> Path:
+        out = tmp_path / "_output"
+        (out / "plans").mkdir(parents=True)
+        (out / "research-logs").mkdir()
+        src = out / "plans" / f"plan-{source_id}-origem.md"
+        src.write_text(f"# Plan {source_id} | X | d | t\n\n## Steps\n", encoding="utf-8")
+        (out / "INDEX.md").write_text(
+            "| Type | Prefix | ID | Date | Title | File |\n"
+            "|---|---|---|---|---|---|\n"
+            f"| Plan | plan | {source_id} | 2026-10-07 | t "
+            f"| [plan-{source_id}-origem.md](plans/plan-{source_id}-origem.md) |\n",
+            encoding="utf-8",
+        )
+        monkeypatch.setattr(update_cross_refs, "OUTPUT_DIR", out)
+        monkeypatch.setattr(update_cross_refs, "INDEX_FILE", out / "INDEX.md")
+        monkeypatch.setattr(update_cross_refs, "REPO_ROOT", tmp_path)
+        return src
+
+    def test_spawned_propagates_from_new_format_source(self, tmp_path, monkeypatch):
+        src = self._ledger(tmp_path, monkeypatch, NEW)
+        child_id = "20261007-a1b2c3"
+        child = tmp_path / "_output" / "research-logs" / f"research-{child_id}-x.md"
+        child.write_text(f"# Research\nsource: plan-{NEW} -- motivo\n", encoding="utf-8")
+        assert update_cross_refs.run(child) == 0
+        assert f"spawned: research-{child_id}" in src.read_text(encoding="utf-8")
+
+    def test_spawned_propagates_from_legacy_source(self, tmp_path, monkeypatch):
+        src = self._ledger(tmp_path, monkeypatch, "000007")
+        child = tmp_path / "_output" / "research-logs" / "research-000020-x.md"
+        child.write_text("# Research\nsource: plan-000007 -- motivo\n", encoding="utf-8")
+        assert update_cross_refs.run(child) == 0
+        assert "spawned: research-000020" in src.read_text(encoding="utf-8")
+
+
+class TestSummarizeArtifactsMatrix:
+    def test_header_legacy(self):
+        m = summarize_artifacts._HEADER_RE.match(
+            "# Plan 000007 | FEATURE-O | 2026-10-05 02:00 UTC | t | Review: standard"
+        )
+        assert m and m.group(1) == "000007"
+
+    def test_header_short_id_rejected(self):
+        assert summarize_artifacts._HEADER_RE.match(
+            f"# Plan {SHORT} | FEATURE-O | 2026-10-05 02:00 UTC | t"
+        ) is None
+
+
+class TestPendingMatrix:
+    def test_plan_id_re(self):
+        assert pending._PLAN_ID_RE.match("plan-000007").group(1) == "000007"
+        assert pending._PLAN_ID_RE.match(f"plan-{NEW}").group(1) == NEW
+        assert pending._PLAN_ID_RE.match(f"plan-{SHORT}") is None
+
+    def test_plan_file_present_legacy(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(pending, "get_path", lambda key, *a: tmp_path)
+        assert pending._plan_file_present("plan-000007") is False
+        (tmp_path / "plan-000007-x.md").write_text("# Plan\n", encoding="utf-8")
+        assert pending._plan_file_present("plan-000007") is True
+
+    def test_plan_file_present_ignores_progress_companion_new_id(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(pending, "get_path", lambda key, *a: tmp_path)
+        (tmp_path / f"plan-{NEW}-progress.md").write_text("# P\n", encoding="utf-8")
+        assert pending._plan_file_present(f"plan-{NEW}") is False
+
+
+class TestCheckDocsMatrix:
+    def test_script_citation_drift_short_rejected(self):
+        assert check_docs._SCRIPT_CITATION_DRIFT_RE.search(f"# plan-{SHORT}") is None
+        assert check_docs._SCRIPT_TRANSITION_ANCHOR_RE.search(f"TRANSITION (plan-{SHORT})") is None
+
+
+class TestDecisionDigestMatrix:
+    def test_advisory_header_legacy_and_short(self):
+        rx = generate_decision_digest._ADVISORY_HEADER_RE
+        legacy = "# Advisory 000058 | X | 2026-10-07 10:00 UTC | titulo"
+        assert rx.search(legacy).group(1) == "000058"
+        assert rx.search(f"# Advisory {SHORT} | X | 2026-10-07 10:00 UTC | t") is None
+        assert generate_decision_digest._RESEARCH_HEADER_RE.search(
+            f"# Research {NEW} | X | 2026-10-07 10:00 UTC | t"
+        ).group(1) == NEW
+
+
+class TestPendingRoadmapMatrix:
+    def test_header_metacomm_groups(self):
+        m = generate_pending_roadmap._PLAN_HEADER_RE.match(
+            "# Plan 000007 | FEATURE-O | METACOMM | 2026-10-05 02:00 UTC | t | Review: standard"
+        )
+        assert m and (m.group(1), m.group(2)) == ("FEATURE-O", "t")
+
+    def test_header_short_id_untitled(self):
+        assert generate_pending_roadmap._parse_plan_header(
+            f"# Plan {SHORT} | FEATURE-B | 2026-10-07 02:00 UTC | t | x\n"
+        ) == ("(untitled)", "other")
+
+
+class TestReflectMatrix:
+    def test_stuck_loops_legacy_and_short(self, tmp_path):
+        b = tmp_path / "briefs.md"
+        b.write_text(
+            "STARTED | 2026-10-07 10:00 UTC | plan | 000007 | fazer y\n"
+            f"STARTED | 2026-10-07 10:00 UTC | plan | {SHORT} | fazer z\n",
+            encoding="utf-8",
+        )
+        assert reflect_stuck_loops._load_briefs_map(b) == {"000007": "fazer y"}
