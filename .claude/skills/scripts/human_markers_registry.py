@@ -29,6 +29,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from artifact_id import ARTIFACT_ID
+
 # ---------------------------------------------------------------------------
 # Registry of files classified as Human (markers)
 # ---------------------------------------------------------------------------
@@ -68,6 +70,16 @@ HUMAN_MARKERS_FILES: list[str] = [
 # smuggling: a --note value containing <!-- or --> could otherwise inject a new
 # marker on the next line.
 
+# Plan reference in markers: legacy ``plan-NNNNNN`` or ULID-era
+# ``plan-YYYYMMDD-xxxxxx`` (plan-000019, D-010). Defined once in artifact_id.
+_PLAN_REF = rf"plan-{ARTIFACT_ID}"
+
+# The exact Source line apply_marker.py writes under a DECISION_APPEND entry
+# (``*Source: <note> (<date>)*``). Kept narrow on purpose: a looser
+# ``\*Source: .{1,200}\*`` would open a 200-char prose channel into a
+# Human (markers) file.
+_DECISION_SOURCE_LINE = r"\*Source: [^*<>\n]{1,200} \(\d{4}-\d{2}-\d{2}\)\*"
+
 ALLOWED_MARKERS: dict[str, dict] = {
     "STATUS": {
         # Accepts both the new lowercase multi-value scheme (proposed | implemented |
@@ -78,7 +90,7 @@ ALLOWED_MARKERS: dict[str, dict] = {
         "line_regex": (
             r"<!-- STATUS: "
             r"(proposed|implemented|established|superseded|IMPLEMENTED)"
-            r"(?: \| (?:plan-\d{6}|manual))?"
+            rf"(?: \| (?:{_PLAN_REF}|manual))?"
             r"(?: \| \d{4}-\d{2}-\d{2})?"
             r" -->"
         ),
@@ -102,14 +114,14 @@ ALLOWED_MARKERS: dict[str, dict] = {
         # Legacy stamp, retained for migration from the current IMPLEMENTED/ESTABLISHED
         # scheme. Stamp is immutable once written; no value/transition validation.
         "line_regex": (
-            r"<!-- ESTABLISHED: plan-\d{6} \| \d{4}-\d{2}-\d{2}"
+            rf"<!-- ESTABLISHED: {_PLAN_REF} \| \d{{4}}-\d{{2}}-\d{{2}}"
             r"(?: \| v\d+\.\d+\.\d+)? -->"
         ),
         "allowed_values": None,
         "allowed_transitions": None,
     },
     "INCORPORATED": {
-        "line_regex": r"<!-- INCORPORATED: plan-\d{6} \| \d{4}-\d{2}-\d{2} -->",
+        "line_regex": rf"<!-- INCORPORATED: {_PLAN_REF} \| \d{{4}}-\d{{2}}-\d{{2}} -->",
         "allowed_values": None,
         "allowed_transitions": None,
     },
@@ -117,7 +129,7 @@ ALLOWED_MARKERS: dict[str, dict] = {
         "line_regex": (
             r"\d{4}-\d{2}-\d{2} \| [A-Z]+-[A-Z]+-\d{3,} \| "
             r"(added|revised|revoked|superseded) \| "
-            r"(plan-\d{6}|-) \| "
+            rf"({_PLAN_REF}|-) \| "
             r"[^<>\n]{1,200}"
         ),
         "allowed_values": None,
@@ -130,9 +142,11 @@ ALLOWED_MARKERS: dict[str, dict] = {
         # heading, and the four DDR body labels (Context / Decision / Consequences /
         # Rejected Alternatives). check_human_markers_only.py checks each diff line on
         # its own, so the body lines must be allowed here or no entry could be committed.
+        # The last alternative is the exact ``*Source: <note> (<date>)*`` line.
         "line_regex": (
             r"### D-\d{3}: .{1,200}"
             r"|\*\*(?:Context|Decision|Consequences|Rejected Alternatives)\*\*: .{1,2000}"
+            rf"|{_DECISION_SOURCE_LINE}"
         ),
         "allowed_values": None,
         "allowed_transitions": None,

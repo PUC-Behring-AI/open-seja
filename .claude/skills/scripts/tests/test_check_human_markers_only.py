@@ -237,3 +237,60 @@ def test_other_bold_label_lines_still_rejected(tmp_path):
     result = _run_with_registry(tmp_path, _write_diff(tmp_path, diff_body))
     assert result.returncode == 1
     assert "slipped-in prose" in result.stderr
+
+
+# ---------------------------------------------------------------------------
+# plan-000019 step 4: Source line of a D-NNN entry and ULID plan ids
+# ---------------------------------------------------------------------------
+
+
+def _added_lines_diff(*added: str) -> str:
+    header = (
+        f"diff --git a/{MARKER_REL} b/{MARKER_REL}\n"
+        f"--- a/{MARKER_REL}\n"
+        f"+++ b/{MARKER_REL}\n"
+        f"@@ -20,0 +21,{len(added)} @@\n"
+    )
+    return header + "".join(f"+{ln}\n" for ln in added)
+
+
+def test_full_decision_entry_with_source_line_accepted(tmp_path):
+    diff_body = _added_lines_diff(
+        "",
+        "### D-005: Identidade de artefato por ULID",
+        "",
+        "**Context**: Colisao de IDs entre devs.",
+        "**Decision**: ULID gerado localmente.",
+        "**Consequences**: INDEX.md derivado.",
+        "**Rejected Alternatives**: Numero global por push.",
+        "",
+        "*Source: from research-000018 (2026-10-06)*",
+    )
+    result = _run_with_registry(tmp_path, _write_diff(tmp_path, diff_body))
+    assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "*Source: texto livre sem data*",
+        "*Source: note (2026-10-06)* with trailing prose",
+    ],
+)
+def test_free_source_line_rejected(tmp_path, line):
+    diff_body = _added_lines_diff(line)
+    result = _run_with_registry(tmp_path, _write_diff(tmp_path, diff_body))
+    assert result.returncode == 1
+
+
+def test_status_marker_with_ulid_plan_accepted(tmp_path):
+    diff_body = (
+        f"diff --git a/{MARKER_REL} b/{MARKER_REL}\n"
+        f"--- a/{MARKER_REL}\n"
+        f"+++ b/{MARKER_REL}\n"
+        "@@ -10,1 +10,1 @@\n"
+        "-<!-- STATUS: proposed -->\n"
+        "+<!-- STATUS: implemented | plan-20261007-k3m9qz | 2026-10-07 -->\n"
+    )
+    result = _run_with_registry(tmp_path, _write_diff(tmp_path, diff_body))
+    assert result.returncode == 0, result.stderr
