@@ -199,5 +199,15 @@
     },
     "scope": "ledger",
     "critical": true
+  },
+  {
+    "script": "check_plan_intent.py",
+    "name": "Plan Intent (v3)",
+    "stack": {
+      "backend": ["any"],
+      "frontend": ["any"]
+    },
+    "scope": "plans",
+    "critical": false
   }
 ]
