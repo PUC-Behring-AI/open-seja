@@ -11,7 +11,7 @@ reserve_id.py -- ULID-based identity for SEJA artifacts, with a birth record per
 Invocation: skill-invoked
 Lifecycle: active
 
-Generates a ULID locally (no coordination, no network; D-010), derives the
+Generates a ULID locally (no coordination, no network; D-005), derives the
 visible ID ``YYYYMMDD-xxxxxx`` from it, and writes the birth record to
 ``<output-dir>/ids/<uid>.json`` (tempfile + os.replace). INDEX.md is neither
 read nor written: it is fully derived by generate_macro_index.py.

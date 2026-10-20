@@ -18,7 +18,7 @@ extracts metadata (date, type, title) from each file's header, and generates
 OUTPUT_DIR/INDEX.md with all artifacts sorted in descending chronological order
 (newest first).
 
-INDEX.md is fully derived (D-010, plan-000019). RESERVED rows come from the
+INDEX.md is fully derived (D-005, plan-000019). RESERVED rows come from the
 birth records that reserve_id.py writes to OUTPUT_DIR/ids/<uid>.json: one row
 per record whose ID has no artifact file yet. Rows of a previous INDEX.md are
 never preserved. Both ID formats are accepted in headers: legacy six digits
