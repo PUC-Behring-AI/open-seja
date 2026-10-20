@@ -24,10 +24,11 @@ _sys.path.insert(0, str(_Path(__file__).resolve().parent.parent / 'scripts'))
 del _sys, _Path
 from project_config import REPO_ROOT, get_path  # noqa: E402
 import step_notes  # noqa: E402
+from artifact_id import ARTIFACT_ID
 
 _HEADER_RE = re.compile(
     r"^#\s+(?:DONE\s*\|[^|]*\|)?\s*(?:Plan|Advisory|Reflection|Inventory|Proposal|Explained|Check)"
-    r"\s+(\d{6})\s*\|\s*([^|]*?)\s*\|\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+UTC)\s*\|\s*(.+?)(?:\s*\|.*)?$",
+    rf"\s+({ARTIFACT_ID})\s*\|\s*([^|]*?)\s*\|(?:\s*METACOMM\s*\|)?\s*(\d{{4}}-\d{{2}}-\d{{2}}\s+\d{{2}}:\d{{2}}\s+UTC)\s*\|\s*(.+?)(?:\s*\|.*)?$",
     re.IGNORECASE,
 )
 
@@ -49,11 +50,27 @@ def _is_companion(name: str) -> bool:
     return name.endswith("-progress.md") or "-qa-" in name
 
 
+_DONE_ONLY_RE = re.compile(r"^#\s+DONE\s*\|[^|]*\|\s*$")
+
+
+def _header_line(lines: list[str]) -> str:
+    """Return the header line, joining a DONE marker written on its own line.
+
+    /implement may write ``# DONE | <date> |`` on a line of its own above the
+    plan H1; joined, the two read like the single-line ``# DONE | ... | Plan ...``.
+    """
+    if not lines:
+        return ""
+    if len(lines) > 1 and _DONE_ONLY_RE.match(lines[0]):
+        return f"{lines[0].rstrip()} {lines[1].lstrip('#').strip()}"
+    return lines[0]
+
+
 def _first_line(path: Path) -> str:
-    """Return the first line of a file (without trailing newline), or '' on error."""
+    """Return the header line of a file (see _header_line), or '' on error."""
     try:
         with path.open(encoding="utf-8") as fh:
-            return fh.readline().rstrip("\n")
+            return _header_line([fh.readline().rstrip("\n"), fh.readline().rstrip("\n")])
     except OSError:
         return ""
 
@@ -138,7 +155,7 @@ def summarize(artifact_refs: list[str]) -> list[dict]:
             results.append({"id": ref, "error": f"could not read {path}"})
             continue
         lines = text.splitlines()
-        header_match = _HEADER_RE.match(lines[0]) if lines else None
+        header_match = _HEADER_RE.match(_header_line(lines)) if lines else None
         entry: dict = {
             "id": header_match.group(1) if header_match else ref,
             "type": _infer_type(path),
@@ -206,7 +223,7 @@ def _drift_evidence(raw: str | None) -> dict:
 
 def _plan_evidence(plan_path: Path) -> dict:
     """Read the sibling progress file: step notes, gate, communication and drift evidence."""
-    prog = plan_path.with_name(re.sub(r"^(plan-\d{6}).*$", r"\1-progress.md", plan_path.name))
+    prog = plan_path.with_name(re.sub(rf"^(plan-{ARTIFACT_ID})(?![0-9A-Za-z]).*$", r"\1-progress.md", plan_path.name))
     text = ""
     if prog.is_file():
         try:
