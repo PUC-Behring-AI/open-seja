@@ -75,7 +75,7 @@ State it as an imperative: "We will use X for Y."}}
 
 ## Numbering Convention
 
-- DDRs are identified by unique, sequential, 6-digit, zero-padded numbers: DDR-000001, DDR-000002, etc.
+- DDRs are identified by unique, sequential, 6-digit, zero-padded numbers: DDR-000001, DDR-000002, etc. This numbering is local to the DDR index under `docs/ddr/` and is independent of the reserved artifact ID (see report-conventions) that `reserve_id.py` gives to artifacts under the output directory.
 
 ## When to Write a DDR
 

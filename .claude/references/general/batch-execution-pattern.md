@@ -19,7 +19,7 @@ Run `/pre-skill` a single time for the entire batch, not per work item.
 
 ### Phase 2: Reserve IDs upfront
 
-Before launching parallel work, reserve all output IDs with `python .claude/skills/scripts/reserve_id.py --type <artifact-type> --title '<slug>'` once per work item. Prevents ID conflicts when subagents write concurrently; each call returns a globally unique 6-digit zero-padded ID.
+Before launching parallel work, reserve all output IDs with `python .claude/skills/scripts/reserve_id.py --type <artifact-type> --title '<slug>'` once per work item. Reserving before launch still pays off: each subagent receives its final ID and filename up front, so no subagent has to reserve while others are writing. Each call returns the visible artifact ID (see report-conventions); uniqueness is now local, since every ID derives from a ULID generated on this machine, so the calls need no ordering or lock among themselves.
 
 ### Phase 3: Prepare output folder and load shared context
 

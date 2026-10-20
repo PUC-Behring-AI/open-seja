@@ -21,7 +21,7 @@ You will receive:
 - **diataxis_mapping_path**: path to the Diataxis mapping file (`.claude/references/general/communication/diataxis-mapping.md`)
 - **project_context**: paths to project state files (conceptual design, conventions, communication style)
 - **output_path**: full path where the output file(s) should be written
-- **output_id**: the reserved 6-digit ID for this artifact
+- **output_id**: the reserved artifact ID (see report-conventions)
 - **format**: `md`, `html`, or `both`
 - **deep**: boolean -- whether to include Deep-dive content sections
 - **source_file_path** (optional): path to an existing file to reformat for the target audience

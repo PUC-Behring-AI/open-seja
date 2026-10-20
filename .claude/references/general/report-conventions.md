@@ -1,12 +1,13 @@
 ---
-designer_description: "When a skill produces a report file under your output directory -- a plan, a research report, a review, a proposal -- I'm the reference that codifies the shared header fields (id, datetime, prefix, scope, source, spawned), the artifact-immutability rule that keeps design history intact, the research tagging scheme, and the ASCII-only character restrictions every authored artifact must pass."
+designer_description: "When a skill produces a report file under your output directory -- a plan, a research report, a review, a proposal -- I'm the reference that codifies the shared header fields (id, uid, datetime, prefix, scope, source, spawned), the artifact-immutability rule that keeps design history intact, the research tagging scheme, and the ASCII-only character restrictions every authored artifact must pass."
 ---
 
 # FRAMEWORK - REPORT CONVENTIONS
 
 When a skill produces a report file in `${OUTPUT_DIR}` (see product-design/conventions.md), apply these conventions for common sub-fields:
 
-- *id*: sequential number, zero-padded to 6 chars, globally unique across artifact types, reserved atomically via `reserve_id.py`.
+- *id*: visible ID `YYYYMMDD-xxxxxx` (UTC date plus the last six characters of the ULID, lowercase; e.g., `20261007-k3m9qz`), derived from a ULID that `reserve_id.py` generates locally, with no coordination and no network. Uniqueness is local by construction: two devs on different machines never pick the same ID, and `check_ledger_ids.py` reports any duplicate. Artifacts created before this version keep their 6-digit zero-padded sequential number (e.g., `000042`); both formats are valid everywhere an ID is cited, and old artifacts are never renumbered.
+- *uid*: the full ULID behind the *id* (26 chars, Crockford base32), written as the line `uid: <ULID>` immediately after the header, before any `source:`/`spawned:`/`tags:` lines. Take it from `reserve_id.py --json` (field `uid`) or from the birth record `${OUTPUT_DIR}/ids/<uid>.json`. Artifacts with a 6-digit *id* have no `uid:` line.
 - *current datetime*: format `YYYY-MM-DD HH:MM` in UTC.
 - *prefix* (when applicable): one of `[FEATURE, REDESIGN, FIX, REFACTOR, DOCUMENT, TEST, CHORE]`.
 - *scope* (when applicable): one of `[-B backend, -F frontend, -X cross-cutting, -O other]`.
@@ -29,7 +30,7 @@ Derive 2-5 tags from: (a) the question's topic, (b) affected components/areas, (
 
 ---
 
-Truncate sluggified short titles as needed. If not overwriting a file, proceed without asking for authorization. Reserve the id via `python .claude/skills/scripts/reserve_id.py --type <type> --title '<title>'` before writing content. If a clarification question is asked (excluding authorization prompts), include both question and answer in the report.
+Truncate sluggified short titles as needed. If not overwriting a file, proceed without asking for authorization. Reserve the id via `python .claude/skills/scripts/reserve_id.py --type <type> --title '<title>'` before writing content (stdout is the visible *id*; add `--json` to also get the *uid*). If a clarification question is asked (excluding authorization prompts), include both question and answer in the report.
 
 NEVER replace existing plan text. Mark it revoked or superseded with a rationale, assign an identifier to the revoked fragment, and append the replacement text referencing that fragment.
 
@@ -40,6 +41,8 @@ Existing artifacts in `${OUTPUT_DIR}` are immutable design history. When format 
 ## Report Filenames
 
 All reports and plans under `${OUTPUT_DIR}` must use lowercase filenames.
+
+Filename pattern: `<type>-<id>-<slug>.md`, where `<id>` is the visible ID returned by `reserve_id.py` (e.g., `plan-20261007-k3m9qz-<slug>.md`). The date followed by the ULID suffix keeps chronological order in the file tree without a counter; order within the same day is not guaranteed. Legacy artifacts keep `<type>-NNNNNN-<slug>.md` (e.g., `plan-000007-<slug>.md`).
 
 ## File Encoding
 
