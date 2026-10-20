@@ -4,8 +4,9 @@
 #   without scanning directories -- every plan, advisory, roadmap, proposal,
 #   communication, onboarding, reflection, mob session, and explain report (behavior,
 #   behavior-evolution, dev-onboarding, data-model, architecture) appears on
-#   one chronological list, newest first, with any RESERVED rows preserved
-#   across regenerations.
+#   one chronological list, newest first. IDs reserved for artifacts not yet
+#   written show up as RESERVED rows, read from their birth records, so I hold
+#   no state of my own and you can regenerate me at any time.
 """
 generate_macro_index.py -- Unified artifact index generator.
 
@@ -17,9 +18,11 @@ extracts metadata (date, type, title) from each file's header, and generates
 OUTPUT_DIR/INDEX.md with all artifacts sorted in descending chronological order
 (newest first).
 
-RESERVED rows (created by reserve_id.py) are preserved across regeneration:
-the script reads any existing RESERVED rows from INDEX.md before scanning,
-and merges them back into the output at their chronological position.
+INDEX.md is fully derived (D-010, plan-000019). RESERVED rows come from the
+birth records that reserve_id.py writes to OUTPUT_DIR/ids/<uid>.json: one row
+per record whose ID has no artifact file yet. Rows of a previous INDEX.md are
+never preserved. Both ID formats are accepted in headers: legacy six digits
+(``000007``) and the ULID-derived visible ID (``20261007-k3m9qz``).
 
 The output directory is read from product-design/conventions.md (the OUTPUT_DIR
 variable), making this script portable across any SEJA-bootstrapped project.
@@ -28,7 +31,8 @@ Usage
 -----
     python .claude/skills/scripts/generate_macro_index.py
     python .claude/skills/scripts/generate_macro_index.py --verbose
-    python .claude/skills/scripts/generate_macro_index.py --finalize 000005 --status DONE
+
+``--finalize ID`` is deprecated and a no-op (INDEX.md is derived; regenerate).
 
 Run from the repository root.
 """
@@ -37,12 +41,14 @@ Run from the repository root.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from artifact_id import ARTIFACT_ID, ULID_ID, normalize_id
 from project_config import REPO_ROOT, get_path
 
 OUTPUT_DIR = get_path("OUTPUT_DIR") or REPO_ROOT / "_output"
@@ -85,45 +91,55 @@ def _normalize_date(date_str: str) -> str:
 # Extractors for known artifact types
 # ---------------------------------------------------------------------------
 
+# ID field of an H1: legacy six digits, ULID-derived visible ID, or any digits
+# (very old headers such as "Plan 7").
+_ID = rf"({ARTIFACT_ID}|\d+)"
+# Optional "METACOMM |" field after the PREFIX-SCOPE of plan headers.
+_METACOMM_OPT = r"(?:METACOMM\s*\|\s*)?"
+# Companion QA log of a plan: plan-<id>-qa-<slug>.md
+_PLAN_QA_FILE_RE = re.compile(rf"^plan-{ARTIFACT_ID}-qa-")
+# Standalone DONE marker that /implement writes above the plan H1.
+_DONE_MARKER_RE = re.compile(r"^#\s+DONE\s*\|\s*[\d\-: UTC]+\|\s*$", re.IGNORECASE)
+
 # Plan (done): # DONE | datetime | Plan NNNN | PREFIX-SCOPE | datetime | title
 _PLAN_DONE_RE = re.compile(
-    r"^#\s+DONE\s*\|\s*([\d\-: UTC]+)\s*\|\s*Plan\s+(\d+)\s*\|\s*(\S+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*([^|]+)",
+    rf"^#\s+DONE\s*\|\s*([\d\-: UTC]+)\s*\|\s*Plan\s+{_ID}\s*\|\s*(\S+)\s*\|\s*{_METACOMM_OPT}([\d\-: UTC]+)\s*\|\s*([^|]+)",
     re.IGNORECASE,
 )
 
 # Plan (open): # Plan NNNN | PREFIX-SCOPE | datetime | title
 _PLAN_OPEN_RE = re.compile(
-    r"^#\s+Plan\s+(\d+)\s*\|\s*(\S+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*([^|]+)",
+    rf"^#\s+Plan\s+{_ID}\s*\|\s*(\S+)\s*\|\s*{_METACOMM_OPT}([\d\-: UTC]+)\s*\|\s*([^|]+)",
     re.IGNORECASE,
 )
 
 # Plan (alt done): # Plan NNNN | DONE | PREFIX-SCOPE | datetime | title
 _PLAN_ALT_DONE_RE = re.compile(
-    r"^#\s+Plan\s+(\d+)\s*\|\s*DONE\s*\|\s*(\S+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*([^|]+)",
+    rf"^#\s+Plan\s+{_ID}\s*\|\s*DONE\s*\|\s*(\S+)\s*\|\s*{_METACOMM_OPT}([\d\-: UTC]+)\s*\|\s*([^|]+)",
     re.IGNORECASE,
 )
 
 # Advisory: # Advisory NNNN | PREFIX-SCOPE | datetime | title
 _ADVISORY_RE = re.compile(
-    r"^#\s+Advisory\s+(\d+)\s*\|\s*(\S+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
+    rf"^#\s+Advisory\s+{_ID}\s*\|\s*(\S+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
     re.IGNORECASE,
 )
 
 # Research: # Research NNNN | PREFIX-SCOPE | datetime | title
 _RESEARCH_RE = re.compile(
-    r"^#\s+Research\s+(\d+)\s*\|\s*(\S+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
+    rf"^#\s+Research\s+{_ID}\s*\|\s*(\S+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
     re.IGNORECASE,
 )
 
 # Proposal: # Proposal NNNN | PREFIX-SCOPE | datetime | title
 _PROPOSAL_RE = re.compile(
-    r"^#\s+Proposal\s+(\d+)\s*\|\s*(\S+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
+    rf"^#\s+Proposal\s+{_ID}\s*\|\s*(\S+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
     re.IGNORECASE,
 )
 
 # Roadmap: # Roadmap NNNN | datetime | title
 _ROADMAP_RE = re.compile(
-    r"^#\s+Roadmap\s+(\d+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
+    rf"^#\s+Roadmap\s+{_ID}\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
     re.IGNORECASE,
 )
 
@@ -142,13 +158,13 @@ _QA_LOG_DATED_RE = re.compile(
 
 # QA Log (plan) with pipe: # QA Log | Plan NNNN | title  OR  # QA Log | implement NNNN, NNNN
 _QA_LOG_PLAN_PIPE_RE = re.compile(
-    r"^#\s+QA\s+Log\s*\|\s*(?:implement\s+)?(?:Plan\s+)?(\d[\d\-,\s]*)(?:\s*\|\s*(.+))?\s*$",
+    rf"^#\s+QA\s+Log\s*\|\s*(?:implement\s+)?(?:Plan\s+)?({ULID_ID}|\d[\d\-,\s]*)(?:\s*\|\s*(.+))?\s*$",
     re.IGNORECASE,
 )
 
 # QA Log (plan) with dash/em-dash: # QA Log — Plan NNNN — title
 _QA_LOG_PLAN_DASH_RE = re.compile(
-    r"^#\s+QA\s+Log\s*[\u2014\-]+\s*(?:Post-skill\s+for\s+)?(?:Plan[s]?\s+)?(\d[\d\-,\s]*)\s*[\u2014\-]+\s*(.+)",
+    rf"^#\s+QA\s+Log\s*[\u2014\-]+\s*(?:Post-skill\s+for\s+)?(?:Plan[s]?\s+)?({ULID_ID}|\d[\d\-,\s]*)\s*[\u2014\-]+\s*(.+)",
     re.IGNORECASE,
 )
 
@@ -172,50 +188,50 @@ _METACOMM_RE = re.compile(
 
 # Check log: # Check <id> | PREFIX-SCOPE | datetime | title
 _CHECK_LOG_RE = re.compile(
-    r"^#\s+Check\s+(\d+)\s*\|\s*(\S+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
+    rf"^#\s+Check\s+{_ID}\s*\|\s*(\S+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
     re.IGNORECASE,
 )
 
 # Reflection: # Reflection <id> | datetime | title
 _REFLECTION_RE = re.compile(
-    r"^#\s+Reflection\s+(\d+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
+    rf"^#\s+Reflection\s+{_ID}\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
     re.IGNORECASE,
 )
 
 # Mob Session: # Mob Session <id> | datetime | title  (${MOB_SESSIONS_DIR})
 _MOB_SESSION_RE = re.compile(
-    r"^#\s+Mob\s+Session\s+(\d+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
+    rf"^#\s+Mob\s+Session\s+{_ID}\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
     re.IGNORECASE,
 )
 
 # Behavior Evolution: # Behavior Evolution <id> | <PREFIX-SCOPE> | <datetime> | <title>
 _BEHAVIOR_EVOLUTION_RE = re.compile(
-    r"^#\s+Behavior\s+Evolution\s+(\d+)\s*\|\s*(\S+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
+    rf"^#\s+Behavior\s+Evolution\s+{_ID}\s*\|\s*(\S+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
     re.IGNORECASE,
 )
 
 # Behavior: # Behavior <id> | <PREFIX-SCOPE> | <datetime> | <title>
 _BEHAVIOR_RE = re.compile(
-    r"^#\s+Behavior\s+(\d+)\s*\|\s*(\S+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
+    rf"^#\s+Behavior\s+{_ID}\s*\|\s*(\S+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
     re.IGNORECASE,
 )
 
 # Dev-Onboarding: # Dev-Onboarding <id> | <PREFIX-SCOPE> | <datetime> | <title>
 _DEV_ONBOARDING_RE = re.compile(
-    r"^#\s+Dev-Onboarding\s+(\d+)\s*\|\s*(\S+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
+    rf"^#\s+Dev-Onboarding\s+{_ID}\s*\|\s*(\S+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
     re.IGNORECASE,
 )
 
 # Data Model: # Data Model <id> | <PREFIX-SCOPE> | <datetime> | <title>
 _DATA_MODEL_RE = re.compile(
-    r"^#\s+Data\s+Model\s+(\d+)\s*\|\s*(\S+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
+    rf"^#\s+Data\s+Model\s+{_ID}\s*\|\s*(\S+)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
     re.IGNORECASE,
 )
 
 # Architecture: # Architecture <id> | <scope-descriptor> | <datetime> | <title>
 # Scope is a multi-word text descriptor (e.g. "entire system"), not a PREFIX-SCOPE token.
 _ARCHITECTURE_RE = re.compile(
-    r"^#\s+Architecture\s+(\d+)\s*\|\s*(.+?)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
+    rf"^#\s+Architecture\s+{_ID}\s*\|\s*(.+?)\s*\|\s*([\d\-: UTC]+)\s*\|\s*(.+)",
     re.IGNORECASE,
 )
 
@@ -260,15 +276,16 @@ def extract_artifact(filepath: Path) -> dict | None:
         return None
 
     # Find the first heading line
-    header_line = ""
-    for line in text.split("\n")[:5]:
-        stripped = line.strip()
-        if stripped.startswith("#"):
-            header_line = stripped
-            break
-
-    if not header_line:
+    headings = [
+        line.strip() for line in text.split("\n")[:5] if line.strip().startswith("#")
+    ]
+    if not headings:
         return None
+    header_line = headings[0]
+    # /implement writes "# DONE | <datetime> |" on its own line above the plan H1;
+    # join the two so the single-line DONE pattern applies.
+    if _DONE_MARKER_RE.match(header_line) and len(headings) > 1:
+        header_line = f"{header_line.rstrip()} {headings[1].lstrip('#').strip()}"
 
     rel_path = filepath.relative_to(OUTPUT_DIR)
 
@@ -278,8 +295,8 @@ def extract_artifact(filepath: Path) -> dict | None:
     m = _PLAN_DONE_RE.match(header_line)
     if m:
         status = "DONE"
-        plan_id = m.group(2).strip().zfill(6)
-        is_qa = bool(re.match(r"^plan-\d{6}-qa-", filepath.name))
+        plan_id = normalize_id(m.group(2).strip())
+        is_qa = bool(_PLAN_QA_FILE_RE.match(filepath.name))
         return {
             "date": _normalize_date(m.group(4).strip()),
             "type": "Plan QA" if is_qa else "Plan",
@@ -292,8 +309,8 @@ def extract_artifact(filepath: Path) -> dict | None:
     # Plan (alt done): # Plan NNNN | DONE | PREFIX-SCOPE | datetime | title
     m = _PLAN_ALT_DONE_RE.match(header_line)
     if m:
-        plan_id = m.group(1).strip().zfill(6)
-        is_qa = bool(re.match(r"^plan-\d{6}-qa-", filepath.name))
+        plan_id = normalize_id(m.group(1).strip())
+        is_qa = bool(_PLAN_QA_FILE_RE.match(filepath.name))
         return {
             "date": _normalize_date(m.group(3).strip()),
             "type": "Plan QA" if is_qa else "Plan",
@@ -306,8 +323,8 @@ def extract_artifact(filepath: Path) -> dict | None:
     # Plan (open)
     m = _PLAN_OPEN_RE.match(header_line)
     if m:
-        plan_id = m.group(1).strip().zfill(6)
-        is_qa = bool(re.match(r"^plan-\d{6}-qa-", filepath.name))
+        plan_id = normalize_id(m.group(1).strip())
+        is_qa = bool(_PLAN_QA_FILE_RE.match(filepath.name))
         return {
             "date": _normalize_date(m.group(3).strip()),
             "type": "Plan QA" if is_qa else "Plan",
@@ -323,7 +340,7 @@ def extract_artifact(filepath: Path) -> dict | None:
         return {
             "date": _normalize_date(m.group(3).strip()),
             "type": "Advisory",
-            "id": m.group(1).strip().zfill(6),
+            "id": normalize_id(m.group(1).strip()),
             "title": truncate(m.group(4).strip().rstrip("|").strip()),
             "status": "DONE",
             "file": str(rel_path),
@@ -335,7 +352,7 @@ def extract_artifact(filepath: Path) -> dict | None:
         return {
             "date": _normalize_date(m.group(3).strip()),
             "type": "Research",
-            "id": m.group(1).strip().zfill(6),
+            "id": normalize_id(m.group(1).strip()),
             "title": truncate(m.group(4).strip().rstrip("|").strip()),
             "status": "DONE",
             "file": str(rel_path),
@@ -347,7 +364,7 @@ def extract_artifact(filepath: Path) -> dict | None:
         return {
             "date": _normalize_date(m.group(3).strip()),
             "type": "Proposal",
-            "id": m.group(1).strip().zfill(6),
+            "id": normalize_id(m.group(1).strip()),
             "title": truncate(m.group(4).strip().rstrip("|").strip()),
             "status": "OPEN",
             "file": str(rel_path),
@@ -359,7 +376,7 @@ def extract_artifact(filepath: Path) -> dict | None:
         return {
             "date": _normalize_date(m.group(2).strip()),
             "type": "Roadmap",
-            "id": m.group(1).strip().zfill(6),
+            "id": normalize_id(m.group(1).strip()),
             "title": truncate(m.group(3).strip().rstrip("|").strip()),
             "status": "DONE",
             "file": str(rel_path),
@@ -382,8 +399,8 @@ def extract_artifact(filepath: Path) -> dict | None:
     if m:
         # Extract ID from parent ref (e.g., "Advisory 000058" -> "000058")
         parent_ref = m.group(1).strip()
-        id_match = re.search(r"(\d{3,6})", parent_ref)
-        qa_id = id_match.group(1).strip().zfill(6) if id_match else ""
+        id_match = re.search(rf"({ULID_ID}|\d{{3,6}})", parent_ref)
+        qa_id = normalize_id(id_match.group(1).strip()) if id_match else ""
         return {
             "date": _normalize_date(m.group(2).strip()),
             "type": "QA Log",
@@ -465,7 +482,7 @@ def extract_artifact(filepath: Path) -> dict | None:
         return {
             "date": _normalize_date(m.group(3).strip()),
             "type": "Check",
-            "id": m.group(1).strip().zfill(6),
+            "id": normalize_id(m.group(1).strip()),
             "title": truncate(m.group(4).strip().rstrip("|").strip()),
             "status": "DONE",
             "file": str(rel_path),
@@ -477,7 +494,7 @@ def extract_artifact(filepath: Path) -> dict | None:
         return {
             "date": _normalize_date(m.group(2).strip()),
             "type": "Reflection",
-            "id": m.group(1).strip().zfill(6),
+            "id": normalize_id(m.group(1).strip()),
             "title": truncate(m.group(3).strip().rstrip("|").strip()),
             "status": "",
             "file": str(rel_path),
@@ -489,7 +506,7 @@ def extract_artifact(filepath: Path) -> dict | None:
         return {
             "date": _normalize_date(m.group(2).strip()),
             "type": "Mob Session",
-            "id": m.group(1).strip().zfill(6),
+            "id": normalize_id(m.group(1).strip()),
             "title": truncate(m.group(3).strip().rstrip("|").strip()),
             "status": "",
             "file": str(rel_path),
@@ -501,7 +518,7 @@ def extract_artifact(filepath: Path) -> dict | None:
         return {
             "date": _normalize_date(m.group(3).strip()),
             "type": "Behavior Evolution",
-            "id": m.group(1).strip().zfill(6),
+            "id": normalize_id(m.group(1).strip()),
             "title": truncate(m.group(4).strip().rstrip("|").strip()),
             "status": "DONE",
             "file": str(rel_path),
@@ -513,7 +530,7 @@ def extract_artifact(filepath: Path) -> dict | None:
         return {
             "date": _normalize_date(m.group(3).strip()),
             "type": "Behavior",
-            "id": m.group(1).strip().zfill(6),
+            "id": normalize_id(m.group(1).strip()),
             "title": truncate(m.group(4).strip().rstrip("|").strip()),
             "status": "DONE",
             "file": str(rel_path),
@@ -525,7 +542,7 @@ def extract_artifact(filepath: Path) -> dict | None:
         return {
             "date": _normalize_date(m.group(3).strip()),
             "type": "Dev-Onboarding",
-            "id": m.group(1).strip().zfill(6),
+            "id": normalize_id(m.group(1).strip()),
             "title": truncate(m.group(4).strip().rstrip("|").strip()),
             "status": "DONE",
             "file": str(rel_path),
@@ -537,7 +554,7 @@ def extract_artifact(filepath: Path) -> dict | None:
         return {
             "date": _normalize_date(m.group(3).strip()),
             "type": "Data Model",
-            "id": m.group(1).strip().zfill(6),
+            "id": normalize_id(m.group(1).strip()),
             "title": truncate(m.group(4).strip().rstrip("|").strip()),
             "status": "DONE",
             "file": str(rel_path),
@@ -549,7 +566,7 @@ def extract_artifact(filepath: Path) -> dict | None:
         return {
             "date": _normalize_date(m.group(3).strip()),
             "type": "Architecture",
-            "id": m.group(1).strip().zfill(6),
+            "id": normalize_id(m.group(1).strip()),
             "title": truncate(m.group(4).strip().rstrip("|").strip()),
             "status": "DONE",
             "file": str(rel_path),
@@ -572,43 +589,52 @@ def extract_artifact(filepath: Path) -> dict | None:
 
 
 # ---------------------------------------------------------------------------
-# RESERVED row helpers
+# RESERVED rows (derived from birth records, never from a previous INDEX.md)
 # ---------------------------------------------------------------------------
 
-# Regex to parse a table row: | Date | Type | ID | Title | Status | File |
-_TABLE_ROW_RE = re.compile(
-    r"^\|\s*([^|]*)\|\s*([^|]*)\|\s*([^|]*)\|\s*([^|]*)\|\s*([^|]*)\|\s*([^|]*)\|"
-)
+
+def _format_ts(ts_utc: str) -> str:
+    """Render an ISO-8601 birth timestamp as ``YYYY-MM-DD HH:MM UTC``."""
+    try:
+        dt = datetime.fromisoformat(ts_utc)
+    except (TypeError, ValueError):
+        return ""
+    if dt.tzinfo is not None:
+        dt = dt.astimezone(timezone.utc)
+    return dt.strftime("%Y-%m-%d %H:%M UTC")
 
 
-def _extract_reserved_rows() -> list[dict]:
-    """Read existing INDEX.md and return entries with status RESERVED."""
-    if not INDEX_FILE.is_file():
+def _reserved_from_ids_dir(scanned_ids: set[str], verbose: bool = False) -> list[dict]:
+    """Return one RESERVED entry per birth record in OUTPUT_DIR/ids/ with no artifact.
+
+    Unreadable or malformed records are skipped with a warning on stderr; the
+    ledger checker (check_ledger_ids.py) is the place that reports them.
+    """
+    ids_dir = OUTPUT_DIR / "ids"
+    if not ids_dir.is_dir():
         return []
     reserved: list[dict] = []
-    try:
-        text = INDEX_FILE.read_text(encoding="utf-8", errors="replace")
-    except OSError:
-        return []
-    for line in text.split("\n"):
-        m = _TABLE_ROW_RE.match(line)
-        if not m:
+    for fp in sorted(ids_dir.glob("*.json")):
+        try:
+            record = json.loads(fp.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            print(f"WARNING: skipping birth record {fp.name}: {exc}", file=sys.stderr)
             continue
-        status = m.group(5).strip()
-        if status != "RESERVED":
+        rid = record.get("id") if isinstance(record, dict) else None
+        if not isinstance(rid, str) or not rid:
+            print(f"WARNING: skipping birth record {fp.name}: no id", file=sys.stderr)
             continue
-        # Reconstruct the entry dict from the row fields
-        file_cell = m.group(6).strip()
-        # Extract filename and link from markdown link: [name](path)
-        link_m = re.match(r"\[([^\]]*)\]\(([^)]*)\)", file_cell)
-        file_val = link_m.group(2) if link_m else ""
+        if rid in scanned_ids:
+            if verbose:
+                print(f"  RESERVED {rid} has its artifact, not listed")
+            continue
         reserved.append({
-            "date": m.group(1).strip(),
-            "type": m.group(2).strip(),
-            "id": m.group(3).strip(),
-            "title": m.group(4).strip(),
+            "date": _format_ts(record.get("ts_utc", "")),
+            "type": "RESERVED",
+            "id": rid,
+            "title": truncate(f"{record.get('type', '')}: {record.get('title', '')}"),
             "status": "RESERVED",
-            "file": file_val,
+            "file": "",
         })
     return reserved
 
@@ -618,12 +644,6 @@ def generate_index(verbose: bool = False) -> int:
     if not OUTPUT_DIR.is_dir():
         print(f"ERROR: Output directory not found: {OUTPUT_DIR}")
         return 0
-
-    # Extract RESERVED rows before regenerating (they have no .md file on disk)
-    reserved_entries = _extract_reserved_rows()
-    if verbose and reserved_entries:
-        for r in reserved_entries:
-            print(f"  Preserved RESERVED: [{r['type']}] {r['id']} -- {r['title']}")
 
     # Collect all .md files recursively, excluding specific files
     md_files = sorted(
@@ -646,13 +666,8 @@ def generate_index(verbose: bool = False) -> int:
         elif verbose:
             print(f"  Skipped (no match): {fp.relative_to(OUTPUT_DIR)}")
 
-    # Merge back RESERVED entries whose ID was NOT found among scanned artifacts
-    for r in reserved_entries:
-        if r["id"] and r["id"] in scanned_ids:
-            if verbose:
-                print(f"  RESERVED {r['id']} superseded by scanned artifact, dropping")
-            continue
-        entries.append(r)
+    # RESERVED rows: birth records whose ID has no artifact file yet
+    entries.extend(_reserved_from_ids_dir(scanned_ids, verbose=verbose))
 
     # Sort by date descending (newest first), entries without dates go last
     entries.sort(key=lambda e: e["date"] if e["date"] else "", reverse=True)
@@ -685,43 +700,17 @@ def generate_index(verbose: bool = False) -> int:
     return len(entries)
 
 
+_FINALIZE_DEPRECATED = "deprecated: INDEX.md is derived; just regenerate"
+
+
 def finalize_reserved(artifact_id: str, status: str, verbose: bool = False) -> bool:
-    """Replace a RESERVED row with actual artifact metadata for the given ID.
+    """Deprecated no-op (plan-000019): INDEX.md is fully derived.
 
-    Re-scans artifact files to find the one matching *artifact_id*, then
-    regenerates INDEX.md with the RESERVED row replaced by real metadata.
+    RESERVED rows disappear on their own once the artifact file exists, so
+    there is nothing to finalize. Kept so old invocations exit 0.
     """
-    padded_id = artifact_id.strip().zfill(6)
-
-    # First check there IS a reserved row for this ID
-    reserved = _extract_reserved_rows()
-    matching = [r for r in reserved if r["id"] == padded_id]
-    if not matching:
-        print(f"ERROR: No RESERVED row found for ID {padded_id}")
-        return False
-
-    # Scan all artifact files to find one with this ID
-    found_entry: dict | None = None
-    for fp in OUTPUT_DIR.rglob("*.md"):
-        if not fp.is_file() or fp.name in EXCLUDED_FILES:
-            continue
-        entry = extract_artifact(fp)
-        if entry and entry["id"] == padded_id:
-            # Override status with the requested one
-            entry["status"] = status
-            found_entry = entry
-            break
-
-    if not found_entry:
-        print(f"ERROR: No artifact file found with ID {padded_id} to finalize")
-        return False
-
-    if verbose:
-        print(f"  Finalized: [{found_entry['type']}] {padded_id} -- {found_entry['title']} ({status})")
-
-    # Regenerate the full index; the scanned artifact will supersede the RESERVED row
-    count = generate_index(verbose=verbose)
-    return count > 0
+    print(f"{_FINALIZE_DEPRECATED} (--finalize {artifact_id})", file=sys.stderr)
+    return True
 
 
 def main():
@@ -734,11 +723,11 @@ def main():
     )
     parser.add_argument(
         "--finalize", metavar="ID",
-        help="Replace the RESERVED row for ID with actual artifact metadata",
+        help="Deprecated no-op: INDEX.md is derived; just regenerate",
     )
     parser.add_argument(
         "--status", choices=["DONE", "OPEN"], default="DONE",
-        help="Status to assign when finalizing (default: DONE)",
+        help="Deprecated; ignored (kept for old --finalize invocations)",
     )
     args = parser.parse_args()
 
@@ -746,9 +735,7 @@ def main():
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[attr-defined]
 
     if args.finalize:
-        ok = finalize_reserved(args.finalize, args.status, verbose=args.verbose)
-        if not ok:
-            sys.exit(1)
+        finalize_reserved(args.finalize, args.status, verbose=args.verbose)
     else:
         count = generate_index(verbose=args.verbose)
         if count == 0:
