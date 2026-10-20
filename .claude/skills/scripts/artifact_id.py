@@ -37,15 +37,15 @@ from datetime import datetime, timezone
 
 _CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 _DECODE = {c: i for i, c in enumerate(_CROCKFORD)}
-_ULID_RE = re.compile(r"^[0-9A-HJKMNP-TV-Z]{26}$")
+_ULID_RE = re.compile(r"^[0-9A-HJKMNP-TV-Z]{26}\Z")
 
 LEGACY_ID = r"\d{6}"
 ULID_ID = r"\d{8}-[0-9a-z]{6}"
 ARTIFACT_ID = rf"(?:{LEGACY_ID}|{ULID_ID})"
-ARTIFACT_ID_RE = re.compile(rf"^{ARTIFACT_ID}$")
+ARTIFACT_ID_RE = re.compile(rf"^{ARTIFACT_ID}\Z")
 
-_LEGACY_RE = re.compile(rf"^{LEGACY_ID}$")
-_ULID_ID_RE = re.compile(rf"^{ULID_ID}$")
+_LEGACY_RE = re.compile(rf"^{LEGACY_ID}\Z")
+_ULID_ID_RE = re.compile(rf"^{ULID_ID}\Z")
 
 BIRTH_SCHEMA_VERSION = 1
 

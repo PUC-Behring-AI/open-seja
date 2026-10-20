@@ -304,3 +304,59 @@ def test_deterministic_output(ledger: Path) -> None:
     first = _run(ledger).stdout
     time.sleep(0.01)
     assert _run(ledger).stdout == first
+
+
+# --- hyphenated artifact types (mob-session, dev-onboarding, data-model) --------
+
+HYPHENATED_TYPES = ["mob-session", "dev-onboarding", "data-model"]
+
+
+@pytest.mark.parametrize("type_", HYPHENATED_TYPES)
+def test_duplicate_hyphenated_type_legacy_id(ledger: Path, type_: str) -> None:
+    _touch(ledger / "x" / f"{type_}-000031-a.md")
+    _touch(ledger / "y" / f"{type_}-000031-b.md")
+    r = _run(ledger)
+    assert r.returncode == 1, r.stdout
+    assert "000031" in r.stdout
+
+
+@pytest.mark.parametrize("type_", HYPHENATED_TYPES)
+def test_duplicate_hyphenated_type_new_id(ledger: Path, type_: str) -> None:
+    _touch(ledger / "x" / f"{type_}-20261007-k3m9qz-a.md")
+    _touch(ledger / "plans" / "plan-20261007-k3m9qz-b.md")
+    r = _run(ledger)
+    assert r.returncode == 1, r.stdout
+    assert "20261007-k3m9qz" in r.stdout
+
+
+@pytest.mark.parametrize("type_", HYPHENATED_TYPES)
+def test_hyphenated_type_new_id_not_read_as_legacy_prefix(ledger: Path, type_: str) -> None:
+    _touch(ledger / "x" / f"{type_}-20261007-k3m9qz-a.md")
+    _touch(ledger / "x" / f"{type_}-202610-b.md")
+    assert _run(ledger).returncode == 0
+
+
+@pytest.mark.parametrize("type_", HYPHENATED_TYPES)
+def test_hyphenated_type_companions_skipped(ledger: Path, type_: str) -> None:
+    _touch(ledger / "x" / f"{type_}-20261007-k3m9qz-a.md")
+    _touch(ledger / "x" / f"{type_}-20261007-k3m9qz-qa.md")
+    _touch(ledger / "x" / f"{type_}-20261007-k3m9qz-qa-a.md")
+    _touch(ledger / "x" / f"{type_}-20261007-k3m9qz-progress.md")
+    assert _run(ledger).returncode == 0
+
+
+@pytest.mark.parametrize("type_", HYPHENATED_TYPES)
+def test_hyphenated_record_with_artifact_is_not_orphan(ledger: Path, type_: str) -> None:
+    uid = _ulid_at(datetime.now(timezone.utc) - timedelta(days=30))
+    _write_record(ledger, _record(uid, type=type_))
+    _touch(ledger / "x" / f"{type_}-{visible_id(uid)}-slug.md")
+    r = _run(ledger, "--strict")
+    assert r.returncode == 0, r.stdout
+    assert "orphan" not in r.stdout.lower()
+
+
+def test_mob_session_record_without_slug_is_not_orphan(ledger: Path) -> None:
+    uid = _ulid_at(datetime.now(timezone.utc) - timedelta(days=30))
+    _write_record(ledger, _record(uid, type="mob-session"))
+    _touch(ledger / "mob-sessions" / f"mob-session-{visible_id(uid)}.md")
+    assert _run(ledger, "--strict").returncode == 0

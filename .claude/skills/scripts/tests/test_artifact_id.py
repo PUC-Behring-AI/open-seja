@@ -109,6 +109,20 @@ def test_artifact_id_re_rejects(value):
     assert not ARTIFACT_ID_RE.match(value)
 
 
+@pytest.mark.parametrize("value", ["000007\n", "20261007-k3m9qz\n"])
+def test_artifact_id_re_rejects_trailing_newline(value):
+    assert not ARTIFACT_ID_RE.match(value)
+    assert not is_legacy_id(value)
+    assert not is_ulid_id(value)
+
+
+def test_ulid_timestamp_rejects_trailing_newline():
+    uid = _ulid_at(datetime(2026, 10, 7, tzinfo=timezone.utc))
+    ulid_timestamp(uid)
+    with pytest.raises(ValueError):
+        ulid_timestamp(uid + "\n")
+
+
 def test_artifact_id_has_no_capture_groups():
     assert re.compile(ARTIFACT_ID).groups == 0
 

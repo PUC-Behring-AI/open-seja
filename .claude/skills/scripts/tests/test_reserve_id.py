@@ -144,8 +144,38 @@ def test_default_author_never_contains_user_name(tmp_path: Path) -> None:
     int(rec["author"], 16)
 
 
-def test_explicit_author_overrides_default(tmp_path: Path) -> None:
+@pytest.mark.parametrize("author", ["0123456789ab", "unknown"])
+def test_explicit_author_overrides_default(tmp_path: Path, author: str) -> None:
     out = _make_output(tmp_path)
-    r = _run(tmp_path, out, "--type", "plan", "--title", "t", "--author", "dev-a", "--json")
+    r = _run(tmp_path, out, "--type", "plan", "--title", "t", "--author", author, "--json")
     assert r.returncode == 0, r.stderr
-    assert json.loads(r.stdout)["author"] == "dev-a"
+    assert json.loads(r.stdout)["author"] == author
+
+
+@pytest.mark.parametrize(
+    "author",
+    [
+        "dev-a",
+        _SECRET_NAME,
+        "0123456789AB",
+        "0123456789a",
+        "0123456789abc",
+        "0123456789ab\n",
+        "unknown\n",
+        "",
+    ],
+)
+def test_free_text_author_exits_2_without_files(tmp_path: Path, author: str) -> None:
+    out = _make_output(tmp_path)
+    r = _run(tmp_path, out, "--type", "plan", "--title", "t", "--author", author)
+    assert r.returncode == 2
+    assert "--author" in r.stderr
+    assert _SECRET_NAME not in r.stderr
+    assert _ids(out) == []
+
+
+def test_origin_with_trailing_newline_exits_2(tmp_path: Path) -> None:
+    out = _make_output(tmp_path)
+    r = _run(tmp_path, out, "--type", "plan", "--title", "t", "--origin", "research-000018\n")
+    assert r.returncode == 2
+    assert _ids(out) == []
