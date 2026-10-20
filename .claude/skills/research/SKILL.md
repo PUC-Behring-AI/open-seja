@@ -41,7 +41,7 @@ If `--inventory` is present, run the **Inventory workflow**; the brief is everyt
 
 ## Inventory Workflow
 
-Output folder: `${INVENTORIES_DIR}` (see product-design/conventions.md). Filename pattern: `inventory-<id>-<truncated short title slug>.md` (6-digit zero-padded ID).
+Output folder: `${INVENTORIES_DIR}` (see product-design/conventions.md). Filename pattern: `inventory-<id>-<truncated short title slug>.md` (artifact ID returned by reserve_id.py).
 
 If there is no brief after `--inventory`, ask for the brief.
 
@@ -52,7 +52,7 @@ If there is no brief after `--inventory`, ask for the brief.
 3. Search the source code for all elements mentioned in the brief, including related enumerations, constants, CSS classes, files, and other relevant elements.
 
 3. Save the information to the output file, including:
-- *header*: `# Inventory <id> | <prefix><scope> | <current datetime> | <short title>`
+- *header*: `# Inventory <id> | <prefix><scope> | <current datetime> | <short title>`, followed on the next line by `uid: <ULID>` (value from `reserve_id.py --json` or `${OUTPUT_DIR}/ids/<uid>.json`)
 - *user brief*, *agent interpretation*, *files* -- per .claude/references/general/report-conventions.md
 - *inventory*: no predefined structure here
 
@@ -66,7 +66,7 @@ If there is no brief after `--inventory`, ask for the brief.
 
 ### Definitions
 
-Output folder: `${RESEARCH_DIR}` (see product-design/conventions.md). Filename pattern: `research-<id>-<truncated short title slug>.md` (6-digit zero-padded ID).
+Output folder: `${RESEARCH_DIR}` (see product-design/conventions.md). Filename pattern: `research-<id>-<truncated short title slug>.md` (artifact ID returned by reserve_id.py).
 
 ### Skill-specific Instructions
 
@@ -93,8 +93,8 @@ Output folder: `${RESEARCH_DIR}` (see product-design/conventions.md). Filename p
 7b. **Prepare telemetry `advisory_decisions` and `research_decisions`** (dual-key during the transition window; TRANSITION (plan-000468): both keys carry identical payload, `research_decisions` is the canonical forward key, retired at advisory-000448 Rec 5's 6-month legacy-folder revisit). For each HIGH or MEDIUM recommendation, emit one entry: `{"topic": "<short topic>", "decision": "<recommendation text truncated to 120 chars>", "priority": "high|medium|low"}`. Populate both keys with the same list. This is carried to post-skill's telemetry flush (step 8b). Set both to `[]` if no actionable recommendations.
 
 8. Save a report to the output file, including:
-   - *header*: `# Research <id> | <prefix><scope> | <current datetime> | <short title>`
-   - *tags*: on a line after the header (and after any `source:` or `spawned:` lines), add `tags: <comma-separated lowercase kebab-case slugs>`. Derive 2-5 tags from: (a) topic, (b) affected components, (c) perspectives evaluated (e.g., `security`, `architecture`, `ux`). See `general/report-conventions.md` § Research tags.
+   - *header*: `# Research <id> | <prefix><scope> | <current datetime> | <short title>`, followed on the next line by `uid: <ULID>` (value from `reserve_id.py --json` or `${OUTPUT_DIR}/ids/<uid>.json`)
+   - *tags*: on a line after the header (and after the `uid:` line and any `source:` or `spawned:` lines), add `tags: <comma-separated lowercase kebab-case slugs>`. Derive 2-5 tags from: (a) topic, (b) affected components, (c) perspectives evaluated (e.g., `security`, `architecture`, `ux`). See `general/report-conventions.md` § Research tags.
    - *user brief*, *agent interpretation*, *files* -- per .claude/references/general/report-conventions.md
    - *Q&A log*: the initial question and answer (verbatim), numbered sequentially
    - *recommendations summary*: concise list of all actionable recommendations
