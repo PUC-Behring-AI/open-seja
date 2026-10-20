@@ -179,12 +179,12 @@ No worker padrão (`_internal/plan/standard/SKILL.md`): passo novo antes da escr
 - [ ] Done
 
 ### Step 11: Fazer o `/implement` ler o plano v3 e testar por requisito
-O `/implement` da base cai para manual fora do v1 (`implement/SKILL.md:134`). Novo comportamento: v1 como hoje; v3 com teste por requisito (para cada step com `Covers:`, o executor escreve primeiro um teste por requisito, que cita o ID no nome ou na docstring e fica vermelho pelo motivo certo, e só então o código até o verde); v2 avisa numa frase ("plano do ciclo com Gherkin: rodo em manual e ignoro Scenarios") e cai para manual; outro valor para. Atualizar `metadata.plan_format_version` do `/plan` e do `/implement`, e o quickguide.
+O `/implement` da base cai para manual fora do v1 (`implement/SKILL.md:134`). Novo comportamento: v1 como hoje; v3 com teste por requisito **nos dois modos, auto e manual** (para cada step com `Covers:`, o executor escreve primeiro um teste por requisito, que cita o ID no nome ou na docstring e fica vermelho pelo motivo certo, e só então o código até o verde). No modo manual, o v3 inverte a regra da base "manual mode retains test-after ordering by design" (passo 7 do modo manual): ela continua valendo só para v1; v2 avisa numa frase ("plano do ciclo com Gherkin: rodo em manual e ignoro Scenarios") e cai para manual; outro valor para. Atualizar `metadata.plan_format_version` do `/plan` e do `/implement`, e o quickguide.
 - **Files**: .claude/skills/implement/SKILL.md (modify), .claude/skills/implement/SKILL-quickguide.md (modify)
 - **References**: .claude/references/general/plan-intent-and-cases.md
 - **Depends on**: Step 10
 - **Interface**: N/A
-- **Verify**: `python3 .claude/skills/scripts/check_skill_spec.py` sem achado novo; `grep -n "plan_format_version" .claude/skills/implement/SKILL.md` cita 1, 2 e 3.
+- **Verify**: `python3 .claude/skills/scripts/check_skill_spec.py` sem achado novo; `grep -n "plan_format_version" .claude/skills/implement/SKILL.md` cita 1, 2 e 3. O passo 7 do modo manual diz que, em plano v3, o teste por requisito vem antes do código.
 - **Tests**: N/A (skill em Markdown)
 - **Traces**: D-006
 - **Scenarios**: N/A (skill em Markdown)
@@ -242,7 +242,7 @@ Copiar para o worktree e commitar em `dev-sem-gherkin`: este plano, o progress, 
 - Branch `dev-sem-gherkin`: base anterior ao Gherkin, ULID como D-005, `/plan` com jogo de linguagem e plano v3, `/implement` com teste por requisito, upgrade que limpa clientes v0.11.0.
 - Tag `archive/gherkin-ladder-v0.11.0` preserva o ladder e a camada PKB; `dev`, `main` e `origin` não são reescritos.
 - Os planos 7 a 16 e o roadmap-000006 que a base já traz em `_output/` ficam como estão (T3).
-- Pendências declaradas: medida de divergência por requisito no `/reflect` (hoje `não medido`); a correção da base em que o upgrade copia só `.md` e `.json` de `template/` (`230955c` no ladder); o upgrade dos dois clientes em v0.11.0 depois da tag; os docs públicos de `docs/doc-*` que dizem "`plan_format_version` must be 1".
+- Pendências declaradas: medida de divergência por requisito no `/reflect` (hoje `não medido`); a correção da base em que o upgrade copia só `.md` e `.json` de `template/` (`230955c` no ladder); o upgrade dos dois clientes em v0.11.0 depois da tag; os docs públicos de `docs/doc-*` que dizem "`plan_format_version` must be 1"; para outra rodada (decisão do designer, 2026-10-20): o portão com CRAP e mutação escrito explicitamente no ciclo v3, e a volta do `cleaner` (CRAP) e do `hardener` (mutação) sem Gherkin. O portão da base continua rodando como hoje.
 
 ## Rumo anterior (não executado)
 

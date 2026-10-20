@@ -18,3 +18,9 @@ Append-only cross-iteration learnings. Each subagent reads this file at the star
 - deviated: O brief pedia remover; o plano agora cria uma linhagem nova em branch, não edita dev; sem plano v3 nem grill.
 - less-sure: Numeração D-010/D-012/D-013; conflitos reais nos ~25 arquivos de código só aparecem na execução; plano e ids ainda sem commit.
 - gate: not-applicable
+
+### Plan -- emenda | 2026-10-20 | Respostas do designer antes do /implement
+- happened: Designer confirmou a base 2b17d27 + multi-dev + jogo de linguagem. Step 11 emendado: teste por requisito antes do código também no modo manual ("o teste por requisito vem antes no modo manual").
+- deviated: Portão com CRAP e mutação explícito no v3, cleaner e hardener ficam para outra rodada ("vamos deixar CRAP, clean e hardener para outra rodada"); registrados nas pendências do plano.
+- less-sure: Os clientes v0.11.0 perdem cleaner e hardener no upgrade (Step 12) até a próxima rodada os trazer de volta.
+- gate: not-applicable
