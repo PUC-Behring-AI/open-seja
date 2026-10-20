@@ -49,7 +49,8 @@ Runs from the **target project** (not the source repo). Applies safe updates to 
 5. **Run upgrade script**: `python .claude/skills/scripts/upgrade_harness.py --from <source-path> --target . --new-version <resolved-tag>`. Add `--dry-run` for preview. Omit `--new-version` only on the pre-release HEAD fallback path. The script reads existing `.seja-version` for the banner's "from" half and writes the resolved tag on success.
 
 6. **Review summary**: highlight public-release pin change (e.g., `v0.1.0 -> v0.2.0`), internal harness version change, old-layout migration if any, new convention variables, files auto-updated vs needing manual merge.
-   - Artifact IDs (D-010): if `_output/ids/` does not exist, there is nothing to migrate; legacy 6-digit IDs stay as they are and remain valid.
+   - Artifact IDs (D-005): if `_output/ids/` does not exist, there is nothing to migrate; legacy 6-digit IDs stay as they are and remain valid.
+   - Gherkin ladder retired (D-006): the script removes each file that v0.11.0 installed for the ladder (list and hashes in `.claude/skills/scripts/retired-files.json`) only when the project's copy is identical to the v0.11.0 one, and prints `removido <path>`; an edited copy stays and is listed as `mantido (editado) <path>` under Manual Steps Needed. `features/`, `_output/` and `pkb_inbox.py` are never touched. Repeat the two one-sentence warnings the script prints, when present: one about `features/` and one about the PKB layer (when `PKB_DIR` is filled, the post-skill step 7f leaves the harness and must be kept as a local deviation).
 
 7. **Show diffs for manual-merge files**: unified diff for each script/rule/agent that differs. For agents: ask "Accept source / Keep current / Show diff?" per file. For scripts and rules: show diff and advise on merge.
 

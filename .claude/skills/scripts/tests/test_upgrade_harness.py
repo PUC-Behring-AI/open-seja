@@ -334,3 +334,143 @@ def test_collect_source_files_excludes_non_py_colocated_files(tmp_path):
     assert "helper.py" in names
     assert "NOTES.md" not in names
     assert "data.json" not in names
+
+
+# ---------------------------------------------------------------------------
+# plan-20261020-688kjs Step 12: retire what v0.11.0 installed for the ladder
+# ---------------------------------------------------------------------------
+
+import hashlib
+import json
+import subprocess
+
+_RETIRED_JSON = Path(upgrade_harness.__file__).resolve().parent / "retired-files.json"
+_LADDER_SCRIPT = ".claude/skills/scripts/check_specify.py"
+
+
+def _entry(path: str) -> dict:
+    data = json.loads(_RETIRED_JSON.read_text(encoding="utf-8"))
+    return next(e for e in data["files"] if e["path"] == path)
+
+
+def _git_show_v0110(path: str) -> bytes | None:
+    try:
+        proc = subprocess.run(
+            ["git", "show", f"v0.11.0:{path}"],
+            capture_output=True, check=False, cwd=_RETIRED_JSON.parent,
+        )
+    except OSError:
+        return None
+    return proc.stdout if proc.returncode == 0 else None
+
+
+def _fake_identical(target: Path, path: str, monkeypatch) -> Path:
+    """Write a file whose sha256 is the one recorded for `path`."""
+    dest = target / path
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    content = b"ladder file as installed by v0.11.0\n"
+    dest.write_bytes(content)
+    entries = [{"path": path, "sha256_v0_11_0": hashlib.sha256(content).hexdigest()}]
+    monkeypatch.setattr(upgrade_harness, "load_retired_files", lambda *a, **k: entries)
+    return dest
+
+
+def test_retired_file_identical_to_v0110_is_removed(tmp_path, monkeypatch, capsys):
+    dest = _fake_identical(tmp_path, _LADDER_SCRIPT, monkeypatch)
+    removed, kept = upgrade_harness.remove_retired_files(tmp_path, dry_run=False)
+    assert not dest.exists()
+    assert removed == [_LADDER_SCRIPT] and kept == []
+    assert f"removido {_LADDER_SCRIPT}" in capsys.readouterr().out
+
+
+def test_retired_file_edited_by_client_is_kept(tmp_path, monkeypatch, capsys):
+    dest = _fake_identical(tmp_path, _LADDER_SCRIPT, monkeypatch)
+    dest.write_text("edited by the client\n", encoding="utf-8")
+    removed, kept = upgrade_harness.remove_retired_files(tmp_path, dry_run=False)
+    assert dest.read_text(encoding="utf-8") == "edited by the client\n"
+    assert removed == [] and kept == [_LADDER_SCRIPT]
+    assert f"mantido (editado) {_LADDER_SCRIPT}" in capsys.readouterr().out
+
+
+def test_retired_file_dry_run_does_not_remove(tmp_path, monkeypatch):
+    dest = _fake_identical(tmp_path, _LADDER_SCRIPT, monkeypatch)
+    removed, _ = upgrade_harness.remove_retired_files(tmp_path, dry_run=True)
+    assert dest.exists() and removed == [_LADDER_SCRIPT]
+
+
+def test_absent_retired_file_is_ignored(tmp_path):
+    removed, kept = upgrade_harness.remove_retired_files(tmp_path, dry_run=False)
+    assert removed == [] and kept == []
+
+
+def test_real_hash_of_check_specify_matches_v0110(tmp_path, capsys):
+    blob = _git_show_v0110(_LADDER_SCRIPT)
+    if blob is None:
+        pytest.skip("tag v0.11.0 not available in this checkout")
+    dest = tmp_path / _LADDER_SCRIPT
+    dest.parent.mkdir(parents=True)
+    dest.write_bytes(blob)
+    removed, _ = upgrade_harness.remove_retired_files(tmp_path, dry_run=False)
+    assert _LADDER_SCRIPT in removed and not dest.exists()
+
+
+def test_features_folder_stays_byte_for_byte_and_warns(tmp_path):
+    feat = tmp_path / "features" / "contas"
+    feat.mkdir(parents=True)
+    (feat / "intent.md").write_text("# intent\n", encoding="utf-8")
+    (feat / "contas.feature").write_bytes(b"Feature: contas\n")
+    before = {p: p.read_bytes() for p in feat.rglob("*") if p.is_file()}
+    upgrade_harness.remove_retired_files(tmp_path, dry_run=False)
+    warnings = upgrade_harness.ladder_warnings(tmp_path)
+    assert {p: p.read_bytes() for p in feat.rglob("*") if p.is_file()} == before
+    assert upgrade_harness.FEATURES_WARNING in warnings
+
+
+def test_pkb_dir_filled_keeps_pkb_inbox_and_warns(tmp_path):
+    (tmp_path / "product-design").mkdir()
+    (tmp_path / "product-design" / "conventions.md").write_text(
+        "| `PKB_DIR` | `00-Inbox` | Pasta de captura |\n", encoding="utf-8"
+    )
+    inbox = tmp_path / ".claude" / "skills" / "scripts" / "pkb_inbox.py"
+    inbox.parent.mkdir(parents=True)
+    inbox.write_text("# pkb\n", encoding="utf-8")
+    upgrade_harness.remove_retired_files(tmp_path, dry_run=False)
+    assert inbox.exists()
+    assert upgrade_harness.PKB_WARNING in upgrade_harness.ladder_warnings(tmp_path)
+
+
+def test_no_warnings_without_features_or_pkb(tmp_path):
+    (tmp_path / "product-design").mkdir()
+    (tmp_path / "product-design" / "conventions.md").write_text(
+        "| `PKB_DIR` |  | vazio desliga |\n", encoding="utf-8"
+    )
+    assert upgrade_harness.ladder_warnings(tmp_path) == []
+
+
+def test_retired_list_never_names_pkb_or_retired_tokens():
+    paths = {e["path"] for e in upgrade_harness.load_retired_files()}
+    assert not any("pkb" in p for p in paths)
+    assert ".claude/skills/scripts/check_retired_tokens.py" not in paths
+
+
+def test_retired_list_covers_every_ladder_file_added_in_v0110():
+    try:
+        proc = subprocess.run(
+            ["git", "diff", "--name-status", "v0.10.1", "v0.11.0", "--", ".claude/"],
+            capture_output=True, text=True, check=False, cwd=_RETIRED_JSON.parent,
+        )
+    except OSError:
+        pytest.skip("git not available")
+    if proc.returncode != 0:
+        pytest.skip("tags v0.10.1/v0.11.0 not available in this checkout")
+    added = [ln.split("\t")[1] for ln in proc.stdout.splitlines() if ln.startswith("A\t")]
+    not_ladder = (
+        "/tests/",
+        "/template/pkb/",
+        "scripts/artifact_id.py",
+        "scripts/check_ledger_ids.py",
+        "scripts/pkb_inbox.py",
+    )
+    ladder = {p for p in added if not any(m in p for m in not_ladder)}
+    listed = {e["path"] for e in upgrade_harness.load_retired_files()}
+    assert ladder - listed == set()

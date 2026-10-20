@@ -25,6 +25,9 @@ The script is idempotent — safe to run multiple times.
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
+import re
 import shutil
 import subprocess
 import sys
@@ -430,6 +433,81 @@ def migrate_references_split(target: Path, dry_run: bool) -> list[str]:
 # ---------------------------------------------------------------------------
 
 
+# ---------------------------------------------------------------------------
+# Retired files (plan-20261020-688kjs, D-006): what v0.11.0 installed for the
+# Gherkin ladder. Removed only when the target copy is byte-identical to the
+# v0.11.0 one; an edited copy is kept. features/ and the PKB are never touched.
+# ---------------------------------------------------------------------------
+
+RETIRED_FILES_JSON = Path(__file__).resolve().parent / "retired-files.json"
+FEATURES_WARNING = (
+    "O ciclo não lê mais features/ nem .feature; nada foi apagado no seu projeto."
+)
+PKB_WARNING = (
+    "A camada PKB saiu do harness: o post-skill não captura mais no inbox; "
+    "guarde a etapa 7f como desvio local se quiser mantê-la."
+)
+_PKB_DIR_ROW = re.compile(r"^\|\s*`PKB_DIR`\s*\|\s*([^|]*?)\s*\|", re.MULTILINE)
+
+
+def load_retired_files(path: Path = RETIRED_FILES_JSON) -> list[dict]:
+    """Return the retired-file entries ({path, sha256_v0_11_0}); [] if the list is missing."""
+    if not path.is_file():
+        return []
+    return list(json.loads(path.read_text(encoding="utf-8")).get("files", []))
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _prune_empty_dirs(start: Path, stop: Path) -> None:
+    current = start
+    while current != stop and current.is_dir() and not any(current.iterdir()):
+        current.rmdir()
+        current = current.parent
+
+
+def remove_retired_files(target: Path, dry_run: bool) -> tuple[list[str], list[str]]:
+    """Remove ladder files identical to v0.11.0; keep edited ones. Returns (removed, kept)."""
+    prefix = "[DRY-RUN] " if dry_run else ""
+    removed: list[str] = []
+    kept: list[str] = []
+    for entry in load_retired_files():
+        rel = entry["path"]
+        dest = target / rel
+        if not dest.is_file():
+            continue
+        if _sha256(dest) != entry["sha256_v0_11_0"]:
+            kept.append(rel)
+            print(f"WARN: {prefix}mantido (editado) {rel}")
+            continue
+        if not dry_run:
+            dest.unlink()
+            _prune_empty_dirs(dest.parent, target)
+        removed.append(rel)
+        print(f"OK: {prefix}removido {rel}")
+    return removed, kept
+
+
+def _pkb_dir_filled(target: Path) -> bool:
+    conventions = target / "product-design" / "conventions.md"
+    if not conventions.is_file():
+        return False
+    match = _PKB_DIR_ROW.search(conventions.read_text(encoding="utf-8"))
+    return bool(match and match.group(1).strip("` "))
+
+
+def ladder_warnings(target: Path) -> list[str]:
+    """One-sentence warnings for a client that used the ladder or the PKB layer."""
+    warnings: list[str] = []
+    if (target / "features").is_dir():
+        warnings.append(FEATURES_WARNING)
+    if _pkb_dir_filled(target):
+        warnings.append(PKB_WARNING)
+    return warnings
+
+
 def run_upgrade(
     source_root: Path,
     target: Path,
@@ -606,6 +684,14 @@ def run_upgrade(
                     f"Removed retired skill {harness_dir}/skills/{skill_name}/"
                 )
                 print(f"OK: {prefix}Removed retired skill {harness_dir}/skills/{skill_name}/")
+
+    # --- Remove retired ladder files (v0.11.0) and warn (plan-20261020-688kjs) ---
+    removed_files, kept_files = remove_retired_files(target, dry_run=dry_run)
+    report_updated.extend(f"removido {rel}" for rel in removed_files)
+    report_manual.extend(f"mantido (editado) {rel}" for rel in kept_files)
+    for warning in ladder_warnings(target):
+        print(f"WARN: {warning}")
+        report_manual.append(warning)
 
     # --- Run pending migrations ---
     print()
