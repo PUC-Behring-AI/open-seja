@@ -25,6 +25,7 @@ Include enough context that the step makes sense in isolation: what the code sho
 - **Docs**: <what documentation to create or update> *(omit line entirely when N/A)*
 - **Deploy**: <deployment configuration changes required by this step — new env vars, changed ports, new services, Docker or server-config changes; cover Docker and standalone (Windows / Linux) where they differ> *(omit line entirely when N/A)*
 - **Traces**: REQ-xxx, REQ-yyy *(omit line entirely when N/A)*
+- **Covers**: REQ-<slug>-NNN, ... *(plan v3 only; only on steps whose `Tests:` is not N/A; omit otherwise)*
 - [ ] Done
 ```
 
@@ -40,4 +41,5 @@ Include enough context that the step makes sense in isolation: what the code sho
 - **Docs**: include for FEATURE/REDESIGN steps that create or modify user-facing code or public APIs. Specify what documentation to create or update (e.g., "Update API reference", "Add contextual help page"). Omit for internal refactors, test-only changes, config.
 - **Deploy**: include when the step adds, removes, or changes deployment configuration: new environment variables (name + expected value shape), changed ports, new services or processes, container/image changes, nginx/web-server config, secrets, volume mounts, migration commands that must run before startup. Describe what operators need to configure for Docker and for standalone server (Windows and Linux), noting where they differ. Omit when the step has no deployment impact — only harness scripts, tests, or pure UI changes with no server-side configuration effect.
 - **Traces**: include when the step implements a design requirement. Comma-separated REQ IDs from `product-design-as-intended.md` (e.g., `REQ-ENT-001, REQ-PERM-003`). Omit when no REQ markers exist or the step does not trace to one. See `general/shared-definitions.md` for the REQ ID convention.
+- **Covers** (plan v3, `general/plan-intent-and-cases.md` PIC-008): the plan's own requirements (`REQ-<slug>-NNN`, lowercase slug, from `## Requisitos`) that this step's tests demonstrate. Only on steps with non-N/A `Tests:`; never inside `Traces:` (which keeps citing the as-intended, uppercase IDs). Every plan requirement must be covered by at least one step. `/implement` writes one failing test per covered ID, citing the ID in the test name or docstring, before the code.
 - Order steps so dependencies flow forward (Step 2 depends on Step 1, not the reverse).
