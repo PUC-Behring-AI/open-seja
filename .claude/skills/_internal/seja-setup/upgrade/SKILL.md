@@ -49,6 +49,7 @@ Runs from the **target project** (not the source repo). Applies safe updates to 
 5. **Run upgrade script**: `python .claude/skills/scripts/upgrade_harness.py --from <source-path> --target . --new-version <resolved-tag>`. Add `--dry-run` for preview. Omit `--new-version` only on the pre-release HEAD fallback path. The script reads existing `.seja-version` for the banner's "from" half and writes the resolved tag on success.
 
 6. **Review summary**: highlight public-release pin change (e.g., `v0.1.0 -> v0.2.0`), internal harness version change, old-layout migration if any, new convention variables, files auto-updated vs needing manual merge.
+   - Artifact IDs (D-010): if `_output/ids/` does not exist, there is nothing to migrate; legacy 6-digit IDs stay as they are and remain valid.
 
 7. **Show diffs for manual-merge files**: unified diff for each script/rule/agent that differs. For agents: ask "Accept source / Keep current / Show diff?" per file. For scripts and rules: show diff and advise on merge.
 

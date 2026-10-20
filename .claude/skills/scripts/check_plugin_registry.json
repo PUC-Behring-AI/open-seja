@@ -189,5 +189,15 @@
     },
     "scope": "harness",
     "critical": false
+  },
+  {
+    "script": "check_ledger_ids.py",
+    "name": "Ledger IDs",
+    "stack": {
+      "backend": ["any"],
+      "frontend": ["any"]
+    },
+    "scope": "ledger",
+    "critical": true
   }
 ]
