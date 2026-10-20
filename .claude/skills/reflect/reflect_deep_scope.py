@@ -25,6 +25,9 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+from artifact_id import ARTIFACT_ID
+
 
 @dataclass
 class ScopeResult:
@@ -110,7 +113,7 @@ def _extract_plan_id(text: str) -> str | None:
     """Extract a plan ID from the extra fields of a DONE brief line."""
     if not text:
         return None
-    m = re.search(r"PLAN\s*\|\s*(\d+)", text)
+    m = re.search(rf"PLAN\s*\|\s*({ARTIFACT_ID})(?![0-9A-Za-z])", text)
     if m:
         return m.group(1)
     return None
