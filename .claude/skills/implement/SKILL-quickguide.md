@@ -20,7 +20,7 @@ Advanced: `--skip-checks` skips the Quality Gate; `--skip-docs` suppresses the a
 
 **When to use**: You have reviewed a plan (created by `/plan`) and are ready to have the agent carry it out. Use auto mode (default) for most plans, especially those with more than 6 steps. Use `--manual` for small plans or when you want per-step confirmation. Use `--roadmap` when you want to execute all plans in a roadmap wave-by-wave without manually triggering each one.
 
-Auto mode follows a TDD red-green cycle for steps with explicit `Tests:` fields (write failing test first, then implement until it passes) and includes a generator-critic loop (max 2 retries) for critical code-review findings. Manual mode retains test-after ordering -- the user's presence is the quality checkpoint.
+Auto mode follows a TDD red-green cycle for steps with explicit `Tests:` fields (write failing test first, then implement until it passes) and includes a generator-critic loop (max 2 retries) for critical code-review findings. Manual mode retains test-after ordering for v1 plans -- the user's presence is the quality checkpoint. For a v3 plan (made by `/plan` with the language game), both modes write one failing test per requirement in `Covers:`, citing the requirement ID, before the code; `check_plan_intent.py` checks the plan first. A v2 plan (cycle with Gherkin scenarios) runs in manual mode and its `Scenarios:` lines are ignored.
 
 **Next step**: `/critique` (validate, review, and tests run automatically unless `--skip-checks` was used). Documentation generation for qualifying plans runs automatically via post-skill unless `--skip-docs` was passed. After that: `/pending` to review pending actions, or `/reflect` to surface patterns across recent work.
 
