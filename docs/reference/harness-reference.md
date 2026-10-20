@@ -130,6 +130,7 @@ Generated 2026-07-04T22:56:29Z from seja-priv harness state.
 | check_ledger_ids.py | Detect duplicate and orphan IDs in the SEJA ledger. | agent-invoked, hook-ci | active | `.claude/skills/scripts/check_ledger_ids.py` |  |
 | check_migration_chain.py | Validate Alembic migration revision chain in dialogos. | agent-invoked, hook-ci | active | `.claude/skills/scripts/check_migration_chain.py` | `concepts/call-graph.md` |
 | check_plan_coverage.py | Plan coverage verification against design-intent requirements. | agent-invoked, hook-ci | active | `.claude/skills/design/check_plan_coverage.py` | `concepts.md`, `concepts/call-graph.md` |
+| check_plan_intent.py | Check the plan v3 shape (D-006, PIC rules). | agent-invoked, hook-ci | active | `.claude/skills/scripts/check_plan_intent.py` |  |
 | check_po_parity.py | Verify Flask-Babel .po catalog parity. | agent-invoked, hook-ci | active | `.claude/skills/scripts/check_po_parity.py` | `concepts/call-graph.md` |
 | check_retired_tokens.py | Guard against retired tokens lingering in live harness files. | agent-invoked, hook-ci | active | `.claude/skills/scripts/check_retired_tokens.py` |  |
 | check_route_coverage.py | Check that backend API routes have corresponding frontend API methods and vice versa. | agent-invoked, hook-ci | active | `.claude/skills/scripts/check_route_coverage.py` | `concepts/call-graph.md` |
@@ -265,6 +266,8 @@ Generated 2026-07-04T22:56:29Z from seja-priv harness state.
 | harness-governance | Harness Governance -- Maintainer-facing conventions for structuring SKILL.md bodies. | `.claude/references/general/harness-governance.md` | `concepts/call-graph.md` |
 | onboarding | HARNESS - ONBOARDING -- --- | `.claude/references/general/onboarding.md` | `concepts/call-graph.md` |
 | permissions | FRAMEWORK - PERMISSIONS -- - Don't ask for confirmation before reading any folder or file in the project codebase. | `.claude/references/general/permissions.md` | `concepts/call-graph.md` |
+| plan-intent-and-cases | GENERAL - PLAN INTENT AND CASES (plano v3) -- Formato do plano v3 (D-006): Intenção, Requisitos, Casos de uso, Retradução, Nas suas palavras e Covers:. | `.claude/references/general/plan-intent-and-cases.md` |  |
+| plan-language-game | GENERAL - PLAN LANGUAGE GAME -- Protocolo da entrevista do `/plan` (D-006): cenas aceitas, recusadas ou corrigidas. | `.claude/references/general/plan-language-game.md` |  |
 | report-conventions | FRAMEWORK - REPORT CONVENTIONS -- When a skill produces a report file in `${OUTPUT_DIR}` (see project/conventions.md)... | `.claude/references/general/report-conventions.md` | `concepts/call-graph.md` |
 | review-log-template | FRAMEWORK - REVIEW LOG TEMPLATE -- ```markdown | `.claude/references/general/review-log-template.md` | `concepts/call-graph.md` |
 | review-perspectives | FRAMEWORK - REVIEW PERSPECTIVES -- --- | `.claude/references/general/review-perspectives.md` | `concepts/call-graph.md` |
@@ -417,6 +420,7 @@ Harness artifacts mentioned at least once in `seja-public/docs`.
 | check_ledger_ids.py | Scripts | `.claude/skills/scripts/check_ledger_ids.py` |  |
 | check_migration_chain.py | Scripts | `.claude/skills/scripts/check_migration_chain.py` | `concepts/call-graph.md` |
 | check_plan_coverage.py | Scripts | `.claude/skills/design/check_plan_coverage.py` | `concepts.md` |
+| check_plan_intent.py | Scripts | `.claude/skills/scripts/check_plan_intent.py` |  |
 | check_po_parity.py | Scripts | `.claude/skills/scripts/check_po_parity.py` | `concepts/call-graph.md` |
 | check_route_coverage.py | Scripts | `.claude/skills/scripts/check_route_coverage.py` | `concepts/call-graph.md` |
 | check_secrets.py | Scripts | `.claude/skills/design/check_secrets.py` | `concepts/call-graph.md` |
@@ -506,6 +510,8 @@ Harness artifacts mentioned at least once in `seja-public/docs`.
 | pending.py | Scripts | `.claude/skills/scripts/pending.py` | `concepts/call-graph.md` |
 | perf | Perspectives | `.claude/references/general/review-perspectives/perf.md` | `concepts/call-graph.md` |
 | permissions | General references | `.claude/references/general/permissions.md` | `concepts/call-graph.md` |
+| plan-intent-and-cases | General references | `.claude/references/general/plan-intent-and-cases.md` |  |
+| plan-language-game | General references | `.claude/references/general/plan-language-game.md` |  |
 | plan-reviewer | Agents | `.claude/agents/plan-reviewer.md` | `concepts/call-graph.md` |
 | plan-step | Templates | `.claude/references/template/plan-step.md` | `concepts/call-graph.md` |
 | product-design-as-coded | Templates | `.claude/references/template/product-design-as-coded.md` | `concepts.md` |

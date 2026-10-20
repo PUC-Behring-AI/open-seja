@@ -111,7 +111,7 @@ def _check_sections(sections: dict, findings: list[dict]) -> None:
             )
 
 
-def _check_intent(sections: dict, findings: list[dict]) -> None:
+def _check_intencao(sections: dict, findings: list[dict]) -> None:
     if "Intenção" not in sections:
         return
     start, body = sections["Intenção"]
@@ -262,7 +262,7 @@ def check_plan(path: Path) -> dict:
     findings: list[dict] = result["findings"]
     sections = split_sections(lines)
     _check_sections(sections, findings)
-    _check_intent(sections, findings)
+    _check_intencao(sections, findings)
     reqs = _parse_requirements(sections, findings)
     _check_use_cases(sections, reqs, findings)
     _check_retelling(sections, findings)

@@ -18,6 +18,21 @@ Format: loosely based on [Keep a Changelog](https://keepachangelog.com/). SemVer
 
 <!-- bump: minor -->
 
+Target: v0.12.0, a new line of the harness that starts before the Gherkin ladder of v0.11.0 (D-006). The v0.11.0 line stays in the tag `archive/gherkin-ladder-v0.11.0`.
+
+### Removed
+
+- **The Gherkin ladder, the grill and the specify phase** (D-006, which supersedes D-004): no `.feature` files, no `features/<slug>/`, no `intent.md`, no `/plan --grill`, `--specify`, `--with-specify` or `--without-specify`, no `SPECIFY_DEFAULT`, no test-first per scenario, no divergence per ladder rung, and no `scenario-tester`, `cleaner` or `hardener` agents. A plan v2 from v0.11.0 still runs: `/implement` runs it in manual mode and ignores its `Scenarios:` lines.
+- **The PKB layer** (inbox capture by the post-skill, `pkb_inbox.py`, the PKB templates) and the as-expressed signal: they were never part of this line. A project that uses them keeps them as a local deviation.
+
+### Added
+
+- **The `/plan` interview is a language game** (`general/plan-language-game.md`): instead of asking what you want, I tell short scenes of what you asked working, and of what it should not do, and you accept, refuse or fix each one. What you accepted becomes requirements and use cases, what you refused becomes what I will not do, and your corrections are quoted as you said them.
+- **Plan format v3** (`general/plan-intent-and-cases.md`): one file per change carries `## Intenção`, `## Requisitos` (`REQ-<slug>-NNN`), `## Casos de uso`, `## Retradução` (my retelling in first person, which you approve) and `## Nas suas palavras`, and every step that tests a requirement says so in a `Covers:` line. `/implement` writes one failing test per covered requirement before the code, in auto and in manual mode. `--light` proposals and roadmap summaries stay v1; roadmap items play a short game.
+- **New check `check_plan_intent.py`**: checks a plan v3 (the five sections, a use case and a covering step for every requirement, `Covers:` only on steps with tests); plans v1 and v2 have nothing to check. It runs in `run_all_checks.py`.
+- **The upgrade cleans what v0.11.0 installed for the ladder**: each file listed in `.claude/skills/scripts/retired-files.json` is removed only when the project's copy is identical to the v0.11.0 one (`removido`); an edited copy stays (`mantido (editado)`). It never touches `features/`, `_output/` or `pkb_inbox.py`, and it warns in one sentence when the project has `features/` or a filled `PKB_DIR`.
+- **`tests/compat/`**: the upgrade rehearsed on a v0.11.0 client and on a v0.10.1 client.
+
 ### Changed
 
 - **Artifact IDs are now generated locally, with no counter** (D-005): `reserve_id.py` creates a ULID for each new artifact and returns a visible ID `YYYYMMDD-xxxxxx` (the UTC date plus six characters of the ULID), for example `plan-20261007-k3m9qz-<slug>.md`. File names keep their chronological order in the tree; the order within one day is not guaranteed. Every new artifact carries a `uid: <ULID>` line right after its header. Two developers on the same branch, on different machines and offline, no longer reserve the same number.
