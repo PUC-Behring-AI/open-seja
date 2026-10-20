@@ -127,6 +127,7 @@ Generated 2026-07-04T22:56:29Z from seja-priv harness state.
 | check_frontend_test_coverage.py | Analyse frontend test coverage. | agent-invoked, hook-ci | active | `.claude/skills/scripts/check_frontend_test_coverage.py` | `concepts/call-graph.md` |
 | check_human_markers_only.py | Verify that diffs to Human (markers) files | agent-invoked, hook-ci | active | `.claude/skills/scripts/check_human_markers_only.py` | `concepts.md`, `concepts/call-graph.md`, `foundations.md`, `how-to/brownfield-collocated.md`, `how-to/brownfield-workspace.md`, `how-to/greenfield-collocated.md`, `how-to/greenfield-workspace.md`, `how-to/quality-gates.md` |
 | check_i18n_keys.py | Detect undefined / mismatched i18n keys. | agent-invoked, hook-ci | active | `.claude/skills/scripts/check_i18n_keys.py` | `concepts/call-graph.md` |
+| check_ledger_ids.py | Detect duplicate and orphan IDs in the SEJA ledger. | agent-invoked, hook-ci | active | `.claude/skills/scripts/check_ledger_ids.py` |  |
 | check_migration_chain.py | Validate Alembic migration revision chain in dialogos. | agent-invoked, hook-ci | active | `.claude/skills/scripts/check_migration_chain.py` | `concepts/call-graph.md` |
 | check_plan_coverage.py | Plan coverage verification against design-intent requirements. | agent-invoked, hook-ci | active | `.claude/skills/design/check_plan_coverage.py` | `concepts.md`, `concepts/call-graph.md` |
 | check_po_parity.py | Verify Flask-Babel .po catalog parity. | agent-invoked, hook-ci | active | `.claude/skills/scripts/check_po_parity.py` | `concepts/call-graph.md` |
@@ -413,6 +414,7 @@ Harness artifacts mentioned at least once in `seja-public/docs`.
 | check_harness_drift.py | Scripts | `.claude/skills/scripts/check_harness_drift.py` | `concepts/call-graph.md` |
 | check_human_markers_only.py | Scripts | `.claude/skills/scripts/check_human_markers_only.py` | `concepts.md` |
 | check_i18n_keys.py | Scripts | `.claude/skills/scripts/check_i18n_keys.py` | `concepts/call-graph.md` |
+| check_ledger_ids.py | Scripts | `.claude/skills/scripts/check_ledger_ids.py` |  |
 | check_migration_chain.py | Scripts | `.claude/skills/scripts/check_migration_chain.py` | `concepts/call-graph.md` |
 | check_plan_coverage.py | Scripts | `.claude/skills/design/check_plan_coverage.py` | `concepts.md` |
 | check_po_parity.py | Scripts | `.claude/skills/scripts/check_po_parity.py` | `concepts/call-graph.md` |
