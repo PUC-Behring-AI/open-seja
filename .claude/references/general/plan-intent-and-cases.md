@@ -38,7 +38,7 @@ Uma vez por plano, depois de `## User brief` e de `## Agent interpretation`, e a
 4. `## Retradução`
 5. `## Nas suas palavras`
 
-Nenhuma das cinco fica vazia num plano com código. Num plano do jogo curto (JDL-009), `## Requisitos` e `## Casos de uso` podem conter só uma linha `nenhum (<motivo>)`: `nenhum (tarefa sem código)` ou, num item de roadmap, `nenhum (jogo curto, item de roadmap)`.
+Nenhuma das cinco fica vazia num plano com código. Num plano do jogo curto (JDL-009), `## Requisitos` e `## Casos de uso` podem conter só uma linha `nenhum (<motivo>)`: `nenhum (tarefa sem código)` ou, num item de roadmap, `nenhum (jogo curto, item de roadmap)`; a `## Retradução` continua obrigatória, curta. Durante o jogo (`--phase game`), a `## Retradução` ainda não é exigida.
 
 - **Quem decide**: o `/plan`.
 - **Critério de aceitação**: as cinco seções existem e têm conteúdo; o verificador devolve `error` para seção ausente ou vazia.
@@ -119,19 +119,21 @@ Cada step com `Tests:` diferente de N/A declara, numa linha própria, os requisi
 ```
 
 - `Covers:` só cita IDs de `## Requisitos` deste plano.
-- `Covers:` só aparece em step com `Tests:` não-N/A.
+- Num plano com requisitos, todo step com `Tests:` não-N/A tem `Covers:`, e `Covers:` só aparece nesses steps.
 - `Covers:` nunca vai dentro de `Traces:`. `Traces:` continua citando o as-intended (`REQ-MC-011`, `D-006`).
 - Todo requisito é coberto por ao menos um step.
 - O `/implement` escreve, para cada ID de `Covers:`, um teste que cita o ID no nome ou na docstring e fica vermelho pelo motivo certo antes do código.
 
 - **Quem decide**: o `/plan` escreve; o `/implement` cumpre.
-- **Critério de aceitação**: o verificador devolve `error` para requisito sem step, `Covers:` com ID inexistente, `Covers:` em step com `Tests: N/A` e ID de requisito do plano dentro de `Traces:`.
+- **Critério de aceitação**: o verificador devolve `error` para requisito sem step, step com `Tests:` não-N/A sem `Covers:`, `Covers:` com ID inexistente, `Covers:` em step com `Tests: N/A` e ID de requisito do plano dentro de `Traces:`.
 
 ### PIC-009 -- O verificador
 
 `check_plan_intent.py [<plano>] [--json]`:
 
 - com um caminho, confere esse plano; sem argumento, varre `${PLANS_DIR}` (só arquivos `plan-*.md` que não são `-progress` nem `-qa-`);
+- `--phase game` é a checagem de cada rodada do jogo: pula a `## Retradução` (PIC-002, PIC-006) e as regras de step (PIC-008); o padrão `--phase plan` confere tudo;
+- linha mal formada em `## Requisitos`, IDs não contíguos e caso de uso sem ID de requisito são `error`; plano ilegível (codificação) é `error`, não exceção;
 - plano v1, v2 ou sem versão: "nada a verificar", saída 0;
 - saída 0 sem `error`, 1 com algum `error`, 2 erro de uso;
 - `--json` traz `schema_version`, a lista de planos e os achados (`severity`, `rule`, `message`, `line`).

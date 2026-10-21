@@ -26,6 +26,10 @@ Rules (``.claude/references/general/plan-intent-and-cases.md``):
 
 Plans in v1, v2 or without a version have nothing to check (exit 0).
 
+``--phase game`` is the check /plan runs after each round of the language game,
+before the retelling and the steps exist: it skips ``## Retradução`` (PIC-002,
+PIC-006) and every step rule (PIC-008). The default ``--phase plan`` checks all.
+
 Exit codes: 0 = no errors (warnings allowed), 1 = errors found, 2 = usage error.
 
 Usage
@@ -33,6 +37,7 @@ Usage
     python .claude/skills/scripts/check_plan_intent.py            # scan PLANS_DIR
     python .claude/skills/scripts/check_plan_intent.py <plan.md>
     python .claude/skills/scripts/check_plan_intent.py <plan.md> --json
+    python .claude/skills/scripts/check_plan_intent.py <plan.md> --phase game
 
 CHECK_PLUGIN_MANIFEST:
   name: Plan Intent (v3)
@@ -55,6 +60,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 SCHEMA_VERSION = 1
 PLAN_FORMAT_VERSION = 3
 SECTIONS = ("Intenção", "Requisitos", "Casos de uso", "Retradução", "Nas suas palavras")
+PHASES = ("plan", "game")
 INTENT_LINES = ("Objetivo", "O que você vê no fim", "Não faz", "Pronto quando")
 NO_CODE_PREFIX = "nenhum ("  # e.g. "nenhum (tarefa sem código)", "nenhum (jogo curto, item de roadmap)"
 
@@ -101,8 +107,10 @@ def _content(body: list[str]) -> list[str]:
     return [b.strip() for b in body if b.strip()]
 
 
-def _check_sections(sections: dict, findings: list[dict]) -> None:
+def _check_sections(sections: dict, findings: list[dict], phase: str) -> None:
     for name in SECTIONS:
+        if phase == "game" and name == "Retradução":
+            continue
         if name not in sections:
             findings.append(_finding("error", "PIC-002", f"seção ausente: ## {name}"))
         elif not _content(sections[name][1]):
@@ -133,8 +141,13 @@ def _parse_requirements(sections: dict, findings: list[dict]) -> dict[str, list[
         return reqs
     start, body = sections["Requisitos"]
     for offset, raw in enumerate(body, start=start + 1):
-        m = _REQ_LINE_RE.match(raw.strip())
+        line = raw.strip()
+        m = _REQ_LINE_RE.match(line)
         if not m:
+            if line:
+                findings.append(
+                    _finding("error", "PIC-004", f"linha mal formada em ## Requisitos: {line[:60]}", offset)
+                )
             continue
         rid, rest = m.group(1), m.group(3)
         if not _PLAN_REQ_RE.fullmatch(rid):
@@ -154,6 +167,11 @@ def _parse_requirements(sections: dict, findings: list[dict]) -> dict[str, list[
         if not rest.split("Para que:")[0].strip(" .()"):
             findings.append(_finding("error", "PIC-004", f"{rid}: sem a frase do requisito", offset))
         reqs[rid] = [o for o in origins if o]
+    numbers = sorted(int(rid.rsplit("-", 1)[1]) for rid in reqs)
+    if numbers and numbers != list(range(1, len(numbers) + 1)):
+        findings.append(
+            _finding("error", "PIC-004", "IDs de requisito não são contíguos de 001 a N", start)
+        )
     return reqs
 
 
@@ -163,7 +181,11 @@ def _check_use_cases(sections: dict, reqs: dict, findings: list[dict]) -> None:
     start, body = sections["Casos de uso"]
     seen: set[str] = set()
     for offset, raw in enumerate(body, start=start + 1):
-        for rid in _ANY_REQ_RE.findall(raw):
+        line = raw.strip()
+        cited = _PLAN_REQ_RE.findall(line)
+        if line.startswith(("-", "*")) and not cited:
+            findings.append(_finding("error", "PIC-005", f"caso de uso sem ID de requisito: {line[:60]}", offset))
+        for rid in cited:
             seen.add(rid)
             if rid not in reqs:
                 findings.append(
@@ -228,6 +250,10 @@ def _check_covers(lines: list[str], reqs: dict, findings: list[dict]) -> None:
         fields = step["fields"]
         tests = fields.get("Tests", ("", step["line"]))[0].strip()
         tests_na = not tests or tests.upper().startswith("N/A")
+        if reqs and not tests_na and "Covers" not in fields:
+            findings.append(
+                _finding("error", "PIC-008", f"{step['title']}: Tests: sem Covers:", fields["Tests"][1])
+            )
         if "Covers" in fields:
             value, line = fields["Covers"]
             if tests_na:
@@ -252,8 +278,16 @@ def _check_covers(lines: list[str], reqs: dict, findings: list[dict]) -> None:
             findings.append(_finding("error", "PIC-008", f"{rid}: nenhum step o cobre com Covers:"))
 
 
-def check_plan(path: Path) -> dict:
-    lines = path.read_text(encoding="utf-8").splitlines()
+def check_plan(path: Path, phase: str = "plan") -> dict:
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeDecodeError) as err:
+        return {
+            "path": str(path),
+            "version": None,
+            "skipped": False,
+            "findings": [_finding("error", "PIC-001", f"plano ilegível: {err}")],
+        }
     version = plan_version(lines)
     result = {"path": str(path), "version": version, "findings": [], "skipped": False}
     if version != PLAN_FORMAT_VERSION:
@@ -261,13 +295,15 @@ def check_plan(path: Path) -> dict:
         return result
     findings: list[dict] = result["findings"]
     sections = split_sections(lines)
-    _check_sections(sections, findings)
+    _check_sections(sections, findings, phase)
     _check_intencao(sections, findings)
     reqs = _parse_requirements(sections, findings)
     _check_use_cases(sections, reqs, findings)
-    _check_retelling(sections, findings)
+    if phase != "game":
+        _check_retelling(sections, findings)
     _check_origins(sections, findings)
-    _check_covers(lines, reqs, findings)
+    if phase != "game":
+        _check_covers(lines, reqs, findings)
     return result
 
 
@@ -291,8 +327,12 @@ def _targets(plan: Path | None) -> list[Path]:
     return sorted(p for p in plans_dir.glob("plan-*.md") if _is_primary_plan(p))
 
 
-def run(paths: list[Path]) -> dict:
-    return {"schema_version": SCHEMA_VERSION, "plans": [check_plan(p) for p in paths]}
+def run(paths: list[Path], phase: str = "plan") -> dict:
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "phase": phase,
+        "plans": [check_plan(p, phase) for p in paths],
+    }
 
 
 def _print_text(report: dict) -> None:
@@ -313,11 +353,15 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Check the plan v3 shape (PIC rules)")
     parser.add_argument("plan", nargs="?", type=Path, help="plan file (default: scan PLANS_DIR)")
     parser.add_argument("--json", action="store_true", help="JSON output with schema_version")
+    parser.add_argument(
+        "--phase", choices=PHASES, default="plan",
+        help="game: during the language game, before the retelling and the steps (default: plan)",
+    )
     args = parser.parse_args(argv)
     if args.plan is not None and not args.plan.is_file():
         parser.error(f"plan not found: {args.plan}")
 
-    report = run(_targets(args.plan))
+    report = run(_targets(args.plan), args.phase)
     if args.json:
         print(json.dumps(report, indent=2, ensure_ascii=False))
     else:

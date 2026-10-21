@@ -40,7 +40,7 @@ Um lance cabe em no máximo 4 frases curtas. `JOGO_MAX_RODADAS` é teto, não al
 - O plano nasce na primeira rodada, com as seções que já têm conteúdo, e cresce a cada rodada. Se a sessão cair, o arquivo guarda o que já foi dito (git é a recuperação).
 
 - **Quem decide**: o designer (D-006); o `/plan` conduz.
-- **Critério de aceitação**: ao fim do jogo, o plano tem as cinco seções e `check_plan_intent.py <plano>` sai 0; ou a decisão voltou a você no teto (JDL-007).
+- **Critério de aceitação**: ao fim do jogo, o plano tem as cinco seções e `check_plan_intent.py <plano> --phase game` sai 0; ou a decisão voltou a você no teto (JDL-007). Depois que os steps existem, `check_plan_intent.py <plano>` (sem fase) sai 0.
 
 ### JDL-002 -- Os lances
 
@@ -102,7 +102,7 @@ Uma rodada tem até `JOGO_MAX_LANCES_POR_RODADA` lances, enviados juntos num só
 | não faz | o que não deve acontecer, mesmo parecendo útil | Contra-cena |
 | erros e limites | o que acontece quando algo dá errado; limite de tempo ou de quantidade | E se |
 
-Uma dimensão pode ficar sem requisito quando você a declara fora: ela entra em "Não faz" com o seu motivo. Ao fim de cada rodada, eu gravo o plano e rodo `check_plan_intent.py`; o resultado do verificador decide se o jogo continua, não a minha impressão.
+Uma dimensão pode ficar sem requisito quando você a declara fora: ela entra em "Não faz" com o seu motivo. Ao fim de cada rodada, eu gravo o plano e rodo `check_plan_intent.py <plano> --phase game` (a fase do jogo ainda não exige a Retradução nem os steps); o resultado do verificador decide se o jogo continua, não a minha impressão.
 
 - **Quem decide**: o verificador diz se continua; eu escolho o próximo lance.
 - **Critério de aceitação**: nenhuma rodada com mais de 3 lances; toda dimensão tem um `A<n>` ou `F<n>` que a preenche, ou está em "Não faz" com motivo.
@@ -160,14 +160,14 @@ Exemplos ruins e o porquê:
 
 ### JDL-009 -- Jogo curto (tarefa sem código)
 
-Uma rodada com dois lances: a **Cena** do fim ("Pronto: você abre ... e vê ...") e uma **Contra-cena**. As respostas preenchem as quatro linhas de `## Intenção` (Objetivo, O que você vê no fim, Não faz, Pronto quando). Não há `## Requisitos` nem `## Casos de uso`, e o plano registra os lances em `## Nas suas palavras`. Itens gerados por `/plan --roadmap` também usam o jogo curto.
+Uma rodada com dois lances: a **Cena** do fim ("Pronto: você abre ... e vê ...") e uma **Contra-cena**. As respostas preenchem as quatro linhas de `## Intenção` (Objetivo, O que você vê no fim, Não faz, Pronto quando). `## Requisitos` e `## Casos de uso` levam só a linha `nenhum (tarefa sem código)` (num item de roadmap, `nenhum (jogo curto, item de roadmap)`); `## Retradução` tem uma ou duas frases em primeira pessoa com "O que eu não vou fazer"; o plano registra os lances em `## Nas suas palavras`. Itens gerados por `/plan --roadmap` também usam o jogo curto.
 
 - **Quem decide**: você, pelas respostas; a aprovação vem com o plano.
-- **Critério de aceitação**: o plano sem código tem `## Intenção` com quatro linhas e `## Nas suas palavras` com dois `A<n>`.
+- **Critério de aceitação**: o plano do jogo curto tem `## Intenção` com quatro linhas, as linhas `nenhum (...)`, uma Retradução curta e `## Nas suas palavras` com dois `A<n>`; `check_plan_intent.py` sai 0.
 
 ### JDL-010 -- Retradução e aprovação
 
-Quando `check_plan_intent.py` não devolve `error`, eu escrevo `## Retradução` em primeira pessoa e em voz controlada (JDL-011): o que entendi, o que vou construir (cada requisito com o seu caso de uso, o texto primeiro e o ID pequeno no fim da linha) e "O que eu não vou fazer" (a linha "Não faz"). Mostro a Retradução e você escolhe num AskUserQuestion:
+Quando `check_plan_intent.py --phase game` não devolve `error`, eu escrevo `## Retradução` em primeira pessoa e em voz controlada (JDL-011): o que entendi, o que vou construir (cada requisito com o seu caso de uso, o texto primeiro e o ID pequeno no fim da linha) e "O que eu não vou fazer" (a linha "Não faz"). Mostro a Retradução e você escolhe num AskUserQuestion:
 
 - **Aprovar** -- Recommended when cada requisito diz algo que você reconhece. NOT recommended when algum requisito surpreendeu você.
 - **Ajustar** -- Recommended when um requisito está quase certo. NOT recommended when o tema inteiro mudou (então Descartar).

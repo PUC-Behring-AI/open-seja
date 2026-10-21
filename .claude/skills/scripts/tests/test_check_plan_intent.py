@@ -186,3 +186,100 @@ def test_short_game_plan_with_none_marks_passes(tmp_path, mark) -> None:
     short = short.replace("- **Covers**: REQ-contas-001\n", "").replace("- **Covers**: REQ-contas-002\n", "")
     p = _write(tmp_path, "p.md", short)
     assert not _errors(p)
+
+
+# --- revisão do Step 14: fase do jogo, jogo curto, Covers obrigatório, linhas mal formadas ---
+
+
+def _without(text: str, start: str, end: str) -> str:
+    a, b = text.index(start), text.index(end)
+    return text[:a] + text[b:]
+
+
+def _game_findings(path: Path) -> list[dict]:
+    return [
+        f
+        for f in check_plan_intent.check_plan(path, phase="game")["findings"]
+        if f["severity"] == "error"
+    ]
+
+
+def test_game_phase_ignores_missing_retelling_and_steps(tmp_path) -> None:
+    text = (FIX / "v3_completo.md").read_text(encoding="utf-8")
+    mid = _without(text, "## Retradução", "## Nas suas palavras")
+    mid = mid[: mid.index("## Steps")]
+    p = _write(tmp_path, "mid.md", mid)
+    assert _game_findings(p) == []
+    assert _errors(p)  # the plan phase still refuses it
+    proc = _run(str(p), "--phase", "game")
+    assert proc.returncode == 0, proc.stdout
+
+
+def test_game_phase_still_checks_requirements_and_use_cases(tmp_path) -> None:
+    text = (FIX / "v3_req_sem_caso.md").read_text(encoding="utf-8")
+    p = _write(tmp_path, "p.md", text[: text.index("## Steps")])
+    assert any(f["rule"] == "PIC-005" for f in _game_findings(p))
+
+
+def test_short_game_plan_with_short_retelling_and_no_steps_coverage_passes(tmp_path) -> None:
+    short = (
+        "# Plan 20261020-k3m9qz | DOCUMENT-O | 2026-10-20 10:00 | README | Review: light\n"
+        "plan_format_version: 3\n\n"
+        "## Intenção\n"
+        "- Objetivo: o README explica o jogo. (A1)\n"
+        "- O que você vê no fim: o README com a seção nova. (A1)\n"
+        "- Não faz: não traduz o README. (A2)\n"
+        "- Pronto quando: a seção existe. (A1)\n\n"
+        "## Requisitos\nnenhum (tarefa sem código)\n\n"
+        "## Casos de uso\nnenhum (tarefa sem código)\n\n"
+        "## Retradução\nEu entendi que você quer a seção nova. O que eu não vou fazer: traduzir.\n\n"
+        "## Nas suas palavras\n- A1 (cena, aceitou): \"x\" -> \"Aceito\"\n- A2 (contra-cena, recusou): \"y\" -> \"não\"\n\n"
+        "## Steps\n\n### Step 1: README\n- **Tests**: N/A (documentação)\n- [ ] Done\n"
+    )
+    p = _write(tmp_path, "short.md", short)
+    assert _errors(p) == []
+
+
+def test_step_with_tests_but_no_covers_is_an_error(tmp_path) -> None:
+    text = (FIX / "v3_completo.md").read_text(encoding="utf-8")
+    text = text.replace(
+        "- **Tests**: N/A (documentação)\n",
+        "- **Tests**: when o README abre, mostra a marcação\n",
+    )
+    p = _write(tmp_path, "p.md", text)
+    assert any(f["rule"] == "PIC-008" and "sem Covers" in f["message"] for f in _errors(p))
+
+
+def test_malformed_requirement_line_is_an_error(tmp_path) -> None:
+    text = (FIX / "v3_completo.md").read_text(encoding="utf-8")
+    p = _write(tmp_path, "p.md", text.replace("- REQ-contas-002: Você vê", "* REQ-contas-002 Você vê"))
+    assert any(f["rule"] == "PIC-004" and "mal formada" in f["message"] for f in _errors(p))
+
+
+def test_non_contiguous_requirement_ids_are_an_error(tmp_path) -> None:
+    text = (FIX / "v3_completo.md").read_text(encoding="utf-8").replace("REQ-contas-002", "REQ-contas-003")
+    p = _write(tmp_path, "p.md", text)
+    assert any(f["rule"] == "PIC-004" and "contíguos" in f["message"] for f in _errors(p))
+
+
+def test_use_case_citing_an_as_intended_req_is_not_a_plan_error(tmp_path) -> None:
+    text = (FIX / "v3_completo.md").read_text(encoding="utf-8")
+    p = _write(tmp_path, "p.md", text.replace("vê o aviso. (A2)", "vê o aviso (ver REQ-MC-011). (A2)"))
+    assert _errors(p) == []
+
+
+def test_use_case_line_without_requirement_id_is_an_error(tmp_path) -> None:
+    text = (FIX / "v3_completo.md").read_text(encoding="utf-8")
+    p = _write(
+        tmp_path,
+        "p.md",
+        text.replace("## Retradução", "- Você abre a lista e vê tudo. (A1)\n\n## Retradução"),
+    )
+    assert any(f["rule"] == "PIC-005" and "sem ID" in f["message"] for f in _errors(p))
+
+
+def test_non_utf8_plan_is_an_error_not_a_traceback(tmp_path) -> None:
+    p = tmp_path / "plan-20261020-k3m9qz-x.md"
+    p.write_bytes(b"plan_format_version: 3\n\xff\xfe")
+    proc = _run(str(p))
+    assert proc.returncode == 1 and "Traceback" not in proc.stderr
