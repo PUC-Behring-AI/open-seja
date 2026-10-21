@@ -7,7 +7,7 @@
 |------|------|----|-------|--------|------|
 | 2026-10-20 21:38 UTC | QA Log | 20261020-688kjs | Linhagem sem Gherkin |  | [plan-20261020-688kjs-qa-remover-gherkin.md](plans/plan-20261020-688kjs-qa-remover-gherkin.md) |
 | 2026-10-20 20:45 UTC | Other |  | Progress -- Plan 20261020-688kjs |  | [plan-20261020-688kjs-progress.md](plans/plan-20261020-688kjs-progress.md) |
-| 2026-10-20 20:45 UTC | Plan | 20261020-688kjs | Linhagem sem Gherkin: base anterior, multi-dev portado e a escada dentro do pla… | OPEN | [plan-20261020-688kjs-remover-gherkin.md](plans/plan-20261020-688kjs-remover-gherkin.md) |
+| 2026-10-20 20:45 UTC | Plan | 20261020-688kjs | Linhagem sem Gherkin: base anterior, multi-dev portado e a escada dentro do pla… | DONE | [plan-20261020-688kjs-remover-gherkin.md](plans/plan-20261020-688kjs-remover-gherkin.md) |
 | 2026-10-20 20:21 UTC | Other |  | Progress -- Plan 000008 |  | [plan-000008-progress.md](plans/plan-000008-progress.md) |
 | 2026-10-20 20:21 UTC | Other |  | Progress -- Plan 000009 |  | [plan-000009-progress.md](plans/plan-000009-progress.md) |
 | 2026-10-20 20:21 UTC | Other |  | Progress -- Plan 000010 |  | [plan-000010-progress.md](plans/plan-000010-progress.md) |

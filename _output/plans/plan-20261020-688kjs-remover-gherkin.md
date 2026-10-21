@@ -1,3 +1,4 @@
+# DONE | 2026-10-21 10:42 UTC |
 # Plan 20261020-688kjs | REFACTOR-O | 2026-10-20 20:45 UTC | Linhagem sem Gherkin: base anterior, multi-dev portado e a escada dentro do plano com o jogo de linguagem | Review: deep
 uid: 01M5DGKNMZVEZ3PNFZ15688KJS
 plan_format_version: 2
@@ -65,7 +66,7 @@ Criar a tag local `archive/gherkin-ladder-v0.11.0` em `bfac21f`. Criar o worktre
 - **Verify**: `git rev-parse archive/gherkin-ladder-v0.11.0` começa com `bfac21f`; `git -C ~/worktrees/open-seja-sem-gherkin rev-parse --abbrev-ref HEAD` é `dev-sem-gherkin`; o baseline está no progress.
 - **Tests**: N/A (operação de git e registro de baseline)
 - **Scenarios**: N/A (operação de git sem comportamento novo)
-- [ ] Done
+- [x] Done
 
 ### Step 2: Portar o núcleo do ULID (plano 19, steps 1 a 9)
 No worktree, `cherry-pick -n -x` de `8dc3eb3` a `763bfb0` (9 commits, intervalo linear), restaurando do HEAD os append-only de `_output/` antes de cada commit. Conflitos reais (simulados na revisão): `tests/test_step_notes.py` (ficar só com o bloco do plano 19, step 7, sem os `test_pipeline_*` do ladder), `check_plugin_registry.json` (só a entrada de `check_ledger_ids.py`) e `CHANGELOG.md` (a entrada `[Unreleased]` do `763bfb0`, escrita já com **D-005**). Ao fim, no worktree: `pending.py done --source plan-000019 --type implement` (fecha a pa-000008) e `pending.py dismiss` da pa-000007 com o motivo "camada PKB não portada nesta linhagem".
@@ -77,7 +78,7 @@ No worktree, `cherry-pick -n -x` de `8dc3eb3` a `763bfb0` (9 commits, intervalo 
 - **Tests**: when `reserve_id.py` roda duas vezes sem coordenação, devolve dois ULIDs diferentes e o nome de arquivo leva a data e seis caracteres; when dois artefatos têm o mesmo `uid`, `check_ledger_ids.py` sai 1 e cita os dois.
 - **Traces**: D-005
 - **Scenarios**: N/A (testes portados do plano 19, sem Gherkin)
-- [ ] Done
+- [x] Done
 
 ### Step 3: Portar as skills do ULID (plano 19, steps 10 a 13 e correções)
 `cherry-pick -n -x` de `f720db0`, `e415c95`, `d9a47c4` e `2f44bbb`. `d34c8ab` entra à mão: só a troca da reserva de ID. Excluir `04ecf9f`. Conflitos reais: `plan/SKILL.md` e `_internal/explain/drift/SKILL.md` (os outros SKILL.md aplicam limpos). O `skills-manifest.json` não é editado: é regenerado por `generate_skills_manifest.py`, para não trazer `--grill`, `--specify`, `--with-specify` e `--pipeline`.
@@ -89,7 +90,7 @@ No worktree, `cherry-pick -n -x` de `8dc3eb3` a `763bfb0` (9 commits, intervalo 
 - **Tests**: N/A (skills em Markdown; cobertas pela suíte do Step 2 e por `check_skill_spec.py`)
 - **Traces**: D-005
 - **Scenarios**: N/A (skills em Markdown sem comportamento novo)
-- [ ] Done
+- [x] Done
 
 ### Step 4: Portar os textos do plano 19 em `_output/`
 `cherry-pick -n -x` de `594a65b`, `2f3cffb` e `b630b6c` sem os append-only e **sem** o hunk de `product-design-as-intended.md` (ele põe um STATUS acima de `### D-010`, que na base é `### D-005`). `plan-000019-progress.md` conflita em todo commit desde `f720db0` (porque o `04ecf9f` pulado mexeu nele): apensar só as linhas novas. Nos hunks do `plan-000019-upgrade-…md`, manter D-005, como a base já diz. Apensar ao plano 19 a nota "Step 14 não portado nesta linhagem" e ao `plan-000019-qa-…md` (que cita D-010) a nota "nesta linhagem a decisão é a D-005". O STATUS da D-005 entra por `apply_marker.py --marker STATUS` (proposed, plan-000019), com cwd no worktree, depois da sua confirmação.
@@ -101,7 +102,7 @@ No worktree, `cherry-pick -n -x` de `8dc3eb3` a `763bfb0` (9 commits, intervalo 
 - **Tests**: N/A (textos do ledger e um marcador)
 - **Traces**: D-005
 - **Scenarios**: N/A (textos do ledger sem comportamento)
-- [ ] Done
+- [x] Done
 
 ### Step 5: Fazer os scripts portados citarem a D-005
 Trocar "D-010" por "D-005" onde a decisão de ULID é citada: `artifact_id.py:16`, `reserve_id.py:14`, `check_ledger_ids.py:14`, `generate_macro_index.py:21`, `human_markers_registry.py:74`. (`upgrade/SKILL.md:55` fica para o Step 12, que já o modifica.) Não tocar em `tests/test_explain_promote_phase3a_phase3b.py`: o "D-010" de lá é um exemplo de PostgreSQL, já na base.
@@ -113,7 +114,7 @@ Trocar "D-010" por "D-005" onde a decisão de ULID é citada: `artifact_id.py:16
 - **Tests**: N/A (troca de citação; a suíte é a verificação)
 - **Traces**: D-005
 - **Scenarios**: N/A (troca de citação sem comportamento)
-- [ ] Done
+- [x] Done
 
 ### Step 6: Registrar a D-006 e tirar o Gherkin do as-intended (designer, ponto de parada)
 Ponto de parada: o texto é seu. O agente propõe em `_output/tmp/design-rascunho-d006-2026-10-20.md` e só grava com a sua confirmação no mesmo turno, cwd no worktree. Conteúdo: a D-006, "A escada vive no plano: jogo de linguagem, intenção, requisitos, casos de uso e testes por requisito; sem Gherkin, sem grill", que diz o que fica da D-004 (o citizen aprova a mensagem, não o contrato) e traz "não confundir com a D-006 da linhagem arquivada (uma pasta por feature)"; a D-004 recebe `STATUS: superseded` (a máquina de estados não tem "em parte"); H-009 reescrita para a escada no plano; as menções de Gherkin, grill e specify em §0, §2 (diagrama `*.feature`), glossário ("Escada de representações", "Degrau zero", "Contrato endereçável"), §8, §10, §14, §16, §17, SS-002, JM-TB-002, US-003, REQ-MC-011 a 013, Q-004 e Q-012. A REQ-MC-014 (preset `apprentice`) fica. Também `design-standards.md:24`. O override de T3 e T4 vai ao CHANGELOG.
@@ -125,7 +126,7 @@ Ponto de parada: o texto é seu. O agente propõe em `_output/tmp/design-rascunh
 - **Tests**: N/A (documento de design)
 - **Traces**: D-004, D-006
 - **Scenarios**: N/A (decisão de design sem comportamento observável)
-- [ ] Done
+- [x] Done
 
 ### Step 7: Escrever a referência do jogo de linguagem como entrevista do `/plan`
 Criar `general/plan-language-game.md` a partir da versão do jogo que hoje é desvio local de um cliente, autossuficiente: os lances (cena, contra-cena, e se, nomear, sua vez); as três respostas (aceito, recuso, corrijo); de onde vêm as cenas; rodada e cobertura **com as seis dimensões dentro** (antes na grill); o teste da surpresa; o jogo curto; e, trazidos da grill, o bom requisito, a voz e as três saídas no teto de 5 rodadas (continuar, aceitar como premissa, arquivar). Saem a regra "voltar à grill", a de registro do experimento, a menção a `Specify: skipped` e os links `[[…]]`. A citação "D-006" da fonte (numeração de outro repositório) vira D-004/D-006 daqui. Destino das respostas: aceito vira requisito ou caso de uso; recusado vai para "Não faz"; corrigido é citado em "Nas suas palavras". A referência declara que cada opção leva a justificativa curta da convenção (`constraints.md`), sem o rótulo `(Recommended)`. Exemplo genérico, sem nome de pessoa nem de instância (C2).
@@ -138,7 +139,7 @@ Criar `general/plan-language-game.md` a partir da versão do jogo que hoje é de
 - **Docs**: a própria referência.
 - **Traces**: D-006
 - **Scenarios**: N/A (referência sem comportamento)
-- [ ] Done
+- [x] Done
 
 ### Step 8: Definir o plano v3 (intenção, requisitos, casos de uso, testes)
 Criar `general/plan-intent-and-cases.md` com as regras PIC: header `plan_format_version: 3`; uma vez por plano, antes dos steps, `## Intenção` (4 linhas), `## Requisitos` (`REQ-<slug>-NNN` com slug **em minúsculas**, para não colidir com `REQ-[A-Z0-9]+-\d{3}` de `check_plan_coverage.py:214`; uma frase; "Para que"; origem `A<n>` do lance), `## Casos de uso` (um ou mais por requisito, em prosa e voz controlada), `## Retradução` (primeira pessoa, com "O que eu não vou fazer") e `## Nas suas palavras` (as respostas verbatim); por step, `Covers: REQ-…` só nos steps com `Tests:` diferente de N/A, e nunca dentro de `Traces:`. Atualizar `template/plan-step.md` e `general/report-conventions.md` (seções do plano).
@@ -151,7 +152,7 @@ Criar `general/plan-intent-and-cases.md` com as regras PIC: header `plan_format_
 - **Docs**: a própria referência.
 - **Traces**: D-006
 - **Scenarios**: N/A (referência sem comportamento)
-- [ ] Done
+- [x] Done
 
 ### Step 9: Criar `check_plan_intent.py`
 Verificador do plano v3, só biblioteca padrão, `--json` com `schema_version`, saída 0/1/2. Interface `check_plan_intent.py [<plano>] [--json]`: **sem argumento** varre `_output/plans/` (o `run_all_checks.py` chama todo `check_*.py` sem argumentos) e sai 0 quando não há v3 com achado. Confere: as cinco seções presentes e não vazias; todo requisito tem caso de uso; todo requisito coberto por ao menos um step com `Covers:`; todo `Covers:` cita requisito existente; `Covers:` só com `Tests:` não-N/A; plano v1 ou v2 (ou sem versão) sai 0 com "nada a verificar". Registrar no `check_plugin_registry.json`.
@@ -163,7 +164,7 @@ Verificador do plano v3, só biblioteca padrão, `--json` com `schema_version`, 
 - **Tests**: when um plano v3 tem um requisito sem caso de uso, sai 1 e cita o requisito; when um step cita `Covers: REQ-x-009` que não existe, sai 1; when `## Casos de uso` está vazia, sai 1; when o plano é v1 ou v2, sai 0 com "nada a verificar"; when chamado sem argumento num diretório só com planos v1 e v2, sai 0; when tudo está coberto, sai 0 e o `--json` traz `schema_version`.
 - **Traces**: D-006
 - **Scenarios**: N/A (testes diretos do verificador, sem Gherkin)
-- [ ] Done
+- [x] Done
 
 ### Step 10: Pôr o jogo de linguagem e o plano v3 no `/plan`
 No worker padrão (`_internal/plan/standard/SKILL.md`): passo novo antes da escrita do plano, que joga o jogo (`plan-language-game.md`) em rodadas, roda `check_plan_intent.py` depois de cada rodada até não haver `error`, mostra a Retradução e pede Aprovar / Ajustar / Descartar; o plano sai v3; na validação de metadata (step 5 do worker), `Covers:` só com `Tests:` não-N/A. Tarefa sem código: jogo curto (só `## Intenção`). `--light` continua v1 (proposal). Itens gerados por `--roadmap` usam o jogo curto, e o worker de roadmap diz isso. Atualizar o wrapper (C3 com v3), o quickguide e o `help`.
@@ -176,7 +177,7 @@ No worker padrão (`_internal/plan/standard/SKILL.md`): passo novo antes da escr
 - **Docs**: quickguide do `/plan`.
 - **Traces**: D-006
 - **Scenarios**: N/A (skill em Markdown)
-- [ ] Done
+- [x] Done
 
 ### Step 11: Fazer o `/implement` ler o plano v3 e testar por requisito
 O `/implement` da base cai para manual fora do v1 (`implement/SKILL.md:134`). Novo comportamento: v1 como hoje; v3 com teste por requisito **nos dois modos, auto e manual** (para cada step com `Covers:`, o executor escreve primeiro um teste por requisito, que cita o ID no nome ou na docstring e fica vermelho pelo motivo certo, e só então o código até o verde). No modo manual, o v3 inverte a regra da base "manual mode retains test-after ordering by design" (passo 7 do modo manual): ela continua valendo só para v1; v2 avisa numa frase ("plano do ciclo com Gherkin: rodo em manual e ignoro Scenarios") e cai para manual; outro valor para. Atualizar `metadata.plan_format_version` do `/plan` e do `/implement`, e o quickguide.
@@ -188,7 +189,7 @@ O `/implement` da base cai para manual fora do v1 (`implement/SKILL.md:134`). No
 - **Tests**: N/A (skill em Markdown)
 - **Traces**: D-006
 - **Scenarios**: N/A (skill em Markdown)
-- [ ] Done
+- [x] Done
 
 ### Step 12: Fazer o upgrade limpar o que o v0.11.0 instalou e avisar
 `retired-files.json` no padrão de `_RETIRED_SKILLS` de `upgrade_harness.py`, com os arquivos do ladder que o v0.11.0 instalou (nenhum existia em v0.10.1): scripts `check_intent.py`, `check_specify.py`, `check_features.py`, `check_plan_scenarios.py`, `build_brief.py`, `build_checks.py`, `cycle_adherence.py`, `drift_report.py`; referências `gherkin-spec-format`, `specify-phase`, `plan-from-scenarios`, `grill-phase`, `extended-cycle-contract`, `drift-metric`, `drift-control-protocol`, `drift-report`, `implement-test-first`; templates `feature-layout.md`, `intent.md`, `pilot-run-record.md`, `feature-example/`, `bdd/python/scenario_report.py.example`; agentes `scenario-tester`, `hardener`, `cleaner`; e, na raiz do cliente, `tests/scenario_report.py`. Remove só se existir e o hash for o de `git show v0.11.0:<path>` (árvore de distribuição); se não, mantém e diz `mantido (editado)`. **Não** aposentar `pkb_inbox.py`, `template/pkb/` nem `check_retired_tokens.py`. Avisos de uma frase: com `features/`, "O ciclo não lê mais features/ nem .feature; nada foi apagado no seu projeto."; com `PKB_DIR` preenchido, "A camada PKB saiu do harness: o post-skill não captura mais no inbox; guarde a etapa 7f como desvio local se quiser mantê-la." Em `upgrade/SKILL.md`, também trocar "D-010" por "D-005" (linha 55).
@@ -200,7 +201,7 @@ O `/implement` da base cai para manual fora do v1 (`implement/SKILL.md:134`). No
 - **Tests**: when um cliente v0.11.0 tem `check_specify.py` idêntico ao do v0.11.0, o upgrade o remove e diz `removido`; when o cliente o editou, mantém e diz `mantido (editado)`; when o projeto tem `features/contas/`, a pasta fica byte a byte igual e a saída traz o aviso; when `PKB_DIR` está preenchido, `pkb_inbox.py` fica e a saída traz o aviso da PKB; when a lista é comparada com as adições de `.claude/` em `git diff v0.10.1 v0.11.0`, todo arquivo do ladder está nela.
 - **Traces**: D-006
 - **Scenarios**: N/A (testes diretos do upgrade, sem Gherkin)
-- [ ] Done
+- [x] Done
 
 ### Step 13: Criar `tests/compat` com um cliente v0.11.0 e um v0.10.1
 `tests/compat/` não existe na base. Criar o runner e duas fixtures mínimas: um cliente v0.11.0 (com arquivos do ladder, `features/`, `PKB_DIR` e um arquivo do ladder editado) e um cliente v0.10.1. O teste roda o upgrade nos dois e confere o relatório.
@@ -212,7 +213,7 @@ O `/implement` da base cai para manual fora do v1 (`implement/SKILL.md:134`). No
 - **Tests**: when o upgrade roda sobre o cliente v0.10.1, nenhum aviso aparece e nada é removido; when roda sobre o cliente v0.11.0, os arquivos do ladder idênticos saem, o editado fica, `features/` fica e os dois avisos aparecem.
 - **Traces**: D-006
 - **Scenarios**: N/A (testes diretos do upgrade, sem Gherkin)
-- [ ] Done
+- [x] Done
 
 ### Step 14: Fechamento: inventário, revisão, busca de resíduos e CHANGELOG
 No worktree: atualizar `rules/harness-structure.md` e `docs/reference/harness-reference.md`; regenerar o `skills-manifest.json` (`generate_skills_manifest.py`); remedir `check_docs_skill_body_length_baseline.md` se os SKILL.md mudados estourarem. Rodar o pytest, `python3 -m pytest tests/compat/ -q`, `ruff check .claude/skills/`, `run_all_checks.py` e `/critique review` sobre `2b17d27..dev-sem-gherkin`; comparar com o baseline do Step 1. Busca de resíduos `gherkin|\.feature\b|scenarios\.lock|--specify|--grill|SPECIFY_DEFAULT|grill-phase|specify-phase|(^|[^-])intent\.md|check_(intent|specify|features|plan_scenarios)`, excluindo `_output/`, `CHANGELOG.md`, `.claude/CHANGELOG.md`, `retired-files.json`, `upgrade_harness.py`, `tests/test_upgrade_harness.py`, `_internal/seja-setup/upgrade/SKILL.md`, `tests/compat/fixtures/` e `product-design/product-design-as-intended.md` (conferido no Step 6). Entrada `v0.12.0` no `CHANGELOG.md` (Removed: Gherkin, grill, specify, camada PKB; Added: jogo de linguagem no `/plan`, plano v3, `check_plan_intent.py`, limpeza no upgrade; Changed: ULID como D-005). Os docs públicos de `docs/doc-*` que dizem "`plan_format_version` must be 1" ficam como pendência declarada. Propor a você nome, push e tag; não cortar tag nem dar push.
@@ -224,7 +225,7 @@ No worktree: atualizar `rules/harness-structure.md` e `docs/reference/harness-re
 - **Tests**: N/A (verificação final)
 - **Traces**: D-006
 - **Scenarios**: N/A (verificação final sem comportamento novo)
-- [ ] Done
+- [x] Done
 
 ### Step 15: Levar para a linhagem nova o plano que a criou
 Copiar para o worktree e commitar em `dev-sem-gherkin`: este plano, o progress, o QA log e `_output/ids/01M5DGKNMZVEZ3PNFZ15688KJS.json`, para a D-006 e os commits "plan-20261020-688kjs step N" apontarem para um plano que existe na branch.
@@ -236,7 +237,7 @@ Copiar para o worktree e commitar em `dev-sem-gherkin`: este plano, o progress, 
 - **Tests**: N/A (cópia de artefatos do ledger)
 - **Traces**: D-006
 - **Scenarios**: N/A (cópia de artefatos sem comportamento)
-- [ ] Done
+- [x] Done
 
 ## Outcomes
 - Branch `dev-sem-gherkin`: base anterior ao Gherkin, ULID como D-005, `/plan` com jogo de linguagem e plano v3, `/implement` com teste por requisito, upgrade que limpa clientes v0.11.0.
@@ -277,3 +278,17 @@ smoke: false
 | Perspectives Adopted | 0 |
 | Perspectives Deferred (with rationale) | 7, resolvidas por emenda |
 | Convergence reason | deep-dive budget |
+
+## Implementation summary (2026-10-21)
+
+- Modo manual, rodado daqui (dev) com código, testes e commits no worktree `~/worktrees/open-seja-sem-gherkin`, branch `dev-sem-gherkin` (base `2b17d27`). Steps: 15/15. Tag local `archive/gherkin-ladder-v0.11.0` em `bfac21f`.
+- Portado: núcleo e skills do ULID (plano 19, steps 1 a 13 e correções, sem o step 14), com D-005 em scripts, CHANGELOG e textos; STATUS da D-005 por apply_marker; pa-000008 fechada e pa-000007 dispensada no worktree.
+- Design (Step 6, com override de T3/T4 aceito pelo designer): D-006 registrada, D-004 superseded, H-009 reescrita e seções derivadas.
+- Novo: `general/plan-language-game.md` (JDL-001..011), `general/plan-intent-and-cases.md` (PIC-001..009), `check_plan_intent.py` (com `--phase game`), passo 2b do `/plan`, `/implement` com plano v3 e teste por requisito nos dois modos, `retired-files.json` e a limpeza no upgrade (inclui desligar o plugin do conftest), `tests/compat/`.
+- Verificação final no worktree: pytest 852 passando, com as mesmas 12 falhas e 2 erros da base; `tests/compat/` 8 passando; `run_all_checks.py` sem check novo falhando; ruff limpo nos arquivos novos (achados novos só nos arquivos do ULID portados, de estilo).
+- `/critique review` (standard): 3 críticos corrigidos (C1 lista de aposentados lida da release e upgrade roda o script da release; C2 fase do jogo no verificador e Retradução curta no jogo curto; C3 plugin sai do conftest), advisórios A1, A3, A4 e A5 corrigidos; A2, A6, A7 e A8 diferidos.
+- Diferidos e pendências: A2 (linha `nenhum (` desliga as regras de requisito em qualquer plano); A6 (plano sem versão: manual no `/implement`, "nada a verificar" no verificador); docs públicos `docs/doc-*` que dizem `plan_format_version` must be 1; medida de divergência por requisito no `/reflect`; portão com CRAP e mutação no v3 e volta do cleaner e do hardener; upgrade dos clientes depois da tag; remover o worktree auxiliar da base criado no scratchpad. Nome, push e tag da linhagem: decisão do designer.
+
+## Reflection
+
+- 2026-10-21: Os Steps 2 a 4 conflitaram onde a revisão do plano previa; o Step 6 parou para o designer e acusou 86 linhas aceitas; o Step 9 e o Step 13 tiveram testes depois de olhar a saída real; a revisão do Step 14 achou três críticos (upgrade lendo a lista errada, verificador incompatível com o jogo, plugin no conftest) que os testes não pegavam. (notes 17, with deviation 17, with gate 0)

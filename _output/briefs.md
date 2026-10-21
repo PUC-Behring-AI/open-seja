@@ -1,5 +1,7 @@
 # Briefs
 
+DONE | 2026-10-21 10:43 UTC | STARTED | 2026-10-20 22:35 UTC | implement | plan-20261020-688kjs --manual --skip-checks | PLAN | plan-20261020-688kjs
+
 DONE | 2026-10-20 21:38 UTC | STARTED | 2026-10-20 20:32 UTC | plan | Remover o Gherkin do open-seja a partir da reflexão recente do designer | PLAN | plan-20261020-688kjs
 
 STARTED | 2026-10-07 21:35 UTC | implement | plan-000020

@@ -27,3 +27,13 @@
 ## Pendente no commit
 
 A terceira revisão Deep voltou antes do commit (a identidade do git faltava); as emendas A1 a A8 foram aplicadas ao plano antes de commitar.
+
+## /implement (2026-10-20 22:35 UTC a 2026-10-21 10:43 UTC)
+
+> /implement plan-20261020-688kjs --manual --skip-checks
+
+1. **Agente** (Step 4): pediu para gravar `<!-- STATUS: proposed | plan-000019 | 2026-10-07 -->` acima de `### D-005` no as-intended do worktree. **Designer:** "Gravar o marcador".
+2. **Agente** (Step 6, ponto de parada): mostrou o rascunho `_output/tmp/design-rascunho-d006-2026-10-20.md` (D-006, D-004 superseded, H-009 reescrita, seções derivadas). **Designer:** "Gravar como está".
+3. **Agente** (Step 6): listou as 86 linhas que `check_human_markers_only --staged` acusou, todas da reescrita. **Designer:** "Aceito, pode commitar".
+4. **Agente** (Step 14): rodou a revisão de código; ela parou uma vez no limite de uso e foi retomada; 3 críticos e 4 advisórios corrigidos no worktree.
+5. **Agente** (fechamento): ofereceu medir a deriva. **Designer:** "Seguir sem medir".
