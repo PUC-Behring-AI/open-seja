@@ -16,9 +16,9 @@ Format: loosely based on [Keep a Changelog](https://keepachangelog.com/). SemVer
 
 ## [Unreleased]
 
-<!-- bump: minor -->
+## [v0.12.0] - 2026-10-21
 
-Target: v0.12.0, a new line of the harness that starts before the Gherkin ladder of v0.11.0 (D-006). The v0.11.0 line stays in the tag `archive/gherkin-ladder-v0.11.0`.
+A new line of the harness that starts before the Gherkin ladder of v0.11.0 (D-006). The v0.11.0 line stays in the tag `archive/gherkin-ladder-v0.11.0`.
 
 ### Removed
 
