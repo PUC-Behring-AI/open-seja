@@ -1,4 +1,4 @@
-**What it does**: Creates a step-by-step plan for your next feature, bug fix, or improvement. You describe what you want, and the agent produces a detailed plan you can review before anything changes. Three modes: **standard** (single plan, default), **lightweight** (`--light`, quick proposal), and **roadmap** (`--roadmap`, full product roadmap with dependency-aware execution waves).
+**What it does**: Creates a step-by-step plan for your next feature, bug fix, or improvement. You describe what you want; before writing the steps, the agent plays a language game with you: it tells short scenes of what you asked working (and of what it should not do), and you accept, refuse or fix each one. What you accepted becomes the plan's requirements and use cases, what you refused becomes what it will not do, and your corrections are quoted as you said them. The agent then retells the plan in first person, you approve it, and every step that tests a requirement says so in a `Covers:` line (plan format v3). Three modes: **standard** (single plan, default), **lightweight** (`--light`, quick proposal), and **roadmap** (`--roadmap`, full product roadmap with dependency-aware execution waves).
 
 **Examples**:
 > `/plan Add a tagging feature so users can organize their tasks by topic`
@@ -25,10 +25,8 @@
 > `/plan --review deep`
 > Overrides the complexity-gated review depth to force a deep review (all 16 perspectives).
 
+**Short game**: a task with no code (docs, chore, research) and each item of a roadmap get a two-scene game that fills only the intention. `--light` proposals skip the game.
+
 **When to use**: You have a clear idea of what you want to build or fix and want a structured plan before any code changes happen. If you omit both `--plan` and `--roadmap`, the agent auto-detects the best mode from your brief (>=3 entities or >=2 architectural layers suggests roadmap; single bug/file suggests single plan) and asks for confirmation before proceeding. Use `--framing metacomm` when describing the change from the user's perspective. Use `--light` for quick proposals that don't need full step metadata.
-
-**Default cycle (guia em português)**: in standard mode `/plan` runs the grill (alone: `--grill`), then the specify (alone: `--specify`; two approvals: the message to you, the `.feature` contract to whoever reads code), then writes a v2 plan whose steps list `Scenarios:` keys; refusals and how to skip the ladder: `docs/how-to/ciclo-default.pt-BR.md`.
-
-**Specify switch**: the project default is `SPECIFY_DEFAULT` (`on`/`off`) in `product-design/conventions.md`. `/plan --with-specify` turns the specify on for one plan when the default is `off` (e.g. a stable part of a prototype); `/plan --without-specify "<motivo>"` turns it off for one plan when the default is `on`, with a one-line reason. Every new v2 plan records `Specify default: on|off`; deviations are listed by `cycle_adherence.py`; details in the guide's section "Ligar e desligar a especificação".
 
 **Next step**: `/implement` to execute the plan (or the first roadmap item) once you have reviewed it.

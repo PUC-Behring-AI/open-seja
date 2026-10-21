@@ -10,9 +10,7 @@ metadata:
 
 > This is an inlined worker; execute these instructions as part of the caller's flow. The wrapper at .claude/skills/plan/SKILL.md has already run C1 (pre-skill) and the Design Guard; execute the steps below and invoke C6 (post-skill) at step 7. Note: when this internal is invoked inline from `_internal/plan/roadmap/SKILL.md` (Mode 1 step 9 or Mode 2 step 8), the caller instructs per-item execution to skip steps 7 and 8 -- the roadmap run owns the commit and the user prompt.
 
-> Extended cycle (grill, specify, test-first): see .claude/references/general/extended-cycle-contract.md.
-
-This mode is the reference prose -- other modes delta off of its shape. Steps 1, 3 (reserve-ID + header), 5 (Review Depth), 7 (post-skill), and 8 (decision-point phrasing) reuse C1, C2+C3, C5, C6, and C4 respectively; the local prose below adds only the single-plan-specific content.
+This mode is the reference prose -- other modes delta off of its shape. Step 2b plays the language game and writes the plan's intention sections (plan v3, D-006). Steps 1, 3 (reserve-ID + header), 5 (Review Depth), 7 (post-skill), and 8 (decision-point phrasing) reuse C1, C2+C3, C5, C6, and C4 respectively; the local prose below adds only the single-plan-specific content.
 
 1. Apply C1 (pre-skill).
 
@@ -24,30 +22,17 @@ This mode is the reference prose -- other modes delta off of its shape. Steps 1,
    | Plan touches backend/frontend/testing/i18n files | `product-design/standards.md` |
    | Plan involves auth, validation, or sensitive data | `product-design/security-checklists.md` |
    | Plan involves UX flows or visual design | `product-design/design-standards.md` |
+   | Before step 2b | `general/plan-language-game.md`, `general/plan-intent-and-cases.md` |
    | Before Phase 1 review | `general/review-perspectives.md` |
    | Before writing the review log | `general/review-log-template.md` |
 
-2b. **Grill phase** (always runs for a new plan -- CYC-002, D-005; only the specify can be skipped, CYC-004). Read `.claude/references/general/grill-phase.md` and follow its `GRL-NNN` rules. In short:
-   - Classify the task (GRL-012): with code (some step will have non-N/A `Tests:`), without code, or brief already detailed. More than 12 likely requirements: propose two features first. "Without code" takes precedence over the switch below: it gives `tarefa sem código` under any default.
-   - Specify switch (CYC-035, CYC-036): read the project default with `python3 -c "import sys; sys.path.insert(0, '.claude/skills/scripts'); import project_config; print(project_config.specify_default())"` (a `ValueError` is said in one sentence and stops the plan). Write `Specify default: on|off` under the header of every new v2 plan. For a task with code, the specify is off when the default is `off` without `--with-specify`, or `on` with `--without-specify`; then the task gets the short interview below and the line `Specify: skipped -- default off` or `Specify: skipped -- opt-out: <motivo>`, and its code steps may have real `Tests:` with `Scenarios: N/A (specify desligada neste plano)`. Default `off` with `--with-specify`: full grill and specify, as below. `--with-specify` with `on`, and `--without-specify` with `off` (the line stays `default off`), do nothing and give no warning. With `on`, the reason becomes one line (line breaks become spaces) and must pass `check_plan_scenarios.reason_ok` (at least 3 words, not filler); a missing or weak reason is refused in one sentence: "Diga em uma linha, com pelo menos três palavras, por que a especificação fica de fora neste plano."
-   - With code and the specify on: propose the slug and let the user confirm (GRL-002); give the C1 notice before recording the brief verbatim (GRL-005); index the brief as `F1..Fn`. Interview in rounds of at most 4 questions, one idea each (GRL-003, GRL-004). Write `features/<slug>/intent.md` with `status: grilling` after every round (model: `.claude/references/template/intent.md`). Never fill in an answer the user did not give: record it as an assumption.
-   - After each round run `python3 .claude/skills/scripts/check_intent.py features/<slug>/intent.md --json` and continue while it reports any `error`. After 5 rounds, hand the decision back (GRL-007).
-   - With no `error`: show the summary in controlled voice (short sentences, fixed terms; no technical numbers) and ask Approve / Adjust / Discard (AskUserQuestion, C4; GRL-008). Only Approve writes `status: approved`, `approved_at` (UTC) and `approved_by: usuario`; then `check_intent.py <intent.md> --require-approved --strict` must exit 0 before step 3. Add `Feature: <slug>` under the plan header.
-   - Without code (DOCUMENT, CHORE, RESEARCH, or a plan only of config/harness), or with the specify off: the grill is a single question confirming the intent. Do not create `features/<slug>/intent.md` and no `features/` folder. Write a `## Intenção` section (4 lines, GRL-012) and one skip line in the plan (the only place it is written, PFS-013): `Specify: skipped -- tarefa sem código: <reason>` without code (CYC-004), or the specify-off line above; the user approves it with the plan. The plan is v2; without code, its steps keep `Tests: N/A`.
-   - Metacomm framing: questions and summary use I/you.
-   - `--grill`: run only this step and stop; write only `features/<slug>/intent.md`, never a plan (GRL-014). Re-entry follows GRL-011.
-   - Existing v1 plans, and projects that do not use `features/`, are read and executed as before (D-008); the grill never rewrites them.
+2b. **Language game (the interview).** Before the steps are written, play the language game of `general/plan-language-game.md` with the user. Reserve the ID and write the header first (C2, C3 with `plan_format_version: 3`), so each round is saved in the plan file as it grows (JDL-001).
+   - **Task with code**: play rounds of up to 3 moves (scenes the user accepts, refuses or fixes; JDL-002 to JDL-006). After each round, write `## Intenção`, `## Requisitos`, `## Casos de uso` and `## Nas suas palavras` into the plan (shape: `general/plan-intent-and-cases.md`, PIC) and run `python3 .claude/skills/scripts/check_plan_intent.py <plan file> --phase game` (the game phase does not yet require the Retelling or the steps). Keep playing while it reports any `error`; the tool decides, not your impression. At the round ceiling, return the decision to the user with the three exits of JDL-007.
+   - **Retelling and approval**: when the check has no `error`, write `## Retradução` (first person, controlled voice, with "O que eu não vou fazer"), show it, and ask via AskUserQuestion **Aprovar** / **Ajustar** / **Descartar** (JDL-010, phrased per C4). Ajustar goes back to the game with a fix move on the requirement pointed at; Descartar stops the plan. On Aprovar, add the line `Aprovação: aprovado em <YYYY-MM-DD>` under the Retelling and go on to step 3.
+   - **Task without code** (DOCUMENT, CHORE or RESEARCH prefix, or steps touching only docs, config or the harness): play the short game (JDL-009, two moves), write `## Intenção`, a short `## Retradução` (one or two first-person sentences with "O que eu não vou fazer") and `## Nas suas palavras`, and write `nenhum (tarefa sem código)` under `## Requisitos` and `## Casos de uso`.
+   - **Invoked inline from a roadmap**: always the short game, with `nenhum (jogo curto, item de roadmap)` under `## Requisitos` and `## Casos de uso`; the roadmap worker says so.
 
-2c. **Specify phase** (CYC-003; runs only when step 2b wrote `features/<slug>/intent.md`; tasks without code and tasks with the specify off skip it (step 2b writes the skip line), and v1 plans and projects without `features/` are unchanged, D-008). Read `.claude/references/general/specify-phase.md` and follow its `SPC-NNN` rules. In short:
-   - Gate (SPC-001): `check_intent.py features/<slug>/intent.md --require-approved --strict` exits 0; otherwise refuse in one sentence and offer `/plan --grill <slug>`. If `check_specify.py --feature <slug> --status` says `stale`, rewrite only the scenarios and items of the REQs it lists, keeping the other scenario names (SPC-012, SPC-013).
-   - Write `features/<slug>/<slug>.feature` (language of the user's words, declared in `# language:`; scenarios grouped by active REQ, each tagged `@REQ-<slug>-NNN`; a `restrição` REQ has a number) and the `## Retradução` section of `intent.md` (`rev: 1`; first person; one item per active REQ with its "Para que" and an `Exemplo:`; then "O que eu não vou fazer"), in controlled voice.
-   - Run `python3 .claude/skills/scripts/check_specify.py --feature <slug>` and fix every finding yourself, at most 3 times, before showing anything to anyone (SPC-008).
-   - The message (SPC-009): show the user the Retradução, never the `.feature`, tags or counts; ask Approve / Adjust / Back to the interview / Discard (AskUserQuestion, C4; texts in specify-phase.md). Adjust edits the Retradução and the `.feature` together, bumps `rev` and adds `Retradução rev N: <what changed>` to "Mudanças"; after 3 rounds hand the decision back (SPC-011). A change in *what* is wanted goes back to the grill.
-   - The contract (SPC-009): show whoever reads code the `.feature` and the raw checker output; ask Approve the contract / Ask for a change / Nobody here reads code.
-   - Only then run `check_specify.py --feature <slug> --approve --at <now UTC> --by usuario --contract-by <name or ninguem>`; say "approved" only on exit 0 (SPC-010). Add `Specify: approved (rev N)` under the plan header (N = `rev` of `scenarios.lock.json`). Step 3 links the steps to the scenarios.
-   - `--specify`: run only this step and stop (SPC-016); without `features/<slug>/`, refuse: "A entrevista vem antes: rode /plan --grill." Without `check_features.py`, leave the drafts unapproved and say why (SPC-014).
-
-3. Create a structured, self-contained plan with these sections (header per C3; `<depth>` set in step 5):
+3. Complete the structured, self-contained plan with these sections (header per C3; `<depth>` set in step 5; the five intention sections of step 2b stay between *agent interpretation* and *steps*):
    - If default framing: *user brief*, *agent interpretation*, *files* -- per `general/report-conventions.md`.
    - If metacomm framing: *designer's metacommunication message* (the brief verbatim), *agent interpretation*, *files*.
    - *agent interpretation* covers three elements (four when `source:` is present):
@@ -61,7 +46,7 @@ This mode is the reference prose -- other modes delta off of its shape. Steps 1,
      - **User-visible impact**: what changes from the user's perspective (one paragraph).
      - **Trade-offs accepted**: what was gained, what was given up.
      - **Metacommunication impact** (when the plan modifies user-facing communication -- error messages, help, UI copy, CLI output, docs): what the system will now communicate differently. Use I/you phrasing per `shared-definitions.md`. Include regardless of `--framing metacomm`.
-   - *steps*: structured step list -- step format and decomposition guidelines: see `.claude/references/template/plan-step.md`. With approved scenarios, build the steps from `index` of `features/<slug>/scenarios.lock.json` (`.claude/references/general/plan-from-scenarios.md`): every approved scenario is owned by exactly one step (`Scenarios:`), infrastructure steps say `N/A (<reason>)`, and the header is v2 (C3).
+   - *steps*: structured step list -- step format and decomposition guidelines: see `.claude/references/template/plan-step.md`. Every step whose `Tests:` is not N/A carries a `Covers:` line with the plan requirements its tests demonstrate (PIC-008); every requirement is covered by at least one step.
    - *review log*: if applicable.
    - *outcomes*: expected outcomes.
    - *smoke*: `true` if any step creates or modifies API route files or frontend page/component files; `false` otherwise. Consumed by `/implement` to decide whether to run `/critique smoke api`.
@@ -71,12 +56,11 @@ This mode is the reference prose -- other modes delta off of its shape. Steps 1,
 
 4b. **Coverage check (advisory)**: if `product-design/product-design-as-intended.md` contains REQ markers (`<!-- REQ-*-NNN -->`), run `python .claude/skills/design/critique_plan_coverage.py --mode advisory` and include the coverage summary in the plan after the steps. Skip silently if no REQ markers exist.
 
-4c. **Scenario check** (plan v2 only; v1 plans skip it): run `python3 .claude/skills/scripts/check_plan_scenarios.py <plan file>` before the review. Exit 1: fix the plan yourself and run it again, at most 3 times, never inventing a scenario. If it persists, say the finding in controlled voice and ask (AskUserQuestion, C4): back to the specify (`/plan --specify`) or adjust the plan. Exit 2: say it in one sentence and do not call the plan ready. Optionally append `--table` output as `## Cobertura de cenários`.
-
 5. **Review the plan** using a complexity-gated, two-phase process. Use `general/review-log-template.md` for the review log format.
 
    **Step metadata validation (before perspective review):**
    - Every step has all required fields (Files, References, Interface, Verify, Tests, checkbox). Optional fields (Depends on, Docs, Deploy, Traces) may be omitted entirely -- absent Depends on = no dependencies; absent Docs/Deploy/Traces = not applicable. `Interface:` is required but may be `N/A` -- omitting it entirely is a validation error; populate for dependency-producing steps.
+   - `Covers:` (plan v3) appears on every step with non-N/A `Tests:` when the plan has requirements, only on those steps, cites only requirements of the plan's `## Requisitos`, and never goes inside `Traces:` (which cites the as-intended). Run `check_plan_intent.py <plan file>` again after the steps are written: no `error` is allowed.
    - Docs, Deploy, and Traces are present-when-relevant. When present, validate: Docs describes specific documentation to update; Deploy describes actionable deployment changes (specific env var names, ports, service names) covering Docker and standalone (Windows/Linux) where they differ; Traces lists valid REQ-xxx IDs.
    - For non-N/A `Tests:` entries: the description must express an observable behavior ('when X is called with Y, returns Z') rather than a structural assertion ('module exports class Z') or bare test name. Auto mode uses this to write a meaningful failing test before implementation.
    - `Tests: N/A` is appropriate for database migrations, configuration-only steps, pure refactors with pre-existing coverage, and framework/tooling-only steps that produce no business logic.
@@ -84,7 +68,6 @@ This mode is the reference prose -- other modes delta off of its shape. Steps 1,
    - Dependencies flow forward (no circular, no backwards references).
    - No step touches >5 files (split if so).
    - Each step description is self-contained.
-   - Plan v2: every step has `Scenarios:` consistent with `Tests:` (step 4c exited 0).
 
    Fix any issues before proceeding.
 

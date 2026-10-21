@@ -336,58 +336,182 @@ def test_collect_source_files_excludes_non_py_colocated_files(tmp_path):
     assert "data.json" not in names
 
 
-def test_collect_source_files_includes_every_template_file(tmp_path):
-    """Template files that are not .md/.json (gate.py, *.example, *.toml) reach upgraded projects.
+# ---------------------------------------------------------------------------
+# plan-20261020-688kjs Step 12: retire what v0.11.0 installed for the ladder
+# ---------------------------------------------------------------------------
 
-    plan-000015 Step 9: the test-first plugin template is `scenario_report.py.example`; without it an
-    upgraded project cannot run `build_checks.py install-plugin`.
-    """
-    template = tmp_path / ".claude" / "references" / "template"
-    (template / "bdd" / "python").mkdir(parents=True)
-    (template / "quality-gate" / "python").mkdir(parents=True)
-    (template / "__pycache__").mkdir()
-    for rel in ("conventions.md", "bdd/python/scenario_report.py.example",
-                "quality-gate/python/gate.py", "quality-gate/python/pyproject-dev.example.toml"):
-        (template / rel).write_text("x\n", encoding="utf-8")
-    (template / "__pycache__" / "gate.cpython-312.pyc").write_bytes(b"\0")
-    names = {p.relative_to(template).as_posix() for p in upgrade_harness.collect_source_files(tmp_path)
-             if template in p.parents}
-    assert names == {"conventions.md", "bdd/python/scenario_report.py.example",
-                     "quality-gate/python/gate.py", "quality-gate/python/pyproject-dev.example.toml"}
+import hashlib
+import json
+import subprocess
+
+_RETIRED_JSON = Path(upgrade_harness.__file__).resolve().parent / "retired-files.json"
+_LADDER_SCRIPT = ".claude/skills/scripts/check_specify.py"
 
 
-@pytest.mark.parametrize("rel", ["inbox/a.md", "logs/2026/x.md", "Templates/Diario.md",
-                                 "Objetivos.md", "index.md"])
-def test_is_preserved_guards_pkb_layer(rel):
-    assert upgrade_harness.is_preserved(rel) is True
+def _entry(path: str) -> dict:
+    data = json.loads(_RETIRED_JSON.read_text(encoding="utf-8"))
+    return next(e for e in data["files"] if e["path"] == path)
 
 
-@pytest.mark.parametrize("rel", [".claude/skills/plan/SKILL.md", "docs/a.md", "docs/index.md"])
-def test_is_preserved_leaves_harness_and_docs_alone(rel):
-    assert upgrade_harness.is_preserved(rel) is False
+def _git_show_v0110(path: str) -> bytes | None:
+    try:
+        proc = subprocess.run(
+            ["git", "show", f"v0.11.0:{path}"],
+            capture_output=True, check=False, cwd=_RETIRED_JSON.parent,
+        )
+    except OSError:
+        return None
+    return proc.stdout if proc.returncode == 0 else None
 
 
-def _dry_run_upgrade(tmp_path, with_pkb, capsys):
-    source = tmp_path / "src"
-    (source / ".claude" / "skills" / "plan").mkdir(parents=True)
-    (source / ".claude" / "skills" / "plan" / "SKILL.md").write_text("x\n", encoding="utf-8")
-    target = tmp_path / "tgt"
-    (target / ".claude" / "skills").mkdir(parents=True)
-    (target / "product-design").mkdir()
-    (target / "product-design" / "conventions.md").write_text("# c\n", encoding="utf-8")
-    if with_pkb:
-        (target / "inbox").mkdir()
-        (target / "inbox" / "README.md").write_text("r\n", encoding="utf-8")
-    upgrade_harness.run_upgrade(source, target, True, new_version="vX")
-    return capsys.readouterr().out
+def _fake_identical(target: Path, path: str, monkeypatch) -> Path:
+    """Write a file whose sha256 is the one recorded for `path`."""
+    dest = target / path
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    content = b"ladder file as installed by v0.11.0\n"
+    dest.write_bytes(content)
+    entries = [{"path": path, "sha256_v0_11_0": hashlib.sha256(content).hexdigest()}]
+    monkeypatch.setattr(upgrade_harness, "load_retired_files", lambda *a, **k: entries)
+    return dest
 
 
-def test_upgrade_prints_pkb_hint_when_layer_present(tmp_path, capsys):
-    out = _dry_run_upgrade(tmp_path, True, capsys)
-    assert "camada PKB detectada" in out
-    assert "inbox/README.md" not in out.split("camada PKB detectada")[0]
+def test_retired_file_identical_to_v0110_is_removed(tmp_path, monkeypatch, capsys):
+    dest = _fake_identical(tmp_path, _LADDER_SCRIPT, monkeypatch)
+    removed, kept = upgrade_harness.remove_retired_files(tmp_path, dry_run=False)
+    assert not dest.exists()
+    assert removed == [_LADDER_SCRIPT] and kept == []
+    assert f"removido {_LADDER_SCRIPT}" in capsys.readouterr().out
 
 
-def test_upgrade_omits_pkb_hint_without_layer(tmp_path, capsys):
-    out = _dry_run_upgrade(tmp_path, False, capsys)
-    assert "camada PKB detectada" not in out
+def test_retired_file_edited_by_client_is_kept(tmp_path, monkeypatch, capsys):
+    dest = _fake_identical(tmp_path, _LADDER_SCRIPT, monkeypatch)
+    dest.write_text("edited by the client\n", encoding="utf-8")
+    removed, kept = upgrade_harness.remove_retired_files(tmp_path, dry_run=False)
+    assert dest.read_text(encoding="utf-8") == "edited by the client\n"
+    assert removed == [] and kept == [_LADDER_SCRIPT]
+    assert f"mantido (editado) {_LADDER_SCRIPT}" in capsys.readouterr().out
+
+
+def test_retired_file_dry_run_does_not_remove(tmp_path, monkeypatch):
+    dest = _fake_identical(tmp_path, _LADDER_SCRIPT, monkeypatch)
+    removed, _ = upgrade_harness.remove_retired_files(tmp_path, dry_run=True)
+    assert dest.exists() and removed == [_LADDER_SCRIPT]
+
+
+def test_absent_retired_file_is_ignored(tmp_path):
+    removed, kept = upgrade_harness.remove_retired_files(tmp_path, dry_run=False)
+    assert removed == [] and kept == []
+
+
+def test_real_hash_of_check_specify_matches_v0110(tmp_path, capsys):
+    blob = _git_show_v0110(_LADDER_SCRIPT)
+    if blob is None:
+        pytest.skip("tag v0.11.0 not available in this checkout")
+    dest = tmp_path / _LADDER_SCRIPT
+    dest.parent.mkdir(parents=True)
+    dest.write_bytes(blob)
+    removed, _ = upgrade_harness.remove_retired_files(tmp_path, dry_run=False)
+    assert _LADDER_SCRIPT in removed and not dest.exists()
+
+
+def test_features_folder_stays_byte_for_byte_and_warns(tmp_path):
+    feat = tmp_path / "features" / "contas"
+    feat.mkdir(parents=True)
+    (feat / "intent.md").write_text("# intent\n", encoding="utf-8")
+    (feat / "contas.feature").write_bytes(b"Feature: contas\n")
+    before = {p: p.read_bytes() for p in feat.rglob("*") if p.is_file()}
+    upgrade_harness.remove_retired_files(tmp_path, dry_run=False)
+    warnings = upgrade_harness.ladder_warnings(tmp_path)
+    assert {p: p.read_bytes() for p in feat.rglob("*") if p.is_file()} == before
+    assert upgrade_harness.FEATURES_WARNING in warnings
+
+
+def test_pkb_dir_filled_keeps_pkb_inbox_and_warns(tmp_path):
+    (tmp_path / "product-design").mkdir()
+    (tmp_path / "product-design" / "conventions.md").write_text(
+        "| `PKB_DIR` | `00-Inbox` | Pasta de captura |\n", encoding="utf-8"
+    )
+    inbox = tmp_path / ".claude" / "skills" / "scripts" / "pkb_inbox.py"
+    inbox.parent.mkdir(parents=True)
+    inbox.write_text("# pkb\n", encoding="utf-8")
+    upgrade_harness.remove_retired_files(tmp_path, dry_run=False)
+    assert inbox.exists()
+    assert upgrade_harness.PKB_WARNING in upgrade_harness.ladder_warnings(tmp_path)
+
+
+def test_no_warnings_without_features_or_pkb(tmp_path):
+    (tmp_path / "product-design").mkdir()
+    (tmp_path / "product-design" / "conventions.md").write_text(
+        "| `PKB_DIR` |  | vazio desliga |\n", encoding="utf-8"
+    )
+    assert upgrade_harness.ladder_warnings(tmp_path) == []
+
+
+def test_retired_list_never_names_pkb_or_retired_tokens():
+    paths = {e["path"] for e in upgrade_harness.load_retired_files()}
+    assert not any("pkb" in p for p in paths)
+    assert ".claude/skills/scripts/check_retired_tokens.py" not in paths
+
+
+def test_retired_list_covers_every_ladder_file_added_in_v0110():
+    try:
+        proc = subprocess.run(
+            ["git", "diff", "--name-status", "v0.10.1", "v0.11.0", "--", ".claude/"],
+            capture_output=True, text=True, check=False, cwd=_RETIRED_JSON.parent,
+        )
+    except OSError:
+        pytest.skip("git not available")
+    if proc.returncode != 0:
+        pytest.skip("tags v0.10.1/v0.11.0 not available in this checkout")
+    added = [ln.split("\t")[1] for ln in proc.stdout.splitlines() if ln.startswith("A\t")]
+    not_ladder = (
+        "/tests/",
+        "/template/pkb/",
+        "scripts/artifact_id.py",
+        "scripts/check_ledger_ids.py",
+        "scripts/pkb_inbox.py",
+    )
+    ladder = {p for p in added if not any(m in p for m in not_ladder)}
+    listed = {e["path"] for e in upgrade_harness.load_retired_files()}
+    assert ladder - listed == set()
+
+
+def _plugin_client(tmp_path: Path, monkeypatch, conftest_text: str) -> Path:
+    _fake_identical(tmp_path, upgrade_harness.SCENARIO_PLUGIN_REL, monkeypatch)
+    tests = tmp_path / "tests"
+    (tests / "conftest.py").write_text(conftest_text, encoding="utf-8")
+    (tests / ".scenario_report.sha256").write_text("abc\n", encoding="utf-8")
+    return tests
+
+
+def test_removing_the_plugin_drops_only_its_conftest_line_and_stamp(tmp_path, monkeypatch):
+    tests = _plugin_client(tmp_path, monkeypatch, 'import os\npytest_plugins = ["scenario_report"]\n')
+    removed, _ = upgrade_harness.remove_retired_files(tmp_path, dry_run=False)
+    assert (tests / "conftest.py").read_text(encoding="utf-8") == "import os\n"
+    assert not (tests / ".scenario_report.sha256").exists()
+    assert "tests/conftest.py" in removed
+
+
+def test_conftest_with_only_the_plugin_line_is_deleted(tmp_path, monkeypatch):
+    tests = _plugin_client(tmp_path, monkeypatch, 'pytest_plugins = ["scenario_report"]\n')
+    upgrade_harness.remove_retired_files(tmp_path, dry_run=False)
+    assert not (tests / "conftest.py").exists()
+
+
+def test_edited_plugin_keeps_its_conftest_line(tmp_path, monkeypatch):
+    tests = _plugin_client(tmp_path, monkeypatch, 'pytest_plugins = ["scenario_report"]\n')
+    (tests / "scenario_report.py").write_text("# edited\n", encoding="utf-8")
+    upgrade_harness.remove_retired_files(tmp_path, dry_run=False)
+    assert "scenario_report" in (tests / "conftest.py").read_text(encoding="utf-8")
+    assert (tests / ".scenario_report.sha256").exists()
+
+
+def test_retired_list_is_read_from_the_given_path(tmp_path):
+    lst = tmp_path / "list.json"
+    blob = b"x\n"
+    lst.write_text(json.dumps({"files": [{"path": "a.txt", "sha256_v0_11_0": hashlib.sha256(blob).hexdigest()}]}))
+    target = tmp_path / "t"
+    target.mkdir()
+    (target / "a.txt").write_bytes(blob)
+    removed, _ = upgrade_harness.remove_retired_files(target, dry_run=False, retired_list=lst)
+    assert removed == ["a.txt"]

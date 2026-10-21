@@ -18,6 +18,10 @@ When a skill produces a report file in `${OUTPUT_DIR}` (see product-design/conve
 - *spawned* (optional): `spawned: <type>-<id>[, ...]` -- artifacts created from this one (updated by post-skill).
 - *files*: files relevant to the skill output.
 
+### Plan sections (format v3)
+
+A plan with `plan_format_version: 3` carries, once per plan, between `## Agent interpretation` and `## Steps`: `## Intenção`, `## Requisitos`, `## Casos de uso`, `## Retradução` and `## Nas suas palavras`, and a `Covers:` line on every step with non-N/A `Tests:`. The shape and the rules are in `general/plan-intent-and-cases.md` (PIC); the interview that fills them is `general/plan-language-game.md` (JDL); `check_plan_intent.py` checks them. Plans in v1 and v2 keep their own sections and are never rewritten.
+
 ### Research tags (optional)
 
 Research reports may include a `tags:` line after the header and any `source:`/`spawned:` lines. Tags are lowercase kebab-case slugs, comma-separated, enabling topic discovery (e.g., `grep "tags:.*notification-system" _output/research-logs/ _output/advisory-logs/`). Example:

@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "description": "Files that harness v0.11.0 installed for the Gherkin ladder (D-004, superseded by D-006). The upgrade removes each one only when it exists in the target and its sha256 equals the v0.11.0 one; an edited copy is kept and reported as 'mantido (editado)'. Hashes from the v0.11.0 distribution tree (git show v0.11.0:<path>).",
+  "source_tag": "v0.11.0",
+  "files": [
+    {
+      "path": ".claude/skills/scripts/check_intent.py",
+      "sha256_v0_11_0": "f817bfa8dd484b91c9fde7535bbf41be6fe408805e6c1a3ee80b13839dce0ec4"
+    },
+    {
+      "path": ".claude/skills/scripts/check_specify.py",
+      "sha256_v0_11_0": "a45b453a93b366df1248f723b2e37f3166bc396c0e49593d12ded48b2a5fae39"
+    },
+    {
+      "path": ".claude/skills/scripts/check_features.py",
+      "sha256_v0_11_0": "83f0f1d7ab155d2de542eeda8d3fa32f6bec7c99364aeb6d2769ec8ac2892cab"
+    },
+    {
+      "path": ".claude/skills/scripts/check_plan_scenarios.py",
+      "sha256_v0_11_0": "0f8403e18f3eaeba99c895cf502aad3398bae42f1dfb18580441ec83148e376a"
+    },
+    {
+      "path": ".claude/skills/scripts/build_brief.py",
+      "sha256_v0_11_0": "dd84e58e42e92a457fcb8208a06eac84de3a9b70bc34c15ee4b12833c7758667"
+    },
+    {
+      "path": ".claude/skills/scripts/build_checks.py",
+      "sha256_v0_11_0": "8967f291bee030f9c3bbf68bf0a8a640cc31738aaf739b1e99d7ad8598ba56e2"
+    },
+    {
+      "path": ".claude/skills/scripts/cycle_adherence.py",
+      "sha256_v0_11_0": "153964b5db875b3575c3f451da2d26d494d6d4fcf2f547cbcf92911853602c1f"
+    },
+    {
+      "path": ".claude/skills/scripts/drift_report.py",
+      "sha256_v0_11_0": "ffc4a278d8cfa2ca2141ab384b5a14b15522a252133aedbffb19000b43cd9969"
+    },
+    {
+      "path": ".claude/references/general/gherkin-spec-format.md",
+      "sha256_v0_11_0": "dd8c004ab0af3f833be705c4102fd41da6829adbcbffee1e0c6b3cb1b54c0bfd"
+    },
+    {
+      "path": ".claude/references/general/specify-phase.md",
+      "sha256_v0_11_0": "ae869c82dc695decfab0ecaaa06fdd042d5e986af0a539f74984a6d82e5adf00"
+    },
+    {
+      "path": ".claude/references/general/plan-from-scenarios.md",
+      "sha256_v0_11_0": "346f035457d9c99bdad96825fa75843eb2201e3f7ad15e196939ee5392da5a57"
+    },
+    {
+      "path": ".claude/references/general/grill-phase.md",
+      "sha256_v0_11_0": "468ba9da28212d240adad28fd7e104ad37f59e4801272c4cd616fb369d7635ac"
+    },
+    {
+      "path": ".claude/references/general/extended-cycle-contract.md",
+      "sha256_v0_11_0": "683c0601f8cf999182ceda55d06769f5b4ee0305eaa5fab1afa7aeebc635b0ed"
+    },
+    {
+      "path": ".claude/references/general/drift-metric.md",
+      "sha256_v0_11_0": "ba2e86846ce1cb6fad3142ee6dce367f6de03d6c5e35dbddee2f231db4a8ab3d"
+    },
+    {
+      "path": ".claude/references/general/drift-control-protocol.md",
+      "sha256_v0_11_0": "9606748fe5a23f983cd0390511ecf840a9b6fded1da4e5227b0259b537ea1ff7"
+    },
+    {
+      "path": ".claude/references/general/drift-report.md",
+      "sha256_v0_11_0": "3f7469dfd38768859e2c4b3aa03bd9778ca5ad8f5ccaf63f44b42d54525f7692"
+    },
+    {
+      "path": ".claude/references/general/implement-test-first.md",
+      "sha256_v0_11_0": "fbe2e657687669d725c5ebe0aca2314015b1f0a35126699672e756f157c63f89"
+    },
+    {
+      "path": ".claude/references/template/feature-layout.md",
+      "sha256_v0_11_0": "99573ca06adac4ededf4240a4eb377228e2b31e72724189c2eed7efb458b13e3"
+    },
+    {
+      "path": ".claude/references/template/intent.md",
+      "sha256_v0_11_0": "68e52dda350e9aa49e8686fe4d750f50a35a295e3b0cc8f37ed3650c05b6e8c8"
+    },
+    {
+      "path": ".claude/references/template/pilot-run-record.md",
+      "sha256_v0_11_0": "6e5374abdf853a65c8ba07cf5633eaa528d096b61f54d8397b0f0b7c343c23a5"
+    },
+    {
+      "path": ".claude/references/template/feature-example/README.md",
+      "sha256_v0_11_0": "5145ccc2c395a5fe5d53ed4c50a1330412ec3ef4de08370334607b6103cdf774"
+    },
+    {
+      "path": ".claude/references/template/feature-example/conftest.py.example",
+      "sha256_v0_11_0": "272d82a9f96c9ba7a7b7e2e997503566b43d383b2a8b565399404143d0b32d7e"
+    },
+    {
+      "path": ".claude/references/template/feature-example/cucumber_states.py.example",
+      "sha256_v0_11_0": "ec39568c0f96580a8bb386c32c72446b7fc7fef495844e421b0d3fbd6b6ff015"
+    },
+    {
+      "path": ".claude/references/template/feature-example/features/task-list/intent.md",
+      "sha256_v0_11_0": "f6bed09b552724a7957bfe84ca4b65a5798e88f59635485314bc3e2c42a0d2e7"
+    },
+    {
+      "path": ".claude/references/template/feature-example/features/task-list/manage-tasks.feature",
+      "sha256_v0_11_0": "d6879e5b398182c5933a079136a5e38450f5d0f3798f90dd88e5310cc7dabe0c"
+    },
+    {
+      "path": ".claude/references/template/feature-example/test_task_list.py.example",
+      "sha256_v0_11_0": "5bfdebc36f8298efc4056199c047d7e672e3628eda26616166548693fb21788e"
+    },
+    {
+      "path": ".claude/references/template/bdd/python/scenario_report.py.example",
+      "sha256_v0_11_0": "043098a5f1b381b2f9bb96adfb374b3f9c0bfb4b53ff323e69e7f678ac8f7f02"
+    },
+    {
+      "path": ".claude/agents/scenario-tester.md",
+      "sha256_v0_11_0": "a1b4d141a576eb331ed3fd1cdf36f61e06ee43a6b94154815359c9d4e98337fe"
+    },
+    {
+      "path": ".claude/agents/hardener.md",
+      "sha256_v0_11_0": "8e6e9a994b29130c5ae90dc8110eff4c2e613aa2540fbd18f2c6bf8da2f1ae7f"
+    },
+    {
+      "path": ".claude/agents/cleaner.md",
+      "sha256_v0_11_0": "170293daa27ebc7e17e6ba89b6536b34a80f07cd368e1fb842b6844cfe62de0f"
+    },
+    {
+      "path": "tests/scenario_report.py",
+      "sha256_v0_11_0": "043098a5f1b381b2f9bb96adfb374b3f9c0bfb4b53ff323e69e7f678ac8f7f02",
+      "installed_from": ".claude/references/template/bdd/python/scenario_report.py.example"
+    }
+  ]
+}

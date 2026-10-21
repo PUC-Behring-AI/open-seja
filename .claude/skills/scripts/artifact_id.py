@@ -13,7 +13,7 @@ Lifecycle: active
 
 The identity of an artifact is a ULID (26 chars, Crockford base32: 48-bit
 millisecond timestamp + 80 random bits) generated locally, without
-coordination (D-010). The visible ID is ``YYYYMMDD-<last 6 chars, lowercase>``,
+coordination (D-005). The visible ID is ``YYYYMMDD-<last 6 chars, lowercase>``,
 with the date derived from the ULID itself, so ``id`` is a pure function of
 ``uid``. Legacy artifacts keep their six-digit IDs; the grammar is additive:
 ``ARTIFACT_ID`` matches both formats and has no capture groups, so callers can

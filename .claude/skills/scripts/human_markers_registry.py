@@ -71,7 +71,7 @@ HUMAN_MARKERS_FILES: list[str] = [
 # marker on the next line.
 
 # Plan reference in markers: legacy ``plan-NNNNNN`` or ULID-era
-# ``plan-YYYYMMDD-xxxxxx`` (plan-000019, D-010). Defined once in artifact_id.
+# ``plan-YYYYMMDD-xxxxxx`` (plan-000019, D-005). Defined once in artifact_id.
 _PLAN_REF = rf"plan-{ARTIFACT_ID}"
 
 # The exact Source line apply_marker.py writes under a DECISION_APPEND entry

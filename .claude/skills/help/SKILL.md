@@ -38,9 +38,8 @@ When invoked without arguments (`/help`), display a curated overview of all user
 - **Quality & review** — `/critique`
 - **Communicate** — `/communicate`, `/onboard`
 - **Housekeeping** — `/qa-log`
-- **Ciclo default** — the guide `docs/how-to/ciclo-default.pt-BR.md` (in Portuguese): grill, specify, plan v2, test-first and divergence per step, with the ladder diagram; the specify switch (`SPECIFY_DEFAULT`, `/plan --with-specify`, `/plan --without-specify "<motivo>"`) is in its section "Ligar e desligar a especificação"
 
-For each category, show the skill names and a one-sentence summary. After the overview, show available options and then ask the user what they'd like to explore:
+For each category, show the skill names and a one-sentence summary. For `/plan`, the summary says that it plays a language game with you (short scenes you accept, refuse or fix) and writes the intention, the requirements, the use cases and the tests for each requirement inside the plan, before any code. After the overview, show available options and then ask the user what they'd like to explore:
 
 **Options:**
 - `/help <skill>` — Full details for a specific skill (guide, arguments, related skills)

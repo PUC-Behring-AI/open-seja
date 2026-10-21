@@ -1,3 +1,0 @@
-$ check_specify.py --feature contas-da-semana --status
-features/contas-da-semana: cenários approved
-exit 0

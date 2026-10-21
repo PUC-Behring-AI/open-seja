@@ -1,12 +1,12 @@
 ---
 name: implement
 description: Execute a previously generated plan to add a feature, fix a bug, or refactor code. Use when user mentions "implement", "execute plan", or "run plan".
-argument-hint: "<planned-item-id> [--manual] [--roadmap <roadmap-id>] [--pending] [--checkpoint wave|plan|none] [--max-iterations N] [--dry-run] [--skip-checks] [--skip-docs] [--pipeline]"
+argument-hint: "<planned-item-id> [--manual] [--roadmap <roadmap-id>] [--pending] [--checkpoint wave|plan|none] [--max-iterations N] [--dry-run] [--skip-checks] [--skip-docs]"
 compatibility: "Designed for Claude Code with the SEJA harness"
 metadata:
   last-updated: 2026-03-27 12:00 UTC
   version: 1.0.0
-  plan_format_version: 1
+  plan_format_version: 3  # reads 1 and 3; 2 (cycle with scenarios) runs in manual mode, ignoring Scenarios
   category: planning
   context_budget: heavy
   eager_references:
@@ -22,11 +22,10 @@ metadata:
     - product-design/standards.md
     - product-design/security-checklists.md
     - general/review-perspectives.md
+    - general/plan-intent-and-cases.md
 ---
 
 > Overview: see [./SKILL-quickguide.md](./SKILL-quickguide.md)
-
-> Extended cycle (grill, specify, test-first): see .claude/references/general/extended-cycle-contract.md. Test-first per scenario (plan v2) and `--pipeline`: see .claude/references/general/implement-test-first.md.
 
 ## Arguments
 
@@ -40,7 +39,6 @@ metadata:
 | `--checkpoint <wave\|plan\|none>` | No | Checkpoint granularity for roadmap mode. Default: `wave` |
 | `--skip-checks` | No | Skip the automatic quality checks (`/critique validate` + `/critique review`) at the end |
 | `--skip-docs` | No | Skip the automatic documentation generation at post-skill step 2b. Files an `update-documentation` pending entry instead |
-| `--pipeline` | No | Plan v2 only: after the green of each scenario step, run the Cleaner (CRAP above target) and the Hardener (surviving mutants). Refused in one sentence on a v1 plan |
 | `--pending` | No | Execute all pending plans by generating a lightweight roadmap and running roadmap mode. Mutually exclusive with `<planned-item-id>` and `--roadmap` |
 
 # Execute a plan
@@ -91,18 +89,19 @@ Dispatch: `--pending` -> pending; else `--roadmap` -> roadmap; else `--manual` -
 | Roadmap (`--roadmap <id>`) | Executing every plan in a roadmap without per-plan invocation. | Each plan runs auto mode in a fresh subagent; pauses between waves per `--checkpoint`. |
 | Pending (`--pending`) | Clearing all pending implement entries in one go. | Generates a lightweight roadmap from pending entries, then dispatches to roadmap mode. |
 
-**Flags.** `--max-iterations N` caps auto-mode iterations (default 20; ignored in manual). `--dry-run` previews per-step file creates/modifies without writing. `--skip-checks` skips the final quality gate. `--pipeline` adds the Cleaner and Hardener passes to the test-first steps of a v2 plan (`general/implement-test-first.md`, ITF-010, ITF-011). `--skip-docs` suppresses the post-skill step 2b auto-doc `AskUserQuestion` (goes straight to Skip; files an `update-documentation` pending entry) -- use when documenting in a separate session or for harness-internal-only plans.
+**Flags.** `--max-iterations N` caps auto-mode iterations (default 20; ignored in manual). `--dry-run` previews per-step file creates/modifies without writing. `--skip-checks` skips the final quality gate. `--skip-docs` suppresses the post-skill step 2b auto-doc `AskUserQuestion` (goes straight to Skip; files an `update-documentation` pending entry) -- use when documenting in a separate session or for harness-internal-only plans.
 
 ## Manual Mode -- Skill-specific Instructions
 
 1. Run /pre-skill "implement" $ARGUMENTS[0] to add general instructions to the context window.
 
-2. Read the planned item from the plan file. A `plan_format_version: 2` plan is checked first as in Auto Mode Phase 0 step 3 (`check_plan_scenarios.py`; exit != 0 stops, without fixing the plan). Its `test-first` steps follow `general/implement-test-first.md` § Procedimento in the current context, with the same tool checks (no role subagents).
+2. Read the planned item from the plan file. Apply the version check of Auto Mode Phase 0 step 3 (v3: run `check_plan_intent.py` first; v2: one-sentence warning; other values: stop).
 
 3. **Load references on demand** based on what the step touches:
 
    | When step touches | Load |
    |-------------------|------|
+   | a plan v3 step with `Covers:` | `general/plan-intent-and-cases.md` (PIC-008) |
    | backend / frontend / testing / i18n files | `product-design/standards.md` |
    | auth or validation | `product-design/security-checklists.md` |
    | quality gate (step 8) | `general/review-perspectives.md` |
@@ -113,7 +112,7 @@ Dispatch: `--pending` -> pending; else `--roadmap` -> roadmap; else `--manual` -
 
 6. Document every file, constant, class, method, and key code fragment created or modified. Save the to-do list.
 
-7. **Test generation** (skipped if `--skip-checks`): for each step with a non-N/A `Tests` field, write or update tests per `product-design/standards.md § Testing`. Absent field (pre-format plans) -- infer from modified files. If a bug is found, record a new plan, do not execute it, and alert the user when concluding. Revise or eliminate obsolete tests. **Note (mode split):** manual mode retains test-after ordering by design. The user's presence provides the quality oversight that the TDD red-green cycle substitutes for in auto mode. Do not invert this order in manual mode.
+7. **Test generation** (skipped if `--skip-checks`): for each step with a non-N/A `Tests` field, write or update tests per `product-design/standards.md § Testing`. Absent field (pre-format plans) -- infer from modified files. If a bug is found, record a new plan, do not execute it, and alert the user when concluding. Revise or eliminate obsolete tests. **Note (mode split by plan version):** for a plan v1 (or v2), manual mode retains test-after ordering by design: the user's presence provides the quality oversight that the TDD red-green cycle substitutes for in auto mode, so do not invert this order there. **For a plan v3, the test per requirement comes first in manual mode too**: in step 5, for each step with `Covers:`, before writing the code, write one test per covered `REQ-<slug>-NNN` that cites the ID in its name or docstring (e.g. `test_req_contas_001_paid_bill_moves_to_paid_list`), run it, and see it fail for the right reason (the behavior is missing, not an import or syntax error); then write the code until it is green. If such a test passes before the code, stop the step and tell the user (the requirement may already exist).
 
 8. Run the [Quality Gate](#quality-gate) (skipped if `--skip-checks`).
 
@@ -134,7 +133,7 @@ Dispatch: `--pending` -> pending; else `--roadmap` -> roadmap; else `--manual` -
 
 2. Read the planned item from the plan file.
 
-3. Parse the Steps section. Each step has structured metadata (title, description, Files, References, Verify, checkbox; optional: Depends on, Docs, Traces). **Version check**: read the plan header for `plan_format_version`. `1`: proceed as before. `2`: run `python3 .claude/skills/scripts/check_plan_scenarios.py <plan file>`; exit != 0 stops the run -- report the findings, do not fix the plan and do not invent scenarios (the fix is the `/plan`'s; `general/plan-from-scenarios.md`, PFS-011, PFS-012); exit 0 then runs `python3 .claude/skills/scripts/build_checks.py route <plan file> [--pipeline] --json` and, with `Specify: approved`, `check_specify.py <root> --feature <slug> --status --json`: a status other than `approved` stops with "os cenários estão desatualizados: refaça a specify". `--pipeline` on a v1 plan: `route` exits 1; say its sentence and stop with no action (v1 otherwise runs exactly as before). Absent: warn and fall back to manual mode (plans without version metadata predate the structured step format). Any other value (e.g. `3`): STOP with the message "plan_format_version N não suportada"; do not fall back to manual mode.
+3. Parse the Steps section. Each step has structured metadata (title, description, Files, References, Verify, checkbox; optional: Depends on, Docs, Traces). **Version check**: read the plan header for `plan_format_version`. `1`: proceed as before. `3` (plan with intention, requirements and use cases, D-006): run `python3 .claude/skills/scripts/check_plan_intent.py <plan file>` first; exit != 0 stops the run -- report the findings and do not fix the plan (the fix is the `/plan`'s); exit 0 proceeds, and every step with `Covers:` follows the per-requirement test order in step 8. `2` (plan of the cycle with Gherkin scenarios, from the archived lineage): say "plano do ciclo com Gherkin: rodo em manual e ignoro Scenarios" and fall back to manual mode. Absent: warn and fall back to manual mode (plans without version metadata predate the structured step format). Any other value: STOP with "plan_format_version N não suportada"; do not fall back.
 
 4. Create the progress file if missing, with header (verbatim):
    ```markdown
@@ -158,8 +157,7 @@ For each step in the execution queue, up to `--max-iterations` (default 20):
 
 7. **Pick the next step**: select the next eligible step (all dependencies complete). If all steps are done, exit to Phase 2. If only blocked steps remain, pause and ask the user for guidance.
 
-8. **Build the subagent prompt** for a `general-purpose` agent. Include: the step's full description (title + body -- self-contained per plan conventions), **Files**, **Verify**, **Tests** (if non-N/A; absent -> infer from modified files), **Interface** (if present and non-N/A), and the progress-file content. Tell the subagent to read `product-design/conventions.md`, `.claude/references/general/coding-standards.md`, and **only** the `product-design/` files named in the step's References (e.g., `product-design/standards.md § Backend`) -- do not load all 9. Action contract: if `Tests:` is non-N/A, follow the TDD red-green cycle -- (a) write a failing test per `Tests:` (if `Interface:` is present, use it as the type contract; if the test passes before any implementation, report PARTIAL with note "test already passes -- possible scope overlap with existing code"); (b) implement the step until the test passes (green phase); (c) run test commands from `product-design/conventions.md` to confirm **Verify**; on failure, retry the green phase up to 3 times before returning PARTIAL. If `Tests:` is N/A or absent (pre-format plans), use the legacy order: implement the step; infer and write/update tests from modified files; run test commands to confirm **Verify**; on failure, retry up to 3 times before returning PARTIAL. Commit message: `plan-<id> step <N>: <step title>`. Append discoveries / gotchas / useful context to the progress file; promote reusable patterns to "Codebase Patterns" at the top. Quality gate (after Verify is confirmed): if `GATE_FAST_CMD` in `product-design/conventions.md` is empty, record the note with `--gate not-installed`. If this step created or modified no `.py` file, skip the gate and say so in the note. Otherwise run `GATE_FAST_CMD --files <those .py files> > "$QUALITY_DIR/plan-<id>-step-<N>-try-<k>.json"`. The step is SUCCESS only if `status` is PASS. On FAIL or ERROR, read the findings, fix, and re-run; at most 3 gate runs in total. A commit blocked by the commit hook counts as one run. After the third failing run, report PARTIAL and append the last findings verbatim to the progress file. Never edit `quality-baseline.json` or the `GATE_*` lines of `conventions.md`, never pass `--accept-baseline`, `--no-verify` or `-c core.hooksPath`, and never add `skip`/`xfail`/`no cover`/`no mutate` without a reason. Pass the last JSON path and the run count to `step_notes.py append --gate-json <path> --gate-attempts <k>`. Before committing, write a reflection-on-action note with `python3 .claude/skills/scripts/step_notes.py append --plan <id> --step <N> --title "<step title>" --happened ... --deviated ... --less-sure ...`, in past tense, describing what you observed, not what anyone should do. Gate field: if you ran the quality gate in this step, pass `--gate-json <last gate JSON> --gate-attempts <k>`; else `--gate not-installed` when `GATE_FAST_CMD` is empty, otherwise `--gate not-run`. Stage the progress file in the step commit. Write the note for SUCCESS, PARTIAL and FAILED alike; a FAILED step's note is the most valuable one. Report **SUCCESS** (verify met), **PARTIAL** (some progress, blocked), or **FAILED**; on PARTIAL/FAILED, describe the blocker in the progress file.
-   **Test-first steps (plan v2).** A step that `route` marks `test-first` does not use the contract above: run `general/implement-test-first.md` § Procedimento (PRÉ, RED, GREEN, [CLEAN, HARD with `--pipeline`], REC), with one fresh subagent per role invocation (`scenario-tester`, then a `general-purpose` Coder, then `cleaner`, `hardener`), each fed only its `build_brief.py` briefing; every transition is an exit code of `build_checks.py` or the gate; at most 3 tries per phase and 10 invocations per step. On a ceiling, a persistent freeze or scope violation, or a scenario already green before the code: status `ESCALATED`, write phase, try and last JSON to the progress file, stop, and ask with AskUserQuestion using the four options of ITF-014 (never offer to move the baseline). A `no-scenario` step keeps the contract above and is recorded with `build_checks.py record` (`mode: no-scenario`).
+8. **Build the subagent prompt** for a `general-purpose` agent. Include: the step's full description (title + body -- self-contained per plan conventions), **Files**, **Verify**, **Tests** (if non-N/A; absent -> infer from modified files), **Interface** (if present and non-N/A), and the progress-file content. Tell the subagent to read `product-design/conventions.md`, `.claude/references/general/coding-standards.md`, and **only** the `product-design/` files named in the step's References (e.g., `product-design/standards.md § Backend`) -- do not load all 9. Action contract: in a plan v3, a step with `Covers:` gets one failing test per covered `REQ-<slug>-NNN`, citing the ID in the test name or docstring, red for the right reason before any code (PIC-008); include the requirement lines and their use cases from the plan's `## Requisitos` and `## Casos de uso` in the prompt. If `Tests:` is non-N/A, follow the TDD red-green cycle -- (a) write a failing test per `Tests:` (if `Interface:` is present, use it as the type contract; if the test passes before any implementation, report PARTIAL with note "test already passes -- possible scope overlap with existing code"); (b) implement the step until the test passes (green phase); (c) run test commands from `product-design/conventions.md` to confirm **Verify**; on failure, retry the green phase up to 3 times before returning PARTIAL. If `Tests:` is N/A or absent (pre-format plans), use the legacy order: implement the step; infer and write/update tests from modified files; run test commands to confirm **Verify**; on failure, retry up to 3 times before returning PARTIAL. Commit message: `plan-<id> step <N>: <step title>`. Append discoveries / gotchas / useful context to the progress file; promote reusable patterns to "Codebase Patterns" at the top. Quality gate (after Verify is confirmed): if `GATE_FAST_CMD` in `product-design/conventions.md` is empty, record the note with `--gate not-installed`. If this step created or modified no `.py` file, skip the gate and say so in the note. Otherwise run `GATE_FAST_CMD --files <those .py files> > "$QUALITY_DIR/plan-<id>-step-<N>-try-<k>.json"`. The step is SUCCESS only if `status` is PASS. On FAIL or ERROR, read the findings, fix, and re-run; at most 3 gate runs in total. A commit blocked by the commit hook counts as one run. After the third failing run, report PARTIAL and append the last findings verbatim to the progress file. Never edit `quality-baseline.json` or the `GATE_*` lines of `conventions.md`, never pass `--accept-baseline`, `--no-verify` or `-c core.hooksPath`, and never add `skip`/`xfail`/`no cover`/`no mutate` without a reason. Pass the last JSON path and the run count to `step_notes.py append --gate-json <path> --gate-attempts <k>`. Before committing, write a reflection-on-action note with `python3 .claude/skills/scripts/step_notes.py append --plan <id> --step <N> --title "<step title>" --happened ... --deviated ... --less-sure ...`, in past tense, describing what you observed, not what anyone should do. Gate field: if you ran the quality gate in this step, pass `--gate-json <last gate JSON> --gate-attempts <k>`; else `--gate not-installed` when `GATE_FAST_CMD` is empty, otherwise `--gate not-run`. Stage the progress file in the step commit. Write the note for SUCCESS, PARTIAL and FAILED alike; a FAILED step's note is the most valuable one. Report **SUCCESS** (verify met), **PARTIAL** (some progress, blocked), or **FAILED**; on PARTIAL/FAILED, describe the blocker in the progress file.
 
 9. **Spawn the subagent** and wait for completion.
 
@@ -177,7 +175,7 @@ For each step in the execution queue, up to `--max-iterations` (default 20):
 
 ### Phase 2: Wrap-up
 
-12. Run the [Quality Gate](#quality-gate) (skipped if `--skip-checks`). Test failures here may be fixed in-context (small targeted fix). Plan v2 with `Specify: approved`: first run the end-of-plan block of `general/implement-test-first.md` § Procedimento item 9 (`full` gate, `uncovered`, `record --step 0`, `export`, `demo` shown to the user, M1 freeze), even under `--skip-checks`.
+12. Run the [Quality Gate](#quality-gate) (skipped if `--skip-checks`). Test failures here may be fixed in-context (small targeted fix).
 
 13. Mark the plan id with `# DONE | <datetime> |`. Save. Invoke `python .claude/skills/scripts/pending.py done --source plan-<id> --type implement` (idempotent; one-line warning on non-zero exit; do not block -- post-skill step 2g.iv is the safety net). If the user aborted with steps still unchecked, apply the Manual Mode step 9 partial-stop rule instead (here: summary at step 14, skip step 15, step 16 still runs).
 

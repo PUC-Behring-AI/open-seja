@@ -1,6 +1,0 @@
-{
-  "descricao": "features/<slug>/ só com .feature, varredura: sai 0 sem achado",
-  "args": [],
-  "exit_code": 0,
-  "findings": []
-}

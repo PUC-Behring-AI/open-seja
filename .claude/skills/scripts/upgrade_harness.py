@@ -25,6 +25,9 @@ The script is idempotent — safe to run multiple times.
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
+import re
 import shutil
 import subprocess
 import sys
@@ -238,11 +241,7 @@ def collect_source_files(source: Path) -> list[Path]:
             subdir = ar_dir / subdir_name
             if subdir.is_dir():
                 for sub in sorted(subdir.rglob("*")):
-                    if not sub.is_file() or "__pycache__" in sub.parts:
-                        continue
-                    # general/ holds only .md/.json; template/ also holds gate.py, *.example, *.toml, *.yaml
-                    # (plan-000015 Step 9: the test-first plugin template must reach upgraded projects).
-                    if subdir_name == "template" or sub.suffix in (".md", ".json"):
+                    if sub.is_file() and sub.suffix in (".md", ".json"):
                         files.append(sub)
 
     # Metadata
@@ -255,20 +254,9 @@ def collect_source_files(source: Path) -> list[Path]:
 
 
 def is_preserved(rel_path: str) -> bool:
-    """Check if a relative path should be preserved (never overwritten).
-
-    The PKB layer (inbox/, logs/, Templates/, root Objetivos.md and index.md) is a
-    defensive guard: collect_source_files only reads .claude/ of the source, so these
-    paths never reach the copy loop today.
-    """
+    """Check if a relative path should be preserved (never overwritten)."""
     parts = Path(rel_path).parts
     filename = parts[-1] if parts else ""
-
-    # PKB layer: personal notes and logs of the project (plan-000020)
-    if parts and parts[0] in ("inbox", "logs", "Templates"):
-        return True
-    if rel_path in ("Objetivos.md", "index.md"):
-        return True
 
     # product-design/ directory (v4 layout: renamed from project-design in v0.3.0)
     # Also guard the old name during the upgrade window before migration 0003 runs.
@@ -443,6 +431,124 @@ def migrate_references_split(target: Path, dry_run: bool) -> list[str]:
 # ---------------------------------------------------------------------------
 # Main upgrade logic
 # ---------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------
+# Retired files (plan-20261020-688kjs, D-006): what v0.11.0 installed for the
+# Gherkin ladder. Removed only when the target copy is byte-identical to the
+# v0.11.0 one; an edited copy is kept. features/ and the PKB are never touched.
+# ---------------------------------------------------------------------------
+
+RETIRED_FILES_JSON = Path(__file__).resolve().parent / "retired-files.json"
+FEATURES_WARNING = (
+    "O ciclo não lê mais features/ nem .feature; nada foi apagado no seu projeto."
+)
+PKB_WARNING = (
+    "A camada PKB saiu do harness: o post-skill não captura mais no inbox; "
+    "guarde a etapa 7f como desvio local se quiser mantê-la."
+)
+# v0.11.0 `build_checks.py install-plugin` hooked the plugin into tests/conftest.py
+# and wrote a stamp next to it; both go when the plugin goes.
+SCENARIO_PLUGIN_REL = "tests/scenario_report.py"
+SCENARIO_PLUGIN_LINE = 'pytest_plugins = ["scenario_report"]'
+SCENARIO_PLUGIN_STAMP_REL = "tests/.scenario_report.sha256"
+_PKB_DIR_ROW = re.compile(r"^\|\s*`PKB_DIR`\s*\|\s*([^|]*?)\s*\|", re.MULTILINE)
+
+
+def load_retired_files(path: Path = RETIRED_FILES_JSON) -> list[dict]:
+    """Return the retired-file entries ({path, sha256_v0_11_0}); [] if the list is missing."""
+    if not path.is_file():
+        return []
+    return list(json.loads(path.read_text(encoding="utf-8")).get("files", []))
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _prune_empty_dirs(start: Path, stop: Path) -> None:
+    current = start
+    while current != stop and current.is_dir() and not any(current.iterdir()):
+        current.rmdir()
+        current = current.parent
+
+
+def unhook_scenario_plugin(target: Path, dry_run: bool) -> list[str]:
+    """Drop the plugin line from tests/conftest.py and the plugin stamp. Returns what changed.
+
+    Only the exact line v0.11.0 wrote is removed; a conftest left empty is deleted.
+    """
+    prefix = "[DRY-RUN] " if dry_run else ""
+    changed: list[str] = []
+    conftest = target / "tests" / "conftest.py"
+    if conftest.is_file():
+        lines = conftest.read_text(encoding="utf-8-sig").splitlines()
+        rest = [ln for ln in lines if ln.strip() != SCENARIO_PLUGIN_LINE]
+        if len(rest) != len(lines):
+            if not dry_run:
+                if any(ln.strip() for ln in rest):
+                    conftest.write_text("\n".join(rest) + "\n", encoding="utf-8")
+                else:
+                    conftest.unlink()
+            changed.append("tests/conftest.py")
+            print(f"OK: {prefix}plugin desligado em tests/conftest.py")
+    stamp = target / SCENARIO_PLUGIN_STAMP_REL
+    if stamp.is_file():
+        if not dry_run:
+            stamp.unlink()
+        changed.append(SCENARIO_PLUGIN_STAMP_REL)
+        print(f"OK: {prefix}removido {SCENARIO_PLUGIN_STAMP_REL}")
+    if not dry_run:
+        _prune_empty_dirs(target / "tests", target)
+    return changed
+
+
+def remove_retired_files(
+    target: Path, dry_run: bool, retired_list: Path = RETIRED_FILES_JSON
+) -> tuple[list[str], list[str]]:
+    """Remove ladder files identical to v0.11.0; keep edited ones. Returns (removed, kept).
+
+    `retired_list` is the list of the release being installed (the source tree's
+    retired-files.json), not the one next to an older copy of this script.
+    """
+    prefix = "[DRY-RUN] " if dry_run else ""
+    removed: list[str] = []
+    kept: list[str] = []
+    for entry in load_retired_files(retired_list):
+        rel = entry["path"]
+        dest = target / rel
+        if not dest.is_file():
+            continue
+        if _sha256(dest) != entry["sha256_v0_11_0"]:
+            kept.append(rel)
+            print(f"WARN: {prefix}mantido (editado) {rel}")
+            continue
+        if not dry_run:
+            dest.unlink()
+            _prune_empty_dirs(dest.parent, target)
+        removed.append(rel)
+        print(f"OK: {prefix}removido {rel}")
+    if SCENARIO_PLUGIN_REL in removed:
+        removed.extend(unhook_scenario_plugin(target, dry_run))
+    return removed, kept
+
+
+def _pkb_dir_filled(target: Path) -> bool:
+    conventions = target / "product-design" / "conventions.md"
+    if not conventions.is_file():
+        return False
+    match = _PKB_DIR_ROW.search(conventions.read_text(encoding="utf-8"))
+    return bool(match and match.group(1).strip("` "))
+
+
+def ladder_warnings(target: Path) -> list[str]:
+    """One-sentence warnings for a client that used the ladder or the PKB layer."""
+    warnings: list[str] = []
+    if (target / "features").is_dir():
+        warnings.append(FEATURES_WARNING)
+    if _pkb_dir_filled(target):
+        warnings.append(PKB_WARNING)
+    return warnings
 
 
 def run_upgrade(
@@ -622,17 +728,18 @@ def run_upgrade(
                 )
                 print(f"OK: {prefix}Removed retired skill {harness_dir}/skills/{skill_name}/")
 
-    # --- PKB layer hint ---
-    try:
-        from pkb_inbox import pkb_layer_present
-    except ImportError:
-        pkb_layer_present = None
-    if pkb_layer_present is not None and pkb_layer_present(target):
-        print()
-        print(
-            f"INFO: {prefix}camada PKB detectada: rode `pkb_inbox.py init` "
-            "para acrescentar templates novos sem sobrescrever"
-        )
+    # --- Remove retired ladder files (v0.11.0) and warn (plan-20261020-688kjs) ---
+    source_list = source_root / ".claude" / "skills" / "scripts" / RETIRED_FILES_JSON.name
+    removed_files, kept_files = remove_retired_files(
+        target,
+        dry_run=dry_run,
+        retired_list=source_list if source_list.is_file() else RETIRED_FILES_JSON,
+    )
+    report_updated.extend(f"removido {rel}" for rel in removed_files)
+    report_manual.extend(f"mantido (editado) {rel}" for rel in kept_files)
+    for warning in ladder_warnings(target):
+        print(f"WARN: {warning}")
+        report_manual.append(warning)
 
     # --- Run pending migrations ---
     print()

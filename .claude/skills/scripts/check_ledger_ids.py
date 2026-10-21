@@ -11,7 +11,7 @@ check_ledger_ids.py -- Detect duplicate and orphan IDs in the SEJA ledger.
 Invocation: agent-invoked, hook-ci
 Lifecycle: active
 
-Checks (D-010):
+Checks (D-005):
   1. duplicate-id: two primary artifacts in ``OUTPUT_DIR/**/*.md`` with the
      same ID in the file name (the type may be hyphenated, e.g.
      ``mob-session-<id>-<slug>.md``) (companions ``<type>-<id>-qa-*.md`` and
