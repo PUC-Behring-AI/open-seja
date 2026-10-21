@@ -37,17 +37,20 @@ UPGRADE = REPO_ROOT / ".claude" / "skills" / "scripts" / "upgrade_harness.py"
 SCHEMA_VERSION = 1
 
 _REMOVED_RE = re.compile(r"^OK: removido (\S+)$")
+_HOOK_RE = re.compile(r"^OK: plugin desligado em (\S+)$")
 _KEPT_RE = re.compile(r"^WARN: mantido \(editado\) (\S+)$")
 _COPIED_RE = re.compile(r"^OK: Updated (\S+)$")
 _WARN_RE = re.compile(r"^WARN: (?!mantido \(editado\))(.+)$")
 
 
 def parse_output(stdout: str) -> dict:
-    report: dict = {"removed": [], "kept": [], "copied": [], "warnings": []}
+    report: dict = {"removed": [], "removed_hooks": [], "kept": [], "copied": [], "warnings": []}
     for raw in stdout.splitlines():
         line = raw.strip()
         if m := _REMOVED_RE.match(line):
             report["removed"].append(m.group(1))
+        elif m := _HOOK_RE.match(line):
+            report["removed_hooks"].append(m.group(1))
         elif m := _KEPT_RE.match(line):
             report["kept"].append(m.group(1))
         elif m := _COPIED_RE.match(line):
@@ -57,12 +60,23 @@ def parse_output(stdout: str) -> dict:
     return report
 
 
-def run(fixture: Path, workdir: Path) -> dict:
-    """Copy `fixture` into `workdir/target`, upgrade it, and return the parsed report."""
+def run(fixture: Path, workdir: Path, client_local: bool = False) -> dict:
+    """Copy `fixture` into `workdir/target`, upgrade it, and return the parsed report.
+
+    With `client_local`, this repository's upgrade_harness.py is first copied into
+    the target (without retired-files.json beside it) and run from there, so the
+    retired list must come from the source tree passed in --from.
+    """
     target = workdir / "target"
     shutil.copytree(fixture, target)
+    script = UPGRADE
+    if client_local:
+        script = target / UPGRADE.relative_to(REPO_ROOT)
+        script.parent.mkdir(parents=True, exist_ok=True)
+        for py in UPGRADE.parent.glob("*.py"):  # the .py scripts a client has, no .json
+            shutil.copy2(py, script.parent / py.name)
     proc = subprocess.run(
-        [sys.executable, str(UPGRADE), "--from", str(REPO_ROOT), "--target", str(target)],
+        [sys.executable, str(script), "--from", str(REPO_ROOT), "--target", str(target)],
         capture_output=True,
         text=True,
         check=False,

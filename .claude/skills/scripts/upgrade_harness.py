@@ -447,6 +447,11 @@ PKB_WARNING = (
     "A camada PKB saiu do harness: o post-skill não captura mais no inbox; "
     "guarde a etapa 7f como desvio local se quiser mantê-la."
 )
+# v0.11.0 `build_checks.py install-plugin` hooked the plugin into tests/conftest.py
+# and wrote a stamp next to it; both go when the plugin goes.
+SCENARIO_PLUGIN_REL = "tests/scenario_report.py"
+SCENARIO_PLUGIN_LINE = 'pytest_plugins = ["scenario_report"]'
+SCENARIO_PLUGIN_STAMP_REL = "tests/.scenario_report.sha256"
 _PKB_DIR_ROW = re.compile(r"^\|\s*`PKB_DIR`\s*\|\s*([^|]*?)\s*\|", re.MULTILINE)
 
 
@@ -468,12 +473,48 @@ def _prune_empty_dirs(start: Path, stop: Path) -> None:
         current = current.parent
 
 
-def remove_retired_files(target: Path, dry_run: bool) -> tuple[list[str], list[str]]:
-    """Remove ladder files identical to v0.11.0; keep edited ones. Returns (removed, kept)."""
+def unhook_scenario_plugin(target: Path, dry_run: bool) -> list[str]:
+    """Drop the plugin line from tests/conftest.py and the plugin stamp. Returns what changed.
+
+    Only the exact line v0.11.0 wrote is removed; a conftest left empty is deleted.
+    """
+    prefix = "[DRY-RUN] " if dry_run else ""
+    changed: list[str] = []
+    conftest = target / "tests" / "conftest.py"
+    if conftest.is_file():
+        lines = conftest.read_text(encoding="utf-8-sig").splitlines()
+        rest = [ln for ln in lines if ln.strip() != SCENARIO_PLUGIN_LINE]
+        if len(rest) != len(lines):
+            if not dry_run:
+                if any(ln.strip() for ln in rest):
+                    conftest.write_text("\n".join(rest) + "\n", encoding="utf-8")
+                else:
+                    conftest.unlink()
+            changed.append("tests/conftest.py")
+            print(f"OK: {prefix}plugin desligado em tests/conftest.py")
+    stamp = target / SCENARIO_PLUGIN_STAMP_REL
+    if stamp.is_file():
+        if not dry_run:
+            stamp.unlink()
+        changed.append(SCENARIO_PLUGIN_STAMP_REL)
+        print(f"OK: {prefix}removido {SCENARIO_PLUGIN_STAMP_REL}")
+    if not dry_run:
+        _prune_empty_dirs(target / "tests", target)
+    return changed
+
+
+def remove_retired_files(
+    target: Path, dry_run: bool, retired_list: Path = RETIRED_FILES_JSON
+) -> tuple[list[str], list[str]]:
+    """Remove ladder files identical to v0.11.0; keep edited ones. Returns (removed, kept).
+
+    `retired_list` is the list of the release being installed (the source tree's
+    retired-files.json), not the one next to an older copy of this script.
+    """
     prefix = "[DRY-RUN] " if dry_run else ""
     removed: list[str] = []
     kept: list[str] = []
-    for entry in load_retired_files():
+    for entry in load_retired_files(retired_list):
         rel = entry["path"]
         dest = target / rel
         if not dest.is_file():
@@ -487,6 +528,8 @@ def remove_retired_files(target: Path, dry_run: bool) -> tuple[list[str], list[s
             _prune_empty_dirs(dest.parent, target)
         removed.append(rel)
         print(f"OK: {prefix}removido {rel}")
+    if SCENARIO_PLUGIN_REL in removed:
+        removed.extend(unhook_scenario_plugin(target, dry_run))
     return removed, kept
 
 
@@ -686,7 +729,12 @@ def run_upgrade(
                 print(f"OK: {prefix}Removed retired skill {harness_dir}/skills/{skill_name}/")
 
     # --- Remove retired ladder files (v0.11.0) and warn (plan-20261020-688kjs) ---
-    removed_files, kept_files = remove_retired_files(target, dry_run=dry_run)
+    source_list = source_root / ".claude" / "skills" / "scripts" / RETIRED_FILES_JSON.name
+    removed_files, kept_files = remove_retired_files(
+        target,
+        dry_run=dry_run,
+        retired_list=source_list if source_list.is_file() else RETIRED_FILES_JSON,
+    )
     report_updated.extend(f"removido {rel}" for rel in removed_files)
     report_manual.extend(f"mantido (editado) {rel}" for rel in kept_files)
     for warning in ladder_warnings(target):

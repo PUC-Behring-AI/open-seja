@@ -49,10 +49,29 @@ def test_v0110_identical_ladder_files_are_removed(v0110) -> None:
         ".claude/agents/scenario-tester.md",
         ".claude/references/template/feature-example/README.md",
         "tests/scenario_report.py",
+        "tests/.scenario_report.sha256",
     }
     assert set(v0110["removed"]) == expected
     assert not any((target / p).exists() for p in expected)
     assert not (target / ".claude/references/template/feature-example").exists()
+
+
+def test_v0110_plugin_line_and_stamp_leave_conftest(v0110) -> None:
+    target = Path(v0110["target"])
+    conftest = (target / "tests/conftest.py").read_text(encoding="utf-8")
+    assert "scenario_report" not in conftest
+    assert "import os" in conftest
+    assert not (target / "tests/.scenario_report.sha256").exists()
+    assert "tests/conftest.py" in v0110["removed_hooks"]
+
+
+def test_v0110_upgrade_from_a_client_local_script_reads_the_source_list(tmp_path) -> None:
+    report = run_upgrade_compat.run(FIXTURES / "client-v0.11.0", tmp_path, client_local=True)
+    assert report["returncode"] == 0, report.get("stderr")
+    target = Path(report["target"])
+    assert not (target / ".claude/skills/scripts/retired-files.json").exists()
+    assert ".claude/skills/scripts/check_specify.py" in report["removed"]
+    assert report["kept"] == [".claude/skills/scripts/check_intent.py"]
 
 
 def test_v0110_edited_ladder_file_is_kept(v0110) -> None:
@@ -89,6 +108,7 @@ def test_parse_output_reads_the_four_kinds() -> None:
     report = run_upgrade_compat.parse_output(out)
     assert report == {
         "removed": [".claude/x.py"],
+        "removed_hooks": [],
         "kept": [".claude/y.py"],
         "copied": [".claude/agents/a.md"],
         "warnings": ["algo"],

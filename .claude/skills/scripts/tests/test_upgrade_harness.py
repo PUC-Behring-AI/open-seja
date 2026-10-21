@@ -474,3 +474,44 @@ def test_retired_list_covers_every_ladder_file_added_in_v0110():
     ladder = {p for p in added if not any(m in p for m in not_ladder)}
     listed = {e["path"] for e in upgrade_harness.load_retired_files()}
     assert ladder - listed == set()
+
+
+def _plugin_client(tmp_path: Path, monkeypatch, conftest_text: str) -> Path:
+    _fake_identical(tmp_path, upgrade_harness.SCENARIO_PLUGIN_REL, monkeypatch)
+    tests = tmp_path / "tests"
+    (tests / "conftest.py").write_text(conftest_text, encoding="utf-8")
+    (tests / ".scenario_report.sha256").write_text("abc\n", encoding="utf-8")
+    return tests
+
+
+def test_removing_the_plugin_drops_only_its_conftest_line_and_stamp(tmp_path, monkeypatch):
+    tests = _plugin_client(tmp_path, monkeypatch, 'import os\npytest_plugins = ["scenario_report"]\n')
+    removed, _ = upgrade_harness.remove_retired_files(tmp_path, dry_run=False)
+    assert (tests / "conftest.py").read_text(encoding="utf-8") == "import os\n"
+    assert not (tests / ".scenario_report.sha256").exists()
+    assert "tests/conftest.py" in removed
+
+
+def test_conftest_with_only_the_plugin_line_is_deleted(tmp_path, monkeypatch):
+    tests = _plugin_client(tmp_path, monkeypatch, 'pytest_plugins = ["scenario_report"]\n')
+    upgrade_harness.remove_retired_files(tmp_path, dry_run=False)
+    assert not (tests / "conftest.py").exists()
+
+
+def test_edited_plugin_keeps_its_conftest_line(tmp_path, monkeypatch):
+    tests = _plugin_client(tmp_path, monkeypatch, 'pytest_plugins = ["scenario_report"]\n')
+    (tests / "scenario_report.py").write_text("# edited\n", encoding="utf-8")
+    upgrade_harness.remove_retired_files(tmp_path, dry_run=False)
+    assert "scenario_report" in (tests / "conftest.py").read_text(encoding="utf-8")
+    assert (tests / ".scenario_report.sha256").exists()
+
+
+def test_retired_list_is_read_from_the_given_path(tmp_path):
+    lst = tmp_path / "list.json"
+    blob = b"x\n"
+    lst.write_text(json.dumps({"files": [{"path": "a.txt", "sha256_v0_11_0": hashlib.sha256(blob).hexdigest()}]}))
+    target = tmp_path / "t"
+    target.mkdir()
+    (target / "a.txt").write_bytes(blob)
+    removed, _ = upgrade_harness.remove_retired_files(target, dry_run=False, retired_list=lst)
+    assert removed == ["a.txt"]
